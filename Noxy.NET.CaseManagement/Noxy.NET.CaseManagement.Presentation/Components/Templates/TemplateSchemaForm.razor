@@ -1,0 +1,46 @@
+@typeparam T where T : class
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @if (Header != null)
+    {
+        <div class="header">
+            @Header
+        </div>
+    }
+
+    <WebForm T="T" Context="Context" OnSubmit="WebFormSubmitHandler">
+        @Content
+
+        @if (Actions != null)
+        {
+            <div class="action-list">
+                @Actions
+            </div>
+        }
+    </WebForm>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required WebFormContext<T> Context { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IWebFormContext<T>.SubmitFunc FormSubmit { get; set; }
+
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment Content { get; set; }
+
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+
+    private void WebFormSubmitHandler()
+    {
+        Context.Submit(FormSubmit);
+    }
+    
+}

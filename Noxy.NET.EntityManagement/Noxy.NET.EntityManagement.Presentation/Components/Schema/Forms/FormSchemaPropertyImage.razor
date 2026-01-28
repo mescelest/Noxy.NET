@@ -1,0 +1,40 @@
+@using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms
+@inherits BaseComponentTextFormSchema<Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms.FormModelSchemaPropertyImage, EntitySchemaPropertyImage>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
+        <Header>
+            @HeaderText
+        </Header>
+
+        <Content>
+            <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.SchemaIdentifier))" Description="@GetDescription(nameof(Context.Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
+            <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Name))" Description="@GetDescription(nameof(Context.Model.Name))" @bind-Value="Context.Model.Name"/>
+            <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Context.Model.Note))" Description="@GetDescription(nameof(Context.Model.Note))" @bind-Value="Context.Model.Note"/>
+            <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.AllowedExtensions))" Description="@GetDescription(nameof(Context.Model.AllowedExtensions))" @bind-Value="Context.Model.AllowedExtensions"/>
+        </Content>
+
+        <Actions>
+            <Button Loading="Context.IsSubmitting" Status="StatusEnum.Success" type="submit">
+                @SubmitText
+            </Button>
+        </Actions>
+    </TemplateSchemaForm>
+</div>
+
+@code {
+
+    private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.UpdateFormHeaderEntitySchemaPropertyBoolean : TextConstants.CreateFormHeaderEntitySchemaPropertyBoolean;
+    private IEnumerable<Guid> OptionList => (Schema.DynamicValueList?.Select(x => x.ID) ?? []).Append(Guid.Empty);
+
+    private string GetOptionName(Guid? id)
+    {
+        return Schema.DynamicValueList?.FirstOrDefault(x => x.ID == id)?.GetValue().Name ?? string.Empty;
+    }
+
+    protected override WebFormContext<FormModelSchemaPropertyImage> CreateContext()
+    {
+        return new(new(Value) { SchemaID = Schema.ID });
+    }
+
+}

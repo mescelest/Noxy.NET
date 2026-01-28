@@ -1,0 +1,34 @@
+﻿@inject IJSRuntime JS
+@inherits ElementComponent
+@typeparam T
+
+<div @attributes="AdditionalAttributes" @ref="_contentRef" class="@CssClass">
+    @foreach (T item in List)
+    {
+        @ChildContent(item)
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<T> List { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<T> ChildContent { get; set; }
+
+    [Parameter]
+    public EventCallback<ElementReference> OnLoad { get; set; }
+
+    private ElementReference _contentRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        await JS.LoadScriptResource($"./_content/{Constants.AssemblyNameUICommon}/Sortable.min.js");
+        await OnLoad.InvokeAsync(_contentRef);
+    }
+
+}

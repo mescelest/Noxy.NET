@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <RootNamespace>Noxy.NET.Test</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="6.0.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
+        <PackageReference Include="xunit" Version="2.9.3"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Noxy.NET.Shared\Noxy.NET.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Filtratexile.Parser\TestData\ActionBlockExample1.filter"/>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\VisibilityBothComment.filter"/>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\VisibilityInlineComment.filter"/>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\VisibilityMultipleComment.filter"/>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\VisibilityNoComment.filter"/>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\VisibilityPrefaceComment.filter"/>
+        <Content Update="Filtratexile.Parser\TestData\LineParser\InstructionFullComment.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\InstructionFullComment.txt"/>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\InstructionInlineComment.txt"/>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\InstructionMultipleComment.txt"/>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\InstructionNoComment.txt"/>
+        <None Remove="Filtratexile.Parser\TestData\LineParser\InstructionPrefaceComment.txt"/>
+        <Content Update="Filtratexile.Parser\TestData\FilterParser\FileOnlyActionBlock.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <None Remove="Filtratexile.Parser\TestData\FilterParser\FileOnlyActionBlock.txt"/>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,23 @@
+﻿@inherits BaseInputMultipleChoiceValue<TOption, TValue>
+@typeparam TOption
+@typeparam TValue where TValue : IEnumerable<TOption>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @foreach (TOption item in OptionList)
+    {
+        <label class="option">
+            <input @attributes="OptionAttributes?.Invoke(item)" class="@CssClass" id="@IDCurrent" name="@NameCurrent" type="checkbox" checked="@IsChecked(item)" @onchange="x => OnInputChange(x, item)"/>
+            @ChildContent(item)
+        </label>
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<TOption> ChildContent { get; set; }
+
+    [Parameter]
+    public Func<TOption, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+
+}

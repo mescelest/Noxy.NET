@@ -1,0 +1,188 @@
+.WizardStep {
+    display: flex;
+    min-height: var(--size-control-medium);
+    position: relative;
+    align-items: center;
+}
+
+.WizardStep::before {
+    content: " ";
+    width: var(--size-control-medium);
+    position: absolute;
+    inset: 0;
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+    transition: background-color 200ms ease-in-out;
+}
+
+.WizardStep .text {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    padding: 0 10px 0 5px;
+    transition: background-color 200ms ease-in-out;
+    user-select: none;
+}
+
+.WizardStep .text .title {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.WizardStep .text .subtitle {
+    font-size: 14px;
+}
+
+.WizardStep.completed:not(.current):hover,
+.WizardStep.active:not(.current):hover {
+    cursor: pointer;
+}
+
+.WizardStep.completed:not(.current):hover::before,
+.WizardStep.active:not(.current):hover::before,
+.WizardStep.completed:not(.current):hover .text,
+.WizardStep.active:not(.current):hover .text {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.WizardStep .icon {
+    width: var(--size-control-medium);
+    height: var(--size-control-medium);
+    position: relative;
+    z-index: 1;
+}
+
+.WizardStep .icon .inner-circle-1 {
+    fill: var(--color-inactive-background);
+}
+
+.WizardStep .icon .inner-circle-2 {
+    fill: none;
+    stroke: var(--color-inactive-border);
+    stroke-width: 2px;
+    filter: brightness(0.7);
+}
+
+.WizardStep .icon text {
+    fill: var(--color-inactive-text);
+    text-anchor: middle;
+    dominant-baseline: central;
+    font-weight: bold;
+    user-select: none;
+}
+
+.WizardStep .icon .outer-circle {
+    fill: none;
+    stroke-width: 2px;
+    stroke: var(--color-active-background);
+}
+
+.WizardStep.completed .icon .inner-circle-1 {
+    fill: var(--color-success-background);
+}
+
+.WizardStep.completed .icon .inner-circle-2 {
+    stroke: var(--color-success-border);
+}
+
+.WizardStep.completed .icon text {
+    fill: var(--color-success-text);
+}
+
+.WizardStep.active .icon .inner-circle-1 {
+    fill: var(--color-active-background);
+}
+
+.WizardStep.active .icon .inner-circle-2 {
+    stroke: var(--color-active-border);
+}
+
+.WizardStep.active .icon .text {
+    fill: var(--color-active-text);
+}
+
+@media (prefers-color-scheme: light) {
+
+    .WizardStep .icon .inner-circle-1 {
+        fill: var(--color-inactive-background-light);
+    }
+
+    .WizardStep .icon .inner-circle-2 {
+        stroke: var(--color-inactive-border-light);
+    }
+
+    .WizardStep .icon text {
+        fill: var(--color-inactive-text-light);
+    }
+
+    .WizardStep .icon .outer-circle {
+        stroke: var(--color-active-background-light);
+    }
+
+    .WizardStep.completed .icon .inner-circle-1 {
+        fill: var(--color-success-background-light);
+    }
+
+    .WizardStep.completed .icon .inner-circle-2 {
+        stroke: var(--color-success-border-light);
+    }
+
+    .WizardStep.completed .icon text {
+        fill: var(--color-success-text-light);
+    }
+
+    .WizardStep.active .icon .inner-circle-1 {
+        fill: var(--color-active-background-light);
+    }
+
+    .WizardStep.active .icon .inner-circle-2 {
+        stroke: var(--color-active-border-light);
+    }
+
+    .WizardStep.active .icon .text {
+        fill: var(--color-active-text-light);
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+
+    .WizardStep .icon .inner-circle-1 {
+        fill: var(--color-inactive-background-dark);
+    }
+
+    .WizardStep .icon .inner-circle-2 {
+        stroke: var(--color-inactive-border-dark);
+    }
+
+    .WizardStep .icon text {
+        fill: var(--color-inactive-text-dark);
+    }
+
+    .WizardStep .icon .outer-circle {
+        stroke: var(--color-active-background-dark);
+    }
+
+    .WizardStep.completed .icon .inner-circle-1 {
+        fill: var(--color-success-background-dark);
+    }
+
+    .WizardStep.completed .icon .inner-circle-2 {
+        stroke: var(--color-success-border-dark);
+    }
+
+    .WizardStep.completed .icon text {
+        fill: var(--color-success-text-dark);
+    }
+
+    .WizardStep.active .icon .inner-circle-1 {
+        fill: var(--color-active-background-dark);
+    }
+
+    .WizardStep.active .icon .inner-circle-2 {
+        stroke: var(--color-active-border-dark);
+    }
+
+    .WizardStep.active .icon .text {
+        fill: var(--color-active-text-dark);
+    }
+}

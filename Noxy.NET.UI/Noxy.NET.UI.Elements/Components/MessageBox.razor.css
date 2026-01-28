@@ -1,0 +1,46 @@
+.MessageBox {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-xs);
+    padding: var(--size-gap-sm);
+    font: var(--font-body);
+    color: var(--color-text-control, #000000);
+    border: var(--size-border-width-md, 2px) solid var(--color-background-messagebox);
+    border-radius: var(--size-border-radius-md);
+    background-color: color-mix(in srgb, var(--color-background-messagebox, #ffffff) 60%, var(--color-mixin-primary, #000000));
+    position: relative;
+}
+
+.message:not(:only-child) {
+    display: list-item;
+    margin-left: 14px;
+}
+
+.MessageBox[status="none"] {
+    --color-background-messagebox: var(--color-background-none);
+}
+
+.MessageBox[status="success"] {
+    --color-background-messagebox: var(--color-background-success);
+}
+
+.MessageBox[status="info"] {
+    --color-background-messagebox: var(--color-background-info);
+}
+
+.MessageBox[status="highlight"] {
+    --color-background-messagebox: var(--color-background-highlight);
+}
+
+.MessageBox[status="warning"] {
+    --color-background-messagebox: var(--color-background-warning);
+}
+
+.MessageBox[status="notice"] {
+    --color-background-messagebox: var(--color-background-notice);
+}
+
+.MessageBox[status="error"] {
+    --color-background-messagebox: var(--color-background-error);
+}

@@ -1,0 +1,40 @@
+﻿.Collapsible {
+    display: flex;
+    flex: 0 1 auto;
+    flex-flow: column;
+}
+
+.header-wrapper {
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    align-items: flex-start;
+    min-height: var(--size-control-md);
+    column-gap: var(--size-gap-xs);
+}
+
+.arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-control-md);
+    height: var(--size-control-md);
+    cursor: pointer;
+}
+
+.content-wrapper {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    margin-top: var(--size-gap-md, 12px);
+    border-left: 2px solid black;
+    background: color-mix(in srgb, transparent 96%, var(--color-mixin-complementary, #000000));
+    overflow: hidden;
+}
+
+.Collapsible[collapsed] .content-wrapper {
+    grid-template-rows: minmax(0, 0fr);
+    margin-top: 0;
+}
+
+.Collapsible[animated] .content-wrapper {
+    transition: grid-template-rows var(--animation-length-medium) ease-in-out, margin var(--animation-length-medium) ease-in-out;
+}

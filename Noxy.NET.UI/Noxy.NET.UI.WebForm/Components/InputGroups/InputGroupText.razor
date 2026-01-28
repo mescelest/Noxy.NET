@@ -1,0 +1,21 @@
+﻿@inherits BaseInputGroupValue<string>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
+        <InputElementText @attributes="InputAttributes" ID="@UUIDCode" Type="Type" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput"
+                          @bind-Value:get="Value" @bind-Value:set="x => ValueChanged.InvokeAsync(x)"/>
+    </TemplateInputGroup>
+</div>
+
+@code {
+
+    [Parameter]
+    public WebFormInputTextTypeEnum? Type { get; set; }
+
+    [Parameter]
+    public int? Size { get; set; }
+
+    [Parameter]
+    public bool? HasChangeEventOnInput { get; set; }
+
+}

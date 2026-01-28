@@ -1,0 +1,95 @@
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="week-list">
+        @for (int i = _weekStart; i <= _weekStart + 5; i++)
+        {
+            int week = i;
+            <div class="week">@week</div>
+        }
+    </div>
+    <div class="day-list">
+        @for (int i = _dayPrevStart; i <= _dayPrevEnd; i++)
+        {
+            int day = i;
+
+            <div class="day">@day</div>
+        }
+        @for (int i = 1; i <= _dayCurrentEnd; i++)
+        {
+            int day = i;
+
+            <div class="day">@day</div>
+        }
+        @for (int i = 1; i <= _dayNextEnd; i++)
+        {
+            int day = i;
+
+            <div class="day">@day</div>
+        }
+    </div>
+
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment<int>? Content { get; set; }
+
+    [Parameter]
+    public DayOfWeek? WeekStart { get; set; }
+    private DayOfWeek WeekStartCurrent => WeekStart ?? DayOfWeek.Monday;
+
+    [Parameter]
+    public DateTime? Value { get; set; }
+    private DateTime ValueCurrent => Value ?? DateTime.UtcNow;
+
+    [Parameter]
+    public EventCallback<DateTime> ValueChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<DateTime>>? ValueExpression { get; set; }
+
+    private DateTime? _internalValue;
+
+    private int _dayPrevStart;
+    private int _dayPrevEnd;
+    private int _dayCurrentEnd;
+    private int _dayNextEnd;
+
+    private int _weekStart;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        UpdateDate();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (ValueCurrent != _internalValue)
+        {
+            UpdateDate();
+        }
+    }
+
+    private void UpdateDate()
+    {
+        _internalValue = ValueCurrent;
+
+        int offset = (ValueCurrent.DayOfWeek - WeekStartCurrent + 7) % 7;
+        DateTime start = new DateTime(ValueCurrent.Year, ValueCurrent.Month, 1).AddDays(-offset);
+
+        _dayPrevStart = start.Day;
+        _dayPrevEnd = DateTime.DaysInMonth(start.Year, start.Month);
+        _dayCurrentEnd = DateTime.DaysInMonth(ValueCurrent.Year, ValueCurrent.Month);
+        _dayNextEnd = 42 - DateTime.DaysInMonth(ValueCurrent.Year, ValueCurrent.Month) - offset;
+
+        _weekStart = ISOWeek.GetWeekOfYear(start);
+    }
+
+
+}

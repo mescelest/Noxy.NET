@@ -1,0 +1,39 @@
+.SplitLayout {
+    display: grid;
+    flex: 0 0 auto;
+    overflow: auto;
+}
+
+.left, .right {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    overflow: auto;
+}
+
+.left {
+    grid-area: left;
+}
+
+.right {
+    grid-area: right;
+}
+
+@media screen and (width < 720px) {
+    .SplitLayout {
+        grid-template: 
+		    "left" max-content
+		    "right" max-content
+		    / 1fr;
+        row-gap: var(--size-gap-xl, 20px);
+    }
+}
+
+@media screen and (720px <= width) {
+    .SplitLayout {
+        grid-template: 
+		    "left right" max-content
+		    / 1fr 1fr;
+        column-gap: var(--size-gap-xl, 20px);
+    }
+}

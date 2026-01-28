@@ -1,0 +1,25 @@
+﻿@inherits BaseInputValue<TValue?>
+@typeparam TValue
+
+<input @attributes="AdditionalAttributes" checked="@Checked" class="@CssClass" id="@IDCurrent" type="checkbox" @onchange="OnInputChange"/>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required TValue Option { get; set; }
+
+    private bool Checked => EqualityComparer<TValue>.Default.Equals(Value, Option);
+
+    private void OnInputChange(ChangeEventArgs args)
+    {
+        NotifyChange(GetEventValue(args) ? (TValue?)Option : default);
+    }
+
+    private static bool GetEventValue(ChangeEventArgs args)
+    {
+        if (args.Value is bool parsed) return parsed;
+        return bool.TryParse(args.Value?.ToString(), out bool value) && value;
+    }
+
+}
+

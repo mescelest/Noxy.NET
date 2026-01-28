@@ -1,0 +1,38 @@
+﻿@inject IDialogService DialogService
+@inherits DialogComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateDialog>
+        <Header>
+            @Title
+        </Header>
+        <Content>
+            @ChildContent
+        </Content>
+        <Footer>
+            <Button @onclick="ButtonClicked">@CloseTextCurrent</Button>
+        </Footer>
+    </TemplateDialog>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? CloseText { get; set; }
+    private string CloseTextCurrent => CloseText ?? "Close";
+
+    [Parameter]
+    public bool? ShowFooter { get; set; }
+
+    private void ButtonClicked()
+    {
+        DialogService.Close(ContextCurrent.ID);
+    }
+
+}

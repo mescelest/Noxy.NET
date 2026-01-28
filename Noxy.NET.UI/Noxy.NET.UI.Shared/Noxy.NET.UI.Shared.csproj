@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.1.20</Version>
+        <Authors>Noxy.NET</Authors>
+        <Title>Noxy.NET.UI.Common</Title>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <RootNamespace>Noxy.NET.UI</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Remove="wwwroot\Scripts\Interop.js"/>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+        <None Include="wwwroot\Interop.js"/>
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <SupportedPlatform Include="browser"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Noxy.NET.Shared\Noxy.NET.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <UpToDateCheckInput Remove="Templates\TemplateStatus.razor"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Models\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0"/>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,40 @@
+.CalendarMonthContent {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    grid-template-rows: repeat(6, max-content);
+}
+
+.week-list {
+    grid-column: 1;
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: 1 / -1;
+}
+
+.week {
+    padding: 5px;
+}
+
+.day-list {
+    grid-column: 2;
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: 1 / -1;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.day {
+    padding: 5px;
+}
+
+.content {
+    display: grid;
+}
+
+.Calendar[mode="Month"] .content {
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.day {
+    border: 1px solid white;
+}

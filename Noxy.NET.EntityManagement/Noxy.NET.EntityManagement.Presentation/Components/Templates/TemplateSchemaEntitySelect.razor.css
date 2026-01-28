@@ -1,0 +1,44 @@
+.TemplateSchemaEntitySelect {
+    display: flex;
+    flex: 0 1 auto;
+    flex-flow: row;
+    column-gap: var(--size-gap-lg);
+}
+
+.TemplateSchemaEntitySelect ::deep .SortableList .item[draggable] .handle {
+    cursor: grabbing;
+}
+
+.column {
+    display: flex;
+    flex: 0 1 auto;
+    flex-flow: column;
+    width: var(--size-column);
+    row-gap: var(--size-gap-sm);
+}
+
+.header {
+    display: flex;
+    flex: 0 1 auto;
+    flex-flow: row;
+    column-gap: var(--size-gap-sm);
+    align-items: center;
+    min-height: var(--size-control-md);
+}
+
+.handle {
+    cursor: grab;
+}
+
+.title {
+    display: flex;
+    flex: 1 1 auto;
+}
+
+.content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
+    padding: var(--size-gap-md);
+}

@@ -1,0 +1,32 @@
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @GetText()
+</div>
+
+@code {
+
+    [Parameter]
+    public string? Value { get; set; }
+    private string ValueCurrent => Value ?? string.Empty;
+
+    [Parameter]
+    public bool? HTMLEncode { get; set; }
+    private bool HTMLEncodeCurrent => HTMLEncode ?? false;
+
+    private MarkupString GetText()
+    {
+        return (MarkupString)(HTMLEncodeCurrent ? GetEncoded() : GetParsed());
+    }
+
+    private string GetEncoded()
+    {
+        return HttpUtility.HtmlEncode(GetParsed());
+    }
+
+    private string GetParsed()
+    {
+        return Regex.Replace(ValueCurrent, "\r?\n|\r", "<br />");
+    }
+
+}

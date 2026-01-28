@@ -1,0 +1,97 @@
+﻿@inject IJSRuntime JSRuntime
+@inherits BaseGraphViewer
+@implements IGraphViewer<T>
+@typeparam T
+
+<CascadingValue Value="this">
+    <div @attributes="@AdditionalAttributes" class="@CssClass">
+
+        @if (Toolbar != null)
+        {
+            <div class="toolbar">
+                @Toolbar(Context)
+            </div>
+        }
+
+        <svg @ref="ReferenceToSVG" class="window" viewBox="@Context.X @Context.Y @Context.Width @Context.Height">
+            <g class="translate">
+                <g class="zoom">
+                    @foreach (IGraphNode<T> item in Context.Data)
+                    {
+                        <GraphViewerNode Data="item"/>
+                    }
+                </g>
+            </g>
+            @ChildContent
+        </svg>
+
+    </div>
+</CascadingValue>
+
+@code {
+
+    [EditorRequired, Parameter]
+    public new required IGraphContext<T> Context { get; set; }
+
+    [EditorRequired, Parameter]
+    public required RenderFragment<IGraphNode<T>> NodeTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<IGraphPath>? PathTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<IGraphContext<T>>? Toolbar { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private IJSObjectReference? Module { get; set; }
+    private DotNetObjectReference<GraphViewer<T>>? ReferenceToComponent { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            ReferenceToComponent = DotNetObjectReference.Create(this);
+            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", $"./_content/{typeof(GraphViewer<T>).Assembly.GetName().Name}/Interop.js");
+
+            if (Context.Drag != null)
+            {
+                await Module.InvokeVoidAsync("NoxyNETUI_Graph.GraphViewerDrag", ReferenceToComponent, ReferenceToSVG, nameof(OnDragCommitHandler), Context.Drag.Speed, Context.Drag.X, Context.Drag.Y);
+            }
+
+            if (Context.Zoom != null)
+            {
+                await Module.InvokeVoidAsync("NoxyNETUI_Graph.GraphViewerZoom", ReferenceToComponent, ReferenceToSVG, nameof(OnZoomCommit), Context.Zoom.Level, Context.Zoom.Speed, Context.Zoom.Min, Context.Zoom.Max);
+            }
+        }
+    }
+
+    [JSInvokable]
+    internal void OnDragCommitHandler(double x, double y)
+    {
+        Context.Drag ??= new();
+        Context.Drag.X = x;
+        Context.Drag.Y = y;
+        OnDragCommit.InvokeAsync(Context.Drag);
+    }
+
+    [JSInvokable]
+    internal void OnZoomCommit(double level)
+    {
+        Context.Zoom ??= new();
+        Context.Zoom.Level = level;
+    }
+
+    // internal void RegisterComponent(GraphViewerTool<T> tool)
+    // {
+    //     ToolCollection[tool.UUID] = tool;
+    // }
+    //
+    // internal void DeregisterComponent(GraphViewerTool<T> tool)
+    // {
+    //     ToolCollection.Remove(tool.UUID);
+    // }
+
+}

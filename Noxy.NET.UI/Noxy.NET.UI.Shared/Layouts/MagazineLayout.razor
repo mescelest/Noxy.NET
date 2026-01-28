@@ -1,0 +1,26 @@
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="left">
+        @Left
+    </div>
+    <div class="center">
+        @Content
+    </div>
+    <div class="right">
+        @Right
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public required RenderFragment Left { get; set; }
+
+    [Parameter]
+    public required RenderFragment Content { get; set; }
+
+    [Parameter]
+    public required RenderFragment Right { get; set; }
+
+}

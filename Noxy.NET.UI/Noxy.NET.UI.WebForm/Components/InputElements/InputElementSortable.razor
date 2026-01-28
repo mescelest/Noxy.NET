@@ -1,0 +1,42 @@
+@inject IJSRuntime JS
+@inherits BaseInputValue<List<TValue>>
+@typeparam TValue
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <SortableList List="Value" OnLoad="OnLoad">
+        <div class="item">
+            @ChildContent(context)
+        </div>
+    </SortableList>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<TValue> ChildContent { get; set; }
+
+    [Parameter]
+    public SortableOptions Options { get; set; } = new();
+
+    private IJSObjectReference? _module;
+    private ElementReference _refElement;
+    private DotNetObjectReference<InputElementSortable<TValue>>? _refClass;
+
+    private async Task OnLoad(ElementReference reference)
+    {
+        _refElement = reference;
+        _refClass ??= DotNetObjectReference.Create(this);
+
+        Options.DraggableSelector = string.Join(",", Options.DraggableSelector.Split(",").Append(".item"));
+
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(InputElementSortable<TValue>)));
+        await _module.InvokeVoidAsync("Register", Options.ToJSON(), _refElement, _refClass, nameof(OnSort));
+    }
+
+    [JSInvokable]
+    public void OnSort(int oldIndex, int newIndex)
+    {
+        ValueChanged.InvokeAsync(Value.ToList().MoveItem(oldIndex, newIndex));
+    }
+
+}

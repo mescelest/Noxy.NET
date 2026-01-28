@@ -1,0 +1,47 @@
+﻿@typeparam T
+@inherits ElementComponent
+
+@foreach (IGraphNode<T> item in Data.Children)
+{
+    @if (GraphViewer.PathTemplate != null)
+    {
+        GraphPath path = new(Data, item);
+        @GraphViewer.PathTemplate(path)
+    }
+    else
+    {
+        <path class="connection" d="@GetPath(item)" stroke="white"/>
+    }
+}
+
+@foreach (IGraphNode<T> item in Data.Children)
+{
+    <GraphViewerNode Data="item"/>
+}
+
+@GraphViewer.NodeTemplate(Data)
+
+@code {
+
+    [CascadingParameter]
+    public required GraphViewer<T> GraphViewer { get; set; }
+
+    [EditorRequired, Parameter]
+    public required IGraphNode<T> Data { get; set; }
+
+    private double CalculateX(IGraphNode node)
+    {
+        return node.X * 100;
+    }
+
+    private double CalculateY(IGraphNode node)
+    {
+        return node.Y * 100;
+    }
+
+    private string GetPath(IGraphNode node)
+    {
+        return $"M{CalculateX(Data)},{CalculateY(Data)} L{CalculateX(node)},{CalculateY(node)}";
+    }
+
+}

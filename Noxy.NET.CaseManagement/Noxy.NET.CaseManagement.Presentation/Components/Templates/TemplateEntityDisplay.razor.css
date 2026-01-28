@@ -1,0 +1,6 @@
+.TemplateEntityDisplay {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
+}

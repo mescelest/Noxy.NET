@@ -1,0 +1,23 @@
+﻿@inherits BaseInputGroupValue<List<TValue>>
+@typeparam TValue
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
+        <InputElementSortable @attributes="InputAttributes" Options="Options" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+            @ChildContent(context)
+        </InputElementSortable>
+    </TemplateInputGroup>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<TValue> ChildContent { get; set; }
+
+    [Parameter]
+    public SortableOptions Options { get; set; } = new();
+
+    [Parameter]
+    public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+
+}

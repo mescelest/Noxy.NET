@@ -1,0 +1,24 @@
+﻿.TemplateDialog {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    row-gap: 30px;
+    position: relative;
+    overflow: auto;
+}
+
+.close-button {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+}
+
+.header {
+}
+
+.content {
+    overflow: auto;
+}
+
+.footer {
+}

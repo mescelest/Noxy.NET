@@ -1,0 +1,76 @@
+@inject TextService TextService
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @{
+        EntitySchemaDynamicValue[] list = Schema.DynamicValueList?.Select(x => x.GetValue()).ToArray() ?? [];
+        IEnumerable<EntitySchemaDynamicValueCode> listCode = list.OfType<EntitySchemaDynamicValueCode>();
+        IEnumerable<EntitySchemaDynamicValueStyleParameter> listStyleParameter = list.OfType<EntitySchemaDynamicValueStyleParameter>();
+        IEnumerable<EntitySchemaDynamicValueSystemParameter> listSystemParameter = list.OfType<EntitySchemaDynamicValueSystemParameter>();
+        IEnumerable<EntitySchemaDynamicValueTextParameter> listTextParameter = list.OfType<EntitySchemaDynamicValueTextParameter>();
+    }
+    <Collapsible>
+        <Header>
+            <h3>Dynamic values</h3>
+        </Header>
+        <Content>
+            <div>
+                <TemplateSchemaOverview Schema="Schema" List="listCode">
+                    <Header>
+                        <h4>Dynamic code values</h4>
+                    </Header>
+                    <Form>
+                        <FormSchemaDynamicValueCode Schema="Schema" Value="context" OnChange="FormChange"/>
+                    </Form>
+                </TemplateSchemaOverview>
+
+                <TemplateSchemaOverview Schema="Schema" List="listStyleParameter">
+                    <Header>
+                        <h4>Dynamic style parameters</h4>
+                    </Header>
+                    <Form>
+                        <FormSchemaDynamicValueStyleParameter Schema="Schema" Value="context" OnChange="FormChange"/>
+                    </Form>
+                </TemplateSchemaOverview>
+
+                <TemplateSchemaOverview Schema="Schema" List="listSystemParameter">
+                    <Header>
+                        <h4>Dynamic system parameters</h4>
+                    </Header>
+                    <Form>
+                        <FormSchemaDynamicValueSystemParameter Schema="Schema" Value="context" OnChange="FormChange"/>
+                    </Form>
+                </TemplateSchemaOverview>
+
+                <TemplateSchemaOverview Schema="Schema" List="listTextParameter">
+                    <Header>
+                        <h4>Dynamic text parameters</h4>
+                    </Header>
+                    <Form>
+                        <FormSchemaDynamicValueTextParameter Schema="Schema" Value="context" OnChange="FormChange"/>
+                    </Form>
+                </TemplateSchemaOverview>
+            </div>
+        </Content>
+    </Collapsible>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchema Schema { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        await WithLoading(TextService.Resolve);
+    }
+
+    private void FormChange(EntitySchemaDynamicValue entity)
+    {
+        Schema.DynamicValueList = Schema.DynamicValueList?.Where(x => x.ID != entity.ID).Append(new(entity)).OrderBy(x => x.GetValue().Order).ToList();
+    }
+
+}

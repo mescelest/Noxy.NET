@@ -1,0 +1,13 @@
+.GraphViewer {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    border: 1px solid white;
+    min-height: 500px;
+}
+
+.window {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+}

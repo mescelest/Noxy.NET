@@ -1,0 +1,43 @@
+﻿.Collapsible {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    border-width: var(--size-border-width);
+    border-style: solid;
+    border-color: var(--color-border-control);
+    border-radius: var(--size-border-radius);
+}
+
+.Collapsible[collapsed] .collapsible-content-wrapper {
+    display: none;
+}
+
+.Collapsible-header-wrapper {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: var(--size-gap-md);
+    box-sizing: border-box;
+}
+
+.Collapsible-content-wrapper {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    height: 100%;
+    padding: var(--size-gap-md);
+    box-sizing: border-box;
+    margin-top: calc(-1 * var(--size-gap-sm));
+    transform: scaleY(1);
+    transition: all 200ms ease-in-out;
+}
+
+.Collapsible-arrow {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    flex: 0 0 auto;
+    fill: var(--color-border-control);
+}

@@ -1,0 +1,114 @@
+.Button {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--size-control-md, 46px);
+    height: var(--size-control-md, 46px);
+    position: relative;
+    padding: 0 var(--size-gap-sm, 8px);
+    background-color: var(--color-background-button, #767676);
+    border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-background-button, #e9e9e9) 60%, var(--color-mixin-primary, #000000));
+    border-radius: var(--size-border-radius-md, 4px);
+    box-shadow: 0 0 0 var(--size-border-width-sm, 1px) transparent inset;
+    font: var(--font-button);
+    color: var(--color-text-button, #000000);
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: box-shadow var(--animation-length-short, 150ms) ease-in-out, border var(--animation-length-short, 150ms) ease-in-out;
+}
+
+.Button.loading > ::deep .Loader {
+    stroke: var(--color-text-button);
+}
+
+.Button:focus {
+    box-shadow: 0 0 0 var(--size-border-width-sm, 1px) var(--color-focus-button, #000000) inset;
+    outline: none;
+}
+
+.Button:not(:disabled):hover {
+    border-bottom-width: calc(var(--size-border-width-lg, 3px) * 2);
+}
+
+.Button:not(:disabled):active {
+    border-bottom-width: var(--size-border-width-sm, 3px);
+}
+
+.Button:disabled:not(.loading) {
+    border-color: transparent;
+    background-color: var(--color-background-disabled, #4d4d4d);
+    color: var(--color-text-disabled, #bcbcbc);
+    cursor: not-allowed;
+}
+
+.Button[size="xxs"] {
+    min-width: var(--size-control-xxs, 24px);
+    height: var(--size-control-xxs, 24px);
+    padding: 0 var(--size-gap-xxs, 2px);
+}
+
+.Button[size="xs"] {
+    min-width: var(--size-control-xs, 30px);
+    height: var(--size-control-xs, 30px);
+    padding: 0 var(--size-gap-xs, 4px);
+}
+
+.Button[size="sm"] {
+    min-width: var(--size-control-sm, 36px);
+    height: var(--size-control-sm, 36px);
+    padding: 0 var(--size-gap-xs, 4px);
+}
+
+.Button[size="md"] {
+    min-width: var(--size-control-md, 42px);
+    height: var(--size-control-md, 42px);
+    padding: 0 var(--size-gap-sm, 8px);
+}
+
+.Button[size="lg"] {
+    min-width: var(--size-control-lg, 48px);
+    height: var(--size-control-lg, 48px);
+    padding: 0 var(--size-gap-sm, 8px);
+}
+
+.Button[size="xl"] {
+    min-width: var(--size-control-xl, 64px);
+    height: var(--size-control-xl, 64px);
+    padding: 0 var(--size-gap-md, 12px);
+}
+
+.Button[size="xxl"] {
+    min-width: var(--size-control-xxl, 92px);
+    height: var(--size-control-xxl, 92px);
+    padding: 0 var(--size-gap-lg, 16px);
+}
+
+
+.Button[status="none"] {
+    --color-background-button: var(--color-background-none);
+}
+
+.Button[status="success"] {
+    --color-background-button: var(--color-background-success);
+}
+
+.Button[status="info"] {
+    --color-background-button: var(--color-background-info);
+}
+
+.Button[status="highlight"] {
+    --color-background-button: var(--color-background-highlight);
+}
+
+.Button[status="warning"] {
+    --color-background-button: var(--color-background-warning);
+}
+
+.Button[status="notice"] {
+    --color-background-button: var(--color-background-notice);
+}
+
+.Button[status="error"] {
+    --color-background-button: var(--color-background-error);
+}

@@ -1,0 +1,25 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateSchemaOverview Schema="Schema" List="Schema.InputList">
+        <Header>
+            <h3>Inputs</h3>
+        </Header>
+
+        <Form>
+            <FormSchemaInput Schema="Schema" Value="context" OnChange="FormChange"/>
+        </Form>
+    </TemplateSchemaOverview>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchema Schema { get; set; }
+
+    private void FormChange(EntitySchemaInput entity)
+    {
+        Schema.InputList = Schema.InputList?.Where(x => x.ID != entity.ID).Append(entity).OrderBy(x => x.Order).ToList();
+    }
+
+}

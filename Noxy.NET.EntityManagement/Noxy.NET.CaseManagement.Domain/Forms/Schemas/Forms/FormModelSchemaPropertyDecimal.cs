@@ -1,0 +1,34 @@
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using Noxy.NET.CaseManagement.Domain.Abstractions.Forms;
+using Noxy.NET.CaseManagement.Domain.Constants;
+using Noxy.NET.CaseManagement.Domain.Entities.Schemas;
+
+namespace Noxy.NET.CaseManagement.Domain.Forms.Schemas.Forms;
+
+public class FormModelSchemaPropertyDecimal(EntitySchemaPropertyDecimal? entity) : BaseFormModelEntitySchemaComponent(entity)
+{
+    public override string APIEndpoint => "Schema/Property/Decimal";
+    public override HttpMethod HttpMethod => HttpMethod.Post;
+
+    [Required]
+    [DisplayName(TextConstants.LabelFormDefaultValue)]
+    [Description(TextConstants.HelpFormDefaultValue)]
+    public Guid DefaultValueDynamicID { get; set; } = entity?.DefaultValueDynamicID ?? Guid.NewGuid();
+
+    [Required]
+    [DisplayName(TextConstants.LabelFormMin)]
+    [Description(TextConstants.HelpFormMin)]
+    public Guid MinDynamicID { get; set; } = entity?.DefaultValueDynamicID ?? Guid.NewGuid();
+    
+    [Required]
+    [DisplayName(TextConstants.LabelFormMax)]
+    [Description(TextConstants.HelpFormMax)]
+    public Guid MaxDynamicID { get; set; } = entity?.DefaultValueDynamicID ?? Guid.NewGuid();
+    
+    [JsonConstructor]
+    public FormModelSchemaPropertyDecimal() : this(null)
+    {
+    }
+}

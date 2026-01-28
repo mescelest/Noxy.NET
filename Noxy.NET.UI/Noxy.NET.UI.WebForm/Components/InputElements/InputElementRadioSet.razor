@@ -1,0 +1,29 @@
+﻿@inherits BaseInputValue<TValue>
+@typeparam TValue
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @foreach (TValue item in OptionList)
+    {
+        <label class="option">
+            <InputElementRadio @attributes="OptionAttributes?.Invoke(item)" name="@NameCurrent" Option="item" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+            @ChildContent(item)
+        </label>
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<TValue> OptionList { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<TValue> ChildContent { get; set; }
+
+    [Parameter]
+    public string? Name { get; set; }
+    private string NameCurrent => Name ?? UUIDCode;
+
+    [Parameter]
+    public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+
+}

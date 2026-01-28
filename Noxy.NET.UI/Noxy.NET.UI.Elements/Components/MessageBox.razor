@@ -1,0 +1,23 @@
+﻿@inherits ElementComponent
+
+@if (MessageListCurrent.Any())
+{
+    <div @attributes="AdditionalAttributes" class="@CssClass" status="@StatusString">
+        @foreach (string message in MessageListCurrent)
+        {
+            <div class="message">@message</div>
+        }
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public IEnumerable<string>? MessageList { get; set; }
+    private IEnumerable<string> MessageListCurrent => MessageList ?? [];
+
+    [Parameter]
+    public StatusEnum? Status { get; set; }
+    private string StatusString => (Status ?? StatusEnum.None).ToText();
+
+}

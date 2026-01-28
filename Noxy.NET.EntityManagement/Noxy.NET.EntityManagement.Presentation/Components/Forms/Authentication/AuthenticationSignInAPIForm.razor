@@ -1,0 +1,20 @@
+@using Noxy.NET.EntityManagement.Domain.Models.Forms.Authentication
+@inherits BaseComponentForm<Noxy.NET.EntityManagement.Domain.Models.Forms.Authentication.AuthenticationSignInAPIFormModel>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm Context="Context" OnSubmit="OnSubmit">
+        <InputGroupText @bind-Value="Context.Model.Email"/>
+        <InputGroupPassword Autocomplete="WebFormInputFieldPasswordAutocompleteEnum.CurrentPassword" @bind-Value="Context.Model.Password"/>
+
+        @ChildContent
+    </WebForm>
+</div>
+
+@code {
+
+    protected override WebFormContext<AuthenticationSignInAPIFormModel> CreateContext()
+    {
+        return new(new());
+    }
+
+}

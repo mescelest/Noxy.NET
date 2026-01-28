@@ -1,0 +1,6 @@
+.TemplateActionList {
+    display: flex;
+    flex-flow: column;
+    flex: 0 0 auto;
+    row-gap: var(--size-gap-lg);
+}

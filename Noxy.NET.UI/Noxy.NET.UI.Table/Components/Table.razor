@@ -1,0 +1,38 @@
+﻿@typeparam T
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="header">
+        @TableHeader
+    </div>
+
+    @if (TableRow != null && List != null)
+    {
+        @foreach (T element in List)
+        {
+            <div class="row">
+                @TableRow(element)
+            </div>
+        }
+    }
+    else if (Placeholder != null)
+    {
+        <div class="placeholder">No rows present</div>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment<T>? TableRow { get; set; }
+
+    [Parameter]
+    public RenderFragment? TableHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment? Placeholder { get; set; }
+
+    [Parameter]
+    public IEnumerable<T>? List { get; set; }
+
+}

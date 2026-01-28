@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Title>Noxy.NET.CaseManagement.API</Title>
+        <Authors>Noxy.NET</Authors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="10.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.WebForm\Noxy.NET.UI.WebForm.csproj" />
+      <ProjectReference Include="..\Noxy.NET.CaseManagement.Application\Noxy.NET.CaseManagement.Application.csproj" />
+      <ProjectReference Include="..\Noxy.NET.CaseManagement.Domain\Noxy.NET.CaseManagement.Domain.csproj" />
+      <ProjectReference Include="..\Noxy.NET.CaseManagement.Persistence\Noxy.NET.CaseManagement.Persistence.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,159 @@
+@inherits BaseComponentTextFormSchema<FormModelSchemaActionInput, EntitySchemaActionInput>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
+        <Header>
+            @HeaderText
+        </Header>
+
+        <Content>
+            <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.SchemaIdentifier))" Description="@GetDescription(nameof(Context.Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
+            <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Name))" Description="@GetDescription(nameof(Context.Model.Name))" @bind-Value="Context.Model.Name"/>
+            <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Note))" Description="@GetDescription(nameof(Context.Model.Note))" @bind-Value="Context.Model.Note"/>
+            <InputGroupSelect DisplayName="@GetDisplayName(nameof(Context.Model.TitleDynamicID))" Description="@GetDescription(nameof(Context.Model.TitleDynamicID))" OptionList="OptionList" @bind-Value="Context.Model.TitleDynamicID">
+                <span>@GetOptionName(context)</span>
+            </InputGroupSelect>
+            <InputGroupSelect DisplayName="@GetDisplayName(nameof(Context.Model.DescriptionDynamicID))" Description="@GetDescription(nameof(Context.Model.DescriptionDynamicID))" OptionList="OptionList" @bind-Value="Context.Model.DescriptionDynamicID">
+                <span>@GetOptionName(context)</span>
+            </InputGroupSelect>
+
+            <InputGroupSelect DisplayName="@GetDisplayName(nameof(Context.Model.InputID))" Description="@GetDescription(nameof(Context.Model.InputID))"
+                              OptionList="InputOptionList" @bind-Value="Context.Model.InputID" @bind-Value:after="UpdateInput">
+                @Schema.InputList?.FirstOrDefault(x => x.ID == context)?.Name
+            </InputGroupSelect>
+
+            @foreach (EntityJunctionSchemaInputHasAttribute item in Input?.AttributeList ?? [])
+            {
+                EntitySchemaAttribute? value = item.Relation;
+                if (value == null) continue;
+                FormModelAssociationSchemaActionInputHasAttribute.Discriminator discriminator = GetModel(value);
+                FormModelAssociationSchemaActionInputHasAttribute model = discriminator.GetValue();
+
+                <TemplateInputGroup DisplayName="@value.Name" Description="@value.Note">
+                    @if (model is FormModelAssociationSchemaActionInputHasAttribute<string> modelString)
+                    {
+                        <TemplateInputAssociation List="modelString.Value" IsList="value.IsValueList" OnAdd="() => modelString.Value.Add(string.Empty)" OnRemove="index => modelString.Value.RemoveAt(index)">
+                            <InputGroupText @bind-Value:get="modelString.Value[context]" @bind-Value:set="x => modelString.Value[context] = x"/>
+                        </TemplateInputAssociation>
+                    }
+                    @if (model is FormModelAssociationSchemaActionInputHasAttribute<int?> modelInteger)
+                    {
+                        <TemplateInputAssociation List="modelInteger.Value" IsList="value.IsValueList" OnAdd="() => modelInteger.Value.Add(null)" OnRemove="index => modelInteger.Value.RemoveAt(index)">
+                            <InputGroupInteger @bind-Value:get="modelInteger.Value[context]" @bind-Value:set="x => modelInteger.Value[context] = x"/>
+                        </TemplateInputAssociation>
+                    }
+                    @if (model is FormModelAssociationSchemaActionInputHasAttribute<bool?> modelBool)
+                    {
+                        <TemplateInputAssociation List="modelBool.Value" IsList="value.IsValueList" OnAdd="() => modelBool.Value.Add(null)" OnRemove="index => modelBool.Value.RemoveAt(index)">
+                            <InputGroupCheckbox Option="true" @bind-Value:get="modelBool.Value[context]" @bind-Value:set="x => modelBool.Value[context] = x">
+                                Yes?
+                            </InputGroupCheckbox>
+                        </TemplateInputAssociation>
+                    }
+                    @if (model is FormModelAssociationSchemaActionInputHasAttribute<GenericUUID<EntitySchemaDynamicValue>?> modelGuid)
+                    {
+                        <TemplateInputAssociation List="modelGuid.Value" IsList="value.IsValueList" OnAdd="() => modelGuid.Value.Add(null)" OnRemove="index => modelGuid.Value.RemoveAt(index)" Context="index">
+                            <InputGroupSelect TValue="Guid?" OptionList="DynamicValueOptionList" @bind-Value:get="GetDynamicValueGuid(modelGuid.Value, index)" @bind-Value:set="x => SetDynamicValue(modelGuid.Value, index, x)" Context="option">
+                                @GetDynamicValue(option)?.GetValue().Name
+                            </InputGroupSelect>
+                        </TemplateInputAssociation>
+                    }
+                </TemplateInputGroup>
+            }
+
+        </Content>
+
+        <Actions>
+            <Button Loading="Context.IsSubmitting" Status="StatusEnum.Success" type="submit">
+                @SubmitText
+            </Button>
+        </Actions>
+    </TemplateSchemaForm>
+</div>
+
+
+@code {
+
+    private void UpdateInput()
+    {
+        Context.Model.AttributeList = Context.Model.AttributeList?
+            .Where(x => Input?.AttributeList?.Any(y => y.RelationID == x.RelationID) ?? false)
+            .ToList();
+    }
+
+    private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.UpdateFormHeaderEntitySchemaActionInput : TextConstants.CreateFormHeaderEntitySchemaActionInput;
+    private IEnumerable<Guid> OptionList => Schema.DynamicValueList?.Select(x => x.ID) ?? [];
+
+    private string GetOptionName(Guid id)
+    {
+        return Schema.DynamicValueList?.FirstOrDefault(x => x.ID == id)?.GetValue().Name ?? "[MISSING]";
+    }
+    
+    private IEnumerable<Guid> InputOptionList => Schema.InputList?.Select(x => x.ID) ?? [];
+    private IEnumerable<Guid?> DynamicValueOptionList => Schema.DynamicValueList?.Select(x => (Guid?)x.ID).Prepend(null) ?? [];
+    private EntitySchemaInput? Input => Schema.InputList?.FirstOrDefault(x => x.ID == Context.Model.InputID);
+
+    protected override WebFormContext<FormModelSchemaActionInput> CreateContext()
+    {
+        return new(new(Value) { SchemaID = Schema.ID });
+    }
+
+    private FormModelAssociationSchemaActionInputHasAttribute.Discriminator GetModel(EntitySchemaAttribute attribute)
+    {
+        FormModelAssociationSchemaActionInputHasAttribute.Discriminator? model = Context.Model.AttributeList?.FirstOrDefault(x => x.RelationID == attribute.ID);
+        if (model != null) return model;
+
+        model = new(attribute.Type switch
+        {
+            AttributeTypeEnum.Boolean => new FormModelAssociationSchemaActionInputHasAttribute<bool>(Value, attribute, []),
+            AttributeTypeEnum.Integer => new FormModelAssociationSchemaActionInputHasAttribute<int?>(Value, attribute, GetIntegerList(attribute)),
+            AttributeTypeEnum.Decimal => new FormModelAssociationSchemaActionInputHasAttribute<decimal?>(Value, attribute, []),
+            AttributeTypeEnum.String => new FormModelAssociationSchemaActionInputHasAttribute<string>(Value, attribute, GetStringList(attribute)),
+            AttributeTypeEnum.DateTime => new FormModelAssociationSchemaActionInputHasAttribute<DateTime?>(Value, attribute, []),
+            AttributeTypeEnum.DynamicValue => new FormModelAssociationSchemaActionInputHasAttribute<GenericUUID<EntitySchemaDynamicValue>?>(Value, attribute, GetDynamicValueList(attribute)),
+            _ => throw new ArgumentOutOfRangeException()
+        });
+        Context.Model.AttributeList?.Add(model);
+
+        return model;
+    }
+
+    private List<T> GetActionInputAttributeList<T>(EntitySchemaAttribute attribute) where T : EntityAssociationSchemaActionInputHasAttribute
+    {
+        return Value?.AttributeList?.Where(x => x.RelationID == attribute.ID).Select(x => x.GetValue()).OfType<T>().ToList() ?? [];
+    }
+
+    private IEnumerable<int?> GetIntegerList(EntitySchemaAttribute attribute)
+    {
+        List<EntityAssociationSchemaActionInputHasAttributeInteger> list = GetActionInputAttributeList<EntityAssociationSchemaActionInputHasAttributeInteger>(attribute);
+        return list.Any() ? list.Select(x => x.Value) : [null];
+    }
+
+    private IEnumerable<string> GetStringList(EntitySchemaAttribute attribute)
+    {
+        List<EntityAssociationSchemaActionInputHasAttributeString> list = GetActionInputAttributeList<EntityAssociationSchemaActionInputHasAttributeString>(attribute);
+        return list.Any() ? list.Select(x => x.Value) : [string.Empty];
+    }
+
+    private IEnumerable<GenericUUID<EntitySchemaDynamicValue>?> GetDynamicValueList(EntitySchemaAttribute attribute)
+    {
+        List<EntityAssociationSchemaActionInputHasAttributeDynamicValue> list = GetActionInputAttributeList<EntityAssociationSchemaActionInputHasAttributeDynamicValue>(attribute);
+        return list.Any() ? list.Select(x => (GenericUUID<EntitySchemaDynamicValue>?)new(x.ValueID)) : [null];
+    }
+
+    private static Guid? GetDynamicValueGuid(List<GenericUUID<EntitySchemaDynamicValue>?> list, int index)
+    {
+        return list.ElementAtOrDefault(index)?.Value;
+    }
+
+    private void SetDynamicValue(List<GenericUUID<EntitySchemaDynamicValue>?> list, int index, Guid? value)
+    {
+        list[index] = new(value);
+    }
+
+    private EntitySchemaDynamicValue.Discriminator? GetDynamicValue(Guid? id)
+    {
+        return id.HasValue ? Schema.DynamicValueList?.FirstOrDefault(x => x.ID == id.Value) : null;
+    }
+
+}

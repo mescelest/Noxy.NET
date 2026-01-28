@@ -1,0 +1,22 @@
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="sidebar">
+        @Sidebar
+    </div>
+
+    <div class="main">
+        @Content
+    </div>
+
+</div>
+
+@code {
+
+    [Parameter]
+    public required RenderFragment? Content { get; set; }
+
+    [Parameter]
+    public required RenderFragment? Sidebar { get; set; }
+
+}

@@ -1,0 +1,50 @@
+.TemplateSchemaOverview {
+
+}
+
+.update {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    padding: var(--size-gap-md);
+}
+
+.edit-content {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    padding: var(--size-gap-md);
+}
+
+.edit-header {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    justify-content: center;
+    min-height: var(--size-control-sm);
+    font-size: var(--size-text-h4);
+    font-weight: 700;
+}
+
+.edit-list {
+    display: flex;
+    flex-flow: column;
+    flex: 0 0 auto;
+    row-gap: var(--size-gap-lg);
+}
+
+.display-header {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    font-size: var(--size-text-h4);
+    font-weight: 700;
+}
+
+.display-content {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
+    padding: var(--size-gap-md);
+}

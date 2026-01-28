@@ -1,0 +1,11 @@
+@inherits BaseComponentActionInput
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateInputGroup DisplayName="@Context.Title" Description="@Context.Description">
+        <InputElementText @bind-Value="Context.StringValue" @bind-Value:after="Commit"/>
+    </TemplateInputGroup>
+</div>
+
+@code {
+
+}

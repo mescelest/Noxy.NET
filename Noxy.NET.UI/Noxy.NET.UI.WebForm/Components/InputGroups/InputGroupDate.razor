@@ -1,0 +1,12 @@
+﻿@inherits BaseInputGroupValue<DateTime?>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
+        <InputElementDate @attributes="InputAttributes" ID="@UUIDCode" @bind-Value:get="Value" @bind-Value:set="x => ValueChanged.InvokeAsync(x)"/>
+    </TemplateInputGroup>
+</div>
+
+@code {
+
+}
+

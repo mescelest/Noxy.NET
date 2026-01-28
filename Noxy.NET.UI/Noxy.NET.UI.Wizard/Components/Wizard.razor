@@ -1,0 +1,60 @@
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <CascadingValue Value="Context">
+        <div class="steps">
+            @ChildContent
+        </div>
+
+        <div class="content">
+            @if (WizardContext.Logic.GetStepList(Context).Any())
+            {
+                @WizardContext.Logic.GetCurrentStep(Context).ChildContent
+            }
+        </div>
+    </CascadingValue>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required WizardContext Context { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public EventCallback OnWizardComplete { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Context.StepChanged += StepChangedHandler;
+        Context.WizardCompleted += WizardCompletedHandler;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void StepChangedHandler(object? sender, GenericEventArgs<int> _)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void WizardCompletedHandler(object? sender, EventArgs _)
+    {
+        OnWizardComplete.InvokeAsync();
+        InvokeAsync(StateHasChanged);
+    }
+
+    public override void Dispose()
+    {
+        Context.StepChanged -= StepChangedHandler;
+        base.Dispose();
+    }
+
+}

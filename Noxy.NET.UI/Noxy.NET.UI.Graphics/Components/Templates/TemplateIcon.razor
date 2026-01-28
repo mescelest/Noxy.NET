@@ -1,0 +1,17 @@
+﻿@inherits ElementComponent
+
+<svg @attributes="AdditionalAttributes" class="@CssClass" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" size="@SizeString">
+    @ChildContent
+</svg>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public IconSizeEnum? Size { get; set; }
+    private IconSizeEnum SizeCurrent => Size ?? IconSizeEnum.Medium;
+    private string SizeString => SizeCurrent.ToText();
+
+}

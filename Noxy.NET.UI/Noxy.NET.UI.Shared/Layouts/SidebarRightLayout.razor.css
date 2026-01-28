@@ -1,0 +1,23 @@
+.SidebarRightLayout {
+    display: flex;
+    flex-flow: row;
+    flex: 1 1 auto;
+    row-gap: var(--size-gap-lg, 16px);
+    column-gap: var(--size-gap-lg, 16px);
+}
+
+.main, .sidebar {
+    display: flex;
+    flex-flow: column;
+    min-width: var(--size-column, 320px);
+    row-gap: var(--size-gap-xl, 20px);
+}
+
+.main {
+    flex: 1 1 auto;
+}
+
+.sidebar {
+    flex: 0 0 auto;
+    max-width: var(--size-column, 320px);
+}

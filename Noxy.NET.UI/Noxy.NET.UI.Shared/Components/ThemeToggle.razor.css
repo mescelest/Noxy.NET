@@ -1,0 +1,69 @@
+.Button {
+    --button-background-color: var(--color-background-button);
+    --button-backdrop-color: color-mix(in srgb, var(--button-background-color) 60%, #000000);
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--size-control-md);
+    min-height: var(--size-control-md);
+    position: relative;
+    padding: 0 var(--size-gap-sm);
+    border: var(--size-border-width) solid var(--button-backdrop-color);
+    border-radius: var(--size-border-radius);
+    font-size: var(--size-text-body);
+    font-family: inherit;
+    font-weight: bold;
+    letter-spacing: 0.2px;
+    color: var(--color-text-control);
+    background-color: var(--button-background-color);
+    box-shadow: 0px 1px 0 var(--size-box-shadow) var(--button-backdrop-color);
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: border-color 200ms ease-in-out, filter 200ms ease-in-out;
+}
+
+.Button[status="success"] {
+    --button-background-color: var(--color-background-success);
+}
+
+.Button[status="info"] {
+    --button-background-color: var(--color-background-info);
+}
+
+.Button[status="highlight"] {
+    --button-background-color: var(--color-background-highlight);
+}
+
+.Button[status="warning"] {
+    --button-background-color: var(--color-background-warning);
+}
+
+.Button[status="notice"] {
+    --button-background-color: var(--color-background-notice);
+}
+
+.Button[status="error"] {
+    --button-background-color: var(--color-background-error);
+}
+
+.Button:focus {
+    border-color: var(--color-border-focus);
+    outline: none;
+}
+
+.Button:hover {
+    filter: brightness(0.96);
+}
+
+.Button:active {
+    border-color: var(--button-backdrop-color);
+    filter: brightness(0.8);
+}
+
+.Button:disabled {
+    --button-background-color: var(--color-background-disabled);
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+    box-shadow: none;
+}

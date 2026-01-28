@@ -1,0 +1,41 @@
+.Wizard {
+    display: flex;
+    flex: 1 1 auto;
+    column-gap: 20px;
+}
+
+.steps {
+    row-gap: 25px;
+    counter-reset: steps;
+    display: flex;
+    flex-flow: column;
+}
+
+.steps ::deep .WizardStep:not(:last-child)::after {
+    content: " ";
+    width: 2px;
+    background-color: var(--color-control-border);
+    height: 20px;
+    position: absolute;
+    top: calc(100% + 5px / 2);
+    left: calc(var(--size-control-medium) / 2);
+    transform: translateX(-50%);
+}
+
+.content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+}
+
+@media (prefers-color-scheme: light) {
+    .steps ::deep .WizardStep:not(:last-child)::after {
+        background-color: var(--color-control-border-light);
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .steps ::deep .WizardStep:not(:last-child)::after {
+        background-color: var(--color-control-border-dark);
+    }
+}

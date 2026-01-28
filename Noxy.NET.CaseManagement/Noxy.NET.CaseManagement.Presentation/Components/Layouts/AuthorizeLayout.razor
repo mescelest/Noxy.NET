@@ -1,0 +1,62 @@
+﻿@inject AuthenticationHttpClient HttpClient
+@inject UserAuthenticationStateProvider AuthService
+@using Noxy.NET.CaseManagement.Domain.Models.Responses.Authentication
+@using Noxy.NET.CaseManagement.Presentation.Components.Forms.Authentication
+@inherits ElementComponent
+
+<AuthorizeView>
+    <Authorized>
+        @ChildContent
+    </Authorized>
+    <NotAuthorized>
+        <div @attributes="AdditionalAttributes" class="@CssClass">
+            <div class="content">
+                <div class="column">
+                    <h2>Create an account</h2>
+                    <AuthenticationSignUpAPIForm OnSubmit="form => form.SubmitAsync(SignUpFormSubmit)">
+                        <Button Status="StatusEnum.Info" type="submit">Sign Up</Button>
+                    </AuthenticationSignUpAPIForm>
+                </div>
+                <div class="column">
+                    <h2>... Or log in</h2>
+                    <AuthenticationSignInAPIForm OnSubmit="form => form.SubmitAsync(SignInFormSubmit)">
+                        <Button Status="StatusEnum.Success" type="submit">Sign in</Button>
+                    </AuthenticationSignInAPIForm>
+                </div>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private async Task SignInFormSubmit(IWebFormContext<AuthenticationSignInAPIFormModel> context)
+    {
+        try
+        {
+            SignInResponse result = await HttpClient.SignInUser(context.Model);
+            await AuthService.UpdateIdentity(result.JWT);
+        }
+        catch (Exception e)
+        {
+            context.HandleException(e);
+        }
+    }
+
+    private async Task SignUpFormSubmit(IWebFormContext<AuthenticationSignUpAPIFormModel> context)
+    {
+        try
+        {
+            SignUpResponse result = await HttpClient.SignUpUser(context.Model);
+            await AuthService.UpdateIdentity(result.JWT);
+        }
+        catch (Exception e)
+        {
+            context.HandleException(e);
+        }
+    }
+
+}

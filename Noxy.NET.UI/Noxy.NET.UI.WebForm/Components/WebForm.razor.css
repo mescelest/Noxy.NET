@@ -1,0 +1,7 @@
+.WebForm {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-xl);
+    min-width: var(--size-column);
+}

@@ -1,0 +1,37 @@
+﻿@inherits BaseInputValue<TValue>
+@typeparam TValue
+
+<select @attributes="AdditionalAttributes" class="@CssClass" name="@NameCurrent" @onchange="OnInputChange">
+    @for (int i = 0; i < OptionList.Count(); i++)
+    {
+        TValue item = OptionList.ElementAt(i);
+        bool isChecked = EqualityComparer<TValue>.Default.Equals(Value, item);
+
+        <option @attributes="OptionAttributes?.Invoke(item)" value="@i" selected="@isChecked">
+            @ChildContent(item)
+        </option>
+    }
+</select>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<TValue> OptionList { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<TValue> ChildContent { get; set; }
+
+    [Parameter]
+    public string? Name { get; set; }
+    private string NameCurrent => Name ?? UUIDCode;
+
+    [Parameter]
+    public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+
+    private void OnInputChange(ChangeEventArgs args)
+    {
+        if (!int.TryParse(args.Value?.ToString(), out int parsed)) return;
+        NotifyChange(OptionList.ElementAt(parsed));
+    }
+
+}

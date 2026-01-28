@@ -1,0 +1,44 @@
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <label class="wrapper" for="@For">
+        @if (!string.IsNullOrWhiteSpace(DisplayName))
+        {
+            <span class="title">
+                <b>
+                    @DisplayName
+                </b>
+            </span>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <span class="description">@Description</span>
+        }
+
+        <div class="control">
+            @ChildContent
+        </div>
+    </label>
+
+    <MessageBox MessageList="ErrorList" Type="@StatusEnum.Error"/>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? DisplayName { get; set; }
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    [Parameter]
+    public string? For { get; set; }
+
+    [Parameter]
+    public IEnumerable<string>? ErrorList { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+}

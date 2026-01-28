@@ -1,0 +1,177 @@
+﻿@inject IJSRuntime JS
+@inherits ElementComponent
+@implements IAsyncDisposable
+
+<div @attributes="@AdditionalAttributes" class="@CssClass" collapsed="@_internalCollapsed" animated="@IsAnimated">
+    <div class="header-wrapper">
+        @Header
+        <div class="arrow" tabindex="0" @onclick="ArrowClicked" @onkeydown="ArrowKeyPressed">
+            @if (Arrow != null)
+            {
+                @Arrow(_internalCollapsed)
+            }
+            else
+            {
+                @if (_internalCollapsed)
+                {
+                    <IconChevronDown Size="IconSizeEnum.Small"/>
+                }
+                else
+                {
+                    <IconChevronUp Size="IconSizeEnum.Small"/>
+                }
+            }
+        </div>
+    </div>
+    <div class="content-wrapper" id="@UUIDCode">
+        @if (!_internalCollapsed)
+        {
+            @Content
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+
+    [Parameter]
+    public RenderFragment? Content { get; set; }
+
+    [Parameter]
+    public RenderFragment<bool>? Arrow { get; set; }
+
+    [Parameter]
+    public bool? Animated { get; set; }
+
+    [Parameter]
+    public bool? Collapsed { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> CollapsedChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<bool>>? CollapsedExpression { get; set; }
+
+    private bool _internalCollapsed;
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<Collapsible>? _reference;
+
+    private bool IsAnimated => _module != null && _reference != null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _internalCollapsed = Collapsed ?? true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        await Register();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (Collapsed.HasValue)
+        {
+            _internalCollapsed = Collapsed.Value;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        if (!IsRendered || !Animated.HasValue) return;
+
+        switch (Animated.Value)
+        {
+            case true when _module == null:
+                await Register();
+                break;
+            case false when _module != null:
+                await Deregister();
+                break;
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnAnimationComplete(bool collapsed)
+    {
+        await CollapsedChanged.InvokeAsync(_internalCollapsed = collapsed);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ArrowKeyPressed(KeyboardEventArgs args)
+    {
+        if (args.Code is " " or "Enter")
+        {
+            await Toggle();
+        }
+    }
+
+    private async Task ArrowClicked()
+    {
+        await Toggle();
+    }
+
+    private async Task Register()
+    {
+        _reference ??= DotNetObjectReference.Create(this);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Collapsible)));
+
+        await _module.InvokeVoidAsync("RegisterCollapsible", UUIDCode, _reference, nameof(OnAnimationComplete));
+    }
+
+    private async Task Deregister()
+    {
+        if (_module != null && _reference != null)
+        {
+            await _module.InvokeVoidAsync("DisposeCollapsible", UUIDCode);
+
+            await _module.DisposeAsync();
+            _reference.Dispose();
+
+            _module = null;
+            _reference = null;
+        }
+    }
+
+    private async Task Toggle()
+    {
+        if (_module == null || _reference == null)
+        {
+            await CollapsedChanged.InvokeAsync(_internalCollapsed = !_internalCollapsed);
+        }
+        else
+        {
+            string method = _internalCollapsed ? "AnimateExpand" : "AnimateCollapse";
+            if (_internalCollapsed)
+            {
+                await CollapsedChanged.InvokeAsync(_internalCollapsed = false);
+            }
+
+            await _module.InvokeVoidAsync(method, UUIDCode);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module != null)
+        {
+            await _module.DisposeAsync();
+            _module = null;
+        }
+
+        _reference?.Dispose();
+        _reference = null;
+    }
+
+}

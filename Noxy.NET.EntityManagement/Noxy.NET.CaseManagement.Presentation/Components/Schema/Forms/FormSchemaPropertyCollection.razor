@@ -1,0 +1,58 @@
+@inherits BaseComponentTextFormSchema<FormModelSchemaPropertyCollection, EntitySchemaPropertyCollection>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
+        <Header>
+            @HeaderText
+        </Header>
+
+        <Content>
+            <SidebarLeftLayout>
+                <Sidebar>
+                    <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.SchemaIdentifier))" Description="@GetDescription(nameof(Context.Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
+                    <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Name))" Description="@GetDescription(nameof(Context.Model.Name))" @bind-Value="Context.Model.Name"/>
+                    <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Note))" Description="@GetDescription(nameof(Context.Model.Note))" @bind-Value="Context.Model.Note"/>
+                    <InputGroupSelect DisplayName="@GetDisplayName(nameof(Context.Model.TitleDynamicID))" Description="@GetDescription(nameof(Context.Model.TitleDynamicID))" OptionList="OptionList" @bind-Value="Context.Model.TitleDynamicID">
+                        <span>@GetOptionName(context)</span>
+                    </InputGroupSelect>
+                    <InputGroupSelect DisplayName="@GetDisplayName(nameof(Context.Model.DescriptionDynamicID))" Description="@GetDescription(nameof(Context.Model.DescriptionDynamicID))" OptionList="OptionList" @bind-Value="Context.Model.DescriptionDynamicID">
+                        <span>@GetOptionName(context)</span>
+                    </InputGroupSelect>
+                </Sidebar>
+                <Content>
+                    <TemplateSchemaEntitySelect @bind-Value="Context.Model.PropertyList" Available="Schema.PropertyList">
+                        <HeaderTemplate>
+                            @context.GetValue().Name
+                        </HeaderTemplate>
+                        <ContentTemplate>
+                            <TemplateEntityDisplay Entity="context"/>
+                        </ContentTemplate>
+                    </TemplateSchemaEntitySelect>
+                </Content>
+            </SidebarLeftLayout>
+        </Content>
+
+        <Actions>
+            <Button Loading="Context.IsSubmitting" Status="StatusEnum.Success" type="submit">
+                @SubmitText
+            </Button>
+        </Actions>
+    </TemplateSchemaForm>
+</div>
+
+@code {
+
+    private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.UpdateFormHeaderEntitySchemaPropertyBoolean : TextConstants.CreateFormHeaderEntitySchemaPropertyBoolean;
+    private IEnumerable<Guid> OptionList => (Schema.DynamicValueList?.Select(x => x.ID) ?? []).Append(Guid.Empty);
+ 
+    private string GetOptionName(Guid? id)
+    {
+        return Schema.DynamicValueList?.FirstOrDefault(x => x.ID == id)?.GetValue().Name ?? string.Empty;
+    }
+
+    protected override WebFormContext<FormModelSchemaPropertyCollection> CreateContext()
+    {
+        return new(new(Value) { SchemaID = Schema.ID });
+    }
+
+}

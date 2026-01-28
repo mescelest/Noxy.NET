@@ -1,0 +1,78 @@
+﻿@inject IDialogService DialogService
+@inherits ElementComponent
+
+@if (Context != null)
+{
+    <CascadingValue Value="Context" Name="@nameof(Context)">
+        <div @attributes="AdditionalAttributes" class="@CssClass">
+            @if (Context.Options.Overlay)
+            {
+                <div class="dialog-overlay" @onmousedown="OverlayMouseDown" @onmouseup="OverlayMouseUp"></div>
+            }
+            <div class="dialog-modal">
+                @Context.Fragment
+            </div>
+        </div>
+    </CascadingValue>
+}
+
+@code {
+
+    public DialogContext? Context { get; set; }
+
+    private bool OverlayCloseStarted { get; set; }
+
+    private bool OverlayCurrent => Context?.Options.Overlay ?? true;
+    private string? OverlayString => OverlayCurrent ? "overlay" : null;
+
+    private DialogSizeEnum SizeCurrent => Context?.Options.Size ?? DialogSizeEnum.Auto;
+
+    protected override string CssClass => CombineCssClass(base.CssClass, OverlayString, GetSizeString());
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        DialogService.DialogChanged += DialogChangedHandler;
+    }
+
+    private string GetSizeString()
+    {
+        return SizeCurrent switch
+        {
+                DialogSizeEnum.Auto => string.Empty,
+                DialogSizeEnum.FullWidth => "full-width",
+                DialogSizeEnum.FullHeight => "full-height",
+                DialogSizeEnum.Fullscreen => "full-width full-height",
+                _ => throw new InvalidEnumArgumentException(nameof(SizeCurrent), (int)SizeCurrent, typeof(DialogSizeEnum))
+        };
+    }
+
+    private void DialogChangedHandler(object? sender, DialogChangedEventArgs args)
+    {
+        Context = args.Context;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OverlayMouseDown(MouseEventArgs args)
+    {
+        OverlayCloseStarted = true;
+    }
+
+    private void OverlayMouseUp(MouseEventArgs args)
+    {
+        if (Context != null && OverlayCloseStarted)
+        {
+            DialogService.Close(Context.ID);
+        }
+
+        OverlayCloseStarted = false;
+    }
+
+    public override void Dispose()
+    {
+        DialogService.DialogChanged -= DialogChangedHandler;
+        base.Dispose();
+    }
+
+}

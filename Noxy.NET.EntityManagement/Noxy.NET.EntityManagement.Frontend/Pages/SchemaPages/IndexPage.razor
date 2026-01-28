@@ -1,0 +1,46 @@
+﻿@page "/Schema"
+@inject SchemaAPIService SchemaAPIService
+@inject TextService TextService
+@inherits PageComponent
+
+<PageTitle>Home</PageTitle>
+
+<AuthorizeLayout>
+    <PageLayout>
+        <SidebarRightLayout>
+            <Sidebar>
+                <FormSchema OnChange="LoadData"/>
+            </Sidebar>
+            <Content>
+                <TemplateGridList List="_data">
+                    <SchemaPanel Schema="@context" OnSchemaChange="OnSchemaPanelSchemaChange"/>
+                </TemplateGridList>
+            </Content>
+        </SidebarRightLayout>
+    </PageLayout>
+</AuthorizeLayout>
+
+@code {
+
+    private List<EntitySchema> _data = [];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        await WithLoading(LoadData);
+        await WithLoading(TextService.Resolve);
+    }
+
+    private async Task OnSchemaPanelSchemaChange()
+    {
+        await WithLoading(LoadData);
+    }
+
+    private async Task LoadData()
+    {
+        _data = await SchemaAPIService.GetSchemaList();
+    }
+
+}

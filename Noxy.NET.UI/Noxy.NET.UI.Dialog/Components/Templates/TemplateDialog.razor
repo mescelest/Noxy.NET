@@ -1,0 +1,72 @@
+﻿@inherits DialogComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @if (!ContextCurrent.Options.Required)
+    {
+        <div class="close-button">
+            @if (CloseButton != null)
+            {
+                @CloseButton
+            }
+            else if (CloseButtonDefault != null)
+            {
+                @CloseButtonDefault
+            }
+            else
+            {
+                <IconMinus/>
+            }
+        </div>
+    }
+
+    @if (ShowHeaderCurrent)
+    {
+        <div class="header">
+            @Header
+        </div>
+    }
+
+    @if (ShowContentCurrent)
+    {
+        <div class="content">
+            @Content
+        </div>
+    }
+
+    @if (ShowFooterCurrent)
+    {
+        <div class="footer">
+            @Footer
+        </div>
+    }
+</div>
+
+
+@code {
+
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+
+    [Parameter]
+    public RenderFragment? Content { get; set; }
+
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+
+    [Parameter]
+    public RenderFragment? CloseButton { get; set; }
+    public static RenderFragment? CloseButtonDefault { get; set; }
+
+    [Parameter]
+    public bool? ShowHeader { get; set; }
+    private bool ShowHeaderCurrent => ShowHeader ?? (Header != null);
+
+    [Parameter]
+    public bool? ShowContent { get; set; }
+    private bool ShowContentCurrent => ShowContent ?? (Content != null);
+
+    [Parameter]
+    public bool? ShowFooter { get; set; }
+    private bool ShowFooterCurrent => ShowFooter ?? (Footer != null);
+
+}

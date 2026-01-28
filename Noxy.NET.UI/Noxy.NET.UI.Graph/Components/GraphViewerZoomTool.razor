@@ -1,0 +1,23 @@
+@inherits GraphViewerTool
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @if (Parent.Context.Zoom != null)
+    {
+        @* <InputFieldNumber @bind-Value:get="GetZoomLevel()" @bind-Value:set="SetZoomLevel" Min="Parent.Context.Zoom.Min" Max="Parent.Context.Zoom.Max"/> *@
+    }
+</div>
+
+@code {
+
+    private double? GetZoomLevel()
+    {
+        return Parent.Context.Zoom?.Level;
+    }
+
+    private void SetZoomLevel(double? value)
+    {
+        if (Parent.Context.Zoom == null) return;
+        Parent.Context.Zoom.Level = value ?? Parent.Context.Zoom.Min;
+    }
+
+}

@@ -1,0 +1,141 @@
+:root {
+    --blazor-load-percentage: 0;
+    --blazor-load-percentage-text: "0%";
+}
+
+:root {
+    --size-text-label: 1.3rem;
+    --size-text-message: 1.4rem;
+    --size-text-body: 1.6rem;
+    --size-text-h1: 3.6rem;
+    --size-text-h2: 3.2rem;
+    --size-text-h3: 2.8rem;
+    --size-text-h4: 2.4rem;
+    --size-text-h5: 2.0rem;
+    --size-text-h6: 1.8rem;
+    --size-gap-xxs: 2px;
+    --size-gap-xs: 4px;
+    --size-gap-sm: 8px;
+    --size-gap-md: 12px;
+    --size-gap-lg: 16px;
+    --size-gap-xl: 20px;
+    --size-gap-xxl: 30px;
+    --size-border-width-sm: 1px;
+    --size-border-width-md: 2px;
+    --size-border-width-lg: 3px;
+    --size-border-width-xl: 4px;
+    --size-border-radius-sm: 2px;
+    --size-border-radius-md: 4px;
+    --size-border-radius-lg: 8px;
+    --size-box-shadow: 2px;
+    --size-control-xxs: 24px;
+    --size-control-xs: 30px;
+    --size-control-sm: 36px;
+    --size-control-md: 42px;
+    --size-control-lg: 48px;
+    --size-control-xl: 64px;
+    --size-control-xxl: 92px;
+    --size-icon-xxs: 16px;
+    --size-icon-xs: 20px;
+    --size-icon-sm: 24px;
+    --size-icon-md: 28px;
+    --size-icon-lg: 32px;
+    --size-icon-xl: 36px;
+    --size-icon-xxl: 40px;
+    --size-page-xs: 320px;
+    --size-page-sm: 360px;
+    --size-page-md: 720px;
+    --size-page-lg: 1280px;
+    --size-page-xl: 1920px;
+    --size-column: 320px;
+    --size-layout-sidebar: clamp(var(--size-column), 15%, 400px);
+}
+
+:root {
+    --animation-length-short: 150ms;
+    --animation-length-medium: 250ms;
+    --animation-length-long: 500ms;
+}
+
+:root {
+    --font-family-primary: "Roboto", sans-serif;
+    --font-label: normal normal 300 normal var(--size-text-label, 13px) var(--font-family-primary, sans-serif);
+    --font-body: normal normal 400 normal var(--size-text-body, 16px) var(--font-family-primary, sans-serif);
+    --font-button: normal normal 500 normal var(--size-text-body, 16px) var(--font-family-primary, sans-serif);
+}
+
+:root {
+    --color-background-none: #4d4Ad3;
+    --color-background-highlight: #0073ec;
+    --color-background-info: #289ed9;
+    --color-background-success: #23883d;
+    --color-background-warning: #d97f00;
+    --color-background-notice: #a948dd;
+    --color-background-error: #e42b21;
+    --color-background-disabled: #4d4d4d;
+}
+
+:root {
+    /* TEMP FOR WHEN YOU ADD DARK MODE OKAY? */
+    --color-mixin-primary: #ffffff;
+    --color-mixin-complementary: #000000;
+
+    --color-text-button: #ffffff;
+    --color-background-button: #767676;
+    --color-background-messagebox: #767676;
+    --color-focus-button: #ffffff;
+    --color-focus-control: #ffffff;
+}
+
+
+
+/* Color mix-in */
+:root[theme="Light"] {
+    --color-mixin-primary: #ffffff;
+    --color-mixin-complementary: #000000;
+}
+
+:root[theme="Dark"] {
+    --color-mixin-primary: #000000;
+    --color-mixin-complementary: #ffffff;
+}
+
+/* Color background */
+:root[theme="Light"] {
+    --color-background-primary: #ffffff;
+    --color-background-backdrop: #f5f5f5;
+    --color-background-control: #f5f5f5;
+}
+
+:root[theme="Dark"] {
+    --color-background-primary: #1e1e1e;
+    --color-background-backdrop: #121212;
+    --color-background-control: #292929;
+}
+
+/* Color text */
+:root[theme="Light"] {
+    --color-text-header: #000000;
+    --color-text-body: #EBEBF5;
+    --color-text-control: #ffffff;
+}
+
+:root[theme="Dark"] {
+    --color-text-header: #ffffff;
+    --color-text-body: #ebebeb;
+    --color-text-control: #ffffff;
+    --color-text-disabled: #c8c8c8;
+    --color-text-label: #b4b4b4;
+}
+
+/* Color border */
+:root[theme="Light"] {
+    --color-border-button: #000000;
+    --color-border-focus: Highlight;
+    --color-border-control: #545454;
+}
+
+:root[theme="Dark"] {
+    --color-border-focus: #ccc;
+    --color-border-control: #545454;
+}

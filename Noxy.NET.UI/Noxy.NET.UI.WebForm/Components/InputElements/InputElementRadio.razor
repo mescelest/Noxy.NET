@@ -1,0 +1,35 @@
+﻿@inherits BaseInputValue<TValue>
+@typeparam TValue
+
+<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" type="radio" checked="@Checked" @onclick="OnInputClick" @onchange="OnInputChange"/>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required TValue Option { get; set; }
+
+    private bool Checked => EqualityComparer<TValue>.Default.Equals(Value, Option);
+
+    private bool _internalNullable;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _internalNullable = Nullable.GetUnderlyingType(typeof(TValue)) != null;
+    }
+
+    private void OnInputClick(MouseEventArgs args)
+    {
+        if (!_internalNullable || !Checked) return;
+
+        ValueChanged.InvokeAsync(default);
+    }
+
+    private void OnInputChange(ChangeEventArgs args)
+    {
+        ValueChanged.InvokeAsync(Option);
+    }
+
+}
+

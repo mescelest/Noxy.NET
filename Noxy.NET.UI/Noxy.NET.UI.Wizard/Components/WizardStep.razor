@@ -1,0 +1,73 @@
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" @onclick="ClickHandler">
+
+    <div class="icon">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <circle class="inner-circle-1" cx="20" cy="20" r="13"/>
+            <circle class="inner-circle-2" cx="20" cy="20" r="13"/>
+            @if (IsCurrent)
+            {
+                <circle class="outer-circle" cx="20" cy="20" r="17"/>
+            }
+            <text class="text" x="20" y="20">@(CurrentIndex + 1)</text>
+        </svg>
+    </div>
+
+    <div class="text">
+        <span class="title">@Title</span>
+        @if (!string.IsNullOrEmpty(Subtitle))
+        {
+            <span class="subtitle">@Subtitle</span>
+        }
+    </div>
+
+</div>
+
+@code {
+
+    [CascadingParameter, EditorRequired]
+    public required WizardContext Context { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    [Parameter]
+    public bool? IgnoreCompletion { get; set; }
+    private bool IgnoreCompletionCurrent => IgnoreCompletion.HasValue && IgnoreCompletion.Value;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private int CurrentIndex => WizardContext.Logic.GetStepIndex(Context, this);
+
+    private bool IsCurrent => WizardContext.Logic.IsStepCurrent(Context, this);
+    private bool IsActive => WizardContext.Logic.IsStepActive(Context, this);
+    private bool IsCompleted => WizardContext.Logic.IsStepCompleted(Context, this);
+
+    private string CurrentClassString => IsCurrent ? "current" : string.Empty;
+    private string ActiveClassString => IsActive ? "active" : string.Empty;
+    private string CompletedClassString => IsCompleted ? "completed" : string.Empty;
+
+    protected new string CssClass => CombineCssClass(base.CssClass, CurrentClassString, ActiveClassString, CompletedClassString);
+
+    protected override void OnInitialized()
+    {
+        WizardContext.Logic.RegisterStep(Context, this);
+    }
+
+    private void ClickHandler()
+    {
+        Context.GoToStep(WizardContext.Logic.GetStepIndex(Context, this), IgnoreCompletionCurrent);
+    }
+
+    public override void Dispose()
+    {
+        WizardContext.Logic.DeregisterStep(Context, this);
+        base.Dispose();
+    }
+
+}

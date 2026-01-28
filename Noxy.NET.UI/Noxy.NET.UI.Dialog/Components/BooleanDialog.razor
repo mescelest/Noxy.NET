@@ -1,0 +1,50 @@
+﻿@inject IDialogService DialogService
+@inherits DialogComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateDialog>
+        <Header>
+            @Title
+        </Header>
+        <Content>
+            @ChildContent
+        </Content>
+        <Footer>
+            <Button class="decline" @onclick="ButtonDeclined">@DeclineTextCurrent</Button>
+            <Button class="accept" @onclick="ButtonAccepted">@AcceptTextCurrent</Button>
+        </Footer>
+    </TemplateDialog>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? AcceptText { get; set; }
+    private string AcceptTextCurrent => AcceptText ?? "Accept";
+
+    [Parameter]
+    public string? DeclineText { get; set; }
+    private string DeclineTextCurrent => DeclineText ?? "Decline";
+
+    [Parameter]
+    public EventCallback<bool> OnSubmit { get; set; }
+
+    private void ButtonAccepted(MouseEventArgs args)
+    {
+        OnSubmit.InvokeAsync(true);
+        DialogService.Close(ContextCurrent.ID);
+    }
+
+    private void ButtonDeclined(MouseEventArgs args)
+    {
+        OnSubmit.InvokeAsync(false);
+        DialogService.Close(ContextCurrent.ID);
+    }
+
+}

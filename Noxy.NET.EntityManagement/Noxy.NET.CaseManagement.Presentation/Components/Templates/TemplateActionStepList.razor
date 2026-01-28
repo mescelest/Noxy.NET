@@ -1,0 +1,56 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @if (ListActionStep.Length == 1)
+    {
+        ViewModelSchemaActionHasActionStep step = ListActionStep.First();
+
+        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">
+            @step.ActionStep?.Title
+        </DynamicHTMLTag>
+        
+        @if (!string.IsNullOrWhiteSpace(step.ActionStep?.Description))
+        {
+            <span>@step.ActionStep?.Description</span>
+        }
+
+        <TemplateActionStep Context="Context" ActionStep="step.ActionStep"/>
+    }
+    else
+    {
+        @foreach (ViewModelSchemaActionHasActionStep step in ListActionStep.OrderBy(x => x.Order))
+        {
+            <Collapsible>
+                <Header>
+                    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">
+                        @step.ActionStep?.Title
+                    </DynamicHTMLTag>
+                </Header>
+                <Content>
+                    <div class="content">
+                        @if (!string.IsNullOrWhiteSpace(step.ActionStep?.Description))
+                        {
+                            <span>@step.ActionStep?.Description</span>
+                        }
+
+                        <TemplateActionStep Context="Context" ActionStep="step.ActionStep"/>
+                    </div>
+                </Content>
+            </Collapsible>
+        }
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required ViewModelSchemaActionHasActionStep[] ListActionStep { get; set; }
+
+    [Parameter, EditorRequired]
+    public required ContextAction? Context { get; set; }
+
+    [Parameter]
+    public HTMLHeaderElementEnum? HeaderLevel { get; set; }
+    private HTMLHeaderElementEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderElementEnum.H3;
+
+}

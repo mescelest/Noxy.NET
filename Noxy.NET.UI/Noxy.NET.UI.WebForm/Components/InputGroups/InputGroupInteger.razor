@@ -1,0 +1,19 @@
+﻿@inherits BaseInputGroupValue<int?>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
+        <InputElementInteger @attributes="InputAttributes" ID="@UUIDCode" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput"
+                             @bind-Value:get="Value" @bind-Value:set="x => ValueChanged.InvokeAsync(x)"/>
+    </TemplateInputGroup>
+</div>
+
+@code {
+
+    [Parameter]
+    public int? Size { get; set; }
+
+    [Parameter]
+    public bool? HasChangeEventOnInput { get; set; }
+
+}
+

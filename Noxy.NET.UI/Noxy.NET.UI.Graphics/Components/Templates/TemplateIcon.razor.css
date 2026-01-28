@@ -1,0 +1,42 @@
+.TemplateIcon {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.TemplateIcon[size="xxs"] {
+    width: var(--size-icon-xxs, 16px);
+    height: var(--size-icon-xxs, 16px);
+}
+
+.TemplateIcon[size="xs"] {
+    width: var(--size-icon-xs, 20px);
+    height: var(--size-icon-xs, 20px);
+}
+
+.TemplateIcon[size="sm"] {
+    width: var(--size-icon-sm, 24px);
+    height: var(--size-icon-sm, 24px);
+}
+
+.TemplateIcon[size="md"] {
+    width: var(--size-icon-md, 28px);
+    height: var(--size-icon-md, 28px);
+}
+
+.TemplateIcon[size="lg"] {
+    width: var(--size-icon-lg, 32px);
+    height: var(--size-icon-lg, 32px);
+}
+
+.TemplateIcon[size="xl"] {
+    width: var(--size-icon-xl, 36px);
+    height: var(--size-icon-xl, 36px);
+}
+
+.TemplateIcon[size="xxl"] {
+    width: var(--size-icon-xxl, 40px);
+    height: var(--size-icon-xxl, 40px);
+}

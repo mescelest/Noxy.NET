@@ -1,0 +1,58 @@
+﻿@inject IThemeService<TType> ThemeService
+@inherits ElementComponent
+@typeparam TType where TType : struct, Enum
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @if (Template != null)
+    {
+        @foreach (TType item in Enum.GetValues(typeof(TType)))
+        {
+            @Template((item, ThemeService))
+        }
+    }
+
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment<(TType Value, IThemeService<TType> Service)>? Template { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private TType? ThemeInternal { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ThemeService.OnThemeChange += OnThemeChangedHandler;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        ThemeInternal = await ThemeService.LoadTheme();
+        if (!Equals(ThemeInternal, ThemeService.GetTheme()))
+        {
+            await ThemeService.SetTheme(ThemeInternal);
+        }
+    }
+
+    private void OnThemeChangedHandler(object? sender, TType? e)
+    {
+        ThemeInternal = e;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public override void Dispose()
+    {
+        ThemeService.OnThemeChange -= OnThemeChangedHandler;
+        base.Dispose();
+    }
+
+}

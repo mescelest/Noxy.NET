@@ -1,0 +1,11 @@
+@inherits BaseComponentActionInput
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateInputGroup DisplayName="@Context.Title" Description="@Context.Description">
+        <InputElementCheckbox Option="true" @bind-Value="Context.BoolValue" @bind-Value:after="Commit"/>
+    </TemplateInputGroup>
+</div>
+
+@code {
+    
+}

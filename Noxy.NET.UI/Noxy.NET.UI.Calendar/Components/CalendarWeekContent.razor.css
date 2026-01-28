@@ -1,0 +1,18 @@
+.Calendar {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    border: 1px solid white;
+}
+
+.content {
+    display: grid;
+}
+
+.Calendar[mode="Month"] .content {
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.day {
+    border: 1px solid white;
+}

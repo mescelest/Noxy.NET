@@ -1,0 +1,152 @@
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" mode="@ModeCurrent">
+    <div class="header">
+        @switch (ModeCurrent)
+        {
+            case CalenderModeEnum.Year:
+                @(YearHeader != null ? MonthHeader : MonthString)
+                break;
+            case CalenderModeEnum.Month:
+                @(MonthHeader != null ? MonthHeader : MonthString)
+                break;
+            case CalenderModeEnum.Week:
+                @(WeekHeader != null ? WeekHeader : MonthString)
+                break;
+            case CalenderModeEnum.Day:
+                @(DayHeader != null ? DayHeader : MonthString)
+                break;
+            default:
+                throw new InvalidEnumArgumentException(nameof(CalenderModeEnum), (int)ModeCurrent, typeof(CalenderModeEnum));
+        }
+    </div>
+    <div class="content">
+        @switch (ModeCurrent)
+        {
+            case CalenderModeEnum.Year:
+                if (YearContent != null)
+                {
+                    @YearContent
+                }
+                else
+                {
+                    @MonthString
+                }
+
+                break;
+            case CalenderModeEnum.Month:
+                if (MonthContent != null)
+                {
+                    @MonthContent
+                }
+                else
+                {
+                    <CalendarMonthContent></CalendarMonthContent>
+                }
+
+                break;
+            case CalenderModeEnum.Week:
+                if (WeekContent != null)
+                {
+                    @WeekContent
+                }
+                else
+                {
+                    <CalendarWeekContent></CalendarWeekContent>
+                }
+
+                break;
+            case CalenderModeEnum.Day:
+                if (DayContent != null)
+                {
+                    @DayContent
+                }
+                else
+                {
+                    @MonthString
+                }
+
+                break;
+            default:
+                throw new InvalidEnumArgumentException(nameof(CalenderModeEnum), (int)ModeCurrent, typeof(CalenderModeEnum));
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? YearHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment? MonthHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment? WeekHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment? DayHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment? YearContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? MonthContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? WeekContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? DayContent { get; set; }
+
+    [Parameter]
+    public CalenderModeEnum? Mode { get; set; }
+    private CalenderModeEnum ModeCurrent => Mode ?? CalenderModeEnum.Month;
+
+    [Parameter]
+    public DateTime? Min { get; set; }
+
+    [Parameter]
+    public DateTime? Max { get; set; }
+
+    [Parameter]
+    public DateTime? Value { get; set; }
+    private DateTime ValueCurrent => Value ?? DateTime.UtcNow;
+
+    [Parameter]
+    public EventCallback<DateTime> ValueChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<DateTime>>? ValueExpression { get; set; }
+
+    private DateTime? _internalValue;
+    private int _days;
+    private int _month;
+
+    private string MonthString => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(_month);
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        UpdateDate();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (ValueCurrent != _internalValue)
+        {
+            UpdateDate();
+        }
+    }
+
+    private void UpdateDate()
+    {
+        _internalValue = ValueCurrent;
+        _days = DateTime.DaysInMonth(ValueCurrent.Year, ValueCurrent.Month);
+        _month = ValueCurrent.Month;
+    }
+
+}

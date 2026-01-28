@@ -1,0 +1,21 @@
+﻿@inherits BaseInputGroupValue<TValue?>
+@typeparam TValue
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
+        <div class="group">
+            <InputElementCheckbox @attributes="InputAttributes" ID="@UUIDCode" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+            @ChildContent
+        </div>
+    </TemplateInputGroup>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required TValue Option { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+
+}

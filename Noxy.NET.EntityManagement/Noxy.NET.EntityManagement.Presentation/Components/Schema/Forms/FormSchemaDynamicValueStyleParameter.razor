@@ -1,0 +1,36 @@
+@using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms
+@inherits BaseComponentTextFormSchema<Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms.FormModelSchemaDynamicValueStyleParameter, EntitySchemaDynamicValueStyleParameter>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
+        <Header>
+            @HeaderText
+        </Header>
+
+        <Content>
+            <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.SchemaIdentifier))" Description="@GetDescription(nameof(Context.Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
+            <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Name))" Description="@GetDescription(nameof(Context.Model.Name))" @bind-Value="Context.Model.Name"/>
+            <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Note))" Description="@GetDescription(nameof(Context.Model.Note))" @bind-Value="Context.Model.Note"/>
+            <InputGroupCheckbox Option="true" DisplayName="@GetDisplayName(nameof(Context.Model.IsApprovalRequired))" Description="@GetDescription(nameof(Context.Model.IsApprovalRequired))" @bind-Value="Context.Model.IsApprovalRequired">
+                <span>Yes</span>
+            </InputGroupCheckbox>
+        </Content>
+
+        <Actions>
+            <Button Loading="Context.IsSubmitting" Status="StatusEnum.Success" type="submit">
+                @SubmitText
+            </Button>
+        </Actions>
+    </TemplateSchemaForm>
+</div>
+
+@code {
+
+    private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.UpdateFormHeaderEntitySchemaDynamicValueSystemParameter : TextConstants.CreateFormHeaderEntitySchemaDynamicValueSystemParameter;
+
+    protected override WebFormContext<FormModelSchemaDynamicValueStyleParameter> CreateContext()
+    {
+        return new(new(Value) { SchemaID = Schema.ID });
+    }
+
+}

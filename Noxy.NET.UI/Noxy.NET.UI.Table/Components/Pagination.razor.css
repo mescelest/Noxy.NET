@@ -1,0 +1,29 @@
+.Pagination {
+    display: grid;
+    column-gap: 10px;
+    grid-auto-flow: column;
+    padding-bottom: 1px;
+}
+
+.Pagination ::deep .first,
+.Pagination ::deep .last,
+.Pagination ::deep .next,
+.Pagination ::deep .previous {
+    padding: 10px;
+}
+
+.Pagination ::deep .first svg,
+.Pagination ::deep .last svg,
+.Pagination ::deep .next svg,
+.Pagination ::deep .previous svg {
+    width: 25px;
+    height: 25px;
+}
+
+.Pagination ::deep .page {
+    text-align: center;
+}
+
+.Pagination ::deep .page .input {
+    text-align: center;
+}

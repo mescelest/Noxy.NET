@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>Noxy.NET.UI</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.2.0</Version>
+        <Authors>Noxy.NET</Authors>
+        <Title>Noxy.NET.UI.WebForm</Title>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <SupportedPlatform Include="browser"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Noxy.NET.Shared\Noxy.NET.Shared.csproj"/>
+        <ProjectReference Include="..\Noxy.NET.UI.Elements\Noxy.NET.UI.Elements.csproj"/>
+        <ProjectReference Include="..\Noxy.NET.UI.Graphics\Noxy.NET.UI.Graphics.csproj"/>
+        <ProjectReference Include="..\Noxy.NET.UI.Shared\Noxy.NET.UI.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <UpToDateCheckInput Remove="Templates\TemplateInputField.razor"/>
+    </ItemGroup>
+
+</Project>

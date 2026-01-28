@@ -1,0 +1,55 @@
+.MagazineLayout {
+    display: grid;
+    flex: 0 0 auto;
+    overflow: auto;
+}
+
+.left, .right, .center {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    overflow: auto;
+}
+
+.left {
+    grid-area: left;
+}
+
+.right {
+    grid-area: right;
+}
+
+.center {
+    grid-area: center;
+}
+
+@media screen and (width < 720px) {
+    .MagazineLayout {
+        grid-template: 
+		    "center" max-content
+		    "left" max-content
+		    "right" max-content
+		    / 1fr;
+        row-gap: var(--size-gap-xl, 20px);
+    }
+}
+
+@media screen and (720px <= width < 1280) {
+    .MagazineLayout {
+        grid-template: 
+		    "center center" max-content
+		    "left right" max-content
+		    / 1fr 1fr;
+        row-gap: var(--size-gap-xl, 20px);
+        column-gap: var(--size-gap-xl, 20px);
+    }
+}
+
+@media screen and (1280px <= width) {
+    .MagazineLayout {
+        grid-template: 
+		    "left center right" max-content
+		    / var(--size-layout-sidebar, minmax(320px, 15%)) 1fr var(--size-layout-sidebar, minmax(320px, 15%));
+        column-gap: var(--size-gap-xl, 20px);
+    }
+}

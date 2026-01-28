@@ -1,0 +1,11 @@
+.SchemaPanel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    min-width: var(--size-column);
+}
+
+.title {
+    display: flex;
+    flex: 1 1 auto;
+}

@@ -1,0 +1,159 @@
+@inject IJSRuntime JS
+@inherits ElementComponent
+@typeparam TEntity where TEntity : Noxy.NET.EntityManagement.Domain.Abstractions.Entities.BaseEntity, Noxy.NET.EntityManagement.Domain.Interfaces.IOrderedEntity
+        @typeparam TRelation where TRelation : Noxy.NET.EntityManagement.Domain.Abstractions.Forms.BaseFormModelEntity.RelationOrdinal
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="column">
+        <span>Current:</span>
+
+        <SortableList List="CurrentList" OnLoad="OnLoad">
+            <Collapsible>
+                <Header>
+                    <div class="header">
+                        <div class="handle">
+                            <IconDraggable Size="IconSizeEnum.ExtraSmall"/>
+                        </div>
+                        <span class="title">
+                        @if (HeaderTemplate != null)
+                            {
+                                @HeaderTemplate(context)
+                            }
+                            else
+                            {
+                                @context.ToString()
+                            }
+                    </span>
+                        <Button type="button" Status="StatusEnum.Error" Size="ButtonSizeEnum.ExtraSmall" @onclick="EventCallback.Factory.Create(this, () => Remove(context))">
+                            <IconSaltire Size="IconSizeEnum.ExtraExtraSmall"/>
+                        </Button>
+                    </div>
+                </Header>
+                <Content>
+                    <div class="content">
+                        @if (ContentTemplate != null)
+                        {
+                            @ContentTemplate(context)
+                        }
+                        else
+                        {
+                            <TemplateEntityDisplay Entity="context"/>
+                        }
+                    </div>
+                </Content>
+            </Collapsible>
+        </SortableList>
+    </div>
+
+    <div class="column">
+        <span>Available:</span>
+
+        <div class="list">
+            @foreach (TEntity item in AvailableList)
+            {
+                <Collapsible>
+                    <Header>
+                        <div class="header">
+                            <span class="title">
+                                @if (HeaderTemplate != null)
+                                {
+                                    @HeaderTemplate(item)
+                                }
+                                else
+                                {
+                                    @item.ToString()
+                                }
+                            </span>
+                            <Button type="button" Status="StatusEnum.Success" Size="ButtonSizeEnum.ExtraSmall" @onclick="EventCallback.Factory.Create(this, () => Add(item))">
+                                <IconPlus Size="IconSizeEnum.ExtraExtraSmall"/>
+                            </Button>
+                        </div>
+                    </Header>
+                    <Content>
+                        <div class="content">
+                            @if (ContentTemplate != null)
+                            {
+                                @ContentTemplate(item)
+                            }
+                            else
+                            {
+                                <TemplateEntityDisplay Entity="item"/>
+                            }
+                        </div>
+                    </Content>
+                </Collapsible>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public List<TEntity>? Available { get; set; }
+
+    [Parameter, EditorRequired]
+    public List<TRelation>? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<List<TRelation>> ValueChanged { get; set; }
+
+    [Parameter]
+    public RenderFragment<TEntity>? HeaderTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<TEntity>? ContentTemplate { get; set; }
+
+    private IJSObjectReference? _module;
+    private ElementReference _refElement;
+    private DotNetObjectReference<TemplateSchemaEntitySelect<TEntity, TRelation>>? _refClass;
+
+    private List<TRelation> ValueCurrent => Value ?? [];
+    private List<TEntity> AvailableCurrent => Available ?? [];
+
+    private IEnumerable<TEntity> CurrentList => ValueCurrent.OrderBy(x => x.Order).Select(x => AvailableCurrent.First(y => y.ID == x.RelationID));
+    private IEnumerable<TEntity> AvailableList => AvailableCurrent.Where(x => ValueCurrent.All(y => y.RelationID != x.ID)).OrderBy(x => x.Order);
+
+    private async Task OnLoad(ElementReference reference)
+    {
+        _refElement = reference;
+        _refClass ??= DotNetObjectReference.Create(this);
+
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(TemplateSchemaEntitySelect<TEntity, TRelation>)));
+        await _module.InvokeVoidAsync("Register", _refElement, _refClass, nameof(OnSort));
+    }
+
+    public void Add(TEntity item)
+    {
+        NotifyChange(CurrentList.Append(item).ToList());
+    }
+
+    public void Remove(TEntity item)
+    {
+        NotifyChange(CurrentList.Where(x => x.ID != item.ID).ToList());
+    }
+
+    [JSInvokable]
+    public void OnSort(int oldIndex, int newIndex)
+    {
+        NotifyChange(CurrentList.ToList().MoveItem(oldIndex, newIndex));
+    }
+
+    private void NotifyChange(List<TEntity> list)
+    {
+        List<TRelation> result = [];
+
+        for (int index = 0; index < list.Count; index++)
+        {
+            TEntity item = list[index];
+            TRelation relation = Activator.CreateInstance<TRelation>();
+            relation.ID = Guid.Empty;
+            relation.RelationID = item.ID;
+            relation.Order = index + 1;
+            result.Add(relation);
+        }
+
+        ValueChanged.InvokeAsync(result);
+    }
+
+}

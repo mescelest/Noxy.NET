@@ -1,0 +1,11 @@
+.Calendar {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+}
+
+.content {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+}

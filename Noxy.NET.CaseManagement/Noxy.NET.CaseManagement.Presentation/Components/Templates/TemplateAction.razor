@@ -1,0 +1,75 @@
+@inject ActionHubService ActionHubService
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Collapsible>
+        <Header>
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">
+                @_context?.Title
+            </DynamicHTMLTag>
+        </Header>
+        <Content>
+            @if (_context != null)
+            {
+                <div class="content">
+                    @if (!string.IsNullOrWhiteSpace(_context?.Description))
+                    {
+                        <span>@_context.Description</span>
+                    }
+
+                    <TemplateActionStepList ListActionStep="ListActionStep" HeaderLevel="HeaderLevelCurrent.GetNext()" Context="_context"/>
+                </div>
+            }
+        </Content>
+    </Collapsible>
+
+    <div class="action-list">
+        <Button @onclick="Submit">Submit</Button>
+    </div>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required ViewModelSchemaAction Action { get; set; }
+
+    [Parameter]
+    public HTMLHeaderElementEnum? HeaderLevel { get; set; }
+    private HTMLHeaderElementEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderElementEnum.H3;
+
+    [Parameter]
+    public EventCallback OnActionComplete { get; set; }
+
+    private ContextAction? _context;
+
+    private ViewModelSchemaActionHasActionStep[] ListActionStep => Action.ActionStepList ?? [];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        _context = await ActionHubService.RegisterAction(UUID, Action.SchemaIdentifier);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async void Submit()
+    {
+        try
+        {
+            object? _ = await ActionHubService.Submit(UUID);
+            await OnActionComplete.InvokeAsync();
+        }
+        catch (Exception)
+        {
+            // Ignore
+        }
+    }
+
+    public override void Dispose()
+    {
+        ActionHubService.DeregisterAction(UUID);
+        base.Dispose();
+    }
+
+}

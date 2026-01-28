@@ -1,0 +1,34 @@
+.InputGroupSelect {
+    display: flex;
+    flex: 0 1 auto;
+    flex-flow: column;
+}
+
+.select-wrapper {
+    display: flex;
+    flex: 0 1 auto;
+    position: relative;
+}
+
+.select-wrapper::after {
+    content: "▼";
+    position: absolute;
+    right: var(--size-gap-sm, 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.InputGroupSelect ::deep .InputElementSelect {
+    max-width: 100%;
+    min-height: var(--size-control-md, 46px);
+    margin: 0;
+    padding: var(--size-gap-sm, 8px);
+    padding-right: calc(var(--size-gap-sm, 8px) + var(--size-gap-lg, 16px) + var(--size-gap-sm, 8px));
+    border: 1px solid black;
+    border-radius: var(--size-border-radius-md, 4px);
+    font-size: var(--size-text-body, 16px);
+    font-family: inherit;
+    box-sizing: border-box;
+    appearance: none;
+}

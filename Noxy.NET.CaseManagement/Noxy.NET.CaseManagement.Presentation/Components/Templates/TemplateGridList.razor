@@ -1,0 +1,23 @@
+@inherits ElementComponent
+@typeparam T
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @foreach (T item in ListCurrent)
+    {
+        <div class="item">
+            @ChildContent(item)
+        </div>
+    }
+</div>
+
+
+@code {
+
+    [Parameter, EditorRequired]
+    public IEnumerable<T>? List { get; set; }
+    private IEnumerable<T> ListCurrent => List ?? [];
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<T> ChildContent { get; set; }
+
+}

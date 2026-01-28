@@ -1,0 +1,42 @@
+.PageLayout {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    overflow: auto;
+    row-gap: var(--size-gap-xl);
+}
+
+.header {
+    display: grid;
+    grid-template-columns: max-content 1fr max-content;
+    padding: var(--size-gap-xl);
+    padding-bottom: 0;
+    column-gap: var(--size-gap-xl);
+}
+
+.logo {
+    display: flex;   
+    flex: 0 0 auto;
+}
+
+.navigation {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    column-gap: var(--size-gap-xl);
+}
+
+.account {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-xl);
+    padding-inline: var(--size-gap-xl);
+    overflow: auto;
+}

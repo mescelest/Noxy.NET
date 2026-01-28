@@ -1,0 +1,31 @@
+﻿@inherits BaseInputTextualValue<int?>
+
+<input @attributes="AdditionalAttributes" id="@IDCurrent" class="@CssClass" type="tel" size="@SizeCurrent" value="@Value" @onchange="OnValueChange"/>
+
+@code {
+
+    [Parameter]
+    public int? Size { get; set; }
+    protected int SizeCurrent => Size ?? 35;
+
+    [JSInvokable]
+    public override void OnValueInput(string value)
+    {
+        HandleChange(value);
+    }
+
+    protected override void OnValueChange(ChangeEventArgs args)
+    {
+        HandleChange(args.Value?.ToString() ?? string.Empty);
+    }
+
+    private void HandleChange(string value)
+    {
+        int? next = int.TryParse(value, out int parsed) ? parsed : null;
+
+        NotifyChange(next);
+        Module?.InvokeVoidAsync("NoxyNETUIWebForm.SetInputValue", UUIDString, next?.ToString());
+    }
+
+}
+
