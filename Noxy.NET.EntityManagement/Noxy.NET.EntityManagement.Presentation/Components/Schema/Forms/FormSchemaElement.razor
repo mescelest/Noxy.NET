@@ -39,11 +39,11 @@
 
     private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.UpdateFormHeaderEntitySchemaElement : TextConstants.CreateFormHeaderEntitySchemaElement;
 
-    private IEnumerable<Guid> OptionList => Schema.DynamicValueList?.Select(x => x.ID) ?? [];
+    private IEnumerable<Guid> OptionList => Schema.ParameterList?.Select(x => x.ID) ?? [];
 
     private string GetOptionName(Guid id)
     {
-        return Schema.DynamicValueList?.FirstOrDefault(x => x.ID == id)?.GetValue().Name ?? "[MISSING]";
+        return Schema.ParameterList?.FirstOrDefault(x => x.ID == id)?.GetValue().Name ?? "[MISSING]";
     }
 
     protected override WebFormContext<FormModelSchemaElement> CreateContext()

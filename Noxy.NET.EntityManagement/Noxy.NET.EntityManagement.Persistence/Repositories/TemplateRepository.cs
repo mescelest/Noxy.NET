@@ -1,16 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
+using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
-using Noxy.NET.EntityManagement.Persistence.Interfaces.Services;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
+using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
-public class TemplateRepository(DataContext context, IEntityToTableMapper mapperE2T, ITableToEntityMapper mapperT2E) : BaseRepository(context, mapperE2T, mapperT2E), ITemplateRepository
+public class TemplateRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), ITemplateRepository
 {
     public async Task<List<EntitySchema>> GetSchemaList()
     {
@@ -21,8 +22,23 @@ public class TemplateRepository(DataContext context, IEntityToTableMapper mapper
 
     public async Task<EntitySchema> Populate(EntitySchema entity)
     {
+        ITaskBundlingService serviceTaskBundling = DI.GetService<ITaskBundlingService>();
+
+        (List<TableSchemaContext> contextList, List<TableSchemaParameter> parameterList, List<TableSchemaElement> elementList, List<TableSchemaProperty> propertyList) = await serviceTaskBundling.WhenAll(
+            Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync(),
+            Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync(),
+            Context.SchemaElement.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync(),
+            Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()
+        );
+
+        entity.ContextList ??= contextList.Select(MapperT2E.Map).ToList();
+        entity.ParameterList ??= parameterList.Select(MapperT2E.Map).ToList();
+        entity.ElementList ??= elementList.Select(MapperT2E.Map).ToList();
+        entity.PropertyList ??= propertyList.Select(MapperT2E.Map).ToList();
+
+
         entity.ContextList ??= (await Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
-        entity.DynamicValueList ??= (await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
+        entity.ParameterList ??= (await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
         entity.ElementList ??= (await Context.SchemaElement.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
         entity.PropertyList ??= (await Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(x => MapperT2E.Map(x)).ToList();
 
@@ -38,7 +54,6 @@ public class TemplateRepository(DataContext context, IEntityToTableMapper mapper
     public async Task<EntitySchema> GetCurrentSchema()
     {
         TableSchema result = await Context.Schema.AsNoTracking().OrderByDescending(x => x.TimeActivated).FirstAsync(x => x.IsActive);
-
 
         return MapperT2E.Map(result);
     }

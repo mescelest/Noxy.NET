@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
+using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
-using Noxy.NET.EntityManagement.Persistence.Interfaces.Services;
 using Noxy.NET.EntityManagement.Persistence.Tables.Data;
 using Noxy.NET.EntityManagement.Persistence.Tables.Data.Discriminators;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
@@ -12,7 +12,7 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
-public class DataRepository(DataContext context, IEntityToTableMapper mapperE2T, ITableToEntityMapper mapperT2E) : BaseRepository(context, mapperE2T, mapperT2E), IDataRepository
+public class DataRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), IDataRepository
 {
     public async Task<List<EntityDataElement>> GetElementListWithIdentifier(string identifier)
     {

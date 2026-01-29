@@ -9,7 +9,7 @@ public class EntitySchema : BaseEntityTemplate
     public required DateTime? TimeActivated { get; set; }
 
     public List<EntitySchemaContext>? ContextList { get; set; }
-    public List<EntitySchemaParameter.Discriminator>? DynamicValueList { get; set; }
+    public List<EntitySchemaParameter.Discriminator>? ParameterList { get; set; }
     public List<EntitySchemaElement>? ElementList { get; set; }
     public List<EntitySchemaProperty.Discriminator>? PropertyList { get; set; }
 }

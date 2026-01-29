@@ -9,21 +9,6 @@ namespace Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms;
 
 public class FormModelSchemaPropertyImage(EntitySchemaPropertyImage? entity) : BaseFormModelEntitySchemaComponent(entity)
 {
-    // [Required]
-    // [DisplayName(TextConstants.LabelFormDefaultValue)]
-    // [Description(TextConstants.HelpFormDefaultValue)]
-    // public Guid DefaultValueDynamicID { get; set; } = entity?.DefaultValueDynamicID ?? Guid.NewGuid();
-    //
-    // [Required]
-    // [DisplayName(TextConstants.LabelFormWidth)]
-    // [Description(TextConstants.HelpFormWidth)]
-    // public Guid WidthDynamicID { get; set; } = entity?.DefaultValueDynamicID ?? Guid.NewGuid();
-    //
-    // [Required]
-    // [DisplayName(TextConstants.LabelFormHeight)]
-    // [Description(TextConstants.HelpFormHeight)]
-    // public Guid HeightDynamicID { get; set; } = entity?.DefaultValueDynamicID ?? Guid.NewGuid();
-
     [JsonConstructor]
     public FormModelSchemaPropertyImage() : this(null)
     {

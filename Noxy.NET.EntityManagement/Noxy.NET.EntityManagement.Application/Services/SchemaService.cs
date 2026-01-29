@@ -24,7 +24,9 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
                 Name = model.Name,
                 Note = model.Note,
                 Order = model.Order,
-                SchemaID = model.SchemaID
+                SchemaID = model.SchemaID,
+                TitleTextParameterID = model.TitleTextParameterID,
+                DescriptionTextParameterID = model.DescriptionTextParameterID,
             });
         }
         else
@@ -39,7 +41,7 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
 
             foreach (FormModelSchemaContext.HasElement item in model.ElementList)
             {
-                EntityJunctionSchemaContextHasElement parsed = await uow.Junction.Create(new EntityJunctionSchemaContextHasElement()
+                EntityJunctionSchemaContextHasElement parsed = await uow.Junction.Create(new EntityJunctionSchemaContextHasElement
                 {
                     ID = item.ID != Guid.Empty ? item.ID : BaseEntity.CreateID(),
                     Order = item.Order,
@@ -152,7 +154,9 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
                 Name = model.Name,
                 Note = model.Note,
                 Order = model.Order,
-                SchemaID = model.SchemaID
+                SchemaID = model.SchemaID,
+                TitleTextParameterID = model.TitleTextParameterID,
+                DescriptionTextParameterID = model.DescriptionTextParameterID,
             });
         }
         else
@@ -167,7 +171,7 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
 
             foreach (FormModelSchemaElement.HasProperty item in model.PropertyList)
             {
-                EntityJunctionSchemaElementHasProperty parsed = await uow.Junction.Create(new EntityJunctionSchemaElementHasProperty()
+                EntityJunctionSchemaElementHasProperty parsed = await uow.Junction.Create(new EntityJunctionSchemaElementHasProperty
                 {
                     ID = item.ID != Guid.Empty ? item.ID : BaseEntity.CreateID(),
                     Order = item.Order,
@@ -195,7 +199,9 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
                 Name = model.Name,
                 Note = model.Note,
                 Order = model.Order,
-                SchemaID = model.SchemaID
+                SchemaID = model.SchemaID,
+                TitleTextParameterID = model.TitleTextParameterID,
+                DescriptionTextParameterID = model.DescriptionTextParameterID,
             });
         }
         else
@@ -224,6 +230,8 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
                 Order = model.Order,
                 Type = model.Type,
                 SchemaID = model.SchemaID,
+                TitleTextParameterID = model.TitleTextParameterID,
+                DescriptionTextParameterID = model.DescriptionTextParameterID,
             });
         }
         else
@@ -251,6 +259,8 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
                 Note = model.Note,
                 Order = model.Order,
                 SchemaID = model.SchemaID,
+                TitleTextParameterID = model.TitleTextParameterID,
+                DescriptionTextParameterID = model.DescriptionTextParameterID,
             });
         }
         else
@@ -279,6 +289,8 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
                 Order = model.Order,
                 IsUnsigned = model.IsUnsigned,
                 SchemaID = model.SchemaID,
+                TitleTextParameterID = model.TitleTextParameterID,
+                DescriptionTextParameterID = model.DescriptionTextParameterID,
             });
         }
         else
@@ -306,6 +318,8 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
                 Note = model.Note,
                 Order = model.Order,
                 SchemaID = model.SchemaID,
+                TitleTextParameterID = model.TitleTextParameterID,
+                DescriptionTextParameterID = model.DescriptionTextParameterID,
             });
         }
         else
@@ -334,6 +348,8 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
                 Order = model.Order,
                 AllowedExtensions = model.AllowedExtensions,
                 SchemaID = model.SchemaID,
+                TitleTextParameterID = model.TitleTextParameterID,
+                DescriptionTextParameterID = model.DescriptionTextParameterID,
             });
         }
         else

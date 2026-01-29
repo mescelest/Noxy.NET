@@ -3,7 +3,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @{
-        EntitySchemaParameter[] list = Schema.DynamicValueList?.Select(x => x.GetValue()).ToArray() ?? [];
+        EntitySchemaParameter[] list = Schema.ParameterList?.Select(x => x.GetValue()).ToArray() ?? [];
         IEnumerable<EntitySchemaParameterStyle> listStyleParameter = list.OfType<EntitySchemaParameterStyle>();
         IEnumerable<EntitySchemaParameterSystem> listSystemParameter = list.OfType<EntitySchemaParameterSystem>();
         IEnumerable<EntitySchemaParameterText> listTextParameter = list.OfType<EntitySchemaParameterText>();
@@ -60,7 +60,7 @@
 
     private void FormChange(EntitySchemaParameter entity)
     {
-        Schema.DynamicValueList = Schema.DynamicValueList?.Where(x => x.ID != entity.ID).Append(new(entity)).OrderBy(x => x.GetValue().Order).ToList();
+        Schema.ParameterList = Schema.ParameterList?.Where(x => x.ID != entity.ID).Append(new(entity)).OrderBy(x => x.GetValue().Order).ToList();
     }
 
 }

@@ -23,7 +23,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         };
     }
 
-    public TableSchemaContext AddContext(string identifier, string name, string note = "", DateTime? timeCreated = null)
+    public TableSchemaContext AddContext(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, DateTime? timeCreated = null)
     {
         return context.SchemaContext.Add(new()
         {
@@ -32,6 +32,8 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
             Note = note,
             Order = GetNextOrder(nameof(TableSchemaContext)),
             SchemaID = schema.ID,
+            TitleTextParameterID = title.ID,
+            DescriptionTextParameterID = description?.ID,
             TimeCreated = timeCreated ?? Now
         }).Entity;
     }
@@ -65,7 +67,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaElement AddElement(string identifier, string name, string note = "", DateTime? timeCreated = null)
+    public TableSchemaElement AddElement(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, DateTime? timeCreated = null)
     {
         return context.SchemaElement.Add(new()
         {
@@ -74,11 +76,13 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
             Note = note,
             Order = GetNextOrder(nameof(TableSchemaElement)),
             SchemaID = schema.ID,
+            TitleTextParameterID = title.ID,
+            DescriptionTextParameterID = description?.ID,
             TimeCreated = timeCreated ?? Now
         }).Entity;
     }
 
-    public TableSchemaPropertyBoolean AddPropertyBoolean(string identifier, string name, string note = "", string @default = "", DateTime? timeCreated = null)
+    public TableSchemaPropertyBoolean AddPropertyBoolean(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, DateTime? timeCreated = null)
     {
         return context.SchemaPropertyBoolean.Add(new()
         {
@@ -87,11 +91,13 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
             Note = note,
             Order = GetNextOrder(nameof(TableSchemaProperty)),
             SchemaID = schema.ID,
+            TitleTextParameterID = title.ID,
+            DescriptionTextParameterID = description?.ID,
             TimeCreated = timeCreated ?? Now
         }).Entity;
     }
 
-    public TableSchemaPropertyDateTime AddPropertyDateTime(string identifier, string name, string note = "", DateTimeTypeEnum type = DateTimeTypeEnum.Date, string @default = "",
+    public TableSchemaPropertyDateTime AddPropertyDateTime(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, DateTimeTypeEnum type = DateTimeTypeEnum.Date,
         DateTime? timeCreated = null)
     {
         return context.SchemaPropertyDateTime.Add(new()
@@ -102,11 +108,13 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
             Order = GetNextOrder(nameof(TableSchemaProperty)),
             Type = type,
             SchemaID = schema.ID,
+            TitleTextParameterID = title.ID,
+            DescriptionTextParameterID = description?.ID,
             TimeCreated = timeCreated ?? Now
         }).Entity;
     }
 
-    public TableSchemaPropertyString AddPropertyString(string identifier, string name, string note = "", string @default = "", DateTime? timeCreated = null)
+    public TableSchemaPropertyString AddPropertyString(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, DateTime? timeCreated = null)
     {
         return context.SchemaPropertyString.Add(new()
         {
@@ -115,6 +123,8 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
             Note = note,
             Order = GetNextOrder(nameof(TableSchemaProperty)),
             SchemaID = schema.ID,
+            TitleTextParameterID = title.ID,
+            DescriptionTextParameterID = description?.ID,
             TimeCreated = timeCreated ?? Now
         }).Entity;
     }

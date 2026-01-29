@@ -42,21 +42,21 @@ public class BaseSchemaSeed(DataContext context)
         builderData.AddTextParameter(IdentifierDynamicValueTextParameterLabelNo, "No");
 
         // Add Properties
-        TableSchemaPropertyString tablePropertyStringCaseNumber = builder.AddPropertyString(IdentifierPropertyStringCaseNumber, "Case number");
-        TableSchemaPropertyBoolean tablePropertyBooleanIsCompleted = builder.AddPropertyBoolean(IdentifierPropertyBooleanCompleted, "Is completed?");
-        TableSchemaPropertyDateTime tablePropertyDateTimeCreatedAt = builder.AddPropertyDateTime(IdentifierPropertyDateTimeCreated, "Created at");
+        TableSchemaPropertyBoolean tablePropertyBooleanIsCompleted = builder.AddPropertyBoolean(IdentifierPropertyBooleanCompleted, "Is completed?", parameterTextPropertyBooleanIsCompleted);
+        TableSchemaPropertyDateTime tablePropertyDateTimeCreatedAt = builder.AddPropertyDateTime(IdentifierPropertyDateTimeCreated, "Created at", parameterTextPropertyStringCaseNumber);
+        TableSchemaPropertyString tablePropertyStringCaseNumber = builder.AddPropertyString(IdentifierPropertyStringCaseNumber, "Case number", parameterTextPropertyDateTimeCreatedAt);
 
         // Add case element
-        TableSchemaElement tableElementCase = builder.AddElement(IdentifierElementCase, "Case");
+        TableSchemaElement tableElementCase = builder.AddElement(IdentifierElementCase, "Case", parameterTextElementCase);
         builder.Relate(tableElementCase, tablePropertyStringCaseNumber);
         builder.Relate(tableElementCase, tablePropertyBooleanIsCompleted);
         builder.Relate(tableElementCase, tablePropertyDateTimeCreatedAt);
 
         // Add journal element
-        TableSchemaElement tableElementJournal = builder.AddElement(IdentifierElementJournal, "Journal");
+        TableSchemaElement tableElementJournal = builder.AddElement(IdentifierElementJournal, "Journal", parameterTextElementJournal);
 
         // Add case context
-        TableSchemaContext tableContextCase = builder.AddContext(IdentifierContextCase, "Case context");
+        TableSchemaContext tableContextCase = builder.AddContext(IdentifierContextCase, "Case context", parameterTextContextCaseManagement);
         builder.Relate(tableContextCase, tableElementCase);
         builder.Relate(tableContextCase, tableElementJournal);
 

@@ -6,12 +6,6 @@ namespace Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms;
 
 public class FormModelSchemaPropertyBoolean(EntitySchemaPropertyBoolean? entity) : BaseFormModelEntitySchemaComponent(entity)
 {
-    // [Required]
-    // [DisplayName(TextConstants.LabelFormDefaultValue)]
-    // [Description(TextConstants.HelpFormDefaultValue)]
-    // public Guid DefaultValueDynamicID { get; set; } = entity?.DefaultValueDynamicID ?? Guid.NewGuid();
-
-
     [JsonConstructor]
     public FormModelSchemaPropertyBoolean() : this(null)
     {

@@ -1,20 +1,14 @@
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
+using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 
 namespace Noxy.NET.EntityManagement.Application.Services;
 
-public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaBuilderService
+public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, TaskBundlingService bundlingServiceTaskBundling) : ISchemaBuilderService
 {
-    private readonly Dictionary<Guid, List<EntityJunctionSchemaContextHasElement>> _collectionContextHasElement = [];
-    private readonly Dictionary<Guid, List<EntityJunctionSchemaElementHasProperty>> _collectionElementHasProperty = [];
-    private Dictionary<Guid, EntitySchemaContext> _collectionContext = [];
-    private Dictionary<Guid, EntitySchemaParameter.Discriminator> _collectionDynamicValue = [];
-    private Dictionary<Guid, EntitySchemaElement> _collectionElement = [];
-    private Dictionary<Guid, EntitySchemaProperty.Discriminator> _collectionProperty = [];
-
     public async Task<EntitySchema> ConstructSchema(Guid? id = null)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
@@ -30,84 +24,111 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory) : ISchem
             schema = await uow.Template.GetSchemaByID(id.Value);
         }
 
-        schema.ContextList = await uow.Schema.GetSchemaContextListBySchemaID(id.Value);
-        schema.DynamicValueList = await uow.Schema.GetSchemaDynamicValueListBySchemaID(id.Value);
-        schema.ElementList = await uow.Schema.GetSchemaElementListBySchemaID(id.Value);
-        schema.PropertyList = await uow.Schema.GetSchemaPropertyListBySchemaID(id.Value);
+        Task<List<EntitySchemaContext>> contextTask = uow.Schema.GetSchemaContextListBySchemaID(id.Value);
+        Task<List<EntitySchemaParameter.Discriminator>> parameterTask = uow.Schema.GetSchemaDynamicValueListBySchemaID(id.Value);
+        Task<List<EntitySchemaElement>> elementTask = uow.Schema.GetSchemaElementListBySchemaID(id.Value);
+        Task<List<EntitySchemaProperty.Discriminator>> propertyTask = uow.Schema.GetSchemaPropertyListBySchemaID(id.Value);
 
-        _collectionContext = schema.ContextList.ToDictionary(x => x.ID, y => y);
-        _collectionDynamicValue = schema.DynamicValueList.ToDictionary(x => x.ID, y => y);
-        _collectionElement = schema.ElementList.ToDictionary(x => x.ID, y => y);
-        _collectionProperty = schema.PropertyList.ToDictionary(x => x.ID, y => y);
+        await Task.WhenAll(contextTask, parameterTask, elementTask, propertyTask);
+
+        (schema.ContextList, schema.ParameterList, schema.ElementList, schema.PropertyList) = await bundlingServiceTaskBundling.WhenAll(
+            uow.Schema.GetSchemaContextListBySchemaID(id.Value),
+            uow.Schema.GetSchemaDynamicValueListBySchemaID(id.Value),
+            uow.Schema.GetSchemaElementListBySchemaID(id.Value),
+            uow.Schema.GetSchemaPropertyListBySchemaID(id.Value)
+        );
+
+        Dictionary<Guid, List<EntityJunctionSchemaContextHasElement>> collectionContextHasElement = new(schema.ContextList.Count + schema.ElementList.Count);
+        Dictionary<Guid, List<EntityJunctionSchemaElementHasProperty>> collectionElementHasProperty = new(schema.ElementList.Count + schema.PropertyList.Count);
+
+        Dictionary<Guid, EntitySchemaContext> collectionContext = schema.ContextList.ToDictionary(x => x.ID, y => y);
+        Dictionary<Guid, EntitySchemaElement> collectionElement = schema.ElementList.ToDictionary(x => x.ID, y => y);
+        Dictionary<Guid, EntitySchemaParameter.Discriminator> collectionParameter = schema.ParameterList.ToDictionary(x => x.ID, y => y);
+        Dictionary<Guid, EntitySchemaProperty.Discriminator> collectionProperty = schema.PropertyList.ToDictionary(x => x.ID, y => y);
 
         // Base
-
         foreach (EntitySchemaContext entity in schema.ContextList)
         {
             entity.Schema = schema;
-        }
-
-        foreach (EntitySchemaParameter.Discriminator entity in schema.DynamicValueList)
-        {
-            EntitySchemaParameter value = entity.GetValue();
-            value.Schema = schema;
+            AssignTextParameters(entity, collectionParameter);
         }
 
         foreach (EntitySchemaElement entity in schema.ElementList)
         {
             entity.Schema = schema;
+            AssignTextParameters(entity, collectionParameter);
         }
 
-        foreach (EntitySchemaProperty.Discriminator entity in schema.PropertyList)
+        IEnumerable<EntitySchemaParameter> listParameter = schema.ParameterList.Select(x => x.GetValue());
+        foreach (EntitySchemaParameter entity in listParameter)
         {
-            EntitySchemaProperty value = entity.GetValue();
-            value.Schema = schema;
+            entity.Schema = schema;
+        }
+
+        IEnumerable<EntitySchemaProperty> listProperty = schema.PropertyList.Select(x => x.GetValue());
+        foreach (EntitySchemaProperty entity in listProperty)
+        {
+            entity.Schema = schema;
+            AssignTextParameters(entity, collectionParameter);
         }
 
         // Junction
 
         foreach (EntityJunctionSchemaContextHasElement junction in await uow.Schema.GetSchemaContextHasElementListBySchemaID(id.Value))
         {
-            if (!_collectionContextHasElement.TryGetValue(junction.EntityID, out List<EntityJunctionSchemaContextHasElement>? listEntity))
+            if (!collectionContextHasElement.TryGetValue(junction.EntityID, out List<EntityJunctionSchemaContextHasElement>? listEntity))
             {
-                _collectionContextHasElement[junction.EntityID] = listEntity = [];
+                collectionContextHasElement[junction.EntityID] = listEntity = [];
             }
 
-            junction.Entity = _collectionContext[junction.EntityID];
+            junction.Entity = collectionContext[junction.EntityID];
             junction.Entity.ElementList = listEntity;
             listEntity.Add(junction);
 
-            if (!_collectionContextHasElement.TryGetValue(junction.RelationID, out List<EntityJunctionSchemaContextHasElement>? listRelation))
+            if (!collectionContextHasElement.TryGetValue(junction.RelationID, out List<EntityJunctionSchemaContextHasElement>? listRelation))
             {
-                _collectionContextHasElement[junction.RelationID] = listRelation = [];
+                collectionContextHasElement[junction.RelationID] = listRelation = [];
             }
 
-            junction.Relation = _collectionElement[junction.RelationID];
+            junction.Relation = collectionElement[junction.RelationID];
             junction.Relation.ContextList = listRelation;
             listRelation.Add(junction);
         }
 
         foreach (EntityJunctionSchemaElementHasProperty junction in await uow.Schema.GetSchemaElementHasPropertyListBySchemaID(id.Value))
         {
-            if (!_collectionElementHasProperty.TryGetValue(junction.EntityID, out List<EntityJunctionSchemaElementHasProperty>? listEntity))
+            if (!collectionElementHasProperty.TryGetValue(junction.EntityID, out List<EntityJunctionSchemaElementHasProperty>? listEntity))
             {
-                _collectionElementHasProperty[junction.EntityID] = listEntity = [];
+                collectionElementHasProperty[junction.EntityID] = listEntity = [];
             }
 
-            junction.Entity = _collectionElement[junction.EntityID];
+            junction.Entity = collectionElement[junction.EntityID];
             junction.Entity.PropertyList = listEntity;
             listEntity.Add(junction);
 
-            if (!_collectionElementHasProperty.TryGetValue(junction.RelationID, out List<EntityJunctionSchemaElementHasProperty>? listRelation))
+            if (!collectionElementHasProperty.TryGetValue(junction.RelationID, out List<EntityJunctionSchemaElementHasProperty>? listRelation))
             {
-                _collectionElementHasProperty[junction.RelationID] = listRelation = [];
+                collectionElementHasProperty[junction.RelationID] = listRelation = [];
             }
 
-            junction.Relation = _collectionProperty[junction.RelationID];
+            junction.Relation = collectionProperty[junction.RelationID];
             junction.Relation.GetValue().RelationElementList = listRelation;
             listRelation.Add(junction);
         }
 
         return schema;
+    }
+
+    private static void AssignTextParameters<T>(T entity, Dictionary<Guid, EntitySchemaParameter.Discriminator> collectionParameter) where T : BaseEntitySchemaComponent
+    {
+        entity.TitleTextParameter = collectionParameter.TryGetValue(entity.TitleTextParameterID, out EntitySchemaParameter.Discriminator? titleParam)
+            ? titleParam.TextParameter
+            : throw new KeyNotFoundException($"Title parameter {entity.TitleTextParameterID} not found for {typeof(T).Name} {entity.ID}");
+
+        if (!entity.DescriptionTextParameterID.HasValue) return;
+
+        entity.DescriptionTextParameter = collectionParameter.TryGetValue(entity.DescriptionTextParameterID.Value, out EntitySchemaParameter.Discriminator? descParam)
+            ? descParam.TextParameter
+            : throw new KeyNotFoundException($"Description parameter {entity.DescriptionTextParameterID} not found for {typeof(T).Name} {entity.ID}");
     }
 }

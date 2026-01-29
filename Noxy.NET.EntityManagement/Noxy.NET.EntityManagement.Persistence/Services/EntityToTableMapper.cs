@@ -114,6 +114,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Order = entity.Order,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -185,6 +187,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Order = entity.Order,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -212,6 +216,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Order = entity.Order,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -226,6 +232,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Order = entity.Order,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -241,6 +249,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Type = entity.Type,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -255,6 +265,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Order = entity.Order,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -270,6 +282,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             AllowedExtensions = entity.AllowedExtensions,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -284,6 +298,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Order = entity.Order,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -298,6 +314,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Order = entity.Order,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -312,6 +330,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Order = entity.Order,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
+            TitleTextParameterID = entity.TitleTextParameterID,
+            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 

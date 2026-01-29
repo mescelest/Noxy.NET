@@ -24,11 +24,11 @@
 @code {
 
     private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.UpdateFormHeaderEntitySchemaPropertyBoolean : TextConstants.CreateFormHeaderEntitySchemaPropertyBoolean;
-    private IEnumerable<Guid> OptionList => (Schema.DynamicValueList?.Select(x => x.ID) ?? []).Append(Guid.Empty);
+    private IEnumerable<Guid> OptionList => (Schema.ParameterList?.Select(x => x.ID) ?? []).Append(Guid.Empty);
 
     private string GetOptionName(Guid? id)
     {
-        return Schema.DynamicValueList?.FirstOrDefault(x => x.ID == id)?.GetValue().Name ?? string.Empty;
+        return Schema.ParameterList?.FirstOrDefault(x => x.ID == id)?.GetValue().Name ?? string.Empty;
     }
 
     protected override WebFormContext<FormModelSchemaPropertyDecimal> CreateContext()
