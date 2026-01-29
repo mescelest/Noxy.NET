@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Domain.Abstractions.Forms;
 
-public abstract class BaseFormModelEntitySchemaDynamicValueParameter(EntitySchemaDynamicValueParameter? entity = null) : BaseFormModelEntitySchema(entity)
+public abstract class BaseFormModelEntitySchemaParameter(EntitySchemaParameter? entity = null) : BaseFormModelEntitySchema(entity)
 {
     [Required]
     [DisplayName(TextConstants.LabelFormIsApprovalRequired)]

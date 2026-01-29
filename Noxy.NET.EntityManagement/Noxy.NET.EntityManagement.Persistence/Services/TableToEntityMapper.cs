@@ -312,9 +312,9 @@ public class TableToEntityMapper : ITableToEntityMapper
     #region -- Schemas --
 
     public EntitySchemaContext Map(TableSchemaContext? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaDynamicValue.Discriminator Map(TableSchemaDynamicValue? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaDynamicValueTextParameter Map(TableSchemaDynamicValueTextParameter? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaDynamicValueSystemParameter Map(TableSchemaDynamicValueSystemParameter? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameter.Discriminator Map(TableSchemaParameter? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameterText Map(TableSchemaParameterText? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameterSystem Map(TableSchemaParameterSystem? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntitySchemaElement Map(TableSchemaElement? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntitySchemaProperty.Discriminator Map(TableSchemaProperty? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntitySchemaPropertyBoolean Map(TableSchemaPropertyBoolean? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
@@ -348,11 +348,11 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntitySchemaDynamicValueSystemParameter? MapInternal(TableSchemaDynamicValueSystemParameter? table, Guid[]? listVisitedRelation = null)
+    private static EntitySchemaParameterSystem? MapInternal(TableSchemaParameterSystem? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
-        EntitySchemaDynamicValueSystemParameter mapped = new()
+        EntitySchemaParameterSystem mapped = new()
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
@@ -371,11 +371,11 @@ public class TableToEntityMapper : ITableToEntityMapper
     }
 
 
-    private static EntitySchemaDynamicValueTextParameter? MapInternal(TableSchemaDynamicValueTextParameter? table, Guid[]? listVisitedRelation = null)
+    private static EntitySchemaParameterText? MapInternal(TableSchemaParameterText? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
-        EntitySchemaDynamicValueTextParameter mapped = new()
+        EntitySchemaParameterText mapped = new()
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
@@ -394,14 +394,14 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntitySchemaDynamicValue.Discriminator? MapInternal(TableSchemaDynamicValue? table, Guid[]? listVisitedRelation = null)
+    private static EntitySchemaParameter.Discriminator? MapInternal(TableSchemaParameter? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
         return new(table switch
         {
-            TableSchemaDynamicValueSystemParameter value => MapInternal(value, listVisitedRelation),
-            TableSchemaDynamicValueTextParameter value => MapInternal(value, listVisitedRelation),
+            TableSchemaParameterSystem value => MapInternal(value, listVisitedRelation),
+            TableSchemaParameterText value => MapInternal(value, listVisitedRelation),
             _ => throw new ArgumentOutOfRangeException(nameof(table), table, null)
         });
     }

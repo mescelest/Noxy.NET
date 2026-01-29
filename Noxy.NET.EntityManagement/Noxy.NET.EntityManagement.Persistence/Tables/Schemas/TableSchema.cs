@@ -13,7 +13,7 @@ public class TableSchema : BaseTableTemplate
     public required DateTime? TimeActivated { get; set; }
 
     public ICollection<TableSchemaContext>? ContextList { get; set; }
-    public ICollection<TableSchemaDynamicValue>? DynamicValueList { get; set; }
+    public ICollection<TableSchemaParameter>? ParameterList { get; set; }
     public ICollection<TableSchemaElement>? ElementList { get; set; }
     public ICollection<TableSchemaProperty>? PropertyList { get; set; }
 }

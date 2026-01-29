@@ -117,18 +117,18 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TableSchemaDynamicValue Map(EntitySchemaDynamicValue entity)
+    public TableSchemaParameter Map(EntitySchemaParameter entity)
     {
         return entity switch
         {
-            EntitySchemaDynamicValueStyleParameter value => Map(value),
-            EntitySchemaDynamicValueSystemParameter value => Map(value),
-            EntitySchemaDynamicValueTextParameter value => Map(value),
+            EntitySchemaParameterStyle value => Map(value),
+            EntitySchemaParameterSystem value => Map(value),
+            EntitySchemaParameterText value => Map(value),
             _ => throw new ArgumentOutOfRangeException(nameof(entity))
         };
     }
 
-    public TableSchemaDynamicValueStyleParameter Map(EntitySchemaDynamicValueStyleParameter entity)
+    public TableSchemaParameterStyle Map(EntitySchemaParameterStyle entity)
     {
         return new()
         {
@@ -143,7 +143,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TableSchemaDynamicValueSystemParameter Map(EntitySchemaDynamicValueSystemParameter entity)
+    public TableSchemaParameterSystem Map(EntitySchemaParameterSystem entity)
     {
         return new()
         {
@@ -158,7 +158,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TableSchemaDynamicValueTextParameter Map(EntitySchemaDynamicValueTextParameter entity)
+    public TableSchemaParameterText Map(EntitySchemaParameterText entity)
     {
         return new()
         {

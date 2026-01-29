@@ -22,16 +22,17 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableDataPropertyDateTime> DataPropertyDateTime { get; set; } = null!;
     public DbSet<TableDataPropertyString> DataPropertyString { get; set; } = null!;
 
+    public DbSet<TableDataStyleParameter> DataStyleParameter { get; set; } = null!;
     public DbSet<TableDataSystemParameter> DataSystemParameter { get; set; } = null!;
     public DbSet<TableDataTextParameter> DataTextParameter { get; set; } = null!;
 
     public DbSet<TableSchema> Schema { get; set; } = null!;
     public DbSet<TableSchemaContext> SchemaContext { get; set; } = null!;
-    public DbSet<TableSchemaDynamicValue> SchemaDynamicValue { get; set; } = null!;
-    public DbSet<TableSchemaDynamicValueSystemParameter> SchemaDynamicValueSystemParameter { get; set; } = null!;
-    public DbSet<TableSchemaDynamicValueStyleParameter> SchemaDynamicValueStyleParameter { get; set; } = null!;
-    public DbSet<TableSchemaDynamicValueTextParameter> SchemaDynamicValueTextParameter { get; set; } = null!;
     public DbSet<TableSchemaElement> SchemaElement { get; set; } = null!;
+    public DbSet<TableSchemaParameter> SchemaParameter { get; set; } = null!;
+    public DbSet<TableSchemaParameterSystem> SchemaParameterSystem { get; set; } = null!;
+    public DbSet<TableSchemaParameterStyle> SchemaParameterStyle { get; set; } = null!;
+    public DbSet<TableSchemaParameterText> SchemaParameterText { get; set; } = null!;
     public DbSet<TableSchemaProperty> SchemaProperty { get; set; } = null!;
     public DbSet<TableSchemaPropertyBoolean> SchemaPropertyBoolean { get; set; } = null!;
     public DbSet<TableSchemaPropertyDateTime> SchemaPropertyDateTime { get; set; } = null!;
@@ -50,8 +51,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         modelBuilder.Entity<TableSchemaProperty>().UseTpcMappingStrategy();
         modelBuilder.Entity<TableSchemaProperty>().Property(e => e.ID).ValueGeneratedNever();
 
-        modelBuilder.Entity<TableSchemaDynamicValue>().UseTpcMappingStrategy();
-        modelBuilder.Entity<TableSchemaDynamicValue>().Property(e => e.ID).ValueGeneratedNever();
+        modelBuilder.Entity<TableSchemaParameter>().UseTpcMappingStrategy();
+        modelBuilder.Entity<TableSchemaParameter>().Property(e => e.ID).ValueGeneratedNever();
 
         modelBuilder.Entity<TableUser>()
             .HasOne(e => e.Authentication)

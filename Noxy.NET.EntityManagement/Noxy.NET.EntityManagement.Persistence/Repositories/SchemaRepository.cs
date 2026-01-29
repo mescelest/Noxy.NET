@@ -21,9 +21,9 @@ public class SchemaRepository(DataContext context, IEntityToTableMapper mapperE2
         return MapperT2E.Map(await Context.SchemaContext.AsNoTracking().SingleAsync(x => x.ID == id));
     }
 
-    public async Task<EntitySchemaDynamicValue.Discriminator> GetSchemaDynamicValueByID(Guid id)
+    public async Task<EntitySchemaParameter.Discriminator> GetSchemaDynamicValueByID(Guid id)
     {
-        return MapperT2E.Map(await Context.SchemaDynamicValue.AsNoTracking().SingleAsync(x => x.ID == id));
+        return MapperT2E.Map(await Context.SchemaParameter.AsNoTracking().SingleAsync(x => x.ID == id));
     }
 
     public async Task<EntitySchemaElement> GetSchemaElementByID(Guid id)
@@ -42,9 +42,9 @@ public class SchemaRepository(DataContext context, IEntityToTableMapper mapperE2
         return result.Select(MapperT2E.Map).ToList();
     }
 
-    public async Task<List<EntitySchemaDynamicValue.Discriminator>> GetSchemaDynamicValueListBySchemaID(Guid id)
+    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaDynamicValueListBySchemaID(Guid id)
     {
-        List<TableSchemaDynamicValue> result = await Context.SchemaDynamicValue.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
+        List<TableSchemaParameter> result = await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         return result.Select(MapperT2E.Map).ToList();
     }
 
@@ -93,23 +93,23 @@ public class SchemaRepository(DataContext context, IEntityToTableMapper mapperE2
         return entity;
     }
 
-    public async Task<EntitySchemaDynamicValue.Discriminator> Populate(EntitySchemaDynamicValue.Discriminator entity)
+    public async Task<EntitySchemaParameter.Discriminator> Populate(EntitySchemaParameter.Discriminator entity)
     {
         return entity.GetValue() switch
         {
-            EntitySchemaDynamicValueSystemParameter entityDateTime => new(await Populate(entityDateTime)),
-            EntitySchemaDynamicValueTextParameter entityString => new(await Populate(entityString)),
+            EntitySchemaParameterSystem entityDateTime => new(await Populate(entityDateTime)),
+            EntitySchemaParameterText entityString => new(await Populate(entityString)),
             _ => entity
         };
     }
 
-    public Task<EntitySchemaDynamicValueSystemParameter> Populate(EntitySchemaDynamicValueSystemParameter entity)
+    public Task<EntitySchemaParameterSystem> Populate(EntitySchemaParameterSystem entity)
     {
         // TODO: Fill this
         return Task.FromResult(entity);
     }
 
-    public Task<EntitySchemaDynamicValueTextParameter> Populate(EntitySchemaDynamicValueTextParameter entity)
+    public Task<EntitySchemaParameterText> Populate(EntitySchemaParameterText entity)
     {
         // TODO: Fill this
         return Task.FromResult(entity);
@@ -169,10 +169,10 @@ public class SchemaRepository(DataContext context, IEntityToTableMapper mapperE2
 
     #region -- Create --
 
-    public async Task<EntitySchemaDynamicValue.Discriminator> Create(EntitySchemaDynamicValue entity)
+    public async Task<EntitySchemaParameter.Discriminator> Create(EntitySchemaParameter entity)
     {
-        await UpdateOrder<TableSchemaDynamicValue>(entity);
-        EntityEntry<TableSchemaDynamicValue> result = await Context.SchemaDynamicValue.AddAsync(MapperE2T.Map(entity));
+        await UpdateOrder<TableSchemaParameter>(entity);
+        EntityEntry<TableSchemaParameter> result = await Context.SchemaParameter.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
 
@@ -202,9 +202,9 @@ public class SchemaRepository(DataContext context, IEntityToTableMapper mapperE2
         Context.SchemaContext.Update(MapperE2T.Map(entity));
     }
 
-    public void Update(EntitySchemaDynamicValue entity)
+    public void Update(EntitySchemaParameter entity)
     {
-        Context.SchemaDynamicValue.Update(MapperE2T.Map(entity));
+        Context.SchemaParameter.Update(MapperE2T.Map(entity));
     }
 
     public void Update(EntitySchemaElement entity)

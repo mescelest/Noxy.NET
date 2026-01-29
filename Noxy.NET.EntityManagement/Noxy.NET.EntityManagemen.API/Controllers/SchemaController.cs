@@ -17,13 +17,13 @@ public class SchemaController(ISchemaService serviceSchema) : ControllerBase
     }
 
     [HttpPost("DynamicValue/SystemParameter")]
-    public async Task<ActionResult<EntitySchemaDynamicValue.Discriminator>> Create(FormModelSchemaDynamicValueSystemParameter model)
+    public async Task<ActionResult<EntitySchemaParameter.Discriminator>> Create(FormModelSchemaParameterSystem model)
     {
         return await serviceSchema.CreateOrUpdate(model);
     }
 
     [HttpPost("DynamicValue/TextParameter")]
-    public async Task<ActionResult<EntitySchemaDynamicValue.Discriminator>> Create(FormModelSchemaDynamicValueTextParameter model)
+    public async Task<ActionResult<EntitySchemaParameter.Discriminator>> Create(FormModelSchemaParameterText model)
     {
         return await serviceSchema.CreateOrUpdate(model);
     }

@@ -3,10 +3,10 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @{
-        EntitySchemaDynamicValue[] list = Schema.DynamicValueList?.Select(x => x.GetValue()).ToArray() ?? [];
-        IEnumerable<EntitySchemaDynamicValueStyleParameter> listStyleParameter = list.OfType<EntitySchemaDynamicValueStyleParameter>();
-        IEnumerable<EntitySchemaDynamicValueSystemParameter> listSystemParameter = list.OfType<EntitySchemaDynamicValueSystemParameter>();
-        IEnumerable<EntitySchemaDynamicValueTextParameter> listTextParameter = list.OfType<EntitySchemaDynamicValueTextParameter>();
+        EntitySchemaParameter[] list = Schema.DynamicValueList?.Select(x => x.GetValue()).ToArray() ?? [];
+        IEnumerable<EntitySchemaParameterStyle> listStyleParameter = list.OfType<EntitySchemaParameterStyle>();
+        IEnumerable<EntitySchemaParameterSystem> listSystemParameter = list.OfType<EntitySchemaParameterSystem>();
+        IEnumerable<EntitySchemaParameterText> listTextParameter = list.OfType<EntitySchemaParameterText>();
     }
     <Collapsible>
         <Header>
@@ -58,7 +58,7 @@
         await WithLoading(TextService.Resolve);
     }
 
-    private void FormChange(EntitySchemaDynamicValue entity)
+    private void FormChange(EntitySchemaParameter entity)
     {
         Schema.DynamicValueList = Schema.DynamicValueList?.Where(x => x.ID != entity.ID).Append(new(entity)).OrderBy(x => x.GetValue().Order).ToList();
     }

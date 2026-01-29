@@ -4,13 +4,13 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms;
 
-public class FormModelSchemaDynamicValueStyleParameter(EntitySchemaDynamicValueStyleParameter? entity = null) : BaseFormModelEntitySchemaDynamicValueParameter(entity)
+public class FormModelSchemaParameterStyle(EntitySchemaParameterStyle? entity = null) : BaseFormModelEntitySchemaParameter(entity)
 {
     [JsonConstructor]
-    public FormModelSchemaDynamicValueStyleParameter() : this(null)
+    public FormModelSchemaParameterStyle() : this(null)
     {
     }
 
-    public override string APIEndpoint => "Schema/DynamicValue/StyleParameter";
+    public override string APIEndpoint => "Schema/Parameter/System";
     public override HttpMethod HttpMethod => HttpMethod.Post;
 }

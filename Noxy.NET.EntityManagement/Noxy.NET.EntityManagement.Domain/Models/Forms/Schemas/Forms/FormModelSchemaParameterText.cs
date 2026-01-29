@@ -8,14 +8,14 @@ using Noxy.NET.EntityManagement.Domain.Enums;
 
 namespace Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms;
 
-public class FormModelSchemaDynamicValueTextParameter(EntitySchemaDynamicValueTextParameter? entity = null) : BaseFormModelEntitySchemaDynamicValueParameter(entity)
+public class FormModelSchemaParameterText(EntitySchemaParameterText? entity = null) : BaseFormModelEntitySchemaParameter(entity)
 {
     [JsonConstructor]
-    public FormModelSchemaDynamicValueTextParameter() : this(null)
+    public FormModelSchemaParameterText() : this(null)
     {
     }
 
-    public override string APIEndpoint => "Schema/DynamicValue/Code";
+    public override string APIEndpoint => "Schema/Parameter/Code";
     public override HttpMethod HttpMethod => HttpMethod.Post;
 
     [Required]

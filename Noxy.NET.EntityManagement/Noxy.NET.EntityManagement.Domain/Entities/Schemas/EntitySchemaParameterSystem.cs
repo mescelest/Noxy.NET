@@ -2,4 +2,4 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
-public class EntitySchemaDynamicValueStyleParameter : EntitySchemaDynamicValueParameter;
+public class EntitySchemaParameterSystem : EntitySchemaParameter;

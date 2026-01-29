@@ -54,14 +54,14 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
         return result;
     }
 
-    public async Task<EntitySchemaDynamicValue.Discriminator> CreateOrUpdate(FormModelSchemaDynamicValueStyleParameter model)
+    public async Task<EntitySchemaParameter.Discriminator> CreateOrUpdate(FormModelSchemaParameterStyle model)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
-        EntitySchemaDynamicValue.Discriminator result;
+        EntitySchemaParameter.Discriminator result;
 
         if (model.ID == Guid.Empty)
         {
-            result = await uow.Schema.Create(new EntitySchemaDynamicValueStyleParameter
+            result = await uow.Schema.Create(new EntitySchemaParameterStyle
             {
                 SchemaIdentifier = model.SchemaIdentifier,
                 Name = model.Name,
@@ -74,7 +74,7 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
         else
         {
             result = await uow.Schema.GetSchemaDynamicValueByID(model.ID);
-            EntitySchemaDynamicValueSystemParameter property = UpdateSchemaFields(result.SystemParameter, model);
+            EntitySchemaParameterSystem property = UpdateSchemaFields(result.SystemParameter, model);
             uow.Schema.Update(property);
         }
 
@@ -82,14 +82,14 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
         return result;
     }
 
-    public async Task<EntitySchemaDynamicValue.Discriminator> CreateOrUpdate(FormModelSchemaDynamicValueSystemParameter model)
+    public async Task<EntitySchemaParameter.Discriminator> CreateOrUpdate(FormModelSchemaParameterSystem model)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
-        EntitySchemaDynamicValue.Discriminator result;
+        EntitySchemaParameter.Discriminator result;
 
         if (model.ID == Guid.Empty)
         {
-            result = await uow.Schema.Create(new EntitySchemaDynamicValueSystemParameter
+            result = await uow.Schema.Create(new EntitySchemaParameterSystem
             {
                 SchemaIdentifier = model.SchemaIdentifier,
                 Name = model.Name,
@@ -102,7 +102,7 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
         else
         {
             result = await uow.Schema.GetSchemaDynamicValueByID(model.ID);
-            EntitySchemaDynamicValueSystemParameter property = UpdateSchemaFields(result.SystemParameter, model);
+            EntitySchemaParameterSystem property = UpdateSchemaFields(result.SystemParameter, model);
             uow.Schema.Update(property);
         }
 
@@ -110,14 +110,14 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
         return result;
     }
 
-    public async Task<EntitySchemaDynamicValue.Discriminator> CreateOrUpdate(FormModelSchemaDynamicValueTextParameter model)
+    public async Task<EntitySchemaParameter.Discriminator> CreateOrUpdate(FormModelSchemaParameterText model)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
-        EntitySchemaDynamicValue.Discriminator result;
+        EntitySchemaParameter.Discriminator result;
 
         if (model.ID == Guid.Empty)
         {
-            result = await uow.Schema.Create(new EntitySchemaDynamicValueTextParameter
+            result = await uow.Schema.Create(new EntitySchemaParameterText
             {
                 SchemaIdentifier = model.SchemaIdentifier,
                 Name = model.Name,
@@ -131,7 +131,7 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
         else
         {
             result = await uow.Schema.GetSchemaDynamicValueByID(model.ID);
-            EntitySchemaDynamicValueTextParameter property = UpdateSchemaFields(result.TextParameter, model);
+            EntitySchemaParameterText property = UpdateSchemaFields(result.TextParameter, model);
             uow.Schema.Update(property);
         }
 

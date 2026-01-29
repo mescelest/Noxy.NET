@@ -1,6 +1,6 @@
 @using Noxy.NET.EntityManagement.Domain.Enums
 @using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms
-@inherits BaseComponentTextFormSchema<Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms.FormModelSchemaDynamicValueTextParameter, EntitySchemaDynamicValueTextParameter>
+@inherits BaseComponentTextFormSchema<Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms.FormModelSchemaParameterText, EntitySchemaParameterText>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
@@ -32,7 +32,7 @@
 
     private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.UpdateFormHeaderEntitySchemaDynamicValueTextParameter : TextConstants.CreateFormHeaderEntitySchemaDynamicValueTextParameter;
 
-    protected override WebFormContext<FormModelSchemaDynamicValueTextParameter> CreateContext()
+    protected override WebFormContext<FormModelSchemaParameterText> CreateContext()
     {
         return new(new(Value) { SchemaID = Schema.ID });
     }

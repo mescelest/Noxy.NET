@@ -23,7 +23,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         };
     }
 
-    public TableSchemaContext AddContext(string identifier, string name, TableSchemaDynamicValue refTitle, string note = "", TableSchemaDynamicValue? refDescription = null, DateTime? timeCreated = null)
+    public TableSchemaContext AddContext(string identifier, string name, string note = "", DateTime? timeCreated = null)
     {
         return context.SchemaContext.Add(new()
         {
@@ -36,28 +36,28 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaDynamicValueSystemParameter AddDynamicValueSystemParameter(string identifier, string name, string note = "", bool isApprovalRequired = false, DateTime? timeCreated = null)
+    public TableSchemaParameterSystem AddDynamicValueSystemParameter(string identifier, string name, string note = "", bool isApprovalRequired = false, DateTime? timeCreated = null)
     {
-        return context.SchemaDynamicValueSystemParameter.Add(new()
+        return context.SchemaParameterSystem.Add(new()
         {
             SchemaIdentifier = identifier,
             Name = name,
             Note = note,
-            Order = GetNextOrder(nameof(TableSchemaDynamicValueTextParameter)),
+            Order = GetNextOrder(nameof(TableSchemaParameterText)),
             IsApprovalRequired = isApprovalRequired,
             SchemaID = schema.ID,
             TimeCreated = timeCreated ?? Now
         }).Entity;
     }
 
-    public TableSchemaDynamicValueTextParameter AddDynamicValueTextParameter(string identifier, string name, TextParameterTypeEnum type = TextParameterTypeEnum.Line, string note = "", bool isApprovalRequired = false, DateTime? timeCreated = null)
+    public TableSchemaParameterText AddDynamicValueTextParameter(string identifier, string name, TextParameterTypeEnum type = TextParameterTypeEnum.Line, string note = "", bool isApprovalRequired = false, DateTime? timeCreated = null)
     {
-        return context.SchemaDynamicValueTextParameter.Add(new()
+        return context.SchemaParameterText.Add(new()
         {
             SchemaIdentifier = identifier,
             Name = name,
             Note = note,
-            Order = GetNextOrder(nameof(TableSchemaDynamicValueTextParameter)),
+            Order = GetNextOrder(nameof(TableSchemaParameterText)),
             Type = type,
             IsApprovalRequired = isApprovalRequired,
             SchemaID = schema.ID,
@@ -65,7 +65,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaElement AddElement(string identifier, string name, TableSchemaDynamicValue refTitle, string note = "", TableSchemaDynamicValue? refDescription = null, DateTime? timeCreated = null)
+    public TableSchemaElement AddElement(string identifier, string name, string note = "", DateTime? timeCreated = null)
     {
         return context.SchemaElement.Add(new()
         {
@@ -78,7 +78,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaPropertyBoolean AddPropertyBoolean(string identifier, string name, TableSchemaDynamicValue refTitle, string note = "", TableSchemaDynamicValue? refDescription = null, string @default = "", DateTime? timeCreated = null)
+    public TableSchemaPropertyBoolean AddPropertyBoolean(string identifier, string name, string note = "", string @default = "", DateTime? timeCreated = null)
     {
         return context.SchemaPropertyBoolean.Add(new()
         {
@@ -91,7 +91,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaPropertyDateTime AddPropertyDateTime(string identifier, string name, TableSchemaDynamicValue refTitle, string note = "", TableSchemaDynamicValue? refDescription = null, DateTimeTypeEnum type = DateTimeTypeEnum.Date, string @default = "",
+    public TableSchemaPropertyDateTime AddPropertyDateTime(string identifier, string name, string note = "", DateTimeTypeEnum type = DateTimeTypeEnum.Date, string @default = "",
         DateTime? timeCreated = null)
     {
         return context.SchemaPropertyDateTime.Add(new()
@@ -106,7 +106,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaPropertyString AddPropertyString(string identifier, string name, TableSchemaDynamicValue refTitle, string note = "", TableSchemaDynamicValue? refDescription = null, string @default = "", DateTime? timeCreated = null)
+    public TableSchemaPropertyString AddPropertyString(string identifier, string name, string note = "", string @default = "", DateTime? timeCreated = null)
     {
         return context.SchemaPropertyString.Add(new()
         {

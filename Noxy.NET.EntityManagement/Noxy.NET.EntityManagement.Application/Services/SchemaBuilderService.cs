@@ -11,7 +11,7 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory) : ISchem
     private readonly Dictionary<Guid, List<EntityJunctionSchemaContextHasElement>> _collectionContextHasElement = [];
     private readonly Dictionary<Guid, List<EntityJunctionSchemaElementHasProperty>> _collectionElementHasProperty = [];
     private Dictionary<Guid, EntitySchemaContext> _collectionContext = [];
-    private Dictionary<Guid, EntitySchemaDynamicValue.Discriminator> _collectionDynamicValue = [];
+    private Dictionary<Guid, EntitySchemaParameter.Discriminator> _collectionDynamicValue = [];
     private Dictionary<Guid, EntitySchemaElement> _collectionElement = [];
     private Dictionary<Guid, EntitySchemaProperty.Discriminator> _collectionProperty = [];
 
@@ -47,9 +47,9 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory) : ISchem
             entity.Schema = schema;
         }
 
-        foreach (EntitySchemaDynamicValue.Discriminator entity in schema.DynamicValueList)
+        foreach (EntitySchemaParameter.Discriminator entity in schema.DynamicValueList)
         {
-            EntitySchemaDynamicValue value = entity.GetValue();
+            EntitySchemaParameter value = entity.GetValue();
             value.Schema = schema;
         }
 

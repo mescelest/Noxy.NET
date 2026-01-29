@@ -6,9 +6,9 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
-[Table(nameof(TableSchemaDynamicValueTextParameter))]
+[Table(nameof(TableSchemaParameterText))]
 [Index(nameof(SchemaID), nameof(SchemaIdentifier), IsUnique = true)]
-public class TableSchemaDynamicValueTextParameter : TableSchemaDynamicValueParameter
+public class TableSchemaParameterText : TableSchemaParameter
 {
     [Required]
     public required TextParameterTypeEnum Type { get; set; }

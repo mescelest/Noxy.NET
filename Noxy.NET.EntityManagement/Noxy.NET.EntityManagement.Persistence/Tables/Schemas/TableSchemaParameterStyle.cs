@@ -4,6 +4,6 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
-[Table(nameof(TableSchemaDynamicValueStyleParameter))]
+[Table(nameof(TableSchemaParameterStyle))]
 [Index(nameof(SchemaID), nameof(SchemaIdentifier), IsUnique = true)]
-public class TableSchemaDynamicValueStyleParameter : TableSchemaDynamicValueParameter;
+public class TableSchemaParameterStyle : TableSchemaParameter;

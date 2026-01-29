@@ -35,10 +35,10 @@ public interface IEntityToTableMapper
     #region -- Schemas --
 
     TableSchemaContext Map(EntitySchemaContext entity);
-    TableSchemaDynamicValue Map(EntitySchemaDynamicValue entity);
-    TableSchemaDynamicValueStyleParameter Map(EntitySchemaDynamicValueStyleParameter entity);
-    TableSchemaDynamicValueSystemParameter Map(EntitySchemaDynamicValueSystemParameter entity);
-    TableSchemaDynamicValueTextParameter Map(EntitySchemaDynamicValueTextParameter entity);
+    TableSchemaParameter Map(EntitySchemaParameter entity);
+    TableSchemaParameterStyle Map(EntitySchemaParameterStyle entity);
+    TableSchemaParameterSystem Map(EntitySchemaParameterSystem entity);
+    TableSchemaParameterText Map(EntitySchemaParameterText entity);
     TableSchemaElement Map(EntitySchemaElement entity);
     TableSchemaProperty Map(EntitySchemaProperty baseEntity);
     TableSchemaPropertyBoolean Map(EntitySchemaPropertyBoolean entity);

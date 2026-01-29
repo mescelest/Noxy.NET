@@ -28,22 +28,22 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         };
     }
 
-    protected TableSchemaDynamicValueTextParameter HasSchemaDynamicValueTextParameter(string id, string identifier, string name = "", string note = "", TextParameterTypeEnum type = TextParameterTypeEnum.Line, bool isApprovalRequired = false,
+    protected TableSchemaParameterText HasSchemaDynamicValueTextParameter(string id, string identifier, string name = "", string note = "", TextParameterTypeEnum type = TextParameterTypeEnum.Line, bool isApprovalRequired = false,
         DateTime? timeCreated = null)
     {
-        TableSchemaDynamicValueTextParameter table = new()
+        TableSchemaParameterText table = new()
         {
             ID = Guid.Parse(id),
             SchemaIdentifier = identifier,
             Name = !string.IsNullOrEmpty(name) ? name : identifier,
             Note = note,
-            Order = GetNextOrder<TableSchemaDynamicValueTextParameter>(),
+            Order = GetNextOrder<TableSchemaParameterText>(),
             Type = type,
             IsApprovalRequired = isApprovalRequired,
             TimeCreated = timeCreated ?? Now,
             SchemaID = Schema.ID
         };
-        Builder.Entity<TableSchemaDynamicValueTextParameter>().HasData(table);
+        Builder.Entity<TableSchemaParameterText>().HasData(table);
         return table;
     }
 

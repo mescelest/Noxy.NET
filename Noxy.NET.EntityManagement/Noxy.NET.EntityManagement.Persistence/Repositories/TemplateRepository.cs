@@ -22,7 +22,7 @@ public class TemplateRepository(DataContext context, IEntityToTableMapper mapper
     public async Task<EntitySchema> Populate(EntitySchema entity)
     {
         entity.ContextList ??= (await Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
-        entity.DynamicValueList ??= (await Context.SchemaDynamicValue.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
+        entity.DynamicValueList ??= (await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
         entity.ElementList ??= (await Context.SchemaElement.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
         entity.PropertyList ??= (await Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == entity.ID).ToListAsync()).Select(x => MapperT2E.Map(x)).ToList();
 

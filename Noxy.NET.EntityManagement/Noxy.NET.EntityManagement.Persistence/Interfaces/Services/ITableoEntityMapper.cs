@@ -51,9 +51,9 @@ public interface ITableToEntityMapper
     #region -- Schemas --
 
     EntitySchemaContext Map(TableSchemaContext? table);
-    EntitySchemaDynamicValue.Discriminator Map(TableSchemaDynamicValue? table);
-    EntitySchemaDynamicValueTextParameter Map(TableSchemaDynamicValueTextParameter? table);
-    EntitySchemaDynamicValueSystemParameter Map(TableSchemaDynamicValueSystemParameter? table);
+    EntitySchemaParameter.Discriminator Map(TableSchemaParameter? table);
+    EntitySchemaParameterText Map(TableSchemaParameterText? table);
+    EntitySchemaParameterSystem Map(TableSchemaParameterSystem? table);
     EntitySchemaElement Map(TableSchemaElement? table);
     EntitySchemaProperty.Discriminator Map(TableSchemaProperty? table);
     EntitySchemaPropertyBoolean Map(TableSchemaPropertyBoolean? table);

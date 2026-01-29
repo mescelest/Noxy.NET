@@ -4,8 +4,10 @@ using Noxy.NET.EntityManagement.Domain.ViewModels;
 
 namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
-public class EntitySchemaDynamicValue : BaseEntitySchema
+public class EntitySchemaParameter : BaseEntitySchema
 {
+    public required bool IsApprovalRequired { get; set; }
+
     public class Discriminator : BaseEntity
     {
         [JsonConstructor]
@@ -13,17 +15,17 @@ public class EntitySchemaDynamicValue : BaseEntitySchema
         {
         }
 
-        public Discriminator(EntitySchemaDynamicValue? entity)
+        public Discriminator(EntitySchemaParameter? entity)
         {
             switch (entity)
             {
-                case EntitySchemaDynamicValueStyleParameter value:
+                case EntitySchemaParameterStyle value:
                     StyleParameter = value;
                     break;
-                case EntitySchemaDynamicValueSystemParameter value:
+                case EntitySchemaParameterSystem value:
                     SystemParameter = value;
                     break;
-                case EntitySchemaDynamicValueTextParameter value:
+                case EntitySchemaParameterText value:
                     TextParameter = value;
                     break;
                 default:
@@ -38,11 +40,11 @@ public class EntitySchemaDynamicValue : BaseEntitySchema
         public Guid SchemaID { get; init; }
         public string SchemaIdentifier { get; init; } = string.Empty;
 
-        public EntitySchemaDynamicValueStyleParameter? StyleParameter { get; init; }
-        public EntitySchemaDynamicValueSystemParameter? SystemParameter { get; init; }
-        public EntitySchemaDynamicValueTextParameter? TextParameter { get; init; }
+        public EntitySchemaParameterStyle? StyleParameter { get; init; }
+        public EntitySchemaParameterSystem? SystemParameter { get; init; }
+        public EntitySchemaParameterText? TextParameter { get; init; }
 
-        public EntitySchemaDynamicValue GetValue()
+        public EntitySchemaParameter GetValue()
         {
             if (StyleParameter != null) return StyleParameter;
             if (SystemParameter != null) return SystemParameter;
