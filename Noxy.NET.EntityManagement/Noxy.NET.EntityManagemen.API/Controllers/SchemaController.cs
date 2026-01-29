@@ -16,20 +16,26 @@ public class SchemaController(ISchemaService serviceSchema) : ControllerBase
         return await serviceSchema.CreateOrUpdate(model);
     }
 
-    [HttpPost("DynamicValue/SystemParameter")]
+    [HttpPost("Element")]
+    public async Task<ActionResult<EntitySchemaElement>> Create(FormModelSchemaElement model)
+    {
+        return await serviceSchema.CreateOrUpdate(model);
+    }
+
+    [HttpPost("Parameter/Style")]
+    public async Task<ActionResult<EntitySchemaParameter.Discriminator>> Create(FormModelSchemaParameterStyle model)
+    {
+        return await serviceSchema.CreateOrUpdate(model);
+    }
+
+    [HttpPost("Parameter/System")]
     public async Task<ActionResult<EntitySchemaParameter.Discriminator>> Create(FormModelSchemaParameterSystem model)
     {
         return await serviceSchema.CreateOrUpdate(model);
     }
 
-    [HttpPost("DynamicValue/TextParameter")]
+    [HttpPost("Parameter/Text")]
     public async Task<ActionResult<EntitySchemaParameter.Discriminator>> Create(FormModelSchemaParameterText model)
-    {
-        return await serviceSchema.CreateOrUpdate(model);
-    }
-
-    [HttpPost("Element")]
-    public async Task<ActionResult<EntitySchemaElement>> Create(FormModelSchemaElement model)
     {
         return await serviceSchema.CreateOrUpdate(model);
     }
@@ -44,6 +50,12 @@ public class SchemaController(ISchemaService serviceSchema) : ControllerBase
     public async Task<ActionResult<EntitySchemaPropertyDateTime>> CreateOrUpdate(FormModelSchemaPropertyDateTime model)
     {
         return (await serviceSchema.CreateOrUpdate(model)).DateTime ?? throw new();
+    }
+
+    [HttpPost("Property/Image")]
+    public async Task<ActionResult<EntitySchemaPropertyImage>> CreateOrUpdate(FormModelSchemaPropertyImage model)
+    {
+        return (await serviceSchema.CreateOrUpdate(model)).Image ?? throw new();
     }
 
     [HttpPost("Property/Decimal")]

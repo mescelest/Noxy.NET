@@ -15,5 +15,6 @@ public interface ISchemaService
     Task<EntitySchemaProperty.Discriminator> CreateOrUpdate(FormModelSchemaPropertyDateTime model);
     Task<EntitySchemaProperty.Discriminator> CreateOrUpdate(FormModelSchemaPropertyDecimal model);
     Task<EntitySchemaProperty.Discriminator> CreateOrUpdate(FormModelSchemaPropertyInteger model);
+    Task<EntitySchemaProperty.Discriminator> CreateOrUpdate(FormModelSchemaPropertyImage model);
     Task<EntitySchemaProperty.Discriminator> CreateOrUpdate(FormModelSchemaPropertyString model);
 }

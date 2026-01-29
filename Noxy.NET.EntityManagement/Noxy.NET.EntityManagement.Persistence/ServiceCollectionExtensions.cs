@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Application.Interfaces.Services;
+using Noxy.NET.EntityManagement.Application.Services;
 using Noxy.NET.EntityManagement.Persistence;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Interfaces.Services;
@@ -21,6 +23,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
+        services.AddScoped<IDependencyInjectionService, DependencyInjectionService>();
 
         services.AddSingleton<IEntityToTableMapper, EntityToTableMapper>();
         services.AddSingleton<ITableToEntityMapper, TableToEntityMapper>();

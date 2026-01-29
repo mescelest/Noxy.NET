@@ -7,7 +7,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 
 namespace Noxy.NET.EntityManagement.Application.Services;
 
-public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, TaskBundlingService bundlingServiceTaskBundling) : ISchemaBuilderService
+public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBundlingService serviceTaskBundling) : ISchemaBuilderService
 {
     public async Task<EntitySchema> ConstructSchema(Guid? id = null)
     {
@@ -24,14 +24,7 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, TaskBund
             schema = await uow.Template.GetSchemaByID(id.Value);
         }
 
-        Task<List<EntitySchemaContext>> contextTask = uow.Schema.GetSchemaContextListBySchemaID(id.Value);
-        Task<List<EntitySchemaParameter.Discriminator>> parameterTask = uow.Schema.GetSchemaDynamicValueListBySchemaID(id.Value);
-        Task<List<EntitySchemaElement>> elementTask = uow.Schema.GetSchemaElementListBySchemaID(id.Value);
-        Task<List<EntitySchemaProperty.Discriminator>> propertyTask = uow.Schema.GetSchemaPropertyListBySchemaID(id.Value);
-
-        await Task.WhenAll(contextTask, parameterTask, elementTask, propertyTask);
-
-        (schema.ContextList, schema.ParameterList, schema.ElementList, schema.PropertyList) = await bundlingServiceTaskBundling.WhenAll(
+        (schema.ContextList, schema.ParameterList, schema.ElementList, schema.PropertyList) = await serviceTaskBundling.WhenAll(
             uow.Schema.GetSchemaContextListBySchemaID(id.Value),
             uow.Schema.GetSchemaDynamicValueListBySchemaID(id.Value),
             uow.Schema.GetSchemaElementListBySchemaID(id.Value),

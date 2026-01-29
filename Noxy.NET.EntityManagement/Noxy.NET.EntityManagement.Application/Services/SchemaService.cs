@@ -274,6 +274,36 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
         return result;
     }
 
+    public async Task<EntitySchemaProperty.Discriminator> CreateOrUpdate(FormModelSchemaPropertyImage model)
+    {
+        await using IUnitOfWork uow = await serviceUoWFactory.Create();
+        EntitySchemaProperty.Discriminator result;
+
+        if (model.ID == Guid.Empty)
+        {
+            result = await uow.Schema.Create(new EntitySchemaPropertyImage
+            {
+                SchemaIdentifier = model.SchemaIdentifier,
+                Name = model.Name,
+                Note = model.Note,
+                Order = model.Order,
+                AllowedExtensions = model.AllowedExtensions,
+                SchemaID = model.SchemaID,
+                TitleTextParameterID = model.TitleTextParameterID,
+                DescriptionTextParameterID = model.DescriptionTextParameterID,
+            });
+        }
+        else
+        {
+            result = await uow.Schema.GetSchemaPropertyByID(model.ID);
+            EntitySchemaPropertyInteger property = UpdateSchemaFields(result.Integer, model);
+            uow.Schema.Update(property);
+        }
+
+        await uow.Commit();
+        return result;
+    }
+
     public async Task<EntitySchemaProperty.Discriminator> CreateOrUpdate(FormModelSchemaPropertyInteger model)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
@@ -333,35 +363,6 @@ public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaServic
         return result;
     }
 
-    public async Task<EntitySchemaProperty.Discriminator> CreateOrUpdate(FormModelSchemaPropertyImage model)
-    {
-        await using IUnitOfWork uow = await serviceUoWFactory.Create();
-        EntitySchemaProperty.Discriminator result;
-
-        if (model.ID == Guid.Empty)
-        {
-            result = await uow.Schema.Create(new EntitySchemaPropertyImage
-            {
-                SchemaIdentifier = model.SchemaIdentifier,
-                Name = model.Name,
-                Note = model.Note,
-                Order = model.Order,
-                AllowedExtensions = model.AllowedExtensions,
-                SchemaID = model.SchemaID,
-                TitleTextParameterID = model.TitleTextParameterID,
-                DescriptionTextParameterID = model.DescriptionTextParameterID,
-            });
-        }
-        else
-        {
-            result = await uow.Schema.GetSchemaPropertyByID(model.ID);
-            EntitySchemaPropertyInteger property = UpdateSchemaFields(result.Integer, model);
-            uow.Schema.Update(property);
-        }
-
-        await uow.Commit();
-        return result;
-    }
 
     #region -- Private methods --
 

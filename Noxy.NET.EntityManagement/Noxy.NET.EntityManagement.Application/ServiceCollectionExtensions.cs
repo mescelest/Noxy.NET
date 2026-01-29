@@ -15,9 +15,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IDataService, DataService>();
         services.AddScoped<IJWTService, JWTService>();
-        services.AddScoped<ITaskBundlingService, TaskBundlingService>();
         services.AddScoped<ISchemaService, SchemaService>();
         services.AddScoped<ISchemaBuilderService, SchemaBuilderService>();
+        services.AddScoped<ITaskBundlingService, TaskBundlingService>();
         services.AddScoped<ITemplateService, TemplateService>();
 
         services.AddSingleton<IApplicationService, ApplicationService>();

@@ -2,7 +2,6 @@
 using System.Text.Json.Serialization;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Services;
 using Noxy.NET.EntityManagement.Presentation.Services;
@@ -40,15 +39,5 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IJWTService, JWTService>();
 
         return services;
-    }
-
-    public static IServiceCollection AddBaseToPresentation(this IServiceCollection services)
-    {
-        return services;
-    }
-
-    public static WebAssemblyHost UseBaseWithPresentation(this WebAssemblyHost app)
-    {
-        return app;
     }
 }
