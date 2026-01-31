@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Services;
 using Noxy.NET.EntityManagement.Presentation.Services;
-using Noxy.NET.EntityManagement.Presentation.Services.HttpClients;
 using Noxy.NET.UI.Services;
 
 #pragma warning disable IDE0130, S1200
@@ -29,9 +28,7 @@ public static class ServiceCollectionExtensions
             config.JsonSerializerOptions.WriteIndented = false;
         });
 
-        services.AddHttpClient<AuthenticationHttpClient>(client => client.BaseAddress = new(url));
-        services.AddHttpClient<SchemaHttpClient>(client => client.BaseAddress = new(url));
-        services.AddHttpClient<DataHttpClient>(client => client.BaseAddress = new(url));
+        services.AddHttpClient<APIHttpClient>(client => client.BaseAddress = new(url));
 
         services.AddScoped<TextService>();
         services.AddScoped<LoadingService>();

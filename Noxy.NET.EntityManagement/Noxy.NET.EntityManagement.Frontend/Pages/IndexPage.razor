@@ -1,5 +1,5 @@
 ﻿@page "/"
-@inject DataHttpClient DataHttpClient
+@inject APIHttpClient APIHttpClient
 @inject TextService TextService
 @inject UserAuthenticationStateProvider UserAuthenticationStateProvider
 @inherits PageComponent
@@ -55,7 +55,7 @@
 
     private async Task LoadData()
     {
-        _listContext = await DataHttpClient.GetContextList();
+        _listContext = await APIHttpClient.SendRequest<ViewModelSchemaContext[]>(HttpMethod.Get, "Data/Context");
     }
 
     private static string GetLink(string identifier)

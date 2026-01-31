@@ -4,7 +4,7 @@ using Noxy.NET.EntityManagement.Domain.Abstractions.Forms;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
-public abstract class BaseComponentTextFormJunction<TForm, TEntity, TRelation, TJunction> : BaseComponentTextFormEntity<TForm, TEntity> where TForm : BaseFormModelEntity where TEntity : BaseEntity where TRelation : BaseEntity where TJunction : BaseEntity
+public abstract class BaseComponentFormJunction<TForm, TEntity, TRelation, TJunction> : BaseComponentFormEntity<TForm, TEntity> where TForm : BaseFormModelEntity where TEntity : BaseEntity where TRelation : BaseEntity where TJunction : BaseEntity
 {
     protected Dictionary<Guid, TRelation> CollectionLookup = [];
     protected IEnumerable<Guid> ListAvailable = [];
@@ -45,6 +45,6 @@ public abstract class BaseComponentTextFormJunction<TForm, TEntity, TRelation, T
 
     protected override async Task<TEntity> HandleSubmission(BaseFormModelEntity model)
     {
-        return await SchemaHttpClient.SendRequest<TEntity>(model);
+        return await APIHttpClient.SendRequest<TEntity>(model);
     }
 }

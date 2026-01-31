@@ -9,16 +9,16 @@ namespace Noxy.NET.EntityManagement.API.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class UserController(IAuthenticationService serviceAuthentication) : ControllerBase
+public class AuthenticationController(IAuthenticationService serviceAuthentication) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<SignUpResponse>> CreateUser(AuthenticationSignUpAPIFormModel model)
+    public async Task<ActionResult<SignUpResponse>> SignUp(AuthenticationSignUpFormModel model)
     {
         return await serviceAuthentication.SignUpUser(model);
     }
 
     [HttpPost("SignIn")]
-    public async Task<ActionResult<SignInResponse>> LogIn(AuthenticationSignInAPIFormModel model)
+    public async Task<ActionResult<SignInResponse>> SignIn(AuthenticationSignInFormModel model)
     {
         return await serviceAuthentication.SignInUser(model);
     }

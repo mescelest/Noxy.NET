@@ -1,8 +1,6 @@
-using Noxy.NET.EntityManagement.Presentation.Services.HttpClients;
-
 namespace Noxy.NET.EntityManagement.Presentation.Services;
 
-public class TextService(DataHttpClient serviceDataAPI)
+public class TextService(APIHttpClient serviceHttpClient)
 {
     private readonly Dictionary<string, (string Value, DateTime? TimeResolved)> _collection = [];
     private TaskCompletionSource<bool> _taskCompletionSource = new();
@@ -43,13 +41,13 @@ public class TextService(DataHttpClient serviceDataAPI)
 
     private async Task ResolveInternal()
     {
-        string[] request = _collection
+        string[] list = _collection
             .Where(x => x.Value.TimeResolved == null)
             .Select(x => x.Key)
             .ToArray();
 
-        if (request.Length == 0) return;
-        Dictionary<string, string> result = await serviceDataAPI.ResolveTextParameterList(request);
+        if (list.Length == 0) return;
+        Dictionary<string, string> result = await serviceHttpClient.SendRequest<Dictionary<string, string>>(HttpMethod.Get, "Data/TextParameter/Resolve", list);
 
         DateTime now = DateTime.UtcNow;
         foreach (KeyValuePair<string, string> item in result)

@@ -1,5 +1,5 @@
 ﻿@inject UserAuthenticationStateProvider AuthService
-@inject DataHttpClient DataHttpClient
+@inject APIHttpClient APIHttpClient
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -40,7 +40,7 @@
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender) return;
 
-        _listContext = await DataHttpClient.GetContextList();
+        _listContext = await APIHttpClient.SendRequest<ViewModelSchemaContext[]>(HttpMethod.Get, "Data/Context");
         await InvokeAsync(StateHasChanged);
     }
 

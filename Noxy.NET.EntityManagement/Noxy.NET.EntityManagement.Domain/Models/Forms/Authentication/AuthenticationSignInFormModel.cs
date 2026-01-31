@@ -1,13 +1,13 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Noxy.NET.EntityManagement.Domain.Attributes;
+using Noxy.NET.EntityManagement.Domain.Models.Responses.Authentication;
 using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Domain.Models.Forms.Authentication;
 
-public class AuthenticationSignUpAPIFormModel : BaseFormAPIModel
+public class AuthenticationSignInFormModel : BaseFormAPIModel<SignInResponse>
 {
-    public override string APIEndpoint => "User";
+    public override string APIEndpoint => "Authentication/SignIn";
     public override HttpMethod HttpMethod => HttpMethod.Post;
 
     [Required]
@@ -19,9 +19,4 @@ public class AuthenticationSignUpAPIFormModel : BaseFormAPIModel
     [MinLength(12), MaxLength(512)]
     [DisplayName("Password")]
     public string Password { get; set; } = string.Empty;
-
-    [Required]
-    [PropertyMatchValidation(nameof(Password))]
-    [DisplayName("Confirm password")]
-    public string ConfirmPassword { get; set; } = string.Empty;
 }

@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Domain.Constants;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
-public abstract class BaseComponentTextFormEntity<TForm, TEntity> : BaseComponentTextForm<TForm> where TForm : BaseFormModelEntity where TEntity : BaseEntity
+public abstract class BaseComponentFormEntity<TForm, TEntity> : BaseComponentForm<TForm> where TForm : BaseFormModelEntity where TEntity : BaseEntity
 {
     [Parameter]
     public TEntity? Value { get; set; }
@@ -39,6 +39,6 @@ public abstract class BaseComponentTextFormEntity<TForm, TEntity> : BaseComponen
 
     protected virtual async Task<TEntity> HandleSubmission(BaseFormModelEntity model)
     {
-        return await SchemaHttpClient.SendRequest<TEntity>(model);
+        return await APIHttpClient.SendRequest<TEntity>(model);
     }
 }

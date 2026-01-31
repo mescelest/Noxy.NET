@@ -1,5 +1,5 @@
 ﻿@page "/Schema/{id:guid}"
-@inject SchemaHttpClient SchemaHttpClient
+@inject APIHttpClient APIHttpClient
 @inject TextService TextService
 @inherits PageComponent
 
@@ -10,7 +10,7 @@
         @if (_data != null)
         {
             <h2>@_data.Name</h2>
-            <SchemaOverviewDynamicValue Schema="_data"/>
+            <SchemaOverviewParameter Schema="_data"/>
             <SchemaOverviewElement Schema="_data"/>
             <SchemaOverviewProperty Schema="_data"/>
         }
@@ -39,7 +39,7 @@
 
     private async Task LoadData()
     {
-        _data = await SchemaHttpClient.GetSchemaWithID(ID);
+        _data = await APIHttpClient.SendRequest<EntitySchema>(HttpMethod.Get, $"Template/Schema/{ID}");
     }
 
 }

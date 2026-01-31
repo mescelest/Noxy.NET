@@ -10,3 +10,9 @@ public abstract class BaseFormAPIModel : BaseFormModel
     [JsonIgnore]
     public abstract HttpMethod HttpMethod { get; }
 }
+
+public abstract class BaseFormAPIModel<TResponse> : BaseFormAPIModel
+{
+    [JsonIgnore]
+    public Type ResponseType { get; } = typeof(TResponse);
+}

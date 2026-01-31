@@ -1,4 +1,4 @@
-﻿@inject AuthenticationHttpClient HttpClient
+﻿@inject APIHttpClient HttpClient
 @inject UserAuthenticationStateProvider AuthService
 @inherits ElementComponent
 
@@ -31,11 +31,11 @@
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
-    private async Task SignInFormSubmit(IWebFormContext<AuthenticationSignInAPIFormModel> context)
+    private async Task SignInFormSubmit(IWebFormContext<AuthenticationSignInFormModel> context)
     {
         try
         {
-            SignInResponse result = await HttpClient.SignInUser(context.Model);
+            SignInResponse result = await HttpClient.SendRequest(context.Model);
             await AuthService.UpdateIdentity(result.JWT);
         }
         catch (Exception e)
@@ -44,11 +44,11 @@
         }
     }
 
-    private async Task SignUpFormSubmit(IWebFormContext<AuthenticationSignUpAPIFormModel> context)
+    private async Task SignUpFormSubmit(IWebFormContext<AuthenticationSignUpFormModel> context)
     {
         try
         {
-            SignUpResponse result = await HttpClient.SignUpUser(context.Model);
+            SignUpResponse result = await HttpClient.SendRequest(context.Model);
             await AuthService.UpdateIdentity(result.JWT);
         }
         catch (Exception e)

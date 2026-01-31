@@ -1,14 +1,13 @@
 using Microsoft.AspNetCore.Components;
 using Noxy.NET.EntityManagement.Presentation.Services;
-using Noxy.NET.EntityManagement.Presentation.Services.HttpClients;
 using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
-public abstract class BaseComponentTextForm<TForm> : BaseComponentForm<TForm> where TForm : BaseFormModel
+public abstract class BaseComponentForm<TForm> : UI.Abstractions.BaseComponentForm<TForm> where TForm : BaseFormModel
 {
     [Inject]
-    protected SchemaHttpClient SchemaHttpClient { get; set; } = null!;
+    protected APIHttpClient APIHttpClient { get; set; } = null!;
 
     [Inject]
     protected TextService TextService { get; set; } = null!;

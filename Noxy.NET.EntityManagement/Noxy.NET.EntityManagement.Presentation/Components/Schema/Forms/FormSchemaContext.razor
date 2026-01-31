@@ -1,4 +1,4 @@
-@inherits BaseComponentTextFormSchema<FormModelSchemaContext, EntitySchemaContext>
+@inherits BaseComponentFormSchema<FormModelSchemaContext, EntitySchemaContext>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
@@ -7,7 +7,6 @@
         </Header>
 
         <Content>
-
             <SidebarLeftLayout>
                 <Sidebar>
                     <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.SchemaIdentifier))" Description="@GetDescription(nameof(Context.Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>

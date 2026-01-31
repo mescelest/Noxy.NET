@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
-public abstract class BaseComponentTextFormSchema<TForm, TEntity> : BaseComponentTextFormTemplate<TForm, TEntity> where TForm : BaseFormModelEntitySchema where TEntity : BaseEntitySchema
+public abstract class BaseComponentFormSchema<TForm, TEntity> : BaseComponentFormTemplate<TForm, TEntity> where TForm : BaseFormModelEntitySchema where TEntity : BaseEntitySchema
 {
     [Parameter, EditorRequired]
     public required EntitySchema Schema { get; set; }

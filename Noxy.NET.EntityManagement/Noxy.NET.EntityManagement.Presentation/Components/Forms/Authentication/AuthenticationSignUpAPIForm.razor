@@ -1,4 +1,4 @@
-@inherits BaseComponentForm<AuthenticationSignUpAPIFormModel>
+@inherits Noxy.NET.UI.Abstractions.BaseComponentForm<AuthenticationSignUpFormModel>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm Context="@Context" OnSubmit="OnSubmit">
@@ -12,7 +12,7 @@
 
 @code {
 
-    protected override WebFormContext<AuthenticationSignUpAPIFormModel> CreateContext()
+    protected override WebFormContext<AuthenticationSignUpFormModel> CreateContext()
     {
         return new(new());
     }

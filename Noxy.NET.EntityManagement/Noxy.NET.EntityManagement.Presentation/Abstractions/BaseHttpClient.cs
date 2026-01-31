@@ -14,10 +14,20 @@ public abstract class BaseHttpClient(HttpClient http, UserAuthenticationStatePro
         return await http.SendAsync(request);
     }
 
+    public async Task<HttpResponseMessage> SendRequest(HttpMethod method, string url, object? content = null)
+    {
+        return await SendRequest(CreateRequest(method, url, content));
+    }
+
     protected async Task<T> SendRequest<T>(HttpRequestMessage request)
     {
         HttpContent response = ExtractResponse(await SendRequest(request));
         return await response.ReadFromJsonAsync<T>() ?? throw new FormatException();
+    }
+
+    public async Task<T> SendRequest<T>(HttpMethod method, string url, object? content = null)
+    {
+        return await SendRequest<T>(CreateRequest(method, url, content));
     }
 
     protected HttpRequestMessage CreateRequest(HttpMethod method, string url, object? content = null)
@@ -30,7 +40,7 @@ public abstract class BaseHttpClient(HttpClient http, UserAuthenticationStatePro
         };
     }
 
-    protected static HttpContent ExtractResponse(HttpResponseMessage response)
+    public static HttpContent ExtractResponse(HttpResponseMessage response)
     {
         return response.IsSuccessStatusCode ? response.Content : throw new();
     }

@@ -1,5 +1,5 @@
 ﻿@inject UserAuthenticationStateProvider AuthService
-@inject AuthenticationHttpClient AuthAPIService
+@inject APIHttpClient APIHttpClient
 
 <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(NotFound)">
     <Found Context="routeData">
@@ -19,7 +19,7 @@
         {
             try
             {
-                string token = await AuthAPIService.RenewUser();
+                string token = await APIHttpClient.SendRequest<string>(HttpMethod.Post, "Authentication/Renew");
                 await AuthService.UpdateIdentity(token);
             }
             catch

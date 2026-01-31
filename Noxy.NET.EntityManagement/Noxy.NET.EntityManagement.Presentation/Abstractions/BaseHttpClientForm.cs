@@ -17,6 +17,10 @@ public abstract class BaseHttpClientForm(HttpClient http, UserAuthenticationStat
         HttpRequestMessage request = CreateRequest(model.HttpMethod, model.APIEndpoint, model);
         HttpContent response = ExtractResponse(await SendRequest(request));
         return await response.ReadFromJsonAsync<T>() ?? throw new FormatException();
-        ;
+    }
+
+    public async Task<T> SendRequest<T>(BaseFormAPIModel<T> model)
+    {
+        return await SendRequest<T>(model as BaseFormAPIModel);
     }
 }

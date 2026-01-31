@@ -26,7 +26,7 @@ public class DataController(IDataService serviceData) : ControllerBase
         return await serviceData.GetElementListWithContextIdentifier(identifier);
     }
 
-    [HttpPost("TextParameter/Resolve")]
+    [HttpPost("Parameter/Text/Resolve")]
     public async Task<ActionResult<Dictionary<string, string>>> ResolveTextParameterList(IEnumerable<string> list)
     {
         return await serviceData.ResolveTextParameterList(list);

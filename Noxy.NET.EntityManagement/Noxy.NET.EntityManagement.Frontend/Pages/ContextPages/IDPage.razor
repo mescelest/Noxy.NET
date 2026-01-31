@@ -1,5 +1,5 @@
 @page "/Context/{identifier}"
-@inject DataHttpClient DataHttpClient
+@inject APIHttpClient APIHttpClient
 @inject TextService TextService
 @inherits PageComponent
 
@@ -53,12 +53,12 @@
 
     private async Task LoadContext()
     {
-        _entityContext = await DataHttpClient.GetContextWithIdentifier(Identifier);
+        _entityContext = await APIHttpClient.SendRequest<ViewModelSchemaContext>(HttpMethod.Get, $"Data/Context/{Identifier}");
     }
 
     private async Task LoadElement()
     {
-        _listElement = await DataHttpClient.GetElementListByContext(Identifier);
+        _listElement = await APIHttpClient.SendRequest<ViewModelDataElement[]>(HttpMethod.Get, $"Data/Context/{Identifier}/Element");
     }
 
 }
