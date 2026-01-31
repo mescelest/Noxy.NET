@@ -1,6 +1,5 @@
 ﻿@inject UserAuthenticationStateProvider AuthService
-@inject DataAPIService DataAPIService
-@using Noxy.NET.EntityManagement.Domain.ViewModels
+@inject DataHttpClient DataHttpClient
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -41,7 +40,7 @@
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender) return;
 
-        _listContext = await DataAPIService.GetContextList();
+        _listContext = await DataHttpClient.GetContextList();
         await InvokeAsync(StateHasChanged);
     }
 

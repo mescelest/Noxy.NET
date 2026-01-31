@@ -8,6 +8,7 @@ public abstract class BaseComponentTextFormJunction<TForm, TEntity, TRelation, T
 {
     protected Dictionary<Guid, TRelation> CollectionLookup = [];
     protected IEnumerable<Guid> ListAvailable = [];
+
     [Parameter, EditorRequired]
     public required TEntity Entity { get; set; }
     private TEntity PreviousEntity { get; set; } = null!;
@@ -44,6 +45,6 @@ public abstract class BaseComponentTextFormJunction<TForm, TEntity, TRelation, T
 
     protected override async Task<TEntity> HandleSubmission(BaseFormModelEntity model)
     {
-        return await SchemaAPIService.PostForm<TEntity>(model);
+        return await SchemaHttpClient.SendRequest<TEntity>(model);
     }
 }

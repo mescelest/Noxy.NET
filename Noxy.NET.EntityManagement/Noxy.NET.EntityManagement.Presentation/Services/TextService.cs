@@ -1,6 +1,8 @@
+using Noxy.NET.EntityManagement.Presentation.Services.HttpClients;
+
 namespace Noxy.NET.EntityManagement.Presentation.Services;
 
-public class TextService(DataAPIService serviceDataAPI)
+public class TextService(DataHttpClient serviceDataAPI)
 {
     private readonly Dictionary<string, (string Value, DateTime? TimeResolved)> _collection = [];
     private TaskCompletionSource<bool> _taskCompletionSource = new();

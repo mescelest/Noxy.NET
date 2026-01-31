@@ -1,8 +1,7 @@
 ﻿@page "/"
-@inject DataAPIService DataAPIService
+@inject DataHttpClient DataHttpClient
 @inject TextService TextService
 @inject UserAuthenticationStateProvider UserAuthenticationStateProvider
-@using Noxy.NET.UI.Models
 @inherits PageComponent
 
 <PageTitle>Home</PageTitle>
@@ -56,7 +55,7 @@
 
     private async Task LoadData()
     {
-        _listContext = await DataAPIService.GetContextList();
+        _listContext = await DataHttpClient.GetContextList();
     }
 
     private static string GetLink(string identifier)

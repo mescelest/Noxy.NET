@@ -1,5 +1,5 @@
 ﻿@page "/Schema"
-@inject SchemaAPIService SchemaAPIService
+@inject SchemaHttpClient SchemaHttpClient
 @inject TextService TextService
 @inherits PageComponent
 
@@ -22,7 +22,7 @@
 
 @code {
 
-    private List<EntitySchema> _data = [];
+    private EntitySchema[] _data = [];
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -40,7 +40,7 @@
 
     private async Task LoadData()
     {
-        _data = await SchemaAPIService.GetSchemaList();
+        _data = await SchemaHttpClient.GetSchemaList();
     }
 
 }

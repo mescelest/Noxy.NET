@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Services;
-using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 #pragma warning disable IDE0130, S1200
@@ -30,15 +29,12 @@ public static class ServiceCollectionExtensions
         try
         {
             using IServiceScope scope = app.Services.CreateScope();
-            IDataService serviceData = scope.ServiceProvider.GetRequiredService<IDataService>();
-            IApplicationService serviceApplication = scope.ServiceProvider.GetRequiredService<IApplicationService>();
-            ISchemaBuilderService serviceSchemaBuilderService = scope.ServiceProvider.GetRequiredService<ISchemaBuilderService>();
 
-            List<EntityDataSystemParameter> listSystemParameter = await serviceData.GetSystemParameterList();
-            List<EntityDataTextParameter> listTextParameter = await serviceData.GetTextParameterList();
+            ISchemaBuilderService serviceSchemaBuilderService = scope.ServiceProvider.GetRequiredService<ISchemaBuilderService>();
             EntitySchema schema = await serviceSchemaBuilderService.ConstructSchema();
+
+            IApplicationService serviceApplication = scope.ServiceProvider.GetRequiredService<IApplicationService>();
             serviceApplication.SetSchema(schema);
-            // serviceDynamicValue.Initialize(schema, listSystemParameter, listTextParameter);
         }
         catch
         {

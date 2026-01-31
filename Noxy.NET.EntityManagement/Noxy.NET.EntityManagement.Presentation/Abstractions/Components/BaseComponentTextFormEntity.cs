@@ -39,6 +39,6 @@ public abstract class BaseComponentTextFormEntity<TForm, TEntity> : BaseComponen
 
     protected virtual async Task<TEntity> HandleSubmission(BaseFormModelEntity model)
     {
-        return await SchemaAPIService.PostForm<TEntity>(model);
+        return await SchemaHttpClient.SendRequest<TEntity>(model);
     }
 }

@@ -1,4 +1,4 @@
-@inject SchemaAPIService SchemaAPIService
+@inject SchemaHttpClient SchemaHttpClient
 @inject TextService TextService
 @inherits ElementComponent
 
@@ -48,7 +48,7 @@
 
     private async Task Activate()
     {
-        await WithLoading(async () => await SchemaAPIService.ActivateSchema(Schema.ID));
+        await WithLoading(async () => await SchemaHttpClient.ActivateSchema(Schema.ID));
         await OnSchemaChange.InvokeAsync(Schema);
     }
 

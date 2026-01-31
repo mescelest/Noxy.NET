@@ -1,5 +1,5 @@
 ﻿@page "/Schema/{id:guid}"
-@inject SchemaAPIService SchemaAPIService
+@inject SchemaHttpClient SchemaHttpClient
 @inject TextService TextService
 @inherits PageComponent
 
@@ -39,7 +39,7 @@
 
     private async Task LoadData()
     {
-        _data = await SchemaAPIService.GetSchemaWithID(ID);
+        _data = await SchemaHttpClient.GetSchemaWithID(ID);
     }
 
 }

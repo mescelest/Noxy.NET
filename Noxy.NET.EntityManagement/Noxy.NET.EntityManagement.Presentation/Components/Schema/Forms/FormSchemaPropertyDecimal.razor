@@ -1,5 +1,4 @@
-@using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms
-@inherits BaseComponentTextFormSchema<Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms.FormModelSchemaPropertyDecimal, EntitySchemaPropertyDecimal>
+@inherits BaseComponentTextFormSchema<FormModelSchemaPropertyDecimal, EntitySchemaPropertyDecimal>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
