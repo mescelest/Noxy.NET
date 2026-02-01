@@ -1,6 +1,6 @@
 namespace Noxy.NET.EntityManagement.Domain.Models.Responses.Authentication;
 
-public class SignInResponse
+public class AuthenticationRenewResponse
 {
     public required string JWT { get; set; }
 }

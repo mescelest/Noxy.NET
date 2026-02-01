@@ -5,7 +5,7 @@ namespace Noxy.NET.EntityManagement.Application.Interfaces.Services;
 
 public interface IAuthenticationService
 {
-    Task<SignInResponse> SignInUser(AuthenticationSignInFormModel model);
-    Task<SignUpResponse> SignUpUser(AuthenticationSignUpFormModel model);
-    Task<string> RenewUser(string email);
+    Task<AuthenticationSignInResponse> SignInUser(AuthenticationSignInFormModel model);
+    Task<AuthenticationSignUpResponse> SignUpUser(AuthenticationSignUpFormModel model);
+    Task<AuthenticationRenewResponse> RenewUser(string email);
 }

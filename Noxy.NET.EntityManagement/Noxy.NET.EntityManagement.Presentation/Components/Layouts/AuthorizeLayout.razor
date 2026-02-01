@@ -35,7 +35,7 @@
     {
         try
         {
-            SignInResponse result = await HttpClient.SendRequest(context.Model);
+            AuthenticationSignInResponse result = await HttpClient.SendRequest(context.Model);
             await AuthService.UpdateIdentity(result.JWT);
         }
         catch (Exception e)
@@ -48,7 +48,7 @@
     {
         try
         {
-            SignUpResponse result = await HttpClient.SendRequest(context.Model);
+            AuthenticationSignUpResponse result = await HttpClient.SendRequest(context.Model);
             await AuthService.UpdateIdentity(result.JWT);
         }
         catch (Exception e)

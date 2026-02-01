@@ -6,7 +6,7 @@ using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Domain.Models.Forms.Authentication;
 
-public class AuthenticationSignUpFormModel : BaseFormAPIModel<SignUpResponse>
+public class AuthenticationSignUpFormModel : BaseFormAPIModel<AuthenticationSignUpResponse>
 {
     public override string APIEndpoint => "Authentication";
     public override HttpMethod HttpMethod => HttpMethod.Post;

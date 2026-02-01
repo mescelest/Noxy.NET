@@ -8,14 +8,14 @@ namespace Noxy.NET.EntityManagement.Application.Services;
 
 public class AuthenticationService(IUnitOfWorkFactory serviceUoWFactory, IJWTService serviceJWT) : IAuthenticationService
 {
-    public async Task<SignInResponse> SignInUser(AuthenticationSignInFormModel model)
+    public async Task<AuthenticationSignInResponse> SignInUser(AuthenticationSignInFormModel model)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
         EntityUser entityUser = await uow.Authentication.GetUserWithEmailAndPassword(model.Email, model.Password);
         return new() { JWT = serviceJWT.Create(entityUser) };
     }
 
-    public async Task<SignUpResponse> SignUpUser(AuthenticationSignUpFormModel model)
+    public async Task<AuthenticationSignUpResponse> SignUpUser(AuthenticationSignUpFormModel model)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
         EntityUser entityUser = await uow.Authentication.CreateUser(model.Email, model.Password);
@@ -23,7 +23,7 @@ public class AuthenticationService(IUnitOfWorkFactory serviceUoWFactory, IJWTSer
         return new() { JWT = serviceJWT.Create(entityUser) };
     }
 
-    public async Task<string> RenewUser(string email)
+    public async Task<AuthenticationRenewResponse> RenewUser(string email)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
@@ -33,6 +33,6 @@ public class AuthenticationService(IUnitOfWorkFactory serviceUoWFactory, IJWTSer
         uow.Authentication.UpdateUser(entityUser);
         await uow.Commit();
 
-        return serviceJWT.Create(entityUser);
+        return new() { JWT = serviceJWT.Create(entityUser) };
     }
 }

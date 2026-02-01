@@ -1,4 +1,5 @@
-﻿@inject UserAuthenticationStateProvider AuthService
+﻿@using Noxy.NET.EntityManagement.Domain.Models.Responses.Authentication
+@inject UserAuthenticationStateProvider AuthService
 @inject APIHttpClient APIHttpClient
 
 <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(NotFound)">
@@ -19,10 +20,10 @@
         {
             try
             {
-                string token = await APIHttpClient.SendRequest<string>(HttpMethod.Post, "Authentication/Renew");
-                await AuthService.UpdateIdentity(token);
+                AuthenticationRenewResponse response = await APIHttpClient.SendRequest<AuthenticationRenewResponse>(HttpMethod.Post, "Authentication/Renew");
+                await AuthService.UpdateIdentity(response.JWT);
             }
-            catch
+            catch (Exception ex)
             {
                 await AuthService.ResetIdentity();
             }

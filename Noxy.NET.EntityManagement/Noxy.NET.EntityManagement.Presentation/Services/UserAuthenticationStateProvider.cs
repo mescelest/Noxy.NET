@@ -62,11 +62,9 @@ public class UserAuthenticationStateProvider(ILocalStorageService serviceStorage
             await serviceStorage.SetItemAsync(UserKey, jwt);
             return CreateClaimsPrincipal(Identity);
         }
-        else
-        {
-            await serviceStorage.RemoveItemAsync(UserKey);
-            return new();
-        }
+
+        await serviceStorage.RemoveItemAsync(UserKey);
+        return new();
     }
 
     private void NotifyAuthenticationStateChanged(ClaimsPrincipal principal)

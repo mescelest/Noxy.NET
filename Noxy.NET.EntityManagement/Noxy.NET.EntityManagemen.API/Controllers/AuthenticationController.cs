@@ -12,20 +12,20 @@ namespace Noxy.NET.EntityManagement.API.Controllers;
 public class AuthenticationController(IAuthenticationService serviceAuthentication) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<SignUpResponse>> SignUp(AuthenticationSignUpFormModel model)
+    public async Task<ActionResult<AuthenticationSignUpResponse>> SignUp(AuthenticationSignUpFormModel model)
     {
         return await serviceAuthentication.SignUpUser(model);
     }
 
     [HttpPost("SignIn")]
-    public async Task<ActionResult<SignInResponse>> SignIn(AuthenticationSignInFormModel model)
+    public async Task<ActionResult<AuthenticationSignInResponse>> SignIn(AuthenticationSignInFormModel model)
     {
         return await serviceAuthentication.SignInUser(model);
     }
 
     [Authorize]
     [HttpPost("Renew")]
-    public async Task<ActionResult<string>> Renew()
+    public async Task<ActionResult<AuthenticationRenewResponse>> Renew()
     {
         Claim? claim = HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email);
         if (claim == null) return Unauthorized();
