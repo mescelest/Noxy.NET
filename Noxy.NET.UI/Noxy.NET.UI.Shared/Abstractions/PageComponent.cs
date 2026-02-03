@@ -1,30 +1,47 @@
-﻿using Noxy.NET.Models;
-
-namespace Noxy.NET.UI.Abstractions;
+﻿namespace Noxy.NET.UI.Abstractions;
 
 public abstract class PageComponent : BlazorComponent, IDisposable
 {
+    private IDisposable? _pageLoadScope;
     protected override string CssClass => CombineCssClass(base.CssClass, "Page");
 
     public virtual void Dispose()
     {
-        LoadingService.OnChange -= OnChangeHandler;
+        PageLoadingService.StateChanged -= OnLoadingChanged;
         GC.SuppressFinalize(this);
     }
 
     protected override void OnInitialized()
     {
-        base.OnInitialized();
-
-        LoadingService.Reset();
-        LoadingService.OnChange += OnChangeHandler;
+        PageLoadingService.StateChanged += OnLoadingChanged;
+        _pageLoadScope = PageLoadingService.BeginOperation();
     }
 
-    private void OnChangeHandler(string sender, GenericEventArgs<bool> args)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (sender != UUIDString || args.Value == IsLoading) return;
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
 
-        IsLoading = args.Value;
+        await OnFirstRenderAsync();
+        await PageLoadingService.WaitForIdleExcept(_pageLoadScope!);
+
+        _pageLoadScope!.Dispose();
+        StateHasChanged();
+    }
+
+    protected virtual Task OnFirstRenderAsync() => Task.CompletedTask;
+
+    protected async Task WithPageLoading(Func<Task> action)
+    {
+        using IDisposable scope = PageLoadingService.BeginOperation();
+        await action();
+        await PageLoadingService.WaitForIdleExcept(scope);
+        StateHasChanged();
+    }
+
+    private void OnLoadingChanged()
+    {
+        IsLoading = PageLoadingService.IsLoading;
         InvokeAsync(StateHasChanged);
     }
 }

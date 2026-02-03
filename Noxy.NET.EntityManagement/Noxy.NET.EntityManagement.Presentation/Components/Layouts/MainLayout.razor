@@ -1,4 +1,4 @@
-﻿@inject APIHttpClient HttpClient
+﻿@inject APIHttpClient APIHttpClient
 @inject UserAuthenticationStateProvider AuthService
 @inherits LayoutComponentBase
 
@@ -34,11 +34,31 @@
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        AuthenticationState state = await AuthService.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated ?? false)
+        {
+            try
+            {
+                AuthenticationRenewResponse response = await APIHttpClient.SendRequest<AuthenticationRenewResponse>(HttpMethod.Post, "Authentication/Renew");
+                await AuthService.UpdateIdentity(response.JWT);
+            }
+            catch (Exception ex)
+            {
+                await AuthService.ResetIdentity();
+            }
+        }
+    }
+
     private async Task SignInFormSubmit(IWebFormContext<AuthenticationSignInFormModel> context)
     {
         try
         {
-            AuthenticationSignInResponse result = await HttpClient.SendRequest(context.Model);
+            AuthenticationSignInResponse result = await APIHttpClient.SendRequest(context.Model);
             await AuthService.UpdateIdentity(result.JWT);
         }
         catch (Exception e)
@@ -51,7 +71,7 @@
     {
         try
         {
-            AuthenticationSignUpResponse result = await HttpClient.SendRequest(context.Model);
+            AuthenticationSignUpResponse result = await APIHttpClient.SendRequest(context.Model);
             await AuthService.UpdateIdentity(result.JWT);
         }
         catch (Exception e)

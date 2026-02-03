@@ -15,14 +15,6 @@ public abstract class BaseComponentFormEntity<TForm, TEntity> : BaseComponentFor
 
     protected string SubmitText => TextService.Get(Context.Model.ID != Guid.Empty ? TextConstants.ButtonUpdate : TextConstants.ButtonCreate);
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
-
-        await WithLoading(TextService.Resolve);
-    }
-
     protected async void FormSubmit(BaseFormModelEntity model)
     {
         try

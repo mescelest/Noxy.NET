@@ -9,6 +9,25 @@ public abstract class ElementComponent : BlazorComponent
 
     protected override string CssClass => CombineCssClass(base.CssClass, GetComponentClass());
 
+    protected void LoadAfterRender(Func<Task> action)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            using IDisposable op = PageLoadingService.BeginOperation();
+            await action();
+            StateHasChanged();
+        });
+    }
+
+    protected async Task WithLoading(Func<Task> callback)
+    {
+        await InvokeAsync(async () =>
+        {
+            using IDisposable op = PageLoadingService.BeginOperation();
+            await callback();
+        });
+    }
+
     protected void InvokeEventCallback<TArgs>(string param, TArgs args) where TArgs : EventArgs
     {
         if (!(AdditionalAttributes?.TryGetValue(param, out object? objFunction) ?? false)) return;

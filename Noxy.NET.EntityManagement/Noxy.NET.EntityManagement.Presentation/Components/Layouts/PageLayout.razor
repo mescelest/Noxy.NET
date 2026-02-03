@@ -2,7 +2,12 @@
 @inject APIHttpClient APIHttpClient
 @inherits ElementComponent
 
-<div @attributes="AdditionalAttributes" class="@CssClass">
+@if (IsRendered && PageLoadingService.IsLoading)
+{
+    <Loader Loading="true"/>
+}
+
+<div @attributes="AdditionalAttributes" class="@CssClass" loading="@PageLoadingService.IsLoading">
     <div class="header">
         <div class="logo">
             <NavLink href="/">
@@ -40,8 +45,12 @@
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender) return;
 
+        LoadAfterRender(LoadData);
+    }
+
+    private async Task LoadData()
+    {
         _listContext = await APIHttpClient.SendRequest<ViewModelSchemaContext[]>(HttpMethod.Get, "Data/Context");
-        await InvokeAsync(StateHasChanged);
     }
 
     private static string GetLink(ViewModelSchemaContext context)

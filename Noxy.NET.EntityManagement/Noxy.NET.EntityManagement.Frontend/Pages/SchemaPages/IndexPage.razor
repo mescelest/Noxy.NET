@@ -22,18 +22,17 @@
 
     private EntitySchema[] _data = [];
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnFirstRenderAsync()
     {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
+        await base.OnFirstRenderAsync();
 
-        await WithLoading(LoadData);
-        await WithLoading(TextService.Resolve);
+        await LoadData();
+        await TextService.Resolve();
     }
 
     private async Task OnSchemaPanelSchemaChange()
     {
-        await WithLoading(LoadData);
+        await WithPageLoading(LoadData);
     }
 
     private async Task LoadData()

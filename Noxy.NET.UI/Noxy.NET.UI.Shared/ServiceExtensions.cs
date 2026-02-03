@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddNoxyNetUILoadingService(this IServiceCollection services)
     {
-        services.AddScoped<LoadingService>();
+        services.AddScoped<PageLoadingService>();
         return services;
     }
 

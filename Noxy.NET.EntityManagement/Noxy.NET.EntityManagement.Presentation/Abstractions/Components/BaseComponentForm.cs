@@ -27,12 +27,4 @@ public abstract class BaseComponentForm<TForm> : UI.Abstractions.BaseComponentFo
         base.OnInitialized();
         Context = CreateContext();
     }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
-
-        await WithLoading(TextService.Resolve);
-    }
 }

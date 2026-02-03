@@ -10,21 +10,23 @@
     {
         <h2>@item.Title</h2>
         <span>@item.Description</span>
-        <NavLink href="@GetLink(item.SchemaIdentifier)">@TextService.Get(TextConstants.LinkNavigationSchema)</NavLink>
+        <NavLink href="@GetLink(item.SchemaIdentifier)">
+            @TextService.Get(TextConstants.LinkNavigationSchema)
+        </NavLink>
     }
 </PageLayout>
 
 @code {
 
+
     private ViewModelSchemaContext[] _listContext = [];
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnFirstRenderAsync()
     {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
+        await base.OnFirstRenderAsync();
 
-        await WithLoading(TextService.Resolve);
-        await WithLoading(LoadData);
+        await LoadData();
+        await TextService.Resolve();
     }
 
     private async Task LoadData()

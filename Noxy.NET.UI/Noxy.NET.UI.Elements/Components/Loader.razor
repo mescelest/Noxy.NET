@@ -3,7 +3,7 @@
 @if (LoadingCurrent)
 {
     <div @attributes="AdditionalAttributes" class="@CssClass">
-        <svg class="spinner" width="@Width" height="@Height" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <svg class="spinner" width="@WidthCurrent" height="@HeightCurrent" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <g fill="none" fill-rule="evenodd" stroke-width="10">
                 <circle stroke-opacity=".5" cx="50" cy="50" r="45"/>
                 <path d="M50,5 A45,45 270 0 1 95,50">
@@ -22,9 +22,11 @@ else
 
     [Parameter]
     public int? Width { get; set; }
+    private int WidthCurrent => Width ?? 100;
 
     [Parameter]
     public int? Height { get; set; }
+    private int HeightCurrent => Height ?? 100;
 
     [Parameter]
     public int? Duration { get; set; }

@@ -1,0 +1,45 @@
+﻿@page "/Schema/{id:guid}"
+@inject APIHttpClient APIHttpClient
+@inject TextService TextService
+@inherits PageComponent
+
+<PageTitle>Home</PageTitle>
+
+<AuthorizeLayout>
+    <PageLayout>
+        @if (_data != null)
+        {
+            <h2>@_data.Name</h2>
+            <SchemaOverviewParameter Schema="_data"/>
+            <SchemaOverviewElement Schema="_data"/>
+            <SchemaOverviewProperty Schema="_data"/>
+        }
+        else
+        {
+            <span>Loading...</span>
+        }
+    </PageLayout>
+</AuthorizeLayout>
+
+@code {
+
+    [Parameter]
+    public Guid ID { get; set; }
+
+    private EntitySchema? _data;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        await WithLoading(LoadData);
+        await WithLoading(TextService.Resolve);
+    }
+
+    private async Task LoadData()
+    {
+        _data = await APIHttpClient.SendRequest<EntitySchema>(HttpMethod.Get, $"Template/Schema/{ID}");
+    }
+
+}

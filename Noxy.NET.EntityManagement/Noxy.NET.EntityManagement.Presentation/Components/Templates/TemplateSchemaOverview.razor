@@ -102,7 +102,7 @@
 
         if (Display == null)
         {
-            await WithLoading(TextService.Resolve);
+            LoadAfterRender(TextService.Resolve);
         }
     }
 

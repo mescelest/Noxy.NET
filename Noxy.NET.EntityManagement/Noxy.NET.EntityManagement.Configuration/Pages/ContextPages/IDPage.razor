@@ -5,20 +5,22 @@
 
 <PageTitle>Home | @_entityContext?.Title</PageTitle>
 
-<PageLayout>
-    @if (IsRendered)
-    {
-        <MagazineLayout>
-            <Content>
-                <ElementPanel List="_listElement"/>
-            </Content>
-        </MagazineLayout>
-    }
-    else
-    {
-        <span>Loading...</span>
-    }
-</PageLayout>
+<AuthorizeLayout>
+    <PageLayout>
+        @if (IsRendered)
+        {
+            <MagazineLayout>
+                <Content>
+                    <ElementPanel List="_listElement"/>
+                </Content>
+            </MagazineLayout>
+        }
+        else
+        {
+            <span>Loading...</span>
+        }
+    </PageLayout>
+</AuthorizeLayout>
 
 @code {
 
@@ -28,13 +30,25 @@
     private ViewModelSchemaContext? _entityContext;
     private ViewModelDataElement[] _listElement = [];
 
-    protected override async Task OnFirstRenderAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await base.OnFirstRenderAsync();
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
 
+        await WithLoading(LoadData);
+        await WithLoading(TextService.Resolve);
+    }
+
+    private async Task OnActionPanelActionComplete()
+    {
+        await WithLoading(LoadData);
+        await WithLoading(TextService.Resolve);
+    }
+
+    private async Task LoadData()
+    {
         await LoadContext();
         await LoadElement();
-        await TextService.Resolve();
     }
 
     private async Task LoadContext()

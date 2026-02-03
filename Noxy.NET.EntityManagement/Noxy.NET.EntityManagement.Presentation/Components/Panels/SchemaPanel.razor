@@ -38,7 +38,7 @@
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender) return;
 
-        await WithLoading(TextService.Resolve);
+        LoadAfterRender(TextService.Resolve);
     }
 
     private string GetSchemaLink()

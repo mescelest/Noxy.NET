@@ -6,7 +6,7 @@ namespace Noxy.NET.UI.Abstractions;
 public abstract class BlazorComponent : ComponentBase
 {
     [Inject]
-    public LoadingService LoadingService { get; set; } = null!;
+    protected PageLoadingService PageLoadingService { get; set; } = null!;
 
     protected bool IsRendered { get; set; }
     protected bool IsLoading { get; set; }
@@ -28,23 +28,6 @@ public abstract class BlazorComponent : ComponentBase
     protected string GetComponentName()
     {
         return GetType().Name.Split('`').First();
-    }
-
-    protected async Task WithLoading(Func<Task> callback)
-    {
-        try
-        {
-            LoadingService.StartLoading(UUIDString);
-            await callback();
-        }
-        catch (Exception)
-        {
-            // Do stuff
-        }
-        finally
-        {
-            LoadingService.FinishLoading(UUIDString);
-        }
     }
 
     protected static string CombineCssClass(params string?[] @params)

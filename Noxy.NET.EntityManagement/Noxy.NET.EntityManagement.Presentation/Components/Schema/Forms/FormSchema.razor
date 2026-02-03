@@ -3,7 +3,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
         <Header>
-            @HeaderText
+            @TextService.Get(HeaderText)
         </Header>
 
         <Content>
@@ -26,6 +26,14 @@
     protected override WebFormContext<FormModelSchema> CreateContext()
     {
         return new(new(Value));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        LoadAfterRender(TextService.Resolve);
     }
 
 }

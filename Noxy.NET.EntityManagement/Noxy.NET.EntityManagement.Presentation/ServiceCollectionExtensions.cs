@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<APIHttpClient>(client => client.BaseAddress = new(url));
 
         services.AddScoped<TextService>();
-        services.AddScoped<LoadingService>();
+        services.AddScoped<PageLoadingService>();
         services.AddScoped<UserAuthenticationStateProvider>();
         services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredService<UserAuthenticationStateProvider>());
         services.AddScoped<IJWTService, JWTService>();

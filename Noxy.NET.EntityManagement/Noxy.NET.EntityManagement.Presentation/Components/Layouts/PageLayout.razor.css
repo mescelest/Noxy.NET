@@ -6,6 +6,10 @@
     row-gap: var(--size-gap-xl);
 }
 
+.PageLayout[loading] {
+    display: none;
+}
+
 .header {
     display: grid;
     grid-template-columns: max-content 1fr max-content;
