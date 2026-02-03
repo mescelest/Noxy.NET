@@ -3,7 +3,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
         <Header>
-            @HeaderText
+            @TextService.Get(HeaderText)
         </Header>
 
         <Content>

@@ -4,7 +4,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
         <div class="select-wrapper">
-            <InputElementSelect @attributes="InputAttributes" Name="@Name" OptionList="OptionList" OptionAttributes="OptionAttributes" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+            <InputElementSelect @attributes="InputAttributes" ID="@UUIDCode" Name="@Name" OptionList="OptionList" OptionAttributes="OptionAttributes" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
                 @ChildContent(context)
             </InputElementSelect>
         </div>

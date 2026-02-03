@@ -19,7 +19,7 @@ public class FormModelSchemaParameterText(EntitySchemaParameterText? entity = nu
     public override HttpMethod HttpMethod => HttpMethod.Post;
 
     [Required]
-    [DisplayName(TextConstants.LabelFormTextParameterType)]
-    [Description(TextConstants.HelpFormTextParameterType)]
+    [DisplayName(TextConstants.LabelFormParameterTextType)]
+    [Description(TextConstants.HelpFormParameterTextType)]
     public TextParameterTypeEnum Type { get; set; } = entity?.Type ?? TextParameterTypeEnum.Line;
 }

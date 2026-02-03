@@ -1,9 +1,10 @@
+@inject TextService TextService
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateSchemaOverview Schema="Schema" List="Schema.ElementList">
         <Header>
-            <h3>Elements</h3>
+            <h3>@TextService.Get(TextConstants.HeaderElement)</h3>
         </Header>
 
         <Form>
