@@ -3,7 +3,7 @@ using Noxy.NET.UI.Models;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseComponentForm<TForm> : ElementComponent where TForm : class
+public abstract class BaseForm<TForm> : ElementComponent where TForm : class
 {
     [Parameter, EditorRequired]
     public EventCallback<WebFormContext<TForm>> OnSubmit { get; set; }

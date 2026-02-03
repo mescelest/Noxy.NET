@@ -4,7 +4,7 @@ using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
-public abstract class BaseComponentForm<TForm> : UI.Abstractions.BaseComponentForm<TForm> where TForm : BaseFormModel
+public abstract class BaseComponentForm<TForm> : BaseForm<TForm> where TForm : BaseFormModel
 {
     [Inject]
     protected APIHttpClient APIHttpClient { get; set; } = null!;
@@ -26,5 +26,13 @@ public abstract class BaseComponentForm<TForm> : UI.Abstractions.BaseComponentFo
     {
         base.OnInitialized();
         Context = CreateContext();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        LoadAfterRender(TextService.Resolve);
     }
 }

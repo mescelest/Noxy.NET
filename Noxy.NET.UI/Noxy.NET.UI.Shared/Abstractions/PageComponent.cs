@@ -29,7 +29,10 @@ public abstract class PageComponent : BlazorComponent, IDisposable
         StateHasChanged();
     }
 
-    protected virtual Task OnFirstRenderAsync() => Task.CompletedTask;
+    protected virtual Task OnFirstRenderAsync()
+    {
+        return Task.CompletedTask;
+    }
 
     protected async Task WithPageLoading(Func<Task> action)
     {
