@@ -818,6 +818,258 @@ namespace Noxy.NET.EntityManagement.Persistence.Migrations
                             TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = "Represents a dynamic text parameter value."
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-7f6e-a91d-db2e3c9e6e5e"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchema",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-71b0-b48d-639f8765db5a"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaContext",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Context"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-754f-9c95-ca256884cd81"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaElement",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Element"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-77db-a925-13311a12f816"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaParameterStyle",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Style Parameter"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-761c-804b-b56d211c5c43"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaParameterSystem",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema System Parameter"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-79bf-af26-543a2ae1fcdf"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaParameterText",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Text Parameter"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-75f8-99cb-285ba1b2ecd8"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyBoolean",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Boolean Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-7cb3-b84c-981fd2862f0e"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyCollection",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Collection Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-736f-87d7-71972f4848b0"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyDateTime",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema DateTime Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-727f-9d4a-b6a92f70bfd9"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyDecimal",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Decimal Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-7789-b384-b32c673d1f98"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyImage",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Image Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-7b18-8700-7933cc2e5ac7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyInteger",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Integer Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-7f86-b88c-db22de407519"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyString",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema String Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-19d8-7b93-9f90-de94403d000a"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyTable",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Create Schema Table Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-7c30-8564-1242f5f9abaa"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchema",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-7303-b114-c733077eb990"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaContext",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Context"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-7a12-bcd4-5316fd6894b0"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaElement",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Element"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-7b6f-8892-d4ddd7793234"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaParameterStyle",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Style Parameter"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-79f5-9787-1aeb9cde12b1"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaParameterSystem",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema System Parameter"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-7eb2-bf9e-fa45f0051326"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaParameterText",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Text Parameter"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-764f-86ad-1e8c2203acee"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyBoolean",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Boolean Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-794e-a648-3da4fd31dc9b"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyCollection",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Collection Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-7b8a-9c71-0d9ae20a2a50"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyDateTime",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema DateTime Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-7b31-98f5-60c0c15ecb49"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyDecimal",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Decimal Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-7d81-bfbc-9f8384ab8a2d"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyImage",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Image Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-79e9-af55-66544574de3a"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyInteger",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Integer Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-7197-954e-c80cb43b9192"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyString",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema String Property"
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-8b86-78a6-942c-7210fa5d6003"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyTable",
+                            TimeApproved = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            TimeEffective = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Update Schema Table Property"
                         });
                 });
 
@@ -2021,6 +2273,342 @@ namespace Noxy.NET.EntityManagement.Persistence.Migrations
                             Order = 60,
                             SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
                             SchemaIdentifier = "HelpFormDynamicValueTextParameter",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-7579-8011-fd306ef3be7d"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchema",
+                            Note = "",
+                            Order = 61,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchema",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-7d7e-accd-c533af9a13f2"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaContext",
+                            Note = "",
+                            Order = 62,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaContext",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-73eb-be79-a8f9fd6195bf"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaElement",
+                            Note = "",
+                            Order = 63,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaElement",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-70b5-866b-f755d1c45382"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaParameterStyle",
+                            Note = "",
+                            Order = 64,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaParameterStyle",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-79a9-ad25-bd0e7f197bfe"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaParameterSystem",
+                            Note = "",
+                            Order = 65,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaParameterSystem",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-7b41-ad27-573d62c60f54"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaParameterText",
+                            Note = "",
+                            Order = 66,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaParameterText",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-728d-a32f-32740d710848"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaPropertyBoolean",
+                            Note = "",
+                            Order = 67,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyBoolean",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-77c6-9d30-a90e02a17d97"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaPropertyCollection",
+                            Note = "",
+                            Order = 68,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyCollection",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-780b-8287-8db5087a9579"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaPropertyDateTime",
+                            Note = "",
+                            Order = 69,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyDateTime",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-7a15-946f-d1cf59ddac12"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaPropertyDecimal",
+                            Note = "",
+                            Order = 70,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyDecimal",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-7a50-8798-918e8726d667"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaPropertyImage",
+                            Note = "",
+                            Order = 71,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyImage",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-7afa-a013-344f1600999c"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaPropertyInteger",
+                            Note = "",
+                            Order = 72,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyInteger",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-7ffb-8f29-38fb70a51934"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaPropertyString",
+                            Note = "",
+                            Order = 73,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyString",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240c-791c-77f9-97ee-ad37630c7fdf"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Create:EntitySchemaPropertyTable",
+                            Note = "",
+                            Order = 74,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Create:EntitySchemaPropertyTable",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-77a8-99d9-76c997bc7eff"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchema",
+                            Note = "",
+                            Order = 75,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchema",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-70f5-bb78-f1017feca103"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaContext",
+                            Note = "",
+                            Order = 76,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaContext",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-7bf6-9778-7d42751cc301"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaElement",
+                            Note = "",
+                            Order = 77,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaElement",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-78af-affd-196b637a0dfc"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaParameterStyle",
+                            Note = "",
+                            Order = 78,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaParameterStyle",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-7f13-91f7-40b557df76e5"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaParameterSystem",
+                            Note = "",
+                            Order = 79,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaParameterSystem",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-7fed-b8e1-87cca3ee930d"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaParameterText",
+                            Note = "",
+                            Order = 80,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaParameterText",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-7913-9fae-b135cf903053"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaPropertyBoolean",
+                            Note = "",
+                            Order = 81,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyBoolean",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-7942-adec-6a8773092b8b"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaPropertyCollection",
+                            Note = "",
+                            Order = 82,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyCollection",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-71fa-a972-a870f1167975"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaPropertyDateTime",
+                            Note = "",
+                            Order = 83,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyDateTime",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-7df2-9ad3-1f4337f1f415"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaPropertyDecimal",
+                            Note = "",
+                            Order = 84,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyDecimal",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-7e3a-8edf-09814b4b8a57"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaPropertyImage",
+                            Note = "",
+                            Order = 85,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyImage",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-7532-a326-85012b6af7be"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaPropertyInteger",
+                            Note = "",
+                            Order = 86,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyInteger",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-7b1e-b540-fe8a2aac155f"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaPropertyString",
+                            Note = "",
+                            Order = 87,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyString",
+                            TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Type = 0
+                        },
+                        new
+                        {
+                            ID = new Guid("019c240d-6e22-77d3-a36c-bbff9662a8e1"),
+                            IsApprovalRequired = false,
+                            Name = "Header:Form:Update:EntitySchemaPropertyTable",
+                            Note = "",
+                            Order = 88,
+                            SchemaID = new Guid("01974e8c-ecb8-75ab-9070-ef902ff370a7"),
+                            SchemaIdentifier = "Header:Form:Update:EntitySchemaPropertyTable",
                             TimeCreated = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Type = 0
                         });

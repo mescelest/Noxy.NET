@@ -28,7 +28,7 @@
 
 @code {
 
-    private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.HeaderFormCreateEntitySchemaParameterText : TextConstants.HeaderFormUpdateEntitySchemaParameterText;
+    private string HeaderText => Context.Model.ID == Guid.Empty ? TextConstants.HeaderFormCreateEntitySchemaParameterText : TextConstants.HeaderFormUpdateEntitySchemaParameterText;
 
     protected override WebFormContext<FormModelSchemaParameterText> CreateContext()
     {

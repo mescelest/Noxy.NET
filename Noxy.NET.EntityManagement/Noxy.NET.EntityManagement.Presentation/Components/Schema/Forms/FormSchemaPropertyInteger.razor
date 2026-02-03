@@ -34,7 +34,7 @@
 
 @code {
 
-    private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.HeaderFormCreateEntitySchemaPropertyInteger : TextConstants.HeaderFormUpdateEntitySchemaPropertyInteger;
+    private string HeaderText => Context.Model.ID == Guid.Empty ? TextConstants.HeaderFormCreateEntitySchemaPropertyInteger : TextConstants.HeaderFormUpdateEntitySchemaPropertyInteger;
     private IEnumerable<Guid> OptionList => (Schema.ParameterList?.Select(x => x.ID) ?? []).Append(Guid.Empty);
 
     private string GetOptionName(Guid? id)
