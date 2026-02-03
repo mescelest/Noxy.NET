@@ -28,7 +28,7 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         };
     }
 
-    protected TableSchemaParameterText HasSchemaDynamicValueTextParameter(string id, string identifier, string name = "", string note = "", TextParameterTypeEnum type = TextParameterTypeEnum.Line, bool isApprovalRequired = false,
+    protected TableSchemaParameterText HasSchemaParameterText(string id, string identifier, string name = "", string note = "", TextParameterTypeEnum type = TextParameterTypeEnum.Line, bool isApprovalRequired = false,
         DateTime? timeCreated = null)
     {
         TableSchemaParameterText table = new()
@@ -47,7 +47,7 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         return table;
     }
 
-    protected TableDataTextParameter HasTableDataTextParameter(string id, string identifier, string value, DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
+    protected TableDataTextParameter HasDataParameterText(string id, string identifier, string value, DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
     {
         TableDataTextParameter table = new()
         {

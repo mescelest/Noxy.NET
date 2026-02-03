@@ -10,6 +10,7 @@
             <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.SchemaIdentifier))" Description="@GetDescription(nameof(Context.Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
             <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Name))" Description="@GetDescription(nameof(Context.Model.Name))" @bind-Value="Context.Model.Name"/>
             <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Note))" Description="@GetDescription(nameof(Context.Model.Note))" @bind-Value="Context.Model.Note"/>
+            
             <InputGroupCheckbox Option="true" DisplayName="@GetDisplayName(nameof(Context.Model.IsApprovalRequired))" Description="@GetDescription(nameof(Context.Model.IsApprovalRequired))" @bind-Value="Context.Model.IsApprovalRequired">
                 <span>Yes</span>
             </InputGroupCheckbox>
@@ -25,7 +26,7 @@
 
 @code {
 
-    private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.UpdateFormHeaderEntitySchemaDynamicValueSystemParameter : TextConstants.CreateFormHeaderEntitySchemaDynamicValueSystemParameter;
+    private string HeaderText => Context.Model.ID != Guid.Empty ? TextConstants.HeaderFormCreateEntitySchemaParameterStyle : TextConstants.HeaderFormUpdateEntitySchemaParameterStyle;
 
     protected override WebFormContext<FormModelSchemaParameterStyle> CreateContext()
     {
