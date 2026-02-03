@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using Noxy.NET.UI.Interfaces;
 
 namespace Noxy.NET.UI.Abstractions;
@@ -13,13 +12,6 @@ public abstract class BaseInput : ElementComponent
     [Parameter]
     public string? ID { get; set; }
     protected string IDCurrent => ID ?? UUIDCode;
-
-    internal IJSObjectReference? Module { get; set; }
-
-    internal async Task LoadInterop(IJSRuntime js)
-    {
-        Module ??= await js.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUIWebForm}/Interop.js");
-    }
 
     protected IWebFormFieldContext? GetField(string name)
     {

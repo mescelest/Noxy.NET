@@ -25,7 +25,10 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
+        if (!firstRender)
+        {
+            return;
+        }
 
         await JS.LoadScriptResource($"./_content/{Constants.AssemblyNameUICommon}/Sortable.min.js");
         await OnLoad.InvokeAsync(_contentRef);

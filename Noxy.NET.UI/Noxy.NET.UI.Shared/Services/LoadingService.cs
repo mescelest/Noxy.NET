@@ -4,23 +4,31 @@ namespace Noxy.NET.UI.Services;
 
 public class LoadingService
 {
-    private Dictionary<string, int> LoadingCollection { get; set; } = [];
+    private int LoadingCount { get; set; } = 0;
     public event EventHandler<string, GenericEventArgs<bool>>? OnChange;
 
     public int StartLoading(string key)
     {
-        if (LoadingCollection.TryGetValue(key, out int value)) return ++value;
+        if (++LoadingCount > 0)
+        {
+            OnChange?.Invoke(key, new(true));
+        }
 
-        value = LoadingCollection[key] = 0;
-        OnChange?.Invoke(key, new(true));
+        return LoadingCount;
+    }
 
-        return ++value;
+    public void Reset()
+    {
+        LoadingCount = 0;
     }
 
     public int FinishLoading(string key)
     {
-        if (!LoadingCollection.TryGetValue(key, out int value)) throw new InvalidOperationException();
-        if (--value == 0) OnChange?.Invoke(key, new(false));
-        return value;
+        if (--LoadingCount == 0)
+        {
+            OnChange?.Invoke(key, new(false));
+        }
+
+        return LoadingCount;
     }
 }

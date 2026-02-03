@@ -5,22 +5,20 @@
 
 <PageTitle>Home | @_entityContext?.Title</PageTitle>
 
-<AuthorizeLayout>
-    <PageLayout>
-        @if (IsRendered)
-        {
-            <MagazineLayout>
-                <Content>
-                    <ElementPanel List="_listElement"/>
-                </Content>
-            </MagazineLayout>
-        }
-        else
-        {
-            <span>Loading...</span>
-        }
-    </PageLayout>
-</AuthorizeLayout>
+<PageLayout>
+    @if (IsRendered)
+    {
+        <MagazineLayout>
+            <Content>
+                <ElementPanel List="_listElement"/>
+            </Content>
+        </MagazineLayout>
+    }
+    else
+    {
+        <span>Loading...</span>
+    }
+</PageLayout>
 
 @code {
 

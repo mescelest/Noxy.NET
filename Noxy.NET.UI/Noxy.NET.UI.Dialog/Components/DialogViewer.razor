@@ -1,5 +1,6 @@
 ﻿@inject IDialogService DialogService
 @inherits ElementComponent
+@implements IDisposable
 
 @if (Context != null)
 {
@@ -69,10 +70,9 @@
         OverlayCloseStarted = false;
     }
 
-    public override void Dispose()
+    public void Dispose()
     {
         DialogService.DialogChanged -= DialogChangedHandler;
-        base.Dispose();
     }
 
 }

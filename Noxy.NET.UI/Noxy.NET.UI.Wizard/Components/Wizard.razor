@@ -1,4 +1,5 @@
 ﻿@inherits ElementComponent
+@implements IDisposable
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <CascadingValue Value="Context">
@@ -51,10 +52,9 @@
         InvokeAsync(StateHasChanged);
     }
 
-    public override void Dispose()
+    public void Dispose()
     {
         Context.StepChanged -= StepChangedHandler;
-        base.Dispose();
     }
 
 }

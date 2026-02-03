@@ -8,6 +8,14 @@
     public int? Size { get; set; }
     protected int SizeCurrent => Size ?? 35;
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        await LoadInterop(JS);
+    }
+
     [JSInvokable]
     public override void OnValueInput(string value)
     {

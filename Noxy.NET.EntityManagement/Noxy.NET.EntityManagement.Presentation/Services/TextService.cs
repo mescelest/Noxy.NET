@@ -47,7 +47,7 @@ public class TextService(APIHttpClient serviceHttpClient)
             .ToArray();
 
         if (list.Length == 0) return;
-        Dictionary<string, string> result = await serviceHttpClient.SendRequest<Dictionary<string, string>>(HttpMethod.Get, "Data/TextParameter/Resolve", list);
+        Dictionary<string, string> result = await serviceHttpClient.SendRequest<Dictionary<string, string>>(HttpMethod.Post, "Data/Parameter/Text/Resolve", list);
 
         DateTime now = DateTime.UtcNow;
         foreach (KeyValuePair<string, string> item in result)

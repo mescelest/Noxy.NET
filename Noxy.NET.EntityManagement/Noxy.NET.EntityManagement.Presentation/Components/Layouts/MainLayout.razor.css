@@ -1,0 +1,25 @@
+.form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: row;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+}
+
+.content {
+    display: flex;
+    flex-flow: row wrap;
+    flex: 0 0 auto;
+    padding: var(--size-gap-xl);
+    min-width: var(--size-column);
+    column-gap: var(--size-gap-xl);
+}
+
+.column {
+    display: flex;
+    flex-flow: column;
+    flex: 0 0 auto;
+    row-gap: var(--size-gap-xl);
+    max-width: var(--size-column);
+}

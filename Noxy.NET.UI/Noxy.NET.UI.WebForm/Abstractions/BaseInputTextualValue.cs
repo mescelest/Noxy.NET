@@ -3,7 +3,7 @@ using Microsoft.JSInterop;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseInputTextualValue<TValue> : BaseInputValue<TValue>
+public abstract class BaseInputTextualValue<TValue> : BaseInputValue<TValue>, IDisposable, IAsyncDisposable
 {
     [Inject]
     protected IJSRuntime JS { get; set; } = null!;
@@ -12,7 +12,23 @@ public abstract class BaseInputTextualValue<TValue> : BaseInputValue<TValue>
     public bool? HasChangeEventOnInput { get; set; }
     protected bool HasChangeEventOnInputCurrent => HasChangeEventOnInput ?? false;
 
+    protected IJSObjectReference? Module { get; set; }
     protected DotNetObjectReference<BaseInputTextualValue<TValue>>? DotNetReference { get; set; }
+
+    public async ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        if (Module != null)
+        {
+            await Module.DisposeAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        DotNetReference?.Dispose();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -22,20 +38,19 @@ public abstract class BaseInputTextualValue<TValue> : BaseInputValue<TValue>
         if (HasChangeEventOnInputCurrent)
         {
             await LoadInterop(JS);
-            Module?.InvokeVoidAsync("NoxyNETUIWebForm.RegisterOnInput", UUIDString, Constants.OnInputDelay, DotNetReference = DotNetObjectReference.Create(this), nameof(OnValueInput));
+
+            DotNetReference = DotNetObjectReference.Create(this);
+            await Module!.InvokeVoidAsync("NoxyNETUIWebForm.RegisterOnInput", UUIDString, Constants.OnInputDelay, DotNetReference, nameof(OnValueInput));
         }
+    }
+
+    protected async Task LoadInterop(IJSRuntime js)
+    {
+        Module ??= await js.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUIWebForm}/Interop.js");
     }
 
     [JSInvokable]
     public abstract void OnValueInput(string value);
 
     protected abstract void OnValueChange(ChangeEventArgs args);
-
-    public override void Dispose()
-    {
-        DotNetReference?.Dispose();
-        Module?.InvokeVoidAsync("NoxyNETUIWebForm.DeregisterOnInput", UUIDString);
-
-        base.Dispose();
-    }
 }

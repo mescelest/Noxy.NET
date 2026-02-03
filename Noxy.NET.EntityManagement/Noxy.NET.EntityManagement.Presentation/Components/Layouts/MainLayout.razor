@@ -1,12 +1,32 @@
 ﻿@inject APIHttpClient HttpClient
 @inject UserAuthenticationStateProvider AuthService
-@inherits ElementComponent
+@inherits LayoutComponentBase
 
 <AuthorizeView>
     <Authorized>
-        @ChildContent
+        @Body
     </Authorized>
+    <Authorizing>
 
+    </Authorizing>
+    <NotAuthorized>
+        <div class="form">
+            <div class="content">
+                <div class="column">
+                    <h2>Create an account</h2>
+                    <AuthenticationSignUpAPIForm OnSubmit="form => form.SubmitAsync(SignUpFormSubmit)">
+                        <Button Status="StatusEnum.Info" type="submit">Sign Up</Button>
+                    </AuthenticationSignUpAPIForm>
+                </div>
+                <div class="column">
+                    <h2>... Or log in</h2>
+                    <AuthenticationSignInAPIForm OnSubmit="form => form.SubmitAsync(SignInFormSubmit)">
+                        <Button Status="StatusEnum.Success" type="submit">Sign in</Button>
+                    </AuthenticationSignInAPIForm>
+                </div>
+            </div>
+        </div>
+    </NotAuthorized>
 </AuthorizeView>
 
 @code {

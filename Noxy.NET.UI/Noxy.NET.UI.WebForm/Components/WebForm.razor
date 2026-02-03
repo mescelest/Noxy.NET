@@ -1,5 +1,6 @@
 ﻿@typeparam T where T : class
 @inherits ElementComponent
+@implements IDisposable
 
 <form @attributes="AdditionalAttributes" class="@CssClass" @onsubmit="SubmitHandler" @onsubmit:preventDefault>
 
@@ -27,10 +28,9 @@
         Context.ContextChanged += ContextChangedHandler;
     }
 
-    public override void Dispose()
+    public void Dispose()
     {
         Context.ContextChanged -= ContextChangedHandler;
-        base.Dispose();
     }
 
     private void SubmitHandler()
