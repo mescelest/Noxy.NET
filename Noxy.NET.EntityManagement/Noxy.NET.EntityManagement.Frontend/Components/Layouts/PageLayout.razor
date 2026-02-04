@@ -1,14 +1,9 @@
-﻿@inject UserAuthenticationStateProvider AuthService
-@inject APIHttpClient APIHttpClient
+﻿@inject UserAuthenticationStateProvider AuthProvider
 @inject TextService TextService
-@inherits ElementComponent
+@layout AuthenticationLayout
+@inherits LayoutComponent
 
-@if (IsRendered && PageLoadingService.IsLoading)
-{
-    <Loader Loading="true"/>
-}
-
-<div @attributes="AdditionalAttributes" class="@CssClass" loading="@PageLoadingService.IsLoading">
+<div class="@CssClass">
     <div class="header">
         <div class="logo">
             <NavLink href="/">
@@ -28,7 +23,7 @@
             }
         </div>
         <div class="account">
-            @if (AuthService.Identity != null)
+            @if (AuthProvider.Identity != null)
             {
                 <Button @onclick="SignOut">
                     @TextService.Get(TextConstants.ButtonSignOut)
@@ -48,19 +43,6 @@
 
     private ViewModelSchemaContext[] _listContext = [];
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
-
-        LoadAfterRender(LoadData);
-    }
-
-    private async Task LoadData()
-    {
-        _listContext = await APIHttpClient.SendRequest<ViewModelSchemaContext[]>(HttpMethod.Get, "Data/Context");
-    }
-
     private static string GetLink(ViewModelSchemaContext context)
     {
         return $"/Context/{context.SchemaIdentifier}";
@@ -70,7 +52,7 @@
     {
         try
         {
-            await AuthService.ResetIdentity();
+            await AuthProvider.ResetIdentity();
         }
         catch (Exception)
         {

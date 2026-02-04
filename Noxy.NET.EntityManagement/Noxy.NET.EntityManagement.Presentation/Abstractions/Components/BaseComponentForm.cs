@@ -12,16 +12,6 @@ public abstract class BaseComponentForm<TForm> : BaseForm<TForm> where TForm : B
     [Inject]
     protected TextService TextService { get; set; } = null!;
 
-    protected string GetDisplayName(string property)
-    {
-        return TextService.Get(Context.GetField(property)?.GetDisplayName());
-    }
-
-    protected string GetDescription(string property)
-    {
-        return TextService.Get(Context.GetField(property)?.GetDescription());
-    }
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -34,5 +24,15 @@ public abstract class BaseComponentForm<TForm> : BaseForm<TForm> where TForm : B
         if (!firstRender) return;
 
         LoadAfterRender(TextService.Resolve);
+    }
+
+    protected string GetDisplayName(string property)
+    {
+        return TextService.Get(Context.GetField(property)?.GetDisplayName());
+    }
+
+    protected string GetDescription(string property)
+    {
+        return TextService.Get(Context.GetField(property)?.GetDescription());
     }
 }

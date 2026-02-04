@@ -48,9 +48,9 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         return table;
     }
 
-    protected TableDataTextParameter HasDataParameterText(string id, string identifier, string value, DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
+    protected TableDataParameterText HasDataParameterText(string id, string identifier, string value, DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
     {
-        TableDataTextParameter table = new()
+        TableDataParameterText table = new()
         {
             ID = Guid.Parse(id),
             SchemaIdentifier = identifier,
@@ -59,7 +59,7 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
             TimeEffective = timeEffective ?? Now,
             TimeCreated = timeCreated ?? Now
         };
-        Builder.Entity<TableDataTextParameter>().HasData(table);
+        Builder.Entity<TableDataParameterText>().HasData(table);
         return table;
     }
 

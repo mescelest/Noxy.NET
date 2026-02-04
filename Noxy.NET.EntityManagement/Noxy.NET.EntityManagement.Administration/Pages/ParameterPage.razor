@@ -1,9 +1,34 @@
 ﻿@page "/Parameter"
-@inject APIHttpClient APIHttpClient
 @inject TextService TextService
+@inject APIHttpClient APIHttpClient
 @inherits PageComponent
 
 <PageTitle>Administration | Parameter</PageTitle>
+
+<div class="@CssClass">
+    <MagazineFrame>
+        <Left>
+            <FormDataParameterList OnSubmit="form => form.SubmitAsync(SignInFormSubmit)">
+                <div class="action-list">
+                    <Button Status="StatusEnum.Warning" type="button">
+                        @TextService.Get(TextConstants.ButtonReset)
+                    </Button>
+                    <Button Status="StatusEnum.Info" type="submit">
+                        @TextService.Get(TextConstants.ButtonFilter)
+                    </Button>
+                </div>
+            </FormDataParameterList>
+        </Left>
+        <Content>
+            <div class="parameter-list">
+                Hello World
+            </div>
+        </Content>
+        <Right>
+            Hello World
+        </Right>
+    </MagazineFrame>
+</div>
 
 @code {
 
@@ -19,12 +44,17 @@
 
     private async Task LoadData()
     {
-        _listParameter = await APIHttpClient.SendRequest<ViewModelParameter[]>(HttpMethod.Get, "Data/Parameter");
+        // _listParameter = await APIHttpClient.SendRequest<ViewModelParameter[]>(HttpMethod.Get, "Data/Parameter");
     }
 
     private static string GetLink(string identifier)
     {
         return $"/Context/{identifier}";
+    }
+
+    private async Task SignInFormSubmit(IWebFormContext<FormModelSchemaParameterList> value)
+    {
+        _listParameter = await APIHttpClient.SendRequest<ViewModelParameter[]>(HttpMethod.Get, "Data/Parameter");
     }
 
 }

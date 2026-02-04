@@ -1,14 +1,10 @@
 ﻿@inherits BaseInputTextualValue<string>
 
-<textarea @attributes="AdditionalAttributes" id="@IDCurrent" class="@CssClass" cols="@ColumnsCurrent" rows="@RowsCurrent" @onchange="OnValueChange">
+<textarea @attributes="AdditionalAttributes" id="@IDCurrent" class="@CssClass" cols="@SizeCurrent" rows="@RowsCurrent" @onchange="OnValueChange">
     @Value
 </textarea>
 
 @code {
-
-    [Parameter]
-    public int? Columns { get; set; }
-    private int ColumnsCurrent => Columns ?? 40;
 
     [Parameter]
     public int? Rows { get; set; }

@@ -24,6 +24,7 @@ public interface ISchemaRepository
 
     Task<List<EntitySchemaContext>> GetSchemaContextListBySchemaID(Guid id);
     Task<List<EntitySchemaElement>> GetSchemaElementListBySchemaID(Guid id);
+    Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(string? search = null, bool? isSystemDefined = null, bool? isApprovalRequired = null);
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id);
     Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id);
 

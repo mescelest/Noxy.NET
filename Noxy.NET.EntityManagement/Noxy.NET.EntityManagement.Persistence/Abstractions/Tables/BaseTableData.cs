@@ -3,8 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
 
-[PrimaryKey(nameof(ID))]
-[Index(nameof(TimeCreated))]
+[Index(nameof(SchemaIdentifier))]
 public abstract class BaseTableData : BaseTable
 {
     [Required]

@@ -36,8 +36,8 @@ public interface ITableToEntityMapper
     EntityDataPropertyBoolean Map(TableDataPropertyBoolean? table);
     EntityDataPropertyDateTime Map(TableDataPropertyDateTime? table);
     EntityDataPropertyString Map(TableDataPropertyString? table);
-    EntityDataSystemParameter Map(TableDataSystemParameter? table);
-    EntityDataTextParameter Map(TableDataTextParameter? table);
+    EntityDataParameterSystem Map(TableDataParameterSystem? table);
+    EntityDataParameterText Map(TableDataParameterText? table);
 
     #endregion -- Data --
 

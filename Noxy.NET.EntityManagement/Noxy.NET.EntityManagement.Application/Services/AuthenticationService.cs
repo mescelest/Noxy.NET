@@ -8,14 +8,14 @@ namespace Noxy.NET.EntityManagement.Application.Services;
 
 public class AuthenticationService(IUnitOfWorkFactory serviceUoWFactory, IJWTService serviceJWT) : IAuthenticationService
 {
-    public async Task<AuthenticationSignInResponse> SignInUser(AuthenticationSignInFormModel model)
+    public async Task<AuthenticationSignInResponse> SignInUser(FormModelAuthenticationSignIn model)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
         EntityUser entityUser = await uow.Authentication.GetUserWithEmailAndPassword(model.Email, model.Password);
         return new() { JWT = serviceJWT.Create(entityUser) };
     }
 
-    public async Task<AuthenticationSignUpResponse> SignUpUser(AuthenticationSignUpFormModel model)
+    public async Task<AuthenticationSignUpResponse> SignUpUser(FormModelAuthenticationSignUp model)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
         EntityUser entityUser = await uow.Authentication.CreateUser(model.Email, model.Password);

@@ -1,11 +1,14 @@
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
-using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms;
+using Noxy.NET.EntityManagement.Domain.Models.Forms.Data;
+using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas;
 
 namespace Noxy.NET.EntityManagement.Application.Interfaces.Services;
 
 public interface ISchemaService
 {
+    Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FormModelSchemaParameterList model);
+
     Task<EntitySchemaContext> CreateOrUpdate(FormModelSchemaContext model);
     Task<EntitySchemaParameter.Discriminator> CreateOrUpdate(FormModelSchemaParameterStyle model);
     Task<EntitySchemaParameter.Discriminator> CreateOrUpdate(FormModelSchemaParameterSystem model);

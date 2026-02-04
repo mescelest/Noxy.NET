@@ -1,0 +1,63 @@
+@using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas
+@inherits BaseComponentFormSchema<Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.FormModelSchemaElement, EntitySchemaElement>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateSchemaForm Context="Context" FormSubmit="context => FormSubmit(context.Model)">
+        <Header>
+            @TextService.Get(HeaderText)
+        </Header>
+
+        <Content>
+            <SidebarLeftLayout>
+                <Sidebar>
+                    <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.SchemaIdentifier))" Description="@GetDescription(nameof(Context.Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
+                    <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Name))" Description="@GetDescription(nameof(Context.Model.Name))" @bind-Value="Context.Model.Name"/>
+                    <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Note))" Description="@GetDescription(nameof(Context.Model.Note))" @bind-Value="Context.Model.Note"/>
+
+                    <InputGroupSelect DisplayName="@GetDisplayName(nameof(Context.Model.TitleTextParameterID))" Description="@GetDescription(nameof(Context.Model.TitleTextParameterID))" OptionList="OptionList" @bind-Value="Context.Model.TitleTextParameterID">
+                        <span>@GetOptionName(context)</span>
+                    </InputGroupSelect>
+
+                    <InputGroupSelect DisplayName="@GetDisplayName(nameof(Context.Model.DescriptionTextParameterID))" Description="@GetDescription(nameof(Context.Model.DescriptionTextParameterID))" OptionList="OptionList"
+                                      @bind-Value="Context.Model.DescriptionTextParameterID">
+                        <span>@GetOptionName(context)</span>
+                    </InputGroupSelect>
+                </Sidebar>
+                <Content>
+                    <TemplateSchemaEntitySelect @bind-Value="Context.Model.PropertyList" Available="Schema.PropertyList">
+                        <HeaderTemplate>
+                            @context.GetValue().Name
+                        </HeaderTemplate>
+                        <ContentTemplate>
+                            <TemplateEntityDisplay Entity="context"/>
+                        </ContentTemplate>
+                    </TemplateSchemaEntitySelect>
+                </Content>
+            </SidebarLeftLayout>
+        </Content>
+
+        <Actions>
+            <Button Loading="Context.IsSubmitting" Status="StatusEnum.Success" type="submit">
+                @SubmitText
+            </Button>
+        </Actions>
+    </TemplateSchemaForm>
+</div>
+
+@code {
+
+    private string HeaderText => Context.Model.ID == Guid.Empty ? TextConstants.HeaderFormCreateEntitySchemaElement : TextConstants.HeaderFormUpdateEntitySchemaElement;
+
+    private IEnumerable<Guid> OptionList => Schema.ParameterList?.Select(x => x.ID) ?? [];
+
+    private string GetOptionName(Guid id)
+    {
+        return Schema.ParameterList?.FirstOrDefault(x => x.ID == id)?.GetValue().Name ?? "[MISSING]";
+    }
+
+    protected override WebFormContext<FormModelSchemaElement> CreateContext()
+    {
+        return new(new(Value) { SchemaID = Schema.ID });
+    }
+
+}

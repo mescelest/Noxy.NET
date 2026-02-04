@@ -26,25 +26,18 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         return result.Select(x => new EntityDataProperty.Discriminator(MapperT2E.Map(x))).ToList();
     }
 
-    public async Task<List<EntityDataSystemParameter>> GetCurrentSystemParameterList()
+    public async Task<EntityDataParameterText> GetCurrentTextParameterByIdentifier(string identifier)
     {
-        List<TableDataSystemParameter> result = await Context.DataSystemParameter.ToListAsync();
-        return result.Select(MapperT2E.Map).ToList();
-    }
-
-    public async Task<List<EntityDataTextParameter>> GetCurrentTextParameterList()
-    {
-        List<TableDataTextParameter> result = await Context.DataTextParameter.ToListAsync();
-        return result.Select(MapperT2E.Map).ToList();
-    }
-
-    public async Task<EntityDataTextParameter> GetCurrentTextParameterByIdentifier(string identifier)
-    {
-        TableDataTextParameter result = await Context.DataTextParameter
+        TableDataParameterText result = await Context.DataTextParameter
             .OrderBy(x => x.TimeCreated)
             .FirstAsync(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective < DateTime.Now);
 
         return MapperT2E.Map(result);
+    }
+
+    public async Task<EntityDataParameter.Discriminator[]> GetParameterList(string? search, bool isSystemDefined, bool isApprovalRequired)
+    {
+        return [];
     }
 
     public async Task<EntityDataElement> CreateElement(string identifier)
@@ -78,6 +71,18 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         });
 
         return new(MapperT2E.Map(result.Entity));
+    }
+
+    public async Task<List<EntityDataParameterSystem>> GetCurrentSystemParameterList()
+    {
+        List<TableDataParameterSystem> result = await Context.DataSystemParameter.ToListAsync();
+        return result.Select(MapperT2E.Map).ToList();
+    }
+
+    public async Task<List<EntityDataParameterText>> GetCurrentTextParameterList()
+    {
+        List<TableDataParameterText> result = await Context.DataTextParameter.ToListAsync();
+        return result.Select(MapperT2E.Map).ToList();
     }
 
     private static TableDataPropertyBoolean CreatePropertyBoolean(Guid idElement, TableSchemaPropertyBoolean entity, object? value)

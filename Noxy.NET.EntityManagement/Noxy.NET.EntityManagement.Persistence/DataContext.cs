@@ -22,9 +22,10 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableDataPropertyDateTime> DataPropertyDateTime { get; set; } = null!;
     public DbSet<TableDataPropertyString> DataPropertyString { get; set; } = null!;
 
-    public DbSet<TableDataStyleParameter> DataStyleParameter { get; set; } = null!;
-    public DbSet<TableDataSystemParameter> DataSystemParameter { get; set; } = null!;
-    public DbSet<TableDataTextParameter> DataTextParameter { get; set; } = null!;
+    public DbSet<TableDataParameter> DataParameter { get; set; } = null!;
+    public DbSet<TableDataParameterStyle> DataStyleParameter { get; set; } = null!;
+    public DbSet<TableDataParameterSystem> DataSystemParameter { get; set; } = null!;
+    public DbSet<TableDataParameterText> DataTextParameter { get; set; } = null!;
 
     public DbSet<TableSchema> Schema { get; set; } = null!;
     public DbSet<TableSchemaContext> SchemaContext { get; set; } = null!;

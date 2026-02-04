@@ -1,0 +1,66 @@
+@inject APIHttpClient APIHttpClient
+@inject TextService TextService
+@inject UserAuthenticationStateProvider AuthProvider
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="content">
+        <div class="column">
+            <h2>@TextService.Get(TextConstants.HeaderFormSignUp)</h2>
+
+            <FormAuthenticationSignUp OnSubmit="form => form.SubmitAsync(SignUpFormSubmit)">
+                <Button Status="StatusEnum.Info" type="submit">
+                    @TextService.Get(TextConstants.ButtonSignUp)
+                </Button>
+            </FormAuthenticationSignUp>
+        </div>
+
+        <div class="column">
+            <h2>@TextService.Get(TextConstants.HeaderFormSignIn)</h2>
+
+            <FormAuthenticationSignIn OnSubmit="form => form.SubmitAsync(SignInFormSubmit)">
+                <Button Status="StatusEnum.Success" type="submit">
+                    @TextService.Get(TextConstants.ButtonSignIn)
+                </Button>
+            </FormAuthenticationSignIn>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (!firstRender) return;
+
+        LoadAfterRender(TextService.Resolve);
+    }
+
+    private async Task SignInFormSubmit(IWebFormContext<FormModelAuthenticationSignIn> context)
+    {
+        try
+        {
+            AuthenticationSignInResponse result = await APIHttpClient.SendRequest(context.Model);
+            await AuthProvider.UpdateIdentity(result.JWT);
+        }
+        catch (Exception e)
+        {
+            context.HandleException(e);
+        }
+    }
+
+    private async Task SignUpFormSubmit(IWebFormContext<FormModelAuthenticationSignUp> context)
+    {
+        try
+        {
+            AuthenticationSignUpResponse result = await APIHttpClient.SendRequest(context.Model);
+            await AuthProvider.UpdateIdentity(result.JWT);
+        }
+        catch (Exception e)
+        {
+            context.HandleException(e);
+        }
+    }
+
+}

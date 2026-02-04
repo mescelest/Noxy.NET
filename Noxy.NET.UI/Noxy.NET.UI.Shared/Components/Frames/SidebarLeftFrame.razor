@@ -1,0 +1,32 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" style="@BuildStyle()">
+    <div class="grid">
+        <div class="left">
+            @Left
+        </div>
+        <div class="content">
+            @Content
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? Left { get; set; }
+
+    [Parameter]
+    public RenderFragment? Content { get; set; }
+
+    [Parameter]
+    public string? ContentWidth { get; set; }
+
+    private string? BuildStyle()
+    {
+        List<string> parts = [];
+        if (ContentWidth is not null) parts.Add($"--center-width:{ContentWidth}");
+        return parts.Count > 0 ? string.Join(";", parts) + ";" : null;
+    }
+
+}

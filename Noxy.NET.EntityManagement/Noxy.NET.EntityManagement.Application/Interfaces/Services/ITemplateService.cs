@@ -1,5 +1,5 @@
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
-using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms;
+using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas;
 
 namespace Noxy.NET.EntityManagement.Application.Interfaces.Services;
 

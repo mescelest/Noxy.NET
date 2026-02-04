@@ -1,0 +1,29 @@
+@inherits BaseComponentForm<FormModelSchemaParameterList>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm Context="Context" OnSubmit="OnSubmit">
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Search))" Description="@GetDescription(nameof(Context.Model.Search))"
+                        @bind-Value="Context.Model.Search"/>
+
+        <InputGroupCheckbox Option="true" DisplayName="@GetDisplayName(nameof(Context.Model.IsSystemDefined))" Description="@GetDescription(nameof(Context.Model.IsSystemDefined))"
+                            @bind-Value="Context.Model.IsSystemDefined">
+            <span>@TextService.Get(TextConstants.ValueFormCheckboxYes)</span>
+        </InputGroupCheckbox>
+
+        <InputGroupCheckbox Option="true" DisplayName="@GetDisplayName(nameof(Context.Model.IsApprovalRequired))" Description="@GetDescription(nameof(Context.Model.IsApprovalRequired))"
+                            @bind-Value="Context.Model.IsApprovalRequired">
+            <span>@TextService.Get(TextConstants.ValueFormCheckboxYes)</span>
+        </InputGroupCheckbox>
+
+        @ChildContent
+    </WebForm>
+</div>
+
+@code {
+
+    protected override WebFormContext<FormModelSchemaParameterList> CreateContext()
+    {
+        return new(new());
+    }
+
+}

@@ -1,0 +1,25 @@
+@inherits BaseComponentForm<FormModelAuthenticationSignUp>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm Context="@Context" OnSubmit="OnSubmit">
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Email))" Description="@GetDescription(nameof(Context.Model.Email))"
+                        @bind-Value="Context.Model.Email"/>
+
+        <InputGroupPassword DisplayName="@GetDisplayName(nameof(Context.Model.Password))" Description="@GetDescription(nameof(Context.Model.Password))"
+                            @bind-Value="Context.Model.Password"/>
+
+        <InputGroupPassword DisplayName="@GetDisplayName(nameof(Context.Model.ConfirmPassword))" Description="@GetDescription(nameof(Context.Model.ConfirmPassword))"
+                            Autocomplete="WebFormInputFieldPasswordAutocompleteEnum.NewPassword" @bind-Value="Context.Model.ConfirmPassword"/>
+
+        @ChildContent
+    </WebForm>
+</div>
+
+@code {
+
+    protected override WebFormContext<FormModelAuthenticationSignUp> CreateContext()
+    {
+        return new(new());
+    }
+
+}

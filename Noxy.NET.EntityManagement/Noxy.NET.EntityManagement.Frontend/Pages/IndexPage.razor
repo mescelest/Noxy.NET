@@ -5,17 +5,6 @@
 
 <PageTitle>Home</PageTitle>
 
-<PageLayout>
-    @foreach (ViewModelSchemaContext item in _listContext)
-    {
-        <h2>@item.Title</h2>
-        <span>@item.Description</span>
-        <NavLink href="@GetLink(item.SchemaIdentifier)">
-            @TextService.Get(TextConstants.LinkNavigationSchema)
-        </NavLink>
-    }
-</PageLayout>
-
 @code {
 
 

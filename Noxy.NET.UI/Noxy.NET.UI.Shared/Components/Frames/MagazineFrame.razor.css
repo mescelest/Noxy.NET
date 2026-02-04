@@ -1,15 +1,16 @@
-.magazine-frame {
-    --gutter: 360px;
-    --center-min: var(--gutter);
-    --center-max: none;
-
-    --break-wide: calc(var(--gutter) * 4);
-    --break-narrow: calc(var(--gutter) * 2);
-
-    display: grid;
-    grid-template-columns: var(--gutter) minmax(var(--center-min), var(--center-max)) var(--gutter);
-    gap: 1rem;
+.MagazineFrame {
+    --center-width: 1fr;
+    
     container-type: inline-size;
+    inline-size: 100%;
+    margin-inline: auto;
+}
+
+.grid {
+    display: grid;
+    row-gap: var(--size-gap-md);
+    column-gap: var(--size-gap-md);
+    grid-template: "left center right" / 360px minmax(360px, var(--center-width)) 360px;
 }
 
 .left {
@@ -24,18 +25,19 @@
     grid-area: right;
 }
 
-/* Breakpoint 1: below 4 × gutter */
-@container (max-width: calc(var(--gutter) * 4)) {
-    .magazine-frame {
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas: "center center" "left right";
+@container (max-width: 1440px) {
+    .grid {
+        grid-template: "center center" "left right" / 1fr 1fr;
     }
 }
 
-/* Breakpoint 2: below 2 × gutter */
-@container (max-width: calc(var(--gutter) * 2)) {
-    .magazine-frame {
-        grid-template-columns: 1fr;
-        grid-template-areas: "center" "left" "right";
+@container (max-width: 720px) {
+    .grid {
+        grid-template: "center" "left" "right" / 1fr;
+    }
+
+    .left, .right {
+        max-width: 360px;
+        margin-inline: auto;
     }
 }

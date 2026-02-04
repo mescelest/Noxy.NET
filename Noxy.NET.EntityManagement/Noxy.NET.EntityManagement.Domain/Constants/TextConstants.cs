@@ -8,6 +8,9 @@ public static class TextConstants
     public const string DefaultEmptyList = "Default:EmptyList";
 
     public const string ButtonActivate = "Button:Activate";
+    public const string ButtonSearch = "Button:Search";
+    public const string ButtonFilter = "Button:Filter";
+    public const string ButtonReset = "Button:Reset";
     public const string ButtonCreate = "Button:Create";
     public const string ButtonUpdate = "Button:Update";
     public const string ButtonSubmit = "Button:Submit";
@@ -34,6 +37,10 @@ public static class TextConstants
     public const string HeaderPropertyString = "Header:Property:String";
     public const string HeaderPropertyTable = "Header:Property:Table";
 
+    public const string LabelFormEmail = "Label:Form:Email";
+    public const string LabelFormPassword = "Label:Form:Password";
+    public const string LabelFormConfirmPassword = "Label:Form:ConfirmPassword";
+    public const string LabelFormSearch = "Label:Form:Search";
     public const string LabelFormSchemaIdentifier = "Label:Form:SchemaIdentifier";
     public const string LabelFormName = "Label:Form:Name";
     public const string LabelFormNote = "Label:Form:Note";
@@ -42,6 +49,7 @@ public static class TextConstants
     public const string LabelFormOrder = "Label:Form:Order";
     public const string LabelFormIsUnsigned = "Label:Form:IsUnsigned";
     public const string LabelFormAllowedExtensions = "Label:Form:AllowedExtensions";
+    public const string LabelFormIsSystemDefined = "Label:Form:IsSystemDefined";
     public const string LabelFormIsApprovalRequired = "Label:Form:IsApprovalRequired";
     public const string LabelFormParameterTextType = "Label:Form:ParameterTextType";
     public const string LabelFormPropertyTypeList = "Label:Form:PropertyTypeList";
@@ -55,6 +63,10 @@ public static class TextConstants
     public const string LabelFormParameterSystem = "Label:Form:ParameterSystem";
     public const string LabelFormParameterText = "Label:Form:ParameterText";
 
+    public const string HelpFormEmail = "Help:Form:Email";
+    public const string HelpFormPassword = "Help:Form:Password";
+    public const string HelpFormConfirmPassword = "Help:Form:ConfirmPassword";
+    public const string HelpFormSearch = "Help:Form:Search";
     public const string HelpFormSchemaIdentifier = "Help:Form:SchemaIdentifier";
     public const string HelpFormName = "Help:Form:Name";
     public const string HelpFormNote = "Help:Form:Note";
@@ -63,6 +75,7 @@ public static class TextConstants
     public const string HelpFormOrder = "Help:Form:Order";
     public const string HelpFormIsUnsigned = "Help:Form:IsUnsigned";
     public const string HelpFormAllowedExtensions = "Help:Form:AllowedExtensions";
+    public const string HelpFormIsSystemDefined = "Help:Form:IsSystemDefined";
     public const string HelpFormIsApprovalRequired = "Help:Form:IsApprovalRequired";
     public const string HelpFormParameterTextType = "Help:Form:ParameterTextType";
     public const string HelpFormParameterTypeList = "Help:Form:ParameterTypeList";

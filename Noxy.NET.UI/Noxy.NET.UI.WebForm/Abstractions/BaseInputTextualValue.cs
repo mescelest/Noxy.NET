@@ -12,6 +12,10 @@ public abstract class BaseInputTextualValue<TValue> : BaseInputValue<TValue>, ID
     public bool? HasChangeEventOnInput { get; set; }
     protected bool HasChangeEventOnInputCurrent => HasChangeEventOnInput ?? false;
 
+    [Parameter]
+    public int? Size { get; set; }
+    protected int SizeCurrent => Size ?? 40;
+
     protected IJSObjectReference? Module { get; set; }
     protected DotNetObjectReference<BaseInputTextualValue<TValue>>? DotNetReference { get; set; }
 

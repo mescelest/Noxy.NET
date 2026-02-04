@@ -19,6 +19,9 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019c2584-67dc-749e-971e-5e6410aeeacd", TextConstants.DefaultEmptyList, "Nothing here yet...");
 
         HasSchemaParameterText("019764ca-25c4-7785-bd02-daa168ae477d", TextConstants.ButtonActivate);
+        HasSchemaParameterText("019c29f9-5de4-760e-90b6-c0b6d174ed8f", TextConstants.ButtonSearch);
+        HasSchemaParameterText("019c29f9-5de4-760e-90b6-c5ba80aa9a14", TextConstants.ButtonFilter);
+        HasSchemaParameterText("019c29f9-5de4-760e-90b6-d26d9226e044", TextConstants.ButtonReset);
         HasSchemaParameterText("019764ca-25c4-7785-bd02-de67a804e592", TextConstants.ButtonCreate);
         HasSchemaParameterText("019764ca-25c4-7785-bd02-e26550fa3aa9", TextConstants.ButtonUpdate);
         HasSchemaParameterText("019764ca-25c4-7785-bd02-e5902e766443", TextConstants.ButtonSubmit);
@@ -27,6 +30,9 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019c2571-7b67-75bb-a029-3ad9550d778d", TextConstants.ButtonSignOut);
 
         HasDataParameterText("019764ca-25c4-7785-bd02-ebdc5a27fb39", TextConstants.ButtonActivate, "Activate");
+        HasDataParameterText("019c29f9-5de4-760e-90b6-caaaa39d8d0d", TextConstants.ButtonSearch, "Search");
+        HasDataParameterText("019c29f9-5de4-760e-90b6-cd1d017360d4", TextConstants.ButtonFilter, "Filter");
+        HasDataParameterText("019c29f9-5de4-760e-90b6-d5266cbcd3fd", TextConstants.ButtonReset, "Reset");
         HasDataParameterText("019764ca-25c4-7785-bd02-efa276b57b62", TextConstants.ButtonCreate, "Create");
         HasDataParameterText("019764ca-25c4-7785-bd02-f1e439a3bb07", TextConstants.ButtonUpdate, "Update");
         HasDataParameterText("019764ca-25c4-7785-bd02-f7c5260cb82d", TextConstants.ButtonSubmit, "Submit");
@@ -42,7 +48,18 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019c254b-1b85-71dc-8f4a-4295bd279c0a", TextConstants.HeaderContext);
         HasSchemaParameterText("019c254b-1b85-772d-aaf0-dff4ea453c6c", TextConstants.HeaderElement);
         HasSchemaParameterText("019c254b-1b85-7ec8-9720-24a5bcaf1888", TextConstants.HeaderParameter);
+        HasSchemaParameterText("019c2960-0f40-756c-b67a-982d29ade43c", TextConstants.HeaderParameterStyle);
+        HasSchemaParameterText("019c2960-0f40-756c-b67a-9fecaa359970", TextConstants.HeaderParameterSystem);
+        HasSchemaParameterText("019c2960-0f40-756c-b67a-a2ee6d674e65", TextConstants.HeaderParameterText);
         HasSchemaParameterText("019c254b-1b85-7b4f-bd18-355a9af4b607", TextConstants.HeaderProperty);
+        HasSchemaParameterText("019c2960-9149-73cf-a2a9-8655ebbe904f", TextConstants.HeaderPropertyBoolean);
+        HasSchemaParameterText("019c2960-9149-73cf-a2a9-89219fb3f605", TextConstants.HeaderPropertyCollection);
+        HasSchemaParameterText("019c2960-9149-73cf-a2a9-8f6cfdeda288", TextConstants.HeaderPropertyDateTime);
+        HasSchemaParameterText("019c2960-9149-73cf-a2a9-90eae211c597", TextConstants.HeaderPropertyDecimal);
+        HasSchemaParameterText("019c2960-9149-73cf-a2a9-97f682a1a142", TextConstants.HeaderPropertyImage);
+        HasSchemaParameterText("019c2960-9149-73cf-a2a9-9a52f7cd3179", TextConstants.HeaderPropertyInteger);
+        HasSchemaParameterText("019c2960-9149-73cf-a2a9-9fce8dad7570", TextConstants.HeaderPropertyString);
+        HasSchemaParameterText("019c2960-9149-73cf-a2a9-a2f08d495c1c", TextConstants.HeaderPropertyTable);
 
         HasDataParameterText("019c254a-c196-7c51-a3c1-82f826185ea8", TextConstants.HeaderSchema, "Schemas");
         HasDataParameterText("019c254a-c196-7595-b493-5ccf1ea9faad", TextConstants.HeaderContext, "Contexts");
@@ -61,12 +78,17 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019c2571-2306-7122-ba5f-aa68f923e6cf", TextConstants.HeaderPropertyString, "String Properties");
         HasDataParameterText("019c2571-7b67-75bb-a029-35dcce9e1f9f", TextConstants.HeaderPropertyTable, "Table Properties");
 
+        HasSchemaParameterText("019c2964-c66f-77de-83ad-b8caf05e9319", TextConstants.LabelFormEmail);
+        HasSchemaParameterText("019c2964-c66f-77de-83ad-bfe74128c9df", TextConstants.LabelFormPassword);
+        HasSchemaParameterText("019c2964-c66f-77de-83ad-c219ed783910", TextConstants.LabelFormConfirmPassword);
+        HasSchemaParameterText("019c297a-384a-716a-92bd-67c96ecb2b83", TextConstants.LabelFormSearch);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-0992c66a9dae", TextConstants.LabelFormSchemaIdentifier);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-12e8b546b239", TextConstants.LabelFormName);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-17209b94ded6", TextConstants.LabelFormNote);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-192c4a3c0eb6", TextConstants.LabelFormTitle);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-1c1707f61f89", TextConstants.LabelFormDescription);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-205e04219122", TextConstants.LabelFormOrder);
+        HasSchemaParameterText("019c297a-384a-716a-92bd-54bc539e59e1", TextConstants.LabelFormIsSystemDefined);
         HasSchemaParameterText("01978a17-7901-7131-8b49-005b042a1608", TextConstants.LabelFormIsApprovalRequired);
         HasSchemaParameterText("01979d14-54ad-72f9-b5d8-a5aa1089fe1b", TextConstants.LabelFormPropertyTypeList);
         HasSchemaParameterText("01978a1f-f0a2-731f-b17d-14f803055489", TextConstants.LabelFormIsValueList);
@@ -79,12 +101,17 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019799a3-a72f-725a-b4f6-d3344af0a274", TextConstants.LabelFormParameterSystem);
         HasSchemaParameterText("019799a3-a72f-725a-b4f6-d6b06a4f6d1b", TextConstants.LabelFormParameterText);
 
+        HasDataParameterText("019c2964-c66f-77de-83ad-c60e1292abfa", TextConstants.LabelFormEmail, "Email");
+        HasDataParameterText("019c2964-c66f-77de-83ad-c8e93394b591", TextConstants.LabelFormPassword, "Password");
+        HasDataParameterText("019c2964-c66f-77de-83ad-cf27649f093d", TextConstants.LabelFormConfirmPassword, "Confirm password");
+        HasDataParameterText("019c297a-384a-716a-92bd-6ad2110dfd27", TextConstants.LabelFormSearch, "Search");
         HasDataParameterText("019789f9-2601-72ac-ad27-ea4b8f4855d6", TextConstants.LabelFormSchemaIdentifier, "Schema identifier");
         HasDataParameterText("019789f9-2601-72ac-ad27-f1f7ad078b01", TextConstants.LabelFormName, "Name");
         HasDataParameterText("019789f9-2601-72ac-ad27-f7c76f0002d4", TextConstants.LabelFormNote, "Note");
         HasDataParameterText("019789f9-2601-72ac-ad27-f9ef87027fec", TextConstants.LabelFormTitle, "Title");
         HasDataParameterText("019789f9-2601-72ac-ad27-fceadc8f7eda", TextConstants.LabelFormDescription, "Description");
         HasDataParameterText("019789f9-2601-72ac-ad28-0204b7c6d497", TextConstants.LabelFormOrder, "Order");
+        HasDataParameterText("019c297a-384a-716a-92bd-5b2db391ac89", TextConstants.LabelFormIsSystemDefined, "Is system defined?");
         HasDataParameterText("01978a17-7901-7131-8b49-1200bad01c81", TextConstants.LabelFormIsApprovalRequired, "Is approval required?");
         HasDataParameterText("01978a1f-f0a2-731f-b17d-2174a6ecd4fe", TextConstants.LabelFormParameterTextType, "Text parameter type");
         HasDataParameterText("01979d14-54ad-72f9-b5d8-ae413650b40c", TextConstants.LabelFormPropertyTypeList, "Choose property type");
@@ -98,12 +125,17 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019799a4-1a2b-7368-9b33-8bd3f0f5e948", TextConstants.LabelFormParameterSystem, "System parameter");
         HasDataParameterText("019799a4-1a2b-7368-9b33-8c2e6b4a0b6d", TextConstants.LabelFormParameterText, "Text parameter");
 
+        HasSchemaParameterText("019c2964-c66f-77de-83ad-d2e4058c6134", TextConstants.HelpFormEmail);
+        HasSchemaParameterText("019c2964-c66f-77de-83ad-d586d9686df2", TextConstants.HelpFormPassword);
+        HasSchemaParameterText("019c2964-c66f-77de-83ad-d89e8c04683e", TextConstants.HelpFormConfirmPassword);
+        HasSchemaParameterText("019c29f9-5de4-760e-90b6-d8e7a6c0239a", TextConstants.HelpFormSearch);
         HasSchemaParameterText("019789fc-3929-75a9-99e8-f7a6abf0c139", TextConstants.HelpFormSchemaIdentifier);
         HasSchemaParameterText("019789fc-3929-75a9-99e8-f819edf63934", TextConstants.HelpFormName);
         HasSchemaParameterText("019789fc-3929-75a9-99e8-ffd616e87b30", TextConstants.HelpFormNote);
         HasSchemaParameterText("019789fc-3929-75a9-99e9-0229499f0ddd", TextConstants.HelpFormTitle);
         HasSchemaParameterText("019789fc-3929-75a9-99e9-046632ba51b7", TextConstants.HelpFormDescription);
         HasSchemaParameterText("019789fc-3929-75a9-99e9-0a5f8ca00604", TextConstants.HelpFormOrder);
+        HasSchemaParameterText("019c297a-384a-716a-92bd-5cefb96ac3a0", TextConstants.HelpFormIsSystemDefined);
         HasSchemaParameterText("01978a17-b7b1-772f-a129-543b087e1606", TextConstants.HelpFormIsApprovalRequired);
         HasSchemaParameterText("01979d14-54ad-72f9-b5d8-b33557c5a806", TextConstants.HelpFormParameterTextType);
         HasSchemaParameterText("01979d14-54ad-72f9-b5d8-c3a68639a28a", TextConstants.HelpFormParameterTypeList);
@@ -118,12 +150,17 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019799a6-8dc0-75af-8866-b0be19e7dcdd", TextConstants.HelpFormParameterSystem);
         HasSchemaParameterText("019799a6-8dc0-75af-8866-b4f08d0df491", TextConstants.HelpFormParameterText);
 
+        HasDataParameterText("019c2964-c66f-77de-83ad-ddee52bf7792", TextConstants.HelpFormEmail, "The email address you want to associate with the account.");
+        HasDataParameterText("019c2964-c66f-77de-83ad-e28d48839f57", TextConstants.HelpFormPassword, "A password consisting of at least 12 characters.");
+        HasDataParameterText("019c2964-c66f-77de-83ad-e416d3c0445a", TextConstants.HelpFormConfirmPassword, "Repeat your password to confirm it.");
+        HasDataParameterText("019c297a-384a-716a-92bd-6e1c4715908c", TextConstants.HelpFormSearch, "Enter the search term you wish to use");
         HasDataParameterText("019789fc-18dc-73ee-94b6-1564b2f72eb7", TextConstants.HelpFormSchemaIdentifier, "The unique, humanly readable identifier for this entity type.");
         HasDataParameterText("019789fc-18dc-73ee-94b6-1c60e96f26a9", TextConstants.HelpFormName, "The internal name of this entity type. Should only be visible in the configuration.");
         HasDataParameterText("019789fc-18dc-73ee-94b6-21b290f8401d", TextConstants.HelpFormNote, "A short note detailing how this entity type is used. Should only be visible in the configuration.");
         HasDataParameterText("019789fc-18dc-73ee-94b6-26ead5f18d4d", TextConstants.HelpFormTitle, "The title used when displaying an entity of this type.");
         HasDataParameterText("019789fc-18dc-73ee-94b6-28dc0edf9b69", TextConstants.HelpFormDescription, "The description used when displaying an entity of this type.");
         HasDataParameterText("019789fc-18dc-73ee-94b6-2ee0b27366dc", TextConstants.HelpFormOrder, "The order in which this entity type is sorted.");
+        HasDataParameterText("019c297a-384a-716a-92bd-627c7c93c3c9", TextConstants.HelpFormIsSystemDefined, "Determines if the entity is system defined and therefore cannot be changed.");
         HasDataParameterText("01978a17-b7b1-772f-a129-66dba634b0b5", TextConstants.HelpFormIsApprovalRequired, "Determines if another user must approve a text parameter value before it becomes active.");
         HasDataParameterText("01978a20-9692-72ff-be7d-b59a17facafb", TextConstants.HelpFormParameterTextType, "The type of text parameter.");
         HasDataParameterText("01979d14-54ad-72f9-b5d8-b830dc26f9f4", TextConstants.HelpFormParameterTypeList, "");

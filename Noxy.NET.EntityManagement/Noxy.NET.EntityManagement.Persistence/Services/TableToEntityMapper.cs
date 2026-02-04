@@ -109,8 +109,8 @@ public class TableToEntityMapper : ITableToEntityMapper
     public EntityDataPropertyBoolean Map(TableDataPropertyBoolean? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntityDataPropertyDateTime Map(TableDataPropertyDateTime? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntityDataPropertyString Map(TableDataPropertyString? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataSystemParameter Map(TableDataSystemParameter? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataTextParameter Map(TableDataTextParameter? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataParameterSystem Map(TableDataParameterSystem? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataParameterText Map(TableDataParameterText? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
 
     private static EntityDataElement? MapInternal(TableDataElement? table)
     {
@@ -185,11 +185,11 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityDataSystemParameter? MapInternal(TableDataSystemParameter? table)
+    private static EntityDataParameterSystem? MapInternal(TableDataParameterSystem? table)
     {
         if (table == null) return null;
 
-        EntityDataSystemParameter mapped = new()
+        EntityDataParameterSystem mapped = new()
         {
             ID = table.ID,
             Value = table.Value,
@@ -202,11 +202,11 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityDataTextParameter? MapInternal(TableDataTextParameter? table)
+    private static EntityDataParameterText? MapInternal(TableDataParameterText? table)
     {
         if (table == null) return null;
 
-        EntityDataTextParameter mapped = new()
+        EntityDataParameterText mapped = new()
         {
             ID = table.ID,
             Value = table.Value,

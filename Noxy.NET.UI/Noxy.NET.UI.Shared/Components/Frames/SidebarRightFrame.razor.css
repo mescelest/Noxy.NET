@@ -1,0 +1,39 @@
+.SidebarRightFrame {
+    --center-width: 1fr;
+
+    container-type: inline-size;
+    inline-size: 100%;
+    margin-inline: auto;
+}
+
+.SidebarRightFrame .grid {
+    display: grid;
+    row-gap: var(--size-gap-md);
+    column-gap: var(--size-gap-md);
+    grid-template: "center right" / minmax(360px, var(--center-width)) 360px;
+}
+
+.SidebarRightFrame .center {
+    grid-area: center;
+}
+
+.SidebarRightFrame .right {
+    grid-area: right;
+}
+
+@container (max-width: 1440px) {
+    .SidebarRightFrame .grid {
+        grid-template: "center" "right" / 1fr;
+    }
+}
+
+@container (max-width: 720px) {
+    .SidebarRightFrame .grid {
+        grid-template: "center" "right" / 1fr;
+    }
+
+    .SidebarRightFrame .right {
+        max-width: 360px;
+        margin-inline: auto;
+    }
+}

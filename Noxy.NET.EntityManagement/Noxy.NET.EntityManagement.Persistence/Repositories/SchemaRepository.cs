@@ -97,15 +97,26 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return result.Select(MapperT2E.Map).ToList();
     }
 
+    public async Task<List<EntitySchemaElement>> GetSchemaElementListBySchemaID(Guid id)
+    {
+        List<TableSchemaElement> result = await Context.SchemaElement.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
+        return result.Select(MapperT2E.Map).ToList();
+    }
+
     public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id)
     {
         List<TableSchemaParameter> result = await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         return result.Select(MapperT2E.Map).ToList();
     }
 
-    public async Task<List<EntitySchemaElement>> GetSchemaElementListBySchemaID(Guid id)
+    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(string? search = null, bool? isSystemDefined = null, bool? isApprovalRequired = null)
     {
-        List<TableSchemaElement> result = await Context.SchemaElement.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
+        IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking();
+        if (search != null) query = query.Where(x => EF.Functions.Like(x.Name, $"%{search}%"));
+        if (isSystemDefined != null) query = query.Where(x => x.IsSystemDefined == isSystemDefined);
+        if (isApprovalRequired != null) query = query.Where(x => x.IsApprovalRequired == isApprovalRequired);
+
+        List<TableSchemaParameter> result = await query.ToListAsync();
         return result.Select(MapperT2E.Map).ToList();
     }
 
@@ -125,18 +136,6 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     {
         List<TableJunctionSchemaElementHasProperty> result = await Context.SchemaElementHasProperty.AsNoTracking().Where(x => x.Entity!.SchemaID == id).ToListAsync();
         return result.Select(MapperT2E.Map).ToList();
-    }
-
-    private async Task<TEntity> CreateEntity<TEntity, TTable>(TEntity entity, Func<TEntity, TTable> mapE2T, Func<TTable, TEntity> mapT2E) where TEntity : BaseEntitySchema where TTable : BaseTableSchema
-    {
-        await UpdateOrder<TTable>(entity);
-        EntityEntry<TTable> result = await Context.Set<TTable>().AddAsync(mapE2T(entity));
-        return mapT2E(result.Entity);
-    }
-
-    private async Task UpdateOrder<TTable>(BaseEntitySchema entity) where TTable : BaseTableSchema
-    {
-        if (entity.Order == 0) entity.Order = await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
     }
 
     #region -- Populate --
@@ -273,4 +272,20 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     }
 
     #endregion -- Update --
+
+    #region -- Private methods --
+
+    private async Task<TEntity> CreateEntity<TEntity, TTable>(TEntity entity, Func<TEntity, TTable> mapE2T, Func<TTable, TEntity> mapT2E) where TEntity : BaseEntitySchema where TTable : BaseTableSchema
+    {
+        await UpdateOrder<TTable>(entity);
+        EntityEntry<TTable> result = await Context.Set<TTable>().AddAsync(mapE2T(entity));
+        return mapT2E(result.Entity);
+    }
+
+    private async Task UpdateOrder<TTable>(BaseEntitySchema entity) where TTable : BaseTableSchema
+    {
+        if (entity.Order == 0) entity.Order = await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
+    }
+
+    #endregion
 }

@@ -7,9 +7,8 @@ public interface IDataRepository
 {
     Task<List<EntityDataElement>> GetElementListWithIdentifier(string identifier);
     Task<List<EntityDataProperty.Discriminator>> GetPropertyListWithIdentifierAndElementID(string identifier, Guid idElement);
-    Task<List<EntityDataSystemParameter>> GetCurrentSystemParameterList();
-    Task<List<EntityDataTextParameter>> GetCurrentTextParameterList();
-    Task<EntityDataTextParameter> GetCurrentTextParameterByIdentifier(string identifier);
+    Task<EntityDataParameterText> GetCurrentTextParameterByIdentifier(string identifier);
+    Task<EntityDataParameter.Discriminator[]> GetParameterList(string? search, bool isSystemDefined, bool isApprovalRequired);
 
     Task<EntityDataElement> CreateElement(string identifier);
     Task UpdateElement(Guid id);

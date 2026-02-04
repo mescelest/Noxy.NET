@@ -1,36 +1,50 @@
-﻿@inject UserAuthenticationStateProvider AuthService
+﻿@inject UserAuthenticationStateProvider AuthProvider
+@inject TextService TextService
 @layout AuthenticationLayout
-@inherits LayoutComponentBase
+@inherits LayoutComponent
 
+<div class="@CssClass">
+    <div class="header">
+        <div class="left">
+            <NavLink href="/">
+                @TextService.Get(TextConstants.Title)
+            </NavLink>
+        </div>
 
+        <div class="center">
+            <NavLink href="/parameter">
+                @TextService.Get(TextConstants.LinkNavigationSchema)
+            </NavLink>
+        </div>
 
-@Body
+        <div class="right">
+            <Button @onclick="SignOut">
+                @TextService.Get(TextConstants.ButtonSignOut)
+            </Button>
+        </div>
+    </div>
+
+    <div class="content">
+        @Body
+    </div>
+</div>
 
 @code {
-
-    [Parameter]
-    public RenderFragment? ChildContent { get; set; }
-
-    private ViewModelSchemaContext[] _listContext = [];
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender) return;
 
-        // LoadAfterRender(LoadData);
-    }
-
-    private static string GetLink(ViewModelSchemaContext context)
-    {
-        return $"/Context/{context.SchemaIdentifier}";
+        await TextService.Resolve();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async void SignOut()
     {
         try
         {
-            await AuthService.ResetIdentity();
+            await AuthProvider.ResetIdentity();
         }
         catch (Exception)
         {

@@ -7,7 +7,7 @@ public class DataSeedBuilder(DataContext context)
 {
     public DateTime Now { get; } = DateTime.UtcNow;
 
-    public TableDataTextParameter AddTextParameter(string identifier, string value, DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
+    public TableDataParameterText AddTextParameter(string identifier, string value, DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
     {
         return context.DataTextParameter.Add(new()
         {

@@ -5,18 +5,16 @@
 
 <PageTitle>Home</PageTitle>
 
-<PageLayout>
-    <SidebarRightLayout>
-        <Sidebar>
-            <FormSchema OnChange="LoadData"/>
-        </Sidebar>
-        <Content>
-            <TemplateGridList List="_data">
-                <SchemaPanel Schema="@context" OnSchemaChange="OnSchemaPanelSchemaChange"/>
-            </TemplateGridList>
-        </Content>
-    </SidebarRightLayout>
-</PageLayout>
+<SidebarRightLayout>
+    <Sidebar>
+        <FormSchema OnChange="LoadData"/>
+    </Sidebar>
+    <Content>
+        <TemplateGridList List="_data">
+            <SchemaPanel Schema="@context" OnSchemaChange="OnSchemaPanelSchemaChange"/>
+        </TemplateGridList>
+    </Content>
+</SidebarRightLayout>
 
 @code {
 
