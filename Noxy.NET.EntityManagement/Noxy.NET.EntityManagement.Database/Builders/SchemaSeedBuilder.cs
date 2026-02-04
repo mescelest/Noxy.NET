@@ -38,7 +38,22 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaParameterSystem AddDynamicValueSystemParameter(string identifier, string name, string note = "", bool isApprovalRequired = false, DateTime? timeCreated = null)
+    public TableSchemaParameterStyle AddDynamicValueStyleParameter(string identifier, string name, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false, DateTime? timeCreated = null)
+    {
+        return context.SchemaParameterStyle.Add(new()
+        {
+            SchemaIdentifier = identifier,
+            Name = name,
+            Note = note,
+            Order = GetNextOrder(nameof(TableSchemaParameterText)),
+            IsSystemDefined = isSystemDefined,
+            IsApprovalRequired = isApprovalRequired,
+            SchemaID = schema.ID,
+            TimeCreated = timeCreated ?? Now
+        }).Entity;
+    }
+
+    public TableSchemaParameterSystem AddDynamicValueSystemParameter(string identifier, string name, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false, DateTime? timeCreated = null)
     {
         return context.SchemaParameterSystem.Add(new()
         {
@@ -46,13 +61,15 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
             Name = name,
             Note = note,
             Order = GetNextOrder(nameof(TableSchemaParameterText)),
+            IsSystemDefined = isSystemDefined,
             IsApprovalRequired = isApprovalRequired,
             SchemaID = schema.ID,
             TimeCreated = timeCreated ?? Now
         }).Entity;
     }
 
-    public TableSchemaParameterText AddDynamicValueTextParameter(string identifier, string name, TextParameterTypeEnum type = TextParameterTypeEnum.Line, string note = "", bool isApprovalRequired = false, DateTime? timeCreated = null)
+    public TableSchemaParameterText AddDynamicValueTextParameter(string identifier, string name, TextParameterTypeEnum type = TextParameterTypeEnum.Line, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false,
+        DateTime? timeCreated = null)
     {
         return context.SchemaParameterText.Add(new()
         {
@@ -61,6 +78,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
             Note = note,
             Order = GetNextOrder(nameof(TableSchemaParameterText)),
             Type = type,
+            IsSystemDefined = isSystemDefined,
             IsApprovalRequired = isApprovalRequired,
             SchemaID = schema.ID,
             TimeCreated = timeCreated ?? Now

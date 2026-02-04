@@ -6,6 +6,7 @@ namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 public class EntitySchemaParameter : BaseEntitySchema
 {
+    public required bool IsSystemDefined { get; set; }
     public required bool IsApprovalRequired { get; set; }
 
     public class Discriminator : BaseEntity

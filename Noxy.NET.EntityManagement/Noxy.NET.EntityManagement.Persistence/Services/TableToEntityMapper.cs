@@ -312,10 +312,11 @@ public class TableToEntityMapper : ITableToEntityMapper
     #region -- Schemas --
 
     public EntitySchemaContext Map(TableSchemaContext? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaParameter.Discriminator Map(TableSchemaParameter? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaParameterText Map(TableSchemaParameterText? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaParameterSystem Map(TableSchemaParameterSystem? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntitySchemaElement Map(TableSchemaElement? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameter.Discriminator Map(TableSchemaParameter? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameterStyle Map(TableSchemaParameterStyle? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameterSystem Map(TableSchemaParameterSystem? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameterText Map(TableSchemaParameterText? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntitySchemaProperty.Discriminator Map(TableSchemaProperty? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntitySchemaPropertyBoolean Map(TableSchemaPropertyBoolean? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntitySchemaPropertyCollection Map(TableSchemaPropertyCollection? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
@@ -350,17 +351,18 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntitySchemaParameterSystem? MapInternal(TableSchemaParameterSystem? table, Guid[]? listVisitedRelation = null)
+    private static EntitySchemaParameterStyle? MapInternal(TableSchemaParameterStyle? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
-        EntitySchemaParameterSystem mapped = new()
+        EntitySchemaParameterStyle mapped = new()
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
             Order = table.Order,
+            IsSystemDefined = table.IsSystemDefined,
             IsApprovalRequired = table.IsApprovalRequired,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID
@@ -372,6 +374,28 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
+    private static EntitySchemaParameterSystem? MapInternal(TableSchemaParameterSystem? table, Guid[]? listVisitedRelation = null)
+    {
+        if (table == null) return null;
+
+        EntitySchemaParameterSystem mapped = new()
+        {
+            ID = table.ID,
+            SchemaIdentifier = table.SchemaIdentifier,
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
+            IsSystemDefined = table.IsSystemDefined,
+            IsApprovalRequired = table.IsApprovalRequired,
+            TimeCreated = table.TimeCreated,
+            SchemaID = table.SchemaID
+        };
+
+        if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
+        mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
+
+        return mapped;
+    }
 
     private static EntitySchemaParameterText? MapInternal(TableSchemaParameterText? table, Guid[]? listVisitedRelation = null)
     {
@@ -385,6 +409,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             Note = table.Note,
             Order = table.Order,
             Type = table.Type,
+            IsSystemDefined = table.IsSystemDefined,
             IsApprovalRequired = table.IsApprovalRequired,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID

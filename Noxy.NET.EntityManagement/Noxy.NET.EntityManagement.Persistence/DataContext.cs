@@ -35,8 +35,13 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableSchemaParameterText> SchemaParameterText { get; set; } = null!;
     public DbSet<TableSchemaProperty> SchemaProperty { get; set; } = null!;
     public DbSet<TableSchemaPropertyBoolean> SchemaPropertyBoolean { get; set; } = null!;
+    public DbSet<TableSchemaPropertyCollection> SchemaPropertyCollection { get; set; } = null!;
     public DbSet<TableSchemaPropertyDateTime> SchemaPropertyDateTime { get; set; } = null!;
+    public DbSet<TableSchemaPropertyDecimal> SchemaPropertyDecimal { get; set; } = null!;
+    public DbSet<TableSchemaPropertyImage> SchemaPropertyImage { get; set; } = null!;
+    public DbSet<TableSchemaPropertyInteger> SchemaPropertyInteger { get; set; } = null!;
     public DbSet<TableSchemaPropertyString> SchemaPropertyString { get; set; } = null!;
+    public DbSet<TableSchemaPropertyTable> SchemaPropertyTable { get; set; } = null!;
 
     public DbSet<TableJunctionSchemaContextHasElement> SchemaContextHasElement { get; set; } = null!;
     public DbSet<TableJunctionSchemaElementHasProperty> SchemaElementHasProperty { get; set; } = null!;

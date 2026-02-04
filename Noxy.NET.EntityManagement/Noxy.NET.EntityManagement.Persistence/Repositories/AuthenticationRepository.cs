@@ -37,12 +37,7 @@ public class AuthenticationRepository(DataContext context, IDependencyInjectionS
         }
 
         byte[] hash = Rfc2898DeriveBytes.Pbkdf2(Encoding.UTF8.GetBytes(password), tableUser.Authentication.Salt, HashIterations, HashAlgorithm, KeySize);
-        if (!CryptographicOperations.FixedTimeEquals(tableUser.Authentication.Hash, hash))
-        {
-            throw new();
-        }
-
-        return MapperT2E.Map(tableUser);
+        return CryptographicOperations.FixedTimeEquals(tableUser.Authentication.Hash, hash) ? MapperT2E.Map(tableUser) : throw new();
     }
 
     public async Task<EntityUser> CreateUser(string email, string password)

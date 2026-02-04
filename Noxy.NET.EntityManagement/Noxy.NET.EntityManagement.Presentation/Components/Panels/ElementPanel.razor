@@ -1,9 +1,12 @@
+@inject TextService TextService
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplatePanelCollapsible HeaderLevel="HeaderLevelCurrent">
         <Header>
-            <span>Elements</span>
+            <span>
+                @TextService.Get(TextConstants.HeaderElement)
+            </span>
         </Header>
         <Content>
             @if (List.Any())
@@ -24,7 +27,9 @@
             }
             else
             {
-                <i>Nothing here...</i>
+                <i>
+                    @TextService.Get(TextConstants.DefaultEmptyList)
+                </i>
             }
         </Content>
     </TemplatePanelCollapsible>

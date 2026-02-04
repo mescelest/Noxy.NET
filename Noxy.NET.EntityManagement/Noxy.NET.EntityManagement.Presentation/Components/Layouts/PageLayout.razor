@@ -1,5 +1,6 @@
 ﻿@inject UserAuthenticationStateProvider AuthService
 @inject APIHttpClient APIHttpClient
+@inject TextService TextService
 @inherits ElementComponent
 
 @if (IsRendered && PageLoadingService.IsLoading)
@@ -11,11 +12,16 @@
     <div class="header">
         <div class="logo">
             <NavLink href="/">
-                <h1>Hello world</h1>
+                <h1>
+                    @TextService.Get(TextConstants.Title)
+                </h1>
             </NavLink>
         </div>
         <div class="navigation">
-            <NavLink href="/Schema">Schema List</NavLink>
+            <NavLink href="/Schema">
+                @TextService.Get(TextConstants.LinkNavigationSchema)
+            </NavLink>
+
             @foreach (ViewModelSchemaContext item in _listContext)
             {
                 <NavLink href="@GetLink(item)">@item.Title</NavLink>
@@ -24,7 +30,9 @@
         <div class="account">
             @if (AuthService.Identity != null)
             {
-                <Button @onclick="LogOut">Log out</Button>
+                <Button @onclick="SignOut">
+                    @TextService.Get(TextConstants.ButtonSignOut)
+                </Button>
             }
         </div>
     </div>
@@ -58,7 +66,7 @@
         return $"/Context/{context.SchemaIdentifier}";
     }
 
-    private async void LogOut()
+    private async void SignOut()
     {
         try
         {

@@ -139,6 +139,7 @@ public class EntityToTableMapper : IEntityToTableMapper
             Name = entity.Name,
             Note = entity.Note,
             Order = entity.Order,
+            IsSystemDefined = entity.IsSystemDefined,
             IsApprovalRequired = entity.IsApprovalRequired,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID
@@ -154,6 +155,7 @@ public class EntityToTableMapper : IEntityToTableMapper
             Name = entity.Name,
             Note = entity.Note,
             Order = entity.Order,
+            IsSystemDefined = entity.IsSystemDefined,
             IsApprovalRequired = entity.IsApprovalRequired,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID
@@ -169,6 +171,7 @@ public class EntityToTableMapper : IEntityToTableMapper
             Name = entity.Name,
             Note = entity.Note,
             Order = entity.Order,
+            IsSystemDefined = entity.IsSystemDefined,
             IsApprovalRequired = entity.IsApprovalRequired,
             Type = entity.Type,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,

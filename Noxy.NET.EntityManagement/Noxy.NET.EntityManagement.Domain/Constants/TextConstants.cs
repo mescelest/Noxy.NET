@@ -2,8 +2,10 @@ namespace Noxy.NET.EntityManagement.Domain.Constants;
 
 public static class TextConstants
 {
-    // Actual constants
+    public const string Title = "Title";
+
     public const string DefaultEmptyValue = "Default:EmptyValue";
+    public const string DefaultEmptyList = "Default:EmptyList";
 
     public const string ButtonActivate = "Button:Activate";
     public const string ButtonCreate = "Button:Create";
@@ -11,6 +13,7 @@ public static class TextConstants
     public const string ButtonSubmit = "Button:Submit";
     public const string ButtonSignIn = "Button:SignIn";
     public const string ButtonSignUp = "Button:SignUp";
+    public const string ButtonSignOut = "Button:SignOut";
 
     public const string LinkNavigationSchema = "Link:Navigation:Schema";
 
@@ -18,7 +21,18 @@ public static class TextConstants
     public const string HeaderContext = "Header:Context";
     public const string HeaderElement = "Header:Element";
     public const string HeaderParameter = "Header:Parameter";
+    public const string HeaderParameterStyle = "Header:Parameter:Style";
+    public const string HeaderParameterSystem = "Header:Parameter:System";
+    public const string HeaderParameterText = "Header:Parameter:Text";
     public const string HeaderProperty = "Header:Property";
+    public const string HeaderPropertyBoolean = "Header:Property:Boolean";
+    public const string HeaderPropertyCollection = "Header:Property:Collection";
+    public const string HeaderPropertyDateTime = "Header:Property:DateTime";
+    public const string HeaderPropertyDecimal = "Header:Property:Decimal";
+    public const string HeaderPropertyImage = "Header:Property:Image";
+    public const string HeaderPropertyInteger = "Header:Property:Integer";
+    public const string HeaderPropertyString = "Header:Property:String";
+    public const string HeaderPropertyTable = "Header:Property:Table";
 
     public const string LabelFormSchemaIdentifier = "Label:Form:SchemaIdentifier";
     public const string LabelFormName = "Label:Form:Name";
@@ -64,6 +78,9 @@ public static class TextConstants
     public const string HelpFormParameterText = "Help:Form:ParameterText";
 
     public const string ValueFormCheckboxYes = "Value:Form:Checkbox:Yes";
+
+    public const string HeaderFormSignUp = "Header:Form:SignUp";
+    public const string HeaderFormSignIn = "Header:Form:SignIn";
 
     public const string HeaderFormCreateEntitySchema = "Header:Form:Create:EntitySchema";
     public const string HeaderFormCreateEntitySchemaContext = "Header:Form:Create:EntitySchemaContext";

@@ -9,9 +9,14 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
 {
     public void Apply()
     {
+        HasSchemaParameterText("019c2571-7b67-75bb-a029-42c44fbfd1fb", TextConstants.Title);
+        HasDataParameterText("019c2571-7b67-75bb-a029-45530805ee07", TextConstants.Title, "Noxy.NET");
+
         HasSchemaParameterText("019789fc-3929-75a9-99e9-11f9d8b81e8a", TextConstants.DefaultEmptyValue);
+        HasSchemaParameterText("019c2584-67dc-749e-971e-580816b3b821", TextConstants.DefaultEmptyList);
 
         HasDataParameterText("019789fc-3929-75a9-99e9-142d13f18fb0", TextConstants.DefaultEmptyValue, "-");
+        HasDataParameterText("019c2584-67dc-749e-971e-5e6410aeeacd", TextConstants.DefaultEmptyList, "Nothing here yet...");
 
         HasSchemaParameterText("019764ca-25c4-7785-bd02-daa168ae477d", TextConstants.ButtonActivate);
         HasSchemaParameterText("019764ca-25c4-7785-bd02-de67a804e592", TextConstants.ButtonCreate);
@@ -19,6 +24,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019764ca-25c4-7785-bd02-e5902e766443", TextConstants.ButtonSubmit);
         HasSchemaParameterText("01977fb8-8d9e-7179-b098-d8800c456351", TextConstants.ButtonSignIn);
         HasSchemaParameterText("01977fb8-8d9e-7179-b098-dde7fae42dc4", TextConstants.ButtonSignUp);
+        HasSchemaParameterText("019c2571-7b67-75bb-a029-3ad9550d778d", TextConstants.ButtonSignOut);
 
         HasDataParameterText("019764ca-25c4-7785-bd02-ebdc5a27fb39", TextConstants.ButtonActivate, "Activate");
         HasDataParameterText("019764ca-25c4-7785-bd02-efa276b57b62", TextConstants.ButtonCreate, "Create");
@@ -26,6 +32,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019764ca-25c4-7785-bd02-f7c5260cb82d", TextConstants.ButtonSubmit, "Submit");
         HasDataParameterText("01977fb8-8d9e-7179-b098-d37940c4d817", TextConstants.ButtonSignIn, "Sign in");
         HasDataParameterText("01977fb8-8d9e-7179-b098-d431e095ba95", TextConstants.ButtonSignUp, "Sign up");
+        HasDataParameterText("019c2571-7b67-75bb-a029-3eea76c0f0c3", TextConstants.ButtonSignOut, "Sign out");
 
         HasSchemaParameterText("01978309-3029-74e9-931c-3cf1322948fd", TextConstants.LinkNavigationSchema);
 
@@ -41,7 +48,18 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019c254a-c196-7595-b493-5ccf1ea9faad", TextConstants.HeaderContext, "Contexts");
         HasDataParameterText("019c254a-c196-7968-8109-da3f68bd324f", TextConstants.HeaderElement, "Elements");
         HasDataParameterText("019c254a-c196-7e7d-98bb-36fd8384fb8f", TextConstants.HeaderParameter, "Parameters");
+        HasDataParameterText("019c2570-ace5-7641-8c58-2e1be9103503", TextConstants.HeaderParameterStyle, "Style Parameters");
+        HasDataParameterText("019c2570-ace5-7641-8c58-33c7d3d23c9c", TextConstants.HeaderParameterSystem, "System Parameters");
+        HasDataParameterText("019c2570-ace5-7641-8c58-36370d2a0092", TextConstants.HeaderParameterText, "Text Parameters");
         HasDataParameterText("019c254a-c196-734d-aeaa-3f93015db3bc", TextConstants.HeaderProperty, "Properties");
+        HasDataParameterText("019c2571-2306-7122-ba5f-910cbf856f22", TextConstants.HeaderPropertyBoolean, "Boolean Properties");
+        HasDataParameterText("019c2571-2306-7122-ba5f-953e8fa4c021", TextConstants.HeaderPropertyCollection, "Collection Properties");
+        HasDataParameterText("019c2571-2306-7122-ba5f-9b4244c8d98f", TextConstants.HeaderPropertyDateTime, "DateTime Properties");
+        HasDataParameterText("019c2571-2306-7122-ba5f-9ecf6b7c21d9", TextConstants.HeaderPropertyDecimal, "Decimal Properties");
+        HasDataParameterText("019c2571-2306-7122-ba5f-a1272b07a512", TextConstants.HeaderPropertyImage, "Image Properties");
+        HasDataParameterText("019c2571-2306-7122-ba5f-a4fc019da2c8", TextConstants.HeaderPropertyInteger, "Integer Properties");
+        HasDataParameterText("019c2571-2306-7122-ba5f-aa68f923e6cf", TextConstants.HeaderPropertyString, "String Properties");
+        HasDataParameterText("019c2571-7b67-75bb-a029-35dcce9e1f9f", TextConstants.HeaderPropertyTable, "Table Properties");
 
         HasSchemaParameterText("019789de-e449-71aa-ab1d-0992c66a9dae", TextConstants.LabelFormSchemaIdentifier);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-12e8b546b239", TextConstants.LabelFormName);
@@ -118,6 +136,16 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019799a6-6b05-7029-b9a7-473fbbc23ec3", TextConstants.HelpFormParameterStyle, "Represents a dynamic style parameter value.");
         HasDataParameterText("019799a6-6b05-7029-b9a7-48183a3903a4", TextConstants.HelpFormParameterSystem, "Represents a dynamic system parameter value.");
         HasDataParameterText("019799a6-6b05-7029-b9a7-4c3fb79cf9d1", TextConstants.HelpFormParameterText, "Represents a dynamic text parameter value.");
+
+        HasSchemaParameterText("019c27aa-cee4-758d-a50d-333d37fb8c53", TextConstants.ValueFormCheckboxYes);
+
+        HasDataParameterText("019c27aa-cee4-758d-a50d-3543259e9a3f", TextConstants.ValueFormCheckboxYes, "Yes");
+
+        HasSchemaParameterText("019c2571-7b67-75bb-a029-49faffc52b0f", TextConstants.HeaderFormSignIn);
+        HasSchemaParameterText("019c2571-7b67-75bb-a029-4fcd838e27ad", TextConstants.HeaderFormSignUp);
+
+        HasDataParameterText("019c2584-67dc-749e-971e-554b0930363a", TextConstants.HeaderFormSignIn, "...Or sign in");
+        HasDataParameterText("019c2584-67dc-749e-971e-536af5f07c05", TextConstants.HeaderFormSignUp, "Create an account");
 
         HasSchemaParameterText("019c240c-791c-7579-8011-fd306ef3be7d", TextConstants.HeaderFormCreateEntitySchema);
         HasSchemaParameterText("019c240c-791c-7d7e-accd-c533af9a13f2", TextConstants.HeaderFormCreateEntitySchemaContext);

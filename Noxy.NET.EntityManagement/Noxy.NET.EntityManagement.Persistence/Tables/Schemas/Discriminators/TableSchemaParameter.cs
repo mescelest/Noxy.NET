@@ -6,5 +6,8 @@ namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 public abstract class TableSchemaParameter : BaseTableSchema
 {
     [Required]
+    public required bool IsSystemDefined { get; set; }
+
+    [Required]
     public required bool IsApprovalRequired { get; set; }
 }

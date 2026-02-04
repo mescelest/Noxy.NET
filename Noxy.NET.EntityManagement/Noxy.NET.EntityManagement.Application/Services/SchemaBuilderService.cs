@@ -26,7 +26,7 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
 
         (schema.ContextList, schema.ParameterList, schema.ElementList, schema.PropertyList) = await serviceTaskBundling.WhenAll(
             uow.Schema.GetSchemaContextListBySchemaID(id.Value),
-            uow.Schema.GetSchemaDynamicValueListBySchemaID(id.Value),
+            uow.Schema.GetSchemaParameterListBySchemaID(id.Value),
             uow.Schema.GetSchemaElementListBySchemaID(id.Value),
             uow.Schema.GetSchemaPropertyListBySchemaID(id.Value)
         );

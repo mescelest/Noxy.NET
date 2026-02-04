@@ -21,9 +21,24 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return MapperT2E.Map(await Context.SchemaContext.AsNoTracking().SingleAsync(x => x.ID == id));
     }
 
-    public async Task<EntitySchemaParameter.Discriminator> GetSchemaDynamicValueByID(Guid id)
+    public async Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id)
     {
         return MapperT2E.Map(await Context.SchemaParameter.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaParameterStyle> GetSchemaParameterStyleByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaParameterStyle.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaParameterSystem> GetSchemaParameterSystemByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaParameterSystem.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaParameterText> GetSchemaParameterTextByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaParameterText.AsNoTracking().SingleAsync(x => x.ID == id));
     }
 
     public async Task<EntitySchemaElement> GetSchemaElementByID(Guid id)
@@ -36,13 +51,53 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return MapperT2E.Map(await Context.SchemaProperty.AsNoTracking().SingleAsync(x => x.ID == id));
     }
 
+    public async Task<EntitySchemaPropertyBoolean> GetSchemaPropertyBooleanByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaPropertyBoolean.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaPropertyCollection> GetSchemaPropertyCollectionByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaPropertyCollection.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaPropertyDateTime> GetSchemaPropertyDateTimeByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaPropertyDateTime.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaPropertyDecimal> GetSchemaPropertyDecimalByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaPropertyDecimal.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaPropertyImage> GetSchemaPropertyImageByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaPropertyImage.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaPropertyInteger> GetSchemaPropertyIntegerByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaPropertyInteger.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaPropertyString> GetSchemaPropertyStringByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaPropertyString.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
+    public async Task<EntitySchemaPropertyTable> GetSchemaPropertyTableByID(Guid id)
+    {
+        return MapperT2E.Map(await Context.SchemaPropertyTable.AsNoTracking().SingleAsync(x => x.ID == id));
+    }
+
     public async Task<List<EntitySchemaContext>> GetSchemaContextListBySchemaID(Guid id)
     {
         List<TableSchemaContext> result = await Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         return result.Select(MapperT2E.Map).ToList();
     }
 
-    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaDynamicValueListBySchemaID(Guid id)
+    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id)
     {
         List<TableSchemaParameter> result = await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         return result.Select(MapperT2E.Map).ToList();

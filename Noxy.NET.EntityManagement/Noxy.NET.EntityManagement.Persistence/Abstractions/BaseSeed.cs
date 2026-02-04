@@ -39,6 +39,7 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
             Note = note,
             Order = GetNextOrder<TableSchemaParameterText>(),
             Type = type,
+            IsSystemDefined = true,
             IsApprovalRequired = isApprovalRequired,
             TimeCreated = timeCreated ?? Now,
             SchemaID = Schema.ID

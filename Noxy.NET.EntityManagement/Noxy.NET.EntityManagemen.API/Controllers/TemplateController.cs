@@ -27,12 +27,6 @@ public class TemplateController(ITemplateService serviceTemplate) : ControllerBa
         return await serviceTemplate.CreateOrUpdate(model);
     }
 
-    [HttpPut("Schema")]
-    public async Task<ActionResult<EntitySchema>> UpdateSchema(FormModelSchema model)
-    {
-        return await serviceTemplate.CreateOrUpdate(model);
-    }
-
     [HttpPost("Schema/{id:guid}/Activate")]
     public async Task<ActionResult> ActivateSchema(Guid id)
     {

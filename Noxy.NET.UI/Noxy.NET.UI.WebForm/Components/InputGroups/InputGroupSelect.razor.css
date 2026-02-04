@@ -20,6 +20,7 @@
 }
 
 .InputGroupSelect ::deep .InputElementSelect {
+    min-width: 160px;
     max-width: 100%;
     min-height: var(--size-control-md, 46px);
     margin: 0;

@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Noxy.NET.EntityManagement.API.Filters;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +11,12 @@ builder.Services.AddOpenApi();
 const string corsPolicyName = "Noxy.NET-CORS-Policy";
 string[] corsOrigins = builder.Configuration.GetSection("CORS:Origins").Get<string[]>() ?? [];
 
-builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddCors(options => options.AddPolicy(corsPolicyName, policy => policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 builder.Services.AddApplication();
 builder.Services.AddPersistence(x => x.UseSqlite($@"Data Source=..\..\Data\Noxy.NET.EntityManagement.sqlite"));
+
+builder.Services.AddControllers(options => { options.Filters.Add<GlobalExceptionFilter>(); });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opts =>

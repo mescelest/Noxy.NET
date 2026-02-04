@@ -1,10 +1,10 @@
-.InputGroupText {
+.InputGroupTextArea {
     display: flex;
     flex: 0 1 auto;
     flex-flow: column;
 }
 
-.InputGroupText ::deep .InputElementTextArea {
+.InputGroupTextArea ::deep .InputElementTextArea {
     margin: 0;
     padding: var(--size-gap-sm, 8px);
     border: 1px solid black;

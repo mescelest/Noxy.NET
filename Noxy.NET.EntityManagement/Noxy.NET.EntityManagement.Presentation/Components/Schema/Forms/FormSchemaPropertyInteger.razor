@@ -10,8 +10,9 @@
             <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.SchemaIdentifier))" Description="@GetDescription(nameof(Context.Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
             <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Name))" Description="@GetDescription(nameof(Context.Model.Name))" @bind-Value="Context.Model.Name"/>
             <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Note))" Description="@GetDescription(nameof(Context.Model.Note))" @bind-Value="Context.Model.Note"/>
+
             <InputGroupCheckbox Option="true" DisplayName="@GetDisplayName(nameof(Context.Model.IsUnsigned))" Description="@GetDescription(nameof(Context.Model.IsUnsigned))" @bind-Value="Context.Model.IsUnsigned">
-                <span>Is unsigned?</span>
+                <span>@TextService.Get(TextConstants.ValueFormCheckboxYes)</span>
             </InputGroupCheckbox>
 
             <InputGroupSelect DisplayName="@GetDisplayName(nameof(Context.Model.TitleTextParameterID))" Description="@GetDescription(nameof(Context.Model.TitleTextParameterID))" OptionList="OptionList" @bind-Value="Context.Model.TitleTextParameterID">

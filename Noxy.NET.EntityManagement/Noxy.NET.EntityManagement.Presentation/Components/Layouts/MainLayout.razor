@@ -1,4 +1,5 @@
 ﻿@inject APIHttpClient APIHttpClient
+@inject TextService TextService
 @inject UserAuthenticationStateProvider AuthService
 @inherits LayoutComponentBase
 
@@ -13,15 +14,23 @@
         <div class="form">
             <div class="content">
                 <div class="column">
-                    <h2>Create an account</h2>
+                    <h2>
+                        @TextService.Get(TextConstants.HeaderFormSignUp)
+                    </h2>
                     <AuthenticationSignUpAPIForm OnSubmit="form => form.SubmitAsync(SignUpFormSubmit)">
-                        <Button Status="StatusEnum.Info" type="submit">Sign Up</Button>
+                        <Button Status="StatusEnum.Info" type="submit">
+                            @TextService.Get(TextConstants.ButtonSignUp)
+                        </Button>
                     </AuthenticationSignUpAPIForm>
                 </div>
                 <div class="column">
-                    <h2>... Or log in</h2>
+                    <h2>
+                        @TextService.Get(TextConstants.HeaderFormSignIn)
+                    </h2>
                     <AuthenticationSignInAPIForm OnSubmit="form => form.SubmitAsync(SignInFormSubmit)">
-                        <Button Status="StatusEnum.Success" type="submit">Sign in</Button>
+                        <Button Status="StatusEnum.Success" type="submit">
+                            @TextService.Get(TextConstants.ButtonSignIn)
+                        </Button>
                     </AuthenticationSignInAPIForm>
                 </div>
             </div>
@@ -33,6 +42,8 @@
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+
+    private bool _isLoading = true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -46,12 +57,20 @@
             {
                 AuthenticationRenewResponse response = await APIHttpClient.SendRequest<AuthenticationRenewResponse>(HttpMethod.Post, "Authentication/Renew");
                 await AuthService.UpdateIdentity(response.JWT);
+                return;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await AuthService.ResetIdentity();
             }
         }
+
+        await InvokeAsync(async () =>
+        {
+            await TextService.Resolve();
+            _isLoading = false;
+            StateHasChanged();
+        });
     }
 
     private async Task SignInFormSubmit(IWebFormContext<AuthenticationSignInFormModel> context)
