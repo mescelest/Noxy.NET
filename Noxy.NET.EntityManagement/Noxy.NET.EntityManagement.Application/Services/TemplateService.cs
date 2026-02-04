@@ -1,6 +1,5 @@
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
-using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.Forms;
 
@@ -73,8 +72,6 @@ public class TemplateService(IUnitOfWorkFactory serviceUoWFactory, ISchemaBuilde
 
         await uow.Commit();
 
-        List<EntityDataSystemParameter> listSystemParameter = await serviceData.GetSystemParameterList();
-        List<EntityDataTextParameter> listTextParameter = await serviceData.GetTextParameterList();
         serviceApplication.SetSchema(entitySchema);
     }
 }

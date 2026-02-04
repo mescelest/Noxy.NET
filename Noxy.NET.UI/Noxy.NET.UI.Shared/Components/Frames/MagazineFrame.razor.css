@@ -1,0 +1,41 @@
+.magazine-frame {
+    --gutter: 360px;
+    --center-min: var(--gutter);
+    --center-max: none;
+
+    --break-wide: calc(var(--gutter) * 4);
+    --break-narrow: calc(var(--gutter) * 2);
+
+    display: grid;
+    grid-template-columns: var(--gutter) minmax(var(--center-min), var(--center-max)) var(--gutter);
+    gap: 1rem;
+    container-type: inline-size;
+}
+
+.left {
+    grid-area: left;
+}
+
+.center {
+    grid-area: center;
+}
+
+.right {
+    grid-area: right;
+}
+
+/* Breakpoint 1: below 4 × gutter */
+@container (max-width: calc(var(--gutter) * 4)) {
+    .magazine-frame {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: "center center" "left right";
+    }
+}
+
+/* Breakpoint 2: below 2 × gutter */
+@container (max-width: calc(var(--gutter) * 2)) {
+    .magazine-frame {
+        grid-template-columns: 1fr;
+        grid-template-areas: "center" "left" "right";
+    }
+}

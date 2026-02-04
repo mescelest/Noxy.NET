@@ -1,0 +1,41 @@
+﻿@inject UserAuthenticationStateProvider AuthService
+@layout AuthenticationLayout
+@inherits LayoutComponentBase
+
+
+
+@Body
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private ViewModelSchemaContext[] _listContext = [];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        // LoadAfterRender(LoadData);
+    }
+
+    private static string GetLink(ViewModelSchemaContext context)
+    {
+        return $"/Context/{context.SchemaIdentifier}";
+    }
+
+    private async void SignOut()
+    {
+        try
+        {
+            await AuthService.ResetIdentity();
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+    }
+
+}

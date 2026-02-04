@@ -1,0 +1,73 @@
+@inject APIHttpClient APIHttpClient
+@inject PageLoadingService LoadingService
+@inject TextService TextService
+@inject UserAuthenticationStateProvider AuthProvider
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="content">
+        <div class="column">
+            <h2>@TextService.Get(TextConstants.HeaderFormSignUp)</h2>
+
+            <AuthenticationSignUpForm OnSubmit="form => form.SubmitAsync(SignUpFormSubmit)">
+                <Button Status="StatusEnum.Info" type="submit">
+                    @TextService.Get(TextConstants.ButtonSignUp)
+                </Button>
+            </AuthenticationSignUpForm>
+        </div>
+
+        <div class="column">
+            <h2>@TextService.Get(TextConstants.HeaderFormSignIn)</h2>
+
+            <AuthenticationSignInForm OnSubmit="form => form.SubmitAsync(SignInFormSubmit)">
+                <Button Status="StatusEnum.Success" type="submit">
+                    @TextService.Get(TextConstants.ButtonSignIn)
+                </Button>
+            </AuthenticationSignInForm>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private IDisposable? _loadingScope;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        _loadingScope = LoadingService.BeginOperation();
+
+        await TextService.Resolve();
+
+        _loadingScope.Dispose();
+        StateHasChanged();
+    }
+
+    private async Task SignInFormSubmit(IWebFormContext<AuthenticationSignInFormModel> context)
+    {
+        try
+        {
+            AuthenticationSignInResponse result = await APIHttpClient.SendRequest(context.Model);
+            await AuthProvider.UpdateIdentity(result.JWT);
+        }
+        catch (Exception e)
+        {
+            context.HandleException(e);
+        }
+    }
+
+    private async Task SignUpFormSubmit(IWebFormContext<AuthenticationSignUpFormModel> context)
+    {
+        try
+        {
+            AuthenticationSignUpResponse result = await APIHttpClient.SendRequest(context.Model);
+            await AuthProvider.UpdateIdentity(result.JWT);
+        }
+        catch (Exception e)
+        {
+            context.HandleException(e);
+        }
+    }
+
+}

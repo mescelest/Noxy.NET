@@ -1,0 +1,41 @@
+﻿@inject UserAuthenticationStateProvider AuthProvider
+@inject UserAuthenticationService AuthService
+@inherits LayoutComponentBase
+@implements IDisposable
+
+<Loader Loading="!AuthProvider.IsInitialized">
+    <AuthorizeView>
+        <Authorized>
+            @Body
+        </Authorized>
+        <NotAuthorized>
+            <AuthenticationForm/>
+        </NotAuthorized>
+    </AuthorizeView>
+</Loader>
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        await AuthService.Renew();
+    }
+
+    protected override void OnInitialized()
+    {
+        AuthProvider.AuthenticationStateChanged += OnAuthStateChanged;
+    }
+
+    private void OnAuthStateChanged(Task<AuthenticationState> _)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AuthProvider.AuthenticationStateChanged -= OnAuthStateChanged;
+    }
+
+}

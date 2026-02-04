@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
+using Noxy.NET.EntityManagement.Domain.Models.Forms.Data;
 using Noxy.NET.EntityManagement.Domain.ViewModels;
 
 namespace Noxy.NET.EntityManagement.API.Controllers;
@@ -24,6 +25,12 @@ public class DataController(IDataService serviceData) : ControllerBase
     public async Task<ActionResult<ViewModelDataElement[]>> GetContextElementListWithIdentifier(string identifier)
     {
         return await serviceData.GetElementListWithContextIdentifier(identifier);
+    }
+
+    [HttpGet("Parameter")]
+    public async Task<ActionResult<ViewModelParameter[]>> GetParameterList([FromQuery] DataParameterListFormModel model)
+    {
+        return await serviceData.GetParameterList(model);
     }
 
     [HttpPost("Parameter/Text/Resolve")]

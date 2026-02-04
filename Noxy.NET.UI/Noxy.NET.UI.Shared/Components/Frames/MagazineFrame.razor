@@ -1,0 +1,54 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" style="@BuildStyle()">
+    <div class="gutter left">
+        @Left
+    </div>
+
+    <div class="center">
+        @Center
+    </div>
+
+    <div class="gutter right">
+        @Right
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? Left { get; set; }
+
+    [Parameter]
+    public RenderFragment? Center { get; set; }
+
+    [Parameter]
+    public RenderFragment? Right { get; set; }
+
+    [Parameter]
+    public string? GutterWidth { get; set; } = "360px";
+
+    [Parameter]
+    public string? CenterMinWidth { get; set; } = "360px";
+
+    [Parameter]
+    public string? CenterMaxWidth { get; set; } = "1200px";
+
+    [Parameter]
+    public string? BreakpointWide { get; set; }
+    [Parameter]
+    public string? BreakpointNarrow { get; set; }
+
+    [Parameter]
+    public string? WrapperMaxWidth { get; set; }
+
+    private string? BuildStyle()
+    {
+        List<string> parts = [];
+        if (GutterWidth is not null) parts.Add($"--gutter:{GutterWidth}");
+        if (CenterMinWidth is not null) parts.Add($"--center-min:{CenterMinWidth}");
+        if (CenterMaxWidth is not null) parts.Add($"--center-max:{CenterMaxWidth}");
+        return parts.Count > 0 ? string.Join(";", parts) + ";" : null;
+    }
+
+}

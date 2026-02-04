@@ -32,6 +32,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<TextService>();
         services.AddScoped<PageLoadingService>();
+        services.AddScoped<UserAuthenticationService>();
         services.AddScoped<UserAuthenticationStateProvider>();
         services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredService<UserAuthenticationStateProvider>());
         services.AddScoped<IJWTService, JWTService>();

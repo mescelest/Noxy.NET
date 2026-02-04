@@ -1,89 +1,74 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text.Json;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 
 namespace Noxy.NET.EntityManagement.Presentation.Services;
 
-public class UserAuthenticationStateProvider(ILocalStorageService serviceStorage, IJWTService serviceJWT) : AuthenticationStateProvider
+public class UserAuthenticationStateProvider : AuthenticationStateProvider
 {
     private const string UserKey = "user";
     private const string AuthenticationType = "JWTAuthentication";
+    private readonly IJWTService _jwt;
+
+    private readonly ILocalStorageService _storage;
+
+    private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
+
+    public UserAuthenticationStateProvider(ILocalStorageService storage, IJWTService jwt)
+    {
+        _storage = storage;
+        _jwt = jwt;
+        _ = InitializeAsync();
+    }
 
     public JwtSecurityToken? Identity { get; private set; }
-    public JwtSecurityToken IdentityCurrent => Identity ?? throw new ArgumentNullException(nameof(Identity));
 
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+    public bool IsInitialized { get; private set; }
+
+    private async Task InitializeAsync()
     {
         try
         {
-            string result = await serviceStorage.GetItemAsync<string>(UserKey) ?? string.Empty;
-            if (string.IsNullOrEmpty(result)) return new(await RegisterUserData(null));
-
-            Identity ??= serviceJWT.ReadJWT(result.Trim('"'));
-            return new(CreateClaimsPrincipal(Identity));
-        }
-        catch (JsonException)
-        {
-            return new(await RegisterUserData(null));
-        }
-        catch (InvalidOperationException ex)
-        {
-            if (ex.Source != "Microsoft.AspNetCore.Components.Server")
+            string? token = await _storage.GetItemAsync<string>(UserKey);
+            if (!string.IsNullOrWhiteSpace(token))
             {
-                return new(await RegisterUserData(null));
+                Identity = _jwt.ReadJWT(token.Trim('"'));
+                _currentUser = CreatePrincipal(Identity);
             }
         }
-        catch (Exception)
+        catch
         {
-            // ignored
+            // Ignore errors and treat as unauthenticated
         }
 
-        return new(new());
+        IsInitialized = true;
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
-    public async Task UpdateIdentity(string? jwt)
+    public override Task<AuthenticationState> GetAuthenticationStateAsync() => Task.FromResult(new AuthenticationState(_currentUser));
+
+    public async Task UpdateIdentity(string jwt)
     {
-        NotifyAuthenticationStateChanged(await RegisterUserData(jwt));
+        Identity = _jwt.ReadJWT(jwt);
+        _currentUser = CreatePrincipal(Identity);
+
+        await _storage.SetItemAsync(UserKey, jwt);
+
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
     public async Task ResetIdentity()
     {
-        NotifyAuthenticationStateChanged(await RegisterUserData(null));
+        Identity = null;
+        _currentUser = new(new ClaimsIdentity());
+
+        await _storage.RemoveItemAsync(UserKey);
+
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
-    private async Task<ClaimsPrincipal> RegisterUserData(string? jwt)
-    {
-        if (jwt != null)
-        {
-            Identity = serviceJWT.ReadJWT(jwt);
-            await serviceStorage.SetItemAsync(UserKey, jwt);
-            return CreateClaimsPrincipal(Identity);
-        }
-
-        await serviceStorage.RemoveItemAsync(UserKey);
-        return new();
-    }
-
-    private void NotifyAuthenticationStateChanged(ClaimsPrincipal principal)
-    {
-        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(principal)));
-    }
-
-    private static ClaimsPrincipal CreateClaimsPrincipal(JwtSecurityToken jwt)
-    {
-        return new(CreateClaimsIdentity(jwt));
-    }
-
-    private static ClaimsIdentity CreateClaimsIdentity(JwtSecurityToken jwt)
-    {
-        return new(CreateClaims(jwt), AuthenticationType);
-    }
-
-    private static Claim[] CreateClaims(JwtSecurityToken jwt)
-    {
-        return jwt.Claims.ToArray();
-    }
+    private static ClaimsPrincipal CreatePrincipal(JwtSecurityToken jwt) => new(CreateIdentity(jwt));
+    private static ClaimsIdentity CreateIdentity(JwtSecurityToken jwt) => new(jwt.Claims, AuthenticationType);
 }
