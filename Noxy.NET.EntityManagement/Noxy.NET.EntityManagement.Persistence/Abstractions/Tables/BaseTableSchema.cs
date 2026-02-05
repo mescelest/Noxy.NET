@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
 namespace Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
 
+[Index(nameof(SchemaID), nameof(SchemaIdentifier), IsUnique = true)]
 public abstract class BaseTableSchema : BaseTableTemplate
 {
     [Required]

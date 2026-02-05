@@ -15,7 +15,3 @@ public abstract class TableDataParameter : BaseTableData
     [Required]
     public required DateTime TimeEffective { get; set; }
 }
-
-public abstract class BaseTableDataParameter : BaseTableData
-{
-}

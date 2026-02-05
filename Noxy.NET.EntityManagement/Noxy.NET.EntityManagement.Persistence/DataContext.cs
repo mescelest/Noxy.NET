@@ -54,6 +54,9 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         modelBuilder.Entity<TableDataProperty>().UseTpcMappingStrategy();
         modelBuilder.Entity<TableDataProperty>().Property(e => e.ID).ValueGeneratedNever();
 
+        modelBuilder.Entity<TableDataParameter>().UseTpcMappingStrategy();
+        modelBuilder.Entity<TableDataParameter>().Property(e => e.ID).ValueGeneratedNever();
+
         modelBuilder.Entity<TableSchemaProperty>().UseTpcMappingStrategy();
         modelBuilder.Entity<TableSchemaProperty>().Property(e => e.ID).ValueGeneratedNever();
 

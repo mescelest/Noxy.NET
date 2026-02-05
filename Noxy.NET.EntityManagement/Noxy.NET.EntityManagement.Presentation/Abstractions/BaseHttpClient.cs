@@ -67,7 +67,6 @@ public abstract class BaseHttpClient(HttpClient http, UserAuthenticationStatePro
         return response.IsSuccessStatusCode ? response.Content : throw new();
     }
 
-
     private static string BuildQueryString(IDictionary<string, object?>? parameters)
     {
         if (parameters is null) return string.Empty;

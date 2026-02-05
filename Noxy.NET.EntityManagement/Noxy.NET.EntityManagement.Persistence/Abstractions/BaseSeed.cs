@@ -7,7 +7,7 @@ namespace Noxy.NET.EntityManagement.Persistence.Abstractions;
 
 public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
 {
-    public static readonly DateTime Now = new(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    public static readonly DateTime Now = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     private static readonly Dictionary<Type, int> CollectionOrder = [];
 

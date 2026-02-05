@@ -1,6 +1,7 @@
 ﻿@page "/Parameter"
 @inject TextService TextService
 @inject APIHttpClient APIHttpClient
+@using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas
 @inherits PageComponent
 
 <PageTitle>Administration | Parameter</PageTitle>
@@ -32,7 +33,7 @@
 
 @code {
 
-    private ViewModelParameter[] _listParameter = [];
+    private EntitySchemaParameter.Discriminator[] _listParameter = [];
 
     protected override async Task OnFirstRenderAsync()
     {
@@ -44,7 +45,7 @@
 
     private async Task LoadData()
     {
-        // _listParameter = await APIHttpClient.SendRequest<ViewModelParameter[]>(HttpMethod.Get, "Data/Parameter");
+        _listParameter = await APIHttpClient.SendRequest<EntitySchemaParameter.Discriminator[]>(HttpMethod.Get, "Schema/Parameter", new Dictionary<string, object?>());
     }
 
     private static string GetLink(string identifier)
@@ -54,7 +55,7 @@
 
     private async Task SignInFormSubmit(IWebFormContext<FormModelSchemaParameterList> value)
     {
-        _listParameter = await APIHttpClient.SendRequest<ViewModelParameter[]>(HttpMethod.Get, "Data/Parameter");
+        _listParameter = await APIHttpClient.SendRequest<EntitySchemaParameter.Discriminator[]>(HttpMethod.Get, "Schema/Parameter", value.Model.AsQueryParameters());
     }
 
 }

@@ -1,31 +1,18 @@
 ﻿@page "/"
-@inject APIHttpClient APIHttpClient
 @inject TextService TextService
 @inherits PageComponent
 
 <PageTitle>Home</PageTitle>
 
+Hello world
+
 @code {
-
-
-    private ViewModelSchemaContext[] _listContext = [];
 
     protected override async Task OnFirstRenderAsync()
     {
         await base.OnFirstRenderAsync();
 
-        await LoadData();
         await TextService.Resolve();
-    }
-
-    private async Task LoadData()
-    {
-        _listContext = await APIHttpClient.SendRequest<ViewModelSchemaContext[]>(HttpMethod.Get, "Data/Context");
-    }
-
-    private static string GetLink(string identifier)
-    {
-        return $"/Context/{identifier}";
     }
 
 }

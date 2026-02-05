@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.UI.Abstractions;
 
-namespace Noxy.NET.EntityManagement.Domain.Models.Forms.Data;
+namespace Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas;
 
 public class FormModelSchemaParameterList : BaseFormModel
 {
@@ -20,4 +20,11 @@ public class FormModelSchemaParameterList : BaseFormModel
     [DisplayName(TextConstants.LabelFormIsApprovalRequired)]
     [Description(TextConstants.HelpFormIsApprovalRequired)]
     public bool IsApprovalRequired { get; set; }
+
+    public IDictionary<string, object?> AsQueryParameters() => new Dictionary<string, object?>
+    {
+        [nameof(Search)] = Search,
+        [nameof(IsSystemDefined)] = IsSystemDefined,
+        [nameof(IsApprovalRequired)] = IsApprovalRequired
+    };
 }
