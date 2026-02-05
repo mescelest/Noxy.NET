@@ -9,12 +9,33 @@ namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
 public class DataRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), IDataRepository
 {
-    public async Task<EntityDataParameterText> GetCurrentTextParameterByIdentifier(string identifier)
+    public async Task<EntityDataParameterText?> GetCurrentTextParameterByIdentifier(string identifier)
     {
-        TableDataParameterText result = await Context.DataTextParameter
+        TableDataParameterText? result = await Context.DataTextParameter
             .OrderBy(x => x.TimeCreated)
-            .FirstAsync(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective < DateTime.Now);
+            .FirstOrDefaultAsync(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective < DateTime.Now);
 
-        return MapperT2E.Map(result);
+        return result != null ? MapperT2E.Map(result) : null;
+    }
+
+    public async Task<Dictionary<string, EntityDataParameterText?>> GetCurrentTextParameterByIdentifierList(IEnumerable<string> identifiers)
+    {
+        List<TableDataParameterText?> newestRows = await Context.DataTextParameter
+            .Where(x =>
+                identifiers.Contains(x.SchemaIdentifier) &&
+                x.TimeApproved != null &&
+                x.TimeEffective < DateTime.UtcNow)
+            .GroupBy(x => x.SchemaIdentifier)
+            .Select(g => g.OrderByDescending(x => x.TimeCreated).FirstOrDefault())
+            .ToListAsync();
+
+        Dictionary<string, TableDataParameterText> lookup = newestRows
+            .OfType<TableDataParameterText>()
+            .ToDictionary(x => x.SchemaIdentifier, x => x);
+
+        return identifiers.ToDictionary(
+            id => id,
+            id => lookup.TryGetValue(id, out TableDataParameterText? row) ? MapperT2E.Map(row) : null
+        );
     }
 }
