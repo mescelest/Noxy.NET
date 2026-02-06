@@ -9,7 +9,7 @@ using Noxy.NET.EntityManagement.Presentation.Services;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions;
 
-public abstract class BaseHttpClient(HttpClient http, UserAuthenticationStateProvider serviceAuthentication)
+public abstract class BaseHttpClientOld(HttpClient http, UserAuthenticationStateProvider serviceAuthentication)
 {
     private static JsonSerializerOptions WriteSerializerOptions { get; } = new() { IgnoreReadOnlyProperties = true };
     private static JsonSerializerOptions QueryStringSerializerOptions { get; } = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };

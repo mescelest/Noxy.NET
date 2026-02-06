@@ -31,6 +31,6 @@ public abstract class BaseComponentFormEntity<TForm, TEntity> : BaseComponentFor
 
     protected virtual async Task<TEntity> HandleSubmission(BaseFormModelEntity model)
     {
-        return await APIHttpClient.SendRequest<TEntity>(model);
+        return await APIHttpClientOld.SendRequest<TEntity>(model);
     }
 }

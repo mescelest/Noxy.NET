@@ -1,5 +1,5 @@
 ﻿@page "/"
-@inject APIHttpClient APIHttpClient
+@inject APIHttpClientOld APIHttpClientOld
 @inject TextService TextService
 @inherits PageComponent
 
@@ -20,8 +20,6 @@
 </div>
 
 @code {
-
-
 
     protected override async Task OnFirstRenderAsync()
     {

@@ -4,7 +4,7 @@ using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions;
 
-public abstract class BaseHttpClientForm(HttpClient http, UserAuthenticationStateProvider serviceAuthentication) : BaseHttpClient(http, serviceAuthentication)
+public abstract class BaseHttpClientOldForm(HttpClient http, UserAuthenticationStateProvider serviceAuthentication) : BaseHttpClientOld(http, serviceAuthentication)
 {
     public async Task<HttpResponseMessage> SendRequest(BaseFormAPIModel model)
     {

@@ -1,5 +1,5 @@
 ﻿@page "/Schema"
-@inject APIHttpClient APIHttpClient
+@inject APIHttpClientOld APIHttpClientOld
 @inject TextService TextService
 @inherits PageComponent
 
@@ -35,7 +35,7 @@
 
     private async Task LoadData()
     {
-        _data = await APIHttpClient.SendRequest<EntitySchema[]>(HttpMethod.Get, "Template/Schema");
+        _data = await APIHttpClientOld.SendRequest<EntitySchema[]>(HttpMethod.Get, "Template/Schema");
     }
 
 }

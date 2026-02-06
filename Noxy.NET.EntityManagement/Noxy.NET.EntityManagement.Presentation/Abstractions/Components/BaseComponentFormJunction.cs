@@ -45,6 +45,6 @@ public abstract class BaseComponentFormJunction<TForm, TEntity, TRelation, TJunc
 
     protected override async Task<TEntity> HandleSubmission(BaseFormModelEntity model)
     {
-        return await APIHttpClient.SendRequest<TEntity>(model);
+        return await APIHttpClientOld.SendRequest<TEntity>(model);
     }
 }

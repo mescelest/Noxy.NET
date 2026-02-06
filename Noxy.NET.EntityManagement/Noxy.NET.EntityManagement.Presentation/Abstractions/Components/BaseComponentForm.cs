@@ -7,7 +7,7 @@ namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 public abstract class BaseComponentForm<TForm> : BaseForm<TForm> where TForm : BaseFormModel
 {
     [Inject]
-    protected APIHttpClient APIHttpClient { get; set; } = null!;
+    protected APIHttpClientOld APIHttpClientOld { get; set; } = null!;
 
     [Inject]
     protected TextService TextService { get; set; } = null!;

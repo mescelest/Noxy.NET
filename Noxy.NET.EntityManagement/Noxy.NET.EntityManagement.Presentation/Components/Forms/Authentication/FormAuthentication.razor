@@ -1,4 +1,4 @@
-@inject APIHttpClient APIHttpClient
+@inject APIHttpClientOld APIHttpClientOld
 @inject TextService TextService
 @inject UserAuthenticationStateProvider AuthProvider
 @inherits ElementComponent
@@ -41,7 +41,7 @@
     {
         try
         {
-            AuthenticationSignInResponse result = await APIHttpClient.SendRequest(context.Model);
+            AuthenticationSignInResponse result = await APIHttpClientOld.SendRequest(context.Model);
             await AuthProvider.UpdateIdentity(result.JWT);
         }
         catch (Exception e)
@@ -54,7 +54,7 @@
     {
         try
         {
-            AuthenticationSignUpResponse result = await APIHttpClient.SendRequest(context.Model);
+            AuthenticationSignUpResponse result = await APIHttpClientOld.SendRequest(context.Model);
             await AuthProvider.UpdateIdentity(result.JWT);
         }
         catch (Exception e)
