@@ -45,7 +45,7 @@
 
     private async Task LoadData()
     {
-        _listParameter = await APIHttpClient.SendRequest<EntitySchemaParameter.Discriminator[]>(HttpMethod.Get, "Schema/Parameter", new Dictionary<string, object?>());
+        // _listParameter = await APIHttpClient.SendRequest<EntitySchemaParameter.Discriminator[]>(HttpMethod.Get, "Schema/Parameter", new Dictionary<string, object?>());
     }
 
     private static string GetLink(string identifier)
@@ -55,7 +55,7 @@
 
     private async Task SignInFormSubmit(IWebFormContext<FormModelSchemaParameterList> value)
     {
-        _listParameter = await APIHttpClient.SendRequest<EntitySchemaParameter.Discriminator[]>(HttpMethod.Get, "Schema/Parameter", value.Model.AsQueryParameters());
+        // _listParameter = await APIHttpClient.SendRequest<EntitySchemaParameter.Discriminator[]>(HttpMethod.Get, "Schema/Parameter", value.Model.AsQueryParameters());
     }
 
 }

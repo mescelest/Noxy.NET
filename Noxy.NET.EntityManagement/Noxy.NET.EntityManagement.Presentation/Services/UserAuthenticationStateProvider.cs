@@ -10,16 +10,18 @@ public class UserAuthenticationStateProvider : AuthenticationStateProvider
 {
     private const string UserKey = "user";
     private const string AuthenticationType = "JWTAuthentication";
-    private readonly IJWTService _jwt;
+    private readonly APIHttpClient _client;
 
+    private readonly IJWTService _jwt;
     private readonly ILocalStorageService _storage;
 
     private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
 
-    public UserAuthenticationStateProvider(ILocalStorageService storage, IJWTService jwt)
+    public UserAuthenticationStateProvider(ILocalStorageService storage, IJWTService jwt, APIHttpClient client)
     {
         _storage = storage;
         _jwt = jwt;
+        _client = client;
         _ = InitializeAsync();
     }
 
@@ -36,6 +38,7 @@ public class UserAuthenticationStateProvider : AuthenticationStateProvider
             {
                 Identity = _jwt.ReadJWT(token.Trim('"'));
                 _currentUser = CreatePrincipal(Identity);
+                _client.SetBearerToken(token.Trim('"'));
             }
         }
         catch
@@ -55,6 +58,7 @@ public class UserAuthenticationStateProvider : AuthenticationStateProvider
         _currentUser = CreatePrincipal(Identity);
 
         await _storage.SetItemAsync(UserKey, jwt);
+        _client.SetBearerToken(jwt);
 
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
@@ -65,6 +69,7 @@ public class UserAuthenticationStateProvider : AuthenticationStateProvider
         _currentUser = new(new ClaimsIdentity());
 
         await _storage.RemoveItemAsync(UserKey);
+        _client.ClearBearerToken();
 
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
