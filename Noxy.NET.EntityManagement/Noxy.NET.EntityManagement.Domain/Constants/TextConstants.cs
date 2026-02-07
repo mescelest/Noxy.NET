@@ -51,6 +51,8 @@ public static class TextConstants
     public const string LabelFormAllowedExtensions = "Label:Form:AllowedExtensions";
     public const string LabelFormIsSystemDefined = "Label:Form:IsSystemDefined";
     public const string LabelFormIsApprovalRequired = "Label:Form:IsApprovalRequired";
+    public const string LabelFormPageSize = "Label:Form:PageSize";
+    public const string LabelFormPageNumber = "Label:Form:PageNumber";
     public const string LabelFormParameterTextType = "Label:Form:ParameterTextType";
     public const string LabelFormPropertyTypeList = "Label:Form:PropertyTypeList";
     public const string LabelFormIsValueList = "Label:Form:IsValueList";
@@ -77,6 +79,8 @@ public static class TextConstants
     public const string HelpFormAllowedExtensions = "Help:Form:AllowedExtensions";
     public const string HelpFormIsSystemDefined = "Help:Form:IsSystemDefined";
     public const string HelpFormIsApprovalRequired = "Help:Form:IsApprovalRequired";
+    public const string HelpFormPageSize = "Help:Form:PageSize";
+    public const string HelpFormPageNumber = "Help:Form:PageNumber";
     public const string HelpFormParameterTextType = "Help:Form:ParameterTextType";
     public const string HelpFormParameterTypeList = "Help:Form:ParameterTypeList";
     public const string HelpFormPropertyTypeList = "Help:Form:PropertyTypeList";

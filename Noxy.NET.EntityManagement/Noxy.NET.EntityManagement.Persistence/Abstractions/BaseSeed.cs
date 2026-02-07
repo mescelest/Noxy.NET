@@ -28,14 +28,14 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         };
     }
 
-    protected TableSchemaParameterText HasSchemaParameterText(string id, string identifier, string name = "", string note = "", TextParameterTypeEnum type = TextParameterTypeEnum.Line, bool isApprovalRequired = false,
+    protected TableSchemaParameterText HasSchemaParameterText(string id, string constant, string name = "", string note = "", TextParameterTypeEnum type = TextParameterTypeEnum.Line, bool isApprovalRequired = false,
         DateTime? timeCreated = null)
     {
         TableSchemaParameterText table = new()
         {
             ID = Guid.Parse(id),
-            SchemaIdentifier = identifier,
-            Name = !string.IsNullOrEmpty(name) ? name : identifier,
+            SchemaIdentifier = constant,
+            Name = !string.IsNullOrEmpty(name) ? name : constant,
             Note = note,
             Order = GetNextOrder<TableSchemaParameterText>(),
             Type = type,
@@ -48,12 +48,12 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         return table;
     }
 
-    protected TableDataParameterText HasDataParameterText(string id, string identifier, string value, DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
+    protected TableDataParameterText HasDataParameterText(string id, string constant, string value, DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
     {
         TableDataParameterText table = new()
         {
             ID = Guid.Parse(id),
-            SchemaIdentifier = identifier,
+            SchemaIdentifier = constant,
             Value = value,
             TimeApproved = timeApproved ?? Now,
             TimeEffective = timeEffective ?? Now,

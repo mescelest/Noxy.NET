@@ -90,6 +90,9 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019789de-e449-71aa-ab1d-205e04219122", TextConstants.LabelFormOrder);
         HasSchemaParameterText("019c297a-384a-716a-92bd-54bc539e59e1", TextConstants.LabelFormIsSystemDefined);
         HasSchemaParameterText("01978a17-7901-7131-8b49-005b042a1608", TextConstants.LabelFormIsApprovalRequired);
+        HasSchemaParameterText("019c3819-d223-700d-a78d-40606a57c869", TextConstants.LabelFormPageNumber);
+        HasSchemaParameterText("019c3819-d224-705d-91a0-96e586add967", TextConstants.LabelFormPageSize);
+        HasSchemaParameterText("01979d14-54ad-72f9-b5d8-a5aa1089fe1b", TextConstants.LabelFormParameterTextType);
         HasSchemaParameterText("01979d14-54ad-72f9-b5d8-a5aa1089fe1b", TextConstants.LabelFormPropertyTypeList);
         HasSchemaParameterText("01978a1f-f0a2-731f-b17d-14f803055489", TextConstants.LabelFormIsValueList);
         HasSchemaParameterText("019799a3-a72f-725a-b4f6-b7144f565f3f", TextConstants.LabelFormBoolean);
@@ -113,6 +116,8 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019789f9-2601-72ac-ad28-0204b7c6d497", TextConstants.LabelFormOrder, "Order");
         HasDataParameterText("019c297a-384a-716a-92bd-5b2db391ac89", TextConstants.LabelFormIsSystemDefined, "Is system defined?");
         HasDataParameterText("01978a17-7901-7131-8b49-1200bad01c81", TextConstants.LabelFormIsApprovalRequired, "Is approval required?");
+        HasDataParameterText("019c3819-d224-705d-91a0-98a1e7acf79a", TextConstants.LabelFormPageNumber, "Page");
+        HasDataParameterText("019c3819-d224-705d-91a0-9f7cd0157d26", TextConstants.LabelFormPageSize, "Rows");
         HasDataParameterText("01978a1f-f0a2-731f-b17d-2174a6ecd4fe", TextConstants.LabelFormParameterTextType, "Text parameter type");
         HasDataParameterText("01979d14-54ad-72f9-b5d8-ae413650b40c", TextConstants.LabelFormPropertyTypeList, "Choose property type");
         HasDataParameterText("019799a4-1a2b-7368-9b33-6a3f0bf60dae", TextConstants.LabelFormIsValueList, "Is value list?");
@@ -137,6 +142,8 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019789fc-3929-75a9-99e9-0a5f8ca00604", TextConstants.HelpFormOrder);
         HasSchemaParameterText("019c297a-384a-716a-92bd-5cefb96ac3a0", TextConstants.HelpFormIsSystemDefined);
         HasSchemaParameterText("01978a17-b7b1-772f-a129-543b087e1606", TextConstants.HelpFormIsApprovalRequired);
+        HasSchemaParameterText("019c3819-d224-705d-91a0-a1fc39ba13d5", TextConstants.HelpFormPageNumber);
+        HasSchemaParameterText("019c3819-d224-705d-91a0-a5d6e5fdfc6d", TextConstants.HelpFormPageSize);
         HasSchemaParameterText("01979d14-54ad-72f9-b5d8-b33557c5a806", TextConstants.HelpFormParameterTextType);
         HasSchemaParameterText("01979d14-54ad-72f9-b5d8-c3a68639a28a", TextConstants.HelpFormParameterTypeList);
         HasSchemaParameterText("01979d14-54ad-72f9-b5d8-c4050ea1f0fd", TextConstants.HelpFormPropertyTypeList);
@@ -162,6 +169,8 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019789fc-18dc-73ee-94b6-2ee0b27366dc", TextConstants.HelpFormOrder, "The order in which this entity type is sorted.");
         HasDataParameterText("019c297a-384a-716a-92bd-627c7c93c3c9", TextConstants.HelpFormIsSystemDefined, "Determines if the entity is system defined and therefore cannot be changed.");
         HasDataParameterText("01978a17-b7b1-772f-a129-66dba634b0b5", TextConstants.HelpFormIsApprovalRequired, "Determines if another user must approve a text parameter value before it becomes active.");
+        HasDataParameterText("019c3819-d224-705d-91a0-a9fe4d149531", TextConstants.HelpFormPageNumber, "The current page being shown");
+        HasDataParameterText("019c3819-d224-705d-91a0-af95528a7316", TextConstants.HelpFormPageSize, "The number of rows shown on each page");
         HasDataParameterText("01978a20-9692-72ff-be7d-b59a17facafb", TextConstants.HelpFormParameterTextType, "The type of text parameter.");
         HasDataParameterText("01979d14-54ad-72f9-b5d8-b830dc26f9f4", TextConstants.HelpFormParameterTypeList, "");
         HasDataParameterText("01979d14-54ad-72f9-b5d8-bf20682e54af", TextConstants.HelpFormPropertyTypeList, "");
