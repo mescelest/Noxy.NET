@@ -1,4 +1,4 @@
-@inherits BaseComponentForm<FormModelAuthenticationSignIn>
+@inherits BaseRequestForm<RequestAuthenticationSignIn, ResponseAuthenticationSignIn>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm Context="Context" OnSubmit="OnSubmit">
@@ -14,7 +14,7 @@
 
 @code {
 
-    protected override WebFormContext<FormModelAuthenticationSignIn> CreateContext()
+    protected override WebFormContext<RequestAuthenticationSignIn> CreateContext()
     {
         return new(new());
     }

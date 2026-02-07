@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.API.Queries;
 using Noxy.NET.EntityManagement.Domain.Requests;
+using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.API.Controllers;
 
@@ -10,14 +11,14 @@ namespace Noxy.NET.EntityManagement.API.Controllers;
 public class DataController(IMediator mediator) : ControllerBase
 {
     [HttpPost("Parameter/Text/Resolve")]
-    public async Task<ActionResult<Dictionary<string, string>>> ParameterTextResolve([FromBody] RequestDataParameterTextResolveList requestData)
+    public async Task<ActionResult<ResponseDataParameterResolveList>> ParameterTextResolve([FromBody] RequestDataParameterTextResolveList requestData)
     {
-        return await mediator.Send(new QueryParameterTextResolveList(requestData));
+        return await mediator.Send(new QueryDataParameterTextResolveList(requestData));
     }
 
     [HttpPost("Parameter/Text/{SchemaIdentifier}/Resolve")]
-    public async Task<ActionResult<string>> ParameterTextResolve(string schemaIdentifier)
+    public async Task<ActionResult<ResponseDataParameterResolve>> ParameterTextResolve(string schemaIdentifier)
     {
-        return await mediator.Send(new QueryParameterTextResolve(schemaIdentifier));
+        return await mediator.Send(new QueryDataParameterTextResolve(schemaIdentifier));
     }
 }

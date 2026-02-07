@@ -1,14 +1,18 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Noxy.NET.EntityManagement.API.Queries;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas;
+using Noxy.NET.EntityManagement.Domain.Requests;
+using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SchemaController(ISchemaService serviceSchema) : ControllerBase
+public class SchemaController(ISchemaService serviceSchema, IMediator mediator) : ControllerBase
 {
     [HttpPost("Context")]
     public async Task<ActionResult<EntitySchemaContext>> Create(FormModelSchemaContext model)
@@ -23,9 +27,9 @@ public class SchemaController(ISchemaService serviceSchema) : ControllerBase
     }
 
     [HttpGet("Parameter")]
-    public async Task<ActionResult<List<EntitySchemaParameter.Discriminator>>> Create([FromQuery] FormModelSchemaParameterList model)
+    public async Task<ActionResult<ResponseSchemaParameterList>> GetParameterList([FromQuery] RequestSchemaParameterList request)
     {
-        return await serviceSchema.GetSchemaParameterList(model);
+        return await mediator.Send(new QuerySchemaParameterList(request));
     }
 
     [HttpPost("Parameter/Style")]

@@ -1,4 +1,4 @@
-@inject APIHttpClientOld APIHttpClientOld
+@inject APIHttpClient APIHttpClient
 @inject TextService TextService
 @inject UserAuthenticationStateProvider AuthProvider
 @inherits ElementComponent
@@ -37,11 +37,11 @@
         LoadAfterRender(TextService.Resolve);
     }
 
-    private async Task SignInFormSubmit(IWebFormContext<FormModelAuthenticationSignIn> context)
+    private async Task SignInFormSubmit(IWebFormContext<RequestAuthenticationSignIn> context)
     {
         try
         {
-            AuthenticationSignInResponse result = await APIHttpClientOld.SendRequest(context.Model);
+            ResponseAuthenticationSignIn result = await APIHttpClient.SendRequest(context.Model);
             await AuthProvider.UpdateIdentity(result.JWT);
         }
         catch (Exception e)
@@ -50,11 +50,11 @@
         }
     }
 
-    private async Task SignUpFormSubmit(IWebFormContext<FormModelAuthenticationSignUp> context)
+    private async Task SignUpFormSubmit(IWebFormContext<RequestAuthenticationSignUp> context)
     {
         try
         {
-            AuthenticationSignUpResponse result = await APIHttpClientOld.SendRequest(context.Model);
+            ResponseAuthenticationSignUp result = await APIHttpClient.SendRequest(context.Model);
             await AuthProvider.UpdateIdentity(result.JWT);
         }
         catch (Exception e)
