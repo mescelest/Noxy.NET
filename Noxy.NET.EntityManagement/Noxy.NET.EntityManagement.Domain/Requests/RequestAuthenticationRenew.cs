@@ -1,9 +1,9 @@
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
-using Noxy.NET.EntityManagement.Domain.Models.Responses.Authentication;
+using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests;
 
-public class RequestAuthenticationRenew : BaseRequestPost<AuthenticationRenewResponse>
+public class RequestAuthenticationRenew : BaseRequestPost<ResponseAuthenticationRenew>
 {
     public override string APIEndpoint => "Authentication/Renew";
 }

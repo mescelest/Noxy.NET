@@ -1,5 +1,5 @@
-using Noxy.NET.EntityManagement.Domain.Models.Responses.Authentication;
 using Noxy.NET.EntityManagement.Domain.Requests;
+using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.Presentation.Services;
 
@@ -10,7 +10,7 @@ public class UserAuthenticationService(APIHttpClient serviceHttp, UserAuthentica
         if (serviceAuth.Identity == null) return;
         try
         {
-            AuthenticationRenewResponse response = await serviceHttp.SendRequest(new RequestAuthenticationRenew());
+            ResponseAuthenticationRenew response = await serviceHttp.SendRequest(new RequestAuthenticationRenew());
             await serviceAuth.UpdateIdentity(response.JWT);
         }
         catch

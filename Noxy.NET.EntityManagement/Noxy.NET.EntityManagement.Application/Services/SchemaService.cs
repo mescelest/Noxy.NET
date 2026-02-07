@@ -11,12 +11,6 @@ namespace Noxy.NET.EntityManagement.Application.Services;
 
 public class SchemaService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaService
 {
-    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FormModelSchemaParameterList model)
-    {
-        await using IUnitOfWork uow = await serviceUoWFactory.Create();
-        return await uow.Schema.GetSchemaParameterList(model.Search, model.IsSystemDefined, model.IsApprovalRequired);
-    }
-
     public async Task<EntitySchemaContext> CreateOrUpdate(FormModelSchemaContext model)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();

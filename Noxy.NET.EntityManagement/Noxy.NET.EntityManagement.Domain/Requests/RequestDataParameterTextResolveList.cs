@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
+using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests;
 
-public class RequestDataParameterTextResolveList : BaseRequestPost<Dictionary<string, string>>
+public class RequestDataParameterTextResolveList : BaseRequestPost<ResponseDataParameterResolveList>
 {
     public override string APIEndpoint => "/Data/Parameter/Text/Resolve";
 

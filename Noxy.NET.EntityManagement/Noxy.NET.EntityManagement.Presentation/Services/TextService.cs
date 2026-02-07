@@ -1,4 +1,5 @@
 using Noxy.NET.EntityManagement.Domain.Requests;
+using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.Presentation.Services;
 
@@ -49,10 +50,10 @@ public class TextService(APIHttpClient serviceHttp)
             .ToArray();
 
         if (list.Length == 0) return;
-        Dictionary<string, string> result = await serviceHttp.SendRequest(new RequestDataParameterTextResolveList() { SchemaIdentifierList = list });
+        ResponseDataParameterResolveList result = await serviceHttp.SendRequest(new RequestDataParameterTextResolveList { SchemaIdentifierList = list });
 
         DateTime now = DateTime.UtcNow;
-        foreach (KeyValuePair<string, string> item in result)
+        foreach (KeyValuePair<string, string> item in result.Value)
         {
             _collection[item.Key] = (item.Value, now);
         }

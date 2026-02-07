@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas;
 
 namespace Noxy.NET.EntityManagement.Application.Services;
 
-public class TemplateService(IUnitOfWorkFactory serviceUoWFactory, ISchemaBuilderService serviceSchemaBuilder, IApplicationService serviceApplication, IDataService serviceData) : ITemplateService
+public class TemplateService(IUnitOfWorkFactory serviceUoWFactory, ISchemaBuilderService serviceSchemaBuilder, IApplicationService serviceApplication) : ITemplateService
 {
     public async Task<List<EntitySchema>> GetSchemaList()
     {

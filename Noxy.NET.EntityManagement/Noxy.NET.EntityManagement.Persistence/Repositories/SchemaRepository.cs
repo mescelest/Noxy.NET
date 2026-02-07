@@ -8,6 +8,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
+using Noxy.NET.EntityManagement.Persistence.Models;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
@@ -109,14 +110,21 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return result.Select(MapperT2E.Map).ToList();
     }
 
-    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(string? search = null, bool? isSystemDefined = null, bool? isApprovalRequired = null)
+    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
     {
         IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking();
-        if (search != null) query = query.Where(x => EF.Functions.Like(x.Name, $"%{search}%"));
-        if (isSystemDefined != null) query = query.Where(x => x.IsSystemDefined == isSystemDefined);
-        if (isApprovalRequired != null) query = query.Where(x => x.IsApprovalRequired == isApprovalRequired);
+        if (filter.Search != null) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+        if (filter.IsSystemDefined != null) query = query.Where(x => x.IsSystemDefined == filter.IsSystemDefined);
+        if (filter.IsApprovalRequired != null) query = query.Where(x => x.IsApprovalRequired == filter.IsApprovalRequired);
 
-        List<TableSchemaParameter> result = await query.ToListAsync();
+        var skip = filter.PageNumber * filter.PageSize;
+        var take = filter.PageSize;
+
+        List<TableSchemaParameter> result = await query
+            .Skip(filter.PageNumber * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
         return result.Select(MapperT2E.Map).ToList();
     }
 

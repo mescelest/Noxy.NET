@@ -11,11 +11,12 @@ builder.Services.AddOpenApi();
 const string corsPolicyName = "Noxy.NET-CORS-Policy";
 string[] corsOrigins = builder.Configuration.GetSection("CORS:Origins").Get<string[]>() ?? [];
 
-builder.Services.AddSignalR();
 builder.Services.AddCors(options => options.AddPolicy(corsPolicyName, policy => policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
 builder.Services.AddApplication();
 builder.Services.AddPersistence(x => x.UseSqlite($@"Data Source=..\..\Data\Noxy.NET.EntityManagement.sqlite"));
 
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 builder.Services.AddControllers(options => { options.Filters.Add<GlobalExceptionFilter>(); });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

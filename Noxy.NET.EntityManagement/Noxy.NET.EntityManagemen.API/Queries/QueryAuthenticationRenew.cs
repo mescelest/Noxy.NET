@@ -5,5 +5,5 @@ namespace Noxy.NET.EntityManagement.API.Queries;
 
 public class QueryAuthenticationRenew(string email) : IRequest<ResponseAuthenticationRenew>
 {
-    public string Email { get; set; } = email;
+    public string Email { get; } = email;
 }

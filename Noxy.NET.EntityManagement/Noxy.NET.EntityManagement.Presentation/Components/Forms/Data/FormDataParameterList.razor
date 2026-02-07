@@ -1,20 +1,19 @@
-@using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas
-@inherits BaseComponentForm<Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas.FormModelSchemaParameterList>
+@inherits BaseRequestForm<RequestSchemaParameterList, ResponseSchemaParameterList>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm Context="Context" OnSubmit="OnSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Search))" Description="@GetDescription(nameof(Context.Model.Search))"
                         @bind-Value="Context.Model.Search"/>
 
-        <InputGroupCheckbox Option="true" DisplayName="@GetDisplayName(nameof(Context.Model.IsSystemDefined))" Description="@GetDescription(nameof(Context.Model.IsSystemDefined))"
-                            @bind-Value="Context.Model.IsSystemDefined">
-            <span>@TextService.Get(TextConstants.ValueFormCheckboxYes)</span>
-        </InputGroupCheckbox>
+        <InputGroupSelect OptionList="BoolOptionList" DisplayName="@GetDisplayName(nameof(Context.Model.IsSystemDefined))" Description="@GetDescription(nameof(Context.Model.IsSystemDefined))"
+                          @bind-Value="Context.Model.IsSystemDefined">
+            <span>@GetSystemDefinedName(context)</span>
+        </InputGroupSelect>
 
-        <InputGroupCheckbox Option="true" DisplayName="@GetDisplayName(nameof(Context.Model.IsApprovalRequired))" Description="@GetDescription(nameof(Context.Model.IsApprovalRequired))"
-                            @bind-Value="Context.Model.IsApprovalRequired">
-            <span>@TextService.Get(TextConstants.ValueFormCheckboxYes)</span>
-        </InputGroupCheckbox>
+        <InputGroupSelect OptionList="BoolOptionList" DisplayName="@GetDisplayName(nameof(Context.Model.IsApprovalRequired))" Description="@GetDescription(nameof(Context.Model.IsApprovalRequired))"
+                          @bind-Value="Context.Model.IsApprovalRequired">
+            <span>@GetApprovalRequiredName(context)</span>
+        </InputGroupSelect>
 
         @ChildContent
     </WebForm>
@@ -22,7 +21,27 @@
 
 @code {
 
-    protected override WebFormContext<FormModelSchemaParameterList> CreateContext()
+    private static bool?[] BoolOptionList => [null, true, false];
+
+    private static string GetSystemDefinedName(bool? value)
+    {
+        if (!value.HasValue) return "Either";
+
+        return value.Value
+            ? "System defined"
+            : "User defined";
+    }
+
+    private static string GetApprovalRequiredName(bool? value)
+    {
+        if (!value.HasValue) return "Either";
+
+        return value.Value
+            ? "With approval required"
+            : "Without approval required";
+    }
+
+    protected override WebFormContext<RequestSchemaParameterList> CreateContext()
     {
         return new(new());
     }

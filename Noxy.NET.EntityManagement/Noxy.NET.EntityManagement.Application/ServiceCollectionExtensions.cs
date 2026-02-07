@@ -11,8 +11,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
-        services.AddScoped<IDataService, DataService>();
         services.AddScoped<IJWTService, JWTService>();
         services.AddScoped<ISchemaService, SchemaService>();
         services.AddScoped<ISchemaBuilderService, SchemaBuilderService>();

@@ -6,8 +6,6 @@ namespace Noxy.NET.EntityManagement.Application.Interfaces.Services;
 
 public interface ISchemaService
 {
-    Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FormModelSchemaParameterList model);
-
     Task<EntitySchemaContext> CreateOrUpdate(FormModelSchemaContext model);
     Task<EntitySchemaParameter.Discriminator> CreateOrUpdate(FormModelSchemaParameterStyle model);
     Task<EntitySchemaParameter.Discriminator> CreateOrUpdate(FormModelSchemaParameterSystem model);

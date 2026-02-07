@@ -6,6 +6,6 @@ namespace Noxy.NET.EntityManagement.API.Queries;
 
 public class QueryAuthenticationSignIn(RequestAuthenticationSignIn request) : IRequest<ResponseAuthenticationSignIn>
 {
-    public string Email { get; set; } = request.Email;
-    public string Password { get; set; } = request.Password;
+    public string Email { get; } = request.Email;
+    public string Password { get; } = request.Password;
 }

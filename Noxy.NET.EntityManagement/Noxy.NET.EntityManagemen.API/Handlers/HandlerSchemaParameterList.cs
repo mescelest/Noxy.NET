@@ -12,7 +12,14 @@ public class HandlerSchemaParameterList(IUnitOfWorkFactory serviceUoWFactory) : 
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        List<EntitySchemaParameter.Discriminator> result = await uow.Schema.GetSchemaParameterList(request.Search, request.IsSystemDefined, request.IsApprovalRequired);
+        List<EntitySchemaParameter.Discriminator> result = await uow.Schema.GetSchemaParameterList(new()
+        {
+            Search = request.Search,
+            IsSystemDefined = request.IsSystemDefined,
+            IsApprovalRequired = request.IsApprovalRequired,
+            PageSize = request.PageSize ?? 10,
+            PageNumber = request.PageNumber ?? 0,
+        });
 
         return new() { Value = result };
     }
