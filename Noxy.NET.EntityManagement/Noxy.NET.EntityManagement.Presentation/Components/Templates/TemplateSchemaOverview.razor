@@ -95,17 +95,6 @@
     [Parameter, EditorRequired]
     public required EntitySchema Schema { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
-
-        if (Display == null)
-        {
-            LoadAfterRender(TextService.Resolve);
-        }
-    }
-
     private List<(string Title, string Description, string Value)> GetDisplay(T item)
     {
         List<(string Title, string Description, string Value)> result = [];

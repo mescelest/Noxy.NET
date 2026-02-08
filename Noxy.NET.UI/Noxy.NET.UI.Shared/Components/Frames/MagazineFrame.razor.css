@@ -8,9 +8,10 @@
 
 .grid {
     display: grid;
-    row-gap: var(--size-gap-md);
+    row-gap: var(--size-gap-md); 
     column-gap: var(--size-gap-md);
-    grid-template: "left center right" / 360px minmax(360px, var(--center-width)) 360px;
+    justify-content: center;
+    grid-template: "left center right" / var(--size-column) minmax(var(--size-column), var(--center-width)) var(--size-column);
 }
 
 .left {
@@ -25,19 +26,21 @@
     grid-area: right;
 }
 
-@container (max-width: 1440px) {
+/* Column-size * 4 */
+@container (max-width: 1320px) {
     .grid {
-        grid-template: "center center" "left right" / 1fr 1fr;
+        grid-template: "center center" "left right" / var(--size-column) var(--size-column);
     }
 }
 
-@container (max-width: 720px) {
+/* Column-size * 2 */
+@container (max-width: 660px) {
     .grid {
-        grid-template: "center" "left" "right" / 1fr;
+        grid-template: "center" "left" "right" / var(--size-column);
     }
 
     .left, .right {
-        max-width: 360px;
+        max-width: var(--size-column);
         margin-inline: auto;
     }
 }

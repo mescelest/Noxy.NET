@@ -15,7 +15,7 @@
 
     protected override void OnInitialized()
     {
-        Observe(State);
+        base.OnInitialized();
 
         if (State.Value.List.Count == 0 && !State.Value.IsLoading)
         {

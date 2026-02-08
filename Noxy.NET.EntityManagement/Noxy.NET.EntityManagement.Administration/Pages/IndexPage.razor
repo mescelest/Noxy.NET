@@ -1,5 +1,4 @@
 ﻿@page "/"
-@inject TextService TextService
 @inherits PageComponent
 
 <PageTitle>Administration</PageTitle>
@@ -19,12 +18,5 @@
 </div>
 
 @code {
-
-    protected override async Task OnFirstRenderAsync()
-    {
-        await base.OnFirstRenderAsync();
-
-        await TextService.Resolve();
-    }
 
 }

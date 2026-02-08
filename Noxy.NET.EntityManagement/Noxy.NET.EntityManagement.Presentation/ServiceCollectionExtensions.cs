@@ -38,6 +38,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredService<UserAuthenticationStateProvider>());
         services.AddScoped<IJWTService, JWTService>();
 
+        services.AddSingleton<IDebouncerService, DebouncerService>();
+
         return services;
     }
 }

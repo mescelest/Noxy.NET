@@ -14,13 +14,13 @@ public class RequestAuthenticationSignUp : BaseRequestPost<ResponseAuthenticatio
     [Required]
     [EmailAddress]
     [DisplayName(TextConstants.LabelFormEmail)]
-    [Description(TextConstants.HelpFormConfirmPassword)]
+    [Description(TextConstants.HelpFormEmail)]
     public string Email { get; set; } = string.Empty;
 
     [Required]
     [MinLength(12), MaxLength(512)]
     [DisplayName(TextConstants.LabelFormPassword)]
-    [Description(TextConstants.HelpFormConfirmPassword)]
+    [Description(TextConstants.HelpFormPassword)]
     public string Password { get; set; } = string.Empty;
 
     [Required]

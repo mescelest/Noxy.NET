@@ -1,61 +1,21 @@
-using Noxy.NET.EntityManagement.Domain.Requests;
-using Noxy.NET.EntityManagement.Domain.Responses;
+using Fluxor;
+using Microsoft.Extensions.DependencyInjection;
+using Noxy.NET.EntityManagement.Presentation.Features;
 
 namespace Noxy.NET.EntityManagement.Presentation.Services;
 
-public class TextService(APIHttpClient serviceHttp)
+public class TextService(IServiceProvider provider)
 {
-    private readonly Dictionary<string, (string Value, DateTime? TimeResolved)> _collection = [];
-    private TaskCompletionSource<bool> _taskCompletionSource = new();
+    private IState<FeatureTextState> State => field ??= provider.GetRequiredService<IState<FeatureTextState>>();
+    private IDispatcher Dispatcher => field ??= provider.GetRequiredService<IDispatcher>();
 
-    private Task? _taskResolver;
-
-    public string Get(string? identifier)
+    public string Get(string? key, string? scope = null)
     {
-        if (string.IsNullOrWhiteSpace(identifier)) return string.Empty;
-        if (_collection.TryGetValue(identifier, out (string Value, DateTime? TimeResolved) item) && item.TimeResolved != null)
-        {
-            return item.Value;
-        }
+        if (key == null) return "[KEY MISSING]";
 
-        _collection[identifier] = (string.Empty, null);
-        return _collection[identifier].Value;
-    }
-
-    public Task Resolve()
-    {
-        return _taskResolver ??= ResolveInternally();
-    }
-
-    private async Task ResolveInternally()
-    {
-        while (true)
-        {
-            if (await Task.WhenAny(Task.Delay(100), _taskCompletionSource.Task) != _taskCompletionSource.Task)
-            {
-                _taskResolver = null;
-                await ResolveInternal();
-                break;
-            }
-
-            _taskCompletionSource = new();
-        }
-    }
-
-    private async Task ResolveInternal()
-    {
-        string[] list = _collection
-            .Where(x => x.Value.TimeResolved == null)
-            .Select(x => x.Key)
-            .ToArray();
-
-        if (list.Length == 0) return;
-        ResponseDataParameterResolveList result = await serviceHttp.SendRequest(new RequestDataParameterTextResolveList { SchemaIdentifierList = list });
-
-        DateTime now = DateTime.UtcNow;
-        foreach (KeyValuePair<string, string> item in result.Value)
-        {
-            _collection[item.Key] = (item.Value, now);
-        }
+        FeatureTextState s = State.Value;
+        if (s.ResolvedTextCollection.TryGetValue(key, out string? value)) return value;
+        if (!s.PendingKeys.Contains(key)) Dispatcher.Dispatch(new FeatureTextReducers.RequestTextKeyAction(key, scope));
+        return string.Empty;
     }
 }

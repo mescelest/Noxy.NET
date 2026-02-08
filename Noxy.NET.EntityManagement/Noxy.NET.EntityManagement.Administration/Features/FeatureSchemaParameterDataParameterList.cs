@@ -10,8 +10,11 @@ namespace Noxy.NET.EntityManagement.Administration.Features;
 public record FeatureSchemaParameterDataParameterListState
 {
     public bool IsLoading { get; init; }
+    public Dictionary<string, bool> IsLoadingPerKey { get; init; } = new();
     public Dictionary<string, IReadOnlyList<EntityDataParameter.Discriminator>> Cache { get; init; } = new();
     public string? ErrorMessage { get; init; }
+
+    public bool IsKeyLoading(string schemaIdentifier) => IsLoadingPerKey.TryGetValue(schemaIdentifier, out bool isLoading) && isLoading;
 }
 
 public static class FeatureSchemaParameterDataParameterListReducers
@@ -19,31 +22,41 @@ public static class FeatureSchemaParameterDataParameterListReducers
     [ReducerMethod]
     public static FeatureSchemaParameterDataParameterListState ReduceLoad(FeatureSchemaParameterDataParameterListState state, LoadDataParameterListAction action)
     {
-        return state with { IsLoading = true, ErrorMessage = null };
+        return state with
+        {
+            IsLoading = true,
+            IsLoadingPerKey = new(state.IsLoadingPerKey) { [action.SchemaIdentifier] = true },
+            ErrorMessage = null
+        };
     }
 
     [ReducerMethod]
     public static FeatureSchemaParameterDataParameterListState ReduceResult(FeatureSchemaParameterDataParameterListState state, DataParameterListResultAction action)
     {
-        Dictionary<string, IReadOnlyList<EntityDataParameter.Discriminator>> updated = new(state.Cache)
+        return state with
         {
-            [action.SchemaIdentifier] = action.Results
+            IsLoading = false,
+            Cache = new(state.Cache) { [action.SchemaIdentifier] = action.Results },
+            IsLoadingPerKey = new(state.IsLoadingPerKey) { [action.SchemaIdentifier] = false }
         };
-
-        return state with { IsLoading = false, Cache = updated };
     }
 
     [ReducerMethod]
     public static FeatureSchemaParameterDataParameterListState ReduceFailed(FeatureSchemaParameterDataParameterListState state, DataParameterListFailedAction action)
     {
-        return state with { IsLoading = false, ErrorMessage = action.Error };
+        return state with
+        {
+            IsLoading = false,
+            IsLoadingPerKey = new(state.IsLoadingPerKey) { [action.SchemaIdentifier] = false },
+            ErrorMessage = action.Error
+        };
     }
 
     public record LoadDataParameterListAction(string SchemaIdentifier);
 
     public record DataParameterListResultAction(string SchemaIdentifier, IReadOnlyList<EntityDataParameter.Discriminator> Results);
 
-    public record DataParameterListFailedAction(string Error);
+    public record DataParameterListFailedAction(string SchemaIdentifier, string Error);
 }
 
 public class FeatureSchemaParameterDataParameterListEffects(APIHttpClient client)
@@ -55,11 +68,12 @@ public class FeatureSchemaParameterDataParameterListEffects(APIHttpClient client
         {
             RequestDataParameterList request = new() { SchemaIdentifier = action.SchemaIdentifier };
             ResponseDataParameterList result = await client.SendRequest(request);
+
             dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.DataParameterListResultAction(action.SchemaIdentifier, result.Value));
         }
         catch (Exception ex)
         {
-            dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.DataParameterListFailedAction(ex.Message));
+            dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.DataParameterListFailedAction(action.SchemaIdentifier, ex.Message));
         }
     }
 }

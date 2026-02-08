@@ -41,8 +41,10 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019c2571-7b67-75bb-a029-3eea76c0f0c3", TextConstants.ButtonSignOut, "Sign out");
 
         HasSchemaParameterText("01978309-3029-74e9-931c-3cf1322948fd", TextConstants.LinkNavigationSchema);
+        HasSchemaParameterText("019c3efa-a140-73be-900f-2e766665bc18", TextConstants.LinkNavigationParameter);
 
         HasDataParameterText("01978309-3029-74e9-931c-436de21f95b0", TextConstants.LinkNavigationSchema, "Schemas");
+        HasDataParameterText("019c3efa-a140-73be-900f-33d0023c5698", TextConstants.LinkNavigationParameter, "Parameters");
 
         HasSchemaParameterText("019c254b-1b85-7dca-abe2-d2a11538b7ed", TextConstants.HeaderSchema);
         HasSchemaParameterText("019c254b-1b85-71dc-8f4a-4295bd279c0a", TextConstants.HeaderContext);
@@ -77,6 +79,18 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019c2571-2306-7122-ba5f-a4fc019da2c8", TextConstants.HeaderPropertyInteger, "Integer Properties");
         HasDataParameterText("019c2571-2306-7122-ba5f-aa68f923e6cf", TextConstants.HeaderPropertyString, "String Properties");
         HasDataParameterText("019c2571-7b67-75bb-a029-35dcce9e1f9f", TextConstants.HeaderPropertyTable, "Table Properties");
+
+        HasSchemaParameterText("019c3efa-a140-73be-900f-360a6ccd354c", TextConstants.LabelValue);
+        HasSchemaParameterText("019c3efa-a140-73be-900f-3bf25ff45c30", TextConstants.LabelTimeApproved);
+        HasSchemaParameterText("019c3efa-a140-73be-900f-3ecaa29e0b39", TextConstants.LabelTimeCreated);
+        HasSchemaParameterText("019c3efa-a140-73be-900f-40a664ac2558", TextConstants.LabelTimeEffectiveFrom);
+        HasSchemaParameterText("019c3efa-a140-73be-900f-45045dba457e", TextConstants.LabelTimeEffectiveTo);
+
+        HasDataParameterText("019c3efa-a140-73be-900f-4bed02a7227c", TextConstants.LabelValue, "Value");
+        HasDataParameterText("019c3efa-a140-73be-900f-4e2b26906c90", TextConstants.LabelTimeApproved, "Approved at");
+        HasDataParameterText("019c3efa-a140-73be-900f-4e2b26906c90", TextConstants.LabelTimeCreated, "Created at");
+        HasDataParameterText("019c3efd-764d-740a-baae-c0240683a292", TextConstants.LabelTimeEffectiveFrom, "Effective from");
+        HasDataParameterText("019c3efd-764d-740a-baae-c7503349db66", TextConstants.LabelTimeEffectiveTo, "Effective to");
 
         HasSchemaParameterText("019c2964-c66f-77de-83ad-b8caf05e9319", TextConstants.LabelFormEmail);
         HasSchemaParameterText("019c2964-c66f-77de-83ad-bfe74128c9df", TextConstants.LabelFormPassword);

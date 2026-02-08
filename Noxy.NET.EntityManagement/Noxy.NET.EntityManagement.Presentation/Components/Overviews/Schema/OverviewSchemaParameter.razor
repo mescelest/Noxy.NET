@@ -50,14 +50,6 @@
     [Parameter, EditorRequired]
     public required EntitySchema Schema { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
-
-        LoadAfterRender(TextService.Resolve);
-    }
-
     private void FormChange(EntitySchemaParameter entity)
     {
         Schema.ParameterList = Schema.ParameterList?.Where(x => x.ID != entity.ID).Append(new(entity)).OrderBy(x => x.GetValue().Order).ToList();

@@ -24,10 +24,10 @@
 .content-wrapper {
     display: grid;
     grid-template-rows: minmax(0, 1fr);
-    margin-top: var(--size-gap-md, 12px);
     border-left: 2px solid black;
     background: color-mix(in srgb, transparent 96%, var(--color-mixin-complementary, #000000));
     overflow: hidden;
+    transition: grid-template-rows var(--animation-length-medium) ease-in-out, margin var(--animation-length-medium) ease-in-out;
 }
 
 .Collapsible[collapsed] .content-wrapper {
@@ -35,6 +35,7 @@
     margin-top: 0;
 }
 
-.Collapsible[animated] .content-wrapper {
-    transition: grid-template-rows var(--animation-length-medium) ease-in-out, margin var(--animation-length-medium) ease-in-out;
+.Collapsible[collapsed] .content-wrapper ::deep > * {
+    display: none;
 }
+

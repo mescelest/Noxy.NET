@@ -1,0 +1,20 @@
+.table {
+    display: grid;
+    grid-template-columns: 1fr max-content max-content max-content max-content;
+    grid-row-gap: var(--size-gap-md);
+    grid-column-gap: var(--size-gap-md);
+}
+
+.header, .body {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+}
+
+.row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-row-gap: var(--size-gap-xs);
+}
+

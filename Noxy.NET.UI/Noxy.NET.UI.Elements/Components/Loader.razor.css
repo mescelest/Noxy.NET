@@ -4,3 +4,7 @@
     flex-flow: column;
     stroke: var(--color-mixin-complementary);
 }
+
+.loading-content {
+    display: none;
+}

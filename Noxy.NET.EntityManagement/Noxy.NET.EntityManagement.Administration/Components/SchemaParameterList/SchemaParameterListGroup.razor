@@ -1,45 +1,57 @@
-@inject IState<FeatureSchemaParameterDataParameterListState> State
+@inject IState<FeatureSchemaParameterDataParameterListState> StateData
+@inject IState<FeatureTextState> StateText
 @inject IDispatcher Dispatcher
+@inject TextService TextService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Collapsible @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+    <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
-            @SchemaParameter.Name
+            <h3>@SchemaParameter.Name</h3>
         </Header>
 
         <Content>
-            <Loader Loading="IsLoading">
+            @if (TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list))
+            {
+                <div class="table">
+                    <div class="header">
+                        <b>@TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
+                        <b>@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
+                        <b>@TextService.Get(TextConstants.LabelTimeEffectiveFrom, GetComponentName())</b>
+                        <b>@TextService.Get(TextConstants.LabelTimeEffectiveTo, GetComponentName())</b>
+                        <b>@TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
+                    </div>
 
-                @if (TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> dataParameterList))
-                {
-                    <ul>
-                        @foreach (EntityDataParameter.Discriminator item in dataParameterList)
+                    <div class="body">
+                        @foreach (EntityDataParameter.Discriminator item in list)
                         {
-                            <li>@item.GetValue().Value</li>
+                            <div class="row">
+                                <span>@item.GetValue().Value</span>
+                                <span>@item.GetValue().TimeCreated</span>
+                                <span>@item.GetValue().TimeEffective</span>
+                                <span>@item.GetValue().TimeEffective</span>
+                                <span>@item.GetValue().TimeApproved</span>
+                            </div>
                         }
-                    </ul>
-                }
-                else
-                {
-                    <p>No data available.</p>
-                }
-            </Loader>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p>No data available.</p>
+            }
         </Content>
     </Collapsible>
 </div>
 
 @code {
+
     [Parameter, EditorRequired]
     public required EntitySchemaParameter SchemaParameter { get; set; }
 
     private bool _isCollapsed = true;
 
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        Observe(State);
-    }
+    private bool IsLoading => StateData.Value.IsKeyLoading(SchemaParameter.SchemaIdentifier) || (StateData.Value.Cache.ContainsKey(SchemaParameter.SchemaIdentifier) && StateText.Value.IsScopeLoading(GetComponentName()));
 
     private void SetCollapsed(bool value)
     {
@@ -47,18 +59,14 @@
         if (_isCollapsed) return;
 
         string id = SchemaParameter.SchemaIdentifier;
-        if (!State.Value.Cache.ContainsKey(id) && !State.Value.IsLoading)
-        {
-            Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.LoadDataParameterListAction(id));
-        }
+        if (StateData.Value.Cache.ContainsKey(id) || StateData.Value.IsLoading) return;
+
+        Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.LoadDataParameterListAction(id));
     }
 
     private bool TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list)
     {
-        return State.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out list!);
+        return StateData.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out list!);
     }
 
-    private bool IsLoading => State.Value.IsLoading && !State.Value.Cache.ContainsKey(SchemaParameter.SchemaIdentifier);
-
-    private string? ErrorMessage => State.Value.ErrorMessage;
 }

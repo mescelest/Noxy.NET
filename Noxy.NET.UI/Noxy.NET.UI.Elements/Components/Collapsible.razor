@@ -2,17 +2,24 @@
 @inherits ElementComponent
 @implements IAsyncDisposable
 
-<div @attributes="@AdditionalAttributes" class="@CssClass" collapsed="@_internalCollapsed" animated="@IsAnimated">
+<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" collapsed="@EffectiveCollapsed" animated="@IsAnimated">
     <div class="header-wrapper">
         @Header
+
         <div class="arrow" tabindex="0" @onclick="ArrowClicked" @onkeydown="ArrowKeyPressed">
-            @if (Arrow != null)
+
+            @if (Loading)
             {
-                @Arrow(_internalCollapsed)
+                <span>LOADING</span>
+                @* <Loader Width="40" Height="40"/>  *@
+            }
+            else if (Arrow != null)
+            {
+                @Arrow(EffectiveCollapsed)
             }
             else
             {
-                @if (_internalCollapsed)
+                @if (EffectiveCollapsed)
                 {
                     <IconChevronDown Size="IconSizeEnum.Small"/>
                 }
@@ -23,11 +30,9 @@
             }
         </div>
     </div>
-    <div class="content-wrapper" id="@UUIDCode">
-        @if (!_internalCollapsed)
-        {
-            @Content
-        }
+
+    <div class="content-wrapper" @ref="_refContentWrapper">
+        @Content
     </div>
 </div>
 
@@ -43,10 +48,10 @@
     public RenderFragment<bool>? Arrow { get; set; }
 
     [Parameter]
-    public bool? Animated { get; set; }
+    public bool? Collapsed { get; set; }
 
     [Parameter]
-    public bool? Collapsed { get; set; }
+    public bool Loading { get; set; }
 
     [Parameter]
     public EventCallback<bool> CollapsedChanged { get; set; }
@@ -54,16 +59,18 @@
     [Parameter]
     public Expression<Func<bool>>? CollapsedExpression { get; set; }
 
+    private bool _wasLoading;
     private bool _internalCollapsed;
     private IJSObjectReference? _module;
-    private DotNetObjectReference<Collapsible>? _reference;
+    private DotNetObjectReference<Collapsible>? _refDotNet;
+    private ElementReference _refContentWrapper;
 
-    private bool IsAnimated => _module != null && _reference != null;
+    private bool IsAnimated => _module != null && _refDotNet != null;
+    private bool EffectiveCollapsed => Loading || _internalCollapsed;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
         _internalCollapsed = Collapsed ?? true;
     }
 
@@ -72,33 +79,27 @@
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender) return;
 
-        await Register();
+        _refDotNet ??= DotNetObjectReference.Create(this);
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Collapsible)));
+
+        await _module.InvokeVoidAsync("RegisterCollapsible", UUIDCode, _refContentWrapper, _refDotNet, nameof(OnAnimationComplete));
     }
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
 
+        if (!_wasLoading && Loading)
+        {
+            if (_module != null) _ = _module.InvokeVoidAsync("ResetInlineStyle", _refContentWrapper);
+            _internalCollapsed = true;
+        }
+
+        _wasLoading = Loading;
+
         if (Collapsed.HasValue)
         {
             _internalCollapsed = Collapsed.Value;
-        }
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await base.OnParametersSetAsync();
-
-        if (!IsRendered || !Animated.HasValue) return;
-
-        switch (Animated.Value)
-        {
-            case true when _module == null:
-                await Register();
-                break;
-            case false when _module != null:
-                await Deregister();
-                break;
         }
     }
 
@@ -122,43 +123,18 @@
         await Toggle();
     }
 
-    private async Task Register()
-    {
-        _reference ??= DotNetObjectReference.Create(this);
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Collapsible)));
-
-        await _module.InvokeVoidAsync("RegisterCollapsible", UUIDCode, _reference, nameof(OnAnimationComplete));
-    }
-
-    private async Task Deregister()
-    {
-        if (_module != null && _reference != null)
-        {
-            await _module.InvokeVoidAsync("DisposeCollapsible", UUIDCode);
-
-            await _module.DisposeAsync();
-            _reference.Dispose();
-
-            _module = null;
-            _reference = null;
-        }
-    }
-
     private async Task Toggle()
     {
-        if (_module == null || _reference == null)
+        if (_module == null || _refDotNet == null)
         {
             await CollapsedChanged.InvokeAsync(_internalCollapsed = !_internalCollapsed);
         }
         else
         {
             string method = _internalCollapsed ? "AnimateExpand" : "AnimateCollapse";
-            if (_internalCollapsed)
-            {
-                await CollapsedChanged.InvokeAsync(_internalCollapsed = false);
-            }
+            if (_internalCollapsed) await CollapsedChanged.InvokeAsync(_internalCollapsed = false);
 
-            await _module.InvokeVoidAsync(method, UUIDCode);
+            await _module.InvokeVoidAsync(method, _refContentWrapper);
         }
     }
 
@@ -170,8 +146,8 @@
             _module = null;
         }
 
-        _reference?.Dispose();
-        _reference = null;
+        _refDotNet?.Dispose();
+        _refDotNet = null;
     }
 
 }

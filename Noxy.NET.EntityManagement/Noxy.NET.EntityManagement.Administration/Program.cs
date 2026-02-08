@@ -3,32 +3,21 @@ using Fluxor.Blazor.Web.ReduxDevTools;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Noxy.NET.EntityManagement.Administration.Application;
-using Noxy.NET.EntityManagement.Administration.Features;
+using Noxy.NET.EntityManagement.Presentation;
 
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddPresentation(builder.Configuration["Backend:URL"] ?? throw new KeyNotFoundException("Backend:URL"));
 builder.Services.AddFluxor(options =>
 {
     options.ScanAssemblies(typeof(Program).Assembly);
-    options.UseReduxDevTools(); // optional
+    options.ScanAssemblies(typeof(PresentationAssemblyMarker).Assembly);
+    options.UseReduxDevTools();
 });
+builder.Services.AddPresentation(builder.Configuration["Backend:URL"] ?? throw new KeyNotFoundException("Backend:URL"));
 
 WebAssemblyHost app = builder.Build();
-
-var featureBase = typeof(Feature<>);
-
-foreach (var type in typeof(FeatureSchemaParameterDataParameterListState).Assembly.GetTypes())
-{
-    if (type.BaseType != null &&
-        type.BaseType.IsGenericType &&
-        type.BaseType.GetGenericTypeDefinition() == typeof(Feature<>))
-    {
-        Console.WriteLine("FEATURE FOUND: " + type.FullName);
-    }
-}
 
 await app.RunAsync();

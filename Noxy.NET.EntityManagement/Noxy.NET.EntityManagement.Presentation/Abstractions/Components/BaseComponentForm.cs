@@ -18,14 +18,6 @@ public abstract class BaseComponentForm<TForm> : BaseForm<TForm> where TForm : B
         Context = CreateContext();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
-
-        LoadAfterRender(TextService.Resolve);
-    }
-
     protected string GetDisplayName(string property)
     {
         return TextService.Get(Context.GetField(property)?.GetDisplayName());

@@ -19,6 +19,7 @@ public static class TextConstants
     public const string ButtonSignOut = "Button:SignOut";
 
     public const string LinkNavigationSchema = "Link:Navigation:Schema";
+    public const string LinkNavigationParameter = "Link:Navigation:Parameter";
 
     public const string HeaderSchema = "Header:Schema";
     public const string HeaderContext = "Header:Context";
@@ -36,6 +37,12 @@ public static class TextConstants
     public const string HeaderPropertyInteger = "Header:Property:Integer";
     public const string HeaderPropertyString = "Header:Property:String";
     public const string HeaderPropertyTable = "Header:Property:Table";
+
+    public const string LabelValue = "Label:Value";
+    public const string LabelTimeApproved = "Label:TimeApproved";
+    public const string LabelTimeCreated = "Label:TimeCreated";
+    public const string LabelTimeEffectiveFrom = "Label:TimeEffectiveFrom";
+    public const string LabelTimeEffectiveTo = "Label:TimeEffectiveTo";
 
     public const string LabelFormEmail = "Label:Form:Email";
     public const string LabelFormPassword = "Label:Form:Password";

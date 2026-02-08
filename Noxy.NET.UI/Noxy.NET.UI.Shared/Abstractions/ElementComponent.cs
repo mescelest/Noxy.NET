@@ -7,7 +7,6 @@ public abstract class ElementComponent : BlazorComponent
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; init; }
 
-
     protected override string CssClass => CombineCssClass(base.CssClass, GetComponentClass());
 
     protected void LoadAfterRender(Func<Task> action)

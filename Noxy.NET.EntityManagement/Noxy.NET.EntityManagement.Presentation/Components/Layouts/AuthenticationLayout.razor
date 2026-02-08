@@ -1,5 +1,6 @@
 ﻿@inject UserAuthenticationStateProvider AuthProvider
 @inject UserAuthenticationService AuthService
+@inject IState<FeatureTextState> State
 @inherits LayoutComponentBase
 @implements IDisposable
 
@@ -25,6 +26,7 @@
 
     protected override void OnInitialized()
     {
+        State.StateChanged += OnStateChanged;
         AuthProvider.AuthenticationStateChanged += OnAuthStateChanged;
     }
 
@@ -33,8 +35,14 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private void OnStateChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
     public void Dispose()
     {
+        State.StateChanged -= OnStateChanged;
         AuthProvider.AuthenticationStateChanged -= OnAuthStateChanged;
     }
 

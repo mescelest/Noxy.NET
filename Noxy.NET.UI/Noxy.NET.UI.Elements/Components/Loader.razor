@@ -12,6 +12,13 @@
             </g>
         </svg>
     </div>
+
+    @if (RenderWhileLoadingCurrent)
+    {
+        <div class="loading-content">
+            @ChildContent
+        </div>
+    }
 }
 else
 {
@@ -38,6 +45,9 @@ else
     private bool LoadingCurrent => Loading ?? false;
 
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public bool? RenderWhileLoading { get; set; }
+    private bool RenderWhileLoadingCurrent => RenderWhileLoading ?? false;
 
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
 }
