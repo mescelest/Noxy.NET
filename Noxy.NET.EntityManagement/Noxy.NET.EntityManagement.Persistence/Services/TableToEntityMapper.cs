@@ -31,8 +31,8 @@ public class TableToEntityMapper : ITableToEntityMapper
 
     #region -- Authentication --
 
-    public EntityIdentity Map(TableIdentity? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityAuthentication Map(TableAuthentication? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityIdentity Map(TableIdentity table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityAuthentication Map(TableAuthentication table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntityUser Map(TableUser table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
 
     private static EntityIdentity? MapInternal(TableIdentity? table, Guid[]? listVisitedRelation = null)
@@ -104,13 +104,15 @@ public class TableToEntityMapper : ITableToEntityMapper
 
     #region -- Data --
 
-    public EntityDataElement Map(TableDataElement? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataProperty Map(TableDataProperty? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataPropertyBoolean Map(TableDataPropertyBoolean? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataPropertyDateTime Map(TableDataPropertyDateTime? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataPropertyString Map(TableDataPropertyString? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataParameterSystem Map(TableDataParameterSystem? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataParameterText Map(TableDataParameterText? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataElement Map(TableDataElement table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataProperty Map(TableDataProperty table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataPropertyBoolean Map(TableDataPropertyBoolean table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataPropertyDateTime Map(TableDataPropertyDateTime table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataPropertyString Map(TableDataPropertyString table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataParameter.Discriminator Map(TableDataParameter table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataParameterStyle Map(TableDataParameterStyle table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataParameterSystem Map(TableDataParameterSystem table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataParameterText Map(TableDataParameterText table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
 
     private static EntityDataElement? MapInternal(TableDataElement? table)
     {
@@ -185,7 +187,37 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityDataParameterSystem? MapInternal(TableDataParameterSystem? table)
+    private static EntityDataParameter.Discriminator? MapInternal(TableDataParameter? table, Guid[]? listVisitedRelation = null)
+    {
+        if (table == null) return null;
+
+        return new(table switch
+        {
+            TableDataParameterStyle property => MapInternal(property, listVisitedRelation),
+            TableDataParameterSystem property => MapInternal(property, listVisitedRelation),
+            TableDataParameterText property => MapInternal(property, listVisitedRelation),
+            _ => throw new ArgumentOutOfRangeException(nameof(table), table, null)
+        });
+    }
+
+    private static EntityDataParameterStyle? MapInternal(TableDataParameterStyle? table, Guid[]? listVisitedRelation = null)
+    {
+        if (table == null) return null;
+
+        EntityDataParameterStyle mapped = new()
+        {
+            ID = table.ID,
+            Value = table.Value,
+            SchemaIdentifier = table.SchemaIdentifier,
+            TimeApproved = table.TimeApproved,
+            TimeEffective = table.TimeEffective,
+            TimeCreated = table.TimeCreated
+        };
+
+        return mapped;
+    }
+
+    private static EntityDataParameterSystem? MapInternal(TableDataParameterSystem? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
@@ -202,7 +234,7 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityDataParameterText? MapInternal(TableDataParameterText? table)
+    private static EntityDataParameterText? MapInternal(TableDataParameterText? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
@@ -311,21 +343,45 @@ public class TableToEntityMapper : ITableToEntityMapper
 
     #region -- Schemas --
 
-    public EntitySchemaContext Map(TableSchemaContext? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaElement Map(TableSchemaElement? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaParameter.Discriminator Map(TableSchemaParameter? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaParameterStyle Map(TableSchemaParameterStyle? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaParameterSystem Map(TableSchemaParameterSystem? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaParameterText Map(TableSchemaParameterText? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaProperty.Discriminator Map(TableSchemaProperty? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaPropertyBoolean Map(TableSchemaPropertyBoolean? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaPropertyCollection Map(TableSchemaPropertyCollection? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaPropertyDateTime Map(TableSchemaPropertyDateTime? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaPropertyDecimal Map(TableSchemaPropertyDecimal? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaPropertyImage Map(TableSchemaPropertyImage? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaPropertyInteger Map(TableSchemaPropertyInteger? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaPropertyString Map(TableSchemaPropertyString? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntitySchemaPropertyTable Map(TableSchemaPropertyTable? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchema Map(TableSchema table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaContext Map(TableSchemaContext table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaElement Map(TableSchemaElement table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameter.Discriminator Map(TableSchemaParameter table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameterStyle Map(TableSchemaParameterStyle table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameterSystem Map(TableSchemaParameterSystem table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaParameterText Map(TableSchemaParameterText table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaProperty.Discriminator Map(TableSchemaProperty table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaPropertyBoolean Map(TableSchemaPropertyBoolean table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaPropertyCollection Map(TableSchemaPropertyCollection table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaPropertyDateTime Map(TableSchemaPropertyDateTime table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaPropertyDecimal Map(TableSchemaPropertyDecimal table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaPropertyImage Map(TableSchemaPropertyImage table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaPropertyInteger Map(TableSchemaPropertyInteger table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaPropertyString Map(TableSchemaPropertyString table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaPropertyTable Map(TableSchemaPropertyTable table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+
+    private static EntitySchema? MapInternal(TableSchema? table, Guid[]? listVisitedRelation = null)
+    {
+        if (table == null) return null;
+
+        EntitySchema mapped = new()
+        {
+            ID = table.ID,
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
+            IsActive = table.IsActive,
+            TimeCreated = table.TimeCreated,
+            TimeActivated = table.TimeActivated
+        };
+
+        if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
+
+        mapped.ElementList = table.ElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
+        mapped.PropertyList = table.PropertyList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
+
+        return mapped;
+    }
 
     private static EntitySchemaContext? MapInternal(TableSchemaContext? table, Guid[]? listVisitedRelation = null)
     {
@@ -427,6 +483,7 @@ public class TableToEntityMapper : ITableToEntityMapper
 
         return new(table switch
         {
+            TableSchemaParameterStyle value => MapInternal(value, listVisitedRelation),
             TableSchemaParameterSystem value => MapInternal(value, listVisitedRelation),
             TableSchemaParameterText value => MapInternal(value, listVisitedRelation),
             _ => throw new ArgumentOutOfRangeException(nameof(table), table, null)
@@ -710,33 +767,4 @@ public class TableToEntityMapper : ITableToEntityMapper
     }
 
     #endregion -- Schemas --
-
-    #region -- Templates --
-
-    public EntitySchema Map(TableSchema? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-
-    private static EntitySchema? MapInternal(TableSchema? table, Guid[]? listVisitedRelation = null)
-    {
-        if (table == null) return null;
-
-        EntitySchema mapped = new()
-        {
-            ID = table.ID,
-            Name = table.Name,
-            Note = table.Note,
-            Order = table.Order,
-            IsActive = table.IsActive,
-            TimeCreated = table.TimeCreated,
-            TimeActivated = table.TimeActivated
-        };
-
-        if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
-
-        mapped.ElementList = table.ElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
-        mapped.PropertyList = table.PropertyList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
-
-        return mapped;
-    }
-
-    #endregion -- Templates --
 }

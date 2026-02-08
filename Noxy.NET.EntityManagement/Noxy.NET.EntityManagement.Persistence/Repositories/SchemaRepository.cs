@@ -117,9 +117,6 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         if (filter.IsSystemDefined != null) query = query.Where(x => x.IsSystemDefined == filter.IsSystemDefined);
         if (filter.IsApprovalRequired != null) query = query.Where(x => x.IsApprovalRequired == filter.IsApprovalRequired);
 
-        var skip = filter.PageNumber * filter.PageSize;
-        var take = filter.PageSize;
-
         List<TableSchemaParameter> result = await query
             .Skip(filter.PageNumber * filter.PageSize)
             .Take(filter.PageSize)

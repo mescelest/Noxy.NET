@@ -6,13 +6,13 @@ using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.API.Handlers;
 
-public class HandlerDataParameterTextResolve(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<QueryDataParameterTextResolve, ResponseDataParameterResolve>
+public class HandlerDataParameterTextResolve(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<QueryDataParameterTextResolve, ResponseDataParameterTextResolve>
 {
-    public async Task<ResponseDataParameterResolve> Handle(QueryDataParameterTextResolve request, CancellationToken cancellationToken)
+    public async Task<ResponseDataParameterTextResolve> Handle(QueryDataParameterTextResolve request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntityDataParameterText? result = await uow.Data.GetCurrentTextParameterByIdentifier(request.SchemaIdentifier);
+        EntityDataParameterText? result = await uow.Data.GetCurrentTextParameterByIdentifier(request.Identifier);
 
         return new() { Value = result?.Value ?? "[MISSING]" };
     }

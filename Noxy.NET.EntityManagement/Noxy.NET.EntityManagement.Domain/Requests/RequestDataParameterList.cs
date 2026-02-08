@@ -4,9 +4,9 @@ using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests;
 
-public class RequestDataParameterTextResolve : BaseRequestGet<ResponseDataParameterTextResolve>
+public class RequestDataParameterList : BaseRequestGet<ResponseDataParameterList>
 {
-    public override string APIEndpoint => $"/Data/Parameter/Text/{SchemaIdentifier}/Resolve";
+    public override string APIEndpoint => $"/Data/Parameter/Text/{SchemaIdentifier}";
 
     [Required]
     public required string SchemaIdentifier { get; init; }

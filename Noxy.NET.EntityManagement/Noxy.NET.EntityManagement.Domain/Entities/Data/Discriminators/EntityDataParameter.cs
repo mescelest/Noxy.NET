@@ -9,7 +9,7 @@ public abstract class EntityDataParameter : BaseEntityData
     public required DateTime? TimeApproved { get; set; }
     public required DateTime TimeEffective { get; set; }
 
-    public class Discriminator
+    public class Discriminator : BaseEntity
     {
         [JsonConstructor]
         public Discriminator()
@@ -32,9 +32,11 @@ public abstract class EntityDataParameter : BaseEntityData
                 default:
                     throw new InvalidOperationException();
             }
+
+            ID = entity.ID;
+            SchemaIdentifier = entity.SchemaIdentifier;
         }
 
-        public Guid ID { get; init; }
         public string SchemaIdentifier { get; init; } = string.Empty;
 
         public EntityDataParameterStyle? Style { get; init; }

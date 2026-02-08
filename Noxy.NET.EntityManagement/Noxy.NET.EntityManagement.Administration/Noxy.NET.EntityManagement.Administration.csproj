@@ -5,12 +5,15 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <WasmBuildNative>true</WasmBuildNative>
-        <Title>Noxy.NET.CaseManagement.Presentation.Frontend</Title>
+        <Title>Noxy.NET.CaseManagement.Presentation.Administration</Title>
         <Authors>Noxy.NET</Authors>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Blazored.LocalStorage" Version="4.5.0"/>
+        <PackageReference Include="Fluxor" Version="6.9.0"/>
+        <PackageReference Include="Fluxor.Blazor.Web" Version="6.9.0"/>
+        <PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="6.9.0"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.2"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.2"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.2" PrivateAssets="all"/>
@@ -38,6 +41,15 @@
         <_ContentIncludedByDefault Remove="Pages\ContextPages\IDPage.razor"/>
         <_ContentIncludedByDefault Remove="Pages\SchemaPages\IDPage.razor"/>
         <_ContentIncludedByDefault Remove="Pages\SchemaPages\IndexPage.razor"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Microsoft.AspNetCore.Hosting.Abstractions">
+            <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\10.0.2\Microsoft.AspNetCore.Hosting.Abstractions.dll</HintPath>
+        </Reference>
+        <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
+            <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\10.0.2\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@ namespace Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 
 public abstract class EntityDataProperty : BaseEntityData
 {
-    public class Discriminator
+    public class Discriminator : BaseEntity
     {
         [JsonConstructor]
         public Discriminator()
@@ -28,9 +28,11 @@ public abstract class EntityDataProperty : BaseEntityData
                 default:
                     throw new InvalidOperationException();
             }
+
+            ID = entity.ID;
+            SchemaIdentifier = entity.SchemaIdentifier;
         }
 
-        public Guid ID { get; init; }
         public string SchemaIdentifier { get; init; } = string.Empty;
 
         public EntityDataPropertyBoolean? Boolean { get; init; }

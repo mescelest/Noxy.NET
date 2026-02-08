@@ -1,0 +1,26 @@
+@inject IState<FeatureSchemaParameterListState> State
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Loader Loading="State.Value.IsLoading">
+        @foreach (EntitySchemaParameter.Discriminator item in State.Value.List)
+        {
+            <SchemaParameterListGroup SchemaParameter="item.GetValue()"/>
+        }
+    </Loader>
+</div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        Observe(State);
+
+        if (State.Value.List.Count == 0 && !State.Value.IsLoading)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaParameterListReducers.SchemaParameterListAction(new()));
+        }
+    }
+
+}

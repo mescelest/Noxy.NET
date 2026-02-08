@@ -2,6 +2,8 @@
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 
+@using Fluxor
+
 @using Noxy.NET.UI.Abstractions
 @using Noxy.NET.UI.Components
 @using Noxy.NET.UI.Components.Frames
@@ -13,6 +15,7 @@
 @using Noxy.NET.UI.Models
 
 @using Noxy.NET.EntityManagement.Domain.Constants
+@using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators
 @using Noxy.NET.EntityManagement.Domain.Entities.Schemas
 @using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators
 @using Noxy.NET.EntityManagement.Domain.Requests
@@ -21,8 +24,11 @@
 
 @using Noxy.NET.EntityManagement.Administration.Application
 @using Noxy.NET.EntityManagement.Administration.Components.Layouts
+@using Noxy.NET.EntityManagement.Administration.Components.SchemaParameterList
+@using Noxy.NET.EntityManagement.Administration.Features
 @using Noxy.NET.EntityManagement.Administration.Pages
 
+@using Noxy.NET.EntityManagement.Presentation.Abstractions
 @using Noxy.NET.EntityManagement.Presentation.Components.Forms.Data
 @using Noxy.NET.EntityManagement.Presentation.Components.Forms.Schema
 @using Noxy.NET.EntityManagement.Presentation.Components.Layouts

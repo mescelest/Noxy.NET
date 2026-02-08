@@ -1,0 +1,64 @@
+@inject IState<FeatureSchemaParameterDataParameterListState> State
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Collapsible @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+        <Header>
+            @SchemaParameter.Name
+        </Header>
+
+        <Content>
+            <Loader Loading="IsLoading">
+
+                @if (TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> dataParameterList))
+                {
+                    <ul>
+                        @foreach (EntityDataParameter.Discriminator item in dataParameterList)
+                        {
+                            <li>@item.GetValue().Value</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No data available.</p>
+                }
+            </Loader>
+        </Content>
+    </Collapsible>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required EntitySchemaParameter SchemaParameter { get; set; }
+
+    private bool _isCollapsed = true;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Observe(State);
+    }
+
+    private void SetCollapsed(bool value)
+    {
+        _isCollapsed = value;
+        if (_isCollapsed) return;
+
+        string id = SchemaParameter.SchemaIdentifier;
+        if (!State.Value.Cache.ContainsKey(id) && !State.Value.IsLoading)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.LoadDataParameterListAction(id));
+        }
+    }
+
+    private bool TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list)
+    {
+        return State.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out list!);
+    }
+
+    private bool IsLoading => State.Value.IsLoading && !State.Value.Cache.ContainsKey(SchemaParameter.SchemaIdentifier);
+
+    private string? ErrorMessage => State.Value.ErrorMessage;
+}

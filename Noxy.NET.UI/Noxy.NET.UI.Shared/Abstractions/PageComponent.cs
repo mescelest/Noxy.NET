@@ -3,6 +3,9 @@
 public abstract class PageComponent : BlazorComponent, IDisposable
 {
     private IDisposable? _pageLoadScope;
+
+    protected bool IsLoading { get; set; }
+
     protected override string CssClass => CombineCssClass(base.CssClass, "Page");
 
     public virtual void Dispose()

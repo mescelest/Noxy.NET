@@ -9,5 +9,5 @@ public class RequestDataParameterTextResolveList : BaseRequestPost<ResponseDataP
     public override string APIEndpoint => "/Data/Parameter/Text/Resolve";
 
     [Required]
-    public required IEnumerable<string> SchemaIdentifierList { get; set; }
+    public required IEnumerable<string> SchemaIdentifierList { get; init; }
 }

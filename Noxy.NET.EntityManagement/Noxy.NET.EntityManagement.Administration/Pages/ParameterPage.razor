@@ -1,6 +1,5 @@
 ﻿@page "/Parameter"
 @inject TextService TextService
-@inject APIHttpClient APIHttpClient
 @inherits PageComponent
 
 <PageTitle>Administration | Parameter</PageTitle>
@@ -8,56 +7,21 @@
 <div class="@CssClass">
     <MagazineFrame>
         <Left>
-            <FormDataParameterList OnSubmit="form => form.SubmitAsync(Submit)">
-                <div class="action-list">
-                    <Button Status="StatusEnum.Warning" type="button">
-                        @TextService.Get(TextConstants.ButtonReset)
-                    </Button>
-                    <Button Status="StatusEnum.Info" type="submit">
-                        @TextService.Get(TextConstants.ButtonFilter)
-                    </Button>
-                </div>
-            </FormDataParameterList>
+            <SchemaParameterListFilter/>
         </Left>
         <Content>
-            <div class="parameter-list">
-                @foreach (EntitySchemaParameter.Discriminator item in _listParameter)
-                {
-                    <div class="parameter">
-                        <span>@item.GetValue().Name</span>
-                    </div>
-                }
-            </div>
+            <SchemaParameterListView/>
         </Content>
     </MagazineFrame>
 </div>
 
 @code {
 
-    private List<EntitySchemaParameter.Discriminator> _listParameter = [];
-
     protected override async Task OnFirstRenderAsync()
     {
         await base.OnFirstRenderAsync();
 
-        await LoadData();
         await TextService.Resolve();
-    }
-
-    private async Task LoadData()
-    {
-        // _listParameter = await APIHttpClient.SendRequest<EntitySchemaParameter.Discriminator[]>(HttpMethod.Get, "Schema/Parameter", new Dictionary<string, object?>());
-    }
-
-    private static string GetLink(string identifier)
-    {
-        return $"/Context/{identifier}";
-    }
-
-    private async Task Submit(IWebFormContext<RequestSchemaParameterList> value)
-    {
-        ResponseSchemaParameterList result = await APIHttpClient.SendRequest(value.Model);
-        _listParameter = result.Value;
     }
 
 }

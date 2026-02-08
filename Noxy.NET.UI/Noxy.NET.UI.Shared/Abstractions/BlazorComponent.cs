@@ -9,7 +9,6 @@ public abstract class BlazorComponent : ComponentBase
     protected PageLoadingService PageLoadingService { get; set; } = null!;
 
     protected bool IsRendered { get; set; }
-    protected bool IsLoading { get; set; }
 
     protected Guid UUID { get; } = Guid.NewGuid();
     protected string UUIDString => UUID.ToString();

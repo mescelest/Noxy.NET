@@ -1,0 +1,25 @@
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <FormDataParameterList OnSubmit="form => form.Submit(Submit)">
+        <div class="action-list">
+            <Button Status="StatusEnum.Warning" type="button">
+                @TextService.Get(TextConstants.ButtonReset)
+            </Button>
+            <Button Status="StatusEnum.Info" type="submit">
+                @TextService.Get(TextConstants.ButtonFilter)
+            </Button>
+        </div>
+    </FormDataParameterList>
+</div>
+
+@code {
+
+    private void Submit(IWebFormContext<RequestSchemaParameterList> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterListReducers.SchemaParameterListAction(value.Model));
+    }
+
+}
