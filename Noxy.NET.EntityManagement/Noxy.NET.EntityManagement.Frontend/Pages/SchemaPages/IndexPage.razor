@@ -20,9 +20,9 @@
 
     private EntitySchema[] _data = [];
 
-    protected override async Task OnFirstRenderAsync()
+    protected override async Task OnAfterFirstRenderAsync()
     {
-        await base.OnFirstRenderAsync();
+        await base.OnAfterFirstRenderAsync();
 
         await LoadData();
     }

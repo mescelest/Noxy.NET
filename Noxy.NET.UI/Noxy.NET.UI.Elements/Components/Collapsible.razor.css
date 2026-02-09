@@ -32,10 +32,8 @@
 
 .Collapsible[collapsed] .content-wrapper {
     grid-template-rows: minmax(0, 0fr);
-    margin-top: 0;
 }
 
-.Collapsible[collapsed] .content-wrapper ::deep > * {
-    display: none;
+.Collapsible[loading] .content-wrapper {
+    transition: none;
 }
-

@@ -26,9 +26,9 @@ else
     private ViewModelSchemaContext? _entityContext;
     private ViewModelDataElement[] _listElement = [];
 
-    protected override async Task OnFirstRenderAsync()
+    protected override async Task OnAfterFirstRenderAsync()
     {
-        await base.OnFirstRenderAsync();
+        await base.OnAfterFirstRenderAsync();
 
         await LoadContext();
         await LoadElement();
