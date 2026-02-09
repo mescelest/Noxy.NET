@@ -2,13 +2,13 @@
 @inherits ElementComponent
 @implements IAsyncDisposable
 
-<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" collapsed="@EffectiveCollapsed" animated="@IsAnimated">
+<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" collapsed="@_isCollapsed">
     <div class="header-wrapper">
         @Header
 
         <div class="arrow" tabindex="0" @onclick="ArrowClicked" @onkeydown="ArrowKeyPressed">
 
-            @if (Loading)
+            @if (LoadingCurrent)
             {
                 <span>LOADING</span>
                 @* <Loader Width="40" Height="40"/>  *@
@@ -48,10 +48,12 @@
     public RenderFragment<bool>? Arrow { get; set; }
 
     [Parameter]
-    public bool? Collapsed { get; set; }
+    public bool? Loading { get; set; }
+    private bool LoadingCurrent => Loading ?? false;
 
     [Parameter]
-    public bool Loading { get; set; }
+    public bool? Collapsed { get; set; }
+    private bool CollapsedCurrent => Collapsed ?? true;
 
     [Parameter]
     public EventCallback<bool> CollapsedChanged { get; set; }
@@ -60,53 +62,73 @@
     public Expression<Func<bool>>? CollapsedExpression { get; set; }
 
     private bool _wasLoading;
-    private bool _internalCollapsed;
-    private IJSObjectReference? _module;
-    private DotNetObjectReference<Collapsible>? _refDotNet;
+    private bool _isCollapsed;
+    private bool? _isAnimating;
+    private IJSObjectReference _module = null!;
+    private DotNetObjectReference<Collapsible> _refDotNet = null!;
     private ElementReference _refContentWrapper;
 
-    private bool IsAnimated => _module != null && _refDotNet != null;
-    private bool EffectiveCollapsed => Loading || _internalCollapsed;
+    private bool EffectiveCollapsed => LoadingCurrent || _isCollapsed;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _internalCollapsed = Collapsed ?? true;
+        _isCollapsed = CollapsedCurrent;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterFirstRenderAsync()
     {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
+        await base.OnAfterFirstRenderAsync();
 
-        _refDotNet ??= DotNetObjectReference.Create(this);
-        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Collapsible)));
+        _refDotNet = DotNetObjectReference.Create(this);
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Collapsible)));
 
-        await _module.InvokeVoidAsync("RegisterCollapsible", UUIDCode, _refContentWrapper, _refDotNet, nameof(OnAnimationComplete));
+        await _module.InvokeVoidAsync("RegisterCollapsible", UUIDCode, _isCollapsed, _refContentWrapper, _refDotNet, nameof(OnAnimationComplete));
     }
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
 
-        if (!_wasLoading && Loading)
+        if (LoadingCurrent)
         {
-            if (_module != null) _ = _module.InvokeVoidAsync("ResetInlineStyle", _refContentWrapper);
-            _internalCollapsed = true;
+            _isCollapsed = true;
         }
 
-        _wasLoading = Loading;
-
-        if (Collapsed.HasValue)
+        if (_wasLoading && !LoadingCurrent)
         {
-            _internalCollapsed = Collapsed.Value;
+            _isCollapsed = false;
+            _ = Animate(false);
+        }
+
+        _wasLoading = LoadingCurrent;
+
+        if (CollapsedCurrent != _isCollapsed)
+        {
+            if (_isAnimating.HasValue)
+            {
+                if (CollapsedCurrent == _isAnimating.Value)
+                {
+                    return;
+                }
+
+                if (CollapsedCurrent == _isAnimating.Value)
+                {
+                    _ = Animate(CollapsedCurrent);
+                }
+            }
+            else
+            {
+                _ = Animate(CollapsedCurrent);
+            }
         }
     }
 
     [JSInvokable]
     public async Task OnAnimationComplete(bool collapsed)
     {
-        await CollapsedChanged.InvokeAsync(_internalCollapsed = collapsed);
+        _isAnimating = null;
+        _isCollapsed = collapsed;
         await InvokeAsync(StateHasChanged);
     }
 
@@ -125,29 +147,20 @@
 
     private async Task Toggle()
     {
-        if (_module == null || _refDotNet == null)
-        {
-            await CollapsedChanged.InvokeAsync(_internalCollapsed = !_internalCollapsed);
-        }
-        else
-        {
-            string method = _internalCollapsed ? "AnimateExpand" : "AnimateCollapse";
-            if (_internalCollapsed) await CollapsedChanged.InvokeAsync(_internalCollapsed = false);
+        await CollapsedChanged.InvokeAsync(!_isCollapsed);
+        await Animate(_isCollapsed);
+    }
 
-            await _module.InvokeVoidAsync(method, _refContentWrapper);
-        }
+    private async Task Animate(bool collapse)
+    {
+        _isAnimating = collapse;
+        await _module.InvokeVoidAsync(collapse ? "AnimateExpand" : "AnimateCollapse", _refContentWrapper);
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (_module != null)
-        {
-            await _module.DisposeAsync();
-            _module = null;
-        }
-
-        _refDotNet?.Dispose();
-        _refDotNet = null;
+        await _module.DisposeAsync();
+        _refDotNet.Dispose();
     }
 
 }

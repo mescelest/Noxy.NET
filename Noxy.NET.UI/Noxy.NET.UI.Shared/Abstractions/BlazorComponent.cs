@@ -22,6 +22,24 @@ public abstract class BlazorComponent : ComponentBase
         if (!firstRender) return;
 
         IsRendered = true;
+        OnAfterFirstRender();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        await OnAfterFirstRenderAsync();
+    }
+
+    protected virtual void OnAfterFirstRender()
+    {
+    }
+
+    protected virtual Task OnAfterFirstRenderAsync()
+    {
+        return Task.CompletedTask;
     }
 
     protected string GetComponentName()

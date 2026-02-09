@@ -1,27 +1,32 @@
-const collection = {};
+export function RegisterCollapsible(id, isCollapsed, element, refDotNet, method) {
+    element._state = isCollapsed;
+    console.log("Element is initialized to state:", element._state);
 
-export function RegisterCollapsible(id, element, refDotNet, method) {
-    collection[id] = event => {
+    element._callback = event => {
         if (event.propertyName !== "grid-template-rows") return;
-        refDotNet.invokeMethodAsync(method, element.getAttribute("state") === "1");
+        console.log(element._state);
+        refDotNet.invokeMethodAsync(method, element._state);
     };
 
-    element.addEventListener('transitionend', collection[id]);
+    element.addEventListener('transitionend', element._callback);
 }
 
 export function DisposeCollapsible(id, element) {
-    element.removeEventListener('transitionend', collection[id]);
-    delete collection[id];
+    element.removeEventListener('transitionend', element._callback);
+    delete element._callback;
+    delete element._state;
 }
 
 export function AnimateExpand(element) {
+    console.log("expanding");
+    element._state = false;
     element.style.gridTemplateRows = 'minmax(0, 1fr)';
-    element.setAttribute("state", "0");
 }
 
 export function AnimateCollapse(element) {
+    console.log("collapsing");
+    element._state = true;
     element.style.gridTemplateRows = 'minmax(0, 0fr)';
-    element.setAttribute("state", "1");
 }
 
 export function ResetInlineStyle(element) {

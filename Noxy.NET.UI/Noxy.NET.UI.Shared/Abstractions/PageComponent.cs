@@ -25,16 +25,10 @@ public abstract class PageComponent : BlazorComponent, IDisposable
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender) return;
 
-        await OnFirstRenderAsync();
         await PageLoadingService.WaitForIdleExcept(_pageLoadScope!);
 
         _pageLoadScope!.Dispose();
         StateHasChanged();
-    }
-
-    protected virtual Task OnFirstRenderAsync()
-    {
-        return Task.CompletedTask;
     }
 
     protected async Task WithPageLoading(Func<Task> action)
