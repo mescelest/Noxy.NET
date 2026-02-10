@@ -7,13 +7,23 @@ namespace Noxy.NET.UI.Models;
 
 public class WebFormFieldContext : IWebFormFieldContext
 {
-    private readonly DescriptionAttribute? _description;
-    private readonly DisplayNameAttribute? _displayName;
-    private readonly List<string> _listError = [];
+    public string Name { get; }
+    public string? DisplayName => _displayName?.DisplayName;
+    public string? Description => _description?.Description;
+    public bool HasChanged { get; private set; }
+    public bool HasError { get; private set; }
+    public object? CurrentValue => _property.GetValue(_model);
+    public IReadOnlyList<string> ErrorList => _listError;
 
     private readonly object _model;
     private readonly object? _originalValue;
     private readonly PropertyInfo _property;
+    private readonly DescriptionAttribute? _description;
+    private readonly DisplayNameAttribute? _displayName;
+    private readonly List<string> _listError = [];
+
+    public event Action<WebFormFieldContext>? Validated;
+    public event Action<WebFormFieldContext>? Changed;
 
     internal WebFormFieldContext(string name, object model)
     {
@@ -24,14 +34,6 @@ public class WebFormFieldContext : IWebFormFieldContext
         _displayName = _property.GetCustomAttribute<DisplayNameAttribute>();
         _description = _property.GetCustomAttribute<DescriptionAttribute>();
     }
-
-    public string Name { get; }
-    public string? DisplayName => _displayName?.DisplayName;
-    public string? Description => _description?.Description;
-    public bool HasChanged { get; private set; }
-    public bool HasError { get; private set; }
-    public object? CurrentValue => _property.GetValue(_model);
-    public IReadOnlyList<string> ErrorList => _listError;
 
     public void NotifyChange()
     {
@@ -106,9 +108,6 @@ public class WebFormFieldContext : IWebFormFieldContext
 
         HasError = true;
     }
-
-    public event Action<WebFormFieldContext>? Validated;
-    public event Action<WebFormFieldContext>? Changed;
 
     private void AddError(string message)
     {

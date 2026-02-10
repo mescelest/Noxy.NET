@@ -5,8 +5,24 @@ namespace Noxy.NET.UI.Models;
 
 public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where TModel : class
 {
+    public TModel Model { get; }
+    public bool HasError { get; private set; }
+    public bool HasChanged { get; private set; }
+    public bool HasAnyError => HasError || AnyFieldHasError;
+    public bool HasAnyChanges => HasChanged || AnyFieldHasChanged;
+    public bool IsSubmitting { get; private set; }
+    public IReadOnlySet<string> FieldNameList { get; }
+
+    protected Dictionary<string, WebFormFieldContext> WebFormFieldContextCollection { get; } = [];
+    protected List<string> ErrorList { get; } = [];
+
     private bool _batchChanged;
     private int _batchCount;
+
+    private bool AnyFieldHasError => WebFormFieldContextCollection.Values.Any(f => f.HasError);
+    private bool AnyFieldHasChanged => WebFormFieldContextCollection.Values.Any(f => f.HasChanged);
+
+    public event Action<IWebFormContext<TModel>>? Changed;
 
     public WebFormContext(TModel value)
     {
@@ -14,36 +30,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         FieldNameList = value.GetType().GetProperties().Select(p => p.Name).ToHashSet();
         foreach (string name in FieldNameList) RegisterField(name);
     }
-
-    public bool IsSubmitting { get; private set; }
-
-    protected Dictionary<string, WebFormFieldContext> WebFormFieldContextCollection { get; } = [];
-    protected List<string> ErrorList { get; } = [];
-
-    private bool AnyFieldHasError => WebFormFieldContextCollection.Values.Any(f => f.HasError);
-    private bool AnyFieldHasChanged => WebFormFieldContextCollection.Values.Any(f => f.HasChanged);
-
-    public void Dispose()
-    {
-        foreach (KeyValuePair<string, WebFormFieldContext> pair in WebFormFieldContextCollection)
-        {
-            pair.Value.Changed -= OnFieldChanged;
-            pair.Value.Validated -= OnFieldValidated;
-        }
-
-        WebFormFieldContextCollection.Clear();
-
-        GC.SuppressFinalize(this);
-    }
-
-    public TModel Model { get; }
-    public bool HasError { get; private set; }
-    public bool HasChanged { get; private set; }
-    public bool HasAnyError => HasError || AnyFieldHasError;
-    public bool HasAnyChanges => HasChanged || AnyFieldHasChanged;
-    public IReadOnlySet<string> FieldNameList { get; }
-
-    public event Action<IWebFormContext<TModel>>? Changed;
 
     public void RegisterField(string name)
     {
@@ -330,5 +316,18 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         if (newValue == HasError) return;
         HasError = newValue;
         NotifyChanged();
+    }
+
+    public void Dispose()
+    {
+        foreach (KeyValuePair<string, WebFormFieldContext> pair in WebFormFieldContextCollection)
+        {
+            pair.Value.Changed -= OnFieldChanged;
+            pair.Value.Validated -= OnFieldValidated;
+        }
+
+        WebFormFieldContextCollection.Clear();
+
+        GC.SuppressFinalize(this);
     }
 }
