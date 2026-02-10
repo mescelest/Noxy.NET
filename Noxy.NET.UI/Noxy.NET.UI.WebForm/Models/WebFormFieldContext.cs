@@ -7,87 +7,116 @@ namespace Noxy.NET.UI.Models;
 
 public class WebFormFieldContext : IWebFormFieldContext
 {
+    private readonly DescriptionAttribute? _description;
+    private readonly DisplayNameAttribute? _displayName;
+    private readonly List<string> _listError = [];
+
+    private readonly object _model;
+    private readonly object? _originalValue;
+    private readonly PropertyInfo _property;
+
+
     internal WebFormFieldContext(string name, object model)
     {
         Name = name;
-        ValidationContext = new(model) { MemberName = name };
+        _model = model;
+
+        _property = model.GetType().GetProperty(name) ?? throw new InvalidOperationException($"Property '{name}' does not exist on model type '{model.GetType().Name}'.");
+        _originalValue = _property.GetValue(model);
+
+        _displayName = _property.GetCustomAttribute<DisplayNameAttribute>();
+        _description = _property.GetCustomAttribute<DescriptionAttribute>();
     }
 
-    private ValidationContext ValidationContext { get; }
-    private List<ValidationResult> ValidationResultList { get; } = [];
     public string Name { get; }
+    public string? DisplayName => _displayName?.DisplayName;
+    public string? Description => _description?.Description;
     public bool HasChanged { get; private set; }
     public bool HasError { get; private set; }
-
-    public event IWebFormFieldContext.WebFormFieldContextEventHandler? Validated;
-    public event IWebFormFieldContext.WebFormFieldContextEventHandler? Changed;
-
-    public string? GetDisplayName()
-    {
-        PropertyInfo? property = GetPropertyInfo();
-        DisplayNameAttribute? attr = property?.GetCustomAttributes(typeof(DisplayNameAttribute), false).FirstOrDefault() as DisplayNameAttribute;
-        return attr?.DisplayName;
-    }
-
-    public string? GetDescription()
-    {
-        PropertyInfo? property = GetPropertyInfo();
-        DescriptionAttribute? attr = property?.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault() as DescriptionAttribute;
-        return attr?.Description;
-    }
-
-    public string[] GetErrorList()
-    {
-        return ValidationResultList.Where(x => !string.IsNullOrEmpty(x.ErrorMessage)).Select(x => x.ErrorMessage!).ToArray();
-    }
+    public object? CurrentValue => _property.GetValue(_model);
+    public IReadOnlyList<string> ErrorList => _listError;
 
     public void NotifyChange()
     {
+        object? currentValue = CurrentValue;
+
+        if (Equals(currentValue, _originalValue)) return;
         HasChanged = true;
         Validate();
+        Changed?.Invoke(this);
     }
 
-    public void Clear()
+    public void ClearErrorList()
     {
         HasError = false;
-        ValidationResultList.Clear();
+        _listError.Clear();
+        Changed?.Invoke(this);
     }
 
     public void Reset()
     {
         HasChanged = false;
-        Clear();
+
+        if (_property.CanWrite)
+        {
+            _property.SetValue(_model, _originalValue);
+        }
+
+        ClearErrorList();
     }
 
     public bool Validate()
     {
-        Clear();
+        ClearErrorList();
 
-        PropertyInfo? property = GetPropertyInfo();
-        object? value = property?.GetValue(ValidationContext.ObjectInstance);
+        object? value = CurrentValue;
 
-        HasError = Validator.TryValidateProperty(value, ValidationContext, ValidationResultList);
+        ValidationContext context = new(_model)
+        {
+            MemberName = Name
+        };
+
+        List<ValidationResult> results = [];
+        bool isValid = Validator.TryValidateProperty(value, context, results);
+
+        foreach (ValidationResult result in results)
+        {
+            if (!string.IsNullOrWhiteSpace(result.ErrorMessage))
+            {
+                _listError.Add(result.ErrorMessage);
+            }
+        }
+
+        HasError = !isValid;
+
         Validated?.Invoke(this);
-
-        return HasError;
+        return isValid;
     }
 
     public void WriteError(string message)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(message);
-        ValidationResultList.Add(new(message, [Name]));
+        AddError(message);
+        HasError = true;
+        Changed?.Invoke(this);
     }
 
     public void WriteError(params string[] list)
     {
         foreach (string message in list)
         {
-            WriteError(message);
+            AddError(message);
         }
+
+        HasError = true;
     }
 
-    private PropertyInfo? GetPropertyInfo()
+    public event IWebFormFieldContext.WebFormFieldContextEventHandler? Validated;
+    public event Action<WebFormFieldContext>? Changed;
+
+    public void AddError(string message)
     {
-        return ValidationContext.ObjectInstance.GetType().GetProperty(Name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(message);
+        _listError.Add(message);
+        Changed?.Invoke(this);
     }
 }

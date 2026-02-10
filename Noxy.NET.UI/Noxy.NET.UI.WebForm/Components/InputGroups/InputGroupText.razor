@@ -2,8 +2,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementText @attributes="InputAttributes" ID="@UUIDCode" Type="Type" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput"
-                          @bind-Value:get="Value" @bind-Value:set="x => ValueChanged.InvokeAsync(x)"/>
+        <InputElementText @attributes="InputAttributes" ID="@UUIDCode" Type="Type" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
     </TemplateInputGroup>
 </div>
 

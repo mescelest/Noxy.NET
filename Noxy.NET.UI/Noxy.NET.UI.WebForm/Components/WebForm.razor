@@ -25,19 +25,29 @@
 
     protected override void OnInitialized()
     {
-        Context.ContextChanged += ContextChangedHandler;
+        Context.Changed += ContextChangedHandler;
     }
 
     public void Dispose()
     {
-        Context.ContextChanged -= ContextChangedHandler;
+        Context.Changed -= ContextChangedHandler;
     }
 
-    private void SubmitHandler()
+    private async Task SubmitHandler()
     {
-        if (Context.IsSubmitting || !Context.Validate()) return;
-        OnSubmit.InvokeAsync(Context);
+        Context.BeginSubmit();
+
+        try
+        {
+            if (!Context.Validate()) return;
+            await OnSubmit.InvokeAsync(Context);
+        }
+        finally
+        {
+            Context.EndSubmit();
+        }
     }
+
 
     private void ContextChangedHandler(IWebFormContext sender)
     {

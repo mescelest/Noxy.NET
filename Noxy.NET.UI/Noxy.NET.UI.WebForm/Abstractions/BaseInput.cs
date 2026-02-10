@@ -7,11 +7,14 @@ namespace Noxy.NET.UI.Abstractions;
 public abstract class BaseInput : ElementComponent
 {
     [CascadingParameter]
-    public IWebFormInputContext? Context { get; set; }
+    public IWebFormContext? Context { get; set; }
 
     [Parameter]
     public string? ID { get; set; }
     protected string IDCurrent => ID ?? UUIDCode;
+
+    [Parameter]
+    public string? Name { get; set; }
 
     protected IWebFormFieldContext? GetField(string name)
     {

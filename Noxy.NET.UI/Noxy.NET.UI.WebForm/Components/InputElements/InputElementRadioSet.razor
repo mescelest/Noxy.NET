@@ -19,8 +19,6 @@
     [Parameter, EditorRequired]
     public required RenderFragment<TValue> ChildContent { get; set; }
 
-    [Parameter]
-    public string? Name { get; set; }
     private string NameCurrent => Name ?? UUIDCode;
 
     [Parameter]

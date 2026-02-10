@@ -88,7 +88,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
 
         HasDataParameterText("019c3efa-a140-73be-900f-4bed02a7227c", TextConstants.LabelValue, "Value");
         HasDataParameterText("019c3efa-a140-73be-900f-4e2b26906c90", TextConstants.LabelTimeApproved, "Approved at");
-        HasDataParameterText("019c3efa-a140-73be-900f-4e2b26906c90", TextConstants.LabelTimeCreated, "Created at");
+        HasDataParameterText("019c47d2-99d6-76d6-bffc-a46b61cfe957", TextConstants.LabelTimeCreated, "Created at");
         HasDataParameterText("019c3efd-764d-740a-baae-c0240683a292", TextConstants.LabelTimeEffectiveFrom, "Effective from");
         HasDataParameterText("019c3efd-764d-740a-baae-c7503349db66", TextConstants.LabelTimeEffectiveTo, "Effective to");
 
@@ -107,7 +107,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019c3819-d223-700d-a78d-40606a57c869", TextConstants.LabelFormPageNumber);
         HasSchemaParameterText("019c3819-d224-705d-91a0-96e586add967", TextConstants.LabelFormPageSize);
         HasSchemaParameterText("01979d14-54ad-72f9-b5d8-a5aa1089fe1b", TextConstants.LabelFormParameterTextType);
-        HasSchemaParameterText("01979d14-54ad-72f9-b5d8-a5aa1089fe1b", TextConstants.LabelFormPropertyTypeList);
+        HasSchemaParameterText("019c47d2-99d6-76d6-bffc-a94bdaa55937", TextConstants.LabelFormPropertyTypeList);
         HasSchemaParameterText("01978a1f-f0a2-731f-b17d-14f803055489", TextConstants.LabelFormIsValueList);
         HasSchemaParameterText("019799a3-a72f-725a-b4f6-b7144f565f3f", TextConstants.LabelFormBoolean);
         HasSchemaParameterText("019799a3-a72f-725a-b4f6-b8b9e65fa2e9", TextConstants.LabelFormDateTime);

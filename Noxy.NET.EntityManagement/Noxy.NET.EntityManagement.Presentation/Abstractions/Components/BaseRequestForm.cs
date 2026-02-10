@@ -7,16 +7,19 @@ using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
-public abstract class BaseRequestForm<TRequest, TResponse> : BaseForm<TRequest> where TRequest : BaseRequest<TResponse>
+public abstract class BaseRequestForm<TRequest, TResponse> : BaseForm<TRequest>, IDisposable where TRequest : BaseRequest<TResponse>
 {
-    [Inject]
-    protected APIHttpClient APIHttpClient { get; set; } = null!;
-
     [Inject]
     protected TextService TextService { get; set; } = null!;
 
     [Inject]
     protected IState<FeatureTextState> TextState { get; set; } = null!;
+
+    public void Dispose()
+    {
+        TextState.StateChanged -= OnTextStateChanged;
+        GC.SuppressFinalize(this);
+    }
 
     protected override void OnInitialized()
     {
@@ -31,16 +34,11 @@ public abstract class BaseRequestForm<TRequest, TResponse> : BaseForm<TRequest> 
 
     protected string GetDisplayName(string property)
     {
-        return TextService.Get(Context.GetField(property)?.GetDisplayName(), GetComponentName());
+        return TextService.Get(Context.GetField(property).DisplayName, GetComponentName());
     }
 
     protected string GetDescription(string property)
     {
-        return TextService.Get(Context.GetField(property)?.GetDescription());
-    }
-
-    public void Dispose()
-    {
-        TextState.StateChanged -= OnTextStateChanged;
+        return TextService.Get(Context.GetField(property).Description, GetComponentName());
     }
 }

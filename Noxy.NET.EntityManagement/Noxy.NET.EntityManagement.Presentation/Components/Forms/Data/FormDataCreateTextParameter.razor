@@ -1,0 +1,69 @@
+@inherits BaseRequestForm<RequestDataCreateTextParameter, ResponseDataCreateTextParameter>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="RequestDataCreateTextParameter" Context="Context" OnSubmit="OnSubmit">
+        @switch (SchemaParameter.Type)
+        {
+            case TextParameterTypeEnum.Line:
+                <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Value))" Description="@GetDescription(nameof(Context.Model.Value))"
+                                @bind-Value="Context.Model.Value"/>
+                break;
+            case TextParameterTypeEnum.Text:
+            case TextParameterTypeEnum.RichText:
+                <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Context.Model.Value))" Description="@GetDescription(nameof(Context.Model.Value))"
+                                    @bind-Value="Context.Model.Value"/>
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Context.Model.DateEffective))" Description="@GetDescription(nameof(Context.Model.DateEffective))"
+                            @bind-Value:get="_effectiveDateImmediate" @bind-Value:set="SetEffectiveDateImmediate">
+            @if (context)
+            {
+                <span>Immediately</span>
+            }
+            else
+            {
+                <InputGroupDate InputAttributes="GetEffectiveDateImmediateAttributes()" DisplayName="Pick date" @bind-Value:get="_effectiveDatePicked" @bind-Value:set="SetEffectiveDatePicked"/>
+            }
+        </InputGroupRadioSet>
+
+        @ChildContent
+    </WebForm>
+</div>
+
+
+@code {
+
+    [Parameter, EditorRequired]
+    public EntitySchemaParameterText SchemaParameter { get; set; }
+
+    private static bool[] OptionList => [false, true];
+    private bool _effectiveDateImmediate = true;
+    private DateTime? _effectiveDatePicked = DateTime.Now;
+
+    protected override WebFormContext<RequestDataCreateTextParameter> CreateContext()
+    {
+        return new(new() { SchemaIdentifier = SchemaParameter.SchemaIdentifier });
+    }
+
+    private void SetEffectiveDatePicked(DateTime? value)
+    {
+        _effectiveDatePicked = value;
+        Context.Model.DateEffective = _effectiveDatePicked;
+    }
+
+    private void SetEffectiveDateImmediate(bool value)
+    {
+        _effectiveDateImmediate = value;
+        Context.Model.DateEffective = value ? null : _effectiveDatePicked;
+    }
+
+    private IReadOnlyDictionary<string, object>? GetEffectiveDateImmediateAttributes()
+    {
+        return new Dictionary<string, object> { { "disabled", _effectiveDateImmediate } };
+    }
+
+}
+

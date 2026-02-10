@@ -3,7 +3,7 @@
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <FormDataParameterList OnSubmit="form => form.Submit(Submit)">
+    <FormDataParameterList OnSubmit="Submit">
         <div class="action-list">
             <Button Status="StatusEnum.Warning" type="button">
                 @TextService.Get(TextConstants.ButtonReset)

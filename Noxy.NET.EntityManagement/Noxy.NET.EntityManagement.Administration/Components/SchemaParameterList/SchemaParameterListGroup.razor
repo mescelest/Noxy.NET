@@ -2,6 +2,7 @@
 @inject IState<FeatureTextState> StateText
 @inject IDispatcher Dispatcher
 @inject TextService TextService
+@inject SystemConstantService SystemConstantService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -13,6 +14,37 @@
         <Content>
             @if (TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list))
             {
+                <div class="create">
+                    @if (_isCreateMode)
+                    {
+                        @switch (SchemaParameter)
+                        {
+                            case EntitySchemaParameterStyle parameterStyle:
+                                break;
+                            case EntitySchemaParameterSystem parameterSystem:
+                                break;
+                            case EntitySchemaParameterText parameterText:
+                                <FormDataCreateTextParameter SchemaParameter="@parameterText" OnSubmit="FormCreateTextParameterSubmit"/>
+                                break;
+                        }
+                    }
+
+                    <div class="action-list">
+                        @if (_isCreateMode)
+                        {
+                            <Button @onclick="StopCreateMode">Cancel</Button>
+                            <Button type="submit">Create value</Button>
+                        }
+                        else
+                        {
+                            <Button @onclick="StartCreateMode">Add new value</Button>
+                        }
+                    </div>
+
+                </div>
+
+                <hr/>
+
                 <div class="table">
                     <div class="header">
                         <b>@TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
@@ -27,10 +59,10 @@
                         {
                             <div class="row">
                                 <span>@item.GetValue().Value</span>
-                                <span>@item.GetValue().TimeCreated</span>
-                                <span>@item.GetValue().TimeEffective</span>
-                                <span>@item.GetValue().TimeEffective</span>
-                                <span>@item.GetValue().TimeApproved</span>
+                                <span>@SystemConstantService.AsDateTime(item.GetValue().TimeCreated)</span>
+                                <span>@SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
+                                <span>@SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
+                                <span>@SystemConstantService.AsDateTime(item.GetValue().TimeApproved)</span>
                             </div>
                         }
                     </div>
@@ -49,6 +81,7 @@
     [Parameter, EditorRequired]
     public required EntitySchemaParameter SchemaParameter { get; set; }
 
+    private bool _isCreateMode;
     private bool _isCollapsed = true;
 
     private bool IsLoading => StateData.Value.IsKeyLoading(SchemaParameter.SchemaIdentifier) || (StateData.Value.Cache.ContainsKey(SchemaParameter.SchemaIdentifier) && StateText.Value.IsScopeLoading(GetComponentName()));
@@ -67,6 +100,22 @@
     private bool TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list)
     {
         return StateData.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out list!);
+    }
+
+    private void StartCreateMode()
+    {
+        _isCreateMode = true;
+    }
+
+    private void StopCreateMode()
+    {
+        _isCreateMode = false;
+    }
+
+    private void FormCreateTextParameterSubmit(WebFormContext<RequestDataCreateTextParameter> context)
+    {
+        _isCreateMode = false;
+        // Should submit this and then do the stop create mode or raise error
     }
 
 }

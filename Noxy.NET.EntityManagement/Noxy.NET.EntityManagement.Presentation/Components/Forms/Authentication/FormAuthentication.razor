@@ -8,7 +8,7 @@
         <div class="column">
             <h2>@TextService.Get(TextConstants.HeaderFormSignUp)</h2>
 
-            <FormAuthenticationSignUp OnSubmit="form => form.SubmitAsync(SignUpFormSubmit)">
+            <FormAuthenticationSignUp OnSubmit="SignUpFormSubmit">
                 <Button Status="StatusEnum.Info" type="submit">
                     @TextService.Get(TextConstants.ButtonSignUp, GetComponentName())
                 </Button>
@@ -18,7 +18,7 @@
         <div class="column">
             <h2>@TextService.Get(TextConstants.HeaderFormSignIn)</h2>
 
-            <FormAuthenticationSignIn OnSubmit="form => form.SubmitAsync(SignInFormSubmit)">
+            <FormAuthenticationSignIn OnSubmit="SignInFormSubmit">
                 <Button Status="StatusEnum.Success" type="submit">
                     @TextService.Get(TextConstants.ButtonSignIn, GetComponentName())
                 </Button>

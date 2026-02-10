@@ -7,16 +7,14 @@ public interface IWebFormFieldContext
     string Name { get; }
     bool HasError { get; }
     bool HasChanged { get; }
+    object? CurrentValue { get; }
+    IReadOnlyList<string> ErrorList { get; }
 
-    event WebFormFieldContextEventHandler? Validated;
-    event WebFormFieldContextEventHandler? Changed;
-
-    string? GetDisplayName();
-    string? GetDescription();
-    string[] GetErrorList();
+    string? DisplayName { get; }
+    string? Description { get; }
     void NotifyChange();
 
-    void Clear();
+    void ClearErrorList();
     void Reset();
     bool Validate();
     void WriteError(string message);

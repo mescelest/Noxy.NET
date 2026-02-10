@@ -3,7 +3,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
         <InputElementDecimal @attributes="InputAttributes" ID="@UUIDCode" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput"
-                             @bind-Value:get="Value" @bind-Value:set="x => ValueChanged.InvokeAsync(x)"/>
+                             Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
     </TemplateInputGroup>
 </div>
 
