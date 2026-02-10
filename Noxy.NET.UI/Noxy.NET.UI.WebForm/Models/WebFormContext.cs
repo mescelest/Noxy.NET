@@ -25,7 +25,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
     private bool AnyFieldHasError => WebFormFieldContextCollection.Values.Any(f => f.HasError);
     private bool AnyFieldHasChanged => WebFormFieldContextCollection.Values.Any(f => f.HasChanged);
 
-
     public void Dispose()
     {
         foreach (KeyValuePair<string, WebFormFieldContext> pair in WebFormFieldContextCollection)
@@ -47,7 +46,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
     public IReadOnlySet<string> FieldNameList { get; }
 
     public event Action<IWebFormContext<TModel>>? Changed;
-
 
     public void RegisterField(string name)
     {
@@ -90,6 +88,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         return WebFormFieldContextCollection.GetValueOrDefault(name);
     }
 
+
     public IReadOnlyList<string> GetFormErrorList()
     {
         return ErrorList;
@@ -100,7 +99,10 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         List<string> list = [];
         foreach (KeyValuePair<string, WebFormFieldContext> pair in WebFormFieldContextCollection)
         {
-            list.AddRange(pair.Value.ErrorList);
+            foreach (string error in pair.Value.ErrorList)
+            {
+                list.Add(error);
+            }
         }
 
         return list;
@@ -123,6 +125,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         errors = field.ErrorList;
         return true;
     }
+
 
     public bool Validate()
     {
@@ -164,16 +167,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
     public bool ValidateFieldList()
     {
         bool isValid = true;
-        Batch(() =>
-        {
-            foreach (WebFormFieldContext field in WebFormFieldContextCollection.Values)
-            {
-                if (!field.Validate())
-                {
-                    isValid = false;
-                }
-            }
-        });
+        Batch(() => isValid = WebFormFieldContextCollection.Values.All(x => x.Validate()));
         return isValid;
     }
 
@@ -194,7 +188,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         result = field.Validate();
         return true;
     }
-
 
     public void WriteError(string message)
     {
@@ -219,7 +212,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         });
     }
 
-
     public void Reset()
     {
         Batch(() =>
@@ -235,7 +227,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         });
     }
 
-
     public void HandleException(Exception exception)
     {
         ArgumentNullException.ThrowIfNull(exception);
@@ -248,7 +239,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
             string[] value = pair.Value switch
             {
-                string s => new[] { s },
+                string s => [s],
                 IEnumerable<string> list => list.ToArray(),
                 IEnumerable<object> list => list.Select(x => x.ToString()).OfType<string>().ToArray(),
                 _ => pair.Value.ToString() is { } s2 ? new[] { s2 } : Array.Empty<string>()
@@ -275,12 +266,26 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         });
     }
 
-    public void BeginBatch()
+    internal void BeginSubmit()
+    {
+        if (IsSubmitting) return;
+        IsSubmitting = true;
+        NotifyChanged();
+    }
+
+    internal void EndSubmit()
+    {
+        if (!IsSubmitting) return;
+        IsSubmitting = false;
+        NotifyChanged();
+    }
+
+    private void BeginBatch()
     {
         _batchCount++;
     }
 
-    public void EndBatch()
+    private void EndBatch()
     {
         if (_batchCount == 0) return;
 
@@ -309,33 +314,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         Changed?.Invoke(this);
     }
 
-
-    public static string GetFieldNameFromExpression<T>(Expression<Func<T>>? expression)
-    {
-        return expression?.Body switch
-        {
-            MemberExpression member => member.Member.Name,
-            UnaryExpression { Operand: MemberExpression m } => m.Member.Name,
-            _ => throw new InvalidOperationException("Expression must be a simple member access.")
-        };
-    }
-
-
-    internal void BeginSubmit()
-    {
-        if (IsSubmitting) return;
-        IsSubmitting = true;
-        NotifyChanged();
-    }
-
-    internal void EndSubmit()
-    {
-        if (!IsSubmitting) return;
-        IsSubmitting = false;
-        NotifyChanged();
-    }
-
-
     private void OnFieldChanged(WebFormFieldContext sender)
     {
         bool newValue = AnyFieldHasChanged;
@@ -350,5 +328,15 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         if (newValue == HasError) return;
         HasError = newValue;
         NotifyChanged();
+    }
+
+    private static string GetFieldNameFromExpression<T>(Expression<Func<T>>? expression)
+    {
+        return expression?.Body switch
+        {
+            MemberExpression member => member.Member.Name,
+            UnaryExpression { Operand: MemberExpression m } => m.Member.Name,
+            _ => throw new InvalidOperationException("Expression must be a simple member access.")
+        };
     }
 }
