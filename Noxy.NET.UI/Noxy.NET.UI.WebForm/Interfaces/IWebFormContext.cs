@@ -13,10 +13,13 @@ public interface IWebFormContext
 {
     bool HasError { get; }
     bool HasChanged { get; }
+    bool HasAnyError { get; }
+    bool HasAnyChanges { get; }
 
     IReadOnlySet<string> FieldNameList { get; }
 
     void RegisterField(string name);
+    bool TryRegisterField(string name);
     IWebFormFieldContext GetField<T>(Expression<Func<T>>? expression);
     IWebFormFieldContext GetField(string name);
     IWebFormFieldContext? TryGetField<T>(Expression<Func<T>>? expression);
@@ -30,6 +33,7 @@ public interface IWebFormContext
     bool Validate();
     bool ValidateField(string name);
     bool TryValidateField(string name, out bool result);
+    bool ValidateFieldList();
     void WriteError(string message);
 
     void HandleException(Exception exception);

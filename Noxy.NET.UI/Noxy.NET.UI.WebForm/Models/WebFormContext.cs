@@ -10,7 +10,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
     private int _batchCount;
 
-
     public WebFormContext(TModel value)
     {
         Model = value;
@@ -25,6 +24,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
     private bool AnyFieldHasError => WebFormFieldContextCollection.Values.Any(f => f.HasError);
     private bool AnyFieldHasChanged => WebFormFieldContextCollection.Values.Any(f => f.HasChanged);
+
 
     public void Dispose()
     {
@@ -42,19 +42,32 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
     public TModel Model { get; }
     public bool HasError { get; private set; }
     public bool HasChanged { get; private set; }
+    public bool HasAnyError => HasError || AnyFieldHasError;
+    public bool HasAnyChanges => HasChanged || AnyFieldHasChanged;
     public IReadOnlySet<string> FieldNameList { get; }
 
     public event Action<IWebFormContext<TModel>>? Changed;
+
 
     public void RegisterField(string name)
     {
         if (!FieldNameList.Contains(name)) throw new InvalidOperationException($"Field '{name}' does not exist.");
 
         if (WebFormFieldContextCollection.ContainsKey(name)) return;
+
         WebFormFieldContext field = new(name, Model);
         field.Changed += OnFieldChanged;
         field.Validated += OnFieldValidated;
         WebFormFieldContextCollection[name] = field;
+    }
+
+    public bool TryRegisterField(string name)
+    {
+        if (!FieldNameList.Contains(name)) return false;
+        if (WebFormFieldContextCollection.ContainsKey(name)) return false;
+
+        RegisterField(name);
+        return true;
     }
 
     public IWebFormFieldContext GetField<T>(Expression<Func<T>>? expression)
@@ -84,7 +97,13 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
     public IReadOnlyList<string> GetFieldErrorList()
     {
-        return WebFormFieldContextCollection.SelectMany(x => x.Value.ErrorList).ToList();
+        List<string> list = [];
+        foreach (KeyValuePair<string, WebFormFieldContext> pair in WebFormFieldContextCollection)
+        {
+            list.AddRange(pair.Value.ErrorList);
+        }
+
+        return list;
     }
 
     public IReadOnlyList<string> GetFieldErrorList(string name)
@@ -107,39 +126,55 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
     public bool Validate()
     {
-        BeginBatch();
-
-        ErrorList.Clear();
-        HasError = false;
-
-        foreach (WebFormFieldContext field in WebFormFieldContextCollection.Values)
+        Batch(() =>
         {
-            field.Validate();
-        }
+            ErrorList.Clear();
+            HasError = false;
 
-        ValidationContext context = new(Model);
-        List<ValidationResult> listResult = [];
-        Validator.TryValidateObject(Model, context, listResult, true);
-
-        foreach (ValidationResult result in listResult)
-        {
-            if (string.IsNullOrWhiteSpace(result.ErrorMessage)) continue;
-
-            bool assignedToField = false;
-            foreach (string memberName in result.MemberNames)
+            foreach (WebFormFieldContext field in WebFormFieldContextCollection.Values)
             {
-                if (!WebFormFieldContextCollection.TryGetValue(memberName, out WebFormFieldContext? field)) continue;
-                field.WriteError(result.ErrorMessage);
-                assignedToField = true;
+                field.Validate();
             }
 
-            if (!assignedToField) ErrorList.Add(result.ErrorMessage);
-        }
+            ValidationContext context = new(Model);
+            List<ValidationResult> listResult = [];
+            Validator.TryValidateObject(Model, context, listResult, true);
 
-        HasError = ErrorList.Count > 0 || AnyFieldHasError;
+            foreach (ValidationResult result in listResult)
+            {
+                if (string.IsNullOrWhiteSpace(result.ErrorMessage)) continue;
 
-        EndBatch();
+                bool assignedToField = false;
+                foreach (string memberName in result.MemberNames)
+                {
+                    if (!WebFormFieldContextCollection.TryGetValue(memberName, out WebFormFieldContext? field)) continue;
+                    field.WriteError(result.ErrorMessage);
+                    assignedToField = true;
+                }
+
+                if (!assignedToField) ErrorList.Add(result.ErrorMessage);
+            }
+
+            HasError = ErrorList.Count > 0 || AnyFieldHasError;
+        });
+
         return !HasError;
+    }
+
+    public bool ValidateFieldList()
+    {
+        bool isValid = true;
+        Batch(() =>
+        {
+            foreach (WebFormFieldContext field in WebFormFieldContextCollection.Values)
+            {
+                if (!field.Validate())
+                {
+                    isValid = false;
+                }
+            }
+        });
+        return isValid;
     }
 
     public bool ValidateField(string name)
@@ -160,6 +195,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         return true;
     }
 
+
     public void WriteError(string message)
     {
         if (string.IsNullOrWhiteSpace(message)) return;
@@ -171,34 +207,34 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
     public void ClearErrorList()
     {
-        BeginBatch();
-
-        HasError = false;
-        ErrorList.Clear();
-
-        foreach (KeyValuePair<string, WebFormFieldContext> item in WebFormFieldContextCollection)
+        Batch(() =>
         {
-            item.Value.ClearErrorList();
-        }
+            HasError = false;
+            ErrorList.Clear();
 
-        EndBatch();
+            foreach (KeyValuePair<string, WebFormFieldContext> item in WebFormFieldContextCollection)
+            {
+                item.Value.ClearErrorList();
+            }
+        });
     }
+
 
     public void Reset()
     {
-        BeginBatch();
-
-        HasError = false;
-        HasChanged = false;
-        ErrorList.Clear();
-
-        foreach (KeyValuePair<string, WebFormFieldContext> item in WebFormFieldContextCollection)
+        Batch(() =>
         {
-            item.Value.Reset();
-        }
+            HasError = false;
+            HasChanged = false;
+            ErrorList.Clear();
 
-        EndBatch();
+            foreach (KeyValuePair<string, WebFormFieldContext> item in WebFormFieldContextCollection)
+            {
+                item.Value.Reset();
+            }
+        });
     }
+
 
     public void HandleException(Exception exception)
     {
@@ -212,10 +248,10 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
             string[] value = pair.Value switch
             {
-                string s => [s],
+                string s => new[] { s },
                 IEnumerable<string> list => list.ToArray(),
                 IEnumerable<object> list => list.Select(x => x.ToString()).OfType<string>().ToArray(),
-                _ => pair.Value.ToString() is { } s2 ? new[] { s2 } : []
+                _ => pair.Value.ToString() is { } s2 ? new[] { s2 } : Array.Empty<string>()
             };
 
             if (value.Length == 0) continue;
@@ -227,17 +263,16 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
     public void HandleException(string message, Dictionary<string, IEnumerable<string>>? data = null)
     {
-        BeginBatch();
-
-        ClearErrorList();
-
-        WriteError(message);
-        foreach (KeyValuePair<string, IEnumerable<string>> entry in data ?? [])
+        Batch(() =>
         {
-            TryGetField(entry.Key)?.WriteError(entry.Value.ToArray());
-        }
+            ClearErrorList();
 
-        EndBatch();
+            WriteError(message);
+            foreach (KeyValuePair<string, IEnumerable<string>> entry in data ?? [])
+            {
+                TryGetField(entry.Key)?.WriteError(entry.Value.ToArray());
+            }
+        });
     }
 
     public void BeginBatch()
@@ -250,12 +285,17 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         if (_batchCount == 0) return;
 
         _batchCount--;
+        if (_batchCount != 0 || !_batchChanged) return;
 
-        if (_batchCount == 0 && _batchChanged)
-        {
-            _batchChanged = false;
-            Changed?.Invoke(this);
-        }
+        _batchChanged = false;
+        Changed?.Invoke(this);
+    }
+
+    private void Batch(Action action)
+    {
+        BeginBatch();
+        action();
+        EndBatch();
     }
 
     private void NotifyChanged()
@@ -269,37 +309,46 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         Changed?.Invoke(this);
     }
 
+
     public static string GetFieldNameFromExpression<T>(Expression<Func<T>>? expression)
     {
         return expression?.Body switch
         {
             MemberExpression member => member.Member.Name,
             UnaryExpression { Operand: MemberExpression m } => m.Member.Name,
-            _ => string.Empty
+            _ => throw new InvalidOperationException("Expression must be a simple member access.")
         };
     }
 
+
     internal void BeginSubmit()
     {
+        if (IsSubmitting) return;
         IsSubmitting = true;
         NotifyChanged();
     }
 
     internal void EndSubmit()
     {
+        if (!IsSubmitting) return;
         IsSubmitting = false;
         NotifyChanged();
     }
 
+
     private void OnFieldChanged(WebFormFieldContext sender)
     {
-        HasChanged = AnyFieldHasChanged;
+        bool newValue = AnyFieldHasChanged;
+        if (newValue == HasChanged) return;
+        HasChanged = newValue;
         NotifyChanged();
     }
 
     private void OnFieldValidated(IWebFormFieldContext sender)
     {
-        HasError = ErrorList.Count > 0 || AnyFieldHasError;
+        bool newValue = ErrorList.Count > 0 || AnyFieldHasError;
+        if (newValue == HasError) return;
+        HasError = newValue;
         NotifyChanged();
     }
 }
