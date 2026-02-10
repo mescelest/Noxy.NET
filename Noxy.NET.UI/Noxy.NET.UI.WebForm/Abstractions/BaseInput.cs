@@ -16,13 +16,13 @@ public abstract class BaseInput : ElementComponent
     [Parameter]
     public string? Name { get; set; }
 
-    protected IWebFormFieldContext? GetField(string name)
+    protected static string GetFieldNameFromExpression<T>(Expression<Func<T>>? expression)
     {
-        return Context?.GetField(name);
-    }
-
-    protected IWebFormFieldContext? GetField<T>(Expression<Func<T>>? expression)
-    {
-        return Context?.GetField(expression);
+        return expression?.Body switch
+        {
+            MemberExpression member => member.Member.Name,
+            UnaryExpression { Operand: MemberExpression m } => m.Member.Name,
+            _ => throw new InvalidOperationException("Expression must be a simple member access.")
+        };
     }
 }

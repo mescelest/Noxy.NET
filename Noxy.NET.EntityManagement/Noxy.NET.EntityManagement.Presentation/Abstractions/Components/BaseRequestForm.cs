@@ -34,11 +34,11 @@ public abstract class BaseRequestForm<TRequest, TResponse> : BaseForm<TRequest>,
 
     protected string GetDisplayName(string property)
     {
-        return TextService.Get(Context.GetField(property).DisplayName, GetComponentName());
+        return TextService.Get(Context.GetFieldDisplayName(property), GetComponentName());
     }
 
     protected string GetDescription(string property)
     {
-        return TextService.Get(Context.GetField(property).Description, GetComponentName());
+        return TextService.Get(Context.GetFieldDescription(property), GetComponentName());
     }
 }

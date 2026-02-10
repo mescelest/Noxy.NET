@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
 using Noxy.NET.UI.Interfaces;
 
 namespace Noxy.NET.UI.Models;
@@ -7,7 +6,6 @@ namespace Noxy.NET.UI.Models;
 public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where TModel : class
 {
     private bool _batchChanged;
-
     private int _batchCount;
 
     public WebFormContext(TModel value)
@@ -68,26 +66,23 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         return true;
     }
 
-    public IWebFormFieldContext GetField<T>(Expression<Func<T>>? expression)
+    public void NotifyFieldChanged(string name)
     {
-        return GetField(GetFieldNameFromExpression(expression));
+        if (WebFormFieldContextCollection.TryGetValue(name, out WebFormFieldContext? field))
+        {
+            field.NotifyChange();
+        }
     }
 
-    public IWebFormFieldContext GetField(string name)
+    public string? GetFieldDisplayName(string name)
     {
-        return TryGetField(name) ?? throw new InvalidOperationException($"Field '{name}' is not registered.");
+        return WebFormFieldContextCollection.TryGetValue(name, out WebFormFieldContext? field) ? field.DisplayName : null;
     }
 
-    public IWebFormFieldContext? TryGetField<T>(Expression<Func<T>>? expression)
+    public string? GetFieldDescription(string name)
     {
-        return TryGetField(GetFieldNameFromExpression(expression));
+        return WebFormFieldContextCollection.TryGetValue(name, out WebFormFieldContext? field) ? field.Description : null;
     }
-
-    public IWebFormFieldContext? TryGetField(string name)
-    {
-        return WebFormFieldContextCollection.GetValueOrDefault(name);
-    }
-
 
     public IReadOnlyList<string> GetFormErrorList()
     {
@@ -99,10 +94,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         List<string> list = [];
         foreach (KeyValuePair<string, WebFormFieldContext> pair in WebFormFieldContextCollection)
         {
-            foreach (string error in pair.Value.ErrorList)
-            {
-                list.Add(error);
-            }
+            list.AddRange(pair.Value.ErrorList);
         }
 
         return list;
@@ -280,6 +272,16 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         NotifyChanged();
     }
 
+    private IWebFormFieldContext GetField(string name)
+    {
+        return TryGetField(name) ?? throw new InvalidOperationException($"Field '{name}' is not registered.");
+    }
+
+    private IWebFormFieldContext? TryGetField(string name)
+    {
+        return WebFormFieldContextCollection.GetValueOrDefault(name);
+    }
+
     private void BeginBatch()
     {
         _batchCount++;
@@ -322,21 +324,11 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         NotifyChanged();
     }
 
-    private void OnFieldValidated(IWebFormFieldContext sender)
+    private void OnFieldValidated(WebFormFieldContext sender)
     {
         bool newValue = ErrorList.Count > 0 || AnyFieldHasError;
         if (newValue == HasError) return;
         HasError = newValue;
         NotifyChanged();
-    }
-
-    private static string GetFieldNameFromExpression<T>(Expression<Func<T>>? expression)
-    {
-        return expression?.Body switch
-        {
-            MemberExpression member => member.Member.Name,
-            UnaryExpression { Operand: MemberExpression m } => m.Member.Name,
-            _ => throw new InvalidOperationException("Expression must be a simple member access.")
-        };
     }
 }

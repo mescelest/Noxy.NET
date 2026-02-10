@@ -6,14 +6,14 @@ public abstract class BaseInputGroupValue<TValue> : BaseInputValue<TValue>
 {
     [Parameter]
     public string? DisplayName { get; set; }
-    protected string DisplayNameCurrent => DisplayName ?? GetField()?.DisplayName ?? string.Empty;
+    protected string DisplayNameCurrent => DisplayName ?? Context?.GetFieldDisplayName(GetName()) ?? string.Empty;
 
     [Parameter]
     public string? Description { get; set; }
-    protected string DescriptionCurrent => Description ?? GetField()?.Description ?? string.Empty;
+    protected string DescriptionCurrent => Description ?? Context?.GetFieldDescription(GetName()) ?? string.Empty;
 
     [Parameter]
     public IReadOnlyDictionary<string, object>? InputAttributes { get; set; }
 
-    protected IReadOnlyList<string>? ErrorList => GetField()?.ErrorList;
+    protected IReadOnlyList<string>? ErrorList => Context?.GetFieldErrorList(GetName());
 }

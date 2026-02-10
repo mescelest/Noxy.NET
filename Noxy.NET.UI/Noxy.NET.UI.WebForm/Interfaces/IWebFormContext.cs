@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-
-namespace Noxy.NET.UI.Interfaces;
+﻿namespace Noxy.NET.UI.Interfaces;
 
 public interface IWebFormContext<out TModel> : IWebFormContext
 {
@@ -20,10 +18,11 @@ public interface IWebFormContext
 
     void RegisterField(string name);
     bool TryRegisterField(string name);
-    IWebFormFieldContext GetField<T>(Expression<Func<T>>? expression);
-    IWebFormFieldContext GetField(string name);
-    IWebFormFieldContext? TryGetField<T>(Expression<Func<T>>? expression);
-    IWebFormFieldContext? TryGetField(string name);
+
+    public void NotifyFieldChanged(string name);
+    public string? GetFieldDisplayName(string name);
+    public string? GetFieldDescription(string name);
+
     IReadOnlyList<string> GetFormErrorList();
     IReadOnlyList<string> GetFieldErrorList();
     IReadOnlyList<string> GetFieldErrorList(string name);

@@ -15,15 +15,12 @@ public class WebFormFieldContext : IWebFormFieldContext
     private readonly object? _originalValue;
     private readonly PropertyInfo _property;
 
-
     internal WebFormFieldContext(string name, object model)
     {
         Name = name;
         _model = model;
-
         _property = model.GetType().GetProperty(name) ?? throw new InvalidOperationException($"Property '{name}' does not exist on model type '{model.GetType().Name}'.");
         _originalValue = _property.GetValue(model);
-
         _displayName = _property.GetCustomAttribute<DisplayNameAttribute>();
         _description = _property.GetCustomAttribute<DescriptionAttribute>();
     }
@@ -110,10 +107,10 @@ public class WebFormFieldContext : IWebFormFieldContext
         HasError = true;
     }
 
-    public event IWebFormFieldContext.WebFormFieldContextEventHandler? Validated;
+    public event Action<WebFormFieldContext>? Validated;
     public event Action<WebFormFieldContext>? Changed;
 
-    public void AddError(string message)
+    private void AddError(string message)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(message);
         _listError.Add(message);

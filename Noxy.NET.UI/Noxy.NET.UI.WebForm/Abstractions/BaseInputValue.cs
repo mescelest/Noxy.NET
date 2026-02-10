@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components;
-using Noxy.NET.UI.Interfaces;
 
 namespace Noxy.NET.UI.Abstractions;
 
@@ -17,16 +16,12 @@ public abstract class BaseInputValue<TValue> : BaseInput
 
     protected void NotifyChange(TValue value)
     {
-        GetField()?.NotifyChange();
+        Context?.NotifyFieldChanged(GetName());
         ValueChanged.InvokeAsync(value);
     }
 
-    protected IWebFormFieldContext? GetField()
+    protected string GetName()
     {
-        return !string.IsNullOrWhiteSpace(Name)
-            ? GetField(Name)
-            : ValueExpression != null
-                ? GetField(ValueExpression)
-                : null;
+        return Name ?? GetFieldNameFromExpression(ValueExpression);
     }
 }

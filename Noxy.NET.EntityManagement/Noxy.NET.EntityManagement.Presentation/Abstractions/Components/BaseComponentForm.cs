@@ -20,11 +20,11 @@ public abstract class BaseComponentForm<TForm> : BaseForm<TForm> where TForm : B
 
     protected string GetDisplayName(string property)
     {
-        return TextService.Get(Context.GetField(property).DisplayName);
+        return TextService.Get(Context.GetFieldDisplayName(property));
     }
 
     protected string GetDescription(string property)
     {
-        return TextService.Get(Context.GetField(property).Description);
+        return TextService.Get(Context.GetFieldDescription(property));
     }
 }
