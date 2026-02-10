@@ -1,5 +1,4 @@
 @page "/Context/{identifier}"
-@inject APIHttpClientOld APIHttpClientOld
 @inject TextService TextService
 @inherits PageComponent
 
@@ -30,18 +29,18 @@ else
     {
         await base.OnAfterFirstRenderAsync();
 
-        await LoadContext();
-        await LoadElement();
+        // await LoadContext();
+        // await LoadElement();
     }
 
-    private async Task LoadContext()
-    {
-        _entityContext = await APIHttpClientOld.SendRequest<ViewModelSchemaContext>(HttpMethod.Get, $"Data/Context/{Identifier}");
-    }
-
-    private async Task LoadElement()
-    {
-        _listElement = await APIHttpClientOld.SendRequest<ViewModelDataElement[]>(HttpMethod.Get, $"Data/Context/{Identifier}/Element");
-    }
+    // private async Task LoadContext()
+    // {
+    //     _entityContext = await APIHttpClientOld.SendRequest<ViewModelSchemaContext>(HttpMethod.Get, $"Data/Context/{Identifier}");
+    // }
+    //
+    // private async Task LoadElement()
+    // {
+    //     _listElement = await APIHttpClientOld.SendRequest<ViewModelDataElement[]>(HttpMethod.Get, $"Data/Context/{Identifier}/Element");
+    // }
 
 }

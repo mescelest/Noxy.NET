@@ -6,7 +6,7 @@
     @foreach (TOption item in OptionList)
     {
         <label class="option">
-            <input @attributes="OptionAttributes?.Invoke(item)" class="@CssClass" id="@IDCurrent" name="@NameCurrent" type="checkbox" checked="@IsChecked(item)" @onchange="x => OnInputChange(x, item)"/>
+            <input @attributes="OptionAttributes?.Invoke(item)" class="@CssClass" id="@IDCurrent" name="@GetName()" type="checkbox" checked="@IsChecked(item)" @onchange="x => OnInputChange(x, item)"/>
             @ChildContent(item)
         </label>
     }

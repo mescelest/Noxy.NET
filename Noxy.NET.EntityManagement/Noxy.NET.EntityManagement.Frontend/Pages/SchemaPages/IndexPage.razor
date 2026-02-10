@@ -1,5 +1,4 @@
 ﻿@page "/Schema"
-@inject APIHttpClientOld APIHttpClientOld
 @inject TextService TextService
 @inherits PageComponent
 
@@ -7,12 +6,12 @@
 
 <SidebarRightLayout>
     <Sidebar>
-        <FormSchema OnChange="LoadData"/>
+        @* <FormSchema OnChange="LoadData"/> *@
     </Sidebar>
     <Content>
-        <TemplateGridList List="_data">
-            <SchemaPanel Schema="@context" OnSchemaChange="OnSchemaPanelSchemaChange"/>
-        </TemplateGridList>
+        @* <TemplateGridList List="_data"> *@
+        @* <SchemaPanel Schema="@context" OnSchemaChange="OnSchemaPanelSchemaChange"/> *@
+        @* </TemplateGridList> *@
     </Content>
 </SidebarRightLayout>
 
@@ -34,7 +33,7 @@
 
     private async Task LoadData()
     {
-        _data = await APIHttpClientOld.SendRequest<EntitySchema[]>(HttpMethod.Get, "Template/Schema");
+        // _data = await APIHttpClientOld.SendRequest<EntitySchema[]>(HttpMethod.Get, "Template/Schema");
     }
 
 }

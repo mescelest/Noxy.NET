@@ -3,21 +3,22 @@ using Noxy.NET.UI.Models;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseForm<TForm> : ElementComponent where TForm : class
+public abstract class BaseForm<TModel> : ElementComponent where TModel : class
 {
     [Parameter, EditorRequired]
-    public EventCallback<WebFormContext<TForm>> OnSubmit { get; set; }
+    public EventCallback<WebFormContext<TModel>> OnSubmit { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
-    protected WebFormContext<TForm> Context { get; set; } = null!;
+    protected WebFormContext<TModel> Context { get; set; } = null!;
 
-    protected abstract WebFormContext<TForm> CreateContext();
+    protected abstract WebFormContext<TModel> CreateContext();
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
+
         Context = CreateContext();
     }
 }

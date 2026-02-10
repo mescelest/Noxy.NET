@@ -1,5 +1,4 @@
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
-using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas;
 
 namespace Noxy.NET.EntityManagement.Application.Interfaces.Services;
 
@@ -11,5 +10,5 @@ public interface ITemplateService
 
     Task ActivateSchema(Guid id);
 
-    Task<EntitySchema> CreateOrUpdate(FormModelSchema model);
+    // Task<EntitySchema> CreateOrUpdate(FormModelSchema model);
 }

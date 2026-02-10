@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
-using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas;
 
 namespace Noxy.NET.EntityManagement.API.Controllers;
 
@@ -21,11 +20,11 @@ public class TemplateController(ITemplateService serviceTemplate) : ControllerBa
         return await serviceTemplate.GetSchemaWithID(id);
     }
 
-    [HttpPost("Schema")]
-    public async Task<ActionResult<EntitySchema>> CreateSchema(FormModelSchema model)
-    {
-        return await serviceTemplate.CreateOrUpdate(model);
-    }
+    // [HttpPost("Schema")]
+    // public async Task<ActionResult<EntitySchema>> CreateSchema(FormModelSchema model)
+    // {
+    //     return await serviceTemplate.CreateOrUpdate(model);
+    // }
 
     [HttpPost("Schema/{id:guid}/Activate")]
     public async Task<ActionResult> ActivateSchema(Guid id)

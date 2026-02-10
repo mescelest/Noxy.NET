@@ -8,10 +8,6 @@ public abstract class BaseInputMultipleChoiceValue<TOption, TValue> : BaseInputV
     public required IEnumerable<TOption> OptionList { get; set; }
 
     [Parameter]
-    public string? Name { get; set; }
-    protected string NameCurrent => Name ?? UUIDCode;
-
-    [Parameter]
     public Func<TOption, IReadOnlyDictionary<string, object>?>? InputAttributes { get; set; }
 
     protected void OnInputChange(ChangeEventArgs args, TOption option)

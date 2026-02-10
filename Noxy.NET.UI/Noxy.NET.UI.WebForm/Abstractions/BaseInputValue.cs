@@ -22,6 +22,6 @@ public abstract class BaseInputValue<TValue> : BaseInput
 
     protected string GetName()
     {
-        return Name ?? GetFieldNameFromExpression(ValueExpression);
+        return Name ?? GetFieldNameFromExpression(ValueExpression) ?? UUIDCode;
     }
 }

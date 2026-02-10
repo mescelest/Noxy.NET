@@ -1,7 +1,6 @@
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
-using Noxy.NET.EntityManagement.Domain.Models.Forms.Schemas;
 
 namespace Noxy.NET.EntityManagement.Application.Services;
 
@@ -24,36 +23,36 @@ public class TemplateService(IUnitOfWorkFactory serviceUoWFactory, ISchemaBuilde
         return await serviceSchemaBuilder.ConstructSchema();
     }
 
-    public async Task<EntitySchema> CreateOrUpdate(FormModelSchema model)
-    {
-        await using IUnitOfWork uow = await serviceUoWFactory.Create();
-
-        EntitySchema result;
-        if (model.ID == Guid.Empty)
-        {
-            result = await uow.Template.Create(new()
-            {
-                Name = model.Name,
-                Note = model.Note,
-                Order = model.Order,
-                IsActive = false,
-                TimeActivated = null
-            });
-        }
-        else
-        {
-            result = await uow.Template.GetSchemaByID(model.ID);
-
-            result.Name = model.Name;
-            result.Note = model.Note;
-
-            uow.Template.Update(result);
-            await uow.Commit();
-        }
-
-        await uow.Commit();
-        return result;
-    }
+    // public async Task<EntitySchema> CreateOrUpdate(FormModelSchema model)
+    // {
+    //     await using IUnitOfWork uow = await serviceUoWFactory.Create();
+    //
+    //     EntitySchema result;
+    //     if (model.ID == Guid.Empty)
+    //     {
+    //         result = await uow.Template.Create(new()
+    //         {
+    //             Name = model.Name,
+    //             Note = model.Note,
+    //             Order = model.Order,
+    //             IsActive = false,
+    //             TimeActivated = null
+    //         });
+    //     }
+    //     else
+    //     {
+    //         result = await uow.Template.GetSchemaByID(model.ID);
+    //
+    //         result.Name = model.Name;
+    //         result.Note = model.Note;
+    //
+    //         uow.Template.Update(result);
+    //         await uow.Commit();
+    //     }
+    //
+    //     await uow.Commit();
+    //     return result;
+    // }
 
     public async Task ActivateSchema(Guid id)
     {

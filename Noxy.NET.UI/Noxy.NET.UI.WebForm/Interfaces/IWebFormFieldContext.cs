@@ -2,8 +2,6 @@ namespace Noxy.NET.UI.Interfaces;
 
 public interface IWebFormFieldContext
 {
-    delegate void WebFormFieldContextEventHandler(IWebFormFieldContext sender);
-
     string Name { get; }
     bool HasError { get; }
     bool HasChanged { get; }
