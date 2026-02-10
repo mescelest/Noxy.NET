@@ -6,15 +6,16 @@ namespace Noxy.NET.UI.Models;
 
 public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where TModel : class
 {
+    private bool _batchChanged;
+
+    private int _batchCount;
+
+
     public WebFormContext(TModel value)
     {
         Model = value;
         FieldNameList = value.GetType().GetProperties().Select(p => p.Name).ToHashSet();
-
-        foreach (string name in FieldNameList)
-        {
-            RegisterField(name);
-        }
+        foreach (string name in FieldNameList) RegisterField(name);
     }
 
     public bool IsSubmitting { get; private set; }
@@ -83,7 +84,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
     public IReadOnlyList<string> GetFieldErrorList()
     {
-        return WebFormFieldContextCollection.Values.SelectMany(x => x.ErrorList).ToList();
+        return WebFormFieldContextCollection.SelectMany(x => x.Value.ErrorList).ToList();
     }
 
     public IReadOnlyList<string> GetFieldErrorList(string name)
@@ -106,22 +107,20 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
     public bool Validate()
     {
-        // Clear form-level errors
+        BeginBatch();
+
         ErrorList.Clear();
         HasError = false;
 
-        // Validate each field individually
         foreach (WebFormFieldContext field in WebFormFieldContextCollection.Values)
         {
             field.Validate();
         }
 
-        // Validate the model as a whole
         ValidationContext context = new(Model);
         List<ValidationResult> listResult = [];
         Validator.TryValidateObject(Model, context, listResult, true);
 
-        // Apply model-level validation results
         foreach (ValidationResult result in listResult)
         {
             if (string.IsNullOrWhiteSpace(result.ErrorMessage)) continue;
@@ -134,16 +133,14 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
                 assignedToField = true;
             }
 
-            // If no field matched, treat as a form-level error
             if (!assignedToField) ErrorList.Add(result.ErrorMessage);
         }
 
-        // Update form-level HasError
-        HasError = ErrorList.Count > 0 || WebFormFieldContextCollection.Values.Any(f => f.HasError);
+        HasError = ErrorList.Count > 0 || AnyFieldHasError;
 
+        EndBatch();
         return !HasError;
     }
-
 
     public bool ValidateField(string name)
     {
@@ -169,10 +166,13 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
         ErrorList.Add(message);
         HasError = true;
+        NotifyChanged();
     }
 
     public void ClearErrorList()
     {
+        BeginBatch();
+
         HasError = false;
         ErrorList.Clear();
 
@@ -180,10 +180,14 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         {
             item.Value.ClearErrorList();
         }
+
+        EndBatch();
     }
 
     public void Reset()
     {
+        BeginBatch();
+
         HasError = false;
         HasChanged = false;
         ErrorList.Clear();
@@ -193,7 +197,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
             item.Value.Reset();
         }
 
-        Changed?.Invoke(this);
+        EndBatch();
     }
 
     public void HandleException(Exception exception)
@@ -214,7 +218,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
                 _ => pair.Value.ToString() is { } s2 ? new[] { s2 } : []
             };
 
-
             if (value.Length == 0) continue;
             data[key] = value;
         }
@@ -224,6 +227,8 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
     public void HandleException(string message, Dictionary<string, IEnumerable<string>>? data = null)
     {
+        BeginBatch();
+
         ClearErrorList();
 
         WriteError(message);
@@ -231,6 +236,37 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         {
             TryGetField(entry.Key)?.WriteError(entry.Value.ToArray());
         }
+
+        EndBatch();
+    }
+
+    public void BeginBatch()
+    {
+        _batchCount++;
+    }
+
+    public void EndBatch()
+    {
+        if (_batchCount == 0) return;
+
+        _batchCount--;
+
+        if (_batchCount == 0 && _batchChanged)
+        {
+            _batchChanged = false;
+            Changed?.Invoke(this);
+        }
+    }
+
+    private void NotifyChanged()
+    {
+        if (_batchCount > 0)
+        {
+            _batchChanged = true;
+            return;
+        }
+
+        Changed?.Invoke(this);
     }
 
     public static string GetFieldNameFromExpression<T>(Expression<Func<T>>? expression)
@@ -246,24 +282,24 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
     internal void BeginSubmit()
     {
         IsSubmitting = true;
-        Changed?.Invoke(this);
+        NotifyChanged();
     }
 
     internal void EndSubmit()
     {
         IsSubmitting = false;
-        Changed?.Invoke(this);
+        NotifyChanged();
     }
 
     private void OnFieldChanged(WebFormFieldContext sender)
     {
         HasChanged = AnyFieldHasChanged;
-        Changed?.Invoke(this);
+        NotifyChanged();
     }
 
     private void OnFieldValidated(IWebFormFieldContext sender)
     {
         HasError = ErrorList.Count > 0 || AnyFieldHasError;
-        Changed?.Invoke(this);
+        NotifyChanged();
     }
 }
