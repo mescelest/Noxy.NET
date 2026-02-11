@@ -1,8 +1,8 @@
 .table {
     display: grid;
+    row-gap: var(--size-gap-md);
+    column-gap: var(--size-gap-md);
     grid-template-columns: 1fr max-content max-content max-content max-content;
-    grid-row-gap: var(--size-gap-md);
-    grid-column-gap: var(--size-gap-md);
 }
 
 .header, .body {
@@ -14,7 +14,29 @@
 .row {
     grid-column: 1 / -1;
     display: grid;
+    row-gap: var(--size-gap-xs);
     grid-template-columns: subgrid;
-    grid-row-gap: var(--size-gap-xs);
 }
 
+.create {
+    display: flex;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
+}
+
+.action-list {
+    display: flex;
+    flex-flow: row;
+    column-gap: var(--size-gap-md);
+    padding-top: var(--size-gap-md);
+    justify-content: flex-end;
+    border-top: 1px solid black;
+}
+
+hr {
+    width: 100%;
+    height: 1px;
+    margin: 0;
+    border: none;
+    background: var(--color-background-disabled);
+}

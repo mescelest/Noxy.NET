@@ -4,3 +4,9 @@
     flex-flow: column;
     row-gap: var(--size-gap-xs);
 }
+
+.option {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+}

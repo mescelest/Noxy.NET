@@ -1,22 +1,11 @@
-@inherits BaseRequestForm<RequestDataCreateTextParameter, ResponseDataCreateTextParameter>
+@inherits BaseRequestForm<RequestDataCreateStyleParameter, ResponseDataCreateStyleParameter>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm T="RequestDataCreateTextParameter" Context="Context" OnSubmit="ForwardSubmit">
-        @switch (SchemaParameter.Type)
-        {
-            case TextParameterTypeEnum.Line:
-                <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
-                                @bind-Value="Context.Model.Value"/>
-                break;
-            case TextParameterTypeEnum.Text:
-            case TextParameterTypeEnum.RichText:
-                <InputGroupTextArea @bind-Value="Context.Model.Value"/>
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+    <WebForm T="RequestDataCreateStyleParameter" Context="Context" OnSubmit="ForwardSubmit">
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
+                        @bind-Value="Context.Model.Value"/>
 
-        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Model.DateEffective))" Description="@GetDescription(nameof(Model.DateEffective))" 
+        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Model.DateEffective))" Description="@GetDescription(nameof(Model.DateEffective))"
                             @bind-Value:get="_effectiveDateImmediate" @bind-Value:set="SetEffectiveDateImmediate">
             @if (context)
             {
@@ -36,13 +25,13 @@
 @code {
 
     [Parameter, EditorRequired]
-    public EntitySchemaParameterText SchemaParameter { get; set; }
+    public EntitySchemaParameterStyle SchemaParameter { get; set; }
 
     private static bool[] OptionList => [true, false];
     private bool _effectiveDateImmediate = true;
     private DateTime? _effectiveDatePicked = DateTime.Now;
 
-    protected override WebFormContext<RequestDataCreateTextParameter> CreateContext()
+    protected override WebFormContext<RequestDataCreateStyleParameter> CreateContext()
     {
         return new(new() { SchemaIdentifier = SchemaParameter.SchemaIdentifier });
     }

@@ -153,7 +153,6 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019c2964-c66f-77de-83ad-d89e8c04683e", TextConstants.HelpFormConfirmPassword);
         HasSchemaParameterText("019c29f9-5de4-760e-90b6-d8e7a6c0239a", TextConstants.HelpFormSearch);
         HasSchemaParameterText("019789fc-3929-75a9-99e8-f7a6abf0c139", TextConstants.HelpFormSchemaIdentifier);
-        HasSchemaParameterText("019c4c5d-b1c8-722e-ac29-ed0ef20d2d87", TextConstants.HelpFormValue);
         HasSchemaParameterText("019c4c5d-b1c8-722e-ac29-e8fc5683a10d", TextConstants.HelpFormValue);
         HasSchemaParameterText("019789fc-3929-75a9-99e8-f819edf63934", TextConstants.HelpFormName);
         HasSchemaParameterText("019789fc-3929-75a9-99e8-ffd616e87b30", TextConstants.HelpFormNote);

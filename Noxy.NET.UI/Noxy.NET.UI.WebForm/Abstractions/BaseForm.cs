@@ -12,6 +12,7 @@ public abstract class BaseForm<TModel> : ElementComponent where TModel : class
     public RenderFragment? ChildContent { get; set; }
 
     protected WebFormContext<TModel> Context { get; set; } = null!;
+    protected TModel Model { get; set; } = null!;
 
     protected abstract WebFormContext<TModel> CreateContext();
 
@@ -20,5 +21,11 @@ public abstract class BaseForm<TModel> : ElementComponent where TModel : class
         base.OnInitialized();
 
         Context = CreateContext();
+        Model = Context.Model;
+    }
+
+    protected Task ForwardSubmit(WebFormContext<TModel> ctx)
+    {
+        return OnSubmit.InvokeAsync(ctx);
     }
 }

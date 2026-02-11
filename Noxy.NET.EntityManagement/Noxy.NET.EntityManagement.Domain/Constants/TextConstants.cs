@@ -79,7 +79,7 @@ public static class TextConstants
     public const string HelpFormConfirmPassword = "Help:Form:ConfirmPassword";
     public const string HelpFormSearch = "Help:Form:Search";
     public const string HelpFormSchemaIdentifier = "Help:Form:SchemaIdentifier";
-    public const string HelpFormValue = "Label:Form:Help";
+    public const string HelpFormValue = "Help:Form:Value";
     public const string HelpFormName = "Help:Form:Name";
     public const string HelpFormNote = "Help:Form:Note";
     public const string HelpFormTitle = "Help:Form:Title";
@@ -89,7 +89,7 @@ public static class TextConstants
     public const string HelpFormAllowedExtensions = "Help:Form:AllowedExtensions";
     public const string HelpFormIsSystemDefined = "Help:Form:IsSystemDefined";
     public const string HelpFormIsApprovalRequired = "Help:Form:IsApprovalRequired";
-    public const string HelpFormDateEffective = "Label:Form:DateEffective";
+    public const string HelpFormDateEffective = "Help:Form:DateEffective";
     public const string HelpFormPageSize = "Help:Form:PageSize";
     public const string HelpFormPageNumber = "Help:Form:PageNumber";
     public const string HelpFormParameterTextType = "Help:Form:ParameterTextType";

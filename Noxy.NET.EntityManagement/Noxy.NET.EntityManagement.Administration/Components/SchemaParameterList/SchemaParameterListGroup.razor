@@ -20,27 +20,28 @@
                         @switch (SchemaParameter)
                         {
                             case EntitySchemaParameterStyle parameterStyle:
+                                <FormDataCreateStyleParameter SchemaParameter="@parameterStyle" OnSubmit="FormCreateStyleParameterSubmit">
+                                    @ActionList
+                                </FormDataCreateStyleParameter>
                                 break;
                             case EntitySchemaParameterSystem parameterSystem:
+                                <FormDataCreateSystemParameter SchemaParameter="@parameterSystem" OnSubmit="FormCreateSystemParameterSubmit">
+                                    @ActionList
+                                </FormDataCreateSystemParameter>
                                 break;
                             case EntitySchemaParameterText parameterText:
-                                <FormDataCreateTextParameter SchemaParameter="@parameterText" OnSubmit="FormCreateTextParameterSubmit"/>
+                                <FormDataCreateTextParameter SchemaParameter="@parameterText" OnSubmit="FormCreateTextParameterSubmit">
+                                    @ActionList
+                                </FormDataCreateTextParameter>
                                 break;
                         }
                     }
-
-                    <div class="action-list">
-                        @if (_isCreateMode)
-                        {
-                            <Button @onclick="StopCreateMode">Cancel</Button>
-                            <Button type="submit">Create value</Button>
-                        }
-                        else
-                        {
+                    else
+                    {
+                        <div class="action-list">
                             <Button @onclick="StartCreateMode">Add new value</Button>
-                        }
-                    </div>
-
+                        </div>
+                    }
                 </div>
 
                 <hr/>
@@ -110,6 +111,24 @@
     private void StopCreateMode()
     {
         _isCreateMode = false;
+    }
+
+    private RenderFragment ActionList =>
+        @<div class="action-list">
+            <Button @onclick="StopCreateMode">Cancel</Button>
+            <Button type="submit">Create value</Button>
+        </div>;
+
+    private void FormCreateStyleParameterSubmit(WebFormContext<RequestDataCreateStyleParameter> context)
+    {
+        _isCreateMode = false;
+        // Should submit this and then do the stop create mode or raise error
+    }
+
+    private void FormCreateSystemParameterSubmit(WebFormContext<RequestDataCreateSystemParameter> context)
+    {
+        _isCreateMode = false;
+        // Should submit this and then do the stop create mode or raise error
     }
 
     private void FormCreateTextParameterSubmit(WebFormContext<RequestDataCreateTextParameter> context)

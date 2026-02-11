@@ -1,7 +1,7 @@
 @inherits BaseRequestForm<RequestSchemaParameterList, ResponseSchemaParameterList>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm Context="Context" OnSubmit="OnSubmit">
+    <WebForm T="RequestSchemaParameterList" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Search))" Description="@GetDescription(nameof(Context.Model.Search))"
                         @bind-Value="Context.Model.Search"/>
 

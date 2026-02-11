@@ -1,7 +1,7 @@
 @inherits BaseRequestForm<RequestAuthenticationSignIn, ResponseAuthenticationSignIn>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm Context="Context" OnSubmit="OnSubmit">
+    <WebForm T="RequestAuthenticationSignIn" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Email))" Description="@GetDescription(nameof(Context.Model.Email))"
                         @bind-Value="Context.Model.Email"/>
 

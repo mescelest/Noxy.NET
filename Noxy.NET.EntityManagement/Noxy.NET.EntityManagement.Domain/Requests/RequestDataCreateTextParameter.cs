@@ -16,10 +16,12 @@ public class RequestDataCreateTextParameter : BaseRequestGet<ResponseDataCreateT
     public required string SchemaIdentifier { get; set; }
 
     [Required]
-    [DisplayName(TextConstants.LabelFormSchemaIdentifier)]
-    [Description(TextConstants.HelpFormSchemaIdentifier)]
+    [DisplayName(TextConstants.LabelFormValue)]
+    [Description(TextConstants.HelpFormValue)]
     public string Value { get; set; } = string.Empty;
 
     [Required]
+    [DisplayName(TextConstants.LabelFormDateEffective)]
+    [Description(TextConstants.HelpFormDateEffective)]
     public DateTime? DateEffective { get; set; }
 }
