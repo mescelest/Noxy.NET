@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.API.Queries;
-using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Requests;
 using Noxy.NET.EntityManagement.Domain.Responses;
 
@@ -9,7 +8,7 @@ namespace Noxy.NET.EntityManagement.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SchemaController(ISchemaService serviceSchema, IMediator mediator) : ControllerBase
+public class SchemaController(IMediator mediator) : ControllerBase
 {
     // [HttpPost("Context")]
     // public async Task<ActionResult<EntitySchemaContext>> Create(FormModelSchemaContext model)

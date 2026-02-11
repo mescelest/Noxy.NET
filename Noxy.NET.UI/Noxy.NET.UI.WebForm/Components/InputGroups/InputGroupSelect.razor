@@ -20,9 +20,6 @@
     public required IEnumerable<TValue> OptionList { get; set; }
 
     [Parameter]
-    public string? Name { get; set; }
-
-    [Parameter]
     public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
 
 }

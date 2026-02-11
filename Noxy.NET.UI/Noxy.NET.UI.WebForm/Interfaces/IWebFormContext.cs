@@ -20,13 +20,16 @@ public interface IWebFormContext
     bool TryRegisterField(string name);
 
     public void NotifyFieldChanged(string name);
-    public string? GetFieldDisplayName(string name);
-    public string? GetFieldDescription(string name);
+    public string GetFieldDisplayName(string name);
+    public bool TryGetFieldDisplayName(string name, out string? value);
+    public string GetFieldDescription(string name);
+    public bool TryGetFieldDescription(string name, out string? value);
 
     IReadOnlyList<string> GetFormErrorList();
     IReadOnlyList<string> GetFieldErrorList();
     IReadOnlyList<string> GetFieldErrorList(string name);
-    bool TryGetFieldErrorList(string name, out IReadOnlyList<string> errors);
+    bool TryGetFieldErrorList(string name, out IReadOnlyList<string> list);
+
     void ClearErrorList();
     void Reset();
     bool Validate();

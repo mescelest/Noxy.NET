@@ -2,13 +2,13 @@
 @inject TextService TextService
 @inherits PageComponent
 
-<PageTitle>Home | @_entityContext?.Title</PageTitle>
+@* <PageTitle>Home | @_entityContext?.Title</PageTitle> *@
 
 @if (IsRendered)
 {
     <MagazineLayout>
         <Content>
-            <ElementPanel List="_listElement"/>
+            @* <ElementPanel List="_listElement"/> *@
         </Content>
     </MagazineLayout>
 }
@@ -22,8 +22,8 @@ else
     [Parameter]
     public string Identifier { get; set; } = string.Empty;
 
-    private ViewModelSchemaContext? _entityContext;
-    private ViewModelDataElement[] _listElement = [];
+    // private ViewModelSchemaContext? _entityContext;
+    // private ViewModelDataElement[] _listElement = [];
 
     protected override async Task OnAfterFirstRenderAsync()
     {

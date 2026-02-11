@@ -15,7 +15,7 @@ public class EntitySchemaParameter : BaseEntitySchema
         {
         }
 
-        public Discriminator(EntitySchemaParameter entity)
+        public Discriminator(EntitySchemaParameter? entity)
         {
             switch (entity)
             {

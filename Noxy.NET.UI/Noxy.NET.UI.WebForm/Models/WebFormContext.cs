@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using Noxy.NET.UI.Interfaces;
 
 namespace Noxy.NET.UI.Models;
@@ -60,14 +61,41 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         }
     }
 
-    public string? GetFieldDisplayName(string name)
+    public string GetFieldDisplayName(string name)
     {
-        return WebFormFieldContextCollection.TryGetValue(name, out WebFormFieldContext? field) ? field.DisplayName : null;
+        return GetField(name).DisplayName ?? throw new InvalidDataException($"Field '{name}' does not have a '{nameof(DisplayNameAttribute)}' attribute.");
     }
 
-    public string? GetFieldDescription(string name)
+    public bool TryGetFieldDisplayName(string name, out string value)
     {
-        return WebFormFieldContextCollection.TryGetValue(name, out WebFormFieldContext? field) ? field.Description : null;
+        IWebFormFieldContext? field = TryGetField(name);
+        if (field?.DisplayName is null)
+        {
+            value = string.Empty;
+            return false;
+        }
+
+        value = field.DisplayName;
+        return true;
+    }
+
+    public string GetFieldDescription(string name)
+    {
+        return GetField(name).Description ?? throw new InvalidDataException($"Field '{name}' does not have a '{nameof(DisplayNameAttribute)}' attribute.");
+        ;
+    }
+
+    public bool TryGetFieldDescription(string name, out string value)
+    {
+        IWebFormFieldContext? field = TryGetField(name);
+        if (field?.Description is null)
+        {
+            value = string.Empty;
+            return false;
+        }
+
+        value = field.Description;
+        return true;
     }
 
     public IReadOnlyList<string> GetFormErrorList()
@@ -91,16 +119,16 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         return GetField(name).ErrorList;
     }
 
-    public bool TryGetFieldErrorList(string name, out IReadOnlyList<string> errors)
+    public bool TryGetFieldErrorList(string name, out IReadOnlyList<string> list)
     {
         IWebFormFieldContext? field = TryGetField(name);
         if (field is null)
         {
-            errors = [];
+            list = [];
             return false;
         }
 
-        errors = field.ErrorList;
+        list = field.ErrorList;
         return true;
     }
 
