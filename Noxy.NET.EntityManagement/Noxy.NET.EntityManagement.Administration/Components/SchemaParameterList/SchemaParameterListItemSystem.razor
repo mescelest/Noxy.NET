@@ -1,0 +1,82 @@
+@inject IState<FeatureSchemaParameterDataParameterListState> StateData
+@inject TextService TextService
+@inject APIHttpClient APIHttpClient
+@inject SystemConstantService SystemConstantService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="create">
+        <FormDataCreateSystemParameter SchemaParameter="@SchemaParameter" OnSubmit="Submit">
+            <div class="action-list">
+                <Button @onclick="StopCreateMode">Cancel</Button>
+                <Button type="submit">Create value</Button>
+            </div>
+        </FormDataCreateSystemParameter>
+    </div>
+
+    @if (TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list))
+    {
+        <hr/>
+
+        <div class="table">
+            <div class="header">
+                <b>@Presentation.Services.TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
+                <b>@Presentation.Services.TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
+                <b>@Presentation.Services.TextService.Get(TextConstants.LabelTimeEffectiveFrom, GetComponentName())</b>
+                <b>@Presentation.Services.TextService.Get(TextConstants.LabelTimeEffectiveTo, GetComponentName())</b>
+                <b>@Presentation.Services.TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
+            </div>
+
+            <div class="body">
+                @foreach (EntityDataParameter.Discriminator item in list)
+                {
+                    <div class="row">
+                        <span>@item.GetValue().Value</span>
+                        <span>@Presentation.Services.SystemConstantService.AsDateTime(item.GetValue().TimeCreated)</span>
+                        <span>@Presentation.Services.SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
+                        <span>@Presentation.Services.SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
+                        <span>@Presentation.Services.SystemConstantService.AsDateTime(item.GetValue().TimeApproved)</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchemaParameterSystem SchemaParameter { get; set; }
+
+    private bool _isCreateMode;
+
+    private bool TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list)
+    {
+        return StateData.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out list!);
+    }
+
+    private void StartCreateMode()
+    {
+        _isCreateMode = true;
+    }
+
+    private void StopCreateMode()
+    {
+        _isCreateMode = false;
+    }
+
+    private async Task Submit(WebFormContext<RequestDataParameterSystemCreate> context)
+    {
+        try
+        {
+            await Presentation.Services.APIHttpClient.SendRequest(context.Model);
+        }
+        catch
+        {
+            // ignored
+        }
+
+        _isCreateMode = false;
+    }
+
+}

@@ -1,7 +1,7 @@
-@inherits BaseRequestForm<RequestDataCreateSystemParameter, ResponseDataCreateSystemParameter>
+@inherits BaseRequestForm<RequestDataParameterSystemCreate, ResponseDataParameterSystemCreate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm T="RequestDataCreateSystemParameter" Context="Context" OnSubmit="ForwardSubmit">
+    <WebForm T="RequestDataParameterSystemCreate" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
                         @bind-Value="Context.Model.Value"/>
 
@@ -31,7 +31,7 @@
     private bool _effectiveDateImmediate = true;
     private DateTime? _effectiveDatePicked = DateTime.Now;
 
-    protected override WebFormContext<RequestDataCreateSystemParameter> CreateContext()
+    protected override WebFormContext<RequestDataParameterSystemCreate> CreateContext()
     {
         return new(new() { SchemaIdentifier = SchemaParameter.SchemaIdentifier });
     }

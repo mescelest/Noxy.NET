@@ -6,7 +6,7 @@ using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests;
 
-public class RequestDataCreateTextParameter : BaseRequestGet<ResponseDataCreateTextParameter>
+public class RequestDataParameterTextCreate : BaseRequestGet<ResponseDataParameterTextCreate>
 {
     public override string APIEndpoint => "/Data/Parameter/Text";
 
@@ -20,7 +20,6 @@ public class RequestDataCreateTextParameter : BaseRequestGet<ResponseDataCreateT
     [Description(TextConstants.HelpFormValue)]
     public string Value { get; set; } = string.Empty;
 
-    [Required]
     [DisplayName(TextConstants.LabelFormDateEffective)]
     [Description(TextConstants.HelpFormDateEffective)]
     public DateTime? DateEffective { get; set; }

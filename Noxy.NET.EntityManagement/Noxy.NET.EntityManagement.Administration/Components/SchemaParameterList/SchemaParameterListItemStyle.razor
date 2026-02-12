@@ -1,0 +1,81 @@
+@inject IState<FeatureSchemaParameterDataParameterListState> StateData
+@inject TextService TextService
+@inject APIHttpClient APIHttpClient
+@inject SystemConstantService SystemConstantService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="create">
+        <FormDataCreateStyleParameter SchemaParameter="@SchemaParameter" OnSubmit="Submit">
+            <div class="action-list">
+                <Button @onclick="StopCreateMode">Cancel</Button>
+                <Button type="submit">Create value</Button>
+            </div>
+        </FormDataCreateStyleParameter>
+    </div>
+
+    @if (TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list))
+    {
+        <hr/>
+
+        <div class="table">
+            <div class="header">
+                <b>@TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
+                <b>@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
+                <b>@TextService.Get(TextConstants.LabelTimeEffectiveFrom, GetComponentName())</b>
+                <b>@TextService.Get(TextConstants.LabelTimeEffectiveTo, GetComponentName())</b>
+                <b>@TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
+            </div>
+
+            <div class="body">
+                @foreach (EntityDataParameter.Discriminator item in list)
+                {
+                    <div class="row">
+                        <span>@item.GetValue().Value</span>
+                        <span>@SystemConstantService.AsDateTime(item.GetValue().TimeCreated)</span>
+                        <span>@SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
+                        <span>@SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
+                        <span>@SystemConstantService.AsDateTime(item.GetValue().TimeApproved)</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchemaParameterStyle SchemaParameter { get; set; }
+
+    private bool _isCreateMode;
+
+    private bool TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list)
+    {
+        return StateData.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out list!);
+    }
+
+    private void StartCreateMode()
+    {
+        _isCreateMode = true;
+    }
+
+    private void StopCreateMode()
+    {
+        _isCreateMode = false;
+    }
+
+    private async Task Submit(WebFormContext<RequestDataParameterStyleCreate> context)
+    {
+        try
+        {
+            await APIHttpClient.SendRequest(context.Model);
+            _isCreateMode = false;
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
+}

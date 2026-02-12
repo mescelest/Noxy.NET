@@ -1,7 +1,7 @@
-@inherits BaseRequestForm<RequestDataCreateTextParameter, ResponseDataCreateTextParameter>
+@inherits BaseRequestForm<RequestDataParameterTextCreate, ResponseDataParameterTextCreate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm T="RequestDataCreateTextParameter" Context="Context" OnSubmit="ForwardSubmit">
+    <WebForm T="RequestDataParameterTextCreate" Context="Context" OnSubmit="ForwardSubmit">
         @switch (SchemaParameter.Type)
         {
             case TextParameterTypeEnum.Line:
@@ -42,7 +42,7 @@
     private bool _effectiveDateImmediate = true;
     private DateTime? _effectiveDatePicked = DateTime.Now;
 
-    protected override WebFormContext<RequestDataCreateTextParameter> CreateContext()
+    protected override WebFormContext<RequestDataParameterTextCreate> CreateContext()
     {
         return new(new() { SchemaIdentifier = SchemaParameter.SchemaIdentifier });
     }

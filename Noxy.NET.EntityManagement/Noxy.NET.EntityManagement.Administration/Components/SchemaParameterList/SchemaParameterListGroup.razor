@@ -1,8 +1,6 @@
 @inject IState<FeatureSchemaParameterDataParameterListState> StateData
 @inject IState<FeatureTextState> StateText
 @inject IDispatcher Dispatcher
-@inject TextService TextService
-@inject SystemConstantService SystemConstantService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -12,66 +10,17 @@
         </Header>
 
         <Content>
-            @if (TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list))
+            @switch (SchemaParameter)
             {
-                <div class="create">
-                    @if (_isCreateMode)
-                    {
-                        @switch (SchemaParameter)
-                        {
-                            case EntitySchemaParameterStyle parameterStyle:
-                                <FormDataCreateStyleParameter SchemaParameter="@parameterStyle" OnSubmit="FormCreateStyleParameterSubmit">
-                                    @ActionList
-                                </FormDataCreateStyleParameter>
-                                break;
-                            case EntitySchemaParameterSystem parameterSystem:
-                                <FormDataCreateSystemParameter SchemaParameter="@parameterSystem" OnSubmit="FormCreateSystemParameterSubmit">
-                                    @ActionList
-                                </FormDataCreateSystemParameter>
-                                break;
-                            case EntitySchemaParameterText parameterText:
-                                <FormDataCreateTextParameter SchemaParameter="@parameterText" OnSubmit="FormCreateTextParameterSubmit">
-                                    @ActionList
-                                </FormDataCreateTextParameter>
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        <div class="action-list">
-                            <Button @onclick="StartCreateMode">Add new value</Button>
-                        </div>
-                    }
-                </div>
-
-                <hr/>
-
-                <div class="table">
-                    <div class="header">
-                        <b>@TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
-                        <b>@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
-                        <b>@TextService.Get(TextConstants.LabelTimeEffectiveFrom, GetComponentName())</b>
-                        <b>@TextService.Get(TextConstants.LabelTimeEffectiveTo, GetComponentName())</b>
-                        <b>@TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
-                    </div>
-
-                    <div class="body">
-                        @foreach (EntityDataParameter.Discriminator item in list)
-                        {
-                            <div class="row">
-                                <span>@item.GetValue().Value</span>
-                                <span>@SystemConstantService.AsDateTime(item.GetValue().TimeCreated)</span>
-                                <span>@SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
-                                <span>@SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
-                                <span>@SystemConstantService.AsDateTime(item.GetValue().TimeApproved)</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-            else
-            {
-                <p>No data available.</p>
+                case EntitySchemaParameterStyle parameterStyle:
+                    <SchemaParameterListItemStyle SchemaParameter="@parameterStyle"/>
+                    break;
+                case EntitySchemaParameterSystem parameterSystem:
+                    <SchemaParameterListItemSystem SchemaParameter="@parameterSystem"/>
+                    break;
+                case EntitySchemaParameterText parameterText:
+                    <SchemaParameterListItemText SchemaParameter="@parameterText"/>
+                    break;
             }
         </Content>
     </Collapsible>
@@ -82,7 +31,6 @@
     [Parameter, EditorRequired]
     public required EntitySchemaParameter SchemaParameter { get; set; }
 
-    private bool _isCreateMode;
     private bool _isCollapsed = true;
 
     private bool IsLoading => StateData.Value.IsKeyLoading(SchemaParameter.SchemaIdentifier) || (StateData.Value.Cache.ContainsKey(SchemaParameter.SchemaIdentifier) && StateText.Value.IsScopeLoading(GetComponentName()));
@@ -97,44 +45,4 @@
 
         Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.LoadDataParameterListAction(id));
     }
-
-    private bool TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list)
-    {
-        return StateData.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out list!);
-    }
-
-    private void StartCreateMode()
-    {
-        _isCreateMode = true;
-    }
-
-    private void StopCreateMode()
-    {
-        _isCreateMode = false;
-    }
-
-    private RenderFragment ActionList =>
-        @<div class="action-list">
-            <Button @onclick="StopCreateMode">Cancel</Button>
-            <Button type="submit">Create value</Button>
-        </div>;
-
-    private void FormCreateStyleParameterSubmit(WebFormContext<RequestDataCreateStyleParameter> context)
-    {
-        _isCreateMode = false;
-        // Should submit this and then do the stop create mode or raise error
-    }
-
-    private void FormCreateSystemParameterSubmit(WebFormContext<RequestDataCreateSystemParameter> context)
-    {
-        _isCreateMode = false;
-        // Should submit this and then do the stop create mode or raise error
-    }
-
-    private void FormCreateTextParameterSubmit(WebFormContext<RequestDataCreateTextParameter> context)
-    {
-        _isCreateMode = false;
-        // Should submit this and then do the stop create mode or raise error
-    }
-
 }
