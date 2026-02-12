@@ -2,10 +2,10 @@
     display: grid;
     row-gap: var(--size-gap-md);
     column-gap: var(--size-gap-md);
-    grid-template-columns: 1fr max-content max-content max-content max-content;
+    grid-template-columns: 1fr max-content max-content max-content;
 }
 
-.header, .body {
+.body {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: subgrid;
@@ -16,6 +16,20 @@
     display: grid;
     row-gap: var(--size-gap-xs);
     grid-template-columns: subgrid;
+}
+
+.column {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+}
+
+.column.left {
+    justify-self: flex-start;
+}
+
+.column.right {
+    justify-self: flex-end;
 }
 
 .create {

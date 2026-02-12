@@ -10,19 +10,19 @@ namespace Noxy.NET.EntityManagement.API.Controllers;
 [Route("[controller]")]
 public class DataController(IMediator mediator) : ControllerBase
 {
-    [HttpGet("Parameter/Style")]
+    [HttpPost("Parameter/Style")]
     public async Task<ActionResult<ResponseDataParameterStyleCreate>> ParameterStyleCreate([FromBody] RequestDataParameterStyleCreate request)
     {
         return await mediator.Send(new QueryDataParameterStyleCreate(request));
     }
 
-    [HttpGet("Parameter/System")]
+    [HttpPost("Parameter/System")]
     public async Task<ActionResult<ResponseDataParameterSystemCreate>> ParameterSystemCreate([FromBody] RequestDataParameterSystemCreate request)
     {
         return await mediator.Send(new QueryDataParameterSystemCreate(request));
     }
 
-    [HttpGet("Parameter/Text")]
+    [HttpPost("Parameter/Text")]
     public async Task<ActionResult<ResponseDataParameterTextCreate>> ParameterTextCreate([FromBody] RequestDataParameterTextCreate request)
     {
         return await mediator.Send(new QueryDataParameterTextCreate(request));

@@ -132,7 +132,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
         return true;
     }
 
-
     public bool Validate()
     {
         Batch(() =>
@@ -151,17 +150,10 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
 
             foreach (ValidationResult result in listResult)
             {
-                if (string.IsNullOrWhiteSpace(result.ErrorMessage)) continue;
-
-                bool assignedToField = false;
-                foreach (string memberName in result.MemberNames)
+                if (!string.IsNullOrWhiteSpace(result.ErrorMessage) && !result.MemberNames.Any())
                 {
-                    if (!WebFormFieldContextCollection.TryGetValue(memberName, out WebFormFieldContext? field)) continue;
-                    field.WriteError(result.ErrorMessage);
-                    assignedToField = true;
+                    ErrorList.Add(result.ErrorMessage);
                 }
-
-                if (!assignedToField) ErrorList.Add(result.ErrorMessage);
             }
 
             HasError = ErrorList.Count > 0 || AnyFieldHasError;

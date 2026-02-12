@@ -60,7 +60,7 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         List<TableDataParameter> result = await Context.DataParameter
             .AsNoTracking()
             .Where(x => x.SchemaIdentifier == identifier)
-            .OrderBy(x => x.TimeCreated)
+            .OrderByDescending(x => x.TimeEffective)
             .ToListAsync();
 
         return result.Select(MapperT2E.Map).ToList();

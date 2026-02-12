@@ -6,7 +6,7 @@ using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests;
 
-public class RequestDataParameterStyleCreate : BaseRequestGet<ResponseDataParameterStyleCreate>
+public class RequestDataParameterStyleCreate : BaseRequestPost<ResponseDataParameterStyleCreate>
 {
     public override string APIEndpoint => "/Data/Parameter/Style";
 

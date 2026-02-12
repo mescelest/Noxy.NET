@@ -6,7 +6,7 @@ using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests;
 
-public class RequestDataParameterSystemCreate : BaseRequestGet<ResponseDataParameterSystemCreate>
+public class RequestDataParameterSystemCreate : BaseRequestPost<ResponseDataParameterSystemCreate>
 {
     public override string APIEndpoint => "/Data/Parameter/System";
 

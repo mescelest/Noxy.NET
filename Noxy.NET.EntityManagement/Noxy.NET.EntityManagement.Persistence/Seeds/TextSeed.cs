@@ -83,12 +83,14 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019c3efa-a140-73be-900f-360a6ccd354c", TextConstants.LabelValue);
         HasSchemaParameterText("019c3efa-a140-73be-900f-3bf25ff45c30", TextConstants.LabelTimeApproved);
         HasSchemaParameterText("019c3efa-a140-73be-900f-3ecaa29e0b39", TextConstants.LabelTimeCreated);
+        HasSchemaParameterText("019c535a-46a5-7391-afea-fd216ed0931f", TextConstants.LabelTimeEffective);
         HasSchemaParameterText("019c3efa-a140-73be-900f-40a664ac2558", TextConstants.LabelTimeEffectiveFrom);
         HasSchemaParameterText("019c3efa-a140-73be-900f-45045dba457e", TextConstants.LabelTimeEffectiveTo);
 
         HasDataParameterText("019c3efa-a140-73be-900f-4bed02a7227c", TextConstants.LabelValue, "Value");
         HasDataParameterText("019c3efa-a140-73be-900f-4e2b26906c90", TextConstants.LabelTimeApproved, "Approved at");
         HasDataParameterText("019c47d2-99d6-76d6-bffc-a46b61cfe957", TextConstants.LabelTimeCreated, "Created at");
+        HasDataParameterText("019c535d-0142-766d-9f9d-eb464887d764", TextConstants.LabelTimeEffective, "Effective at");
         HasDataParameterText("019c3efd-764d-740a-baae-c0240683a292", TextConstants.LabelTimeEffectiveFrom, "Effective from");
         HasDataParameterText("019c3efd-764d-740a-baae-c7503349db66", TextConstants.LabelTimeEffectiveTo, "Effective to");
 

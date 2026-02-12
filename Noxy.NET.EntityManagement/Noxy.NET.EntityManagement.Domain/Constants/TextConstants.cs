@@ -41,6 +41,7 @@ public static class TextConstants
     public const string LabelValue = "Label:Value";
     public const string LabelTimeApproved = "Label:TimeApproved";
     public const string LabelTimeCreated = "Label:TimeCreated";
+    public const string LabelTimeEffective = "Label:TimeEffective";
     public const string LabelTimeEffectiveFrom = "Label:TimeEffectiveFrom";
     public const string LabelTimeEffectiveTo = "Label:TimeEffectiveTo";
 

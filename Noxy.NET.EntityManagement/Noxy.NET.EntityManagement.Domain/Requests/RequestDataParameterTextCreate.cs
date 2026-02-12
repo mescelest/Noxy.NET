@@ -6,7 +6,7 @@ using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests;
 
-public class RequestDataParameterTextCreate : BaseRequestGet<ResponseDataParameterTextCreate>
+public class RequestDataParameterTextCreate : BaseRequestPost<ResponseDataParameterTextCreate>
 {
     public override string APIEndpoint => "/Data/Parameter/Text";
 

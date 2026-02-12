@@ -8,35 +8,37 @@
     <div class="create">
         <FormDataCreateSystemParameter SchemaParameter="@SchemaParameter" OnSubmit="Submit">
             <div class="action-list">
-                <Button @onclick="StopCreateMode">Cancel</Button>
+                <Button type="button" @onclick="StopCreateMode">Cancel</Button>
                 <Button type="submit">Create value</Button>
             </div>
         </FormDataCreateSystemParameter>
     </div>
 
-    @if (TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list))
+    @if (TryGetData(out IReadOnlyList<EntityDataParameter> list))
     {
         <hr/>
 
         <div class="table">
-            <div class="header">
-                <b>@Presentation.Services.TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
-                <b>@Presentation.Services.TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
-                <b>@Presentation.Services.TextService.Get(TextConstants.LabelTimeEffectiveFrom, GetComponentName())</b>
-                <b>@Presentation.Services.TextService.Get(TextConstants.LabelTimeEffectiveTo, GetComponentName())</b>
-                <b>@Presentation.Services.TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
+            <div class="row">
+                <b class="column left">@TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
+                <b class="column right">@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
+                <b class="column right">@TextService.Get(TextConstants.LabelTimeEffective, GetComponentName())</b>
+                <b class="column right">@TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
             </div>
 
             <div class="body">
-                @foreach (EntityDataParameter.Discriminator item in list)
-                {
-                    <div class="row">
-                        <span>@item.GetValue().Value</span>
-                        <span>@Presentation.Services.SystemConstantService.AsDateTime(item.GetValue().TimeCreated)</span>
-                        <span>@Presentation.Services.SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
-                        <span>@Presentation.Services.SystemConstantService.AsDateTime(item.GetValue().TimeEffective)</span>
-                        <span>@Presentation.Services.SystemConstantService.AsDateTime(item.GetValue().TimeApproved)</span>
-                    </div>
+                @{
+                    Guid current = GetCurrent(list);
+                    foreach (EntityDataParameter item in list)
+                    {
+                        bool? isCurrent = current == item.ID ? true : false;
+                        <div class="row" current="@isCurrent">
+                            <span class="column left">@item.Value</span>
+                            <span class="column right">@SystemConstantService.AsDate(item.TimeCreated)</span>
+                            <span class="column right">@SystemConstantService.AsDate(item.TimeEffective)</span>
+                            <span class="column right">@SystemConstantService.AsDate(item.TimeApproved)</span>
+                        </div>
+                    }
                 }
             </div>
         </div>
@@ -50,9 +52,16 @@
 
     private bool _isCreateMode;
 
-    private bool TryGetData(out IReadOnlyList<EntityDataParameter.Discriminator> list)
+    private bool TryGetData(out IReadOnlyList<EntityDataParameter> list)
     {
         return StateData.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out list!);
+    }
+
+    private Guid GetCurrent(IReadOnlyList<EntityDataParameter> list)
+    {
+        return list.Count != 0
+            ? list.Where(x => x.TimeEffective > DateTime.Now).OrderByDescending(x => x.TimeCreated).FirstOrDefault()?.ID ?? Guid.Empty
+            : Guid.Empty;
     }
 
     private void StartCreateMode()
@@ -69,7 +78,7 @@
     {
         try
         {
-            await Presentation.Services.APIHttpClient.SendRequest(context.Model);
+            await APIHttpClient.SendRequest(context.Model);
         }
         catch
         {

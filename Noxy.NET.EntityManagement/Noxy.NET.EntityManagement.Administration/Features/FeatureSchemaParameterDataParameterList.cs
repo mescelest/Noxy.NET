@@ -11,7 +11,7 @@ public record FeatureSchemaParameterDataParameterListState
 {
     public bool IsLoading { get; init; }
     public Dictionary<string, bool> IsLoadingPerKey { get; init; } = new();
-    public Dictionary<string, IReadOnlyList<EntityDataParameter.Discriminator>> Cache { get; init; } = new();
+    public Dictionary<string, IReadOnlyList<EntityDataParameter>> Cache { get; init; } = new();
     public string? ErrorMessage { get; init; }
 
     public bool IsKeyLoading(string schemaIdentifier) => IsLoadingPerKey.TryGetValue(schemaIdentifier, out bool isLoading) && isLoading;
@@ -36,7 +36,7 @@ public static class FeatureSchemaParameterDataParameterListReducers
         return state with
         {
             IsLoading = false,
-            Cache = new(state.Cache) { [action.SchemaIdentifier] = action.Results },
+            Cache = new(state.Cache) { [action.SchemaIdentifier] = action.Result.Select(x => x.GetValue()).ToList() },
             IsLoadingPerKey = new(state.IsLoadingPerKey) { [action.SchemaIdentifier] = false }
         };
     }
@@ -54,7 +54,7 @@ public static class FeatureSchemaParameterDataParameterListReducers
 
     public record LoadDataParameterListAction(string SchemaIdentifier);
 
-    public record DataParameterListResultAction(string SchemaIdentifier, IReadOnlyList<EntityDataParameter.Discriminator> Results);
+    public record DataParameterListResultAction(string SchemaIdentifier, IReadOnlyList<EntityDataParameter.Discriminator> Result);
 
     public record DataParameterListFailedAction(string SchemaIdentifier, string Error);
 }
