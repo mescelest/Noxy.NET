@@ -2,18 +2,23 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestSchemaParameterList" Context="Context" OnSubmit="ForwardSubmit">
-        <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Search))" Description="@GetDescription(nameof(Context.Model.Search))"
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Search))" Description="@GetDescription(nameof(Model.Search))"
                         @bind-Value="Context.Model.Search"/>
 
-        <InputGroupSelect OptionList="BoolOptionList" DisplayName="@GetDisplayName(nameof(Context.Model.IsSystemDefined))" Description="@GetDescription(nameof(Context.Model.IsSystemDefined))"
-                          @bind-Value="Context.Model.IsSystemDefined">
-            <span>@GetSystemDefinedName(context)</span>
+        <InputGroupSelect OptionList="ListIsSystemDefinedKey" DisplayName="@GetDisplayName(nameof(Model.IsSystemDefined))" Description="@GetDescription(nameof(Model.IsSystemDefined))"
+                          Name="@nameof(Model.IsSystemDefined)" @bind-Value:get="GetIsSystemDefined()" @bind-Value:set="SetIsSystemDefined">
+            <span>@_collectionIsSystemDefined[context]</span>
         </InputGroupSelect>
 
-        <InputGroupSelect OptionList="BoolOptionList" DisplayName="@GetDisplayName(nameof(Context.Model.IsApprovalRequired))" Description="@GetDescription(nameof(Context.Model.IsApprovalRequired))"
-                          @bind-Value="Context.Model.IsApprovalRequired">
-            <span>@GetApprovalRequiredName(context)</span>
+        <InputGroupSelect OptionList="ListIsApprovalRequiredKey" DisplayName="@GetDisplayName(nameof(Model.IsApprovalRequired))" Description="@GetDescription(nameof(Model.IsApprovalRequired))"
+                          Name="@nameof(Model.IsApprovalRequired)" @bind-Value:get="GetIsApprovalRequired()" @bind-Value:set="SetIsApprovalRequired">
+            <span>@_collectionIsApprovalRequired[context]</span>
         </InputGroupSelect>
+
+        <InputGroupCheckboxSet OptionList="ListTypeKey" DisplayName="@GetDisplayName(nameof(Model.ParameterType))" Description="@GetDescription(nameof(Model.ParameterType))"
+                               @bind-Value:get="GetParameterType()" @bind-Value:set="SetParameterType">
+            <span>@TextService.Get(_collectionType[context])</span>
+        </InputGroupCheckboxSet>
 
         @ChildContent
     </WebForm>
@@ -21,24 +26,69 @@
 
 @code {
 
-    private static bool?[] BoolOptionList => [null, true, false];
+    private readonly Dictionary<int, string> _collectionIsSystemDefined = [];
+    private readonly Dictionary<int, string> _collectionIsApprovalRequired = [];
+    private readonly Dictionary<string, string> _collectionType = [];
 
-    private static string GetSystemDefinedName(bool? value)
+    private IEnumerable<int> ListIsSystemDefinedKey => _collectionIsSystemDefined.Select(x => x.Key);
+    private IEnumerable<int> ListIsApprovalRequiredKey => _collectionIsApprovalRequired.Select(x => x.Key);
+    private IEnumerable<string> ListTypeKey => _collectionType.Select(x => x.Key);
+
+    protected override async Task OnAfterFirstRenderAsync()
     {
-        if (!value.HasValue) return "Either";
+        await base.OnAfterFirstRenderAsync();
 
-        return value.Value
-            ? "System defined"
-            : "User defined";
+        _collectionIsSystemDefined[-1] = "Either";
+        _collectionIsSystemDefined[0] = "System defined";
+        _collectionIsSystemDefined[1] = "User defined";
+
+        _collectionIsApprovalRequired[-1] = "Either";
+        _collectionIsApprovalRequired[0] = "With approval required";
+        _collectionIsApprovalRequired[1] = "Without approval required";
+
+        _collectionType[nameof(EntitySchemaParameterStyle)] = TextConstants.LabelParameterStyle;
+        _collectionType[nameof(EntitySchemaParameterSystem)] = TextConstants.LabelParameterSystem;
+        _collectionType[nameof(EntitySchemaParameterText)] = TextConstants.LabelParameterText;
     }
 
-    private static string GetApprovalRequiredName(bool? value)
+    private int GetIsSystemDefined()
     {
-        if (!value.HasValue) return "Either";
+        return Model.IsSystemDefined switch
+        {
+            true => 1,
+            false => 0,
+            _ => -1
+        };
+    }
 
-        return value.Value
-            ? "With approval required"
-            : "Without approval required";
+    private void SetIsSystemDefined(int value)
+    {
+        Model.IsSystemDefined = value == -1 ? null : value == 1;
+    }
+
+    private int GetIsApprovalRequired()
+    {
+        return Model.IsApprovalRequired switch
+        {
+            true => 1,
+            false => 0,
+            _ => -1
+        };
+    }
+
+    private void SetIsApprovalRequired(int value)
+    {
+        Model.IsApprovalRequired = value == -1 ? null : value == 1;
+    }
+
+    private IEnumerable<string> GetParameterType()
+    {
+        return Model.ParameterType ?? [];
+    }
+
+    private void SetParameterType(IEnumerable<string>? value)
+    {
+        Model.ParameterType = value;
     }
 
     protected override WebFormContext<RequestSchemaParameterList> CreateContext()

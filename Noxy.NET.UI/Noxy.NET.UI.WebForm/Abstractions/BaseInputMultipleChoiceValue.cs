@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Components;
 
 namespace Noxy.NET.UI.Abstractions;
 
@@ -10,28 +11,40 @@ public abstract class BaseInputMultipleChoiceValue<TOption, TValue> : BaseInputV
     [Parameter]
     public Func<TOption, IReadOnlyDictionary<string, object>?>? InputAttributes { get; set; }
 
+    private static readonly ConstructorInfo? EnumerableConstructor = typeof(TValue).GetConstructor([typeof(IEnumerable<TOption>)]);
+    private static readonly bool IsListAssignable = typeof(TValue).IsAssignableFrom(typeof(List<TOption>));
+    private static readonly bool IsArrayAssignable = typeof(TValue).IsAssignableFrom(typeof(TOption[]));
+
     protected void OnInputChange(ChangeEventArgs args, TOption option)
     {
-        TOption? value = GetEventValue(args) ? option : default;
-        List<TOption> current = Value.ToList();
-        List<TOption> next = [];
-        if (IsEqual(value, default))
+        bool isChecked = GetEventValue(args);
+        HashSet<TOption> set = Value != null ? [..Value] : [];
+
+        if (isChecked)
         {
-            next.AddRange(current.Where(x => !IsEqual(x, option)));
+            set.Add(option);
         }
         else
         {
-            next.AddRange(current);
-            next.Add(option);
+            set.Remove(option);
         }
 
-        TValue result = (TValue)Activator.CreateInstance(typeof(TValue), next.AsEnumerable())!;
+        TValue result = CreateValue(set.ToList());
         NotifyChange(result);
+    }
+
+    private static TValue CreateValue(List<TOption> items)
+    {
+        if (EnumerableConstructor is not null) return (TValue)EnumerableConstructor.Invoke([items]);
+        if (IsListAssignable) return (TValue)(object)items;
+        if (IsArrayAssignable) return (TValue)(object)items.ToArray();
+
+        throw new InvalidOperationException($"TValue '{typeof(TValue).Name}' is not supported. It must have a constructor accepting IEnumerable<TOption>.");
     }
 
     protected bool IsChecked(TOption option)
     {
-        return Value.Any(x => IsEqual(x, option));
+        return Value is not null && Value.Any(x => IsEqual(x, option));
     }
 
     private static bool IsEqual(TOption? a, TOption? b)

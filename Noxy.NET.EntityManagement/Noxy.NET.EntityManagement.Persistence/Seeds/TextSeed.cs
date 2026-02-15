@@ -81,6 +81,9 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019c2571-7b67-75bb-a029-35dcce9e1f9f", TextConstants.HeaderPropertyTable, "Table Properties");
 
         HasSchemaParameterText("019c3efa-a140-73be-900f-360a6ccd354c", TextConstants.LabelValue);
+        HasSchemaParameterText("019c6162-6735-703a-be4d-44e4e3999607", TextConstants.LabelParameterStyle);
+        HasSchemaParameterText("019c6162-6735-703a-be4d-4951669119ef", TextConstants.LabelParameterSystem);
+        HasSchemaParameterText("019c6162-6735-703a-be4d-4d4849732133", TextConstants.LabelParameterText);
         HasSchemaParameterText("019c5c4f-2f15-74a8-a98f-6ec5e9fe6e27", TextConstants.LabelCulture);
         HasSchemaParameterText("019c3efa-a140-73be-900f-3bf25ff45c30", TextConstants.LabelTimeApproved);
         HasSchemaParameterText("019c3efa-a140-73be-900f-3ecaa29e0b39", TextConstants.LabelTimeCreated);
@@ -89,6 +92,9 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019c3efa-a140-73be-900f-45045dba457e", TextConstants.LabelTimeEffectiveTo);
 
         HasDataParameterText("019c3efa-a140-73be-900f-4bed02a7227c", TextConstants.LabelValue, "Value");
+        HasDataParameterText("019c6162-6735-703a-be4d-53373d5df7f0", TextConstants.LabelParameterStyle, "Style parameter");
+        HasDataParameterText("019c6162-6735-703a-be4d-568ee7a09e9c", TextConstants.LabelParameterSystem, "System parameter");
+        HasDataParameterText("019c6162-6735-703a-be4d-586369c5b173", TextConstants.LabelParameterText, "Text parameter");
         HasDataParameterText("019c5c4f-2f15-74a8-a98f-70001c79500c", TextConstants.LabelCulture, "Culture");
         HasDataParameterText("019c3efa-a140-73be-900f-4e2b26906c90", TextConstants.LabelTimeApproved, "Approved at");
         HasDataParameterText("019c47d2-99d6-76d6-bffc-a46b61cfe957", TextConstants.LabelTimeCreated, "Created at");

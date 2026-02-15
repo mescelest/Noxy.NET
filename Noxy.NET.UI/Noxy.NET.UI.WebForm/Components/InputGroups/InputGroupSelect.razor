@@ -14,12 +14,12 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required RenderFragment<TValue> ChildContent { get; set; }
+    public required RenderFragment<TValue?> ChildContent { get; set; }
 
     [Parameter, EditorRequired]
     public required IEnumerable<TValue> OptionList { get; set; }
 
     [Parameter]
-    public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+    public Func<TValue?, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
 
 }

@@ -112,18 +112,42 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
     {
-        IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking();
-        if (filter.Search != null) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+        IQueryable<TableSchemaParameter> query = Enumerable.Empty<TableSchemaParameter>().AsQueryable();
+
+        if (filter.ParameterType == null || !filter.ParameterType.Any())
+        {
+            query = Context.SchemaParameter.AsNoTracking();
+        }
+        else
+        {
+            Dictionary<string, IQueryable<TableSchemaParameter>> sources = new()
+            {
+                { nameof(EntitySchemaParameterStyle), Context.SchemaParameterStyle.AsNoTracking() },
+                { nameof(EntitySchemaParameterSystem), Context.SchemaParameterSystem.AsNoTracking() },
+                { nameof(EntitySchemaParameterText), Context.SchemaParameterText.AsNoTracking() }
+            };
+
+            foreach (string type in filter.ParameterType)
+            {
+                if (sources.TryGetValue(type, out IQueryable<TableSchemaParameter>? src))
+                {
+                    query = query.Union(src);
+                }
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
         if (filter.IsSystemDefined != null) query = query.Where(x => x.IsSystemDefined == filter.IsSystemDefined);
         if (filter.IsApprovalRequired != null) query = query.Where(x => x.IsApprovalRequired == filter.IsApprovalRequired);
-
-        List<TableSchemaParameter> result = await query
+        query = query
+            .OrderBy(x => x.Name)
             .Skip(filter.PageNumber * filter.PageSize)
-            .Take(filter.PageSize)
-            .ToListAsync();
+            .Take(filter.PageSize);
 
+        List<TableSchemaParameter> result = await query.ToListAsync();
         return result.Select(MapperT2E.Map).ToList();
     }
+
 
     public async Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id)
     {

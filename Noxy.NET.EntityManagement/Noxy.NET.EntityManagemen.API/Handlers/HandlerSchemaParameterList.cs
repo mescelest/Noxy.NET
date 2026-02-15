@@ -17,6 +17,7 @@ public class HandlerSchemaParameterList(IUnitOfWorkFactory serviceUoWFactory) : 
             Search = request.Search,
             IsSystemDefined = request.IsSystemDefined,
             IsApprovalRequired = request.IsApprovalRequired,
+            ParameterType = request.ParameterType,
             PageSize = request.PageSize ?? 10,
             PageNumber = request.PageNumber ?? 0,
         });

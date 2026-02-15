@@ -36,7 +36,7 @@
     [JSInvokable]
     public void OnSort(int oldIndex, int newIndex)
     {
-        ValueChanged.InvokeAsync(Value.ToList().MoveItem(oldIndex, newIndex));
+        ValueChanged.InvokeAsync(Value?.ToList().MoveItem(oldIndex, newIndex));
     }
 
 }

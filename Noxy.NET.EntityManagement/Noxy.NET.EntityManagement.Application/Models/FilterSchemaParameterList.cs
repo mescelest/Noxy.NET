@@ -5,6 +5,7 @@ public class FilterSchemaParameterList
     public string? Search { get; init; }
     public bool? IsSystemDefined { get; init; }
     public bool? IsApprovalRequired { get; init; }
+    public IEnumerable<string>? ParameterType { get; init; }
     public required int PageNumber { get; init; }
     public required int PageSize { get; init; }
 }

@@ -6,15 +6,15 @@ namespace Noxy.NET.UI.Abstractions;
 public abstract class BaseInputValue<TValue> : BaseInput
 {
     [Parameter, EditorRequired]
-    public required TValue Value { get; set; }
+    public required TValue? Value { get; set; }
 
     [Parameter]
-    public EventCallback<TValue> ValueChanged { get; set; }
+    public EventCallback<TValue?> ValueChanged { get; set; }
 
     [Parameter]
-    public Expression<Func<TValue>>? ValueExpression { get; set; }
+    public Expression<Func<TValue?>>? ValueExpression { get; set; }
 
-    protected void NotifyChange(TValue value)
+    protected void NotifyChange(TValue? value)
     {
         Context?.NotifyFieldChanged(GetName());
         ValueChanged.InvokeAsync(value);

@@ -21,12 +21,16 @@ public class RequestSchemaParameterList : BaseRequestGet<ResponseSchemaParameter
     [Description(TextConstants.HelpFormIsApprovalRequired)]
     public bool? IsApprovalRequired { get; set; }
 
-    [DisplayName(TextConstants.LabelFormIsApprovalRequired)]
-    [Description(TextConstants.HelpFormIsApprovalRequired)]
+    [DisplayName(TextConstants.LabelFormParameterTypeList)]
+    [Description(TextConstants.HelpFormParameterTypeList)]
+    public IEnumerable<string>? ParameterType { get; set; }
+
+    [DisplayName(TextConstants.LabelFormPageSize)]
+    [Description(TextConstants.HelpFormPageSize)]
     public int? PageSize { get; set; }
 
-    [DisplayName(TextConstants.LabelFormIsApprovalRequired)]
-    [Description(TextConstants.HelpFormIsApprovalRequired)]
+    [DisplayName(TextConstants.LabelFormPageNumber)]
+    [Description(TextConstants.HelpFormPageNumber)]
     public int? PageNumber { get; set; }
 
     public override Dictionary<string, object?> ToQueryParameters()
