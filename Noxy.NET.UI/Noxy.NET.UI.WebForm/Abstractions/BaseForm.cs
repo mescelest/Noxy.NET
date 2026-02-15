@@ -11,8 +11,8 @@ public abstract class BaseForm<TModel> : ElementComponent where TModel : class
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
-    protected WebFormContext<TModel> Context { get; set; } = null!;
-    protected TModel Model { get; set; } = null!;
+    public WebFormContext<TModel> Context { get; private set; } = null!;
+    public TModel Model { get; private set; } = null!;
 
     protected abstract WebFormContext<TModel> CreateContext();
 

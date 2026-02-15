@@ -245,7 +245,8 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             TimeApproved = table.TimeApproved,
             TimeEffective = table.TimeEffective,
-            TimeCreated = table.TimeCreated
+            TimeCreated = table.TimeCreated,
+            Culture = table.Culture
         };
 
         return mapped;

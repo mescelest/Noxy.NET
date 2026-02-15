@@ -2,45 +2,61 @@
 @inject TextService TextService
 @inject APIHttpClient APIHttpClient
 @inject SystemConstantService SystemConstantService
+@inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="create">
-        <FormDataCreateTextParameter SchemaParameter="@SchemaParameter" OnSubmit="Submit">
+        <FormDataParameterTextCreate @ref="_ref" SchemaParameter="@SchemaParameter" OnSubmit="Submit">
             <div class="action-list">
                 <Button type="submit">Create new value</Button>
             </div>
-        </FormDataCreateTextParameter>
+        </FormDataParameterTextCreate>
     </div>
 
-
-    @if (TryGetData(out IReadOnlyList<EntityDataParameter> list))
-    {
-        <div class="table">
-            <div class="header row">
-                <b class="column left">@TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
-                <b class="column right">@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
-                <b class="column right">@TextService.Get(TextConstants.LabelTimeEffective, GetComponentName())</b>
-                <b class="column right">@TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
-            </div>
-
-            <div class="body">
-                @{
-                    Guid current = GetCurrent(list);
-                    foreach (EntityDataParameter item in list)
-                    {
-                        bool? isCurrent = current == item.ID ? true : false;
-                        <div class="row" current="@isCurrent">
-                            <span class="column left">@item.Value</span>
-                            <span class="column right">@SystemConstantService.AsDate(item.TimeCreated)</span>
-                            <span class="column right">@SystemConstantService.AsDate(item.TimeEffective)</span>
-                            <span class="column right">@SystemConstantService.AsDate(item.TimeApproved)</span>
-                        </div>
-                    }
-                }
-            </div>
+    <div class="table">
+        <div class="header row">
+            <b></b>
+            <b class="column left">@TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
+            <b class="column left">@TextService.Get(TextConstants.LabelCulture, GetComponentName())</b>
+            <b class="column right">@TextService.Get(TextConstants.LabelTimeEffective, GetComponentName())</b>
+            <b class="column right">@TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
+            <b class="column right">@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
         </div>
-    }
+
+        <div class="body">
+            @{
+                EntityDataParameterText[] list = GetParameterList();
+                Guid current = GetCurrent(list);
+
+                foreach (EntityDataParameterText item in list)
+                {
+                    bool? isCurrent = current == item.ID;
+                    <div class="row" current="@isCurrent">
+                            <span>
+                                @if (item.TimeEffective > DateTime.UtcNow)
+                                {
+                                    <IconMinus Size="IconSizeEnum.ExtraExtraSmall" @onclick="() => DeleteParameter(item)"/>
+                                }
+                                else if (isCurrent.Value)
+                                {
+                                    <IconChevronRight Size="IconSizeEnum.ExtraExtraSmall"/>
+                                }
+                                else
+                                {
+                                    <IconTick Size="IconSizeEnum.ExtraExtraSmall" @onclick="() => UpdateForm(item)"/>
+                                }
+                            </span>
+                        <span class="column left">@item.Value</span>
+                        <span class="column left">@item.Culture</span>
+                        <span class="column right">@SystemConstantService.AsDate(item.TimeEffective)</span>
+                        <span class="column right">@SystemConstantService.AsDate(item.TimeApproved)</span>
+                        <span class="column right">@SystemConstantService.AsDate(item.TimeCreated)</span>
+                    </div>
+                }
+            }
+        </div>
+    </div>
 </div>
 
 @code {
@@ -48,24 +64,52 @@
     [Parameter, EditorRequired]
     public required EntitySchemaParameterText SchemaParameter { get; set; }
 
-    private bool TryGetData(out IReadOnlyList<EntityDataParameter> list)
+    private FormDataParameterTextCreate? _ref;
+
+    private EntityDataParameterText[] GetParameterList()
     {
-        return StateData.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out list!);
+        IReadOnlyList<EntityDataParameter> list = StateData.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out IReadOnlyList<EntityDataParameter>? value) ? value : [];
+        return list.OfType<EntityDataParameterText>().OrderByDescending(x => x.TimeEffective).ToArray();
     }
 
-    private Guid GetCurrent(IReadOnlyList<EntityDataParameter> list)
+    private static Guid GetCurrent(EntityDataParameterText[] list)
     {
-        return list.Count != 0
-            ? list.Where(x => x.TimeEffective < DateTime.Now).OrderByDescending(x => x.TimeCreated).FirstOrDefault()?.ID ?? Guid.Empty
+        return list.Length != 0
+            ? list.FirstOrDefault(x => x.TimeEffective < DateTime.UtcNow && x.TimeApproved != null)?.ID ?? Guid.Empty
             : Guid.Empty;
+    }
+
+    private void UpdateForm(EntityDataParameterText entity)
+    {
+        if (_ref == null) return;
+
+        _ref.Model.Value = entity.Value;
+        _ref.Model.Culture = entity.Culture;
+        _ref.Model.TimeEffective = entity.TimeEffective;
+    }
+
+    private async Task DeleteParameter(EntityDataParameter entity)
+    {
+        try
+        {
+            ResponseDataParameterDelete response = await APIHttpClient.SendRequest(new RequestDataParameterDelete { ID = entity.ID });
+            Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.RemoveDataParameterListAction(SchemaParameter.SchemaIdentifier, response.ID));
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private async Task Submit(WebFormContext<RequestDataParameterTextCreate> context)
     {
         try
         {
-            await APIHttpClient.SendRequest(context.Model);
+            ResponseDataParameterTextCreate response = await APIHttpClient.SendRequest(context.Model);
+            Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.AddDataParameterListAction(SchemaParameter.SchemaIdentifier, response.Value));
             context.Reset();
+            await InvokeAsync(StateHasChanged);
         }
         catch
         {

@@ -5,7 +5,7 @@
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
                         @bind-Value="Context.Model.Value"/>
 
-        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Model.DateEffective))" Description="@GetDescription(nameof(Model.DateEffective))"
+        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
                             @bind-Value:get="_effectiveDateImmediate" @bind-Value:set="SetEffectiveDateImmediate">
             @if (context)
             {
@@ -29,7 +29,7 @@
 
     private static bool[] OptionList => [true, false];
     private bool _effectiveDateImmediate = true;
-    private DateTime? _effectiveDatePicked = DateTime.Now;
+    private DateTime? _effectiveDatePicked = DateTime.UtcNow;
 
     protected override WebFormContext<RequestDataParameterStyleCreate> CreateContext()
     {
@@ -39,13 +39,13 @@
     private void SetEffectiveDatePicked(DateTime? value)
     {
         _effectiveDatePicked = value;
-        Context.Model.DateEffective = _effectiveDatePicked;
+        Context.Model.TimeEffective = _effectiveDatePicked;
     }
 
     private void SetEffectiveDateImmediate(bool value)
     {
         _effectiveDateImmediate = value;
-        Context.Model.DateEffective = value ? null : _effectiveDatePicked;
+        Context.Model.TimeEffective = value ? null : _effectiveDatePicked;
     }
 
     private IReadOnlyDictionary<string, object>? GetEffectiveDateImmediateAttributes()

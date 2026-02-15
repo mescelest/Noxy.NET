@@ -48,12 +48,13 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         return table;
     }
 
-    protected TableDataParameterText HasDataParameterText(string id, string constant, string value, DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
+    protected TableDataParameterText HasDataParameterText(string id, string constant, string value, string culture = "en", DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
     {
         TableDataParameterText table = new()
         {
             ID = Guid.Parse(id),
             SchemaIdentifier = constant,
+            Culture = culture,
             Value = value,
             TimeApproved = timeApproved ?? Now,
             TimeEffective = timeEffective ?? Now,

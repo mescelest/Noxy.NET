@@ -1,3 +1,4 @@
+@using System.Globalization
 @inherits BaseRequestForm<RequestDataParameterTextCreate, ResponseDataParameterTextCreate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -16,7 +17,10 @@
                 throw new ArgumentOutOfRangeException();
         }
 
-        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Model.DateEffective))" Description="@GetDescription(nameof(Model.DateEffective))" 
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Culture))" Description="@GetDescription(nameof(Model.Culture))"
+                        @bind-Value="Context.Model.Culture"/>
+
+        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))" 
                             @bind-Value:get="_effectiveDateImmediate" @bind-Value:set="SetEffectiveDateImmediate">
             @if (context)
             {
@@ -40,23 +44,23 @@
 
     private static bool[] OptionList => [true, false];
     private bool _effectiveDateImmediate = true;
-    private DateTime? _effectiveDatePicked = DateTime.Now;
+    private DateTime? _effectiveDatePicked = DateTime.UtcNow;
 
     protected override WebFormContext<RequestDataParameterTextCreate> CreateContext()
     {
-        return new(new() { SchemaIdentifier = SchemaParameter.SchemaIdentifier });
+        return new(new() { SchemaIdentifier = SchemaParameter.SchemaIdentifier, Culture = CultureInfo.CurrentUICulture.Name });
     }
 
     private void SetEffectiveDatePicked(DateTime? value)
     {
         _effectiveDatePicked = value;
-        Context.Model.DateEffective = _effectiveDatePicked;
+        Context.Model.TimeEffective = _effectiveDatePicked;
     }
 
     private void SetEffectiveDateImmediate(bool value)
     {
         _effectiveDateImmediate = value;
-        Context.Model.DateEffective = value ? null : _effectiveDatePicked;
+        Context.Model.TimeEffective = value ? null : _effectiveDatePicked;
     }
 
     private IReadOnlyDictionary<string, object>? GetEffectiveDateImmediateAttributes()

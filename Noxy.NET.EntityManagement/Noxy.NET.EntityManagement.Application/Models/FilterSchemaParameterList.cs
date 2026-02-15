@@ -1,4 +1,4 @@
-namespace Noxy.NET.EntityManagement.Persistence.Models;
+namespace Noxy.NET.EntityManagement.Application.Models;
 
 public class FilterSchemaParameterList
 {

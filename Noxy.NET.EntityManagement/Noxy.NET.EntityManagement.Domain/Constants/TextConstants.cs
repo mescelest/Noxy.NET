@@ -39,6 +39,7 @@ public static class TextConstants
     public const string HeaderPropertyTable = "Header:Property:Table";
 
     public const string LabelValue = "Label:Value";
+    public const string LabelCulture = "Label:Culture";
     public const string LabelTimeApproved = "Label:TimeApproved";
     public const string LabelTimeCreated = "Label:TimeCreated";
     public const string LabelTimeEffective = "Label:TimeEffective";
@@ -51,6 +52,7 @@ public static class TextConstants
     public const string LabelFormSearch = "Label:Form:Search";
     public const string LabelFormSchemaIdentifier = "Label:Form:SchemaIdentifier";
     public const string LabelFormValue = "Label:Form:Value";
+    public const string LabelFormCulture = "Label:Form:Culture";
     public const string LabelFormName = "Label:Form:Name";
     public const string LabelFormNote = "Label:Form:Note";
     public const string LabelFormTitle = "Label:Form:Title";
@@ -81,6 +83,7 @@ public static class TextConstants
     public const string HelpFormSearch = "Help:Form:Search";
     public const string HelpFormSchemaIdentifier = "Help:Form:SchemaIdentifier";
     public const string HelpFormValue = "Help:Form:Value";
+    public const string HelpFormCulture = "Help:Form:Culture";
     public const string HelpFormName = "Help:Form:Name";
     public const string HelpFormNote = "Help:Form:Note";
     public const string HelpFormTitle = "Help:Form:Title";

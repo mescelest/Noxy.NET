@@ -15,14 +15,13 @@
     display: flex;
     flex-flow: row;
     column-gap: var(--size-gap-md);
-    padding: var(--size-gap-xs);
     justify-content: flex-end;
 }
 
 .table {
     display: grid;
     column-gap: var(--size-gap-md);
-    grid-template-columns: 1fr max-content max-content max-content;
+    grid-template-columns: max-content 1fr max-content max-content max-content max-content;
     border-top: 1px solid black;
 }
 
@@ -40,7 +39,7 @@
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: subgrid;
-    padding-inline: var(--size-gap-xs);
+    padding: var(--size-gap-xs);
 }
 
 .row[current] {

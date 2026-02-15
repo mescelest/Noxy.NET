@@ -22,5 +22,5 @@ public class RequestDataParameterStyleCreate : BaseRequestPost<ResponseDataParam
 
     [DisplayName(TextConstants.LabelFormDateEffective)]
     [Description(TextConstants.HelpFormDateEffective)]
-    public DateTime? DateEffective { get; set; }
+    public DateTime? TimeEffective { get; set; }
 }

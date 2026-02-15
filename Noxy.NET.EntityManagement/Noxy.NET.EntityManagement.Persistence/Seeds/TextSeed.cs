@@ -81,6 +81,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019c2571-7b67-75bb-a029-35dcce9e1f9f", TextConstants.HeaderPropertyTable, "Table Properties");
 
         HasSchemaParameterText("019c3efa-a140-73be-900f-360a6ccd354c", TextConstants.LabelValue);
+        HasSchemaParameterText("019c5c4f-2f15-74a8-a98f-6ec5e9fe6e27", TextConstants.LabelCulture);
         HasSchemaParameterText("019c3efa-a140-73be-900f-3bf25ff45c30", TextConstants.LabelTimeApproved);
         HasSchemaParameterText("019c3efa-a140-73be-900f-3ecaa29e0b39", TextConstants.LabelTimeCreated);
         HasSchemaParameterText("019c535a-46a5-7391-afea-fd216ed0931f", TextConstants.LabelTimeEffective);
@@ -88,6 +89,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019c3efa-a140-73be-900f-45045dba457e", TextConstants.LabelTimeEffectiveTo);
 
         HasDataParameterText("019c3efa-a140-73be-900f-4bed02a7227c", TextConstants.LabelValue, "Value");
+        HasDataParameterText("019c5c4f-2f15-74a8-a98f-70001c79500c", TextConstants.LabelCulture, "Culture");
         HasDataParameterText("019c3efa-a140-73be-900f-4e2b26906c90", TextConstants.LabelTimeApproved, "Approved at");
         HasDataParameterText("019c47d2-99d6-76d6-bffc-a46b61cfe957", TextConstants.LabelTimeCreated, "Created at");
         HasDataParameterText("019c535d-0142-766d-9f9d-eb464887d764", TextConstants.LabelTimeEffective, "Effective at");
@@ -100,6 +102,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019c297a-384a-716a-92bd-67c96ecb2b83", TextConstants.LabelFormSearch);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-0992c66a9dae", TextConstants.LabelFormSchemaIdentifier);
         HasSchemaParameterText("019c4c5d-b1c8-722e-ac29-e0f469968754", TextConstants.LabelFormValue);
+        HasSchemaParameterText("019c5c4f-2f15-74a8-a98f-7832658bff84", TextConstants.LabelFormCulture);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-12e8b546b239", TextConstants.LabelFormName);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-17209b94ded6", TextConstants.LabelFormNote);
         HasSchemaParameterText("019789de-e449-71aa-ab1d-192c4a3c0eb6", TextConstants.LabelFormTitle);
@@ -128,6 +131,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019c297a-384a-716a-92bd-6ad2110dfd27", TextConstants.LabelFormSearch, "Search");
         HasDataParameterText("019789f9-2601-72ac-ad27-ea4b8f4855d6", TextConstants.LabelFormSchemaIdentifier, "Schema identifier");
         HasDataParameterText("019c4c5d-b1c8-722e-ac29-e4745ec5528e", TextConstants.LabelFormValue, "Value");
+        HasDataParameterText("019c5c4f-2f15-74a8-a98f-77d2f6daeaf6", TextConstants.LabelFormCulture, "Culture");
         HasDataParameterText("019789f9-2601-72ac-ad27-f1f7ad078b01", TextConstants.LabelFormName, "Name");
         HasDataParameterText("019789f9-2601-72ac-ad27-f7c76f0002d4", TextConstants.LabelFormNote, "Note");
         HasDataParameterText("019789f9-2601-72ac-ad27-f9ef87027fec", TextConstants.LabelFormTitle, "Title");
@@ -156,6 +160,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasSchemaParameterText("019c29f9-5de4-760e-90b6-d8e7a6c0239a", TextConstants.HelpFormSearch);
         HasSchemaParameterText("019789fc-3929-75a9-99e8-f7a6abf0c139", TextConstants.HelpFormSchemaIdentifier);
         HasSchemaParameterText("019c4c5d-b1c8-722e-ac29-e8fc5683a10d", TextConstants.HelpFormValue);
+        HasSchemaParameterText("019c5c4f-2f15-74a8-a98f-7fde1fc8f8ac", TextConstants.HelpFormCulture);
         HasSchemaParameterText("019789fc-3929-75a9-99e8-f819edf63934", TextConstants.HelpFormName);
         HasSchemaParameterText("019789fc-3929-75a9-99e8-ffd616e87b30", TextConstants.HelpFormNote);
         HasSchemaParameterText("019789fc-3929-75a9-99e9-0229499f0ddd", TextConstants.HelpFormTitle);
@@ -185,6 +190,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         HasDataParameterText("019c297a-384a-716a-92bd-6e1c4715908c", TextConstants.HelpFormSearch, "Enter the search term you wish to use");
         HasDataParameterText("019789fc-18dc-73ee-94b6-1564b2f72eb7", TextConstants.HelpFormSchemaIdentifier, "The unique, humanly readable identifier for this entity type.");
         HasDataParameterText("019c4c5d-b1c8-722e-ac29-f25552e22b82", TextConstants.HelpFormValue, "The value to be used with this entity.");
+        HasDataParameterText("019c5c4f-2f15-74a8-a98f-8095ce1d47e4", TextConstants.HelpFormCulture, "The culture this entity is used together with.");
         HasDataParameterText("019789fc-18dc-73ee-94b6-1c60e96f26a9", TextConstants.HelpFormName, "The internal name of this entity type. Should only be visible in the configuration.");
         HasDataParameterText("019789fc-18dc-73ee-94b6-21b290f8401d", TextConstants.HelpFormNote, "A short note detailing how this entity type is used. Should only be visible in the configuration.");
         HasDataParameterText("019789fc-18dc-73ee-94b6-26ead5f18d4d", TextConstants.HelpFormTitle, "The title used when displaying an entity of this type.");

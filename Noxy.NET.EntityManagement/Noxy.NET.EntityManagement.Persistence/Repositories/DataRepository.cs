@@ -41,12 +41,13 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         return MapperT2E.Map(entry.Entity);
     }
 
-    public async Task<EntityDataParameterText> CreateTextParameter(string identifier, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterText> CreateTextParameter(string identifier, string culture, string value, DateTime? timeEffective = null)
     {
         TableSchemaParameterText schema = await Context.SchemaParameterText.SingleAsync(x => x.SchemaIdentifier == identifier);
         EntityEntry<TableDataParameterText> entry = await Context.DataTextParameter.AddAsync(new()
         {
             SchemaIdentifier = identifier,
+            Culture = culture,
             Value = value,
             TimeApproved = schema.IsApprovalRequired ? null : DateTime.UtcNow,
             TimeEffective = timeEffective ?? DateTime.UtcNow,
@@ -55,12 +56,20 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         return MapperT2E.Map(entry.Entity);
     }
 
+    public async Task<Guid> RemoveParameterByID(Guid id)
+    {
+        TableDataParameter entity = await Context.DataParameter.FirstAsync(x => x.ID == id);
+        if (entity.TimeEffective <= DateTime.UtcNow) throw new InvalidOperationException("Cannot delete parameter that is already effective.");
+
+        Context.DataParameter.Remove(entity);
+        return entity.ID;
+    }
+
     public async Task<List<EntityDataParameter.Discriminator>> GetParameterListWithIdentifier(string identifier)
     {
         List<TableDataParameter> result = await Context.DataParameter
             .AsNoTracking()
             .Where(x => x.SchemaIdentifier == identifier)
-            .OrderByDescending(x => x.TimeEffective)
             .ToListAsync();
 
         return result.Select(MapperT2E.Map).ToList();
@@ -70,7 +79,7 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
     {
         TableDataParameterText? result = await Context.DataTextParameter
             .OrderBy(x => x.TimeCreated)
-            .FirstOrDefaultAsync(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective < DateTime.Now);
+            .FirstOrDefaultAsync(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective < DateTime.UtcNow);
 
         return result != null ? MapperT2E.Map(result) : null;
     }

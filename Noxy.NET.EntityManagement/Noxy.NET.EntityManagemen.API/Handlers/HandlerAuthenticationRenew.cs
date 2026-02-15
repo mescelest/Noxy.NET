@@ -1,5 +1,5 @@
 using MediatR;
-using Noxy.NET.EntityManagement.API.Queries;
+using Noxy.NET.EntityManagement.API.Commands;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Authentication;
@@ -7,9 +7,9 @@ using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.API.Handlers;
 
-public class HandlerAuthenticationRenew(IUnitOfWorkFactory serviceUoWFactory, IJWTService serviceJWT) : IRequestHandler<QueryAuthenticationRenew, ResponseAuthenticationRenew>
+public class HandlerAuthenticationRenew(IUnitOfWorkFactory serviceUoWFactory, IJWTService serviceJWT) : IRequestHandler<CommandAuthenticationRenew, ResponseAuthenticationRenew>
 {
-    public async Task<ResponseAuthenticationRenew> Handle(QueryAuthenticationRenew request, CancellationToken cancellationToken)
+    public async Task<ResponseAuthenticationRenew> Handle(CommandAuthenticationRenew request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

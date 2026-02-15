@@ -1,14 +1,14 @@
 using MediatR;
-using Noxy.NET.EntityManagement.API.Queries;
+using Noxy.NET.EntityManagement.API.Commands;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Responses;
 
 namespace Noxy.NET.EntityManagement.API.Handlers;
 
-public class HandlerDataParameterStyleCreate(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<QueryDataParameterStyleCreate, ResponseDataParameterStyleCreate>
+public class HandlerDataParameterStyleCreate(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandDataParameterStyleCreate, ResponseDataParameterStyleCreate>
 {
-    public async Task<ResponseDataParameterStyleCreate> Handle(QueryDataParameterStyleCreate request, CancellationToken cancellationToken)
+    public async Task<ResponseDataParameterStyleCreate> Handle(CommandDataParameterStyleCreate request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

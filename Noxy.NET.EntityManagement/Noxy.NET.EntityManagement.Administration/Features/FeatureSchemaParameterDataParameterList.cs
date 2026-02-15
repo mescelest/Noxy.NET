@@ -19,6 +19,16 @@ public record FeatureSchemaParameterDataParameterListState
 
 public static class FeatureSchemaParameterDataParameterListReducers
 {
+    public record LoadDataParameterListAction(string SchemaIdentifier);
+
+    public record AddDataParameterListAction(string SchemaIdentifier, EntityDataParameter Entity);
+
+    public record RemoveDataParameterListAction(string SchemaIdentifier, Guid ID);
+
+    public record DataParameterListResultAction(string SchemaIdentifier, IReadOnlyList<EntityDataParameter.Discriminator> Result);
+
+    public record DataParameterListFailedAction(string SchemaIdentifier, string Error);
+
     [ReducerMethod]
     public static FeatureSchemaParameterDataParameterListState ReduceLoad(FeatureSchemaParameterDataParameterListState state, LoadDataParameterListAction action)
     {
@@ -27,6 +37,32 @@ public static class FeatureSchemaParameterDataParameterListReducers
             IsLoading = true,
             IsLoadingPerKey = new(state.IsLoadingPerKey) { [action.SchemaIdentifier] = true },
             ErrorMessage = null
+        };
+    }
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterDataParameterListState ReduceAdd(FeatureSchemaParameterDataParameterListState state, AddDataParameterListAction action)
+    {
+        Dictionary<string, IReadOnlyList<EntityDataParameter>> newCache = new(state.Cache);
+        IReadOnlyList<EntityDataParameter> list = newCache.GetValueOrDefault(action.SchemaIdentifier) ?? [];
+        newCache[action.SchemaIdentifier] = [.. list, action.Entity];
+
+        return state with
+        {
+            Cache = newCache
+        };
+    }
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterDataParameterListState ReduceRemove(FeatureSchemaParameterDataParameterListState state, RemoveDataParameterListAction action)
+    {
+        Dictionary<string, IReadOnlyList<EntityDataParameter>> newCache = new(state.Cache);
+        IReadOnlyList<EntityDataParameter> list = newCache.GetValueOrDefault(action.SchemaIdentifier) ?? [];
+        newCache[action.SchemaIdentifier] = list.Where(x => x.ID != action.ID).ToList();
+
+        return state with
+        {
+            Cache = newCache
         };
     }
 
@@ -51,12 +87,6 @@ public static class FeatureSchemaParameterDataParameterListReducers
             ErrorMessage = action.Error
         };
     }
-
-    public record LoadDataParameterListAction(string SchemaIdentifier);
-
-    public record DataParameterListResultAction(string SchemaIdentifier, IReadOnlyList<EntityDataParameter.Discriminator> Result);
-
-    public record DataParameterListFailedAction(string SchemaIdentifier, string Error);
 }
 
 public class FeatureSchemaParameterDataParameterListEffects(APIHttpClient client)

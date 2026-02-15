@@ -2,9 +2,9 @@ using MediatR;
 using Noxy.NET.EntityManagement.Domain.Requests;
 using Noxy.NET.EntityManagement.Domain.Responses;
 
-namespace Noxy.NET.EntityManagement.API.Queries;
+namespace Noxy.NET.EntityManagement.API.Commands;
 
-public class QueryAuthenticationSignIn(RequestAuthenticationSignIn request) : IRequest<ResponseAuthenticationSignIn>
+public class CommandAuthenticationSignIn(RequestAuthenticationSignIn request) : IRequest<ResponseAuthenticationSignIn>
 {
     public string Email { get; } = request.Email;
     public string Password { get; } = request.Password;

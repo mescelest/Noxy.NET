@@ -1,7 +1,7 @@
+using Noxy.NET.EntityManagement.Application.Models;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
-using Noxy.NET.EntityManagement.Persistence.Models;
 
 namespace Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
 
