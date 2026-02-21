@@ -1,9 +1,0 @@
-using Noxy.NET.EntityManagement.Domain.Abstractions;
-using Noxy.NET.EntityManagement.Domain.Entities.Data;
-
-namespace Noxy.NET.EntityManagement.Domain.Responses;
-
-public class ResponseDataParameterStyleCreate : BaseResponse
-{
-    public required EntityDataParameterStyle Value { get; set; }
-}

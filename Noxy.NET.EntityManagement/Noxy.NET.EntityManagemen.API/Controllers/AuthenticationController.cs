@@ -2,9 +2,9 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Noxy.NET.EntityManagement.API.Commands;
-using Noxy.NET.EntityManagement.Domain.Requests;
-using Noxy.NET.EntityManagement.Domain.Responses;
+using Noxy.NET.EntityManagement.API.Commands.Authentication;
+using Noxy.NET.EntityManagement.Domain.Requests.Authentication;
+using Noxy.NET.EntityManagement.Domain.Responses.Authentication;
 
 namespace Noxy.NET.EntityManagement.API.Controllers;
 

@@ -9,7 +9,5 @@ public abstract class TableSchemaProperty : BaseTableSchemaComponent
     public ICollection<TableJunctionSchemaPropertyCollectionHasProperty>? RelationPropertyCollectionList { get; set; }
     public ICollection<TableJunctionSchemaPropertyTableHasProperty>? RelationPropertyTableList { get; set; }
 
-    public abstract class Primitive : TableSchemaProperty
-    {
-    }
+    public abstract class Primitive : TableSchemaProperty;
 }

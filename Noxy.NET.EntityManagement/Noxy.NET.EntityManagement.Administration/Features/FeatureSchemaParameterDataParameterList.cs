@@ -1,7 +1,7 @@
 using Fluxor;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
-using Noxy.NET.EntityManagement.Domain.Requests;
-using Noxy.NET.EntityManagement.Domain.Responses;
+using Noxy.NET.EntityManagement.Domain.Requests.Data;
+using Noxy.NET.EntityManagement.Domain.Responses.Data;
 using Noxy.NET.EntityManagement.Presentation.Services;
 
 namespace Noxy.NET.EntityManagement.Administration.Features;

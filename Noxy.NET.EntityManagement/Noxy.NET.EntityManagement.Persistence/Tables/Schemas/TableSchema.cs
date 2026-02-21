@@ -10,6 +10,7 @@ public class TableSchema : BaseTableTemplate
 {
     [Required]
     public required bool IsActive { get; set; }
+
     public required DateTime? TimeActivated { get; set; }
 
     public ICollection<TableSchemaContext>? ContextList { get; set; }

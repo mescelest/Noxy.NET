@@ -17,6 +17,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableUser> User { get; set; } = null!;
 
     public DbSet<TableDataElement> DataElement { get; set; } = null!;
+
     public DbSet<TableDataProperty> DataProperty { get; set; } = null!;
     public DbSet<TableDataPropertyBoolean> DataPropertyBoolean { get; set; } = null!;
     public DbSet<TableDataPropertyDateTime> DataPropertyDateTime { get; set; } = null!;
@@ -30,10 +31,12 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableSchema> Schema { get; set; } = null!;
     public DbSet<TableSchemaContext> SchemaContext { get; set; } = null!;
     public DbSet<TableSchemaElement> SchemaElement { get; set; } = null!;
+
     public DbSet<TableSchemaParameter> SchemaParameter { get; set; } = null!;
     public DbSet<TableSchemaParameterSystem> SchemaParameterSystem { get; set; } = null!;
     public DbSet<TableSchemaParameterStyle> SchemaParameterStyle { get; set; } = null!;
     public DbSet<TableSchemaParameterText> SchemaParameterText { get; set; } = null!;
+
     public DbSet<TableSchemaProperty> SchemaProperty { get; set; } = null!;
     public DbSet<TableSchemaPropertyBoolean> SchemaPropertyBoolean { get; set; } = null!;
     public DbSet<TableSchemaPropertyCollection> SchemaPropertyCollection { get; set; } = null!;
@@ -53,15 +56,32 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         modelBuilder.Entity<TableDataProperty>().UseTpcMappingStrategy();
         modelBuilder.Entity<TableDataProperty>().Property(e => e.ID).ValueGeneratedNever();
+        modelBuilder.Entity<TableDataPropertyBoolean>().ToTable("TableDataPropertyBoolean").HasBaseType<TableDataProperty>();
+        modelBuilder.Entity<TableDataPropertyDateTime>().ToTable("TableDataPropertyDateTime").HasBaseType<TableDataProperty>();
+        modelBuilder.Entity<TableDataPropertyString>().ToTable("TableDataPropertyString").HasBaseType<TableDataProperty>();
 
         modelBuilder.Entity<TableDataParameter>().UseTpcMappingStrategy();
         modelBuilder.Entity<TableDataParameter>().Property(e => e.ID).ValueGeneratedNever();
+        modelBuilder.Entity<TableDataParameterStyle>().ToTable("TableDataParameterStyle").HasBaseType<TableDataParameter>();
+        modelBuilder.Entity<TableDataParameterSystem>().ToTable("TableDataParameterSystem").HasBaseType<TableDataParameter>();
+        modelBuilder.Entity<TableDataParameterText>().ToTable("TableDataParameterText").HasBaseType<TableDataParameter>();
 
         modelBuilder.Entity<TableSchemaProperty>().UseTpcMappingStrategy();
         modelBuilder.Entity<TableSchemaProperty>().Property(e => e.ID).ValueGeneratedNever();
+        modelBuilder.Entity<TableSchemaPropertyBoolean>().ToTable("TableSchemaPropertyBoolean").HasBaseType<TableSchemaProperty>();
+        modelBuilder.Entity<TableSchemaPropertyCollection>().ToTable("TableSchemaPropertyCollection").HasBaseType<TableSchemaProperty>();
+        modelBuilder.Entity<TableSchemaPropertyDateTime>().ToTable("TableSchemaPropertyDateTime").HasBaseType<TableSchemaProperty>();
+        modelBuilder.Entity<TableSchemaPropertyDecimal>().ToTable("TableSchemaPropertyDecimal").HasBaseType<TableSchemaProperty>();
+        modelBuilder.Entity<TableSchemaPropertyImage>().ToTable("TableSchemaPropertyImage").HasBaseType<TableSchemaProperty>();
+        modelBuilder.Entity<TableSchemaPropertyInteger>().ToTable("TableSchemaPropertyInteger").HasBaseType<TableSchemaProperty>();
+        modelBuilder.Entity<TableSchemaPropertyString>().ToTable("TableSchemaPropertyString").HasBaseType<TableSchemaProperty>();
+        modelBuilder.Entity<TableSchemaPropertyTable>().ToTable("TableSchemaPropertyTable").HasBaseType<TableSchemaProperty>();
 
         modelBuilder.Entity<TableSchemaParameter>().UseTpcMappingStrategy();
         modelBuilder.Entity<TableSchemaParameter>().Property(e => e.ID).ValueGeneratedNever();
+        modelBuilder.Entity<TableSchemaParameterStyle>().ToTable("TableSchemaParameterStyle").HasBaseType<TableSchemaParameter>();
+        modelBuilder.Entity<TableSchemaParameterSystem>().ToTable("TableSchemaParameterSystem").HasBaseType<TableSchemaParameter>();
+        modelBuilder.Entity<TableSchemaParameterText>().ToTable("TableSchemaParameterText").HasBaseType<TableSchemaParameter>();
 
         modelBuilder.Entity<TableUser>()
             .HasOne(e => e.Authentication)

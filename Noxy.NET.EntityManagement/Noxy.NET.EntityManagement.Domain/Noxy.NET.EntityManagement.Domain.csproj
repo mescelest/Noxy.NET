@@ -17,8 +17,4 @@
         <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.WebForm\Noxy.NET.UI.WebForm.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Models\"/>
-    </ItemGroup>
-
 </Project>

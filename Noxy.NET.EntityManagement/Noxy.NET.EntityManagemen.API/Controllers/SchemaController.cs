@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.API.Queries;
-using Noxy.NET.EntityManagement.Domain.Requests;
-using Noxy.NET.EntityManagement.Domain.Responses;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.API.Controllers;
 

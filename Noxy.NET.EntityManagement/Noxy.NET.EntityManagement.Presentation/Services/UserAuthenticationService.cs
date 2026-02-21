@@ -1,5 +1,5 @@
-using Noxy.NET.EntityManagement.Domain.Requests;
-using Noxy.NET.EntityManagement.Domain.Responses;
+using Noxy.NET.EntityManagement.Domain.Requests.Authentication;
+using Noxy.NET.EntityManagement.Domain.Responses.Authentication;
 
 namespace Noxy.NET.EntityManagement.Presentation.Services;
 

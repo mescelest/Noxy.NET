@@ -1,5 +1,3 @@
 namespace Noxy.NET.EntityManagement.Application.Interfaces.Services;
 
-public interface IViewModelFactoryService
-{
-}
+public interface IViewModelFactoryService;

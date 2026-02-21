@@ -1,4 +1,5 @@
-@inherits BaseRequestForm<RequestSchemaParameterList, ResponseSchemaParameterList>
+@using Noxy.NET.EntityManagement.Domain.Requests.Schema
+@inherits Noxy.NET.EntityManagement.Presentation.Abstractions.BaseRequestForm<Noxy.NET.EntityManagement.Domain.Requests.Schema.RequestSchemaParameterList, Noxy.NET.EntityManagement.Domain.Responses.Schema.ResponseSchemaParameterList>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestSchemaParameterList" Context="Context" OnSubmit="ForwardSubmit">
@@ -7,12 +8,12 @@
 
         <InputGroupSelect OptionList="ListIsSystemDefinedKey" DisplayName="@GetDisplayName(nameof(Model.IsSystemDefined))" Description="@GetDescription(nameof(Model.IsSystemDefined))"
                           Name="@nameof(Model.IsSystemDefined)" @bind-Value:get="GetIsSystemDefined()" @bind-Value:set="SetIsSystemDefined">
-            <span>@_collectionIsSystemDefined[context]</span>
+            <span>@TextService.Get(_collectionIsSystemDefined[context])</span>
         </InputGroupSelect>
 
         <InputGroupSelect OptionList="ListIsApprovalRequiredKey" DisplayName="@GetDisplayName(nameof(Model.IsApprovalRequired))" Description="@GetDescription(nameof(Model.IsApprovalRequired))"
                           Name="@nameof(Model.IsApprovalRequired)" @bind-Value:get="GetIsApprovalRequired()" @bind-Value:set="SetIsApprovalRequired">
-            <span>@_collectionIsApprovalRequired[context]</span>
+            <span>@TextService.Get(_collectionIsApprovalRequired[context])</span>
         </InputGroupSelect>
 
         <InputGroupCheckboxSet OptionList="ListTypeKey" DisplayName="@GetDisplayName(nameof(Model.ParameterType))" Description="@GetDescription(nameof(Model.ParameterType))"
@@ -38,13 +39,13 @@
     {
         await base.OnAfterFirstRenderAsync();
 
-        _collectionIsSystemDefined[-1] = "Either";
-        _collectionIsSystemDefined[0] = "System defined";
-        _collectionIsSystemDefined[1] = "User defined";
+        _collectionIsSystemDefined[-1] = TextConstants.ValueIsSystemDefinedNeutral;
+        _collectionIsSystemDefined[0] = TextConstants.ValueIsSystemDefinedYes;
+        _collectionIsSystemDefined[1] = TextConstants.ValueIsSystemDefinedNo;
 
-        _collectionIsApprovalRequired[-1] = "Either";
-        _collectionIsApprovalRequired[0] = "With approval required";
-        _collectionIsApprovalRequired[1] = "Without approval required";
+        _collectionIsApprovalRequired[-1] = TextConstants.ValueIsApprovalRequiredNeutral;
+        _collectionIsApprovalRequired[0] = TextConstants.ValueIsApprovalRequiredYes;
+        _collectionIsApprovalRequired[1] = TextConstants.ValueIsApprovalRequiredNo;
 
         _collectionType[nameof(EntitySchemaParameterStyle)] = TextConstants.LabelParameterStyle;
         _collectionType[nameof(EntitySchemaParameterSystem)] = TextConstants.LabelParameterSystem;
@@ -81,12 +82,12 @@
         Model.IsApprovalRequired = value == -1 ? null : value == 1;
     }
 
-    private IEnumerable<string> GetParameterType()
+    private List<string> GetParameterType()
     {
         return Model.ParameterType ?? [];
     }
 
-    private void SetParameterType(IEnumerable<string>? value)
+    private void SetParameterType(List<string>? value)
     {
         Model.ParameterType = value;
     }

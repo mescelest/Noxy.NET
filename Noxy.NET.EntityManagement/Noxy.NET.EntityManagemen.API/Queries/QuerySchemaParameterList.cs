@@ -1,6 +1,6 @@
 using MediatR;
-using Noxy.NET.EntityManagement.Domain.Requests;
-using Noxy.NET.EntityManagement.Domain.Responses;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.API.Queries;
 
@@ -9,7 +9,7 @@ public class QuerySchemaParameterList(RequestSchemaParameterList request) : IReq
     public string? Search { get; } = request.Search;
     public bool? IsSystemDefined { get; } = request.IsSystemDefined;
     public bool? IsApprovalRequired { get; } = request.IsApprovalRequired;
-    public IEnumerable<string>? ParameterType { get; } = request.ParameterType;
+    public IReadOnlyList<string>? ParameterType { get; } = request.ParameterType;
     public int? PageNumber { get; } = request.PageNumber;
     public int? PageSize { get; } = request.PageSize;
 }

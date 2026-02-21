@@ -1,5 +1,6 @@
 @using System.Globalization
-@inherits BaseRequestForm<RequestDataParameterTextCreate, ResponseDataParameterTextCreate>
+@using Noxy.NET.EntityManagement.Domain.Requests.Data
+@inherits Noxy.NET.EntityManagement.Presentation.Abstractions.BaseRequestForm<Noxy.NET.EntityManagement.Domain.Requests.Data.RequestDataParameterTextCreate, Noxy.NET.EntityManagement.Domain.Responses.Data.ResponseDataParameterTextCreate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestDataParameterTextCreate" Context="Context" OnSubmit="ForwardSubmit">

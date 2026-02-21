@@ -1,5 +1,3 @@
 namespace Noxy.NET.EntityManagement.Presentation;
 
-public sealed class PresentationAssemblyMarker
-{
-}
+public sealed class PresentationAssemblyMarker;

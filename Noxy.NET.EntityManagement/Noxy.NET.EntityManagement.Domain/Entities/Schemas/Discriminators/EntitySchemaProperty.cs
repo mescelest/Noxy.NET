@@ -16,9 +16,7 @@ public abstract class EntitySchemaProperty : BaseEntitySchemaComponent
     [JsonIgnore]
     public ICollection<EntityJunctionSchemaPropertyTableHasProperty>? RelationPropertyTableList { get; set; }
 
-    public abstract class Primitive : EntitySchemaProperty
-    {
-    }
+    public abstract class Primitive : EntitySchemaProperty;
 
     public class Discriminator : BaseEntity, IOrderedEntity
     {

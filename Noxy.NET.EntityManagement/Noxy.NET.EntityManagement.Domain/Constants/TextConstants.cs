@@ -61,17 +61,16 @@ public static class TextConstants
     public const string LabelFormTitle = "Label:Form:Title";
     public const string LabelFormDescription = "Label:Form:Description";
     public const string LabelFormOrder = "Label:Form:Order";
-    public const string LabelFormIsUnsigned = "Label:Form:IsUnsigned";
-    public const string LabelFormAllowedExtensions = "Label:Form:AllowedExtensions";
     public const string LabelFormIsSystemDefined = "Label:Form:IsSystemDefined";
     public const string LabelFormIsApprovalRequired = "Label:Form:IsApprovalRequired";
-    public const string LabelFormParameterTypeList = "Label:Form:ParameterTypeList";
+    public const string LabelFormParameterType = "Label:Form:ParameterType";
     public const string LabelFormDateEffective = "Label:Form:DateEffective";
     public const string LabelFormPageSize = "Label:Form:PageSize";
     public const string LabelFormPageNumber = "Label:Form:PageNumber";
+
     public const string LabelFormParameterTextType = "Label:Form:ParameterTextType";
-    public const string LabelFormPropertyTypeList = "Label:Form:PropertyTypeList";
-    public const string LabelFormIsValueList = "Label:Form:IsValueList";
+    public const string LabelFormIsUnsigned = "Label:Form:IsUnsigned";
+    public const string LabelFormAllowedExtensions = "Label:Form:AllowedExtensions";
     public const string LabelFormString = "Label:Form:String";
     public const string LabelFormBoolean = "Label:Form:Boolean";
     public const string LabelFormDateTime = "Label:Form:DateTime";
@@ -93,17 +92,16 @@ public static class TextConstants
     public const string HelpFormTitle = "Help:Form:Title";
     public const string HelpFormDescription = "Help:Form:Description";
     public const string HelpFormOrder = "Help:Form:Order";
-    public const string HelpFormIsUnsigned = "Help:Form:IsUnsigned";
-    public const string HelpFormAllowedExtensions = "Help:Form:AllowedExtensions";
     public const string HelpFormIsSystemDefined = "Help:Form:IsSystemDefined";
     public const string HelpFormIsApprovalRequired = "Help:Form:IsApprovalRequired";
-    public const string HelpFormParameterTypeList = "Help:Form:ParameterTypeList";
+    public const string HelpFormParameterType = "Help:Form:ParameterType";
     public const string HelpFormDateEffective = "Help:Form:DateEffective";
     public const string HelpFormPageSize = "Help:Form:PageSize";
     public const string HelpFormPageNumber = "Help:Form:PageNumber";
+
     public const string HelpFormParameterTextType = "Help:Form:ParameterTextType";
-    public const string HelpFormPropertyTypeList = "Help:Form:PropertyTypeList";
-    public const string HelpFormIsValueList = "Help:Form:IsValueList";
+    public const string HelpFormIsUnsigned = "Help:Form:IsUnsigned";
+    public const string HelpFormAllowedExtensions = "Help:Form:AllowedExtensions";
     public const string HelpFormString = "Help:Form:String";
     public const string HelpFormBoolean = "Help:Form:Boolean";
     public const string HelpFormDateTime = "Help:Form:DateTime";
@@ -113,7 +111,14 @@ public static class TextConstants
     public const string HelpFormParameterSystem = "Help:Form:ParameterSystem";
     public const string HelpFormParameterText = "Help:Form:ParameterText";
 
-    public const string ValueFormCheckboxYes = "Value:Form:Checkbox:Yes";
+    public const string ValueOptionYes = "Value:Option:Yes";
+    public const string ValueOptionNo = "Value:Option:No";
+    public const string ValueIsSystemDefinedNeutral = "Value:IsSystemDefined:Neutral";
+    public const string ValueIsSystemDefinedYes = "Value:IsSystemDefined:Yes";
+    public const string ValueIsSystemDefinedNo = "Value:IsSystemDefined:No";
+    public const string ValueIsApprovalRequiredNeutral = "Value:IsApprovalRequired:Neutral";
+    public const string ValueIsApprovalRequiredYes = "Value:IsApprovalRequired:Yes";
+    public const string ValueIsApprovalRequiredNo = "Value:IsApprovalRequired:No";
 
     public const string HeaderFormSignUp = "Header:Form:SignUp";
     public const string HeaderFormSignIn = "Header:Form:SignIn";

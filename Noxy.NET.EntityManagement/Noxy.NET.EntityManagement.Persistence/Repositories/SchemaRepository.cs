@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
@@ -112,42 +113,30 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
     {
-        IQueryable<TableSchemaParameter> query = Enumerable.Empty<TableSchemaParameter>().AsQueryable();
+        IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking();
 
-        if (filter.ParameterType == null || !filter.ParameterType.Any())
+        if (filter.ParameterType is { Count: > 0 })
         {
-            query = Context.SchemaParameter.AsNoTracking();
-        }
-        else
-        {
-            Dictionary<string, IQueryable<TableSchemaParameter>> sources = new()
-            {
-                { nameof(EntitySchemaParameterStyle), Context.SchemaParameterStyle.AsNoTracking() },
-                { nameof(EntitySchemaParameterSystem), Context.SchemaParameterSystem.AsNoTracking() },
-                { nameof(EntitySchemaParameterText), Context.SchemaParameterText.AsNoTracking() }
-            };
+            List<Type> types = filter.ParameterType.Select(key => TableSchemaParameter.TypeMap[key]).ToList();
 
-            foreach (string type in filter.ParameterType)
-            {
-                if (sources.TryGetValue(type, out IQueryable<TableSchemaParameter>? src))
-                {
-                    query = query.Union(src);
-                }
-            }
+            ParameterExpression param = Expression.Parameter(typeof(TableSchemaParameter), "x");
+            Expression typeChecks = types.Select(Expression (t) => Expression.TypeIs(param, t)).Aggregate(Expression.OrElse);
+            Expression<Func<TableSchemaParameter, bool>> lambda = Expression.Lambda<Func<TableSchemaParameter, bool>>(typeChecks, param);
+            query = query.Where(lambda);
         }
 
         if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
-        if (filter.IsSystemDefined != null) query = query.Where(x => x.IsSystemDefined == filter.IsSystemDefined);
-        if (filter.IsApprovalRequired != null) query = query.Where(x => x.IsApprovalRequired == filter.IsApprovalRequired);
-        query = query
+        if (filter.IsSystemDefined is not null) query = query.Where(x => x.IsSystemDefined == filter.IsSystemDefined);
+        if (filter.IsApprovalRequired is not null) query = query.Where(x => x.IsApprovalRequired == filter.IsApprovalRequired);
+
+        List<TableSchemaParameter> result = await query
             .OrderBy(x => x.Name)
             .Skip(filter.PageNumber * filter.PageSize)
-            .Take(filter.PageSize);
+            .Take(filter.PageSize)
+            .ToListAsync();
 
-        List<TableSchemaParameter> result = await query.ToListAsync();
         return result.Select(MapperT2E.Map).ToList();
     }
-
 
     public async Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id)
     {

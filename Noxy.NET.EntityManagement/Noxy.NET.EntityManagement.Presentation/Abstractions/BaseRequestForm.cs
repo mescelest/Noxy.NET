@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Presentation.Features;
 using Noxy.NET.EntityManagement.Presentation.Services;
 using Noxy.NET.UI.Abstractions;
 
-namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
+namespace Noxy.NET.EntityManagement.Presentation.Abstractions;
 
 public abstract class BaseRequestForm<TRequest, TResponse> : BaseForm<TRequest>, IDisposable where TRequest : BaseRequest<TResponse>
 {
