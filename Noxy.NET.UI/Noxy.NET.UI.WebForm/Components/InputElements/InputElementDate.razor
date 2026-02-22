@@ -1,6 +1,6 @@
-﻿@inherits BaseInputValue<DateTime?>
+﻿@inherits BaseInput<DateTime?>
 
-<input @attributes="AdditionalAttributes" id="@IDCurrent" class="@CssClass" type="@UseTimeString" value="@ValueCurrent" @onchange="OnInputChange"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="@UseTimeString" value="@ValueCurrent" @onchange="OnInputChange"/>
 
 @code {
 

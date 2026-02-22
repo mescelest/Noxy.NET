@@ -1,6 +1,6 @@
-﻿@inherits BaseInputTextualValue<int?>
+﻿@inherits BaseInputTextual<int?>
 
-<input @attributes="AdditionalAttributes" id="@IDCurrent" class="@CssClass" type="tel" size="@SizeCurrent" value="@Value" @onchange="OnValueChange"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="tel" size="@SizeCurrent" value="@Value" @onchange="OnValueChange"/>
 
 @code {
 

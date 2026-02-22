@@ -1,5 +1,4 @@
-@using Noxy.NET.EntityManagement.Domain.Requests.Authentication
-@inherits Noxy.NET.EntityManagement.Presentation.Abstractions.BaseRequestForm<Noxy.NET.EntityManagement.Domain.Requests.Authentication.RequestAuthenticationSignUp, Noxy.NET.EntityManagement.Domain.Responses.Authentication.ResponseAuthenticationSignUp>
+@inherits BaseRequestForm<RequestAuthenticationSignUp, ResponseAuthenticationSignUp>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestAuthenticationSignUp" Context="@Context" OnSubmit="ForwardSubmit">

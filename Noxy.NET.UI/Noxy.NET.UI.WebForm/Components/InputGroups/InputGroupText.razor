@@ -1,8 +1,9 @@
-﻿@inherits BaseInputGroupValue<string>
+﻿@inherits BaseInputGroup<string>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementText @attributes="InputAttributes" ID="@UUIDCode" Type="Type" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+        <InputElementText @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Type="Type" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput"
+                          Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
     </TemplateInputGroup>
 </div>
 

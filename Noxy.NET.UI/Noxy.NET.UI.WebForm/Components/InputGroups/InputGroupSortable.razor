@@ -1,9 +1,10 @@
-﻿@inherits BaseInputGroupValue<List<TValue>>
+﻿@inherits BaseInputGroup<List<TValue>>
 @typeparam TValue
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementSortable @attributes="InputAttributes" Options="Options" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+        <InputElementSortable @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Options="Options"
+                              Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
             @ChildContent(context)
         </InputElementSortable>
     </TemplateInputGroup>

@@ -1,7 +1,7 @@
-﻿@inherits BaseInputValue<TValue?>
+﻿@inherits BaseInput<TValue?>
 @typeparam TValue
 
-<input @attributes="AdditionalAttributes" checked="@Checked" class="@CssClass" id="@IDCurrent" type="checkbox" @onchange="OnInputChange"/>
+<input @attributes="AdditionalAttributes" checked="@Checked" class="@CssClass" id="@IDCurrent" name="@GetName()" type="checkbox" @onchange="OnInputChange"/>
 
 @code {
 

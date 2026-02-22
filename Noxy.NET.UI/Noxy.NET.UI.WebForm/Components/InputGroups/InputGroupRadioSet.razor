@@ -1,9 +1,10 @@
-﻿@inherits BaseInputGroupValue<TValue>
+﻿@inherits BaseInputGroup<TValue>
 @typeparam TValue
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementRadioSet @attributes="InputAttributes" ID="@UUIDCode" Name="@Name" OptionList="OptionList" OptionAttributes="OptionAttributes" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+    <TemplateInputGroup DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
+        <InputElementRadioSet @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
+                              Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
             @ChildContent(context)
         </InputElementRadioSet>
     </TemplateInputGroup>

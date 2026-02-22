@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseInputMultipleChoiceValue<TOption, TValue> : BaseInputValue<TValue> where TValue : IEnumerable<TOption>
+public abstract class BaseInputMultipleChoice<TOption, TValue> : BaseInput<TValue> where TValue : IEnumerable<TOption>
 {
     [Parameter, EditorRequired]
     public required IEnumerable<TOption> OptionList { get; set; }

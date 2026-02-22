@@ -1,7 +1,7 @@
-﻿@inherits BaseInputValue<TValue>
+﻿@inherits BaseInput<TValue>
 @typeparam TValue
 
-<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" type="radio" checked="@Checked" @onclick="OnInputClick" @onchange="OnInputChange"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="radio" checked="@Checked" @onclick="OnInputClick" @onchange="OnInputChange"/>
 
 @code {
 

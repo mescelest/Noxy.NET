@@ -2,7 +2,7 @@
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseInputGroupValue<TValue> : BaseInputValue<TValue>
+public abstract class BaseInputGroup<TValue> : BaseInput<TValue>
 {
     [Parameter]
     public string? DisplayName { get; set; }

@@ -3,7 +3,7 @@ using Microsoft.JSInterop;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseInputTextualValue<TValue> : BaseInputValue<TValue>, IDisposable, IAsyncDisposable
+public abstract class BaseInputTextual<TValue> : BaseInput<TValue>, IDisposable, IAsyncDisposable
 {
     [Inject]
     protected IJSRuntime JS { get; set; } = null!;
@@ -17,7 +17,7 @@ public abstract class BaseInputTextualValue<TValue> : BaseInputValue<TValue>, ID
     protected int SizeCurrent => Size ?? 40;
 
     protected IJSObjectReference? Module { get; set; }
-    protected DotNetObjectReference<BaseInputTextualValue<TValue>>? DotNetReference { get; set; }
+    protected DotNetObjectReference<BaseInputTextual<TValue>>? DotNetReference { get; set; }
 
     public async ValueTask DisposeAsync()
     {

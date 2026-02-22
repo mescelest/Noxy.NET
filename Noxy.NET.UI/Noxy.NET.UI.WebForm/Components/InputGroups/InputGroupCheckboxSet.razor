@@ -1,10 +1,11 @@
-﻿@inherits BaseInputGroupValue<TValueList>
+﻿@inherits BaseInputGroup<TValueList>
 @typeparam TValue
 @typeparam TValueList where TValueList : IEnumerable<TValue>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementCheckboxSet @attributes="InputAttributes" Name="@Name" OptionList="OptionList" OptionAttributes="OptionAttributes" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+    <TemplateInputGroup DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
+        <InputElementCheckboxSet @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
+                                 Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
             @ChildContent(context)
         </InputElementCheckboxSet>
     </TemplateInputGroup>

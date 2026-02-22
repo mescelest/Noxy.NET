@@ -1,5 +1,4 @@
-@using Noxy.NET.EntityManagement.Domain.Requests.Schema
-@inherits Noxy.NET.EntityManagement.Presentation.Abstractions.BaseRequestForm<Noxy.NET.EntityManagement.Domain.Requests.Schema.RequestSchemaParameterList, Noxy.NET.EntityManagement.Domain.Responses.Schema.ResponseSchemaParameterList>
+@inherits BaseRequestForm<RequestSchemaParameterList, ResponseSchemaParameterList>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestSchemaParameterList" Context="Context" OnSubmit="ForwardSubmit">

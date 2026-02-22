@@ -1,8 +1,9 @@
-﻿@inherits BaseInputGroupValue<DateTime?>
+﻿@inherits BaseInputGroup<DateTime?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementDate @attributes="InputAttributes" ID="@UUIDCode" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+        <InputElementDate @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()"
+                          Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
     </TemplateInputGroup>
 </div>
 

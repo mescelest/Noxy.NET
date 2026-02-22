@@ -1,6 +1,5 @@
 @using System.Globalization
-@using Noxy.NET.EntityManagement.Domain.Requests.Data
-@inherits Noxy.NET.EntityManagement.Presentation.Abstractions.BaseRequestForm<Noxy.NET.EntityManagement.Domain.Requests.Data.RequestDataParameterTextCreate, Noxy.NET.EntityManagement.Domain.Responses.Data.ResponseDataParameterTextCreate>
+@inherits BaseRequestForm<RequestDataParameterTextCreate, ResponseDataParameterTextCreate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestDataParameterTextCreate" Context="Context" OnSubmit="ForwardSubmit">
@@ -21,7 +20,7 @@
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Culture))" Description="@GetDescription(nameof(Model.Culture))"
                         @bind-Value="Context.Model.Culture"/>
 
-        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))" 
+        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
                             @bind-Value:get="_effectiveDateImmediate" @bind-Value:set="SetEffectiveDateImmediate">
             @if (context)
             {
