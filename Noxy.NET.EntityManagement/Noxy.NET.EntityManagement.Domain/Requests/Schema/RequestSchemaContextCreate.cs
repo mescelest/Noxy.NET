@@ -11,6 +11,8 @@ public class RequestSchemaContextCreate : BaseRequestPost<ResponseSchemaContextC
 {
     public override string APIEndpoint => "Schema/Context";
 
+    public Guid? SchemaID { get; set; }
+
     [Required]
     [DisplayName(TextConstants.LabelFormSchemaIdentifier)]
     [Description(TextConstants.HelpFormSchemaIdentifier)]

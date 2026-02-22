@@ -4,7 +4,7 @@ using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.API.Commands.Schema;
 
-public class CommandSchemaContextCreate(RequestSchemaContextCreate request) : IRequest<ResponseSchemaContextCreate>
+public class CommandSchemaElementCreate(RequestSchemaElementCreate request) : IRequest<ResponseSchemaElementCreate>
 {
     public Guid? SchemaID { get; set; } = request.SchemaID;
     public string SchemaIdentifier { get; set; } = request.SchemaIdentifier;

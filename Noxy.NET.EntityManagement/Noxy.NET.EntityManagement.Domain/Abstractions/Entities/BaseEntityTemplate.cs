@@ -18,6 +18,8 @@ public abstract class BaseEntityTemplate : BaseEntity, IOrderedEntity
     [Description(TextConstants.HelpFormOrder)]
     public required int Order { get; set; }
 
+    public static int DefaultOrder => -1;
+
     public override string ToString()
     {
         return Name;

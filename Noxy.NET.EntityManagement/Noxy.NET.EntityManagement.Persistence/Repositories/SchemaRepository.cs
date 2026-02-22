@@ -302,7 +302,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     private async Task UpdateOrder<TTable>(BaseEntitySchema entity) where TTable : BaseTableSchema
     {
-        if (entity.Order == 0) entity.Order = await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
+        if (entity.Order == BaseEntityTemplate.DefaultOrder) entity.Order = await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
     }
 
     #endregion
