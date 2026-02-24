@@ -1,12 +1,14 @@
 ﻿@inherits BaseInputMultipleChoice<TOption, TValue>
 @typeparam TOption
-@typeparam TValue where TValue : IEnumerable<TOption>
+@typeparam TValue where TValue : ISet<TOption>, new()
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @foreach (TOption item in OptionList)
     {
-        <label class="option">
-            <input @attributes="OptionAttributes?.Invoke(item)" class="@CssClass" id="@IDCurrent" name="@GetName()" type="checkbox" checked="@IsChecked(item)" @onchange="x => OnInputChange(x, item)"/>
+        string id = Guid.NewGuid().ToString();
+
+        <label class="option" for="@id">
+            <InputElementCheckbox @attributes="OptionAttributes?.Invoke(item)" ID="@id" Name="@GetName()" Option="item" Checked="@IsChecked(item)" OnChange="x => OnCheckboxChanged(x, item)"/>
             @ChildContent(item)
         </label>
     }
@@ -19,5 +21,10 @@
 
     [Parameter]
     public Func<TOption, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+
+    private void OnCheckboxChanged(ChangeEventArgs args, TOption item)
+    {
+        OnInputChange(args, item);
+    }
 
 }

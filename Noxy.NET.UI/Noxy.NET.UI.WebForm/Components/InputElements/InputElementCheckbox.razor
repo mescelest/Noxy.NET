@@ -1,17 +1,20 @@
 ﻿@inherits BaseInput<TValue?>
 @typeparam TValue
 
-<input @attributes="AdditionalAttributes" checked="@Checked" class="@CssClass" id="@IDCurrent" name="@GetName()" type="checkbox" @onchange="OnInputChange"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="checkbox" checked="@CheckedCurrent" @onchange="OnInputChange"/>
 
 @code {
 
     [Parameter, EditorRequired]
     public required TValue Option { get; set; }
 
-    private bool Checked => EqualityComparer<TValue>.Default.Equals(Value, Option);
+    [Parameter]
+    public bool? Checked { get; set; }
+    private bool CheckedCurrent => Checked ?? EqualityComparer<TValue>.Default.Equals(Value, Option);
 
     private void OnInputChange(ChangeEventArgs args)
     {
+        OnChange.InvokeAsync(args);
         NotifyChange(GetEventValue(args) ? (TValue?)Option : default);
     }
 
@@ -22,4 +25,3 @@
     }
 
 }
-

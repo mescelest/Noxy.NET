@@ -5,7 +5,8 @@
     @foreach (TValue item in OptionList)
     {
         <label class="option">
-            <InputElementRadio @attributes="OptionAttributes?.Invoke(item)" ID="@IDCurrent" Name="@GetName()" Option="item" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+            <InputElementRadio @attributes="OptionAttributes?.Invoke(item)" Name="@GetName()" Option="item" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" OnChange="OnRadioChanged"/>
+
             @ChildContent(item)
         </label>
     }
@@ -14,12 +15,17 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required IEnumerable<TValue> OptionList { get; set; }
+    public required HashSet<TValue> OptionList { get; set; }
 
     [Parameter, EditorRequired]
     public required RenderFragment<TValue> ChildContent { get; set; }
 
     [Parameter]
     public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+
+    private void OnRadioChanged(ChangeEventArgs args)
+    {
+        OnChange.InvokeAsync(args);
+    }
 
 }

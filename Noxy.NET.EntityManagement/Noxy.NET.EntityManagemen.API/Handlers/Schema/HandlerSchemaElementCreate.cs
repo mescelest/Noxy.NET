@@ -15,13 +15,13 @@ public class HandlerSchemaElementCreate(IUnitOfWorkFactory serviceUoWFactory) : 
 
         EntitySchemaElement result = await uow.Schema.Create(new EntitySchemaElement
         {
+            SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
             SchemaIdentifier = request.SchemaIdentifier,
             Name = request.Name,
             Note = request.Note,
+            Order = BaseEntityTemplate.DefaultOrder,
             TitleTextParameterID = request.TitleParameterTextID,
             DescriptionTextParameterID = request.DescriptionParameterTextID,
-            SchemaID = request.SchemaID ?? Guid.Empty,
-            Order = BaseEntityTemplate.DefaultOrder
         });
 
         return new() { Value = result };

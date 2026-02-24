@@ -28,6 +28,7 @@
 
     private void OnInputChange(ChangeEventArgs args)
     {
+        OnChange.InvokeAsync(args);
         ValueChanged.InvokeAsync(Option);
     }
 

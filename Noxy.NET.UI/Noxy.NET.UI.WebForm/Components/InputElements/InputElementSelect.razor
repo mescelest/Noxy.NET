@@ -16,7 +16,7 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required IEnumerable<TValue> OptionList { get; set; }
+    public required HashSet<TValue> OptionList { get; set; }
 
     [Parameter, EditorRequired]
     public required RenderFragment<TValue> ChildContent { get; set; }
@@ -27,6 +27,8 @@
     private void OnInputChange(ChangeEventArgs args)
     {
         if (!int.TryParse(args.Value?.ToString(), out int parsed)) return;
+
+        OnChange.InvokeAsync(args);
         NotifyChange(OptionList.ElementAt(parsed));
     }
 

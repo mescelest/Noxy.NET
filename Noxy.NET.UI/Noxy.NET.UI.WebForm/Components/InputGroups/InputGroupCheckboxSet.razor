@@ -1,10 +1,10 @@
 ﻿@inherits BaseInputGroup<TValueList>
 @typeparam TValue
-@typeparam TValueList where TValueList : IEnumerable<TValue>
+@typeparam TValueList where TValueList : ISet<TValue>, new()
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementCheckboxSet @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
+        <InputElementCheckboxSet @attributes="InputAttributes" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
                                  Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
             @ChildContent(context)
         </InputElementCheckboxSet>
@@ -17,7 +17,7 @@
     public required RenderFragment<TValue> ChildContent { get; set; }
 
     [Parameter, EditorRequired]
-    public required IEnumerable<TValue> OptionList { get; set; }
+    public required HashSet<TValue> OptionList { get; set; }
 
     [Parameter]
     public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }

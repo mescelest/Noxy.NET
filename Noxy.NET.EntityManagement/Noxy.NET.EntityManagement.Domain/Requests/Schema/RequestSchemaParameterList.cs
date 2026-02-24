@@ -23,7 +23,7 @@ public class RequestSchemaParameterList : BaseRequestGet<ResponseSchemaParameter
 
     [DisplayName(TextConstants.LabelFormParameterType)]
     [Description(TextConstants.HelpFormParameterType)]
-    public List<string>? ParameterType { get; set; }
+    public HashSet<string>? ParameterType { get; set; }
 
     [DisplayName(TextConstants.LabelFormPageSize)]
     [Description(TextConstants.HelpFormPageSize)]

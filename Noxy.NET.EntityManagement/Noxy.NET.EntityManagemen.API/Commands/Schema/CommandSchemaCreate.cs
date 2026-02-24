@@ -6,6 +6,6 @@ namespace Noxy.NET.EntityManagement.API.Commands.Schema;
 
 public class CommandSchemaCreate(RequestSchemaCreate request) : IRequest<ResponseSchemaCreate>
 {
-    public string Name { get; set; } = request.Name;
-    public string Note { get; set; } = request.Note;
+    public string Name { get; } = request.Name;
+    public string Note { get; } = request.Note;
 }

@@ -14,6 +14,8 @@
     private void OnInputChange(ChangeEventArgs args)
     {
         DateTime? next = DateTime.TryParse(args.Value?.ToString(), out DateTime parsed) ? parsed : null;
+
+        OnChange.InvokeAsync(args);
         NotifyChange(next);
     }
 

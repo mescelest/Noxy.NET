@@ -7,6 +7,9 @@ namespace Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
 
 public interface ISchemaRepository
 {
+    Task<Guid> GetCurrentSchemaID();
+    Task<EntitySchema> GetCurrentSchema();
+    Task<EntitySchema> GetSchemaByID(Guid id);
     Task<EntitySchemaContext> GetSchemaContextByID(Guid id);
     Task<EntitySchemaElement> GetSchemaElementByID(Guid id);
     Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id);
@@ -32,6 +35,7 @@ public interface ISchemaRepository
     Task<List<EntityJunctionSchemaContextHasElement>> GetSchemaContextHasElementListBySchemaID(Guid id);
     Task<List<EntityJunctionSchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id);
 
+    Task<EntitySchema> Create(EntitySchema entity);
     Task<EntitySchemaContext> Create(EntitySchemaContext entity);
     Task<EntitySchemaParameter.Discriminator> Create(EntitySchemaParameter entity);
     Task<EntitySchemaElement> Create(EntitySchemaElement entity);

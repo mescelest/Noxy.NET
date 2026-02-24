@@ -3,7 +3,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementRadioSet @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
+        <InputElementRadioSet @attributes="InputAttributes" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
                               Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
             @ChildContent(context)
         </InputElementRadioSet>
@@ -16,7 +16,7 @@
     public required RenderFragment<TValue?> ChildContent { get; set; }
 
     [Parameter, EditorRequired]
-    public required IEnumerable<TValue> OptionList { get; set; }
+    public required HashSet<TValue> OptionList { get; set; }
 
     [Parameter]
     public Func<TValue?, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }

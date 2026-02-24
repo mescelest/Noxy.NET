@@ -1,14 +1,10 @@
 ﻿@inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <label class="wrapper" for="@For">
+    <DynamicHTMLTag Tag="@WrapperTag" class="wrapper" for="@For">
         @if (!string.IsNullOrWhiteSpace(DisplayName))
         {
-            <span class="title">
-                <b>
-                    @DisplayName
-                </b>
-            </span>
+            <span class="title"><b>@DisplayName</b></span>
         }
 
         @if (!string.IsNullOrWhiteSpace(Description))
@@ -19,7 +15,8 @@
         <div class="control">
             @ChildContent
         </div>
-    </label>
+    </DynamicHTMLTag>
+
 
     <MessageBox MessageList="ErrorList" Type="@StatusEnum.Error"/>
 </div>
@@ -40,5 +37,7 @@
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+
+    private string WrapperTag => string.IsNullOrWhiteSpace(For) ? "div" : "label";
 
 }

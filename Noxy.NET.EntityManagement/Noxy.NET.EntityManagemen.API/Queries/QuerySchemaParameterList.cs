@@ -9,7 +9,7 @@ public class QuerySchemaParameterList(RequestSchemaParameterList request) : IReq
     public string? Search { get; } = request.Search;
     public bool? IsSystemDefined { get; } = request.IsSystemDefined;
     public bool? IsApprovalRequired { get; } = request.IsApprovalRequired;
-    public IReadOnlyList<string>? ParameterType { get; } = request.ParameterType;
+    public IReadOnlySet<string>? ParameterType { get; } = request.ParameterType;
     public int? PageNumber { get; } = request.PageNumber;
     public int? PageSize { get; } = request.PageSize;
 }

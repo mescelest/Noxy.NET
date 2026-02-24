@@ -12,6 +12,7 @@
 
     protected override void OnValueChange(ChangeEventArgs args)
     {
+        OnChange.InvokeAsync(args);
         HandleChange(args.Value?.ToString() ?? string.Empty);
     }
 

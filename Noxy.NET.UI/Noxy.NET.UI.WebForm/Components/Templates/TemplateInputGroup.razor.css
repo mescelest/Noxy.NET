@@ -5,7 +5,7 @@
     row-gap: var(--size-gap-sm);
 }
 
-.wrapper {
+.TemplateInputGroup ::deep > .wrapper {
     display: flex;
     flex: 0 1 auto;
     flex-flow: column;

@@ -1,4 +1,3 @@
-@using System.Globalization
 @inherits BaseRequestForm<RequestDataParameterTextCreate, ResponseDataParameterTextCreate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -7,30 +6,35 @@
         {
             case TextParameterTypeEnum.Line:
                 <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
-                                @bind-Value="Context.Model.Value"/>
+                                @bind-Value="Model.Value"/>
                 break;
             case TextParameterTypeEnum.Text:
             case TextParameterTypeEnum.RichText:
-                <InputGroupTextArea @bind-Value="Context.Model.Value"/>
+                <InputGroupTextArea @bind-Value="Model.Value"/>
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Culture))" Description="@GetDescription(nameof(Model.Culture))"
-                        @bind-Value="Context.Model.Culture"/>
+                        @bind-Value="Model.Culture"/>
 
-        <InputGroupRadioSet OptionList="OptionList" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
-                            @bind-Value:get="_effectiveDateImmediate" @bind-Value:set="SetEffectiveDateImmediate">
-            @if (context)
+        <InputGroupRadioSet OptionList="OptionSet" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
+                            @bind-Value="Model.TimeEffective">
+            @if (context == null)
             {
                 <span>Immediately</span>
             }
             else
             {
-                <InputGroupDate InputAttributes="GetEffectiveDateImmediateAttributes()" DisplayName="Pick date" @bind-Value:get="_effectiveDatePicked" @bind-Value:set="SetEffectiveDatePicked"/>
+                <span>Pick a future date</span>
             }
         </InputGroupRadioSet>
+
+        @if (Model.TimeEffective != null)
+        {
+            <InputGroupDate DisplayName="Pick effective date" @bind-Value:get="_optionList[1]" @bind-Value:set="SetEffectiveDatePicked"/>
+        }
 
         @ChildContent
     </WebForm>
@@ -42,9 +46,8 @@
     [Parameter, EditorRequired]
     public EntitySchemaParameterText SchemaParameter { get; set; }
 
-    private static bool[] OptionList => [true, false];
-    private bool _effectiveDateImmediate = true;
-    private DateTime? _effectiveDatePicked = DateTime.UtcNow;
+    private readonly List<DateTime?> _optionList = [null, DateTime.Now.AddDays(1)];
+    private HashSet<DateTime?> OptionSet => _optionList.ToHashSet();
 
     protected override WebFormContext<RequestDataParameterTextCreate> CreateContext()
     {
@@ -53,19 +56,7 @@
 
     private void SetEffectiveDatePicked(DateTime? value)
     {
-        _effectiveDatePicked = value;
-        Context.Model.TimeEffective = _effectiveDatePicked;
-    }
-
-    private void SetEffectiveDateImmediate(bool value)
-    {
-        _effectiveDateImmediate = value;
-        Context.Model.TimeEffective = value ? null : _effectiveDatePicked;
-    }
-
-    private IReadOnlyDictionary<string, object>? GetEffectiveDateImmediateAttributes()
-    {
-        return new Dictionary<string, object> { { "disabled", _effectiveDateImmediate } };
+        Model.TimeEffective = _optionList[1] = value;
     }
 
 }

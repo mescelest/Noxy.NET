@@ -30,9 +30,9 @@
     private readonly Dictionary<int, string> _collectionIsApprovalRequired = [];
     private readonly Dictionary<string, string> _collectionType = [];
 
-    private IEnumerable<int> ListIsSystemDefinedKey => _collectionIsSystemDefined.Select(x => x.Key);
-    private IEnumerable<int> ListIsApprovalRequiredKey => _collectionIsApprovalRequired.Select(x => x.Key);
-    private IEnumerable<string> ListTypeKey => _collectionType.Select(x => x.Key);
+    private HashSet<int> ListIsSystemDefinedKey => _collectionIsSystemDefined.Select(x => x.Key).ToHashSet();
+    private HashSet<int> ListIsApprovalRequiredKey => _collectionIsApprovalRequired.Select(x => x.Key).ToHashSet();
+    private HashSet<string> ListTypeKey => _collectionType.Select(x => x.Key).ToHashSet();
 
     protected override async Task OnAfterFirstRenderAsync()
     {
@@ -81,12 +81,12 @@
         Model.IsApprovalRequired = value == -1 ? null : value == 1;
     }
 
-    private List<string> GetParameterType()
+    private HashSet<string> GetParameterType()
     {
         return Model.ParameterType ?? [];
     }
 
-    private void SetParameterType(List<string>? value)
+    private void SetParameterType(HashSet<string>? value)
     {
         Model.ParameterType = value;
     }

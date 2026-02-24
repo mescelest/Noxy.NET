@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Noxy.NET.EntityManagement.API.Commands.Schema;
 using Noxy.NET.EntityManagement.API.Queries;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
@@ -10,22 +11,28 @@ namespace Noxy.NET.EntityManagement.API.Controllers;
 [Route("[controller]")]
 public class SchemaController(IMediator mediator) : ControllerBase
 {
-    // [HttpPost("Context")]
-    // public async Task<ActionResult<EntitySchemaContext>> Create(FormModelSchemaContext model)
-    // {
-    //     return await serviceSchema.CreateOrUpdate(model);
-    // }
-    //
-    // [HttpPost("Element")]
-    // public async Task<ActionResult<EntitySchemaElement>> Create(FormModelSchemaElement model)
-    // {
-    //     return await serviceSchema.CreateOrUpdate(model);
-    // }
-
     [HttpGet("Parameter")]
     public async Task<ActionResult<ResponseSchemaParameterList>> GetParameterList([FromQuery] RequestSchemaParameterList request)
     {
         return await mediator.Send(new QuerySchemaParameterList(request));
+    }
+
+    [HttpPost("")]
+    public async Task<ActionResult<ResponseSchemaCreate>> CreateSchema(RequestSchemaCreate request)
+    {
+        return await mediator.Send(new CommandSchemaCreate(request));
+    }
+
+    [HttpPost("Context")]
+    public async Task<ActionResult<ResponseSchemaContextCreate>> Create(RequestSchemaContextCreate request)
+    {
+        return await mediator.Send(new CommandSchemaContextCreate(request));
+    }
+
+    [HttpPost("Element")]
+    public async Task<ActionResult<ResponseSchemaElementCreate>> Create(RequestSchemaElementCreate request)
+    {
+        return await mediator.Send(new CommandSchemaElementCreate(request));
     }
 
     // [HttpPost("Parameter/Style")]
