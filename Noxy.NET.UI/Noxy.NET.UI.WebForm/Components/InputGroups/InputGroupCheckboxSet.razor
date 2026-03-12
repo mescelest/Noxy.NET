@@ -4,8 +4,13 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementCheckboxSet @attributes="InputAttributes" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
+        <InputElementCheckboxSet @attributes="InputAttributes" class="input" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
                                  Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+
+            <div class="control">
+                <IconChevronDown Size="IconSizeEnum.ExtraSmall"/>
+            </div>
+
             @ChildContent(context)
         </InputElementCheckboxSet>
     </TemplateInputGroup>

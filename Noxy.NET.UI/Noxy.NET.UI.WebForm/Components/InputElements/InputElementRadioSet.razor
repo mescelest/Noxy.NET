@@ -4,8 +4,10 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @foreach (TValue item in OptionList)
     {
-        <label class="option">
-            <InputElementRadio @attributes="OptionAttributes?.Invoke(item)" Name="@GetName()" Option="item" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" OnChange="OnRadioChanged"/>
+        string id = Guid.NewGuid().ToString();
+
+        <label class="option" for="@id">
+            <InputElementRadio @attributes="OptionAttributes?.Invoke(item)" ID="@id" Name="@GetName()" Option="item" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" OnChange="OnRadioChanged"/>
 
             @ChildContent(item)
         </label>

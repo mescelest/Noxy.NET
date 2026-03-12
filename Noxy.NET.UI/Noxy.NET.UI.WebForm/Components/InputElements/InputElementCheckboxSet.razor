@@ -9,6 +9,7 @@
 
         <label class="option" for="@id">
             <InputElementCheckbox @attributes="OptionAttributes?.Invoke(item)" ID="@id" Name="@GetName()" Option="item" Checked="@IsChecked(item)" OnChange="x => OnCheckboxChanged(x, item)"/>
+
             @ChildContent(item)
         </label>
     }

@@ -3,11 +3,9 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@IDCurrent" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <div class="group">
-            <InputElementCheckbox @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Option="Option"
-                                  Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
-            @ChildContent
-        </div>
+        <InputElementCheckbox @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Option="Option"
+                              Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+        @ChildContent
     </TemplateInputGroup>
 </div>
 
