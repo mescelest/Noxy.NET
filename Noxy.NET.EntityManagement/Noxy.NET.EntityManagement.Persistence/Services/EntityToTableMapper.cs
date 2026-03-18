@@ -12,24 +12,6 @@ namespace Noxy.NET.EntityManagement.Persistence.Services;
 
 public class EntityToTableMapper : IEntityToTableMapper
 {
-    #region -- Templates --
-
-    public TableSchema Map(EntitySchema entity)
-    {
-        return new()
-        {
-            ID = entity.ID,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
-            IsActive = entity.IsActive,
-            TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
-            TimeActivated = entity.TimeActivated
-        };
-    }
-
-    #endregion -- Templates --
-
     #region -- Authentication --
 
     public TableAuthentication Map(EntityAuthentication entity)
@@ -80,7 +62,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         return new()
         {
             ID = entity.ID,
-            Order = entity.Order,
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             EntityID = entity.EntityID,
             RelationID = entity.RelationID
@@ -92,7 +74,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         return new()
         {
             ID = entity.ID,
-            Order = entity.Order,
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             EntityID = entity.EntityID,
             RelationID = entity.RelationID
@@ -103,19 +85,29 @@ public class EntityToTableMapper : IEntityToTableMapper
 
     #region -- Schemas --
 
+    public TableSchema Map(EntitySchema entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            IsActive = entity.IsActive,
+            TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
+            TimeActivated = entity.TimeActivated
+        };
+    }
+
     public TableSchemaContext Map(EntitySchemaContext entity)
     {
         return new()
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -136,9 +128,8 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Ordering = new(entity.Ordering.Value),
             IsSystemDefined = entity.IsSystemDefined,
             IsApprovalRequired = entity.IsApprovalRequired,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
@@ -152,9 +143,8 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Ordering = new(entity.Ordering.Value),
             IsSystemDefined = entity.IsSystemDefined,
             IsApprovalRequired = entity.IsApprovalRequired,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
@@ -168,9 +158,8 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Ordering = new(entity.Ordering.Value),
             IsSystemDefined = entity.IsSystemDefined,
             IsApprovalRequired = entity.IsApprovalRequired,
             Type = entity.Type,
@@ -185,13 +174,11 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -214,9 +201,9 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
             TitleTextParameterID = entity.TitleTextParameterID,
@@ -230,13 +217,11 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -246,14 +231,12 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             Type = entity.Type,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -263,13 +246,11 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -279,14 +260,12 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             AllowedExtensions = entity.AllowedExtensions,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -296,13 +275,11 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -312,13 +289,11 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 
@@ -328,13 +303,11 @@ public class EntityToTableMapper : IEntityToTableMapper
         {
             ID = entity.ID,
             SchemaIdentifier = entity.SchemaIdentifier,
-            Name = entity.Name,
-            Note = entity.Note,
-            Order = entity.Order,
+            Description = new(entity.Description.Name, entity.Description.Note),
+            Presentation = new(entity.Presentation.TitleTextParameterID, entity.Presentation.DescriptionTextParameterID),
+            Ordering = new(entity.Ordering.Value),
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
         };
     }
 

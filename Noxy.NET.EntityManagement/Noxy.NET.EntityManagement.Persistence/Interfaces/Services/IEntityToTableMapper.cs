@@ -11,12 +11,6 @@ namespace Noxy.NET.EntityManagement.Persistence.Interfaces.Services;
 
 public interface IEntityToTableMapper
 {
-    #region -- Templates --
-
-    TableSchema Map(EntitySchema entity);
-
-    #endregion -- Templates --
-
     #region -- Authentication --
 
     TableAuthentication Map(EntityAuthentication entity);
@@ -34,6 +28,7 @@ public interface IEntityToTableMapper
 
     #region -- Schemas --
 
+    TableSchema Map(EntitySchema entity);
     TableSchemaContext Map(EntitySchemaContext entity);
     TableSchemaElement Map(EntitySchemaElement entity);
     TableSchemaParameter Map(EntitySchemaParameter entity);

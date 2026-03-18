@@ -264,17 +264,19 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<EntitySchemaContext> Create(EntitySchemaContext entity)
     {
+        if (entity.Ordering.IsDefault) entity.Order = await UpdateOrder<TableSchemaContext>(entity);
         return await CreateEntity(entity, MapperE2T.Map, MapperT2E.Map);
     }
 
     public async Task<EntitySchemaElement> Create(EntitySchemaElement entity)
     {
+        if (entity.Ordering.IsDefault) entity.Order = await UpdateOrder<TableSchemaElement>(entity);
         return await CreateEntity(entity, MapperE2T.Map, MapperT2E.Map);
     }
 
     public async Task<EntitySchemaProperty.Discriminator> Create(EntitySchemaProperty entity)
     {
-        await UpdateOrder<TableSchemaProperty>(entity);
+        if (entity.Ordering.IsDefault) entity.Order = await UpdateOrder<TableSchemaProperty>(entity);
         EntityEntry<TableSchemaProperty> result = await Context.SchemaProperty.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
@@ -314,14 +316,13 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     private async Task<TEntity> CreateEntity<TEntity, TTable>(TEntity entity, Func<TEntity, TTable> mapE2T, Func<TTable, TEntity> mapT2E) where TEntity : BaseEntitySchema where TTable : BaseTableSchema
     {
-        await UpdateOrder<TTable>(entity);
         EntityEntry<TTable> result = await Context.Set<TTable>().AddAsync(mapE2T(entity));
         return mapT2E(result.Entity);
     }
 
-    private async Task UpdateOrder<TTable>(BaseEntitySchema entity) where TTable : BaseTableSchema
+    private async Task<int> UpdateOrder<TTable>(BaseEntitySchema entity) where TTable : BaseTableSchema
     {
-        if (entity.Order == BaseEntityTemplate.DefaultOrder) entity.Order = await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
+        return await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
     }
 
     #endregion

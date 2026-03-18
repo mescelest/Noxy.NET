@@ -5,8 +5,29 @@ namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 public class EntitySchemaParameter : BaseEntitySchema
 {
+    public required FeatureDescription Description { get; set; }
+    public required FeatureOrdering Ordering { get; set; }
+
     public required bool IsSystemDefined { get; set; }
     public required bool IsApprovalRequired { get; set; }
+
+    public string Name
+    {
+        get => Description.Name;
+        set => Description.Name = value;
+    }
+
+    public string Note
+    {
+        get => Description.Name;
+        set => Description.Name = value;
+    }
+
+    public int Order
+    {
+        get => Ordering.Value;
+        set => Ordering.Value = value;
+    }
 
     public class Discriminator : BaseEntity
     {

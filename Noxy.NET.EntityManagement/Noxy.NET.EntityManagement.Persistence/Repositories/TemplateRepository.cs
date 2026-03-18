@@ -68,9 +68,8 @@ public class TemplateRepository(DataContext context, IDependencyInjectionService
         Context.Schema.Update(MapperE2T.Map(entity));
     }
 
-    private async Task<TEntity> CreateEntity<TEntity, TTable>(TEntity entity, Func<TEntity, TTable> mapE2T, Func<TTable, TEntity> mapT2E) where TEntity : BaseEntityTemplate where TTable : BaseTableTemplate
+    private async Task<TEntity> CreateEntity<TEntity, TTable>(TEntity entity, Func<TEntity, TTable> mapE2T, Func<TTable, TEntity> mapT2E) where TEntity : BaseEntity where TTable : BaseTable
     {
-        if (entity.Order == 0) entity.Order = await Context.Set<TTable>().CountAsync();
         EntityEntry<TTable> result = await Context.Set<TTable>().AddAsync(mapE2T(entity));
         return mapT2E(result.Entity);
     }

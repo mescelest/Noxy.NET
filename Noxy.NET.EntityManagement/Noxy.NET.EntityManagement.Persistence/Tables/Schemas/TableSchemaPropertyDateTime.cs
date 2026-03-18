@@ -4,7 +4,7 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
-public class TableSchemaPropertyDateTime : TableSchemaProperty.Primitive
+public class TableSchemaPropertyDateTime : TableSchemaProperty
 {
     [Required]
     public required DateTimeTypeEnum Type { get; set; }

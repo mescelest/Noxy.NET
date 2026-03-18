@@ -101,14 +101,14 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
             .HasForeignKey(x => x.SchemaID);
 
         modelBuilder.Entity<TableSchema>()
-            .HasMany(e => e.PropertyList)
+            .HasMany(e => e.ParameterList)
             .WithOne(e => e.Schema)
             .HasForeignKey(x => x.SchemaID);
 
         modelBuilder.Entity<TableSchema>()
             .HasMany(e => e.PropertyList)
             .WithOne(e => e.Schema)
-            .HasForeignKey(x => x.SchemaID);
+            .HasForeignKey(x => x.ID);
 
         #endregion -- Schema --
 

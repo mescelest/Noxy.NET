@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 
-public class BaseEntitySchema : BaseEntityTemplate
+public class BaseEntitySchema : BaseEntity
 {
     [DisplayName(TextConstants.LabelFormSchemaIdentifier)]
     [Description(TextConstants.HelpFormSchemaIdentifier)]

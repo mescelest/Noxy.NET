@@ -17,11 +17,9 @@ public class HandlerSchemaElementCreate(IUnitOfWorkFactory serviceUoWFactory) : 
         {
             SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
             SchemaIdentifier = request.SchemaIdentifier,
-            Name = request.Name,
-            Note = request.Note,
-            Order = BaseEntityTemplate.DefaultOrder,
-            TitleTextParameterID = request.TitleParameterTextID,
-            DescriptionTextParameterID = request.DescriptionParameterTextID,
+            Description = new(request.Name, request.Note),
+            Presentation = new(request.TitleParameterTextID, request.DescriptionParameterTextID),
+            Ordering = new(BaseEntity.FeatureOrdering.DefaultOrder),
         });
 
         return new() { Value = result };

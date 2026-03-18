@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 namespace Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
 
 [Index(nameof(SchemaID), nameof(SchemaIdentifier), IsUnique = true)]
-public abstract class BaseTableSchema : BaseTableTemplate
+public abstract class BaseTableSchema : BaseTable
 {
     [Required]
     [StringLength(64)]

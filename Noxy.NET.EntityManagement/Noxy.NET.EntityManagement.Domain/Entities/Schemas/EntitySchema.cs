@@ -3,8 +3,10 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
-public class EntitySchema : BaseEntityTemplate
+public class EntitySchema : BaseEntity
 {
+    public required FeatureDescription Description { get; set; }
+
     public required bool IsActive { get; set; }
     public required DateTime? TimeActivated { get; set; }
 
@@ -12,4 +14,16 @@ public class EntitySchema : BaseEntityTemplate
     public List<EntitySchemaParameter.Discriminator>? ParameterList { get; set; }
     public List<EntitySchemaElement>? ElementList { get; set; }
     public List<EntitySchemaProperty.Discriminator>? PropertyList { get; set; }
+
+    public string Name
+    {
+        get => Description.Name;
+        set => Description.Name = value;
+    }
+
+    public string Note
+    {
+        get => Description.Name;
+        set => Description.Name = value;
+    }
 }

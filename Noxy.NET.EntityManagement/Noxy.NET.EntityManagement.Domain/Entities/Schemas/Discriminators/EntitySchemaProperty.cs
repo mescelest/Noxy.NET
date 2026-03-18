@@ -1,12 +1,15 @@
 using System.Text.Json.Serialization;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
-using Noxy.NET.EntityManagement.Domain.Interfaces;
 
 namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
-public abstract class EntitySchemaProperty : BaseEntitySchemaComponent
+public abstract class EntitySchemaProperty : BaseEntitySchema
 {
+    public required FeatureDescription Description { get; set; }
+    public required FeaturePresentation Presentation { get; set; }
+    public required FeatureOrdering Ordering { get; set; }
+
     [JsonIgnore]
     public ICollection<EntityJunctionSchemaElementHasProperty>? RelationElementList { get; set; }
 
@@ -16,9 +19,49 @@ public abstract class EntitySchemaProperty : BaseEntitySchemaComponent
     [JsonIgnore]
     public ICollection<EntityJunctionSchemaPropertyTableHasProperty>? RelationPropertyTableList { get; set; }
 
-    public abstract class Primitive : EntitySchemaProperty;
+    public string Name
+    {
+        get => Description.Name;
+        set => Description.Name = value;
+    }
 
-    public class Discriminator : BaseEntity, IOrderedEntity
+    public string Note
+    {
+        get => Description.Name;
+        set => Description.Name = value;
+    }
+
+    public EntitySchemaParameterText? TitleTextParameter
+    {
+        get => Presentation.TitleTextParameter;
+        set => Presentation.TitleTextParameter = value;
+    }
+
+    public Guid TitleTextParameterID
+    {
+        get => Presentation.TitleTextParameterID;
+        set => Presentation.TitleTextParameterID = value;
+    }
+
+    public EntitySchemaParameterText? DescriptionTextParameter
+    {
+        get => Presentation.DescriptionTextParameter;
+        set => Presentation.DescriptionTextParameter = value;
+    }
+
+    public Guid? DescriptionTextParameterID
+    {
+        get => Presentation.DescriptionTextParameterID;
+        set => Presentation.DescriptionTextParameterID = value;
+    }
+
+    public int Order
+    {
+        get => Ordering.Value;
+        set => Ordering.Value = value;
+    }
+
+    public class Discriminator : BaseEntity
     {
         [JsonConstructor]
         public Discriminator()
@@ -76,8 +119,8 @@ public abstract class EntitySchemaProperty : BaseEntitySchemaComponent
 
         public int Order
         {
-            get => GetValue().Order;
-            set => GetValue().Order = value;
+            get => GetValue().Ordering.Value;
+            set => GetValue().Ordering.Value = value;
         }
 
         public EntitySchemaProperty GetValue()
