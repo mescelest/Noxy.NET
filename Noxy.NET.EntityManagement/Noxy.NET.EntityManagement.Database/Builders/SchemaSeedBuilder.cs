@@ -14,7 +14,8 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
     {
         return new()
         {
-            Description = new(name, note),
+            Name = name,
+            Note = note,
             IsActive = isActive,
             TimeActivated = timeActivated,
             TimeCreated = timeCreated ?? DateTime.UtcNow
@@ -26,9 +27,8 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         return context.SchemaContext.Add(new()
         {
             SchemaIdentifier = identifier,
-            Description = new(name, note),
-            Presentation = new(title.ID, description?.ID),
-            Ordering = new(GetNextOrder(nameof(TableSchemaContext))),
+            Name = name,
+            Note = note,
             SchemaID = schema.ID,
             TitleTextParameterID = title.ID,
             DescriptionTextParameterID = description?.ID,
@@ -41,8 +41,8 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         return context.SchemaParameterStyle.Add(new()
         {
             SchemaIdentifier = identifier,
-            Description = new(name, note),
-            Ordering = new(GetNextOrder(nameof(TableSchemaParameterText))),
+            Name = name,
+            Note = note,
             IsSystemDefined = isSystemDefined,
             IsApprovalRequired = isApprovalRequired,
             SchemaID = schema.ID,
@@ -55,8 +55,8 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         return context.SchemaParameterSystem.Add(new()
         {
             SchemaIdentifier = identifier,
-            Description = new(name, note),
-            Ordering = new(GetNextOrder(nameof(TableSchemaParameterText))),
+            Name = name,
+            Note = note,
             IsSystemDefined = isSystemDefined,
             IsApprovalRequired = isApprovalRequired,
             SchemaID = schema.ID,
@@ -70,8 +70,8 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         return context.SchemaParameterText.Add(new()
         {
             SchemaIdentifier = identifier,
-            Description = new(name, note),
-            Ordering = new(GetNextOrder(nameof(TableSchemaParameterText))),
+            Name = name,
+            Note = note,
             Type = type,
             IsSystemDefined = isSystemDefined,
             IsApprovalRequired = isApprovalRequired,
@@ -85,9 +85,9 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         return context.SchemaElement.Add(new()
         {
             SchemaIdentifier = identifier,
-            Description = new(name, note),
-            Presentation = new(title.ID, description?.ID),
-            Ordering = new(GetNextOrder(nameof(TableSchemaElement))),
+            Name = name,
+            Note = note,
+            Order = GetNextOrder(nameof(TableSchemaElement)),
             SchemaID = schema.ID,
             TitleTextParameterID = title.ID,
             DescriptionTextParameterID = description?.ID,
@@ -100,9 +100,9 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         return context.SchemaPropertyBoolean.Add(new()
         {
             SchemaIdentifier = identifier,
-            Description = new(name, note),
-            Presentation = new(title.ID, description?.ID),
-            Ordering = new(GetNextOrder(nameof(TableSchemaProperty))),
+            Name = name,
+            Note = note,
+            Order = GetNextOrder(nameof(TableSchemaProperty)),
             SchemaID = schema.ID,
             TitleTextParameterID = title.ID,
             DescriptionTextParameterID = description?.ID,
@@ -116,11 +116,13 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         return context.SchemaPropertyDateTime.Add(new()
         {
             SchemaIdentifier = identifier,
-            Description = new(name, note),
-            Presentation = new(title.ID, description?.ID),
-            Ordering = new(GetNextOrder(nameof(TableSchemaProperty))),
+            Name = name,
+            Note = note,
+            Order = GetNextOrder(nameof(TableSchemaProperty)),
             Type = type,
             SchemaID = schema.ID,
+            TitleTextParameterID = title.ID,
+            DescriptionTextParameterID = description?.ID,
             TimeCreated = timeCreated ?? Now
         }).Entity;
     }
@@ -130,10 +132,12 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         return context.SchemaPropertyString.Add(new()
         {
             SchemaIdentifier = identifier,
-            Description = new(name, note),
-            Presentation = new(title.ID, description?.ID),
-            Ordering = new(GetNextOrder(nameof(TableSchemaProperty))),
+            Name = name,
+            Note = note,
+            Order = GetNextOrder(nameof(TableSchemaProperty)),
             SchemaID = schema.ID,
+            TitleTextParameterID = title.ID,
+            DescriptionTextParameterID = description?.ID,
             TimeCreated = timeCreated ?? Now
         }).Entity;
     }
@@ -142,7 +146,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
     {
         context.SchemaContextHasElement.Add(new()
         {
-            Ordering = new(GetNextOrder(nameof(TableSchemaContext) + nameof(TableSchemaElement))),
+            Order = GetNextOrder(nameof(TableSchemaContext) + nameof(TableSchemaElement)),
             Entity = refContext,
             EntityID = refContext.ID,
             Relation = refElement,
@@ -155,11 +159,11 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
     {
         context.SchemaElementHasProperty.Add(new()
         {
+            Order = GetNextOrder(nameof(TableSchemaElement) + nameof(TableSchemaProperty)),
             Entity = refElement,
             EntityID = refElement.ID,
             Relation = refProperty,
             RelationID = refProperty.ID,
-            Ordering = new(GetNextOrder(nameof(TableSchemaElement) + nameof(TableSchemaProperty))),
             TimeCreated = timeCreated ?? Now
         });
     }

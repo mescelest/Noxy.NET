@@ -8,6 +8,7 @@ using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
+using Noxy.NET.EntityManagement.Domain.Interfaces;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
@@ -257,26 +258,24 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<EntitySchemaParameter.Discriminator> Create(EntitySchemaParameter entity)
     {
-        await UpdateOrder<TableSchemaParameter>(entity);
         EntityEntry<TableSchemaParameter> result = await Context.SchemaParameter.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
 
     public async Task<EntitySchemaContext> Create(EntitySchemaContext entity)
     {
-        if (entity.Ordering.IsDefault) entity.Order = await UpdateOrder<TableSchemaContext>(entity);
         return await CreateEntity(entity, MapperE2T.Map, MapperT2E.Map);
     }
 
     public async Task<EntitySchemaElement> Create(EntitySchemaElement entity)
     {
-        if (entity.Ordering.IsDefault) entity.Order = await UpdateOrder<TableSchemaElement>(entity);
+        await UpdateOrder<TableSchemaElement, EntitySchemaElement>(entity);
         return await CreateEntity(entity, MapperE2T.Map, MapperT2E.Map);
     }
 
     public async Task<EntitySchemaProperty.Discriminator> Create(EntitySchemaProperty entity)
     {
-        if (entity.Ordering.IsDefault) entity.Order = await UpdateOrder<TableSchemaProperty>(entity);
+        await UpdateOrder<TableSchemaProperty, EntitySchemaProperty>(entity);
         EntityEntry<TableSchemaProperty> result = await Context.SchemaProperty.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
@@ -320,9 +319,10 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return mapT2E(result.Entity);
     }
 
-    private async Task<int> UpdateOrder<TTable>(BaseEntitySchema entity) where TTable : BaseTableSchema
+    private async Task UpdateOrder<TTable, TEntity>(TEntity entity) where TTable : BaseTableSchema where TEntity : BaseEntitySchema, ISchemaOrdering
     {
-        return await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
+        if (entity.Order != BaseEntity.DefaultOrder) return;
+        entity.Order = await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
     }
 
     #endregion

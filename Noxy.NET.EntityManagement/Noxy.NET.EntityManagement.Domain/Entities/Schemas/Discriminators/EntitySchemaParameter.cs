@@ -1,33 +1,23 @@
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
+using Noxy.NET.EntityManagement.Domain.Constants;
+using Noxy.NET.EntityManagement.Domain.Interfaces;
 
 namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
-public class EntitySchemaParameter : BaseEntitySchema
+public class EntitySchemaParameter : BaseEntitySchemaPresentation, ISchemaMetadata
 {
-    public required FeatureDescription Description { get; set; }
-    public required FeatureOrdering Ordering { get; set; }
+    [DisplayName(TextConstants.LabelFormName)]
+    [Description(TextConstants.HelpFormName)]
+    public required string Name { get; set; }
+
+    [DisplayName(TextConstants.LabelFormNote)]
+    [Description(TextConstants.HelpFormNote)]
+    public string Note { get; set; } = string.Empty;
 
     public required bool IsSystemDefined { get; set; }
     public required bool IsApprovalRequired { get; set; }
-
-    public string Name
-    {
-        get => Description.Name;
-        set => Description.Name = value;
-    }
-
-    public string Note
-    {
-        get => Description.Name;
-        set => Description.Name = value;
-    }
-
-    public int Order
-    {
-        get => Ordering.Value;
-        set => Ordering.Value = value;
-    }
 
     public class Discriminator : BaseEntity
     {

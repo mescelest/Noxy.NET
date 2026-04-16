@@ -20,7 +20,8 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         return new()
         {
             ID = Guid.Parse(id),
-            Description = new(name, note),
+            Name = name,
+            Note = note,
             IsActive = isActive,
             TimeActivated = timeActivated ?? Now,
             TimeCreated = timeCreated ?? Now
@@ -33,8 +34,8 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         {
             ID = constant.ToDeterministicGuid(),
             SchemaIdentifier = constant,
-            Description = new(constant, ""),
-            Ordering = new(GetNextOrder<TableSchemaParameterText>()),
+            Name = constant,
+            Note = "",
             Type = type,
             IsSystemDefined = true,
             IsApprovalRequired = isApprovalRequired,
@@ -54,54 +55,6 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
             TimeCreated = Now
         };
         Builder.Entity<TableDataParameterText>().HasData(tableParameterValue);
-    }
-
-    protected TableSchemaParameterText HasSchemaParameterText(string constant, string name = "", string note = "", TextParameterTypeEnum type = TextParameterTypeEnum.Line, bool isApprovalRequired = false, DateTime? timeCreated = null)
-    {
-        TableSchemaParameterText table = new()
-        {
-            ID = constant.ToDeterministicGuid(),
-            SchemaIdentifier = constant,
-            Description = new(!string.IsNullOrEmpty(name) ? name : constant, note),
-            Ordering = new(GetNextOrder<TableSchema>()),
-            Type = type,
-            IsSystemDefined = true,
-            IsApprovalRequired = isApprovalRequired,
-            TimeCreated = timeCreated ?? Now,
-            SchemaID = Schema.ID
-        };
-        Builder.Entity<TableSchemaParameterText>().HasData(table);
-        return table;
-    }
-
-    protected TableDataParameterText AddDataParameterText(string constant, string value, string culture = "en", DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
-    {
-        return new()
-        {
-            ID = Guid.NewGuid(),
-            SchemaIdentifier = constant,
-            Culture = culture,
-            Value = value,
-            TimeApproved = timeApproved ?? Now,
-            TimeEffective = timeEffective ?? Now,
-            TimeCreated = timeCreated ?? Now
-        };
-    }
-
-    protected TableDataParameterText HasDataParameterText(string constant, string value, string culture = "en", DateTime? timeApproved = null, DateTime? timeEffective = null, DateTime? timeCreated = null)
-    {
-        TableDataParameterText table = new()
-        {
-            ID = constant.ToDeterministicGuid(),
-            SchemaIdentifier = constant,
-            Culture = culture,
-            Value = value,
-            TimeApproved = timeApproved ?? Now,
-            TimeEffective = timeEffective ?? Now,
-            TimeCreated = timeCreated ?? Now
-        };
-        Builder.Entity<TableDataParameterText>().HasData(table);
-        return table;
     }
 
     protected static int GetNextOrder<T>()

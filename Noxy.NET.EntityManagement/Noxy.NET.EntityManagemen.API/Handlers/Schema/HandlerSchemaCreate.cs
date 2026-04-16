@@ -14,7 +14,8 @@ public class HandlerSchemaCreate(IUnitOfWorkFactory serviceUoWFactory) : IReques
 
         EntitySchema result = await uow.Schema.Create(new EntitySchema
         {
-            Description = new(request.Name, request.Note),
+            Name = request.Name,
+            Note = request.Note,
             IsActive = false,
             TimeActivated = null,
         });

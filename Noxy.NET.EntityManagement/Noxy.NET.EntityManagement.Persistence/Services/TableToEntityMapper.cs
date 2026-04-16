@@ -267,7 +267,7 @@ public class TableToEntityMapper : ITableToEntityMapper
         EntityJunctionSchemaContextHasElement mapped = new()
         {
             ID = table.ID,
-            Ordering = new(table.Ordering.Value),
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             EntityID = table.EntityID,
             RelationID = table.RelationID
@@ -287,8 +287,7 @@ public class TableToEntityMapper : ITableToEntityMapper
         EntityJunctionSchemaElementHasProperty mapped = new()
         {
             ID = table.ID,
-            Ordering = new(table.Ordering.Value),
-
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             EntityID = table.EntityID,
             RelationID = table.RelationID
@@ -308,8 +307,7 @@ public class TableToEntityMapper : ITableToEntityMapper
         EntityJunctionSchemaPropertyCollectionHasProperty mapped = new()
         {
             ID = table.ID,
-            Ordering = new(table.Ordering.Value),
-
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             EntityID = table.EntityID,
             RelationID = table.RelationID
@@ -329,8 +327,7 @@ public class TableToEntityMapper : ITableToEntityMapper
         EntityJunctionSchemaPropertyTableHasProperty mapped = new()
         {
             ID = table.ID,
-            Ordering = new(table.Ordering.Value),
-
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             EntityID = table.EntityID,
             RelationID = table.RelationID
@@ -371,7 +368,8 @@ public class TableToEntityMapper : ITableToEntityMapper
         EntitySchema mapped = new()
         {
             ID = table.ID,
-            Description = new(table.Description.Name, table.Description.Note),
+            Name = table.Name,
+            Note = table.Note,
             IsActive = table.IsActive,
             TimeCreated = table.TimeCreated,
             TimeActivated = table.TimeActivated
@@ -393,15 +391,18 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
+        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listVisitedRelation);
+        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listVisitedRelation);
         mapped.ElementList = table.ElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
 
         return mapped;
@@ -415,8 +416,8 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
             IsSystemDefined = table.IsSystemDefined,
             IsApprovalRequired = table.IsApprovalRequired,
             TimeCreated = table.TimeCreated,
@@ -437,8 +438,8 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
             IsSystemDefined = table.IsSystemDefined,
             IsApprovalRequired = table.IsApprovalRequired,
             TimeCreated = table.TimeCreated,
@@ -459,8 +460,8 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
             Type = table.Type,
             IsSystemDefined = table.IsSystemDefined,
             IsApprovalRequired = table.IsApprovalRequired,
@@ -495,11 +496,13 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
@@ -534,11 +537,13 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
@@ -559,11 +564,13 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
@@ -587,12 +594,14 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
             Type = table.Type,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
@@ -615,11 +624,13 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
@@ -642,12 +653,14 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
             AllowedExtensions = table.AllowedExtensions,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
@@ -670,12 +683,14 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
             IsUnsigned = table.IsUnsigned,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
@@ -698,11 +713,13 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
@@ -725,11 +742,13 @@ public class TableToEntityMapper : ITableToEntityMapper
         {
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
-            Description = new(table.Description.Name, table.Description.Note),
-            Presentation = new(table.Presentation.TitleTextParameterID, table.Presentation.DescriptionTextParameterID),
-            Ordering = new(table.Ordering.Value),
+            Name = table.Name,
+            Note = table.Note,
+            Order = table.Order,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
+            TitleTextParameterID = table.TitleTextParameterID,
+            DescriptionTextParameterID = table.DescriptionTextParameterID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;

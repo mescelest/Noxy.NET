@@ -37,13 +37,13 @@ public class JunctionRepository(DataContext context, IDependencyInjectionService
 
     public async Task<List<EntityJunctionSchemaElementHasProperty>> RelateElementToPropertyList(Guid entityGuid, IEnumerable<Guid> listGuid)
     {
-        List<TableJunctionSchemaElementHasProperty> list = await Relate<TableJunctionSchemaElementHasProperty, TableSchemaElement, TableSchemaProperty>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y, Ordering = new(0) });
+        List<TableJunctionSchemaElementHasProperty> list = await Relate<TableJunctionSchemaElementHasProperty, TableSchemaElement, TableSchemaProperty>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y, Order = 0 });
         return list.Select(MapperT2E.Map).ToList();
     }
 
     public async Task<List<EntityJunctionSchemaContextHasElement>> RelateContextToElement(Guid entityGuid, IEnumerable<Guid> listGuid)
     {
-        List<TableJunctionSchemaContextHasElement> list = await Relate<TableJunctionSchemaContextHasElement, TableSchemaContext, TableSchemaElement>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y, Ordering = new(0) });
+        List<TableJunctionSchemaContextHasElement> list = await Relate<TableJunctionSchemaContextHasElement, TableSchemaContext, TableSchemaElement>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y, Order = 0 });
         return list.Select(MapperT2E.Map).ToList();
     }
 

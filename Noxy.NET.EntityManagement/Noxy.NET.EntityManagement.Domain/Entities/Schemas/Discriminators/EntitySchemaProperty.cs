@@ -1,14 +1,35 @@
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
+using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
+using Noxy.NET.EntityManagement.Domain.Interfaces;
 
 namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
-public abstract class EntitySchemaProperty : BaseEntitySchema
+public abstract class EntitySchemaProperty : BaseEntitySchema, ISchemaMetadata, ISchemaPresentation, ISchemaOrdering
 {
-    public required FeatureDescription Description { get; set; }
-    public required FeaturePresentation Presentation { get; set; }
-    public required FeatureOrdering Ordering { get; set; }
+    [DisplayName(TextConstants.LabelFormName)]
+    [Description(TextConstants.HelpFormName)]
+    public required string Name { get; set; }
+
+    [DisplayName(TextConstants.LabelFormNote)]
+    [Description(TextConstants.HelpFormNote)]
+    public string Note { get; set; } = string.Empty;
+
+    [DisplayName(TextConstants.LabelFormTitle)]
+    [Description(TextConstants.HelpFormTitle)]
+    public EntitySchemaParameterText? TitleTextParameter { get; set; }
+    public Guid TitleTextParameterID { get; set; }
+
+    [DisplayName(TextConstants.LabelFormDescription)]
+    [Description(TextConstants.HelpFormDescription)]
+    public EntitySchemaParameterText? DescriptionTextParameter { get; set; }
+    public Guid? DescriptionTextParameterID { get; set; }
+
+    [DisplayName(TextConstants.LabelFormOrder)]
+    [Description(TextConstants.HelpFormOrder)]
+    public int Order { get; set; } = DefaultOrder;
 
     [JsonIgnore]
     public ICollection<EntityJunctionSchemaElementHasProperty>? RelationElementList { get; set; }
@@ -18,48 +39,6 @@ public abstract class EntitySchemaProperty : BaseEntitySchema
 
     [JsonIgnore]
     public ICollection<EntityJunctionSchemaPropertyTableHasProperty>? RelationPropertyTableList { get; set; }
-
-    public string Name
-    {
-        get => Description.Name;
-        set => Description.Name = value;
-    }
-
-    public string Note
-    {
-        get => Description.Name;
-        set => Description.Name = value;
-    }
-
-    public EntitySchemaParameterText? TitleTextParameter
-    {
-        get => Presentation.TitleTextParameter;
-        set => Presentation.TitleTextParameter = value;
-    }
-
-    public Guid TitleTextParameterID
-    {
-        get => Presentation.TitleTextParameterID;
-        set => Presentation.TitleTextParameterID = value;
-    }
-
-    public EntitySchemaParameterText? DescriptionTextParameter
-    {
-        get => Presentation.DescriptionTextParameter;
-        set => Presentation.DescriptionTextParameter = value;
-    }
-
-    public Guid? DescriptionTextParameterID
-    {
-        get => Presentation.DescriptionTextParameterID;
-        set => Presentation.DescriptionTextParameterID = value;
-    }
-
-    public int Order
-    {
-        get => Ordering.Value;
-        set => Ordering.Value = value;
-    }
 
     public class Discriminator : BaseEntity
     {
@@ -116,12 +95,6 @@ public abstract class EntitySchemaProperty : BaseEntitySchema
         public EntitySchemaPropertyInteger? Integer { get; init; }
         public EntitySchemaPropertyString? String { get; init; }
         public EntitySchemaPropertyTable? Table { get; init; }
-
-        public int Order
-        {
-            get => GetValue().Ordering.Value;
-            set => GetValue().Ordering.Value = value;
-        }
 
         public EntitySchemaProperty GetValue()
         {
