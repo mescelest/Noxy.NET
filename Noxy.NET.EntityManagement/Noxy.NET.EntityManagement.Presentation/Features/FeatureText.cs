@@ -62,12 +62,19 @@ public static class FeatureTextReducers
 
 public class FeatureTextEffects(IState<FeatureTextState> state, APIHttpClient http, IDebouncerService debouncer)
 {
+    private int _lastPendingCount;
+
     [EffectMethod]
     public Task Handle(FeatureTextReducers.RequestTextKeyAction action, IDispatcher dispatcher)
     {
+        int current = state.Value.PendingKeys.Count;
+        if (current == _lastPendingCount) return Task.CompletedTask;
+
+        _lastPendingCount = current;
         debouncer.Debounce(() => ResolveInternal(dispatcher));
         return Task.CompletedTask;
     }
+
 
     private async Task ResolveInternal(IDispatcher dispatcher)
     {

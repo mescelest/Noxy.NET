@@ -34,6 +34,10 @@
     grid-template-rows: minmax(0, 0fr);
 }
 
+.Collapsible[collapsed] .content-wrapper .content {
+    visibility: hidden;
+}
+
 .Collapsible[loading] .content-wrapper {
     transition: none;
 }

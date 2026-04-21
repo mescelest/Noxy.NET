@@ -2,7 +2,7 @@
 @inherits ElementComponent
 @implements IAsyncDisposable
 
-<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" loading="@_isLoading" collapsed="@_isCollapsed">
+<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" loading="@_isLoading" collapsed="@(_isCollapsed && _isAnimating == null)">
     <div class="header-wrapper">
         @Header
 
@@ -10,8 +10,8 @@
 
             @if (LoadingCurrent)
             {
-                <span>LOADING</span>
-                @* <Loader Width="40" Height="40"/>  *@
+                @* <span>LOADING</span> *@
+                <Loader Width="40" Height="40"/>
             }
             else if (Arrow != null)
             {

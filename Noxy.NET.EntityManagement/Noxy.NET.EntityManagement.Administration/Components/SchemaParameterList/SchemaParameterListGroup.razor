@@ -41,7 +41,7 @@
         if (_isCollapsed) return;
 
         string id = SchemaParameter.SchemaIdentifier;
-        if (StateData.Value.Cache.ContainsKey(id) || StateData.Value.IsLoading) return;
+        if (StateData.Value.Cache.ContainsKey(id) || StateData.Value.IsKeyLoading(id)) return;
 
         Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.LoadDataParameterListAction(id));
     }

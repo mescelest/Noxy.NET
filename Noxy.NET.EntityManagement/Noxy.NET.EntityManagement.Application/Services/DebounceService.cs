@@ -49,13 +49,12 @@ public sealed class DebouncerService : IDebouncerService
             Task completed = await Task.WhenAny(delay, local.Task);
             if (completed != delay) continue;
 
-            await callback();
-
             lock (_lock)
             {
                 _running[key] = false;
             }
 
+            await callback();
             break;
         }
     }
