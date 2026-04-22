@@ -29,6 +29,18 @@ public class SchemaController(IMediator mediator) : ControllerBase
         return await mediator.Send(new CommandSchemaCreate(request));
     }
 
+    [HttpPost("{id:guid}/Activate")]
+    public async Task<ActionResult<ResponseSchemaActivate>> ActivateSchema(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaActivate(id));
+    }
+
+    [HttpPost("{id:guid}/Delete")]
+    public async Task<ActionResult<ResponseSchemaDelete>> DeleteSchema(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaDelete(id));
+    }
+
     [HttpPost("Context")]
     public async Task<ActionResult<ResponseSchemaContextCreate>> Create(RequestSchemaContextCreate request)
     {

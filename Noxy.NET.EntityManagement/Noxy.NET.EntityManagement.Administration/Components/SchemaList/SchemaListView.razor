@@ -6,7 +6,7 @@
     <Loader Loading="IsLoading">
         @foreach (EntitySchema item in List)
         {
-            <SchemaListGroup Schema="item" HeaderLevel="HTMLHeaderLevelEnum.H3"/>
+            <SchemaListGroup Schema="item" Context="@ContextCurrent" HeaderLevel="HTMLHeaderLevelEnum.H3"/>
         }
     </Loader>
 </div>

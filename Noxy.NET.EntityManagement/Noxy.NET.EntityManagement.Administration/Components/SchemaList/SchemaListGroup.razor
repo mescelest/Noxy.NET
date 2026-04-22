@@ -4,12 +4,26 @@
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@Schema.Name</DynamicHTMLTag>
+    <div class="header">
+        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@Schema.Name</DynamicHTMLTag>
+        <div class="action-list">
+            @if (!Schema.IsActive)
+            {
+                <Button Status="StatusEnum.Info" @onclick="OnButtonActivateClick">Activate</Button>
+            }
 
-    <p>@Schema.Note</p>
-    <p>@Schema.IsActive</p>
-    <p>@Schema.TimeActivated</p>
-    <p>@Schema.TimeCreated</p>
+            @if (Schema.TimeActivated == null)
+            {
+                <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
+            }
+        </div>
+
+    </div>
+
+    <div>@Schema.Note</div>
+    <div>@Schema.IsActive</div>
+    <div>@Schema.TimeActivated</div>
+    <div>@Schema.TimeCreated</div>
 
     <Collapsible Loading="IsLoadingElement" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
@@ -63,6 +77,16 @@
         if (StateElement.Value.Cache.ContainsKey(id) || StateElement.Value.IsKeyLoading(id)) return;
 
         Dispatcher.Dispatch(new FeatureSchemaElementListReducers.LoadSchemaElementListAction(id));
+    }
+
+    private void OnButtonActivateClick()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaActivateAction(ContextCurrent, new() { ID = Schema.ID }));
+    }
+
+    private void OnButtonDeleteClick()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaDeleteAction(ContextCurrent, new() { ID = Schema.ID }));
     }
 
 }

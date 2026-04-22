@@ -120,7 +120,6 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return result.Select(MapperT2E.Map).ToList();
     }
 
-
     public async Task<List<EntitySchema>> GetSchemaList(FilterSchemaList filter)
     {
         IQueryable<TableSchema> query = Context.Schema.AsNoTracking();
@@ -270,6 +269,34 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     {
         EntityEntry<TableSchema> result = await Context.Schema.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<Guid> Delete(Guid id)
+    {
+        TableSchema entity = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == id);
+        if (entity.TimeActivated != null) throw new InvalidOperationException("Cannot delete schema that has been activated.");
+
+        Context.Schema.Remove(entity);
+        return entity.ID;
+    }
+
+    public async Task<EntitySchema> Activate(Guid id)
+    {
+        TableSchema entity = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == id);
+        if (entity.IsActive) throw new InvalidOperationException("Cannot activate schema that is already active.");
+
+        entity.IsActive = true;
+        entity.TimeActivated = DateTime.UtcNow;
+        Context.Schema.Update(entity);
+
+        List<TableSchema> list = await Context.Schema.AsNoTracking().Where(x => x.ID != id && x.IsActive).ToListAsync();
+        foreach (TableSchema item in list)
+        {
+            item.IsActive = false;
+            Context.Schema.Update(item);
+        }
+
+        return MapperT2E.Map(entity);
     }
 
     public async Task<EntitySchemaParameter.Discriminator> Create(EntitySchemaParameter entity)
