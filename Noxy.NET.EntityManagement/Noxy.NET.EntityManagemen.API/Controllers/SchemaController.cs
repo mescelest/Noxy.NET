@@ -11,8 +11,14 @@ namespace Noxy.NET.EntityManagement.API.Controllers;
 [Route("[controller]")]
 public class SchemaController(IMediator mediator) : ControllerBase
 {
+    [HttpGet("")]
+    public async Task<ActionResult<ResponseSchemaList>> GetSchemaList([FromQuery] RequestSchemaList request)
+    {
+        return await mediator.Send(new QuerySchemaList(request));
+    }
+
     [HttpGet("Parameter")]
-    public async Task<ActionResult<ResponseSchemaParameterList>> GetParameterList([FromQuery] RequestSchemaParameterList request)
+    public async Task<ActionResult<ResponseSchemaParameterList>> GetSchemaParameterList([FromQuery] RequestSchemaParameterList request)
     {
         return await mediator.Send(new QuerySchemaParameterList(request));
     }

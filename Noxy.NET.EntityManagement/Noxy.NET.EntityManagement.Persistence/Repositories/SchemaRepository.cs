@@ -120,6 +120,22 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return result.Select(MapperT2E.Map).ToList();
     }
 
+
+    public async Task<List<EntitySchema>> GetSchemaList(FilterSchemaList filter)
+    {
+        IQueryable<TableSchema> query = Context.Schema.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+
+        List<TableSchema> result = await query
+            .OrderBy(x => x.Name)
+            .Skip(filter.PageNumber * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return result.Select(MapperT2E.Map).ToList();
+    }
+
     public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
     {
         IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking();

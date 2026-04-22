@@ -15,7 +15,6 @@ public class RequestSchemaCreate : BaseRequestPost<ResponseSchemaCreate>
     [Description(TextConstants.HelpFormName)]
     public string Name { get; set; } = string.Empty;
 
-    [Required]
     [DisplayName(TextConstants.LabelFormDescription)]
     [Description(TextConstants.HelpFormDescription)]
     public string Note { get; set; } = string.Empty;

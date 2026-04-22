@@ -20,6 +20,8 @@ public class HandlerSchemaCreate(IUnitOfWorkFactory serviceUoWFactory) : IReques
             TimeActivated = null,
         });
 
+        await uow.Commit();
+
         return new() { Value = result };
     }
 }

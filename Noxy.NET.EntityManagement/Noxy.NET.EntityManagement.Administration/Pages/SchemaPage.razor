@@ -6,14 +6,19 @@
 <div class="@CssClass">
     <MagazineFrame>
         <Left>
-            <SchemaParameterListFilter/>
+            <SchemaListFilter Context="@Context"/>
         </Left>
         <Content>
-            <SchemaParameterListView/>
+            <SchemaListView Context="@Context"/>
         </Content>
+        <Right>
+            <SchemaListCreate Context="@Context"/>
+        </Right>
     </MagazineFrame>
 </div>
 
 @code {
+
+    private string Context => GetComponentName();
 
 }

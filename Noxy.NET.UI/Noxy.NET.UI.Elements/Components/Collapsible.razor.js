@@ -1,8 +1,10 @@
 export function RegisterCollapsible(isCollapsed, element, refDotNet, method) {
+    if (!element) return;
+    
     element._state = isCollapsed;
 
     element._callback = event => {
-        if (event.propertyName !== "grid-template-rows") return;
+        if (!element._refDotNet || event.propertyName !== "grid-template-rows") return;
         refDotNet.invokeMethodAsync(method, element._state);
     };
 

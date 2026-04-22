@@ -1,0 +1,29 @@
+@inject IState<FeatureSchemaState> State
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <FormSchemaCreate OnSubmit="Submit">
+        <div class="action-list">
+            <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
+                @TextService.Get(TextConstants.ButtonCreate)
+            </Button>
+        </div>
+    </FormSchemaCreate>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
+    
+    private void Submit(IWebFormContext<RequestSchemaCreate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaAddAction(ContextCurrent, value.Model));
+    }
+
+}

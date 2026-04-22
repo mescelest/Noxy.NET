@@ -1,0 +1,20 @@
+@inherits BaseRequestForm<RequestSchemaCreate, ResponseSchemaCreate>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="RequestSchemaCreate" Context="Context" OnSubmit="ForwardSubmit">
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Context.Model.Name"/>
+
+        <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Context.Model.Note"/>
+
+        @ChildContent
+    </WebForm>
+</div>
+
+@code {
+
+    protected override WebFormContext<RequestSchemaCreate> CreateContext()
+    {
+        return new(new());
+    }
+
+}

@@ -22,6 +22,8 @@ public class HandlerSchemaContextCreate(IUnitOfWorkFactory serviceUoWFactory) : 
             DescriptionTextParameterID = request.DescriptionParameterTextID,
         });
 
+        await uow.Commit();
+
         return new() { Value = result };
     }
 }

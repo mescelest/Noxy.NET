@@ -1,0 +1,68 @@
+@inject IState<FeatureSchemaElementListState> StateElement
+@inject IState<FeatureTextState> StateText
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@Schema.Name</DynamicHTMLTag>
+
+    <p>@Schema.Note</p>
+    <p>@Schema.IsActive</p>
+    <p>@Schema.TimeActivated</p>
+    <p>@Schema.TimeCreated</p>
+
+    <Collapsible Loading="IsLoadingElement" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+        <Header>
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.GetNext().ToText()">Elements</DynamicHTMLTag>
+        </Header>
+        <Content>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Note</th>
+                    <th>Created at</th>
+                </tr>
+                @foreach (EntitySchemaElement item in ElementList)
+                {
+                    <tr>
+                        <th>@item.Name</th>
+                        <th>@item.Note</th>
+                        <th>@item.TimeCreated</th>
+                    </tr>
+                }
+            </table>
+        </Content>
+    </Collapsible>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchema Schema { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H3;
+
+    private bool _isCollapsed = true;
+
+    private bool IsLoadingElement => StateElement.Value.IsKeyLoading(Schema.ID) || (StateElement.Value.Cache.ContainsKey(Schema.ID) && StateText.Value.IsScopeLoading(GetComponentName()));
+
+    private IReadOnlyList<EntitySchemaElement> ElementList => StateElement.Value.Cache.TryGetValue(Schema.ID, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];
+
+    private void SetCollapsed(bool value)
+    {
+        _isCollapsed = value;
+        if (_isCollapsed) return;
+
+        Guid id = Schema.ID;
+        if (StateElement.Value.Cache.ContainsKey(id) || StateElement.Value.IsKeyLoading(id)) return;
+
+        Dispatcher.Dispatch(new FeatureSchemaElementListReducers.LoadSchemaElementListAction(id));
+    }
+
+}

@@ -1,0 +1,33 @@
+@inject IState<FeatureSchemaState> State
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Loader Loading="IsLoading">
+        @foreach (EntitySchema item in List)
+        {
+            <SchemaListGroup Schema="item" HeaderLevel="HTMLHeaderLevelEnum.H3"/>
+        }
+    </Loader>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchema> List => State.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchema>? list) ? list : [];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (List.Count == 0 && !IsLoading)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaListAction(ContextCurrent, new()));
+        }
+    }
+
+}

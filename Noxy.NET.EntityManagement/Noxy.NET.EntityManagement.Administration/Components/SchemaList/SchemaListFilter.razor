@@ -3,7 +3,7 @@
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <FormSchemaParameterList OnSubmit="Submit">
+    <FormSchemaList OnSubmit="Submit">
         <div class="action-list">
             <Button Status="StatusEnum.Warning" type="button">
                 @TextService.Get(TextConstants.ButtonReset)
@@ -12,14 +12,18 @@
                 @TextService.Get(TextConstants.ButtonFilter)
             </Button>
         </div>
-    </FormSchemaParameterList>
+    </FormSchemaList>
 </div>
 
 @code {
 
-    private void Submit(IWebFormContext<RequestSchemaParameterList> value)
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    private void Submit(IWebFormContext<RequestSchemaList> value)
     {
-        Dispatcher.Dispatch(new FeatureSchemaParameterListReducers.SchemaParameterListAction(value.Model));
+        Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaListAction(ContextCurrent, value.Model));
     }
 
 }

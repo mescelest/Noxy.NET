@@ -63,12 +63,13 @@
     [Parameter]
     public Expression<Func<bool>>? CollapsedExpression { get; set; }
 
+    private bool _disposed;
     private bool _intent;
     private bool _isLoading;
     private bool _isCollapsed;
     private bool? _isAnimating;
-    private IJSObjectReference _module = null!;
-    private DotNetObjectReference<Collapsible> _refDotNet = null!;
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<Collapsible>? _refDotNet;
     private ElementReference _refContentWrapper;
 
     private bool IsCollapsed => _isAnimating ?? _isCollapsed;
@@ -85,6 +86,12 @@
 
         _refDotNet = DotNetObjectReference.Create(this);
         _module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Collapsible)));
+
+        if (_disposed)
+        {
+            Console.WriteLine("Is Disposed 3");
+            return;
+        }
 
         await _module.InvokeVoidAsync("RegisterCollapsible", _isCollapsed, _refContentWrapper, _refDotNet, nameof(OnAnimationComplete));
     }
@@ -126,6 +133,8 @@
     [JSInvokable]
     public async Task OnAnimationComplete(bool collapsed)
     {
+        if (_disposed) return;
+
         _isAnimating = null;
         _isCollapsed = collapsed;
         await InvokeAsync(StateHasChanged);
@@ -152,14 +161,30 @@
 
     private async Task Animate(bool collapse)
     {
+        if (_disposed || _module is null) return;
+
         _isAnimating = collapse;
         await _module.InvokeVoidAsync(collapse ? "AnimateCollapse" : "AnimateExpand", _refContentWrapper);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _module.DisposeAsync();
-        _refDotNet.Dispose();
+        Console.WriteLine($"Disposing {GetType().Name}");
+        _disposed = true;
+
+        try
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Safe to ignore
+        }
+
+        _refDotNet = null;
     }
 
 }
