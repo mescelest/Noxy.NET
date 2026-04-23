@@ -6,15 +6,36 @@
 
         <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Context.Model.Note"/>
 
+        @if (SchemaOptionList is { Count: > 0 })
+        {
+            <InputGroupSelect OptionList="SchemaOptionList" DisplayName="@GetDisplayName(nameof(Model.SchemaID))" Description="@GetDescription(nameof(Model.SchemaID))"
+                              @bind-Value:get="GetSchema()" @bind-Value:set="SetSchema">
+                <span>@context?.Name</span>
+            </InputGroupSelect>
+        }
+
         @ChildContent
     </WebForm>
 </div>
 
 @code {
 
+    [Parameter]
+    public HashSet<EntitySchema>? SchemaOptionList { get; set; }
+
     protected override WebFormContext<RequestSchemaCreate> CreateContext()
     {
         return new(new());
+    }
+
+    private EntitySchema? GetSchema()
+    {
+        return SchemaOptionList?.FirstOrDefault(x => x.ID == Context.Model.SchemaID);
+    }
+
+    private void SetSchema(EntitySchema? schema)
+    {
+        Model.SchemaID = schema?.ID;
     }
 
 }

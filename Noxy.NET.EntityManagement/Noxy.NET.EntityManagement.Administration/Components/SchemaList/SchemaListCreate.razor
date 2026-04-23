@@ -4,7 +4,7 @@
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <FormSchemaCreate OnSubmit="Submit">
+    <FormSchemaCreate SchemaOptionList="SchemaOptionList" OnSubmit="Submit">
         <div class="action-list">
             <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
                 @TextService.Get(TextConstants.ButtonCreate)
@@ -20,6 +20,7 @@
     private string ContextCurrent => Context ?? GetComponentName();
 
     private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
+    private HashSet<EntitySchema> SchemaOptionList => State.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchema>? list) ? list.ToHashSet() : [];
     
     private void Submit(IWebFormContext<RequestSchemaCreate> value)
     {

@@ -18,4 +18,8 @@ public class RequestSchemaCreate : BaseRequestPost<ResponseSchemaCreate>
     [DisplayName(TextConstants.LabelFormDescription)]
     [Description(TextConstants.HelpFormDescription)]
     public string Note { get; set; } = string.Empty;
+
+    [DisplayName(TextConstants.LabelFormSchemaIdentifier)]
+    [Description(TextConstants.HelpFormSchemaIdentifier)]
+    public Guid? SchemaID { get; set; }
 }
