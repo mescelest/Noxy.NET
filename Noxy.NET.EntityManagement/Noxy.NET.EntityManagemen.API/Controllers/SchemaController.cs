@@ -29,6 +29,12 @@ public class SchemaController(IMediator mediator) : ControllerBase
         return await mediator.Send(new CommandSchemaCreate(request));
     }
 
+    [HttpPost("{id:guid}/Clone")]
+    public async Task<ActionResult<ResponseSchemaClone>> CloneSchema(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaClone(id));
+    }
+
     [HttpPost("{id:guid}/Activate")]
     public async Task<ActionResult<ResponseSchemaActivate>> ActivateSchema(Guid id)
     {
