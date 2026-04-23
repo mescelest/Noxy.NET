@@ -25,4 +25,17 @@ public class TableSchemaContext : BaseTableSchema, ISchemaMetadata, ISchemaPrese
     public Guid? DescriptionTextParameterID { get; set; }
 
     public ICollection<TableJunctionSchemaContextHasElement>? ElementList { get; set; }
+
+    public TableSchemaContext Clone(Guid? schemaID = null)
+    {
+        return new()
+        {
+            SchemaID = schemaID ?? SchemaID,
+            SchemaIdentifier = SchemaIdentifier,
+            Name = Name,
+            Note = Note,
+            TitleTextParameterID = TitleTextParameterID,
+            DescriptionTextParameterID = DescriptionTextParameterID,
+        };
+    }
 }

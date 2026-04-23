@@ -2,8 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using Fluxor;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
-using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 using Noxy.NET.EntityManagement.Presentation.Services;
+using static Noxy.NET.EntityManagement.Administration.Features.FeatureSchemaReducers;
 
 namespace Noxy.NET.EntityManagement.Administration.Features;
 
@@ -15,7 +15,8 @@ public enum FeatureSchemaActionKind
     Add,
     Update,
     Delete,
-    Activate
+    Activate,
+    Clone
 }
 
 [FeatureState]
@@ -43,14 +44,14 @@ public static class FeatureSchemaReducers
     }
 
     [ReducerMethod]
-    public static FeatureSchemaState ReduceListResult(FeatureSchemaState state, SchemaListResultAction action)
+    public static FeatureSchemaState ReduceListResult(FeatureSchemaState state, SchemaResultAction<List<EntitySchema>> action)
     {
         FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.List);
-        return state with { Loading = Set(state.Loading, key, false), Cache = Set(state.Cache, action.Context, action.Result) };
+        return state with { Loading = Set(state.Loading, key, false), Cache = Set(state.Cache, action.Context, action.Value) };
     }
 
     [ReducerMethod]
-    public static FeatureSchemaState ReduceListFailed(FeatureSchemaState state, SchemaListFailedAction action)
+    public static FeatureSchemaState ReduceListFailed(FeatureSchemaState state, SchemaFailedAction action)
     {
         FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.List);
         return state with { Loading = Set(state.Loading, key, false), Error = Set(state.Error, key, action.Error) };
@@ -64,16 +65,37 @@ public static class FeatureSchemaReducers
     }
 
     [ReducerMethod]
-    public static FeatureSchemaState ReduceAddResult(FeatureSchemaState state, SchemaAddResultAction action)
+    public static FeatureSchemaState ReduceAddResult(FeatureSchemaState state, SchemaResultAction<Guid> action)
     {
         FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.Add);
         return state with { Loading = Set(state.Loading, key, false) };
     }
 
     [ReducerMethod]
-    public static FeatureSchemaState ReduceAddFailed(FeatureSchemaState state, SchemaAddFailedAction action)
+    public static FeatureSchemaState ReduceAddFailed(FeatureSchemaState state, SchemaFailedAction action)
     {
         FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.Add);
+        return state with { Loading = Set(state.Loading, key, false), Error = Set(state.Error, key, action.Error) };
+    }
+
+    [ReducerMethod]
+    public static FeatureSchemaState ReduceClone(FeatureSchemaState state, SchemaCloneAction action)
+    {
+        FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.Clone);
+        return state with { Loading = Set(state.Loading, key, false), Error = Set(state.Error, key, null) };
+    }
+
+    [ReducerMethod]
+    public static FeatureSchemaState ReduceCloneResult(FeatureSchemaState state, SchemaResultAction<Guid> action)
+    {
+        FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.Clone);
+        return state with { Loading = Set(state.Loading, key, false) };
+    }
+
+    [ReducerMethod]
+    public static FeatureSchemaState ReduceCloneFailed(FeatureSchemaState state, SchemaFailedAction action)
+    {
+        FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.Clone);
         return state with { Loading = Set(state.Loading, key, false), Error = Set(state.Error, key, action.Error) };
     }
 
@@ -85,14 +107,14 @@ public static class FeatureSchemaReducers
     }
 
     [ReducerMethod]
-    public static FeatureSchemaState ReduceDeleteResult(FeatureSchemaState state, SchemaDeleteResultAction action)
+    public static FeatureSchemaState ReduceDeleteResult(FeatureSchemaState state, SchemaResultAction<Guid> action)
     {
         FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.Delete);
         return state with { Loading = Set(state.Loading, key, false) };
     }
 
     [ReducerMethod]
-    public static FeatureSchemaState ReduceDeleteFailed(FeatureSchemaState state, SchemaDeleteFailedAction action)
+    public static FeatureSchemaState ReduceDeleteFailed(FeatureSchemaState state, SchemaFailedAction action)
     {
         FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.Delete);
         return state with { Loading = Set(state.Loading, key, false), Error = Set(state.Error, key, action.Error) };
@@ -106,14 +128,14 @@ public static class FeatureSchemaReducers
     }
 
     [ReducerMethod]
-    public static FeatureSchemaState ReduceActivateResult(FeatureSchemaState state, SchemaActivateResultAction action)
+    public static FeatureSchemaState ReduceActivateResult(FeatureSchemaState state, SchemaResultAction<Guid> action)
     {
         FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.Activate);
         return state with { Loading = Set(state.Loading, key, false) };
     }
 
     [ReducerMethod]
-    public static FeatureSchemaState ReduceActivateFailed(FeatureSchemaState state, SchemaActivateFailedAction action)
+    public static FeatureSchemaState ReduceActivateFailed(FeatureSchemaState state, SchemaFailedAction action)
     {
         FeatureSchemaKey key = new(action.Context, FeatureSchemaActionKind.Activate);
         return state with { Loading = Set(state.Loading, key, false), Error = Set(state.Error, key, action.Error) };
@@ -126,99 +148,92 @@ public static class FeatureSchemaReducers
             : new(source) { [key] = value };
     }
 
-
     public record SchemaListAction(string Context, RequestSchemaList Request);
-
-    public record SchemaListResultAction(string Context, IReadOnlyList<EntitySchema> Result);
-
-    public record SchemaListFailedAction(string Context, string Error);
 
     public record SchemaAddAction(string Context, RequestSchemaCreate Request);
 
-    public record SchemaAddResultAction(string Context);
-
-    public record SchemaAddFailedAction(string Context, string Error);
+    public record SchemaCloneAction(string Context, RequestSchemaClone Request);
 
     public record SchemaDeleteAction(string Context, RequestSchemaDelete Request);
 
-    public record SchemaDeleteResultAction(string Context);
-
-    public record SchemaDeleteFailedAction(string Context, string Error);
-
     public record SchemaActivateAction(string Context, RequestSchemaActivate Request);
 
-    public record SchemaActivateResultAction(string Context);
+    public record SchemaResultAction<T>(string Context, T Value);
 
-    public record SchemaActivateFailedAction(string Context, string Error);
+    public record SchemaFailedAction(string Context, string Error);
 }
 
 public class FeatureSchemaListEffects(APIHttpClient client, IState<FeatureSchemaState> state)
 {
     [EffectMethod]
-    public async Task Handle(FeatureSchemaReducers.SchemaListAction action, IDispatcher dispatcher)
+    public Task Handle(SchemaListAction action, IDispatcher dispatcher)
     {
-        try
-        {
-            ResponseSchemaList result = await client.SendRequest(action.Request);
-            dispatcher.Dispatch(new FeatureSchemaReducers.SchemaListResultAction(action.Context, result.Value));
-        }
-        catch (Exception ex)
-        {
-            dispatcher.Dispatch(new FeatureSchemaReducers.SchemaListFailedAction(action.Context, ex.Message));
-        }
+        return Execute(action.Context, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
     [EffectMethod]
-    public async Task Handle(FeatureSchemaReducers.SchemaAddAction action, IDispatcher dispatcher)
+    public Task Handle(SchemaAddAction action, IDispatcher dispatcher)
     {
-        try
-        {
-            await client.SendRequest(action.Request);
-            dispatcher.Dispatch(new FeatureSchemaReducers.SchemaAddResultAction(action.Context));
-            if (state.Value.TryGetRequest(action.Context, out RequestSchemaList? request))
-            {
-                dispatcher.Dispatch(new FeatureSchemaReducers.SchemaListAction(action.Context, request));
-            }
-        }
-        catch (Exception ex)
-        {
-            dispatcher.Dispatch(new FeatureSchemaReducers.SchemaAddFailedAction(action.Context, ex.Message));
-        }
+        return ExecuteWithRefresh(action.Context, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
     [EffectMethod]
-    public async Task Handle(FeatureSchemaReducers.SchemaDeleteAction action, IDispatcher dispatcher)
+    public Task Handle(SchemaCloneAction action, IDispatcher dispatcher)
     {
-        try
-        {
-            await client.SendRequest(action.Request);
-            dispatcher.Dispatch(new FeatureSchemaReducers.SchemaDeleteResultAction(action.Context));
-            if (state.Value.TryGetRequest(action.Context, out RequestSchemaList? request))
-            {
-                dispatcher.Dispatch(new FeatureSchemaReducers.SchemaListAction(action.Context, request));
-            }
-        }
-        catch (Exception ex)
-        {
-            dispatcher.Dispatch(new FeatureSchemaReducers.SchemaDeleteFailedAction(action.Context, ex.Message));
-        }
+        return ExecuteWithRefresh(action.Context, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
     [EffectMethod]
-    public async Task Handle(FeatureSchemaReducers.SchemaActivateAction action, IDispatcher dispatcher)
+    public Task Handle(SchemaDeleteAction action, IDispatcher dispatcher)
+    {
+        return ExecuteWithRefresh(action.Context, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+    }
+
+    [EffectMethod]
+    public Task Handle(SchemaActivateAction action, IDispatcher dispatcher)
+    {
+        return ExecuteWithRefresh(action.Context, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+    }
+
+    private static async Task Execute<TResult>(string context, IDispatcher dispatcher, Func<Task<TResult>> operation)
+    {
+        var (success, result) = await TryExecute(operation, context, dispatcher);
+        if (success)
+        {
+            dispatcher.Dispatch(new SchemaResultAction<TResult>(context, result!));
+        }
+    }
+
+
+    private async Task ExecuteWithRefresh<TResult>(string context, IDispatcher dispatcher, Func<Task<TResult>> operation)
+    {
+        var (success, result) = await TryExecute(operation, context, dispatcher);
+        if (success)
+        {
+            dispatcher.Dispatch(new SchemaResultAction<TResult>(context, result!));
+            RefreshList(context, dispatcher);
+        }
+    }
+
+    private static async Task<(bool Success, TResult? Result)> TryExecute<TResult>(Func<Task<TResult>> operation, string context, IDispatcher dispatcher)
     {
         try
         {
-            await client.SendRequest(action.Request);
-            dispatcher.Dispatch(new FeatureSchemaReducers.SchemaActivateResultAction(action.Context));
-            if (state.Value.TryGetRequest(action.Context, out RequestSchemaList? request))
-            {
-                dispatcher.Dispatch(new FeatureSchemaReducers.SchemaListAction(action.Context, request));
-            }
+            TResult result = await operation();
+            return (true, result);
         }
         catch (Exception ex)
         {
-            dispatcher.Dispatch(new FeatureSchemaReducers.SchemaActivateFailedAction(action.Context, ex.Message));
+            dispatcher.Dispatch(new SchemaFailedAction(context, ex.Message));
+            return (false, default);
+        }
+    }
+
+    private void RefreshList(string context, IDispatcher dispatcher)
+    {
+        if (state.Value.TryGetRequest(context, out RequestSchemaList? request))
+        {
+            dispatcher.Dispatch(new SchemaListAction(context, request));
         }
     }
 }

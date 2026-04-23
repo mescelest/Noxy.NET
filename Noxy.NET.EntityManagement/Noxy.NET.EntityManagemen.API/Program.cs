@@ -37,16 +37,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 WebApplication app = builder.Build();
 
+app.UseCors(corsPolicyName);
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
-app.MapControllers();
-app.UseCors(corsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
 
 await app.UseBaseWithPersistence();
 await app.UseApplication();

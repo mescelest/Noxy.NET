@@ -8,4 +8,18 @@ public class TableSchemaParameterText : TableSchemaParameter
 {
     [Required]
     public required TextParameterTypeEnum Type { get; set; }
+
+    public override TableSchemaParameterText Clone(Guid? schemaID = null)
+    {
+        return new()
+        {
+            SchemaID = schemaID ?? SchemaID,
+            SchemaIdentifier = SchemaIdentifier,
+            Name = Name,
+            Note = Note,
+            Type = Type,
+            IsApprovalRequired = IsApprovalRequired,
+            IsSystemDefined = IsSystemDefined,
+        };
+    }
 }

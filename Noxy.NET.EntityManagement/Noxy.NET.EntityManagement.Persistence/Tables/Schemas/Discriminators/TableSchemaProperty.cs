@@ -41,4 +41,6 @@ public abstract class TableSchemaProperty : BaseTableSchemaPresentation, ISchema
         { nameof(EntitySchemaPropertyString), typeof(TableSchemaPropertyString) },
         { nameof(EntitySchemaPropertyTable), typeof(TableSchemaPropertyTable) },
     };
+
+    public abstract TableSchemaProperty Clone(Guid? schemaID = null);
 }

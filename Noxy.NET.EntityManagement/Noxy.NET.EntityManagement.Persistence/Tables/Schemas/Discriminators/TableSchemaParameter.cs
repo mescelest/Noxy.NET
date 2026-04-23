@@ -27,4 +27,6 @@ public abstract class TableSchemaParameter : BaseTableSchema, ISchemaMetadata
         { nameof(EntitySchemaParameterSystem), typeof(TableSchemaParameterSystem) },
         { nameof(EntitySchemaParameterText), typeof(TableSchemaParameterText) }
     };
+
+    public abstract TableSchemaParameter Clone(Guid? schemaID = null);
 }

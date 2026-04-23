@@ -32,4 +32,18 @@ public class TableSchemaElement : BaseTableSchema, ISchemaMetadata, ISchemaOrder
 
     public ICollection<TableJunctionSchemaContextHasElement>? RelationContextList { get; set; }
     public ICollection<TableJunctionSchemaElementHasElement>? RelationElementList { get; set; }
+
+    public TableSchemaElement Clone(Guid? schemaID = null)
+    {
+        return new()
+        {
+            SchemaID = schemaID ?? SchemaID,
+            SchemaIdentifier = SchemaIdentifier,
+            Name = Name,
+            Order = Order,
+            Note = Note,
+            TitleTextParameterID = TitleTextParameterID,
+            DescriptionTextParameterID = DescriptionTextParameterID,
+        };
+    }
 }

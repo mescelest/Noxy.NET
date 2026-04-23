@@ -16,6 +16,8 @@
             {
                 <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
             }
+
+            <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
         </div>
 
     </div>
@@ -87,6 +89,11 @@
     private void OnButtonDeleteClick()
     {
         Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaDeleteAction(ContextCurrent, new() { ID = Schema.ID }));
+    }
+
+    private void OnButtonCloneClick()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaCloneAction(ContextCurrent, new() { ID = Schema.ID }));
     }
 
 }

@@ -26,4 +26,15 @@ public class TableSchema : BaseTable, ISchemaMetadata
     public ICollection<TableSchemaElement>? ElementList { get; set; }
     public ICollection<TableSchemaParameter>? ParameterList { get; set; }
     public ICollection<TableSchemaProperty>? PropertyList { get; set; }
+
+    public TableSchema Clone()
+    {
+        return new()
+        {
+            Name = Name,
+            Note = Note,
+            IsActive = false,
+            TimeActivated = null,
+        };
+    }
 }

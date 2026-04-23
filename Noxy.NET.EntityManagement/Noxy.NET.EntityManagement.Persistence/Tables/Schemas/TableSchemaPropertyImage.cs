@@ -7,4 +7,19 @@ public class TableSchemaPropertyImage : TableSchemaProperty
 {
     [Required]
     public required string AllowedExtensions { get; set; }
+
+    public override TableSchemaPropertyImage Clone(Guid? schemaID = null)
+    {
+        return new()
+        {
+            SchemaID = schemaID ?? SchemaID,
+            SchemaIdentifier = SchemaIdentifier,
+            Name = Name,
+            Note = Note,
+            Order = Order,
+            DescriptionTextParameterID = DescriptionTextParameterID,
+            TitleTextParameterID = TitleTextParameterID,
+            AllowedExtensions = AllowedExtensions,
+        };
+    }
 }

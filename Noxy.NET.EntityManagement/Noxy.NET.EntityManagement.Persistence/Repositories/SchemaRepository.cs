@@ -271,6 +271,26 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return MapperT2E.Map(result.Entity);
     }
 
+    public async Task<EntitySchema> Clone(Guid id)
+    {
+        TableSchema entity = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == id);
+        entity = entity.Clone();
+
+        List<TableSchemaElement> listSchemaElement = await Context.SchemaElement.Where(x => x.SchemaID == id).ToListAsync();
+        listSchemaElement = listSchemaElement.Select(x => x.Clone(entity.ID)).ToList();
+
+        List<TableSchemaContext> listSchemaContext = await Context.SchemaContext.Where(x => x.SchemaID == id).ToListAsync();
+        listSchemaContext = listSchemaContext.Select(x => x.Clone(entity.ID)).ToList();
+
+        List<TableSchemaParameter> listSchemaParameter = await Context.SchemaParameter.Where(x => x.SchemaID == id).ToListAsync();
+        listSchemaParameter = listSchemaParameter.Select(x => x.Clone(entity.ID)).ToList();
+
+        List<TableSchemaProperty> listSchemaProperty = await Context.SchemaProperty.Where(x => x.SchemaID == id).ToListAsync();
+        listSchemaProperty = listSchemaProperty.Select(x => x.Clone(entity.ID)).ToList();
+
+        return MapperT2E.Map(entity);
+    }
+
     public async Task<Guid> Delete(Guid id)
     {
         TableSchema entity = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == id);

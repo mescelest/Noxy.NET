@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Title>Noxy.NET.CaseManagement.API</Title>
         <Authors>Noxy.NET</Authors>
+        <UserSecretsId>b622107f-bf69-4245-9e0d-224f1c6f5016</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
