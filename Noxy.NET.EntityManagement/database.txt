@@ -1,0 +1,1 @@
+dotnet ef migrations add Initial --startup-project .\Noxy.NET.EntityManagement.Database --project .\Noxy.NET.EntityManagement.Persistence
