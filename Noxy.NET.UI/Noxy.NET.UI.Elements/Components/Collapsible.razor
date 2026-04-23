@@ -87,11 +87,7 @@
         _refDotNet = DotNetObjectReference.Create(this);
         _module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Collapsible)));
 
-        if (_disposed)
-        {
-            Console.WriteLine("Is Disposed 3");
-            return;
-        }
+        if (_disposed) return;
 
         await _module.InvokeVoidAsync("RegisterCollapsible", _isCollapsed, _refContentWrapper, _refDotNet, nameof(OnAnimationComplete));
     }
@@ -169,7 +165,6 @@
 
     public async ValueTask DisposeAsync()
     {
-        Console.WriteLine($"Disposing {GetType().Name}");
         _disposed = true;
 
         try

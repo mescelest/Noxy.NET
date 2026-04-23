@@ -11,4 +11,14 @@ public class TableJunctionSchemaElementHasProperty : BaseTableManyToMany<TableSc
 {
     [Required]
     public required int Order { get; set; }
+
+    public TableJunctionSchemaElementHasProperty Clone(Guid? entityID = null, Guid? relationID = null)
+    {
+        return new()
+        {
+            Order = Order,
+            EntityID = entityID ?? EntityID,
+            RelationID = relationID ?? RelationID,
+        };
+    }
 }

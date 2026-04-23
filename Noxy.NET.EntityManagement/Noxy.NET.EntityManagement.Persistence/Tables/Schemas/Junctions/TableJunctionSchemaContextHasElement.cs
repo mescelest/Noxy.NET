@@ -10,4 +10,14 @@ public class TableJunctionSchemaContextHasElement : BaseTableManyToMany<TableSch
 {
     [Required]
     public required int Order { get; set; }
+
+    public TableJunctionSchemaContextHasElement Clone(Guid? entityID = null, Guid? relationID = null)
+    {
+        return new()
+        {
+            Order = Order,
+            EntityID = entityID ?? EntityID,
+            RelationID = relationID ?? RelationID,
+        };
+    }
 }

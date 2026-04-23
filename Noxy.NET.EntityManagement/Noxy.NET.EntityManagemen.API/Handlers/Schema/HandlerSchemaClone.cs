@@ -14,7 +14,7 @@ public class HandlerSchemaClone(IUnitOfWorkFactory serviceUoWFactory) : IRequest
 
         EntitySchema result = await uow.Schema.Clone(request.ID);
 
-        //await uow.Commit();
+        await uow.Commit();
 
         return new() { Value = result };
     }

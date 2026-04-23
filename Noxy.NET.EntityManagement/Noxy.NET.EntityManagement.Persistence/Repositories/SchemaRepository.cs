@@ -275,18 +275,34 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     {
         TableSchema entity = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == id);
         entity = entity.Clone();
+        await Context.Schema.AddAsync(entity);
 
-        List<TableSchemaElement> listSchemaElement = await Context.SchemaElement.Where(x => x.SchemaID == id).ToListAsync();
-        listSchemaElement = listSchemaElement.Select(x => x.Clone(entity.ID)).ToList();
+        List<TableSchemaElement> listElement = await Context.SchemaElement.Where(x => x.SchemaID == id).ToListAsync();
+        List<TableSchemaElement> listElementClone = listElement.Select(x => x.Clone(entity.ID)).ToList();
+        await Context.SchemaElement.AddRangeAsync(listElementClone);
 
-        List<TableSchemaContext> listSchemaContext = await Context.SchemaContext.Where(x => x.SchemaID == id).ToListAsync();
-        listSchemaContext = listSchemaContext.Select(x => x.Clone(entity.ID)).ToList();
+        List<TableSchemaContext> listContext = await Context.SchemaContext.Where(x => x.SchemaID == id).ToListAsync();
+        List<TableSchemaContext> listContextClone = listContext.Select(x => x.Clone(entity.ID)).ToList();
+        await Context.SchemaContext.AddRangeAsync(listContextClone);
 
-        List<TableSchemaParameter> listSchemaParameter = await Context.SchemaParameter.Where(x => x.SchemaID == id).ToListAsync();
-        listSchemaParameter = listSchemaParameter.Select(x => x.Clone(entity.ID)).ToList();
+        List<TableSchemaParameter> listParameter = await Context.SchemaParameter.Where(x => x.SchemaID == id).ToListAsync();
+        List<TableSchemaParameter> listParameterClone = listParameter.Select(x => x.Clone(entity.ID)).ToList();
+        await Context.SchemaParameter.AddRangeAsync(listParameterClone);
 
-        List<TableSchemaProperty> listSchemaProperty = await Context.SchemaProperty.Where(x => x.SchemaID == id).ToListAsync();
-        listSchemaProperty = listSchemaProperty.Select(x => x.Clone(entity.ID)).ToList();
+        List<TableSchemaProperty> listProperty = await Context.SchemaProperty.Where(x => x.SchemaID == id).ToListAsync();
+        List<TableSchemaProperty> listPropertyClone = listProperty.Select(x => x.Clone(entity.ID)).ToList();
+        await Context.SchemaProperty.AddRangeAsync(listPropertyClone);
+
+        Dictionary<Guid, Guid> mapElement = listElement.Zip(listElementClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
+        Dictionary<Guid, Guid> mapContext = listContext.Zip(listContextClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
+        // Dictionary<Guid, Guid> mapParameter = listParameter.Zip(listParameterClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
+        Dictionary<Guid, Guid> mapProperty = listProperty.Zip(listPropertyClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
+
+        List<TableJunctionSchemaElementHasProperty> listJunctionElement = await Context.SchemaElementHasProperty.Where(x => mapElement.Keys.Contains(x.EntityID)).ToListAsync();
+        await Context.SchemaElementHasProperty.AddRangeAsync(listJunctionElement.Select(j => j.Clone(mapElement[j.EntityID], mapProperty[j.RelationID])));
+
+        List<TableJunctionSchemaContextHasElement> listJunctionContext = await Context.SchemaContextHasElement.Where(x => mapContext.Keys.Contains(x.EntityID)).ToListAsync();
+        await Context.SchemaContextHasElement.AddRangeAsync(listJunctionContext.Select(j => j.Clone(mapElement[j.EntityID], mapProperty[j.RelationID])));
 
         return MapperT2E.Map(entity);
     }
@@ -296,7 +312,33 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         TableSchema entity = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == id);
         if (entity.TimeActivated != null) throw new InvalidOperationException("Cannot delete schema that has been activated.");
 
+        entity = await Context.Schema
+            .AsNoTracking()
+            .Include(x => x.ContextList!)
+            .ThenInclude(e => e.ElementList)
+            .Include(x => x.ElementList!)
+            .ThenInclude(e => e.PropertyList)
+            .Include(x => x.PropertyList)
+            .Include(x => x.ParameterList)
+            .FirstAsync(x => x.ID == id);
+
+        foreach (TableSchemaElement element in entity.ElementList ?? [])
+        {
+            Context.SchemaElementHasProperty.RemoveRange(element.PropertyList ?? []);
+        }
+
+        foreach (TableSchemaContext context in entity.ContextList ?? [])
+        {
+            Context.SchemaContextHasElement.RemoveRange(context.ElementList ?? []);
+        }
+
+        Context.SchemaElement.RemoveRange(entity.ElementList ?? []);
+        Context.SchemaContext.RemoveRange(entity.ContextList ?? []);
+        Context.SchemaParameter.RemoveRange(entity.ParameterList ?? []);
+        Context.SchemaProperty.RemoveRange(entity.PropertyList ?? []);
+
         Context.Schema.Remove(entity);
+
         return entity.ID;
     }
 
