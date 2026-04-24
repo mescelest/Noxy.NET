@@ -64,7 +64,6 @@
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H3;
 
-    private bool _isCollapsed = true;
     private bool _isEditMode;
 
     private bool IsLoadingUpdate => StateSchema.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Update, out bool value) && value;
