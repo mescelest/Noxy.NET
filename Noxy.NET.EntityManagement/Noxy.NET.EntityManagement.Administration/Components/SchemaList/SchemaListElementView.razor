@@ -1,0 +1,61 @@
+@inject IState<FeatureSchemaState> StateSchema
+@inject IState<FeatureSchemaElementListState> StateElement
+@inject IState<FeatureTextState> StateText
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+        <Header>
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Elements</DynamicHTMLTag>
+        </Header>
+        <Content>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Note</th>
+                    <th>Created at</th>
+                </tr>
+                @foreach (EntitySchemaElement item in ElementList)
+                {
+                    <tr>
+                        <th>@item.Name</th>
+                        <th>@item.Note</th>
+                        <th>@item.TimeCreated</th>
+                    </tr>
+                }
+            </table>
+        </Content>
+    </Collapsible>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required Guid ID { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H4;
+
+    private bool _isCollapsed = true;
+
+    private bool IsLoading => StateElement.Value.IsKeyLoading(ID) || (StateElement.Value.Cache.ContainsKey(ID) && StateText.Value.IsScopeLoading(GetComponentName()));
+    private IReadOnlyList<EntitySchemaElement> ElementList => StateElement.Value.Cache.TryGetValue(ID, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];
+
+    private void SetCollapsed(bool value)
+    {
+        _isCollapsed = value;
+        if (_isCollapsed) return;
+
+        if (StateElement.Value.Cache.ContainsKey(ID) || StateElement.Value.IsKeyLoading(ID)) return;
+
+        Dispatcher.Dispatch(new FeatureSchemaElementListReducers.LoadSchemaElementListAction(ID));
+    }
+
+}

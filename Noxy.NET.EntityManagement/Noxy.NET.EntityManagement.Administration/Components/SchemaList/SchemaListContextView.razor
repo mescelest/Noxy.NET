@@ -1,0 +1,64 @@
+@inject IState<FeatureSchemaState> StateSchema
+@inject IState<FeatureSchemaContextState> StateContext
+@inject IState<FeatureTextState> StateText
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+        <Header>
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Elements</DynamicHTMLTag>
+        </Header>
+        <Content>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Note</th>
+                    <th>Schema Identifier</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Created at</th>
+                </tr>
+                @foreach (EntitySchemaContext item in List)
+                {
+                    <tr>
+                        <th>@item.Name</th>
+                        <th>@item.Note</th>
+                        <th>@item.SchemaIdentifier</th>
+                        <th>@item.TitleTextParameter?.Name</th>
+                        <th>@item.DescriptionTextParameter?.Name</th>
+                        <th>@item.TimeCreated</th>
+                    </tr>
+                }
+            </table>
+        </Content>
+    </Collapsible>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required Guid ID { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H4;
+
+    private bool _isCollapsed = true;
+
+    private bool IsLoading => StateContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaContext> List => StateContext.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaContext>? value) ? value : [];
+
+    private void SetCollapsed(bool value)
+    {
+        _isCollapsed = value;
+        if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ContextCurrent) || IsLoading) return;
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.SchemaContextListAction(ContextCurrent, new()));
+    }
+
+}
