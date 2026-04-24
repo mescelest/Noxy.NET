@@ -105,19 +105,19 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<List<EntitySchemaContext>> GetSchemaContextListBySchemaID(Guid id)
     {
         List<TableSchemaContext> result = await Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     public async Task<List<EntitySchemaElement>> GetSchemaElementListBySchemaID(Guid id)
     {
         List<TableSchemaElement> result = await Context.SchemaElement.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id)
     {
         List<TableSchemaParameter> result = await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     public async Task<List<EntitySchema>> GetSchemaList(FilterSchemaList filter)
@@ -132,16 +132,46 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
             .Take(filter.PageSize)
             .ToListAsync();
 
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
+    }
+
+    public async Task<List<EntitySchemaContext>> GetSchemaContextList(FilterSchemaContextList filter)
+    {
+        IQueryable<TableSchemaContext> query = Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+
+        List<TableSchemaContext> result = await query
+            .OrderBy(x => x.Name)
+            .Skip(filter.PageNumber * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return [.. result.Select(MapperT2E.Map)];
+    }
+
+    public async Task<List<EntitySchemaElement>> GetSchemaElementList(FilterSchemaElementList filter)
+    {
+        IQueryable<TableSchemaElement> query = Context.SchemaElement.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+
+        List<TableSchemaElement> result = await query
+            .OrderBy(x => x.Name)
+            .Skip(filter.PageNumber * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
     {
-        IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking();
+        IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
 
         if (filter.ParameterType is { Count: > 0 })
         {
-            List<Type> types = filter.ParameterType.Select(key => TableSchemaParameter.TypeMap[key]).ToList();
+            List<Type> types = [.. filter.ParameterType.Select(key => TableSchemaParameter.TypeMap[key])];
 
             ParameterExpression param = Expression.Parameter(typeof(TableSchemaParameter), "x");
             Expression typeChecks = types.Select(Expression (t) => Expression.TypeIs(param, t)).Aggregate(Expression.OrElse);
@@ -159,25 +189,25 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
             .Take(filter.PageSize)
             .ToListAsync();
 
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     public async Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id)
     {
         List<TableSchemaProperty> result = await Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     public async Task<List<EntityJunctionSchemaContextHasElement>> GetSchemaContextHasElementListBySchemaID(Guid id)
     {
         List<TableJunctionSchemaContextHasElement> result = await Context.SchemaContextHasElement.AsNoTracking().Where(x => x.Entity!.SchemaID == id).ToListAsync();
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     public async Task<List<EntityJunctionSchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id)
     {
         List<TableJunctionSchemaElementHasProperty> result = await Context.SchemaElementHasProperty.AsNoTracking().Where(x => x.Entity!.SchemaID == id).ToListAsync();
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     #region -- Schema --
@@ -207,19 +237,19 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         await Context.Schema.AddAsync(entity);
 
         List<TableSchemaElement> listElement = await Context.SchemaElement.Where(x => x.SchemaID == id).ToListAsync();
-        List<TableSchemaElement> listElementClone = listElement.Select(x => x.Clone(entity.ID)).ToList();
+        List<TableSchemaElement> listElementClone = [.. listElement.Select(x => x.Clone(entity.ID))];
         await Context.SchemaElement.AddRangeAsync(listElementClone);
 
         List<TableSchemaContext> listContext = await Context.SchemaContext.Where(x => x.SchemaID == id).ToListAsync();
-        List<TableSchemaContext> listContextClone = listContext.Select(x => x.Clone(entity.ID)).ToList();
+        List<TableSchemaContext> listContextClone = [.. listContext.Select(x => x.Clone(entity.ID))];
         await Context.SchemaContext.AddRangeAsync(listContextClone);
 
         List<TableSchemaParameter> listParameter = await Context.SchemaParameter.Where(x => x.SchemaID == id).ToListAsync();
-        List<TableSchemaParameter> listParameterClone = listParameter.Select(x => x.Clone(entity.ID)).ToList();
+        List<TableSchemaParameter> listParameterClone = [.. listParameter.Select(x => x.Clone(entity.ID))];
         await Context.SchemaParameter.AddRangeAsync(listParameterClone);
 
         List<TableSchemaProperty> listProperty = await Context.SchemaProperty.Where(x => x.SchemaID == id).ToListAsync();
-        List<TableSchemaProperty> listPropertyClone = listProperty.Select(x => x.Clone(entity.ID)).ToList();
+        List<TableSchemaProperty> listPropertyClone = [.. listProperty.Select(x => x.Clone(entity.ID))];
         await Context.SchemaProperty.AddRangeAsync(listPropertyClone);
 
         Dictionary<Guid, Guid> mapElement = listElement.Zip(listElementClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);

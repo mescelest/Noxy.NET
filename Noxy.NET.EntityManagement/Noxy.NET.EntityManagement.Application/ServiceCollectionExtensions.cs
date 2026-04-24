@@ -12,12 +12,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<IJWTService, JWTService>();
-        services.AddScoped<ISchemaService, SchemaService>();
         services.AddScoped<ISchemaBuilderService, SchemaBuilderService>();
         services.AddScoped<ITaskBundlingService, TaskBundlingService>();
-        services.AddScoped<ITemplateService, TemplateService>();
-
-        services.AddSingleton<IApplicationService, ApplicationService>();
 
         return services;
     }
@@ -30,9 +26,6 @@ public static class ServiceCollectionExtensions
 
             ISchemaBuilderService serviceSchemaBuilderService = scope.ServiceProvider.GetRequiredService<ISchemaBuilderService>();
             EntitySchema schema = await serviceSchemaBuilderService.ConstructSchema();
-
-            IApplicationService serviceApplication = scope.ServiceProvider.GetRequiredService<IApplicationService>();
-            serviceApplication.SetSchema(schema);
         }
         catch
         {

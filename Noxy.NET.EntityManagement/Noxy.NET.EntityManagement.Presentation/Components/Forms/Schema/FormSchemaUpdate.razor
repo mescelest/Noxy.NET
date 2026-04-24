@@ -13,11 +13,11 @@
 @code {
 
     [Parameter, EditorRequired]
-    public Guid ID { get; set; }
+    public EntitySchema Schema { get; set; }
 
     protected override WebFormContext<RequestSchemaUpdate> CreateContext()
     {
-        return new(new() { ID = ID });
+        return new(new() { ID = Schema.ID, Name = Schema.Name, Note = Schema.Note });
     }
 
 }

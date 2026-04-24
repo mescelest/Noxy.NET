@@ -82,7 +82,7 @@ public class APIHttpClient(HttpClient client)
         return value switch
         {
             string s => [$"{key}={Uri.EscapeDataString(s)}"],
-            IEnumerable<object?> seq => seq.OfType<object>().Select(item => $"{key}={Uri.EscapeDataString(FormatValue(item))}").ToList(),
+            IEnumerable<object?> seq => [.. seq.OfType<object>().Select(item => $"{key}={Uri.EscapeDataString(FormatValue(item))}")],
             _ => [$"{key}={Uri.EscapeDataString(FormatValue(value))}"]
         };
     }

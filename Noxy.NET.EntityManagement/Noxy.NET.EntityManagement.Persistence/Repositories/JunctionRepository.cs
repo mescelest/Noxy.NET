@@ -38,25 +38,27 @@ public class JunctionRepository(DataContext context, IDependencyInjectionService
     public async Task<List<EntityJunctionSchemaElementHasProperty>> RelateElementToPropertyList(Guid entityGuid, IEnumerable<Guid> listGuid)
     {
         List<TableJunctionSchemaElementHasProperty> list = await Relate<TableJunctionSchemaElementHasProperty, TableSchemaElement, TableSchemaProperty>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y, Order = 0 });
-        return list.Select(MapperT2E.Map).ToList();
+        return [.. list.Select(MapperT2E.Map)];
     }
 
     public async Task<List<EntityJunctionSchemaContextHasElement>> RelateContextToElement(Guid entityGuid, IEnumerable<Guid> listGuid)
     {
         List<TableJunctionSchemaContextHasElement> list = await Relate<TableJunctionSchemaContextHasElement, TableSchemaContext, TableSchemaElement>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y, Order = 0 });
-        return list.Select(MapperT2E.Map).ToList();
+        return [.. list.Select(MapperT2E.Map)];
     }
 
     private async Task<List<TJunction>> Relate<TJunction, TEntity, TRelation>(Guid entityGuid, IEnumerable<Guid> listGuid, Func<Guid, Guid, TJunction> callback) where TJunction : BaseTableManyToMany<TEntity, TRelation>
     {
-        List<TJunction> list = listGuid.Select(x => callback(entityGuid, x)).ToList();
+        List<TJunction> list = [.. listGuid.Select(x => callback(entityGuid, x))];
         List<TJunction> result = await Context.Set<TJunction>().AsNoTracking().Where(x => x.EntityID == entityGuid).ToListAsync();
 
-        List<TJunction> toRemove = result.Where(item => list.All(x => x.RelationID != item.RelationID)).ToList();
-        List<TJunction> toAdd = list
-            .Where(item => result.All(x => x.RelationID != item.RelationID))
-            .Select(item => callback(entityGuid, item.RelationID))
-            .ToList();
+        List<TJunction> toRemove = [.. result.Where(item => list.All(x => x.RelationID != item.RelationID))];
+        List<TJunction> toAdd =
+        [
+            .. list
+                .Where(item => result.All(x => x.RelationID != item.RelationID))
+                .Select(item => callback(entityGuid, item.RelationID))
+        ];
 
         await Context.AddRangeAsync(toAdd);
         Context.RemoveRange(toRemove);

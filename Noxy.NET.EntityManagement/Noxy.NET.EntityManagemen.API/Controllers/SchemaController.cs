@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.API.Commands.Schema;
-using Noxy.NET.EntityManagement.API.Queries;
+using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
@@ -15,6 +15,12 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaList>> GetSchemaList([FromQuery] RequestSchemaList request)
     {
         return await mediator.Send(new QuerySchemaList(request));
+    }
+
+    [HttpGet("Element")]
+    public async Task<ActionResult<ResponseSchemaElementList>> GetSchemaParameterList([FromQuery] RequestSchemaElementList request)
+    {
+        return await mediator.Send(new QuerySchemaElementList(request));
     }
 
     [HttpGet("Parameter")]

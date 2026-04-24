@@ -7,7 +7,7 @@ public static class EnumerableExtensions
         ArgumentNullException.ThrowIfNull(list);
         ArgumentNullException.ThrowIfNull(iterator);
 
-        TValue[] array = list.ToArray();
+        TValue[] array = [.. list];
         for (int i = 0; i < array.Length; i++)
         {
             if (iterator(array[i]))
@@ -23,7 +23,7 @@ public static class EnumerableExtensions
     {
         ArgumentNullException.ThrowIfNull(list);
 
-        TValue[] array = list.ToArray();
+        TValue[] array = [.. list];
         for (int i = 0; i < array.Length; i++)
         {
             if (EqualityComparer<TValue>.Default.Equals(array[i], value))

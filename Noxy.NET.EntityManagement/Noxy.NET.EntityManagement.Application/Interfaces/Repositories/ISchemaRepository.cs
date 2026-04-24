@@ -29,6 +29,8 @@ public interface ISchemaRepository
     Task<List<EntitySchemaContext>> GetSchemaContextListBySchemaID(Guid id);
     Task<List<EntitySchemaElement>> GetSchemaElementListBySchemaID(Guid id);
     Task<List<EntitySchema>> GetSchemaList(FilterSchemaList filter);
+    Task<List<EntitySchemaContext>> GetSchemaContextList(FilterSchemaContextList filter);
+    Task<List<EntitySchemaElement>> GetSchemaElementList(FilterSchemaElementList filter);
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter);
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id);
     Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id);

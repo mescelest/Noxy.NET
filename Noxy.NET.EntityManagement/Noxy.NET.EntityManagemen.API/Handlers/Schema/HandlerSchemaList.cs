@@ -1,5 +1,5 @@
 using MediatR;
-using Noxy.NET.EntityManagement.API.Queries;
+using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;

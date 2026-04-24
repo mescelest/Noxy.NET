@@ -13,9 +13,9 @@ namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
 public class DataRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), IDataRepository
 {
-    public async Task<EntityDataParameterStyle> CreateStyleParameter(string identifier, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterStyle> CreateStyleParameter(Guid schemaID, string identifier, string value, DateTime? timeEffective = null)
     {
-        TableSchemaParameterStyle schema = await Context.SchemaParameterStyle.SingleAsync(x => x.SchemaIdentifier == identifier);
+        TableSchemaParameterStyle schema = await Context.SchemaParameterStyle.SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
         EntityEntry<TableDataParameterStyle> entry = await Context.DataStyleParameter.AddAsync(new()
         {
             SchemaIdentifier = identifier,
@@ -27,9 +27,9 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         return MapperT2E.Map(entry.Entity);
     }
 
-    public async Task<EntityDataParameterSystem> CreateSystemParameter(string identifier, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterSystem> CreateSystemParameter(Guid schemaID, string identifier, string value, DateTime? timeEffective = null)
     {
-        TableSchemaParameterSystem schema = await Context.SchemaParameterSystem.SingleAsync(x => x.SchemaIdentifier == identifier);
+        TableSchemaParameterSystem schema = await Context.SchemaParameterSystem.SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
         EntityEntry<TableDataParameterSystem> entry = await Context.DataSystemParameter.AddAsync(new()
         {
             SchemaIdentifier = identifier,
@@ -41,9 +41,9 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         return MapperT2E.Map(entry.Entity);
     }
 
-    public async Task<EntityDataParameterText> CreateTextParameter(string identifier, string culture, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterText> CreateTextParameter(Guid schemaID, string identifier, string culture, string value, DateTime? timeEffective = null)
     {
-        TableSchemaParameterText schema = await Context.SchemaParameterText.SingleAsync(x => x.SchemaIdentifier == identifier);
+        TableSchemaParameterText schema = await Context.SchemaParameterText.SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
         EntityEntry<TableDataParameterText> entry = await Context.DataTextParameter.AddAsync(new()
         {
             SchemaIdentifier = identifier,
@@ -72,7 +72,7 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
             .Where(x => x.SchemaIdentifier == identifier)
             .ToListAsync();
 
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     public async Task<EntityDataParameterText?> GetCurrentTextParameterByIdentifier(string identifier)

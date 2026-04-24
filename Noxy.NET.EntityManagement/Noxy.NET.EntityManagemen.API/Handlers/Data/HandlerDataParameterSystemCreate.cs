@@ -12,7 +12,8 @@ public class HandlerDataParameterSystemCreate(IUnitOfWorkFactory serviceUoWFacto
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntityDataParameterSystem result = await uow.Data.CreateSystemParameter(request.SchemaIdentifier, request.Value, request.DateEffective);
+        Guid id = await uow.Schema.GetCurrentSchemaID();
+        EntityDataParameterSystem result = await uow.Data.CreateSystemParameter(id, request.SchemaIdentifier, request.Value, request.DateEffective);
 
         await uow.Commit();
 

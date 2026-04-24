@@ -73,7 +73,7 @@ public class AuthenticationRepository(DataContext context, IDependencyInjectionS
             .Where(x => x.UserID == idUser)
             .ToListAsync();
 
-        return list.Select(MapperT2E.Map).ToList();
+        return [.. list.Select(MapperT2E.Map)];
     }
 
     public async Task<EntityIdentity> GetIdentityWithID(Guid idIdentity)

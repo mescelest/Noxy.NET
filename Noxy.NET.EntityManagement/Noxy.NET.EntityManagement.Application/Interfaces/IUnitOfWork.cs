@@ -8,7 +8,6 @@ public interface IUnitOfWork : IAsyncDisposable
     IDataRepository Data { get; }
     IJunctionRepository Junction { get; }
     ISchemaRepository Schema { get; }
-    ITemplateRepository Template { get; }
 
     Task Commit(bool useClearTracking = false);
     T GetRepository<T>() where T : IRepository;

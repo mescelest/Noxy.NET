@@ -7,6 +7,8 @@ using Noxy.NET.EntityManagement.Presentation;
 
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 
+//builder.Logging.SetMinimumLevel(LogLevel.Warning);
+
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 

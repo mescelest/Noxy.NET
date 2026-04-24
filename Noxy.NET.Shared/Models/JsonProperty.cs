@@ -297,7 +297,7 @@ public class JsonProperty
 
     public object?[] AsArray()
     {
-        return Value.EnumerateArray().Select(x => x.Deserialize<JsonProperty>()?.GetValue()).ToArray();
+        return [.. Value.EnumerateArray().Select(x => x.Deserialize<JsonProperty>()?.GetValue())];
     }
 
     public Dictionary<string, object?> AsDictionary()

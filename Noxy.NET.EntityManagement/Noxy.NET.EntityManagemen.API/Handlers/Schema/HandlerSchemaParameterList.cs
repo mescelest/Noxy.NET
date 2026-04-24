@@ -1,5 +1,5 @@
 using MediatR;
-using Noxy.NET.EntityManagement.API.Queries;
+using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
@@ -14,6 +14,7 @@ public class HandlerSchemaParameterList(IUnitOfWorkFactory serviceUoWFactory) : 
 
         List<EntitySchemaParameter.Discriminator> result = await uow.Schema.GetSchemaParameterList(new()
         {
+            SchemaID = await uow.Schema.GetCurrentSchemaID(),
             Search = request.Search,
             IsSystemDefined = request.IsSystemDefined,
             IsApprovalRequired = request.IsApprovalRequired,

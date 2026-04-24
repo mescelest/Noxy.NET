@@ -12,7 +12,8 @@ public class HandlerDataParameterStyleCreate(IUnitOfWorkFactory serviceUoWFactor
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntityDataParameterStyle result = await uow.Data.CreateStyleParameter(request.SchemaIdentifier, request.Value, request.DateEffective);
+        Guid id = await uow.Schema.GetCurrentSchemaID();
+        EntityDataParameterStyle result = await uow.Data.CreateStyleParameter(id, request.SchemaIdentifier, request.Value, request.DateEffective);
 
         await uow.Commit();
 

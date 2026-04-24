@@ -25,7 +25,6 @@ public sealed class UnitOfWork(DataContext context, IDependencyInjectionService 
     public IDataRepository Data => GetRepository<DataRepository>();
     public IJunctionRepository Junction => GetRepository<JunctionRepository>();
     public ISchemaRepository Schema => GetRepository<SchemaRepository>();
-    public ITemplateRepository Template => GetRepository<TemplateRepository>();
 
     public async Task Commit(bool useClearTracking = false)
     {

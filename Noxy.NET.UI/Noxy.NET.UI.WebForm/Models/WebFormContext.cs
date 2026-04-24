@@ -238,8 +238,8 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
             string[] value = pair.Value switch
             {
                 string s => [s],
-                IEnumerable<string> list => list.ToArray(),
-                IEnumerable<object> list => list.Select(x => x.ToString()).OfType<string>().ToArray(),
+                IEnumerable<string> list => [.. list],
+                IEnumerable<object> list => [.. list.Select(x => x.ToString()).OfType<string>()],
                 _ => pair.Value.ToString() is { } s2 ? new[] { s2 } : Array.Empty<string>()
             };
 
@@ -259,7 +259,7 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
             WriteError(message);
             foreach (KeyValuePair<string, IEnumerable<string>> entry in data ?? [])
             {
-                TryGetField(entry.Key)?.WriteError(entry.Value.ToArray());
+                TryGetField(entry.Key)?.WriteError([.. entry.Value]);
             }
         });
     }

@@ -99,7 +99,7 @@ public static class FeatureSchemaReducers
             : new(source) { [key] = value };
     }
 
-    private static FeatureSchemaState StartAction(FeatureSchemaState state, string context, FeatureSchemaActionKind kind, Func<FeatureSchemaState, FeatureSchemaState>? extra = null)
+    private static FeatureSchemaState StartAction(FeatureSchemaState state, string context, FeatureSchemaActionKind kind, Func<FeatureSchemaState, FeatureSchemaState>? cb = null)
     {
         FeatureSchemaKey key = new(context, kind);
         FeatureSchemaState newState = state with
@@ -108,10 +108,10 @@ public static class FeatureSchemaReducers
             Error = Set(state.Error, key, null)
         };
 
-        return extra != null ? extra(newState) : newState;
+        return cb != null ? cb(newState) : newState;
     }
 
-    private static FeatureSchemaState SuccessAction<T>(FeatureSchemaState state, SchemaResultAction<T> action, Func<FeatureSchemaState, T, FeatureSchemaState>? extra = null)
+    private static FeatureSchemaState SuccessAction<T>(FeatureSchemaState state, SchemaResultAction<T> action, Func<FeatureSchemaState, T, FeatureSchemaState>? cb = null)
     {
         FeatureSchemaKey key = new(action.Context, action.Kind);
         FeatureSchemaState newState = state with
@@ -119,10 +119,10 @@ public static class FeatureSchemaReducers
             Loading = Set(state.Loading, key, false)
         };
 
-        return extra != null ? extra(newState, action.Value) : newState;
+        return cb != null ? cb(newState, action.Value) : newState;
     }
 
-    private static FeatureSchemaState FailedAction(FeatureSchemaState state, SchemaFailedAction action, Func<FeatureSchemaState, SchemaFailedAction, FeatureSchemaState>? extra = null)
+    private static FeatureSchemaState FailedAction(FeatureSchemaState state, SchemaFailedAction action, Func<FeatureSchemaState, SchemaFailedAction, FeatureSchemaState>? cb = null)
     {
         FeatureSchemaKey key = new(action.Context, action.Kind);
         FeatureSchemaState newState = state with
@@ -131,7 +131,7 @@ public static class FeatureSchemaReducers
             Error = Set(state.Error, key, action.Error)
         };
 
-        return extra != null ? extra(newState, action) : newState;
+        return cb != null ? cb(newState, action) : newState;
     }
 
     public record SchemaListAction(string Context, RequestSchemaList Request);

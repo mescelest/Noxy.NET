@@ -6,7 +6,7 @@ public class WeightManager<TItem> : IWeightManager<TItem> where TItem : class, I
 {
     public IEnumerable<TItem> Order(IEnumerable<TItem> list, bool apply = false)
     {
-        List<TItem> result = list.OrderBy(x => x.Weight).ToList();
+        List<TItem> result = [.. list.OrderBy(x => x.Weight)];
         if (!apply) return result;
 
         for (int index = 0; index < result.Count; index++)

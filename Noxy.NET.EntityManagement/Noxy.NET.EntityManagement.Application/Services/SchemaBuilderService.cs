@@ -1,6 +1,5 @@
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
-using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
@@ -16,12 +15,12 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
         EntitySchema schema;
         if (!id.HasValue)
         {
-            schema = await uow.Template.GetCurrentSchema();
+            schema = await uow.Schema.GetCurrentSchema();
             id = schema.ID;
         }
         else
         {
-            schema = await uow.Template.GetSchemaByID(id.Value);
+            schema = await uow.Schema.GetSchemaByID(id.Value);
         }
 
         (schema.ContextList, schema.ParameterList, schema.ElementList, schema.PropertyList) = await serviceTaskBundling.WhenAll(
@@ -137,9 +136,5 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
         }
 
         return schema;
-    }
-
-    private static void AssignTextParameters<T>(T entity, Dictionary<Guid, EntitySchemaParameter.Discriminator> collectionParameter) where T : BaseEntitySchema
-    {
     }
 }

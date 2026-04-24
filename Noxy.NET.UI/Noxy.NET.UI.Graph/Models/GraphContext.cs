@@ -17,5 +17,5 @@ public class GraphContext : IGraphContext
 
 public class GraphContext<T>(IEnumerable<IGraphNode<T>> data) : GraphContext, IGraphContext<T>
 {
-    public new List<IGraphNode<T>> Data { get; set; } = data.ToList();
+    public new List<IGraphNode<T>> Data { get; set; } = [.. data];
 }

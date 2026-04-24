@@ -78,7 +78,7 @@ public class FeatureTextEffects(IState<FeatureTextState> state, APIHttpClient ht
 
     private async Task ResolveInternal(IDispatcher dispatcher)
     {
-        string[] snapshot = state.Value.PendingKeys.ToArray();
+        string[] snapshot = [.. state.Value.PendingKeys];
         if (snapshot.Length == 0) return;
 
         RequestDataParameterTextResolveList request = new() { SchemaIdentifierList = snapshot };
