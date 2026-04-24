@@ -22,5 +22,4 @@
     flex: 0 0 auto;
     flex-flow: row;
     column-gap: var(--size-gap-md);
-    justify-content: flex-end;
 }

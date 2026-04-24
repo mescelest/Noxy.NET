@@ -12,6 +12,7 @@ public static class TextConstants
     public const string ButtonFilter = "Button:Filter";
     public const string ButtonReset = "Button:Reset";
     public const string ButtonCreate = "Button:Create";
+    public const string ButtonCancel = "Button:Cancel";
     public const string ButtonUpdate = "Button:Update";
     public const string ButtonSubmit = "Button:Submit";
     public const string ButtonSignIn = "Button:SignIn";

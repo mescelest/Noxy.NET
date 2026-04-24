@@ -1,6 +1,8 @@
+@inject IState<FeatureSchemaState> StateSchema
 @inject IState<FeatureSchemaElementListState> StateElement
 @inject IState<FeatureTextState> StateText
 @inject IDispatcher Dispatcher
+@inject TextService TextService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -9,7 +11,7 @@
         <div class="action-list">
             @if (!Schema.IsActive)
             {
-                <Button Status="StatusEnum.Info" @onclick="OnButtonActivateClick">Activate</Button>
+                <Button Status="StatusEnum.Success" @onclick="OnButtonActivateClick">Activate</Button>
             }
 
             @if (Schema.TimeActivated == null)
@@ -18,14 +20,32 @@
             }
 
             <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
+            <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
         </div>
 
     </div>
 
-    <div>@Schema.Note</div>
-    <div>@Schema.IsActive</div>
-    <div>@Schema.TimeActivated</div>
-    <div>@Schema.TimeCreated</div>
+    @if (!_isEditMode)
+    {
+        <div>@Schema.Note</div>
+        <div>@Schema.IsActive</div>
+        <div>@Schema.TimeActivated</div>
+        <div>@Schema.TimeCreated</div>
+    }
+    else
+    {
+        <FormSchemaUpdate ID="Schema.ID" OnSubmit="OnButtonEditSubmit">
+            <div class="action-list">
+                <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
+                    @TextService.Get(TextConstants.ButtonUpdate)
+                </Button>
+
+                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                    @TextService.Get(TextConstants.ButtonCancel)
+                </Button>
+            </div>
+        </FormSchemaUpdate>
+    }
 
     <Collapsible Loading="IsLoadingElement" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
@@ -65,7 +85,9 @@
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H3;
 
     private bool _isCollapsed = true;
+    private bool _isEditMode;
 
+    private bool IsLoadingUpdate => StateSchema.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Update, out bool value) && value;
     private bool IsLoadingElement => StateElement.Value.IsKeyLoading(Schema.ID) || (StateElement.Value.Cache.ContainsKey(Schema.ID) && StateText.Value.IsScopeLoading(GetComponentName()));
 
     private IReadOnlyList<EntitySchemaElement> ElementList => StateElement.Value.Cache.TryGetValue(Schema.ID, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];
@@ -79,6 +101,22 @@
         if (StateElement.Value.Cache.ContainsKey(id) || StateElement.Value.IsKeyLoading(id)) return;
 
         Dispatcher.Dispatch(new FeatureSchemaElementListReducers.LoadSchemaElementListAction(id));
+    }
+
+    private void OnButtonEditClick()
+    {
+        _isEditMode = true;
+    }
+
+    private void OnButtonEditSubmit(IWebFormContext<RequestSchemaUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaUpdateAction(ContextCurrent, value.Model));
+        _isEditMode = false;
+    }
+
+    private void OnButtonEditCancel()
+    {
+        _isEditMode = false;
     }
 
     private void OnButtonActivateClick()

@@ -29,6 +29,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.ButtonFilter, "Filter");
         RegisterText(TextConstants.ButtonReset, "Reset");
         RegisterText(TextConstants.ButtonCreate, "Create");
+        RegisterText(TextConstants.ButtonCancel, "Cancel");
         RegisterText(TextConstants.ButtonUpdate, "Update");
         RegisterText(TextConstants.ButtonSubmit, "Submit");
         RegisterText(TextConstants.ButtonSignIn, "Sign in");

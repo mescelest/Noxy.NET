@@ -37,6 +37,7 @@ public interface ISchemaRepository
     Task<List<EntityJunctionSchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id);
 
     Task<EntitySchema> Create(EntitySchema entity);
+    Task<EntitySchema> Update(EntitySchema entity);
     Task<EntitySchema> Clone(Guid id);
     Task<Guid> Delete(Guid id);
     Task<EntitySchema> Activate(Guid id);

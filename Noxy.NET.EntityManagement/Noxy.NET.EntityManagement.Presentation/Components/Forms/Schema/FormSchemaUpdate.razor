@@ -1,0 +1,23 @@
+@inherits BaseRequestForm<RequestSchemaUpdate, ResponseSchemaUpdate>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="RequestSchemaUpdate" Context="Context" OnSubmit="ForwardSubmit">
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Context.Model.Name"/>
+
+        <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Context.Model.Note"/>
+
+        @ChildContent
+    </WebForm>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid ID { get; set; }
+
+    protected override WebFormContext<RequestSchemaUpdate> CreateContext()
+    {
+        return new(new() { ID = ID });
+    }
+
+}

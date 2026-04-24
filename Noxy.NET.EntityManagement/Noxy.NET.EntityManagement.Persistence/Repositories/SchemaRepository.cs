@@ -180,95 +180,24 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return result.Select(MapperT2E.Map).ToList();
     }
 
-    #region -- Populate --
-
-    public async Task<EntitySchemaContext> Populate(EntitySchemaContext entity)
-    {
-        entity.ElementList ??= (await Context.SchemaContextHasElement.AsNoTracking().Where(x => x.EntityID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
-
-        return entity;
-    }
-
-    public async Task<EntitySchemaParameter.Discriminator> Populate(EntitySchemaParameter.Discriminator entity)
-    {
-        return entity.GetValue() switch
-        {
-            EntitySchemaParameterSystem entityDateTime => new(await Populate(entityDateTime)),
-            EntitySchemaParameterText entityString => new(await Populate(entityString)),
-            _ => entity
-        };
-    }
-
-    public Task<EntitySchemaParameterSystem> Populate(EntitySchemaParameterSystem entity)
-    {
-        // TODO: Fill this
-        return Task.FromResult(entity);
-    }
-
-    public Task<EntitySchemaParameterText> Populate(EntitySchemaParameterText entity)
-    {
-        // TODO: Fill this
-        return Task.FromResult(entity);
-    }
-
-    public async Task<EntitySchemaElement> Populate(EntitySchemaElement entity)
-    {
-        entity.PropertyList ??= (await Context.SchemaElementHasProperty.AsNoTracking().Where(x => x.EntityID == entity.ID).ToListAsync()).Select(MapperT2E.Map).ToList();
-
-        return entity;
-    }
-
-    public async Task<EntitySchemaProperty.Discriminator> Populate(EntitySchemaProperty.Discriminator entity)
-    {
-        return entity.GetValue() switch
-        {
-            EntitySchemaPropertyBoolean entityBoolean => new(await Populate(entityBoolean)),
-            EntitySchemaPropertyDateTime entityDateTime => new(await Populate(entityDateTime)),
-            EntitySchemaPropertyString entityString => new(await Populate(entityString)),
-            _ => entity
-        };
-    }
-
-    public Task<EntitySchemaPropertyBoolean> Populate(EntitySchemaPropertyBoolean entity)
-    {
-        // TODO: Fill this
-        return Task.FromResult(entity);
-    }
-
-    public Task<EntitySchemaPropertyDateTime> Populate(EntitySchemaPropertyDateTime entity)
-    {
-        // TODO: Fill this
-        return Task.FromResult(entity);
-    }
-
-    public Task<EntitySchemaPropertyString> Populate(EntitySchemaPropertyString entity)
-    {
-        // TODO: Fill this
-        return Task.FromResult(entity);
-    }
-
-    public async Task<EntityJunctionSchemaContextHasElement> Populate(EntityJunctionSchemaContextHasElement entity)
-    {
-        entity.Relation ??= MapperT2E.Map(await Context.SchemaElement.AsNoTracking().SingleAsync(x => x.ID == entity.RelationID));
-
-        return entity;
-    }
-
-    public async Task<EntityJunctionSchemaElementHasProperty> Populate(EntityJunctionSchemaElementHasProperty entity)
-    {
-        entity.Relation ??= MapperT2E.Map(await Context.SchemaProperty.AsNoTracking().SingleAsync(x => x.ID == entity.RelationID));
-
-        return entity;
-    }
-
-    #endregion -- Populate --
-
-    #region -- Create --
+    #region -- Schema --
 
     public async Task<EntitySchema> Create(EntitySchema entity)
     {
         EntityEntry<TableSchema> result = await Context.Schema.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchema> Update(EntitySchema entity)
+    {
+        TableSchema result = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+
+        result.Name = entity.Name;
+        result.Note = entity.Note;
+        result.TimeUpdated = DateTime.UtcNow;
+        Context.Schema.Update(result);
+
+        return MapperT2E.Map(result);
     }
 
     public async Task<EntitySchema> Clone(Guid id)
