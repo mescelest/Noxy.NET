@@ -1,0 +1,38 @@
+@inherits ElementComponent
+
+<i class="@CssClass" style="GetStyle()">
+    @IconCurrent
+</i>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public string? Icon { get; set; }
+    private string IconCurrent => Icon ?? "crop_square";
+
+    [Parameter]
+    public string? Size { get; set; }
+    private string SizeCurrent => Size ?? "24px";
+
+    [Parameter]
+    public string? Color { get; set; }
+    private string ColorCurrent => Color ?? "inherit";
+
+    [Parameter]
+    public MaterialIconVariantEnum? Variant { get; set; }
+    private MaterialIconVariantEnum VariantCurrent => Variant ?? MaterialIconVariantEnum.Filled;
+
+    protected override string CssClass => CombineCssClass(base.CssClass, GetComponentClass(), VariantCurrent.ToText());
+
+    private Dictionary<string, object> GetStyle()
+    {
+        Dictionary<string, object> style = new()
+        {
+                ["font-size"] = SizeCurrent,
+                ["color"] = ColorCurrent
+        };
+
+        return style;
+    }
+
+}

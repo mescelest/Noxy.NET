@@ -15,7 +15,7 @@ public class TableSchemaElement : BaseTableSchema, ISchemaMetadata, ISchemaOrder
 
     [Required]
     [MaxLength(DefaultNoteLength)]
-    public string Note { get; set; } = string.Empty;
+    public string? Note { get; set; } = string.Empty;
 
     [Required]
     public required int Order { get; set; }

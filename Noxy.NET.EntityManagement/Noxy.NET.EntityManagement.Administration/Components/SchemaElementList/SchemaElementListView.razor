@@ -1,0 +1,54 @@
+@inject IState<FeatureSchemaState> StateSchema
+@inject IState<FeatureSchemaElementState> StateElement
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Loader Loading="IsLoading">
+        @if (Schema != null)
+        {
+            @foreach (EntitySchemaElement item in List)
+            {
+                <SchemaElementListGroup Schema="Schema" SchemaElement="item" Context="@ContextCurrent" HeaderLevel="HeaderLevelCurrent"/>
+            }
+        }
+    </Loader>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid SchemaID { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H3;
+
+    private bool IsLoading => IsLoadingSchema || IsLoadingElement;
+
+    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => StateSchema.Value.TryGetFind(ContextCurrent, out EntitySchema? value) ? value : null;
+
+    private bool IsLoadingElement => StateElement.Value.TryGetLoading(ContextCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaElement> List => StateElement.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaElement>? list) ? list : [];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (Schema == null && !IsLoadingSchema)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaFindAction(ContextCurrent, new() { ID = SchemaID }));
+        }
+
+        if (List.Count == 0 && !IsLoadingElement)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementListAction(ContextCurrent, new()));
+        }
+    }
+
+}

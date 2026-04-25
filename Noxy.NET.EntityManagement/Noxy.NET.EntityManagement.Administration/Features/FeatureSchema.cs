@@ -11,6 +11,7 @@ public readonly record struct FeatureSchemaKey(string Context, FeatureSchemaActi
 
 public enum FeatureSchemaActionKind
 {
+    Find,
     List,
     Add,
     Update,
@@ -24,25 +25,38 @@ public record FeatureSchemaState
 {
     public Dictionary<FeatureSchemaKey, bool> Loading { get; init; } = [];
     public Dictionary<FeatureSchemaKey, string?> Error { get; init; } = [];
-    public Dictionary<string, IReadOnlyList<EntitySchema>> Cache { get; init; } = [];
+    public Dictionary<string, EntitySchema> Find { get; init; } = [];
+    public Dictionary<string, IReadOnlyList<EntitySchema>> List { get; init; } = [];
     public Dictionary<string, RequestSchemaList> Request { get; init; } = [];
 
     public bool TryGetLoading(string context, FeatureSchemaActionKind kind, out bool value) => Loading.TryGetValue(new(context, kind), out value);
     public bool TryGetError(string context, FeatureSchemaActionKind kind, out string? error) => Error.TryGetValue(new(context, kind), out error);
 
-    public bool TryGetList(string context, [NotNullWhen(true)] out IReadOnlyList<EntitySchema>? list) => Cache.TryGetValue(context, out list);
+    public bool TryGetFind(string context, [NotNullWhen(true)] out EntitySchema? value) => Find.TryGetValue(context, out value);
+    public bool TryGetList(string context, [NotNullWhen(true)] out IReadOnlyList<EntitySchema>? list) => List.TryGetValue(context, out list);
     public bool TryGetRequest(string context, [NotNullWhen(true)] out RequestSchemaList? request) => Request.TryGetValue(context, out request);
 }
 
 public static class FeatureSchemaReducers
 {
     [ReducerMethod]
+    public static FeatureSchemaState ReduceFind(FeatureSchemaState state, SchemaListAction action) =>
+        StartAction(state, action.Context, FeatureSchemaActionKind.Find);
+
+    [ReducerMethod]
+    public static FeatureSchemaState ReduceFindResult(FeatureSchemaState state, SchemaResultAction<EntitySchema> action) =>
+        SuccessAction(state, action, (next, value) => next with { Find = Set(next.Find, action.Context, value) });
+
+    [ReducerMethod]
+    public static FeatureSchemaState ReduceFindFailed(FeatureSchemaState state, SchemaFailedAction action) => FailedAction(state, action);
+
+    [ReducerMethod]
     public static FeatureSchemaState ReduceList(FeatureSchemaState state, SchemaListAction action) =>
         StartAction(state, action.Context, FeatureSchemaActionKind.List, (next) => next with { Request = Set(next.Request, action.Context, action.Request) });
 
     [ReducerMethod]
     public static FeatureSchemaState ReduceListResult(FeatureSchemaState state, SchemaResultAction<List<EntitySchema>> action) =>
-        SuccessAction(state, action, (next, value) => next with { Cache = Set(next.Cache, action.Context, value) });
+        SuccessAction(state, action, (next, value) => next with { List = Set(next.List, action.Context, value) });
 
     [ReducerMethod]
     public static FeatureSchemaState ReduceListFailed(FeatureSchemaState state, SchemaFailedAction action) => FailedAction(state, action);
@@ -134,6 +148,8 @@ public static class FeatureSchemaReducers
         return cb != null ? cb(newState, action) : newState;
     }
 
+    public record SchemaFindAction(string Context, RequestSchemaFind Request);
+
     public record SchemaListAction(string Context, RequestSchemaList Request);
 
     public record SchemaAddAction(string Context, RequestSchemaCreate Request);
@@ -153,6 +169,12 @@ public static class FeatureSchemaReducers
 
 public class FeatureSchemaListEffects(APIHttpClient client, IState<FeatureSchemaState> state)
 {
+    [EffectMethod]
+    public Task Handle(SchemaFindAction action, IDispatcher dispatcher)
+    {
+        return Execute(action.Context, FeatureSchemaActionKind.Find, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+    }
+
     [EffectMethod]
     public Task Handle(SchemaListAction action, IDispatcher dispatcher)
     {

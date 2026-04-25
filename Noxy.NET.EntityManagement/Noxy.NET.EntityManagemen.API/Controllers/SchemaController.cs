@@ -1,9 +1,14 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.API.Commands.Schema;
+using Noxy.NET.EntityManagement.API.Commands.Schema.Element;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
 
 namespace Noxy.NET.EntityManagement.API.Controllers;
 
@@ -12,9 +17,15 @@ namespace Noxy.NET.EntityManagement.API.Controllers;
 public class SchemaController(IMediator mediator) : ControllerBase
 {
     [HttpGet("")]
-    public async Task<ActionResult<ResponseSchemaList>> GetSchemaList([FromQuery] RequestSchemaList request)
+    public async Task<ActionResult<ResponseSchemaList>> GetSchemaByID([FromQuery] RequestSchemaList request)
     {
         return await mediator.Send(new QuerySchemaList(request));
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaFind>> GetSchemaList(Guid id)
+    {
+        return await mediator.Send(new QuerySchemaFind(id));
     }
 
     [HttpGet("Context")]
@@ -66,15 +77,33 @@ public class SchemaController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("Context")]
-    public async Task<ActionResult<ResponseSchemaContextCreate>> Create(RequestSchemaContextCreate request)
+    public async Task<ActionResult<ResponseSchemaContextCreate>> CreateSchemaContext(RequestSchemaContextCreate request)
     {
         return await mediator.Send(new CommandSchemaContextCreate(request));
     }
 
     [HttpPost("Element")]
-    public async Task<ActionResult<ResponseSchemaElementCreate>> Create(RequestSchemaElementCreate request)
+    public async Task<ActionResult<ResponseSchemaElementCreate>> CreateSchemaElement(RequestSchemaElementCreate request)
     {
         return await mediator.Send(new CommandSchemaElementCreate(request));
+    }
+
+    [HttpPost("Element/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaElementUpdate>> UpdateSchemaElement(Guid id, RequestSchemaElementUpdate request)
+    {
+        return await mediator.Send(new CommandSchemaElementUpdate(id, request));
+    }
+
+    [HttpPost("Element/{id:guid}/Clone")]
+    public async Task<ActionResult<ResponseSchemaElementClone>> CloneSchemaElement(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaElementClone(id));
+    }
+
+    [HttpPost("Element/{id:guid}/Delete")]
+    public async Task<ActionResult<ResponseSchemaElementDelete>> DeleteSchemaElement(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaElementDelete(id));
     }
 
     // [HttpPost("Parameter/Style")]

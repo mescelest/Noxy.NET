@@ -12,7 +12,7 @@ public class HandlerSchemaActivate(IUnitOfWorkFactory serviceUoWFactory) : IRequ
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchema result = await uow.Schema.Activate(request.ID);
+        EntitySchema result = await uow.Schema.ActivateSchema(request.ID);
 
         await uow.Commit();
 

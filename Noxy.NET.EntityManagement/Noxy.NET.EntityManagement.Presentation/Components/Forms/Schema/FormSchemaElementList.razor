@@ -1,0 +1,21 @@
+@inherits BaseRequestForm<RequestSchemaElementList, ResponseSchemaElementList>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="RequestSchemaElementList" Context="Context" OnSubmit="ForwardSubmit">
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Search))" Description="@GetDescription(nameof(Model.Search))"
+                        @bind-Value="Context.Model.Search"/>
+        @ChildContent
+    </WebForm>
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    protected override WebFormContext<RequestSchemaElementList> CreateContext()
+    {
+        return new(new() { SchemaID = SchemaID });
+    }
+
+}

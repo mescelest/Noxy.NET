@@ -9,9 +9,23 @@ public interface ISchemaRepository
 {
     Task<Guid> GetCurrentSchemaID();
     Task<EntitySchema> GetCurrentSchema();
+
     Task<EntitySchema> GetSchemaByID(Guid id);
-    Task<EntitySchemaContext> GetSchemaContextByID(Guid id);
+    Task<List<EntitySchema>> GetSchemaList(FilterSchemaList filter);
+    Task<EntitySchema> CreateSchema(EntitySchema entity);
+    Task<EntitySchema> UpdateSchema(EntitySchema entity);
+    Task<EntitySchema> CloneSchema(Guid id);
+    Task<Guid> DeleteSchema(Guid id);
+    Task<EntitySchema> ActivateSchema(Guid id);
+
     Task<EntitySchemaElement> GetSchemaElementByID(Guid id);
+    Task<List<EntitySchemaElement>> GetSchemaElementList(FilterSchemaElementList filter);
+    Task<EntitySchemaElement> CreateSchemaElement(EntitySchemaElement entity);
+    Task<EntitySchemaElement> UpdateSchemaElement(EntitySchemaElement entity);
+    Task<EntitySchemaElement> CloneSchemaElement(Guid id);
+    Task<Guid> DeleteSchemaElement(Guid id);
+
+    Task<EntitySchemaContext> GetSchemaContextByID(Guid id);
     Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id);
     Task<EntitySchemaParameterStyle> GetSchemaParameterStyleByID(Guid id);
     Task<EntitySchemaParameterSystem> GetSchemaParameterSystemByID(Guid id);
@@ -28,9 +42,7 @@ public interface ISchemaRepository
 
     Task<List<EntitySchemaContext>> GetSchemaContextListBySchemaID(Guid id);
     Task<List<EntitySchemaElement>> GetSchemaElementListBySchemaID(Guid id);
-    Task<List<EntitySchema>> GetSchemaList(FilterSchemaList filter);
     Task<List<EntitySchemaContext>> GetSchemaContextList(FilterSchemaContextList filter);
-    Task<List<EntitySchemaElement>> GetSchemaElementList(FilterSchemaElementList filter);
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter);
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id);
     Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id);
@@ -38,19 +50,11 @@ public interface ISchemaRepository
     Task<List<EntityJunctionSchemaContextHasElement>> GetSchemaContextHasElementListBySchemaID(Guid id);
     Task<List<EntityJunctionSchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id);
 
-    Task<EntitySchema> Create(EntitySchema entity);
-    Task<EntitySchema> Update(EntitySchema entity);
-    Task<EntitySchema> Clone(Guid id);
-    Task<Guid> Delete(Guid id);
-    Task<EntitySchema> Activate(Guid id);
-
     Task<EntitySchemaContext> Create(EntitySchemaContext entity);
     Task<EntitySchemaParameter.Discriminator> Create(EntitySchemaParameter entity);
-    Task<EntitySchemaElement> Create(EntitySchemaElement entity);
     Task<EntitySchemaProperty.Discriminator> Create(EntitySchemaProperty entity);
 
     void Update(EntitySchemaContext entity);
     void Update(EntitySchemaParameter entity);
-    void Update(EntitySchemaElement entity);
     void Update(EntitySchemaProperty baseEntity);
 }

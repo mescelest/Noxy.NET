@@ -1,0 +1,25 @@
+@page "/Schema/{ID:guid}"
+@inherits PageComponent
+
+<PageTitle>Administration | Schema</PageTitle>
+
+<div class="@CssClass">
+    <MagazineFrame>
+        <Left>
+        </Left>
+        <Content>
+            <SchemaEntityView Context="@Context" ID="ID"/>
+        </Content>
+        <Right>
+        </Right>
+    </MagazineFrame>
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid ID { get; set; }
+
+    private string Context => ID.ToString();
+
+}

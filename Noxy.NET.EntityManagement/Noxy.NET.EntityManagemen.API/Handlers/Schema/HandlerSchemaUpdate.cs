@@ -12,7 +12,7 @@ public class HandlerSchemaUpdate(IUnitOfWorkFactory serviceUoWFactory) : IReques
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchema result = await uow.Schema.Update(new EntitySchema
+        EntitySchema result = await uow.Schema.UpdateSchema(new()
         {
             ID = request.ID,
             Name = request.Name,

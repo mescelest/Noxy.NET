@@ -1,0 +1,27 @@
+﻿@page "/Schema/{ID:guid}/Element"
+@inherits PageComponent
+
+<PageTitle>Administration | Element</PageTitle>
+
+<div class="@CssClass">
+    <MagazineFrame>
+        <Left>
+            <SchemaElementListFilter Context="@Context" SchemaID="ID"/>
+        </Left>
+        <Content>
+            <SchemaElementListView Context="@Context" SchemaID="ID"/>
+        </Content>
+        <Right>
+            <SchemaElementListCreate Context="@Context"/>
+        </Right>
+    </MagazineFrame>
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid ID { get; set; }
+
+    private string Context => GetComponentName();
+
+}

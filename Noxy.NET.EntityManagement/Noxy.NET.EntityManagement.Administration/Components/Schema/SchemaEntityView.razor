@@ -1,0 +1,38 @@
+@inject IState<FeatureSchemaState> State
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Loader Loading="IsLoading">
+        @if (Schema != null)
+        {
+            @Schema.Name
+            
+            @* <SchemaEntityElementView></SchemaEntityElementView> *@
+        }
+    </Loader>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid ID { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => State.Value.TryGetFind(ContextCurrent, out EntitySchema? value) ? value : null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (Schema == null && !IsLoading)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaFindAction(ContextCurrent, new() { ID = ID }));
+        }
+    }
+
+}

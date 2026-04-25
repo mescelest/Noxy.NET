@@ -12,7 +12,7 @@ public class HandlerSchemaClone(IUnitOfWorkFactory serviceUoWFactory) : IRequest
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchema result = await uow.Schema.Clone(request.ID);
+        EntitySchema result = await uow.Schema.CloneSchema(request.ID);
 
         await uow.Commit();
 

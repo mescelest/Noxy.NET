@@ -1,0 +1,98 @@
+@inject IState<FeatureSchemaElementState> StateSchemaElement
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="header">
+        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@SchemaElement.Name</DynamicHTMLTag>
+        <NavLink href="@Link">
+            <MaterialIcon Icon="link"/>
+        </NavLink>
+        <div class="action-list">
+
+            @if (Schema.TimeActivated == null)
+            {
+                <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
+            }
+
+            <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
+            <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
+        </div>
+
+    </div>
+
+    @if (!_isEditMode)
+    {
+        <div>@SchemaElement.SchemaIdentifier</div>
+        <div>@SchemaElement.Name</div>
+        <div>@SchemaElement.Note</div>
+        <div>@SchemaElement.TimeCreated</div>
+        <div>@SchemaElement.TitleTextParameterID</div>
+        <div>@SchemaElement.DescriptionTextParameterID</div>
+    }
+    else
+    {
+        <FormSchemaElementUpdate SchemaElement="SchemaElement" OnSubmit="OnButtonEditSubmit">
+            <div class="action-list">
+                <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
+                    @TextService.Get(TextConstants.ButtonUpdate)
+                </Button>
+
+                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                    @TextService.Get(TextConstants.ButtonCancel)
+                </Button>
+            </div>
+        </FormSchemaElementUpdate>
+    }
+
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchema Schema { get; set; }
+
+    [Parameter, EditorRequired]
+    public required EntitySchemaElement SchemaElement { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H3;
+
+    private bool _isEditMode;
+
+    private string Link => $"/schema/{Schema.ID}/element/{SchemaElement.ID}";
+    private bool IsLoadingUpdate => StateSchemaElement.Value.TryGetLoading(ContextCurrent, FeatureSchemaElementActionKind.Update, out bool value) && value;
+
+    private void OnButtonEditClick()
+    {
+        _isEditMode = true;
+    }
+
+    private void OnButtonEditSubmit(IWebFormContext<RequestSchemaElementUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementUpdateAction(ContextCurrent, value.Model));
+        _isEditMode = false;
+    }
+
+    private void OnButtonEditCancel()
+    {
+        _isEditMode = false;
+    }
+
+    private void OnButtonDeleteClick()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementDeleteAction(ContextCurrent, new() { ID = SchemaElement.ID }));
+    }
+
+    private void OnButtonCloneClick()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementCloneAction(ContextCurrent, new() { ID = SchemaElement.ID }));
+    }
+
+}

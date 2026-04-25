@@ -11,7 +11,7 @@ public class HandlerSchemaDelete(IUnitOfWorkFactory serviceUoWFactory) : IReques
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        Guid result = await uow.Schema.Delete(request.ID);
+        Guid result = await uow.Schema.DeleteSchema(request.ID);
 
         await uow.Commit();
 

@@ -1,0 +1,22 @@
+@inherits BaseRequestForm<RequestSchemaElementCreate, ResponseSchemaElementCreate>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="RequestSchemaElementCreate" Context="Context" OnSubmit="ForwardSubmit">
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.SchemaIdentifier))" Description="@GetDescription(nameof(Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
+
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Context.Model.Name"/>
+
+        <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Context.Model.Note"/>
+
+        @ChildContent
+    </WebForm>
+</div>
+
+@code {
+
+    protected override WebFormContext<RequestSchemaElementCreate> CreateContext()
+    {
+        return new(new() { TitleParameterTextID = Guid.Parse("3C8A9DC6-C617-1B50-8AB9-1F1310ED112C") });
+    }
+
+}

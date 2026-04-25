@@ -1,25 +1,33 @@
-@inject IState<FeatureSchemaElementListState> StateElement
-@inject IState<FeatureTextState> StateText
+@inject IState<FeatureSchemaElementState> StateContext
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
-            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Elements</DynamicHTMLTag>
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Element list</DynamicHTMLTag>
+            <NavLink href="@Link">
+                <MaterialIcon Icon="link"/>
+            </NavLink>
         </Header>
         <Content>
             <table>
                 <tr>
                     <th>Name</th>
                     <th>Note</th>
+                    <th>Schema Identifier</th>
+                    <th>Title</th>
+                    <th>Description</th>
                     <th>Created at</th>
                 </tr>
-                @foreach (EntitySchemaElement item in ElementList)
+                @foreach (EntitySchemaElement item in List)
                 {
                     <tr>
                         <th>@item.Name</th>
                         <th>@item.Note</th>
+                        <th>@item.SchemaIdentifier</th>
+                        <th>@item.TitleTextParameter?.Name</th>
+                        <th>@item.DescriptionTextParameter?.Name</th>
                         <th>@item.TimeCreated</th>
                     </tr>
                 }
@@ -43,17 +51,15 @@
 
     private bool _isCollapsed = true;
 
-    private bool IsLoading => StateElement.Value.IsKeyLoading(ID) || (StateElement.Value.Cache.ContainsKey(ID) && StateText.Value.IsScopeLoading(GetComponentName()));
-    private IReadOnlyList<EntitySchemaElement> ElementList => StateElement.Value.Cache.TryGetValue(ID, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];
+    private string Link => $"/schema/{ID}/element";
+    private bool IsLoading => StateContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaElement> List => StateContext.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];
 
     private void SetCollapsed(bool value)
     {
         _isCollapsed = value;
-        if (_isCollapsed) return;
-
-        if (StateElement.Value.Cache.ContainsKey(ID) || StateElement.Value.IsKeyLoading(ID)) return;
-
-        Dispatcher.Dispatch(new FeatureSchemaElementListReducers.LoadSchemaElementListAction(ID));
+        if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ContextCurrent) || IsLoading) return;
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementListAction(ContextCurrent, new()));
     }
 
 }
