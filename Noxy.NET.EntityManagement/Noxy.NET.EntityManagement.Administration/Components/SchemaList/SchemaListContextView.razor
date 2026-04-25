@@ -1,14 +1,11 @@
-@inject IState<FeatureSchemaState> StateSchema
 @inject IState<FeatureSchemaContextState> StateContext
-@inject IState<FeatureTextState> StateText
 @inject IDispatcher Dispatcher
-@inject TextService TextService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
-            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Elements</DynamicHTMLTag>
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Context list</DynamicHTMLTag>
         </Header>
         <Content>
             <table>

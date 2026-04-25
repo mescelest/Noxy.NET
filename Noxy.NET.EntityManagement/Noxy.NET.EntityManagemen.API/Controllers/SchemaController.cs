@@ -17,6 +17,12 @@ public class SchemaController(IMediator mediator) : ControllerBase
         return await mediator.Send(new QuerySchemaList(request));
     }
 
+    [HttpGet("Context")]
+    public async Task<ActionResult<ResponseSchemaContextList>> GetSchemaContextList([FromQuery] RequestSchemaContextList request)
+    {
+        return await mediator.Send(new QuerySchemaContextList(request));
+    }
+
     [HttpGet("Element")]
     public async Task<ActionResult<ResponseSchemaElementList>> GetSchemaParameterList([FromQuery] RequestSchemaElementList request)
     {

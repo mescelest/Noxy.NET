@@ -1,6 +1,4 @@
 @inject IState<FeatureSchemaState> StateSchema
-@inject IState<FeatureSchemaElementListState> StateElement
-@inject IState<FeatureTextState> StateText
 @inject IDispatcher Dispatcher
 @inject TextService TextService
 @inherits FluxorElementComponent
@@ -47,7 +45,8 @@
         </FormSchemaUpdate>
     }
 
-    <SchemaListElementView ID="Schema.ID" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+    <SchemaListElementView ID="@Schema.ID" Context="@ContextCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+    <SchemaListContextView ID="@Schema.ID" Context="@ContextCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
 
 </div>
 

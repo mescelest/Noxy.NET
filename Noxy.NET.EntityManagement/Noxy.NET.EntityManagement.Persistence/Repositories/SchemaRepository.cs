@@ -21,12 +21,12 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 {
     public async Task<Guid> GetCurrentSchemaID()
     {
-        return await Context.Schema.AsNoTracking().Where(x => x.IsActive).OrderByDescending(x => x.TimeActivated).Select(x => x.ID).SingleAsync();
+        return await Context.Schema.AsNoTracking().Where(x => x.IsActive).Select(x => x.ID).SingleAsync();
     }
 
     public async Task<EntitySchema> GetCurrentSchema()
     {
-        return MapperT2E.Map(await Context.Schema.AsNoTracking().OrderByDescending(x => x.TimeActivated).SingleAsync(x => x.IsActive));
+        return MapperT2E.Map(await Context.Schema.AsNoTracking().SingleAsync(x => x.IsActive));
     }
 
     public async Task<EntitySchema> GetSchemaByID(Guid id)
@@ -89,11 +89,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return MapperT2E.Map(await Context.SchemaPropertyDecimal.AsNoTracking().SingleAsync(x => x.ID == id));
     }
 
-    public async Task<EntitySchemaPropertyImage> GetSchemaPropertyImageByID(Guid id)
-    {
-        return MapperT2E.Map(await Context.SchemaPropertyImage.AsNoTracking().SingleAsync(x => x.ID == id));
-    }
-
+    public async Task<EntitySchemaPropertyImage> GetSchemaPropertyImageByID(Guid id) => await GetEntityByID<TableSchemaPropertyImage, EntitySchemaPropertyImage>(id, MapperT2E.Map);
     public async Task<EntitySchemaPropertyInteger> GetSchemaPropertyIntegerByID(Guid id) => await GetEntityByID<TableSchemaPropertyInteger, EntitySchemaPropertyInteger>(id, MapperT2E.Map);
     public async Task<EntitySchemaPropertyString> GetSchemaPropertyStringByID(Guid id) => await GetEntityByID<TableSchemaPropertyString, EntitySchemaPropertyString>(id, MapperT2E.Map);
 

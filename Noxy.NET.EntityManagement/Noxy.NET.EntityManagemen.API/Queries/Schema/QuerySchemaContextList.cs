@@ -4,9 +4,9 @@ using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.API.Queries.Schema;
 
-public class QuerySchemaContextList(Guid schemaID, RequestSchemaContextList request) : IRequest<ResponseSchemaContextList>
+public class QuerySchemaContextList(RequestSchemaContextList request) : IRequest<ResponseSchemaContextList>
 {
-    public Guid SchemaID { get; } = schemaID;
+    public Guid? SchemaID { get; } = request.SchemaID;
     public string? Search { get; } = request.Search;
     public int? PageNumber { get; } = request.PageNumber;
     public int? PageSize { get; } = request.PageSize;

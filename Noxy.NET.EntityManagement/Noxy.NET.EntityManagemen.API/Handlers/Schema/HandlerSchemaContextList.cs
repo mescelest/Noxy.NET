@@ -14,6 +14,7 @@ public class HandlerSchemaContextList(IUnitOfWorkFactory serviceUoWFactory) : IR
 
         List<EntitySchemaContext> result = await uow.Schema.GetSchemaContextList(new()
         {
+            SchemaID = await uow.Schema.GetCurrentSchemaID(),
             Search = request.Search,
             PageSize = request.PageSize ?? 10,
             PageNumber = request.PageNumber ?? 0,
