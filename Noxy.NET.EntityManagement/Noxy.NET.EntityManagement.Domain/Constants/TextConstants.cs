@@ -44,6 +44,11 @@ public static class TextConstants
     public const string LabelParameterSystem = "Label:ParameterSystem";
     public const string LabelParameterText = "Label:ParameterText";
     public const string LabelCulture = "Label:Culture";
+    public const string LabelSchemaIdentifier = "Label:SchemaIdentifier";
+    public const string LabelName = "Label:Name";
+    public const string LabelNote = "Label:Note";
+    public const string LabelTitle = "Label:Title";
+    public const string LabelDescription = "Label:Description";
     public const string LabelTimeApproved = "Label:TimeApproved";
     public const string LabelTimeCreated = "Label:TimeCreated";
     public const string LabelTimeEffective = "Label:TimeEffective";

@@ -22,6 +22,18 @@ body {
     overflow: auto;
 }
 
+a {
+    display: flex;
+    color: inherit;
+    text-decoration: none;
+    transition: opacity var(--animation-length-long) ease-in-out;
+    opacity: 0.75;
+}
+
+a:hover {
+    opacity: 1;
+}
+
 h1 {
     font-size: var(--size-text-h1);
 }

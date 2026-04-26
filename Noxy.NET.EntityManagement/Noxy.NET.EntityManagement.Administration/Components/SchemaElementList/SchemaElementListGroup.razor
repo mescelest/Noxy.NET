@@ -5,12 +5,14 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="header">
-        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@SchemaElement.Name</DynamicHTMLTag>
-        <NavLink href="@Link">
-            <MaterialIcon Icon="link"/>
-        </NavLink>
-        <div class="action-list">
+        <div class="title">
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@SchemaElement.Name</DynamicHTMLTag>
+            <NavLink href="@Link">
+                <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
+            </NavLink>
+        </div>
 
+        <div class="action-list">
             @if (Schema.TimeActivated == null)
             {
                 <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
@@ -66,6 +68,7 @@
 
     private bool _isEditMode;
 
+    private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
     private string Link => $"/schema/{Schema.ID}/element/{SchemaElement.ID}";
     private bool IsLoadingUpdate => StateSchemaElement.Value.TryGetLoading(ContextCurrent, FeatureSchemaElementActionKind.Update, out bool value) && value;
 

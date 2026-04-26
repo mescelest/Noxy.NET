@@ -14,6 +14,21 @@
     column-gap: var(--size-gap-xl);
 }
 
+.left {
+
+}
+
+.center {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: row wrap;
+    column-gap: var(--size-gap-md);
+}
+
+.right {
+
+}
+
 .content {
     display: flex;
     flex: 1 1 auto;

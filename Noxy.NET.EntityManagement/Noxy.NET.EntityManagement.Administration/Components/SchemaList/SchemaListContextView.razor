@@ -1,4 +1,5 @@
 @inject IState<FeatureSchemaContextState> StateContext
+@inject TextService TextService
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
@@ -8,27 +9,27 @@
             <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Context list</DynamicHTMLTag>
         </Header>
         <Content>
-            <table>
-                <tr>
-                    <th>Name</th>
-                    <th>Note</th>
-                    <th>Schema Identifier</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Created at</th>
-                </tr>
+            <div class="grid">
+                <div class="grid-header">
+                    <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelName)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelNote)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelTitle)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelDescription)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelTimeCreated)</strong>
+                </div>
                 @foreach (EntitySchemaContext item in List)
                 {
-                    <tr>
-                        <th>@item.Name</th>
-                        <th>@item.Note</th>
-                        <th>@item.SchemaIdentifier</th>
-                        <th>@item.TitleTextParameter?.Name</th>
-                        <th>@item.DescriptionTextParameter?.Name</th>
-                        <th>@item.TimeCreated</th>
-                    </tr>
+                    <div class="grid-row">
+                        <span>@item.SchemaIdentifier</span>
+                        <span>@item.Name</span>
+                        <span>@item.Note</span>
+                        <span>@item.TitleTextParameter?.Name</span>
+                        <span>@item.DescriptionTextParameter?.Name</span>
+                        <span>@item.TimeCreated</span>
+                    </div>
                 }
-            </table>
+            </div>
         </Content>
     </Collapsible>
 </div>

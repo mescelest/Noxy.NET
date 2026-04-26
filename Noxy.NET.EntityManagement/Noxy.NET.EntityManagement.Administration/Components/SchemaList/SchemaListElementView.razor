@@ -1,37 +1,40 @@
 @inject IState<FeatureSchemaElementState> StateContext
+@inject TextService TextService
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
-            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Element list</DynamicHTMLTag>
-            <NavLink href="@Link">
-                <MaterialIcon Icon="link"/>
-            </NavLink>
+            <div class="title">
+                <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Element list</DynamicHTMLTag>
+                <NavLink href="@Link">
+                    <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
+                </NavLink>
+            </div>
         </Header>
         <Content>
-            <table>
-                <tr>
-                    <th>Name</th>
-                    <th>Note</th>
-                    <th>Schema Identifier</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Created at</th>
-                </tr>
+            <div class="grid">
+                <div class="grid-header">
+                    <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelName)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelNote)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelTitle)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelDescription)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelTimeCreated)</strong>
+                </div>
                 @foreach (EntitySchemaElement item in List)
                 {
-                    <tr>
-                        <th>@item.Name</th>
-                        <th>@item.Note</th>
-                        <th>@item.SchemaIdentifier</th>
-                        <th>@item.TitleTextParameter?.Name</th>
-                        <th>@item.DescriptionTextParameter?.Name</th>
-                        <th>@item.TimeCreated</th>
-                    </tr>
+                    <div class="grid-row">
+                        <span>@item.SchemaIdentifier</span>
+                        <span>@item.Name</span>
+                        <span>@item.Note</span>
+                        <span>@item.TitleTextParameter?.Name</span>
+                        <span>@item.DescriptionTextParameter?.Name</span>
+                        <span>@item.TimeCreated</span>
+                    </div>
                 }
-            </table>
+            </div>
         </Content>
     </Collapsible>
 </div>
@@ -51,6 +54,7 @@
 
     private bool _isCollapsed = true;
 
+    private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
     private string Link => $"/schema/{ID}/element";
     private bool IsLoading => StateContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
     private IReadOnlyList<EntitySchemaElement> List => StateContext.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];

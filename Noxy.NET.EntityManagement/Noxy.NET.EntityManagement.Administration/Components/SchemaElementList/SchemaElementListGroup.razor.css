@@ -1,4 +1,4 @@
-.SchemaListGroup {
+.SchemaElementListGroup {
     display: flex;
     flex: 1 1 auto;
     flex-flow: column;
@@ -15,7 +15,14 @@
     row-gap: var(--size-gap-md);
     column-gap: var(--size-gap-md);
     align-items: center;
-    justify-content: space-between;
+}
+
+.title {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: row wrap;
+    column-gap: var(--size-gap-sm);
+    align-items: center;
 }
 
 .action-list {

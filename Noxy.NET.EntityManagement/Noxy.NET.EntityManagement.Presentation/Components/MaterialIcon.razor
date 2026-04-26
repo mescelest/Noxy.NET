@@ -1,6 +1,6 @@
 @inherits ElementComponent
 
-<i class="@CssClass" style="GetStyle()">
+<i class="@CssClass" style="@GetStyle()">
     @IconCurrent
 </i>
 
@@ -12,7 +12,7 @@
 
     [Parameter]
     public string? Size { get; set; }
-    private string SizeCurrent => Size ?? "24px";
+    private string SizeCurrent => Size ?? "var(--size-text-body, 16px)";
 
     [Parameter]
     public string? Color { get; set; }
@@ -24,15 +24,15 @@
 
     protected override string CssClass => CombineCssClass(base.CssClass, GetComponentClass(), VariantCurrent.ToText());
 
-    private Dictionary<string, object> GetStyle()
+    private string GetStyle()
     {
         Dictionary<string, object> style = new()
         {
-                ["font-size"] = SizeCurrent,
-                ["color"] = ColorCurrent
+            ["font-size"] = SizeCurrent,
+            ["color"] = ColorCurrent
         };
 
-        return style;
+        return string.Join(";", style.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
     }
 
 }

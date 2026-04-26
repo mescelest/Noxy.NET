@@ -68,6 +68,8 @@
 }
 
 :root {
+    --color-background-light: #ffffff;
+    --color-background-dark: #000000;
     --color-background-none: #4d4Ad3;
     --color-background-highlight: #0073ec;
     --color-background-info: #289ed9;
@@ -79,65 +81,71 @@
 }
 
 :root {
-    /* TEMP FOR WHEN YOU ADD DARK MODE OKAY? */
-    --color-mixin-primary: #ffffff;
-    --color-mixin-complementary: #000000;
-
-    --color-text-button: #ffffff;
-    --color-background-button: #767676;
-    --color-background-messagebox: #767676;
-    --color-focus-button: #ffffff;
-    --color-focus-control: #ffffff;
+    --color-text-light: #ffffff;
+    --color-text-dark: #000000;
+    --color-text-none: #4d4Ad3;
+    --color-text-highlight: #0073ec;
+    --color-text-info: #289ed9;
+    --color-text-success: #23883d;
+    --color-text-warning: #d97f00;
+    --color-text-notice: #a948dd;
+    --color-text-error: #e42b21;
+    --color-text-disabled: #4d4d4d;
 }
 
-
-/* Color mix-in */
-:root[theme="Light"] {
-    --color-mixin-primary: #ffffff;
-    --color-mixin-complementary: #000000;
+:root {
+    --color-background-primary: var(--color-background-light);
+    --color-background-complementary: var(--color-background-dark);
+    --color-text-button: var(--color-text-light);
 }
 
-:root[theme="Dark"] {
-    --color-mixin-primary: #000000;
-    --color-mixin-complementary: #ffffff;
-}
+/*!* Color mix-in *!*/
+/*:root[theme="Light"] {*/
+/*    --color-mixin-primary: #ffffff;*/
+/*    --color-mixin-complementary: #000000;*/
+/*}*/
 
-/* Color background */
-:root[theme="Light"] {
-    --color-background-primary: #ffffff;
-    --color-background-backdrop: #f5f5f5;
-    --color-background-control: #f5f5f5;
-}
+/*:root[theme="Dark"] {*/
+/*    --color-mixin-primary: #000000;*/
+/*    --color-mixin-complementary: #ffffff;*/
+/*}*/
 
-:root[theme="Dark"] {
-    --color-background-primary: #1e1e1e;
-    --color-background-backdrop: #121212;
-    --color-background-control: #292929;
-}
+/*!* Color background *!*/
+/*:root[theme="Light"] {*/
+/*    --color-background-primary: #ffffff;*/
+/*    --color-background-backdrop: #f5f5f5;*/
+/*    --color-background-control: #f5f5f5;*/
+/*}*/
 
-/* Color text */
-:root[theme="Light"] {
-    --color-text-header: #000000;
-    --color-text-body: #EBEBF5;
-    --color-text-control: #ffffff;
-}
+/*:root[theme="Dark"] {*/
+/*    --color-background-primary: #1e1e1e;*/
+/*    --color-background-backdrop: #121212;*/
+/*    --color-background-control: #292929;*/
+/*}*/
 
-:root[theme="Dark"] {
-    --color-text-header: #ffffff;
-    --color-text-body: #ebebeb;
-    --color-text-control: #ffffff;
-    --color-text-disabled: #c8c8c8;
-    --color-text-label: #b4b4b4;
-}
+/*!* Color text *!*/
+/*:root[theme="Light"] {*/
+/*    --color-text-header: #000000;*/
+/*    --color-text-body: #EBEBF5;*/
+/*    --color-text-control: #ffffff;*/
+/*}*/
 
-/* Color border */
-:root[theme="Light"] {
-    --color-border-button: #000000;
-    --color-border-focus: Highlight;
-    --color-border-control: #545454;
-}
+/*:root[theme="Dark"] {*/
+/*    --color-text-header: #ffffff;*/
+/*    --color-text-body: #ebebeb;*/
+/*    --color-text-control: #ffffff;*/
+/*    --color-text-disabled: #c8c8c8;*/
+/*    --color-text-label: #b4b4b4;*/
+/*}*/
 
-:root[theme="Dark"] {
-    --color-border-focus: #ccc;
-    --color-border-control: #545454;
-}
+/*!* Color border *!*/
+/*:root[theme="Light"] {*/
+/*    --color-border-button: #000000;*/
+/*    --color-border-focus: Highlight;*/
+/*    --color-border-control: #545454;*/
+/*}*/
+
+/*:root[theme="Dark"] {*/
+/*    --color-border-focus: #ccc;*/
+/*    --color-border-control: #545454;*/
+/*}*/

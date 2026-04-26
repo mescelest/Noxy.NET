@@ -5,10 +5,12 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="header">
-        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@Schema.Name</DynamicHTMLTag>
-        <NavLink href="@Link">
-            <MaterialIcon Icon="link"/>
-        </NavLink>
+        <div class="title">
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@Schema.Name</DynamicHTMLTag>
+            <NavLink href="@Link">
+                <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
+            </NavLink>
+        </div>
         <div class="action-list">
             @if (!Schema.IsActive)
             {
@@ -69,6 +71,7 @@
 
     private bool _isEditMode;
 
+    private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
     private string Link => $"/schema/{Schema.ID}";
     private bool IsLoadingUpdate => StateSchema.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Update, out bool value) && value;
 
