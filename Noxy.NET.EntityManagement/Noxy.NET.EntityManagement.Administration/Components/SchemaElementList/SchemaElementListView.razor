@@ -7,9 +7,11 @@
     <Loader Loading="IsLoading">
         @if (Schema != null)
         {
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of elements for @Schema?.Name</DynamicHTMLTag>
+
             @foreach (EntitySchemaElement item in List)
             {
-                <SchemaElementListGroup Schema="Schema" SchemaElement="item" Context="@ContextCurrent" HeaderLevel="HeaderLevelCurrent"/>
+                <SchemaElementListGroup Schema="Schema" SchemaElement="item" Context="@ContextCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
             }
         }
     </Loader>

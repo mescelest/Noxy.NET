@@ -4,14 +4,20 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <Loader Loading="IsLoading">
+        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schemas</DynamicHTMLTag>
+
         @foreach (EntitySchema item in List)
         {
-            <SchemaListGroup Schema="item" Context="@ContextCurrent" HeaderLevel="HTMLHeaderLevelEnum.H3"/>
+            <SchemaListGroup Schema="item" Context="@ContextCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
         }
     </Loader>
 </div>
 
 @code {
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
 
     [Parameter]
     public string? Context { get; set; }

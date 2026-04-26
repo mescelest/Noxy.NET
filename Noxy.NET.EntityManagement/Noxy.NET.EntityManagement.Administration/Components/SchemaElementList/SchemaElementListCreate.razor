@@ -4,6 +4,7 @@
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new element</DynamicHTMLTag>
     <FormSchemaElementCreate OnSubmit="Submit">
         <div class="action-list">
             <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
@@ -18,6 +19,10 @@
     [Parameter]
     public string? Context { get; set; }
     private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
 
     private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
 

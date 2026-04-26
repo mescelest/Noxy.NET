@@ -19,7 +19,7 @@ public static class WebFormFieldStateEnumExtensions
     {
         return value switch
         {
-            StatusEnum.None => "",
+            StatusEnum.None => "none",
             StatusEnum.Error => "error",
             StatusEnum.Warning => "warning",
             StatusEnum.Success => "success",

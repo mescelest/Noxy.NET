@@ -3,6 +3,7 @@
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Search for an element</DynamicHTMLTag>
     <FormSchemaElementList SchemaID="SchemaID" OnSubmit="Submit">
         <div class="action-list">
             <Button Status="StatusEnum.Warning" type="button">
@@ -23,6 +24,10 @@
     [Parameter]
     public string? Context { get; set; }
     private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
 
     private void Submit(IWebFormContext<RequestSchemaElementList> value)
     {

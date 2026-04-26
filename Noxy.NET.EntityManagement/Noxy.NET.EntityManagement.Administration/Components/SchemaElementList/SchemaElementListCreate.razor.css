@@ -1,12 +1,14 @@
-.SchemaListFilter {
-
+.SchemaElementListCreate {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
 }
 
 .action-list {
     display: flex;
     flex: 1 1 auto;
     flex-flow: row;
-    justify-content: flex-end;
     column-gap: var(--size-gap-md);
 }
 

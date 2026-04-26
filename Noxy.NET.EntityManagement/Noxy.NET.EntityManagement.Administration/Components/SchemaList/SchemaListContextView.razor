@@ -6,7 +6,12 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
-            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Context list</DynamicHTMLTag>
+            <div class="title">
+                <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Context list</DynamicHTMLTag>
+                <NavLink href="@Link">
+                    <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
+                </NavLink>
+            </div>
         </Header>
         <Content>
             <div class="grid">
@@ -49,6 +54,8 @@
 
     private bool _isCollapsed = true;
 
+    private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
+    private string Link => $"/schema/{ID}/context";
     private bool IsLoading => StateContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
     private IReadOnlyList<EntitySchemaContext> List => StateContext.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaContext>? value) ? value : [];
 

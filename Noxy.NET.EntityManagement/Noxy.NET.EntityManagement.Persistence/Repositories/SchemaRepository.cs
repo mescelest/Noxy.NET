@@ -216,7 +216,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     {
         TableSchemaElement entity = await Context.SchemaElement.AsNoTracking().FirstAsync(x => x.ID == id);
         entity = entity.Clone();
-        entity.SchemaIdentifier = entity.SchemaIdentifier + "#" + Guid.NewGuid().ToString("N");
+        entity.SchemaIdentifier = Guid.NewGuid().ToString("N");
         await Context.SchemaElement.AddAsync(entity);
 
         return MapperT2E.Map(entity);

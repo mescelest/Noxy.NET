@@ -4,7 +4,7 @@
     flex-flow: column;
     row-gap: var(--size-gap-md);
     padding: var(--size-gap-md);
-    background-color: #efefef;
+    background-color: color-mix(in srgb, transparent 96%, var(--color-mixin-complementary, #000000));
     border-radius: var(--size-border-radius-lg);
 }
 
@@ -21,7 +21,7 @@
     display: flex;
     flex: 1 1 auto;
     flex-flow: row wrap;
-    column-gap: var(--size-gap-sm);
+    column-gap: var(--size-gap-xs);
     align-items: center;
 }
 

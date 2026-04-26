@@ -6,13 +6,13 @@
 <div class="@CssClass">
     <MagazineFrame>
         <Left>
-            <SchemaElementListFilter Context="@Context" SchemaID="ID"/>
+            <SchemaElementListFilter Context="@Context" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
         </Left>
         <Content>
-            <SchemaElementListView Context="@Context" SchemaID="ID"/>
+            <SchemaElementListView Context="@Context" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
         </Content>
         <Right>
-            <SchemaElementListCreate Context="@Context"/>
+            <SchemaElementListCreate Context="@Context" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
         </Right>
     </MagazineFrame>
 </div>

@@ -9,13 +9,14 @@
 .header {
     display: grid;
     grid-template-columns: max-content 1fr max-content;
-    padding: var(--size-gap-md);
-    padding-bottom: 0;
+    align-items: center;
+    padding: var(--size-gap-xs) var(--size-gap-xl);
     column-gap: var(--size-gap-xl);
+    border-bottom: var(--size-border-width-md) solid color-mix(in srgb, transparent 80%, var(--color-background-complementary, #000000));
 }
 
 .left {
-
+    font-size: var(--size-text-h3);
 }
 
 .center {
