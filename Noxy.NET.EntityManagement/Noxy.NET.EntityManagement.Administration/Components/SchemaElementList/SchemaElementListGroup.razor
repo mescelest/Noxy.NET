@@ -26,12 +26,30 @@
 
     @if (!_isEditMode)
     {
-        <div>@SchemaElement.SchemaIdentifier</div>
-        <div>@SchemaElement.Name</div>
-        <div>@SchemaElement.Note</div>
-        <div>@SchemaElement.TimeCreated</div>
-        <div>@SchemaElement.TitleTextParameterID</div>
-        <div>@SchemaElement.DescriptionTextParameterID</div>
+        <div>
+            <strong>Schema Identifier:</strong>
+            @SchemaElement.SchemaIdentifier
+        </div>
+        <div>
+            <strong>Name:</strong>
+            @SchemaElement.Name
+        </div>
+        <div>
+            <strong>Note:</strong>
+            @SchemaElement.Note
+        </div>
+        <div>
+            <strong>Created at:</strong>
+            @SchemaElement.TimeCreated
+        </div>
+        <div>
+            <strong>Title:</strong>
+            @SchemaElement.TitleTextParameter?.Name
+        </div>
+        <div>
+            <strong>Description:</strong>
+            @SchemaElement.DescriptionTextParameter?.Name
+        </div>
     }
     else
     {

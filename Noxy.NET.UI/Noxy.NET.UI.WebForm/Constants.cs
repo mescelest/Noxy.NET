@@ -7,6 +7,4 @@ internal static class Constants
 
     public const string InteropNameUICommon = "NoxyNETUI";
     public const string InteropNameUIWebForm = "NoxyNETUIWebForm";
-
-    public const int OnInputDelay = 500;
 }

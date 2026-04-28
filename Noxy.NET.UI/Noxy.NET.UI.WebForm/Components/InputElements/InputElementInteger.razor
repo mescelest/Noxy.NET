@@ -1,6 +1,6 @@
 ﻿@inherits BaseInputTextual<int?>
 
-<input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="tel" size="@SizeCurrent" value="@Value" @onchange="OnValueChange"/>
+<input @attributes="AdditionalAttributes" @ref="InputRef" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="tel" size="@SizeCurrent" value="@Value" @onchange="OnValueChange"/>
 
 @code {
 
@@ -29,7 +29,7 @@
         int? next = int.TryParse(value, out int parsed) ? parsed : null;
 
         NotifyChange(next);
-        Module?.InvokeVoidAsync("NoxyNETUIWebForm.SetInputValue", UUIDString, next?.ToString());
+        InteropModule?.InvokeVoidAsync("NoxyNETUIWebForm.SetInputValue", InputRef, next?.ToString());
     }
 
 }

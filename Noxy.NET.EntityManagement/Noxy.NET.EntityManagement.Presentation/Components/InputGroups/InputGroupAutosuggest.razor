@@ -1,0 +1,34 @@
+﻿@typeparam TOption
+@inherits FluxorInputGroupComponent<TOption>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="@ErrorList">
+        <InputElementAutosuggest @attributes="InputAttributes" TOption="TOption" OptionSet="OptionList" ID="@IDCurrent" Name="@GetName()" Loading="Loading" Size="Size" DebounceDelay="DebounceDelay" NoResultText="@NoResultsText"
+                                 DisplaySelector="DisplaySelector" OnSearch="OnSearch" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+    </TemplateInputGroup>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public HashSet<TOption> OptionList { get; set; }
+
+    [Parameter]
+    public int? Size { get; set; }
+
+    [Parameter]
+    public int? DebounceDelay { get; set; }
+
+    [Parameter]
+    public bool? Loading { get; set; }
+
+    [Parameter]
+    public string? NoResultsText { get; set; }
+
+    [Parameter, EditorRequired]
+    public required EventCallback<string> OnSearch { get; set; }
+
+    [Parameter]
+    public Func<TOption?, string>? DisplaySelector { get; set; }
+
+}

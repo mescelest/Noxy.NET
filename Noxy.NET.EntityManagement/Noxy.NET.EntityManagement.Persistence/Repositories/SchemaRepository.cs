@@ -165,7 +165,12 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<EntitySchemaElement> GetSchemaElementByID(Guid id)
     {
-        return MapperT2E.Map(await Context.SchemaElement.AsNoTracking().SingleAsync(x => x.ID == id));
+        TableSchemaElement result = await Context.SchemaElement
+            .AsNoTracking()
+            .Include(x => x.TitleTextParameter)
+            .Include(x => x.DescriptionTextParameter)
+            .SingleAsync(x => x.ID == id);
+        return MapperT2E.Map(result);
     }
 
     public async Task<List<EntitySchemaElement>> GetSchemaElementList(FilterSchemaElementList filter)
@@ -175,6 +180,8 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
 
         List<TableSchemaElement> result = await query
+            .Include(x => x.TitleTextParameter)
+            .Include(x => x.DescriptionTextParameter)
             .OrderBy(x => x.Name)
             .Skip(filter.PageNumber * filter.PageSize)
             .Take(filter.PageSize)
@@ -237,7 +244,11 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<EntitySchemaContext> GetSchemaContextByID(Guid id)
     {
-        return MapperT2E.Map(await Context.SchemaContext.AsNoTracking().SingleAsync(x => x.ID == id));
+        return MapperT2E.Map(await Context.SchemaContext
+            .AsNoTracking()
+            .Include(x => x.TitleTextParameter)
+            .Include(x => x.DescriptionTextParameter)
+            .SingleAsync(x => x.ID == id));
     }
 
     public async Task<EntitySchemaContext> Create(EntitySchemaContext entity)

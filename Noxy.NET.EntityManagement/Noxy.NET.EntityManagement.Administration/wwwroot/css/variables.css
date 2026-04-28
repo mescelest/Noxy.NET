@@ -94,6 +94,7 @@
 }
 
 :root {
+    --color-text-primary: var(--color-text-light);
     --color-background-primary: var(--color-background-light);
     --color-background-complementary: var(--color-background-dark);
     --color-text-button: var(--color-text-light);

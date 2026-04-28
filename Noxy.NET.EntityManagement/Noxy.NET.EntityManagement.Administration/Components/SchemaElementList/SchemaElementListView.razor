@@ -49,7 +49,7 @@
 
         if (List.Count == 0 && !IsLoadingElement)
         {
-            Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementListAction(ContextCurrent, new()));
+            Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementListAction(ContextCurrent, new() { SchemaID = SchemaID }));
         }
     }
 

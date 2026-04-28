@@ -8,7 +8,7 @@ public class NotEmptyAttribute : ValidationAttribute
     {
         if (value is Guid guid && guid == Guid.Empty)
         {
-            return new($"The field {validationContext.DisplayName} cannot be an empty GUID.");
+            return new($"The field {validationContext.DisplayName} cannot be an empty GUID.", [validationContext.MemberName ?? validationContext.DisplayName]);
         }
 
         return ValidationResult.Success;

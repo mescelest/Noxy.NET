@@ -3,7 +3,6 @@
     flex: 1 1 auto;
     flex-flow: column;
     overflow: auto;
-    row-gap: var(--size-gap-md);
 }
 
 .header {
@@ -35,5 +34,7 @@
     flex: 1 1 auto;
     flex-flow: column;
     padding-inline: var(--size-gap-md);
+    padding-top: var(--size-gap-md);
+    padding-bottom: calc(2.5 * var(--size-gap-huge));
     overflow: auto;
 }

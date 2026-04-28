@@ -6,15 +6,7 @@ namespace Noxy.NET.EntityManagement.Presentation.Abstractions;
 
 public abstract class FluxorElementComponent : ElementComponent, IDisposable
 {
-    private readonly List<IDisposable> _subscriptions = new();
-
-    public void Dispose()
-    {
-        foreach (IDisposable sub in _subscriptions) sub.Dispose();
-
-        _subscriptions.Clear();
-        GC.SuppressFinalize(this);
-    }
+    private readonly List<IDisposable> _subscriptions = [];
 
     protected override void OnInitialized()
     {
@@ -67,5 +59,13 @@ public abstract class FluxorElementComponent : ElementComponent, IDisposable
             _disposed = true;
             unsubscribe();
         }
+    }
+
+    public void Dispose()
+    {
+        foreach (IDisposable sub in _subscriptions) sub.Dispose();
+
+        _subscriptions.Clear();
+        GC.SuppressFinalize(this);
     }
 }

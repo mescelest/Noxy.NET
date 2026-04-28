@@ -1,0 +1,26 @@
+@inject IState<FeatureSchemaParameterState> State
+@inject IDispatcher Dispatcher
+@inherits FluxorInputGroupComponent<EntitySchemaParameterText?>
+
+<InputGroupAutosuggest Name="@Name" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" InputAttributes="@InputAttributes"
+                       TOption="EntitySchemaParameterText" OptionList="@TitleTextList" Loading="TitleLoading" NoResultsText="No text parameters match your search"
+                       DisplaySelector="@(c => c?.Name ?? "")" OnSearch="TitleSearchHandler" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+
+@code {
+
+    private string TitleContext => $"Autosuggest:{UUIDCode}";
+    private bool TitleLoading => State.Value.TryGetLoading(TitleContext, FeatureSchemaParameterActionKind.List, out bool loading) && loading;
+    private IReadOnlyList<EntitySchemaParameter.Discriminator> TitleList => State.Value.TryGetList(TitleContext, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) ? list : [];
+    private HashSet<EntitySchemaParameterText> TitleTextList => TitleList.Select(x => x.TextParameter).OfType<EntitySchemaParameterText>().ToHashSet();
+
+    private void TitleSearchHandler(string obj)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.SchemaParameterListAction(TitleContext, new()
+        {
+            PageSize = 10,
+            Search = obj,
+            ParameterType = [nameof(EntitySchemaParameterText)],
+        }));
+    }
+
+}

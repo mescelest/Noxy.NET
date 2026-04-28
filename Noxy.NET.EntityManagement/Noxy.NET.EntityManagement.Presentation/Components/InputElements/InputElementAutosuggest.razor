@@ -1,0 +1,275 @@
+@typeparam TOption
+@inherits BaseInput<TOption>
+@inject IJSRuntime JS
+
+<div @ref="_refComponent" class="@CssClass" @onclick="DropdownOpenClickHandler">
+    <input @ref="_refInput" id="@IDCurrent" class="input" autocomplete="off" name="@GetName()" size="@SizeCurrent" value="@TextCurrent"/>
+
+    @if (_isDropdownOpen)
+    {
+        <div class="dropdown">
+            @if (LoadingCurrent)
+            {
+                <div class="loading">Loading...</div>
+            }
+            else if (!HasMinLength && !string.IsNullOrWhiteSpace(MinLengthText))
+            {
+                <div class="no-results">@NoResultText</div>
+            }
+            else if (_cacheOptionList.Count > 0)
+            {
+                @for (int i = 0; i < _cacheOptionList.Count; i++)
+                {
+                    int index = i;
+                    TOption item = _cacheOptionList[index];
+                    bool selected = index == IndexSelected;
+
+                    <span class="option" selected="@selected" @onmousedown="() => Select(item)" @onmouseenter="() => SetIndexPreview(index)" @onmouseleave="() => SetIndexPreview(-1)">
+                        @GetDisplayText(item)
+                    </span>
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(NoResultText))
+            {
+                <div class="no-results">@NoResultText</div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+
+    private ElementReference _refComponent;
+    private ElementReference _refInput;
+    private IJSObjectReference? _autosuggestModule;
+    private DotNetObjectReference<InputElementAutosuggest<TOption>>? _refDotNet;
+
+    private TOption? _cacheValue;
+    private List<TOption> _cacheOptionList = [];
+    private HashSet<TOption> _cacheOptionSet = [];
+
+    private string? _textValue;
+    private string? _textSearch;
+    private string? _textPreview;
+    private bool _isDropdownOpen;
+    private int _indexPreview = -1;
+    private int _indexCurrent = -1;
+
+    [Parameter, EditorRequired]
+    public required HashSet<TOption> OptionSet { get; set; }
+
+    [Parameter]
+    public int? MinLength { get; set; }
+    private int MinLengthCurrent => MinLength ?? 2;
+    private bool HasMinLength => _textSearch?.Length >= MinLengthCurrent;
+
+    [Parameter]
+    public bool? Loading { get; set; }
+    private bool LoadingCurrent => Loading ?? false;
+
+    [Parameter]
+    public int? DebounceDelay { get; set; }
+    private int DebounceDelayCurrent => DebounceDelay ?? 500;
+
+    [Parameter]
+    public int? Size { get; set; }
+    private int SizeCurrent => Size ?? 40;
+
+    [Parameter, EditorRequired]
+    public required EventCallback<string> OnSearch { get; set; }
+
+    [Parameter]
+    public Func<TOption?, string>? DisplaySelector { get; set; }
+
+    [Parameter]
+    public string? MinLengthText { get; set; }
+
+    [Parameter]
+    public string? NoResultText { get; set; }
+
+    private string TextCurrent => _textPreview ?? _textSearch ?? _textValue ?? string.Empty;
+    private int IndexSelected => _indexPreview >= 0 ? _indexPreview : _indexCurrent;
+    private bool IsIndexValid => IndexSelected >= 0 && IndexSelected < _cacheOptionList.Count;
+
+    protected override async Task OnAfterFirstRenderAsync()
+    {
+        _refDotNet = DotNetObjectReference.Create(this);
+        _autosuggestModule = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Noxy.NET.EntityManagement.Presentation/Components/InputElements/InputElementAutosuggest.razor.js");
+        string[] listCallback = [nameof(OnArrowDown), nameof(OnArrowUp), nameof(OnEnterKey), nameof(OnEscapeKey), nameof(OnTabKey), nameof(OnBlur), nameof(OnValueInput)];
+        await _autosuggestModule.InvokeVoidAsync("RegisterAutosuggest", DebounceDelayCurrent, _refComponent, _refInput, _refDotNet, listCallback);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!_cacheOptionSet.SetEquals(OptionSet))
+        {
+            _cacheOptionSet = new(OptionSet);
+            _cacheOptionList = OptionSet.OrderBy(GetDisplayText).ToList();
+            _indexPreview = -1;
+            UpdateIndexCurrent();
+        }
+
+        if (!EqualityComparer<TOption>.Default.Equals(Value, _cacheValue))
+        {
+            _cacheValue = Value;
+            _textValue = GetDisplayText(Value);
+            _textPreview = null;
+            _textSearch = null;
+            _indexPreview = -1;
+            UpdateIndexCurrent();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnValueInput(string value)
+    {
+        _textSearch = value;
+        _textPreview = null;
+        _indexPreview = -1;
+        UpdateIndexCurrent();
+
+        if (MinLengthCurrent > _textSearch.Length)
+        {
+            _isDropdownOpen = false;
+            _indexCurrent = -1;
+        }
+        else
+        {
+            _isDropdownOpen = true;
+            await OnSearch.InvokeAsync(_textSearch);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnArrowDown()
+    {
+        _isDropdownOpen = true;
+
+        if (_cacheOptionList.Count > 0)
+        {
+            SetIndexPreview(IndexSelected >= _cacheOptionList.Count - 1 ? -1 : IndexSelected + 1);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnArrowUp()
+    {
+        _isDropdownOpen = true;
+
+        if (_cacheOptionList.Count > 0)
+        {
+            SetIndexPreview(IndexSelected < 0 ? _cacheOptionList.Count - 1 : IndexSelected - 1);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnEnterKey()
+    {
+        _isDropdownOpen = !_isDropdownOpen;
+
+        if (_isDropdownOpen)
+        {
+            Commit(IsIndexValid ? _cacheOptionList[IndexSelected] : default);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnEscapeKey()
+    {
+        _textSearch = null;
+        _textPreview = null;
+        _indexPreview = -1;
+        UpdateIndexCurrent();
+        _isDropdownOpen = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnTabKey()
+    {
+        _isDropdownOpen = false;
+
+        if (IsIndexValid)
+        {
+            Commit(_cacheOptionList[IndexSelected]);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnBlur()
+    {
+        _textSearch = null;
+        _textPreview = null;
+        _indexPreview = -1;
+        UpdateIndexCurrent();
+        _isDropdownOpen = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void DropdownOpenClickHandler()
+    {
+        if (_cacheOptionList.Count > 0)
+        {
+            _isDropdownOpen = true;
+        }
+    }
+
+    private string GetDisplayText(TOption? item)
+    {
+        return DisplaySelector is not null ? DisplaySelector(item) : item?.ToString() ?? "";
+    }
+
+    private void UpdateIndexCurrent()
+    {
+        string text = _textSearch ?? _textValue ?? string.Empty;
+
+        _indexCurrent = _cacheOptionList.FindIndex(item =>
+            string.Equals(GetDisplayText(item), text, StringComparison.CurrentCultureIgnoreCase));
+    }
+
+    private void SetIndexPreview(int index)
+    {
+        _indexPreview = Math.Clamp(index, -1, _cacheOptionList.Count - 1);
+        _textPreview = _indexPreview >= 0 ? GetDisplayText(_cacheOptionList[_indexPreview]) : null;
+    }
+
+    private void Commit(TOption? item)
+    {
+        NotifyChange(item);
+    }
+
+    private void Select(TOption? item)
+    {
+        _isDropdownOpen = false;
+        Commit(item);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_autosuggestModule != null)
+            {
+                await _autosuggestModule.InvokeVoidAsync("DeregisterAutosuggest", _refInput);
+                await _autosuggestModule.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Ignore
+        }
+
+        _refDotNet?.Dispose();
+    }
+
+}

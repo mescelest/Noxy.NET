@@ -5,7 +5,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new element</DynamicHTMLTag>
-    <FormSchemaElementCreate OnSubmit="Submit">
+    <FormSchemaElementCreate SchemaID="SchemaID" OnSubmit="Submit">
         <div class="action-list">
             <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
                 @TextService.Get(TextConstants.ButtonCreate)
@@ -15,6 +15,9 @@
 </div>
 
 @code {
+
+    [Parameter, EditorRequired]
+    public Guid SchemaID { get; set; }
 
     [Parameter]
     public string? Context { get; set; }

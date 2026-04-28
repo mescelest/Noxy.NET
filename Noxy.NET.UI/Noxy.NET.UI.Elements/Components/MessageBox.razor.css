@@ -3,9 +3,9 @@
     flex: 0 0 auto;
     flex-flow: column;
     row-gap: var(--size-gap-xs);
-    padding: var(--size-gap-sm);
+    padding: var(--size-gap-xs);
     font: var(--font-body);
-    color: var(--color-text-control, #000000);
+    color: var(--color-text-primary, #000000);
     border: var(--size-border-width-md, 2px) solid var(--color-background-messagebox);
     border-radius: var(--size-border-radius-md);
     background-color: color-mix(in srgb, var(--color-background-messagebox, #ffffff) 60%, var(--color-mixin-primary, #000000));

@@ -4,7 +4,7 @@
 
 <form @attributes="AdditionalAttributes" class="@CssClass" @onsubmit="SubmitHandler" @onsubmit:preventDefault>
 
-    <MessageBox MessageList="Context.GetFormErrorList()" Type="@StatusEnum.Error"/>
+    <MessageBox MessageList="Context.GetFormErrorList()" Status="@StatusEnum.Error"/>
 
     <CascadingValue Value="@Context" IsFixed="true">
         @ChildContent

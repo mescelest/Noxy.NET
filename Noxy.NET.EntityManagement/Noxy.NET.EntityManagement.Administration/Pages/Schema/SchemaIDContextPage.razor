@@ -1,7 +1,7 @@
-﻿@page "/Schema/{ID:guid}/Element"
+﻿@page "/Schema/{ID:guid}/Context"
 @inherits PageComponent
 
-<PageTitle>Administration | Element</PageTitle>
+<PageTitle>Administration | Context</PageTitle>
 
 <div class="@CssClass">
     <MagazineFrame>
@@ -12,7 +12,7 @@
             <SchemaElementListView Context="@Context" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
         </Content>
         <Right>
-            <SchemaElementListCreate Context="@Context" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+            <SchemaElementListCreate Context="@Context" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
         </Right>
     </MagazineFrame>
 </div>

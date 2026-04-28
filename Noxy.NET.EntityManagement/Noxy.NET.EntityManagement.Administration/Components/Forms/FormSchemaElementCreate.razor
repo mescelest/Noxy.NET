@@ -8,15 +8,29 @@
 
         <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Context.Model.Note"/>
 
+        <InputGroupAutosuggestTextParameter Name="@nameof(Model.TitleParameterTextID)" DisplayName="@GetDisplayName(nameof(Model.TitleParameterTextID))" Description="@GetDescription(nameof(Model.TitleParameterTextID))"
+                                            @bind-Value:get="_valueTitle" @bind-Value:set="SetValueTitle"/>
+
         @ChildContent
     </WebForm>
 </div>
 
 @code {
 
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    private EntitySchemaParameterText? _valueTitle;
+
     protected override WebFormContext<RequestSchemaElementCreate> CreateContext()
     {
-        return new(new() { TitleParameterTextID = Guid.Parse("3C8A9DC6-C617-1B50-8AB9-1F1310ED112C") });
+        return new(new() { SchemaID = SchemaID });
+    }
+
+    private void SetValueTitle(EntitySchemaParameterText? obj)
+    {
+        Context.Model.TitleParameterTextID = obj?.ID ?? Guid.Empty;
+        _valueTitle = obj;
     }
 
 }

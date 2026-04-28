@@ -139,7 +139,7 @@ public static class FeatureSchemaElementReducers
     public record SchemaElementFailedAction(string Context, FeatureSchemaElementActionKind Kind, string Error);
 }
 
-public class FeatureSchemaElementListEffects(APIHttpClient client, IState<FeatureSchemaElementState> state)
+public class FeatureSchemaElementEffects(APIHttpClient client, IState<FeatureSchemaElementState> state)
 {
     [EffectMethod]
     public Task Handle(SchemaElementListAction action, IDispatcher dispatcher)
