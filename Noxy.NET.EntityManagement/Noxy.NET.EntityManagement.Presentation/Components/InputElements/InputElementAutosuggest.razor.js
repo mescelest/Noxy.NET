@@ -5,22 +5,33 @@ export function RegisterAutosuggest(delay, component, input, refDotNet, listCall
     input._delay = delay;
     input._callback = {ArrowDown, ArrowUp, Enter, Escape, Tab, OnBlur, OnValueInput};
     input._clickOutsideHandler = function (e) {
-        if (!component.contains(e.target) && component.contains(document.activeElement)) {
+        if (input._ref && input._callback && !component.contains(e.target) && component.contains(document.activeElement)) {
             input._ref.invokeMethodAsync(input._callback.OnBlur);
         }
     };
 
     input.addEventListener("keydown", HandleKeyDown);
-    input.addEventListener("input", HandleInput)
+    input.addEventListener("input", HandleInput);
     document.addEventListener("mousedown", input._clickOutsideHandler);
 }
 
 export function DeregisterAutosuggest(element) {
     element.removeEventListener("keydown", HandleKeyDown);
+    element.removeEventListener("input", HandleInput);
 
     if (element._clickOutsideHandler) {
         document.removeEventListener("mousedown", element._clickOutsideHandler);
     }
+
+    if (element._timeout) {
+        clearTimeout(element._timeout);
+    }
+
+    element._ref = null;
+    element._callback = null;
+    element._clickOutsideHandler = null;
+    element._timeout = null;
+    element._delay = null;
 }
 
 function HandleInput(event) {
@@ -29,27 +40,51 @@ function HandleInput(event) {
     if (element._timeout) {
         clearTimeout(element._timeout);
     }
+
     element._timeout = setTimeout(() => {
-        element._ref.invokeMethodAsync(element._callback.OnValueInput, element.value);
+        if (element._ref && element._callback) {
+            element._ref.invokeMethodAsync(element._callback.OnValueInput, element.value);
+        }
     }, element._delay);
 }
 
-async function HandleKeyDown(event) {
-    const {_ref, _callback} = event.target;
+function ClearPendingInput(element) {
+    if (element._timeout) {
+        clearTimeout(element._timeout);
+        element._timeout = null;
+    }
+}
 
-    if (event.key === "ArrowDown") {
-        event.preventDefault();
-        _ref.invokeMethodAsync(_callback.ArrowDown);
-    } else if (event.key === "ArrowUp") {
-        event.preventDefault();
-        _ref.invokeMethodAsync(_callback.ArrowUp);
-    } else if (event.key === "Enter") {
-        event.preventDefault();
-        _ref.invokeMethodAsync(_callback.Enter);
-    } else if (event.key === "Escape") {
-        event.preventDefault();
-        _ref.invokeMethodAsync(_callback.Escape);
-    } else if (event.key === "Tab") {
-        _ref.invokeMethodAsync(_callback.Tab);
+function HandleKeyDown(event) {
+    const {_ref, _callback} = event.target;
+    if (!_ref || !_callback) return;
+
+    switch (event.key) {
+        case "ArrowDown":
+            event.preventDefault();
+            _ref.invokeMethodAsync(_callback.ArrowDown);
+            break;
+
+        case "ArrowUp":
+            event.preventDefault();
+            _ref.invokeMethodAsync(_callback.ArrowUp);
+            break;
+
+        case "Enter":
+            event.preventDefault();
+            ClearPendingInput(event.target);
+            _ref.invokeMethodAsync(_callback.Enter);
+            break;
+
+        case "Escape":
+            event.preventDefault();
+            ClearPendingInput(event.target);
+            _ref.invokeMethodAsync(_callback.Escape);
+            break;
+
+        case "Tab":
+            ClearPendingInput(event.target);
+            _ref.invokeMethodAsync(_callback.Tab);
+            break;
     }
 }

@@ -3,7 +3,8 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="@ErrorList">
-        <InputElementAutosuggest @attributes="InputAttributes" TOption="TOption" OptionSet="OptionList" ID="@IDCurrent" Name="@GetName()" Loading="Loading" Size="Size" DebounceDelay="DebounceDelay" NoResultText="@NoResultsText"
+        <InputElementAutosuggest @attributes="InputAttributes" TOption="TOption" OptionSet="OptionList" ID="@IDCurrent" Name="@GetName()" Loading="Loading" Size="Size" DebounceDelay="DebounceDelay"
+                                 NoResultText="@NoResultText" MinLengthText="@MinLengthText"
                                  DisplaySelector="DisplaySelector" OnSearch="OnSearch" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
     </TemplateInputGroup>
 </div>
@@ -23,7 +24,10 @@
     public bool? Loading { get; set; }
 
     [Parameter]
-    public string? NoResultsText { get; set; }
+    public string? NoResultText { get; set; }
+
+    [Parameter]
+    public string? MinLengthText { get; set; }
 
     [Parameter, EditorRequired]
     public required EventCallback<string> OnSearch { get; set; }

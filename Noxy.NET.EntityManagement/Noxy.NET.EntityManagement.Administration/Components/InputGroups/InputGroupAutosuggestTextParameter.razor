@@ -3,7 +3,7 @@
 @inherits FluxorInputGroupComponent<EntitySchemaParameterText?>
 
 <InputGroupAutosuggest Name="@Name" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" InputAttributes="@InputAttributes"
-                       TOption="EntitySchemaParameterText" OptionList="@TitleTextList" Loading="TitleLoading" NoResultsText="No text parameters match your search"
+                       TOption="EntitySchemaParameterText" OptionList="@TitleTextList" Loading="TitleLoading" MinLengthText="Write more characters" NoResultText="No text parameters match your search"
                        DisplaySelector="@(c => c?.Name ?? "")" OnSearch="TitleSearchHandler" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
 
 @code {
