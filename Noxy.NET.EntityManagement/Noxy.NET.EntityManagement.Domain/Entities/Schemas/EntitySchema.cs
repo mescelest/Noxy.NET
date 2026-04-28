@@ -14,7 +14,7 @@ public class EntitySchema : BaseEntity, ISchemaMetadata
 
     [DisplayName(TextConstants.LabelFormNote)]
     [Description(TextConstants.HelpFormNote)]
-    public string? Note { get; set; } = string.Empty;
+    public string Note { get; set; } = string.Empty;
 
     public required bool IsActive { get; set; }
     public required DateTime? TimeActivated { get; set; }

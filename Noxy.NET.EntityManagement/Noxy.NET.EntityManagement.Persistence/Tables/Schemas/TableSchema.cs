@@ -14,7 +14,7 @@ public class TableSchema : BaseTable, ISchemaMetadata
     public required string Name { get; set; }
 
     [MaxLength(DefaultNoteLength)]
-    public string? Note { get; set; }
+    public string Note { get; set; } = string.Empty;
 
     [Required]
     public required bool IsActive { get; set; }

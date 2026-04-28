@@ -82,7 +82,6 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
     public string GetFieldDescription(string name)
     {
         return GetField(name).Description ?? throw new InvalidDataException($"Field '{name}' does not have a '{nameof(DisplayNameAttribute)}' attribute.");
-        ;
     }
 
     public bool TryGetFieldDescription(string name, out string value)

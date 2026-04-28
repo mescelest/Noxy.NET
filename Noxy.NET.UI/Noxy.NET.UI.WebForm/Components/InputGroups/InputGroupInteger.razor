@@ -2,7 +2,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementInteger @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput"
+        <InputElementInteger @attributes="InputAttributes" ID="@IDCurrent" class="textual" Name="@GetName()" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput"
                              Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
     </TemplateInputGroup>
 </div>

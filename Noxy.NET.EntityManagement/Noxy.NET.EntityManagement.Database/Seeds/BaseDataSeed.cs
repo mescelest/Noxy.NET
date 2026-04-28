@@ -6,5 +6,6 @@ public class BaseDataSeed(DataContext context)
 {
     public async Task Apply()
     {
+        Console.WriteLine($"Seeding with {context}");
     }
 }

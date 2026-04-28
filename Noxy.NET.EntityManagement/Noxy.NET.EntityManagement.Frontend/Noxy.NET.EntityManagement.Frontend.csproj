@@ -34,4 +34,8 @@
         </Content>
     </ItemGroup>
 
+    <ItemGroup>
+        <_ContentIncludedByDefault Remove="Pages\ContextPages\IDPage.razor"/>
+    </ItemGroup>
+
 </Project>

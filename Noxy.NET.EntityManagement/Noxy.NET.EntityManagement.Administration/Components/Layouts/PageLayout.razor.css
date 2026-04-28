@@ -11,7 +11,7 @@
     align-items: center;
     padding: var(--size-gap-xs) var(--size-gap-xl);
     column-gap: var(--size-gap-xl);
-    border-bottom: var(--size-border-width-md) solid color-mix(in srgb, transparent 80%, var(--color-background-complementary, #000000));
+    border-bottom: var(--size-border-width-md) solid color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
 }
 
 .left {

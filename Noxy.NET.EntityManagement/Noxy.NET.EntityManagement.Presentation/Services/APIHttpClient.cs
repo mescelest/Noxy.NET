@@ -42,7 +42,6 @@ public class APIHttpClient(HttpClient client)
 
     public async Task<TResponse> SendRequest<TResponse>(BaseRequestPost<TResponse> request, CancellationToken cancellationToken = default)
     {
-        object? body = request.ToBody();
         HttpResponseMessage response = await client.PostAsJsonAsync(request.APIEndpoint, request.ToBody(), WriteSerializerOptions, cancellationToken);
         await EnsureSuccess(response);
 

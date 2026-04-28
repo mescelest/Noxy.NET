@@ -1,6 +1,6 @@
 .InputElementAutosuggest {
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     flex-flow: column;
     max-width: 100%;
     position: relative;
@@ -15,21 +15,20 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    border: var(--size-border-width-sm) solid var(--color-border-control);
-    border-bottom-left-radius: var(--size-border-radius-md);
-    border-bottom-right-radius: var(--size-border-radius-md);
-    background-color: var(--color-background-primary);
+    border: var(--size-border-width-sm, 1px) solid var(--color-complementary, #000000);
+    border-bottom-left-radius: var(--size-border-radius-md, 4px);
+    border-bottom-right-radius: var(--size-border-radius-md, 4px);
+    background-color: var(--color-primary, #FFFFFF);
 }
 
-.autocomplete-dropdown {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+.min-length,
+.no-result,
+.option {
+    padding: var(--size-gap-xxs, 8px) var(--size-gap-xxs, 8px);
 }
 
 .option {
     cursor: pointer;
-    padding: var(--size-gap-xxs) var(--size-gap-xxs);
 }
 
 .option[data-selected] {

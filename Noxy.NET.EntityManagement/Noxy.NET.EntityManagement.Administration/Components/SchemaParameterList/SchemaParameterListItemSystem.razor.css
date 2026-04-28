@@ -56,5 +56,5 @@ hr {
     height: 1px;
     margin: 0;
     border: none;
-    background: var(--color-background-disabled);
+    background: var(--color-disabled);
 }

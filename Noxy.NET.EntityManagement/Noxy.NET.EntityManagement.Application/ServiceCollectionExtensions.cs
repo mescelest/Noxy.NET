@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Services;
-using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -22,10 +21,9 @@ public static class ServiceCollectionExtensions
     {
         try
         {
-            using IServiceScope scope = app.Services.CreateScope();
-
-            ISchemaBuilderService serviceSchemaBuilderService = scope.ServiceProvider.GetRequiredService<ISchemaBuilderService>();
-            EntitySchema schema = await serviceSchemaBuilderService.ConstructSchema();
+            // using IServiceScope scope = app.Services.CreateScope();
+            // ISchemaBuilderService serviceSchemaBuilderService = scope.ServiceProvider.GetRequiredService<ISchemaBuilderService>();
+            // EntitySchema schema = await serviceSchemaBuilderService.ConstructSchema();
         }
         catch
         {

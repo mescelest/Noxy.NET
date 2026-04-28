@@ -15,7 +15,7 @@ public class EntitySchemaElement : BaseEntitySchema, ISchemaMetadata, ISchemaPre
 
     [DisplayName(TextConstants.LabelFormNote)]
     [Description(TextConstants.HelpFormNote)]
-    public string? Note { get; set; } = string.Empty;
+    public string Note { get; set; } = string.Empty;
 
     [DisplayName(TextConstants.LabelFormTitle)]
     [Description(TextConstants.HelpFormTitle)]

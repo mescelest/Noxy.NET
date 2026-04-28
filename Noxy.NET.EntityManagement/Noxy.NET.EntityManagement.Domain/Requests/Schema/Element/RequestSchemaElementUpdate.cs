@@ -27,7 +27,7 @@ public class RequestSchemaElementUpdate : BaseRequestPost<ResponseSchemaElementU
 
     [DisplayName(TextConstants.LabelFormDescription)]
     [Description(TextConstants.HelpFormDescription)]
-    public string? Note { get; set; } = string.Empty;
+    public string Note { get; set; } = string.Empty;
 
     [NotEmpty]
     [DisplayName(TextConstants.LabelFormTitle)]

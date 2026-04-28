@@ -8,24 +8,24 @@
     display: grid;
     grid-template-columns: 1fr max-content;
     align-items: center;
-    min-height: var(--size-control-md);
-    column-gap: var(--size-gap-xs);
+    min-height: var(--size-control-md, 42px);
+    column-gap: var(--size-gap-xs, 12px);
 }
 
 .arrow {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--size-control-md);
-    height: var(--size-control-md);
+    width: var(--size-control-md, 42px);
+    height: var(--size-control-md, 42px);
     cursor: pointer;
 }
 
 .content-wrapper {
     display: grid;
     grid-template-rows: minmax(0, 1fr);
-    border-left: 2px solid color-mix(in srgb, transparent 80%, var(--color-background-complementary, #000000));
-    background: color-mix(in srgb, transparent 96%, var(--color-background-complementary, #000000));
+    border-left: var(--size-border-width-md, 2px) solid color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
+    background: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
     overflow: hidden;
     transition: grid-template-rows var(--animation-length-medium) ease-in-out, margin var(--animation-length-medium) ease-in-out;
 }

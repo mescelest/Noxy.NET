@@ -42,20 +42,20 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required Guid ID { get; set; }
-
-    [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? GetComponentName();
+    public required Guid SchemaID { get; set; }
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H4;
 
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? $"{GetComponentName()}:{SchemaID}";
+
     private bool _isCollapsed = true;
 
     private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
-    private string Link => $"/schema/{ID}/context";
+    private string Link => $"/schema/{SchemaID}/context";
     private bool IsLoading => StateContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
     private IReadOnlyList<EntitySchemaContext> List => StateContext.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaContext>? value) ? value : [];
 
@@ -63,7 +63,7 @@
     {
         _isCollapsed = value;
         if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ContextCurrent) || IsLoading) return;
-        Dispatcher.Dispatch(new FeatureSchemaContextReducers.SchemaContextListAction(ContextCurrent, new()));
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.SchemaContextListAction(ContextCurrent, new() { SchemaID = SchemaID }));
     }
 
 }

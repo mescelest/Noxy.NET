@@ -25,7 +25,7 @@
                 </div>
                 @foreach (EntitySchemaElement item in List)
                 {
-                <div class="grid-row">
+                    <div class="grid-row">
                         <span>@item.SchemaIdentifier</span>
                         <span>@item.Name</span>
                         <span>@item.Note</span>
@@ -42,20 +42,20 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required Guid ID { get; set; }
-
-    [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? GetComponentName();
+    public required Guid SchemaID { get; set; }
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H4;
 
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? $"{GetComponentName()}:{SchemaID}";
+
     private bool _isCollapsed = true;
 
     private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
-    private string Link => $"/schema/{ID}/element";
+    private string Link => $"/schema/{SchemaID}/element";
     private bool IsLoading => StateContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
     private IReadOnlyList<EntitySchemaElement> List => StateContext.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];
 
@@ -63,7 +63,7 @@
     {
         _isCollapsed = value;
         if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ContextCurrent) || IsLoading) return;
-        Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementListAction(ContextCurrent, new()));
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementListAction(ContextCurrent, new() { SchemaID = SchemaID }));
     }
 
 }

@@ -3,12 +3,10 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <div class="select-wrapper">
-            <InputElementSelect @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
+        <InputElementSelect @attributes="InputAttributes" ID="@IDCurrent" class="textual" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
                                 Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
                 @ChildContent(context)
             </InputElementSelect>
-        </div>
     </TemplateInputGroup>
 </div>
 
@@ -23,4 +21,4 @@
     [Parameter]
     public Func<TValue?, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
 
-}
+} 

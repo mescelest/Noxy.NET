@@ -5,10 +5,10 @@ public static class ListExtensions
     public static List<T> MoveItem<T>(this List<T> list, int oldIndex, int newIndex)
     {
         ArgumentNullException.ThrowIfNull(list);
-        ArgumentOutOfRangeException.ThrowIfLessThan(oldIndex, 0, nameof(oldIndex));
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(oldIndex, list.Count, nameof(oldIndex));
-        ArgumentOutOfRangeException.ThrowIfLessThan(newIndex, 0, nameof(newIndex));
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(newIndex, list.Count, nameof(newIndex));
+        ArgumentOutOfRangeException.ThrowIfLessThan(oldIndex, 0);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(oldIndex, list.Count);
+        ArgumentOutOfRangeException.ThrowIfLessThan(newIndex, 0);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(newIndex, list.Count);
         if (oldIndex == newIndex) return list;
 
         // TODO: Does not work.

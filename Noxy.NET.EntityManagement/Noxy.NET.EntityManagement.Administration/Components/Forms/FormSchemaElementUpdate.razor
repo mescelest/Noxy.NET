@@ -8,6 +8,12 @@
 
         <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Context.Model.Note"/>
 
+        <InputGroupAutosuggestTextParameter Name="@nameof(Model.TitleParameterTextID)" DisplayName="@GetDisplayName(nameof(Model.TitleParameterTextID))" Description="@GetDescription(nameof(Model.TitleParameterTextID))"
+                                            @bind-Value:get="GetValueTitle()" @bind-Value:set="SetValueTitle"/>
+
+        <InputGroupAutosuggestTextParameter Name="@nameof(Model.DescriptionParameterTextID)" DisplayName="@GetDisplayName(nameof(Model.DescriptionParameterTextID))" Description="@GetDescription(nameof(Model.DescriptionParameterTextID))"
+                                            @bind-Value:get="GetValueDescription()" @bind-Value:set="SetValueDescription"/>
+
         @ChildContent
     </WebForm>
 </div>
@@ -17,9 +23,28 @@
     [Parameter, EditorRequired]
     public EntitySchemaElement SchemaElement { get; set; }
 
+    private EntitySchemaParameterText? _valueTitle;
+    private EntitySchemaParameterText? _valueDescription;
+
     protected override WebFormContext<RequestSchemaElementUpdate> CreateContext()
     {
-        return new(new() { ID = SchemaElement.ID, Name = SchemaElement.Name, Note = SchemaElement.Note, TitleParameterTextID = Guid.Parse("3C8A9DC6-C617-1B50-8AB9-1F1310ED112C") });
+        _valueTitle = SchemaElement.TitleTextParameter;
+        _valueDescription = SchemaElement.DescriptionTextParameter;
+        return new(new()
+        {
+            ID = SchemaElement.ID,
+            SchemaIdentifier = SchemaElement.SchemaIdentifier,
+            Name = SchemaElement.Name,
+            Note = SchemaElement.Note,
+            TitleParameterTextID = SchemaElement.TitleTextParameterID,
+            DescriptionParameterTextID = SchemaElement.DescriptionTextParameterID,
+        });
     }
+
+    private EntitySchemaParameterText? GetValueTitle() => _valueTitle?.ID == Context.Model.TitleParameterTextID ? _valueTitle : null;
+    private void SetValueTitle(EntitySchemaParameterText? obj) => Context.Model.TitleParameterTextID = (_valueTitle = obj)?.ID ?? Guid.Empty;
+
+    private EntitySchemaParameterText? GetValueDescription() => _valueDescription?.ID == Context.Model.DescriptionParameterTextID ? _valueDescription : null;
+    private void SetValueDescription(EntitySchemaParameterText? obj) => Context.Model.DescriptionParameterTextID = (_valueDescription = obj)?.ID ?? Guid.Empty;
 
 }

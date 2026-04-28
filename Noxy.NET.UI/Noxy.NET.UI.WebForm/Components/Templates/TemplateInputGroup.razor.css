@@ -17,3 +17,15 @@
     flex: 0 1 auto;
     flex-flow: row;
 }
+
+.control ::deep > .textual {
+    max-width: 100%;
+    min-height: var(--size-control-md, 42px);
+    margin: 0;
+    padding: var(--size-gap-xxs, 8px);
+    border: var(--size-border-width-sm, 1px) solid var(--color-complementary);
+    border-radius: var(--size-border-radius-md, 4px);
+    font-size: var(--size-text-body, 16px);
+    font-family: inherit;
+    box-sizing: border-box;
+}

@@ -3,21 +3,28 @@
 @inherits FluxorInputGroupComponent<EntitySchemaParameterText?>
 
 <InputGroupAutosuggest Name="@Name" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" InputAttributes="@InputAttributes"
-                       TOption="EntitySchemaParameterText" OptionList="@TitleTextList" Loading="TitleLoading" MinLengthText="Write more characters" NoResultText="No text parameters match your search"
+                       TOption="EntitySchemaParameterText" OptionList="@Set" Loading="Loading" MinLengthText="Write more characters" NoResultText="No text parameters match your search"
                        DisplaySelector="@(c => c?.Name ?? "")" OnSearch="TitleSearchHandler" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
 
 @code {
 
-    private string TitleContext => $"Autosuggest:{UUIDCode}";
-    private bool TitleLoading => State.Value.TryGetLoading(TitleContext, FeatureSchemaParameterActionKind.List, out bool loading) && loading;
-    private IReadOnlyList<EntitySchemaParameter.Discriminator> TitleList => State.Value.TryGetList(TitleContext, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) ? list : [];
-    private HashSet<EntitySchemaParameterText> TitleTextList => TitleList.Select(x => x.TextParameter).OfType<EntitySchemaParameterText>().ToHashSet();
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    [Parameter]
+    public int? Count { get; set; }
+
+    private string RequestContext => $"Autosuggest:{UUIDCode}";
+    private bool Loading => State.Value.TryGetLoading(RequestContext, FeatureSchemaParameterActionKind.List, out bool loading) && loading;
+    private IReadOnlyList<EntitySchemaParameter.Discriminator> List => State.Value.TryGetList(RequestContext, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) ? list : [];
+    private HashSet<EntitySchemaParameterText> Set => List.Select(x => x.TextParameter).OfType<EntitySchemaParameterText>().ToHashSet();
 
     private void TitleSearchHandler(string obj)
     {
-        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.SchemaParameterListAction(TitleContext, new()
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.SchemaParameterListAction(RequestContext, new()
         {
-            PageSize = 10,
+                SchemaID = SchemaID,
+                PageSize = Count,
             Search = obj,
             ParameterType = [nameof(EntitySchemaParameterText)],
         }));

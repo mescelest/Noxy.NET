@@ -5,13 +5,13 @@
 }
 
 .InputGroupAutosuggest ::deep .InputElementAutosuggest .input {
+    max-width: 100%;
+    min-height: var(--size-control-md, 46px);
     margin: 0;
     padding: var(--size-gap-xxs, 8px);
-    border: var(--size-border-width-sm, 1px) solid var(--color-border-control, #000000);
+    border: var(--size-border-width-sm, 1px) solid var(--color-complementary, #000000);
     border-radius: var(--size-border-radius-md, 4px);
     font-size: var(--size-text-body, 16px);
     font-family: inherit;
-    min-height: var(--size-control-md, 46px);
     box-sizing: border-box;
-    max-width: 100%;
 }

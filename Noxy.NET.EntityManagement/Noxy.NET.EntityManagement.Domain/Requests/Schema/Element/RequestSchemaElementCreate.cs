@@ -24,9 +24,9 @@ public class RequestSchemaElementCreate : BaseRequestPost<ResponseSchemaElementC
     [Description(TextConstants.HelpFormName)]
     public string Name { get; set; } = string.Empty;
 
-    [DisplayName(TextConstants.LabelFormDescription)]
-    [Description(TextConstants.HelpFormDescription)]
-    public string? Note { get; set; } = string.Empty;
+    [DisplayName(TextConstants.LabelFormNote)]
+    [Description(TextConstants.HelpFormNote)]
+    public string Note { get; set; } = string.Empty;
 
     [NotEmpty]
     [DisplayName(TextConstants.LabelFormTitle)]

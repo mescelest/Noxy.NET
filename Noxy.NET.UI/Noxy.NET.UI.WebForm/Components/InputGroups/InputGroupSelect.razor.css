@@ -4,13 +4,16 @@
     flex-flow: column;
 }
 
-.select-wrapper {
+.InputGroupSelect ::deep > .TemplateInputGroup > .wrapper > .control {
     display: flex;
     flex: 0 1 auto;
+    flex-flow: row;
     position: relative;
+    max-width: 100%;
+    align-self: flex-start;
 }
 
-.select-wrapper::after {
+.InputGroupSelect ::deep > .TemplateInputGroup > .wrapper > .control::after {
     content: "▼";
     position: absolute;
     right: var(--size-gap-xxs, 8px);
@@ -19,17 +22,8 @@
     pointer-events: none;
 }
 
-.InputGroupSelect ::deep .InputElementSelect {
+.InputGroupSelect ::deep > .TemplateInputGroup > .wrapper > .control .InputElementSelect {
     min-width: 160px;
-    max-width: 100%;
-    min-height: var(--size-control-md, 46px);
-    margin: 0;
-    padding: var(--size-gap-xxs, 8px);
     padding-right: calc(var(--size-gap-xxs, 8px) + var(--size-gap-sm, 16px) + var(--size-gap-xxs, 8px));
-    border: 1px solid black;
-    border-radius: var(--size-border-radius-md, 4px);
-    font-size: var(--size-text-body, 16px);
-    font-family: inherit;
-    box-sizing: border-box;
     appearance: none;
 }

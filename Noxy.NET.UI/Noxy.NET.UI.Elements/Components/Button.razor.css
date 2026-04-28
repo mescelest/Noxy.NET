@@ -7,19 +7,19 @@
     height: var(--size-control-md, 46px);
     position: relative;
     padding: 0 var(--size-gap-sm, 8px);
-    background-color: var(--color-background-button, #767676);
-    border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-background-button, #e9e9e9) 60%, var(--color-background-primary, #ffffff));
+    background-color: var(--color-button, #767676);
+    border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-button, #767676) 35%, var(--color-primary, #ffffff));
     border-radius: var(--size-border-radius-md, 4px);
     box-shadow: 0 0 0 var(--size-border-width-sm, 1px) transparent inset;
     font: var(--font-button);
-    color: var(--color-text-button, #000000);
+    color: var(--color-primary, #FFFFFF);
     box-sizing: border-box;
     cursor: pointer;
     transition: box-shadow var(--animation-length-short, 150ms) ease-in-out, border var(--animation-length-short, 150ms) ease-in-out;
 }
 
 .Button.loading > ::deep .Loader {
-    stroke: var(--color-text-button);
+    stroke: var(--color-complementary, #000000);
 }
 
 .Button:focus {
@@ -37,8 +37,8 @@
 
 .Button:disabled:not(.loading) {
     border-color: transparent;
-    background-color: var(--color-background-disabled, #4d4d4d);
-    color: var(--color-text-disabled, #bcbcbc);
+    background-color: var(--color-disabled, #4D4D4D);
+    color: color-mix(in srgb, var(--color-disabled, #4D4D4D) 60%, var(--color-primary, #ffffff));
     cursor: not-allowed;
 }
 
@@ -84,31 +84,30 @@
     padding: 0 var(--size-gap-lg, 16px);
 }
 
-
 .Button[status="none"] {
-    --color-background-button: var(--color-background-none);
+    --color-button: var(--color-none, #4D4AD3);
 }
 
 .Button[status="success"] {
-    --color-background-button: var(--color-background-success);
+    --color-button: var(--color-success, #23883D);
 }
 
 .Button[status="info"] {
-    --color-background-button: var(--color-background-info);
+    --color-button: var(--color-info, #289ED9);
 }
 
 .Button[status="highlight"] {
-    --color-background-button: var(--color-background-highlight);
+    --color-button: var(--color-highlight, #0073EC);
 }
 
 .Button[status="warning"] {
-    --color-background-button: var(--color-background-warning);
+    --color-button: var(--color-warning, #D97F00);
 }
 
 .Button[status="notice"] {
-    --color-background-button: var(--color-background-notice);
+    --color-button: var(--color-notice, #A948DD);
 }
 
 .Button[status="error"] {
-    --color-background-button: var(--color-background-error);
+    --color-button: var(--color-error, #E42B21);
 }

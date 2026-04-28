@@ -41,6 +41,7 @@
         {
             if (!Context.Validate()) return;
             await OnSubmit.InvokeAsync(Context);
+            Context.Reset();
         }
         finally
         {

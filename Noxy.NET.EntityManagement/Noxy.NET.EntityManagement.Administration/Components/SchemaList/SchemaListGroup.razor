@@ -30,10 +30,26 @@
 
     @if (!_isEditMode)
     {
-        <div>@Schema.Note</div>
-        <div>@Schema.IsActive</div>
-        <div>@Schema.TimeActivated</div>
-        <div>@Schema.TimeCreated</div>
+        <div>
+            <strong>Name:</strong>
+            @Schema.Name
+        </div>
+        <div>
+            <strong>Note:</strong>
+            @Schema.Note
+        </div>
+        <div>
+            <strong>Created at:</strong>
+            @Schema.TimeCreated
+        </div>
+        <div>
+            <strong>Is active:</strong>
+            @Schema.IsActive
+        </div>
+        <div>
+            <strong>Activated at:</strong>
+            @Schema.TimeActivated
+        </div>
     }
     else
     {
@@ -50,9 +66,9 @@
         </FormSchemaUpdate>
     }
 
-    <SchemaListElementView ID="@Schema.ID" Context="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+    <SchemaListElementView SchemaID="@Schema.ID" Context="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
 
-    <SchemaListContextView ID="@Schema.ID" Context="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+    <SchemaListContextView SchemaID="@Schema.ID" Context="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
 
 </div>
 

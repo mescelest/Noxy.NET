@@ -1,5 +1,5 @@
 using MediatR;
-using Noxy.NET.EntityManagement.API.Commands.Schema;
+using Noxy.NET.EntityManagement.API.Commands.Schema.Context;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
@@ -17,7 +17,7 @@ public class HandlerSchemaContextCreate(IUnitOfWorkFactory serviceUoWFactory) : 
             SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
             SchemaIdentifier = request.SchemaIdentifier,
             Name = request.Name,
-            Note = request.Note,
+            Note = request.Note ?? string.Empty,
             TitleTextParameterID = request.TitleParameterTextID,
             DescriptionTextParameterID = request.DescriptionParameterTextID,
         });
