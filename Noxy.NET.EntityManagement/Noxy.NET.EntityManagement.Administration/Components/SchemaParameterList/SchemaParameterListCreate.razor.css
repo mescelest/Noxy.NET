@@ -1,0 +1,17 @@
+.SchemaElementListCreate {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
+}
+
+.action-list {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: row;
+    column-gap: var(--size-gap-md);
+}
+
+.action-list ::deep .Button {
+    min-width: 120px;
+}

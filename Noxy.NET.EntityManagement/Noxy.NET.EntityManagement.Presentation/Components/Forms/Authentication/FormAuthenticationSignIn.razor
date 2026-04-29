@@ -2,11 +2,11 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestAuthenticationSignIn" Context="Context" OnSubmit="ForwardSubmit">
-        <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Email))" Description="@GetDescription(nameof(Context.Model.Email))"
-                        @bind-Value="Context.Model.Email"/>
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Email))" Description="@GetDescription(nameof(Model.Email))"
+                        @bind-Value="Model.Email"/>
 
-        <InputGroupPassword DisplayName="@GetDisplayName(nameof(Context.Model.Password))" Description="@GetDescription(nameof(Context.Model.Password))"
-                            Autocomplete="WebFormInputFieldPasswordAutocompleteEnum.CurrentPassword" @bind-Value="Context.Model.Password"/>
+        <InputGroupPassword DisplayName="@GetDisplayName(nameof(Model.Password))" Description="@GetDescription(nameof(Model.Password))"
+                            Autocomplete="WebFormInputFieldPasswordAutocompleteEnum.CurrentPassword" @bind-Value="Model.Password"/>
 
         @ChildContent
     </WebForm>

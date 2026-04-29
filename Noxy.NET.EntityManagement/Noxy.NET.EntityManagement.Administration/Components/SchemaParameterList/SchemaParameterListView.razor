@@ -1,26 +1,42 @@
-@inject IState<FeatureSchemaParameterListState> State
+@inject IState<FeatureSchemaParameterState> State
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Loader Loading="State.Value.IsLoading">
-        @foreach (EntitySchemaParameter.Discriminator item in State.Value.List)
-        {
-            <SchemaParameterListGroup SchemaParameter="item.GetValue()"/>
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schema parameters</DynamicHTMLTag>
+
+    <Loader Loading="IsLoading">
+        @foreach (EntiEntitySchemaParameter.Discriminator item in List      {
+            @ChildContent(item)
         }
     </Loader>
 </div>
 
 @code {
 
-    protected override void OnInitialized()
+  
+
+    [Parameter, EditorRequired]
+    public RenderFragment<EntitySchemaParameter.Discriminator> ChildContent t; set; }
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
+
+    [Parameter]
+    public RequestSchemaParameterList? Request { get; set; }
+    private RequestSchemaParameterList RequestCurrent => Request ?? new();
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
+
+    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaParameterActionKind.List, out bool value) && value;
+    private IReadOnlprivate IReadOnlyList<EntitySchemaParameter.Discriminator> List r> State.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list    protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        if (State.Value.List.Count == 0 && !State.Value.IsLoading)
+        if (List.Count == 0 && !IsLoading)
         {
-            Dispatcher.Dispatch(new FeatureSchemaParameterListReducers.SchemaParameterListAction(new()));
-        }
-    }
-
+            Dispatcher.Dispatch(Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, RequestCurrent
 }

@@ -6,13 +6,15 @@
 <div class="@CssClass">
     <MagazineFrame>
         <Left>
-            <SchemaContextListFilter Context="@Context" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+            <SchemaContextListFilter Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
         </Left>
         <Content>
-            <SchemaContextListView Context="@Context" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
+            <SchemaContextListView Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1">
+                <SchemaContextListGroup Schema="context.Schema" SchemaContext="context.SchemaContext" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+            </SchemaContextListView>
         </Content>
         <Right>
-            <SchemaContextListCreate Context="@Context" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+            <SchemaContextListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
         </Right>
     </MagazineFrame>
 </div>
@@ -22,6 +24,6 @@
     [Parameter]
     public Guid ID { get; set; }
 
-    private string Context => GetComponentName();
+    private string Scope => ID.ToString();
 
 }

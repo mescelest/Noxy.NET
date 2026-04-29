@@ -3,7 +3,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestDataParameterSystemCreate" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
-                        @bind-Value="Context.Model.Value"/>
+                        @bind-Value="Model.Value"/>
 
         <InputGroupRadioSet OptionList="OptionSet" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
                             @bind-Value="Model.TimeEffective">

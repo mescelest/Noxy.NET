@@ -1,0 +1,29 @@
+﻿@page "/Schema/{ID:guid}/Parameter"
+@inherits PageComponent
+
+<PageTitle>Administration | Context</PageTitle>
+
+<div class="@CssClass">
+    <MagazineFrame>
+        <Left>
+            <SchemaParameterListFilter Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+        </Left>
+        <Content>
+            @* <SchemaContextListView Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1"> *@
+            @*     <SchemaContextListGroup Schema="context.Schema" SchemaContext="context.SchemaContext" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/> *@
+            @* </SchemaContextListView> *@
+        </Content>
+        <Right>
+            <SchemaParameterListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+        </Right>
+    </MagazineFrame>
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid ID { get; set; }
+
+    private string Scope => ID.ToString();
+
+}

@@ -1,0 +1,49 @@
+@inject IState<FeatureSchemaParameterDataParameterListState> StateData
+@inject IState<FeatureTextState> StateText
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+        <Header>
+            <h3>@SchemaParameter.Name</h3>
+        </Header>
+
+        <Content>
+            @switch (SchemaParameter)
+            {
+                case EntitySchemaParameterStyle parameterStyle:
+                    <DataParameterListItemStyle SchemaParameter="@parameterStyle"/>
+                    break;
+                case EntitySchemaParameterSystem parameterSystem:
+                    <DataParameterListItemSystem SchemaParameter="@parameterSystem"/>
+                    break;
+                case EntitySchemaParameterText parameterText:
+                    <DataParameterListItemText SchemaParameter="@parameterText"/>
+                    break;
+            }
+        </Content>
+    </Collapsible>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchemaParameter SchemaParameter { get; set; }
+
+    private bool _isCollapsed = true;
+
+    private bool IsLoading => StateData.Value.IsKeyLoading(SchemaParameter.SchemaIdentifier) || (StateData.Value.Cache.ContainsKey(SchemaParameter.SchemaIdentifier) && StateText.Value.IsScopeLoading(GetComponentName()));
+
+    private void SetCollapsed(bool value)
+    {
+        _isCollapsed = value;
+        if (_isCollapsed) return;
+
+        string id = SchemaParameter.SchemaIdentifier;
+        if (StateData.Value.Cache.ContainsKey(id) || StateData.Value.IsKeyLoading(id)) return;
+
+        Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.LoadDataParameterListAction(id));
+    }
+
+}

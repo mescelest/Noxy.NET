@@ -2,13 +2,13 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestSchemaElementUpdate" Context="Context" OnSubmit="ForwardSubmit">
-        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.SchemaIdentifier))" Description="@GetDescription(nameof(Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.SchemaIdentifier))" Description="@GetDescription(nameof(Model.SchemaIdentifier))" @bind-Value="Model.SchemaIdentifier"/>
 
-        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Context.Model.Name"/>
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Model.Name"/>
 
-        <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Context.Model.Note"/>
+        <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Model.Note"/>
 
-        <InputGroupInteger DisplayName="@GetDisplayName(nameof(Model.Weight))" Description="@GetDescription(nameof(Model.Weight))" @bind-Value="Context.Model.Weight"/>
+        <InputGroupInteger DisplayName="@GetDisplayName(nameof(Model.Weight))" Description="@GetDescription(nameof(Model.Weight))" @bind-Value="Model.Weight"/>
 
         <InputGroupAutosuggestTextParameter Name="@nameof(Model.TitleParameterTextID)" DisplayName="@GetDisplayName(nameof(Model.TitleParameterTextID))" Description="@GetDescription(nameof(Model.TitleParameterTextID))"
                                             @bind-Value:get="GetValueTitle()" @bind-Value:set="SetValueTitle"/>
@@ -43,10 +43,10 @@
         });
     }
 
-    private EntitySchemaParameterText? GetValueTitle() => _valueTitle?.ID == Context.Model.TitleParameterTextID ? _valueTitle : null;
-    private void SetValueTitle(EntitySchemaParameterText? obj) => Context.Model.TitleParameterTextID = (_valueTitle = obj)?.ID ?? Guid.Empty;
+    private EntitySchemaParameterText? GetValueTitle() => _valueTitle?.ID == Model.TitleParameterTextID ? _valueTitle : null;
+    private void SetValueTitle(EntitySchemaParameterText? obj) => Model.TitleParameterTextID = (_valueTitle = obj)?.ID ?? Guid.Empty;
 
-    private EntitySchemaParameterText? GetValueDescription() => _valueDescription?.ID == Context.Model.DescriptionParameterTextID ? _valueDescription : null;
-    private void SetValueDescription(EntitySchemaParameterText? obj) => Context.Model.DescriptionParameterTextID = (_valueDescription = obj)?.ID ?? Guid.Empty;
+    private EntitySchemaParameterText? GetValueDescription() => _valueDescription?.ID == Model.DescriptionParameterTextID ? _valueDescription : null;
+    private void SetValueDescription(EntitySchemaParameterText? obj) => Model.DescriptionParameterTextID = (_valueDescription = obj)?.ID ?? Guid.Empty;
 
 }

@@ -4,12 +4,12 @@
     <WebForm T="RequestDataParameterTextCreate" Context="Context" OnSubmit="ForwardSubmit">
         @switch (SchemaParameter.Type)
         {
-            case TextParameterTypeEnum.Line:
+            case ParameterTextTypeEnum.Line:
                 <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
                                 @bind-Value="Model.Value"/>
                 break;
-            case TextParameterTypeEnum.Text:
-            case TextParameterTypeEnum.RichText:
+            case ParameterTextTypeEnum.Text:
+            case ParameterTextTypeEnum.RichText:
                 <InputGroupTextArea @bind-Value="Model.Value"/>
                 break;
             default:

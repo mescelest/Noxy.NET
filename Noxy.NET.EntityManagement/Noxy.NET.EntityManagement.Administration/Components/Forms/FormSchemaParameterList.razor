@@ -3,7 +3,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestSchemaParameterList" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Search))" Description="@GetDescription(nameof(Model.Search))"
-                        @bind-Value="Context.Model.Search"/>
+                        @bind-Value="Model.Search"/>
 
         <InputGroupSelect OptionList="ListIsSystemDefinedKey" DisplayName="@GetDisplayName(nameof(Model.IsSystemDefined))" Description="@GetDescription(nameof(Model.IsSystemDefined))"
                           Name="@nameof(Model.IsSystemDefined)" @bind-Value:get="GetIsSystemDefined()" @bind-Value:set="SetIsSystemDefined">
@@ -26,29 +26,34 @@
 
 @code {
 
-    private readonly Dictionary<int, string> _collectionIsSystemDefined = [];
-    private readonly Dictionary<int, string> _collectionIsApprovalRequired = [];
-    private readonly Dictionary<string, string> _collectionType = [];
+    private readonly Dictionary<int, string> _collectionIsSystemDefined = new()
+    {
+        { -1, TextConstants.ValueIsSystemDefinedNeutral },
+        { 0, TextConstants.ValueIsSystemDefinedYes },
+        { 1, TextConstants.ValueIsSystemDefinedNo }
+    };
+
+    private readonly Dictionary<int, string> _collectionIsApprovalRequired = new()
+    {
+        { -1, TextConstants.ValueIsApprovalRequiredNeutral },
+        { 0, TextConstants.ValueIsApprovalRequiredYes },
+        { 1, TextConstants.ValueIsApprovalRequiredNo }
+    };
+
+    private readonly Dictionary<string, string> _collectionType = new()
+    {
+        { nameof(EntitySchemaParameterStyle), TextConstants.LabelParameterStyle },
+        { nameof(EntitySchemaParameterSystem), TextConstants.LabelParameterSystem },
+        { nameof(EntitySchemaParameterText), TextConstants.LabelParameterText }
+    };
 
     private HashSet<int> ListIsSystemDefinedKey => _collectionIsSystemDefined.Select(x => x.Key).ToHashSet();
     private HashSet<int> ListIsApprovalRequiredKey => _collectionIsApprovalRequired.Select(x => x.Key).ToHashSet();
     private HashSet<string> ListTypeKey => _collectionType.Select(x => x.Key).ToHashSet();
 
-    protected override async Task OnAfterFirstRenderAsync()
+    protected override WebFormContext<RequestSchemaParameterList> CreateContext()
     {
-        await base.OnAfterFirstRenderAsync();
-
-        _collectionIsSystemDefined[-1] = TextConstants.ValueIsSystemDefinedNeutral;
-        _collectionIsSystemDefined[0] = TextConstants.ValueIsSystemDefinedYes;
-        _collectionIsSystemDefined[1] = TextConstants.ValueIsSystemDefinedNo;
-
-        _collectionIsApprovalRequired[-1] = TextConstants.ValueIsApprovalRequiredNeutral;
-        _collectionIsApprovalRequired[0] = TextConstants.ValueIsApprovalRequiredYes;
-        _collectionIsApprovalRequired[1] = TextConstants.ValueIsApprovalRequiredNo;
-
-        _collectionType[nameof(EntitySchemaParameterStyle)] = TextConstants.LabelParameterStyle;
-        _collectionType[nameof(EntitySchemaParameterSystem)] = TextConstants.LabelParameterSystem;
-        _collectionType[nameof(EntitySchemaParameterText)] = TextConstants.LabelParameterText;
+        return new(new());
     }
 
     private int GetIsSystemDefined()
@@ -91,9 +96,5 @@
         Model.ParameterType = value;
     }
 
-    protected override WebFormContext<RequestSchemaParameterList> CreateContext()
-    {
-        return new(new());
-    }
 
 }

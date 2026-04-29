@@ -3,6 +3,7 @@
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Search for a parameter</DynamicHTMLTag>
     <FormSchemaParameterList OnSubmit="Submit">
         <div class="action-list">
             <Button Status="StatusEnum.Warning" type="button">
@@ -17,9 +18,20 @@
 
 @code {
 
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
+
     private void Submit(IWebFormContext<RequestSchemaParameterList> value)
     {
-        Dispatcher.Dispatch(new FeatureSchemaParameterListReducers.SchemaParameterListAction(value.Model));
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, value.Model));
     }
 
 }

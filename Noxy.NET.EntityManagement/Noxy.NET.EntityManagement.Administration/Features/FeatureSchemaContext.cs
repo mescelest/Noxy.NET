@@ -8,7 +8,7 @@ using static Noxy.NET.EntityManagement.Administration.Features.FeatureSchemaCont
 
 namespace Noxy.NET.EntityManagement.Administration.Features;
 
-public readonly record struct FeatureSchemaContextKey(string Context, FeatureSchemaContextActionKind Kind);
+public readonly record struct FeatureSchemaContextKey(string Scope, FeatureSchemaContextActionKind Kind);
 
 public enum FeatureSchemaContextActionKind
 {
@@ -16,7 +16,6 @@ public enum FeatureSchemaContextActionKind
     Add,
     Update,
     Delete,
-    Activate,
     Clone
 }
 
@@ -28,72 +27,70 @@ public record FeatureSchemaContextState
     public Dictionary<string, IReadOnlyList<EntitySchemaContext>> Cache { get; init; } = [];
     public Dictionary<string, RequestSchemaContextList> Request { get; init; } = [];
 
-    public bool TryGetLoading(string context, FeatureSchemaContextActionKind kind, out bool value) => Loading.TryGetValue(new(context, kind), out value);
-    public bool TryGetError(string context, FeatureSchemaContextActionKind kind, out string? error) => Error.TryGetValue(new(context, kind), out error);
+    public bool TryGetLoading(string scope, FeatureSchemaContextActionKind kind, out bool value) => Loading.TryGetValue(new(scope, kind), out value);
+    public bool TryGetError(string scope, FeatureSchemaContextActionKind kind, out string? error) => Error.TryGetValue(new(scope, kind), out error);
 
-    public bool TryGetList(string context, [NotNullWhen(true)] out IReadOnlyList<EntitySchemaContext>? list) => Cache.TryGetValue(context, out list);
-    public bool TryGetRequest(string context, [NotNullWhen(true)] out RequestSchemaContextList? request) => Request.TryGetValue(context, out request);
+    public bool TryGetList(string scope, [NotNullWhen(true)] out IReadOnlyList<EntitySchemaContext>? list) => Cache.TryGetValue(scope, out list);
+    public bool TryGetRequest(string scope, [NotNullWhen(true)] out RequestSchemaContextList? request) => Request.TryGetValue(scope, out request);
 }
 
 public static class FeatureSchemaContextReducers
 {
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceList(FeatureSchemaContextState state, SchemaContextListAction action) =>
-        StartAction(state, action.Context, FeatureSchemaContextActionKind.List, (next) => next with { Request = Set(next.Request, action.Context, action.Request) });
+    public static FeatureSchemaContextState ReduceList(FeatureSchemaContextState state, ListAction action) =>
+        StartAction(state, action.Scope, FeatureSchemaContextActionKind.List, (next) => next with { Request = Set(next.Request, action.Scope, action.Request) });
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceListResult(FeatureSchemaContextState state, SchemaContextResultAction<List<EntitySchemaContext>> action) =>
-        SuccessAction(state, action, (next, value) => next with { Cache = Set(next.Cache, action.Context, value) });
+    public static FeatureSchemaContextState ReduceListSuccess(FeatureSchemaContextState state, SuccessAction<List<EntitySchemaContext>> action) =>
+        HandleSuccessAction(state, action, (next, value) => next with { Cache = Set(next.Cache, action.Scope, value) });
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceListFailed(FeatureSchemaContextState state, SchemaContextFailedAction action) => FailedAction(state, action);
+    public static FeatureSchemaContextState ReduceListFailure(FeatureSchemaContextState state, FailureAction action) => HandleFailureAction(state, action);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceAdd(FeatureSchemaContextState state, SchemaContextAddAction action) => StartAction(state, action.Context, FeatureSchemaContextActionKind.Add);
+    public static FeatureSchemaContextState ReduceAdd(FeatureSchemaContextState state, AddAction action) => StartAction(state, action.Scope, FeatureSchemaContextActionKind.Add);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceAddResult(FeatureSchemaContextState state, SchemaContextResultAction<Guid> action) => SuccessAction(state, action);
+    public static FeatureSchemaContextState ReduceAddSuccess(FeatureSchemaContextState state, SuccessAction<Guid> action) => HandleSuccessAction(state, action);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceAddFailed(FeatureSchemaContextState state, SchemaContextFailedAction action) => FailedAction(state, action);
+    public static FeatureSchemaContextState ReduceAddFailure(FeatureSchemaContextState state, FailureAction action) => HandleFailureAction(state, action);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceUpdate(FeatureSchemaContextState state, SchemaContextUpdateAction action) => StartAction(state, action.Context, FeatureSchemaContextActionKind.Update);
+    public static FeatureSchemaContextState ReduceUpdate(FeatureSchemaContextState state, UpdateAction action) => StartAction(state, action.Scope, FeatureSchemaContextActionKind.Update);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceUpdateResult(FeatureSchemaContextState state, SchemaContextResultAction<Guid> action) => SuccessAction(state, action);
+    public static FeatureSchemaContextState ReduceUpdateSuccess(FeatureSchemaContextState state, SuccessAction<Guid> action) => HandleSuccessAction(state, action);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceUpdateFailed(FeatureSchemaContextState state, SchemaContextFailedAction action) => FailedAction(state, action);
+    public static FeatureSchemaContextState ReduceUpdateFailure(FeatureSchemaContextState state, FailureAction action) => HandleFailureAction(state, action);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceClone(FeatureSchemaContextState state, SchemaContextCloneAction action) => StartAction(state, action.Context, FeatureSchemaContextActionKind.Clone);
+    public static FeatureSchemaContextState ReduceClone(FeatureSchemaContextState state, CloneAction action) => StartAction(state, action.Scope, FeatureSchemaContextActionKind.Clone);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceCloneResult(FeatureSchemaContextState state, SchemaContextResultAction<Guid> action) => SuccessAction(state, action);
+    public static FeatureSchemaContextState ReduceCloneSuccess(FeatureSchemaContextState state, SuccessAction<Guid> action) => HandleSuccessAction(state, action);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceCloneFailed(FeatureSchemaContextState state, SchemaContextFailedAction action) => FailedAction(state, action);
+    public static FeatureSchemaContextState ReduceCloneFailure(FeatureSchemaContextState state, FailureAction action) => HandleFailureAction(state, action);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceDelete(FeatureSchemaContextState state, SchemaContextDeleteAction action) => StartAction(state, action.Context, FeatureSchemaContextActionKind.Delete);
+    public static FeatureSchemaContextState ReduceDelete(FeatureSchemaContextState state, DeleteAction action) => StartAction(state, action.Scope, FeatureSchemaContextActionKind.Delete);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceDeleteResult(FeatureSchemaContextState state, SchemaContextResultAction<Guid> action) => SuccessAction(state, action);
+    public static FeatureSchemaContextState ReduceDeleteSuccess(FeatureSchemaContextState state, SuccessAction<Guid> action) => HandleSuccessAction(state, action);
 
     [ReducerMethod]
-    public static FeatureSchemaContextState ReduceDeleteFailed(FeatureSchemaContextState state, SchemaContextFailedAction action) => FailedAction(state, action);
+    public static FeatureSchemaContextState ReduceDeleteFailure(FeatureSchemaContextState state, FailureAction action) => HandleFailureAction(state, action);
 
     private static Dictionary<TKey, TValue> Set<TKey, TValue>(Dictionary<TKey, TValue> source, TKey key, TValue value) where TKey : notnull
     {
-        return source.TryGetValue(key, out TValue? existing) && EqualityComparer<TValue>.Default.Equals(existing, value)
-            ? source
-            : new(source) { [key] = value };
+        return source.TryGetValue(key, out TValue? existing) && EqualityComparer<TValue>.Default.Equals(existing, value) ? source : new(source) { [key] = value };
     }
 
-    private static FeatureSchemaContextState StartAction(FeatureSchemaContextState state, string context, FeatureSchemaContextActionKind kind, Func<FeatureSchemaContextState, FeatureSchemaContextState>? cb = null)
+    private static FeatureSchemaContextState StartAction(FeatureSchemaContextState state, string scope, FeatureSchemaContextActionKind kind, Func<FeatureSchemaContextState, FeatureSchemaContextState>? cb = null)
     {
-        FeatureSchemaContextKey key = new(context, kind);
+        FeatureSchemaContextKey key = new(scope, kind);
         FeatureSchemaContextState newState = state with
         {
             Loading = Set(state.Loading, key, true),
@@ -103,9 +100,9 @@ public static class FeatureSchemaContextReducers
         return cb != null ? cb(newState) : newState;
     }
 
-    private static FeatureSchemaContextState SuccessAction<T>(FeatureSchemaContextState state, SchemaContextResultAction<T> action, Func<FeatureSchemaContextState, T, FeatureSchemaContextState>? cb = null)
+    private static FeatureSchemaContextState HandleSuccessAction<T>(FeatureSchemaContextState state, SuccessAction<T> action, Func<FeatureSchemaContextState, T, FeatureSchemaContextState>? cb = null)
     {
-        FeatureSchemaContextKey key = new(action.Context, action.Kind);
+        FeatureSchemaContextKey key = new(action.Scope, action.Kind);
         FeatureSchemaContextState newState = state with
         {
             Loading = Set(state.Loading, key, false)
@@ -114,9 +111,9 @@ public static class FeatureSchemaContextReducers
         return cb != null ? cb(newState, action.Value) : newState;
     }
 
-    private static FeatureSchemaContextState FailedAction(FeatureSchemaContextState state, SchemaContextFailedAction action, Func<FeatureSchemaContextState, SchemaContextFailedAction, FeatureSchemaContextState>? cb = null)
+    private static FeatureSchemaContextState HandleFailureAction(FeatureSchemaContextState state, FailureAction action, Func<FeatureSchemaContextState, FailureAction, FeatureSchemaContextState>? cb = null)
     {
-        FeatureSchemaContextKey key = new(action.Context, action.Kind);
+        FeatureSchemaContextKey key = new(action.Scope, action.Kind);
         FeatureSchemaContextState newState = state with
         {
             Loading = Set(state.Loading, key, false),
@@ -126,73 +123,73 @@ public static class FeatureSchemaContextReducers
         return cb != null ? cb(newState, action) : newState;
     }
 
-    public record SchemaContextListAction(string Context, RequestSchemaContextList Request);
+    public record ListAction(string Scope, RequestSchemaContextList Request);
 
-    public record SchemaContextAddAction(string Context, RequestSchemaContextCreate Request);
+    public record AddAction(string Scope, RequestSchemaContextCreate Request);
 
-    public record SchemaContextUpdateAction(string Context, RequestSchemaContextUpdate Request);
+    public record UpdateAction(string Scope, RequestSchemaContextUpdate Request);
 
-    public record SchemaContextCloneAction(string Context, RequestSchemaContextClone Request);
+    public record CloneAction(string Scope, RequestSchemaContextClone Request);
 
-    public record SchemaContextDeleteAction(string Context, RequestSchemaContextDelete Request);
+    public record DeleteAction(string Scope, RequestSchemaContextDelete Request);
 
-    public record SchemaContextResultAction<T>(string Context, FeatureSchemaContextActionKind Kind, T Value);
+    public record SuccessAction<T>(string Scope, FeatureSchemaContextActionKind Kind, T Value);
 
-    public record SchemaContextFailedAction(string Context, FeatureSchemaContextActionKind Kind, string Error);
+    public record FailureAction(string Scope, FeatureSchemaContextActionKind Kind, string Error);
 }
 
 public class FeatureSchemaContextListEffects(APIHttpClient client, IState<FeatureSchemaContextState> state)
 {
     [EffectMethod]
-    public Task Handle(SchemaContextListAction action, IDispatcher dispatcher)
+    public Task Handle(ListAction action, IDispatcher dispatcher)
     {
-        return Execute(action.Context, FeatureSchemaContextActionKind.List, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+        return Execute(action.Scope, FeatureSchemaContextActionKind.List, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
     [EffectMethod]
-    public Task Handle(SchemaContextAddAction action, IDispatcher dispatcher)
+    public Task Handle(AddAction action, IDispatcher dispatcher)
     {
-        return ExecuteWithRefresh(action.Context, FeatureSchemaContextActionKind.Add, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+        return ExecuteWithRefresh(action.Scope, FeatureSchemaContextActionKind.Add, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
     [EffectMethod]
-    public Task Handle(SchemaContextUpdateAction action, IDispatcher dispatcher)
+    public Task Handle(UpdateAction action, IDispatcher dispatcher)
     {
-        return ExecuteWithRefresh(action.Context, FeatureSchemaContextActionKind.Update, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+        return ExecuteWithRefresh(action.Scope, FeatureSchemaContextActionKind.Update, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
     [EffectMethod]
-    public Task Handle(SchemaContextCloneAction action, IDispatcher dispatcher)
+    public Task Handle(CloneAction action, IDispatcher dispatcher)
     {
-        return ExecuteWithRefresh(action.Context, FeatureSchemaContextActionKind.Clone, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+        return ExecuteWithRefresh(action.Scope, FeatureSchemaContextActionKind.Clone, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
     [EffectMethod]
-    public Task Handle(SchemaContextDeleteAction action, IDispatcher dispatcher)
+    public Task Handle(DeleteAction action, IDispatcher dispatcher)
     {
-        return ExecuteWithRefresh(action.Context, FeatureSchemaContextActionKind.Delete, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+        return ExecuteWithRefresh(action.Scope, FeatureSchemaContextActionKind.Delete, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
-    private static async Task Execute<TResult>(string context, FeatureSchemaContextActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
+    private static async Task Execute<TResult>(string scope, FeatureSchemaContextActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
     {
-        (bool success, TResult? result) = await TryExecute(context, kind, dispatcher, operation);
+        (bool success, TResult? result) = await TryExecute(scope, kind, dispatcher, operation);
         if (success)
         {
-            dispatcher.Dispatch(new SchemaContextResultAction<TResult>(context, kind, result!));
+            dispatcher.Dispatch(new SuccessAction<TResult>(scope, kind, result!));
         }
     }
 
-    private async Task ExecuteWithRefresh<TResult>(string context, FeatureSchemaContextActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
+    private async Task ExecuteWithRefresh<TResult>(string scope, FeatureSchemaContextActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
     {
-        (bool success, TResult? result) = await TryExecute(context, kind, dispatcher, operation);
+        (bool success, TResult? result) = await TryExecute(scope, kind, dispatcher, operation);
         if (success)
         {
-            dispatcher.Dispatch(new SchemaContextResultAction<TResult>(context, kind, result!));
-            RefreshList(context, dispatcher);
+            dispatcher.Dispatch(new SuccessAction<TResult>(scope, kind, result!));
+            RefreshList(scope, dispatcher);
         }
     }
 
-    private static async Task<(bool Success, TResult? Result)> TryExecute<TResult>(string context, FeatureSchemaContextActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
+    private static async Task<(bool Success, TResult? Result)> TryExecute<TResult>(string scope, FeatureSchemaContextActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
     {
         try
         {
@@ -201,16 +198,16 @@ public class FeatureSchemaContextListEffects(APIHttpClient client, IState<Featur
         }
         catch (Exception ex)
         {
-            dispatcher.Dispatch(new SchemaContextFailedAction(context, kind, ex.Message));
+            dispatcher.Dispatch(new FailureAction(scope, kind, ex.Message));
             return (false, default);
         }
     }
 
-    private void RefreshList(string context, IDispatcher dispatcher)
+    private void RefreshList(string scope, IDispatcher dispatcher)
     {
-        if (state.Value.TryGetRequest(context, out RequestSchemaContextList? request))
+        if (state.Value.TryGetRequest(scope, out RequestSchemaContextList? request))
         {
-            dispatcher.Dispatch(new SchemaContextListAction(context, request));
+            dispatcher.Dispatch(new ListAction(scope, request));
         }
     }
 }

@@ -1,0 +1,39 @@
+@inject IState<FeatureSchemaState> State
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@using Noxy.NET.EntityManagement.Administration.Components.Forms.SchemaParameter
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new parameter</DynamicHTMLTag>
+
+    <FormSchemaParameterTextCreate SchemaID="SchemaID" OnSubmit="Submit">
+        <div class="action-list">
+            <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
+                @TextService.Get(TextConstants.ButtonCreate)
+            </Button>
+        </div>
+    </FormSchemaParameterTextCreate>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid SchemaID { get; set; }
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
+
+    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
+
+    private void Submit(IWebFormContext<RequestSchemaParameterTextCreate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.AddTextAction(ScopeCurrent, value.Model));
+    }
+
+}

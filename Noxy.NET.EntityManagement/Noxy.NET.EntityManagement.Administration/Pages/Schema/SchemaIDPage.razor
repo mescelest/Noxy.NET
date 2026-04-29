@@ -8,7 +8,7 @@
         <Left>
         </Left>
         <Content>
-            <SchemaEntityView Context="@Context" ID="ID"/>
+            <SchemaEntityView Context="@Scope" ID="ID"/>
         </Content>
         <Right>
         </Right>
@@ -20,6 +20,6 @@
     [Parameter]
     public Guid ID { get; set; }
 
-    private string Context => ID.ToString();
+    private string Scope => ID.ToString();
 
 }

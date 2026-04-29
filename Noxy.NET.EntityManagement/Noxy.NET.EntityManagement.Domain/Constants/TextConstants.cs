@@ -119,6 +119,9 @@ public static class TextConstants
 
     public const string ValueOptionYes = "Value:Option:Yes";
     public const string ValueOptionNo = "Value:Option:No";
+    public const string ValueParameterTextTypeLine = "Value:ParameterTextType:Line";
+    public const string ValueParameterTextTypeText = "Value:ParameterTextType:Text";
+    public const string ValueParameterTextTypeRichText = "Value:ParameterTextType:RichText";
     public const string ValueIsSystemDefinedNeutral = "Value:IsSystemDefined:Neutral";
     public const string ValueIsSystemDefinedYes = "Value:IsSystemDefined:Yes";
     public const string ValueIsSystemDefinedNo = "Value:IsSystemDefined:No";

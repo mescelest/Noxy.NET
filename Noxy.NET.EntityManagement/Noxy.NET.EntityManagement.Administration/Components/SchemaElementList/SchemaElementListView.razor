@@ -9,9 +9,9 @@
         {
             <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of elements for @Schema?.Name</DynamicHTMLTag>
 
-            @foreach (EntitySchemaElement item in List)
+            @foreach (EntitySchemaElement entitySchemaElement in List)
             {
-                <SchemaElementListGroup Schema="Schema" SchemaElement="item" Context="@ContextCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+                @ChildContent((Schema, entitySchemaElement))
             }
         }
     </Loader>
@@ -22,21 +22,28 @@
     [Parameter, EditorRequired]
     public Guid SchemaID { get; set; }
 
-    [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? GetComponentName();
+    [Parameter, EditorRequired]
+    public RenderFragment<(EntitySchema Schema, EntitySchemaElement SchemaElement)> ChildContent { get; set; }
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
-    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H3;
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
 
-    private bool IsLoading => IsLoadingSchema || IsLoadingElement;
+    [Parameter]
+    public RequestSchemaElementList? Request { get; set; }
+    private RequestSchemaElementList RequestCurrent => Request ?? new() { SchemaID = SchemaID };
 
-    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Find, out bool value) && value;
-    private EntitySchema? Schema => StateSchema.Value.TryGetFind(ContextCurrent, out EntitySchema? value) ? value : null;
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
 
-    private bool IsLoadingElement => StateElement.Value.TryGetLoading(ContextCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchemaElement> List => StateElement.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaElement>? list) ? list : [];
+    private bool IsLoading => IsLoadingSchema || IsLoadingList;
+
+    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => StateSchema.Value.TryGetFind(ScopeCurrent, out EntitySchema? value) ? value : null;
+
+    private bool IsLoadingList => StateElement.Value.TryGetLoading(ScopeCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaElement> List => StateElement.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaElement>? list) ? list : [];
 
     protected override void OnInitialized()
     {
@@ -44,12 +51,12 @@
 
         if (Schema == null && !IsLoadingSchema)
         {
-            Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaFindAction(ContextCurrent, new() { ID = SchemaID }));
+            Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(ScopeCurrent, new() { ID = SchemaID }));
         }
 
-        if (List.Count == 0 && !IsLoadingElement)
+        if (List.Count == 0 && !IsLoadingList)
         {
-            Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementListAction(ContextCurrent, new() { SchemaID = SchemaID }));
+            Dispatcher.Dispatch(new FeatureSchemaElementReducers.ListAction(ScopeCurrent, RequestCurrent));
         }
     }
 

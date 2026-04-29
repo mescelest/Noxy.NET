@@ -6,19 +6,21 @@
 <div class="@CssClass">
     <MagazineFrame>
         <Left>
-            <SchemaListFilter Context="@Context" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+            <SchemaListFilter Context="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
         </Left>
         <Content>
-            <SchemaListView Context="@Context" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
+            <SchemaListView Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2">
+                <SchemaListGroup Schema="context" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+            </SchemaListView>
         </Content>
         <Right>
-            <SchemaListCreate Context="@Context" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+            <SchemaListCreate Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
         </Right>
     </MagazineFrame>
 </div>
 
 @code {
 
-    private string Context => GetComponentName();
+    private string Scope => GetComponentName();
 
 }

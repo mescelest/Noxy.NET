@@ -31,7 +31,7 @@
 
         if (Schema == null && !IsLoading)
         {
-            Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaFindAction(ContextCurrent, new() { ID = ID }));
+            Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(ContextCurrent, new() { ID = ID }));
         }
     }
 

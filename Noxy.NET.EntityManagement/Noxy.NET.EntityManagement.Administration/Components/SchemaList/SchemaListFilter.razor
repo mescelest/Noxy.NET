@@ -20,8 +20,8 @@
 @code {
 
     [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? GetComponentName();
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
@@ -29,7 +29,7 @@
 
     private void Submit(IWebFormContext<RequestSchemaList> value)
     {
-        Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaListAction(ContextCurrent, value.Model));
+        Dispatcher.Dispatch(new FeatureSchemaReducers.ListAction(ScopeCurrent, value.Model));
     }
 
 }

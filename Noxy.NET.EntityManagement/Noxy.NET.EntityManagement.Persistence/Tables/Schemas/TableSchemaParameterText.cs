@@ -7,7 +7,7 @@ namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 public class TableSchemaParameterText : TableSchemaParameter
 {
     [Required]
-    public required TextParameterTypeEnum Type { get; set; }
+    public required ParameterTextTypeEnum Type { get; set; }
 
     public override TableSchemaParameterText Clone(Guid? schemaID = null)
     {

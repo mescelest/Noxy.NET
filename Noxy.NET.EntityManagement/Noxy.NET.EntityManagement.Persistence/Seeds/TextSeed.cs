@@ -189,6 +189,9 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
 
         RegisterText(TextConstants.ValueOptionYes, "Yes");
         RegisterText(TextConstants.ValueOptionNo, "No");
+        RegisterText(TextConstants.ValueParameterTextTypeLine, "Line");
+        RegisterText(TextConstants.ValueParameterTextTypeText, "Text");
+        RegisterText(TextConstants.ValueParameterTextTypeRichText, "Rich text");
         RegisterText(TextConstants.ValueIsSystemDefinedNeutral, "Either");
         RegisterText(TextConstants.ValueIsSystemDefinedYes, "System defined");
         RegisterText(TextConstants.ValueIsSystemDefinedNo, "User defined");

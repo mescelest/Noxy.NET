@@ -1,14 +1,10 @@
-using System.ComponentModel;
 using System.Text.Json.Serialization;
-using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 
 public class BaseEntitySchema : BaseEntity
 {
-    [DisplayName(TextConstants.LabelFormSchemaIdentifier)]
-    [Description(TextConstants.HelpFormSchemaIdentifier)]
     public required string SchemaIdentifier { get; set; }
 
     [JsonIgnore]

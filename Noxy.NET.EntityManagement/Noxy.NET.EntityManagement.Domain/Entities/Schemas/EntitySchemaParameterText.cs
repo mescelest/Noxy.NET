@@ -5,5 +5,5 @@ namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 public class EntitySchemaParameterText : EntitySchemaParameter
 {
-    public required TextParameterTypeEnum Type { get; set; }
+    public required ParameterTextTypeEnum Type { get; set; }
 }

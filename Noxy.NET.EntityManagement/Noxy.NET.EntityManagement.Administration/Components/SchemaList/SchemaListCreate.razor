@@ -18,18 +18,18 @@
 @code {
 
     [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? GetComponentName();
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
 
-    private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
+    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
     
     private void Submit(IWebFormContext<RequestSchemaCreate> value)
     {
-        Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaAddAction(ContextCurrent, value.Model));
+        Dispatcher.Dispatch(new FeatureSchemaReducers.AddAction(ScopeCurrent, value.Model));
     }
 
 }

@@ -39,8 +39,8 @@
     public required Guid ID { get; set; }
 
     [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? GetComponentName();
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
@@ -48,14 +48,14 @@
 
     private bool _isCollapsed = true;
 
-    private bool IsLoading => StateContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchemaElement> List => StateContext.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];
+    private bool IsLoading => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaElement> List => StateContext.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];
 
     private void SetCollapsed(bool value)
     {
         _isCollapsed = value;
-        if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ContextCurrent) || IsLoading) return;
-        Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementListAction(ContextCurrent, new()));
+        if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ScopeCurrent) || IsLoading) return;
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.ListAction(ScopeCurrent, new()));
     }
 
 }

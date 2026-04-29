@@ -21,7 +21,7 @@
 
     private void TitleSearchHandler(string obj)
     {
-        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.SchemaParameterListAction(RequestContext, new()
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(RequestContext, new()
         {
                 SchemaID = SchemaID,
                 PageSize = Count,

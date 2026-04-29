@@ -2,14 +2,14 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestAuthenticationSignUp" Context="@Context" OnSubmit="ForwardSubmit">
-        <InputGroupText DisplayName="@GetDisplayName(nameof(Context.Model.Email))" Description="@GetDescription(nameof(Context.Model.Email))"
-                        @bind-Value="Context.Model.Email"/>
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Email))" Description="@GetDescription(nameof(Model.Email))"
+                        @bind-Value="Model.Email"/>
 
-        <InputGroupPassword DisplayName="@GetDisplayName(nameof(Context.Model.Password))" Description="@GetDescription(nameof(Context.Model.Password))"
-                            @bind-Value="Context.Model.Password"/>
+        <InputGroupPassword DisplayName="@GetDisplayName(nameof(Model.Password))" Description="@GetDescription(nameof(Model.Password))"
+                            @bind-Value="Model.Password"/>
 
-        <InputGroupPassword DisplayName="@GetDisplayName(nameof(Context.Model.ConfirmPassword))" Description="@GetDescription(nameof(Context.Model.ConfirmPassword))"
-                            Autocomplete="WebFormInputFieldPasswordAutocompleteEnum.NewPassword" @bind-Value="Context.Model.ConfirmPassword"/>
+        <InputGroupPassword DisplayName="@GetDisplayName(nameof(Model.ConfirmPassword))" Description="@GetDescription(nameof(Model.ConfirmPassword))"
+                            Autocomplete="WebFormInputFieldPasswordAutocompleteEnum.NewPassword" @bind-Value="Model.ConfirmPassword"/>
 
         @ChildContent
     </WebForm>

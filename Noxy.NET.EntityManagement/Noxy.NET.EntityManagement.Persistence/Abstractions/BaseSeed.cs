@@ -28,7 +28,7 @@ public class BaseSeed(ModelBuilder builder, TableSchema refSchema)
         };
     }
 
-    protected void RegisterText(string constant, string value, string culture = "en", TextParameterTypeEnum type = TextParameterTypeEnum.Line, bool isApprovalRequired = false)
+    protected void RegisterText(string constant, string value, string culture = "en", ParameterTextTypeEnum type = ParameterTextTypeEnum.Line, bool isApprovalRequired = false)
     {
         TableSchemaParameterText tableParameterText = new()
         {

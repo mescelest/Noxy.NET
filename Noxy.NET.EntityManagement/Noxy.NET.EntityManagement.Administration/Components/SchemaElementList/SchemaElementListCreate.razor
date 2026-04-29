@@ -20,18 +20,18 @@
     public Guid SchemaID { get; set; }
 
     [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? GetComponentName();
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
 
-    private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
+    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
 
     private void Submit(IWebFormContext<RequestSchemaElementCreate> value)
     {
-        Dispatcher.Dispatch(new FeatureSchemaElementReducers.SchemaElementAddAction(ContextCurrent, value.Model));
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.AddAction(ScopeCurrent, value.Model));
     }
 
 }

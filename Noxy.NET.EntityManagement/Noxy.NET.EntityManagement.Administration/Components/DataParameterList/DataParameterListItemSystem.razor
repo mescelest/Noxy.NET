@@ -1,0 +1,117 @@
+@inject IState<FeatureSchemaParameterDataParameterListState> StateData
+@inject TextService TextService
+@inject APIHttpClient APIHttpClient
+@inject SystemConstantService SystemConstantService
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="create">
+        <FormDataParameterSystemCreate @ref="_ref" SchemaParameter="@SchemaParameter" OnSubmit="Submit">
+            <div class="action-list">
+                <Button type="submit">Create new value</Button>
+            </div>
+        </FormDataParameterSystemCreate>
+    </div>
+
+    <div class="table">
+        <div class="header row">
+            <b></b>
+            <b class="column left">@Presentation.Services.TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
+            <b class="column right">@Presentation.Services.TextService.Get(TextConstants.LabelTimeEffective, GetComponentName())</b>
+            <b class="column right">@Presentation.Services.TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
+            <b class="column right">@Presentation.Services.TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
+        </div>
+
+        <div class="body">
+            @{
+                EntityDataParameterSystem[] list = GetParameterList();
+                Guid current = GetCurrent(list);
+
+                foreach (EntityDataParameterSystem item in list)
+                {
+                    bool? isCurrent = current == item.ID;
+                    <div class="row" current="@isCurrent">
+                            <span>
+                                @if (item.TimeEffective > DateTime.UtcNow)
+                                {
+                                    <IconMinus Size="IconSizeEnum.ExtraExtraSmall" @onclick="() => DeleteParameter(item)"/>
+                                }
+                                else if (isCurrent.Value)
+                                {
+                                    <IconChevronRight Size="IconSizeEnum.ExtraExtraSmall"/>
+                                }
+                                else
+                                {
+                                    <IconTick Size="IconSizeEnum.ExtraExtraSmall" @onclick="() => UpdateForm(item)"/>
+                                }
+                            </span>
+                        <span class="column left">@item.Value</span>
+                        <span class="column right">@Presentation.Services.SystemConstantService.AsDate(item.TimeEffective)</span>
+                        <span class="column right">@Presentation.Services.SystemConstantService.AsDate(item.TimeApproved)</span>
+                        <span class="column right">@Presentation.Services.SystemConstantService.AsDate(item.TimeCreated)</span>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchemaParameterSystem SchemaParameter { get; set; }
+
+    private FormDataParameterSystemCreate? _ref;
+
+    private EntityDataParameterSystem[] GetParameterList()
+    {
+        IReadOnlyList<EntityDataParameter> list = StateData.Value.Cache.TryGetValue(SchemaParameter.SchemaIdentifier, out IReadOnlyList<EntityDataParameter>? value) ? value : [];
+        return list.OfType<EntityDataParameterSystem>().OrderByDescending(x => x.TimeEffective).ToArray();
+    }
+
+    private static Guid GetCurrent(EntityDataParameterSystem[] list)
+    {
+        return list.Length != 0
+                ? list.FirstOrDefault(x => x.TimeEffective < DateTime.UtcNow && x.TimeApproved != null)?.ID ?? Guid.Empty
+                : Guid.Empty;
+    }
+
+    private void UpdateForm(EntityDataParameterSystem entity)
+    {
+        if (_ref == null) return;
+
+        _ref.Model.Value = entity.Value;
+        _ref.Model.TimeEffective = entity.TimeEffective;
+    }
+
+    private async Task DeleteParameter(EntityDataParameter entity)
+    {
+        try
+        {
+            ResponseDataParameterDelete response = await Presentation.Services.APIHttpClient.SendRequest(new RequestDataParameterDelete { ID = entity.ID });
+            Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.RemoveDataParameterListAction(SchemaParameter.SchemaIdentifier, response.ID));
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
+    private async Task Submit(WebFormContext<RequestDataParameterSystemCreate> context)
+    {
+        try
+        {
+            ResponseDataParameterSystemCreate response = await Presentation.Services.APIHttpClient.SendRequest(context.Model);
+            Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.AddDataParameterListAction(SchemaParameter.SchemaIdentifier, response.Value));
+            context.Reset();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
+}

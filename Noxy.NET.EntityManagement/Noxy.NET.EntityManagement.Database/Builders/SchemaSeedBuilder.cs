@@ -78,7 +78,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaParameterText AddParameterText(string identifier, string name, TextParameterTypeEnum type = TextParameterTypeEnum.Line, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false,
+    public TableSchemaParameterText AddParameterText(string identifier, string name, ParameterTextTypeEnum type = ParameterTextTypeEnum.Line, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false,
         DateTime? timeCreated = null)
     {
         return context.SchemaParameterText.Add(new()

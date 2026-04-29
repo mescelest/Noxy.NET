@@ -8,23 +8,30 @@
 
         @foreach (EntitySchema item in List)
         {
-            <SchemaListGroup Schema="item" Context="@ContextCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+            @ChildContent(item)
         }
     </Loader>
 </div>
 
 @code {
 
+    [Parameter, EditorRequired]
+    public RenderFragment<EntitySchema> ChildContent { get; set; }
+
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
 
     [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? GetComponentName();
+    public RequestSchemaList? Request { get; set; }
+    private RequestSchemaList RequestCurrent => Request ?? new();
 
-    private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchema> List => State.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchema>? list) ? list : [];
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
+
+    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchema> List => State.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchema>? list) ? list : [];
 
     protected override void OnInitialized()
     {
@@ -32,7 +39,7 @@
 
         if (List.Count == 0 && !IsLoading)
         {
-            Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaListAction(ContextCurrent, new()));
+            Dispatcher.Dispatch(new FeatureSchemaReducers.ListAction(ScopeCurrent, RequestCurrent));
         }
     }
 

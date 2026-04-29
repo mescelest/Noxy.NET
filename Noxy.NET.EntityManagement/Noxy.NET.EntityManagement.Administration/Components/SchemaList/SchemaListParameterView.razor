@@ -7,7 +7,7 @@
     <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
             <div class="title">
-                <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Element list</DynamicHTMLTag>
+                <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Parameter list</DynamicHTMLTag>
                 <NavLink href="@Link">
                     <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
                 </NavLink>
@@ -25,13 +25,15 @@
                 </div>
                 @foreach (EntitySchemaParameter.Discriminator item in List)
                 {
+                    EntitySchemaParameter parameter = @item.GetValue();
+
                     <div class="grid-row">
-                        <span>@item.SchemaIdentifier</span>
-                        <span>@item.Name</span>
-                        <span>@item.Note</span>
-                        <span>@item.TitleTextParameter?.Name</span>
-                        <span>@item.DescriptionTextParameter?.Name</span>
-                        <span>@item.TimeCreated</span>
+                        <span>@parameter.SchemaIdentifier</span>
+                        <span>@parameter.Name</span>
+                        <span>@parameter.Note</span>
+                        <span>@parameter.IsApprovalRequired</span>
+                        <span>@parameter.IsSystemDefined</span>
+                        <span>@parameter.TimeCreated</span>
                     </div>
                 }
             </div>
@@ -49,21 +51,21 @@
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H4;
 
     [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? $"{GetComponentName()}:{SchemaID}";
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{SchemaID}";
 
     private bool _isCollapsed = true;
 
     private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
     private string Link => $"/schema/{SchemaID}/parameter";
-    private bool IsLoading => StateContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaParameterActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchemaParameter.Discriminator> List => StateContext.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? value) ? value : [];
+    private bool IsLoading => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaParameterActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaParameter.Discriminator> List => StateContext.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? value) ? value : [];
 
     private void SetCollapsed(bool value)
     {
         _isCollapsed = value;
-        if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ContextCurrent) || IsLoading) return;
-        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.SchemaParameterListAction(ContextCurrent, new() { SchemaID = SchemaID }));
+        if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ScopeCurrent) || IsLoading) return;
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, new() { SchemaID = SchemaID }));
     }
 
 }
