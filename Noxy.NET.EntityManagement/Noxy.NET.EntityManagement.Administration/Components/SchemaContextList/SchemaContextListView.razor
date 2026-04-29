@@ -1,0 +1,56 @@
+@inject IState<FeatureSchemaState> StateSchema
+@inject IState<FeatureSchemaContextState> StateElement
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Loader Loading="IsLoading">
+        @if (Schema != null)
+        {
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of contexts for @Schema?.Name</DynamicHTMLTag>
+
+            @foreach (EntitySchemaContext item in List)
+            {
+                <SchemaContextListGroup Schema="Schema" SchemaContext="item" Context="@ContextCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+            }
+        }
+    </Loader>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid SchemaID { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H3;
+
+    private bool IsLoading => IsLoadingSchema || IsLoadingElement;
+
+    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => StateSchema.Value.TryGetFind(ContextCurrent, out EntitySchema? value) ? value : null;
+
+    private bool IsLoadingElement => StateElement.Value.TryGetLoading(ContextCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaContext> List => StateElement.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaContext>? list) ? list : [];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (Schema == null && !IsLoadingSchema)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaReducers.SchemaFindAction(ContextCurrent, new() { ID = SchemaID }));
+        }
+
+        if (List.Count == 0 && !IsLoadingElement)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaContextReducers.SchemaContextListAction(ContextCurrent, new() { SchemaID = SchemaID }));
+        }
+    }
+
+}

@@ -18,7 +18,7 @@ public class TableSchemaElement : BaseTableSchema, ISchemaMetadata, ISchemaOrder
     public string Note { get; set; } = string.Empty;
 
     [Required]
-    public required int Order { get; set; }
+    public required int Weight { get; set; }
 
     [Required]
     public TableSchemaParameterText? TitleTextParameter { get; set; }
@@ -27,11 +27,9 @@ public class TableSchemaElement : BaseTableSchema, ISchemaMetadata, ISchemaOrder
     public TableSchemaParameterText? DescriptionTextParameter { get; set; }
     public Guid? DescriptionTextParameterID { get; set; }
 
-    public ICollection<TableJunctionSchemaElementHasElement>? ElementList { get; set; }
     public ICollection<TableJunctionSchemaElementHasProperty>? PropertyList { get; set; }
 
     public ICollection<TableJunctionSchemaContextHasElement>? RelationContextList { get; set; }
-    public ICollection<TableJunctionSchemaElementHasElement>? RelationElementList { get; set; }
 
     public TableSchemaElement Clone(Guid? schemaID = null)
     {
@@ -40,7 +38,7 @@ public class TableSchemaElement : BaseTableSchema, ISchemaMetadata, ISchemaOrder
             SchemaID = schemaID ?? SchemaID,
             SchemaIdentifier = SchemaIdentifier,
             Name = Name,
-            Order = Order,
+            Weight = Weight,
             Note = Note,
             TitleTextParameterID = TitleTextParameterID,
             DescriptionTextParameterID = DescriptionTextParameterID,

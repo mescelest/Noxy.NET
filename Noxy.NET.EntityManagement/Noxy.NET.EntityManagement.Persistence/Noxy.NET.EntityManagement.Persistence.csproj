@@ -28,9 +28,4 @@
         <ProjectReference Include="..\Noxy.NET.EntityManagement.Domain\Noxy.NET.EntityManagement.Domain.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Compile Remove="Migrations\20250608201508_Initial.cs"/>
-        <Compile Remove="Migrations\20250608201508_Initial.Designer.cs"/>
-    </ItemGroup>
-
 </Project>

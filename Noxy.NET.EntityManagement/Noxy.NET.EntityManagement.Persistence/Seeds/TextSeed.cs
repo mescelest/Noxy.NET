@@ -134,7 +134,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.LabelFormNote, "Note");
         RegisterText(TextConstants.LabelFormTitle, "Title");
         RegisterText(TextConstants.LabelFormDescription, "Description");
-        RegisterText(TextConstants.LabelFormOrder, "Order");
+        RegisterText(TextConstants.LabelFormWeight, "Weight");
         RegisterText(TextConstants.LabelFormIsSystemDefined, "Is system defined?");
         RegisterText(TextConstants.LabelFormIsApprovalRequired, "Is approval required?");
         RegisterText(TextConstants.LabelFormParameterType, "Parameter type");
@@ -166,7 +166,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.HelpFormNote, "A short note detailing how this entity type is used. Should only be visible in the configuration.");
         RegisterText(TextConstants.HelpFormTitle, "The title used when displaying an entity of this type.");
         RegisterText(TextConstants.HelpFormDescription, "The description used when displaying an entity of this type.");
-        RegisterText(TextConstants.HelpFormOrder, "The order in which this entity type is sorted.");
+        RegisterText(TextConstants.HelpFormWeight, "The sorting weight of this entity type when it is being ordered.");
         RegisterText(TextConstants.HelpFormIsSystemDefined, "Determines if the entity is system defined and therefore cannot be changed.");
         RegisterText(TextConstants.HelpFormIsApprovalRequired, "Determines if another user must approve a text parameter value before it becomes active.");
         RegisterText(TextConstants.HelpFormParameterType, "The specific type of parameter to be used.");

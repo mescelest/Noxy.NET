@@ -1,0 +1,69 @@
+@inject IState<FeatureSchemaParameterState> StateContext
+@inject TextService TextService
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+        <Header>
+            <div class="title">
+                <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Element list</DynamicHTMLTag>
+                <NavLink href="@Link">
+                    <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
+                </NavLink>
+            </div>
+        </Header>
+        <Content>
+            <div class="grid">
+                <div class="grid-header">
+                    <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelName)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelNote)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelTitle)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelDescription)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelTimeCreated)</strong>
+                </div>
+                @foreach (EntitySchemaParameter.Discriminator item in List)
+                {
+                    <div class="grid-row">
+                        <span>@item.SchemaIdentifier</span>
+                        <span>@item.Name</span>
+                        <span>@item.Note</span>
+                        <span>@item.TitleTextParameter?.Name</span>
+                        <span>@item.DescriptionTextParameter?.Name</span>
+                        <span>@item.TimeCreated</span>
+                    </div>
+                }
+            </div>
+        </Content>
+    </Collapsible>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required Guid SchemaID { get; set; }
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H4;
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? $"{GetComponentName()}:{SchemaID}";
+
+    private bool _isCollapsed = true;
+
+    private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
+    private string Link => $"/schema/{SchemaID}/parameter";
+    private bool IsLoading => StateContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaParameterActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaParameter.Discriminator> List => StateContext.Value.TryGetList(ContextCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? value) ? value : [];
+
+    private void SetCollapsed(bool value)
+    {
+        _isCollapsed = value;
+        if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ContextCurrent) || IsLoading) return;
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.SchemaParameterListAction(ContextCurrent, new() { SchemaID = SchemaID }));
+    }
+
+}

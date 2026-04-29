@@ -4,7 +4,7 @@
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new schema</DynamicHTMLTag>
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@TextService.Get(TextConstants.HeaderFormCreateEntitySchema)</DynamicHTMLTag>
 
     <FormSchemaCreate OnSubmit="Submit">
         <div class="action-list">

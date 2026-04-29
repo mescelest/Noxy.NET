@@ -242,19 +242,84 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     #endregion -- SchemaElement --
 
+    #region -- SchemaContext --
+
     public async Task<EntitySchemaContext> GetSchemaContextByID(Guid id)
     {
-        return MapperT2E.Map(await Context.SchemaContext
+        TableSchemaContext result = await Context.SchemaContext
             .AsNoTracking()
             .Include(x => x.TitleTextParameter)
             .Include(x => x.DescriptionTextParameter)
-            .SingleAsync(x => x.ID == id));
+            .SingleAsync(x => x.ID == id);
+        return MapperT2E.Map(result);
     }
 
-    public async Task<EntitySchemaContext> Create(EntitySchemaContext entity)
+    public async Task<List<EntitySchemaContext>> GetSchemaContextList(FilterSchemaContextList filter)
     {
-        return await CreateEntity(entity, MapperE2T.Map, MapperT2E.Map);
+        IQueryable<TableSchemaContext> query = Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+
+        List<TableSchemaContext> result = await query
+            .Include(x => x.TitleTextParameter)
+            .Include(x => x.DescriptionTextParameter)
+            .OrderBy(x => x.Name)
+            .Skip(filter.PageNumber * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return [.. result.Select(MapperT2E.Map)];
     }
+
+    public async Task<EntitySchemaContext> CreateSchemaContext(EntitySchemaContext entity)
+    {
+        EntityEntry<TableSchemaContext> result = await Context.SchemaContext.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaContext> UpdateSchemaContext(EntitySchemaContext entity)
+    {
+        TableSchemaContext result = await Context.SchemaContext.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        if (entity.SchemaIdentifier != result.SchemaIdentifier)
+        {
+            TableSchemaContext? valid = await Context.SchemaContext.AsNoTracking().FirstOrDefaultAsync(x => x.SchemaIdentifier == entity.SchemaIdentifier);
+            if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
+        }
+
+        //result.SchemaID = entity.SchemaID;
+        result.SchemaIdentifier = entity.SchemaIdentifier;
+        result.Name = entity.Name;
+        result.Note = entity.Note;
+        result.TitleTextParameterID = entity.TitleTextParameterID;
+        result.DescriptionTextParameterID = entity.DescriptionTextParameterID;
+        result.TimeUpdated = DateTime.UtcNow;
+        Context.SchemaContext.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaContext> CloneSchemaContext(Guid id)
+    {
+        TableSchemaContext entity = await Context.SchemaContext.AsNoTracking().FirstAsync(x => x.ID == id);
+        entity = entity.Clone();
+        entity.SchemaIdentifier = Guid.NewGuid().ToString("N");
+        await Context.SchemaContext.AddAsync(entity);
+
+        return MapperT2E.Map(entity);
+    }
+
+    public async Task<Guid> DeleteSchemaContext(Guid id)
+    {
+        TableSchemaContext entity = await Context.SchemaContext.AsNoTracking().FirstAsync(x => x.ID == id);
+        TableSchema schema = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entity.SchemaID);
+        if (schema.TimeActivated != null) throw new InvalidOperationException("Cannot delete schema element from schema that has been activated.");
+
+        Context.SchemaContext.Remove(entity);
+
+        return entity.ID;
+    }
+
+    #endregion -- SchemaContext --
 
     public async Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id)
     {
@@ -300,22 +365,6 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         List<TableSchemaParameter> result = await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         return [.. result.Select(MapperT2E.Map)];
     }
-
-    public async Task<List<EntitySchemaContext>> GetSchemaContextList(FilterSchemaContextList filter)
-    {
-        IQueryable<TableSchemaContext> query = Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
-
-        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
-
-        List<TableSchemaContext> result = await query
-            .OrderBy(x => x.Name)
-            .Skip(filter.PageNumber * filter.PageSize)
-            .Take(filter.PageSize)
-            .ToListAsync();
-
-        return [.. result.Select(MapperT2E.Map)];
-    }
-
 
     public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
     {
@@ -370,13 +419,6 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return MapperT2E.Map(result.Entity);
     }
 
-
-    public async Task<EntitySchemaElement> Create(EntitySchemaElement entity)
-    {
-        await UpdateOrder<TableSchemaElement, EntitySchemaElement>(entity);
-        return await CreateEntity(entity, MapperE2T.Map, MapperT2E.Map);
-    }
-
     public async Task<EntitySchemaProperty.Discriminator> Create(EntitySchemaProperty entity)
     {
         await UpdateOrder<TableSchemaProperty, EntitySchemaProperty>(entity);
@@ -388,19 +430,9 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     #region -- Update --
 
-    public void Update(EntitySchemaContext entity)
-    {
-        Context.SchemaContext.Update(MapperE2T.Map(entity));
-    }
-
     public void Update(EntitySchemaParameter entity)
     {
         Context.SchemaParameter.Update(MapperE2T.Map(entity));
-    }
-
-    public void Update(EntitySchemaElement entity)
-    {
-        Context.SchemaElement.Update(MapperE2T.Map(entity));
     }
 
     public void Update(EntitySchemaProperty baseEntity)
@@ -417,16 +449,10 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return mapT2E(await Context.Set<TTable>().AsNoTracking().SingleAsync(x => x.ID == id));
     }
 
-    private async Task<TEntity> CreateEntity<TEntity, TTable>(TEntity entity, Func<TEntity, TTable> mapE2T, Func<TTable, TEntity> mapT2E) where TEntity : BaseEntitySchema where TTable : BaseTableSchema
-    {
-        EntityEntry<TTable> result = await Context.Set<TTable>().AddAsync(mapE2T(entity));
-        return mapT2E(result.Entity);
-    }
-
     private async Task UpdateOrder<TTable, TEntity>(TEntity entity) where TTable : BaseTableSchema where TEntity : BaseEntitySchema, ISchemaOrdering
     {
-        if (entity.Order != BaseEntity.DefaultOrder) return;
-        entity.Order = await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
+        if (entity.Weight != BaseEntity.DefaultWeight) return;
+        entity.Weight = await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
     }
 
     #endregion

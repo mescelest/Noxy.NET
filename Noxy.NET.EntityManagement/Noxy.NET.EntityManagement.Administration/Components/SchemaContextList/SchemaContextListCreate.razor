@@ -1,0 +1,37 @@
+@inject IState<FeatureSchemaState> State
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new context</DynamicHTMLTag>
+    <FormSchemaContextCreate SchemaID="SchemaID" OnSubmit="Submit">
+        <div class="action-list">
+            <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
+                @TextService.Get(TextConstants.ButtonCreate)
+            </Button>
+        </div>
+    </FormSchemaContextCreate>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid SchemaID { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
+
+    private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
+
+    private void Submit(IWebFormContext<RequestSchemaContextCreate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.SchemaContextAddAction(ContextCurrent, value.Model));
+    }
+
+}

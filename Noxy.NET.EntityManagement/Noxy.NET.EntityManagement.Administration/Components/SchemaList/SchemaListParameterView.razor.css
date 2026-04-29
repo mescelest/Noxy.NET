@@ -1,0 +1,40 @@
+.SchemaListElementView {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-xxs);
+    border-radius: var(--size-border-radius-lg);
+}
+
+.title {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: row wrap;
+    column-gap: var(--size-gap-xs);
+    align-items: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: max-content max-content 1fr max-content max-content max-content;
+    column-gap: var(--size-gap-xs);
+    row-gap: var(--size-gap-xs);
+    padding: var(--size-gap-xxs);
+}
+
+.grid-header {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    border-bottom: 2px solid color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
+    background-color: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
+    padding: var(--size-gap-xxs);
+    margin: calc(-1 * var(--size-gap-xxs));
+    margin-bottom: calc(-1 * var(--size-gap-tiny));
+}
+
+.grid-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+}

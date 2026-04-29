@@ -11,7 +11,7 @@
     flex: 1 1 auto;
     flex-flow: column;
     position: absolute;
-    top: 100%;
+    top: calc(100% - var(--size-border-radius-md, 4px));
     left: 0;
     right: 0;
     z-index: 1000;
@@ -21,10 +21,14 @@
     background-color: var(--color-primary, #FFFFFF);
 }
 
+.loading,
 .min-length,
 .no-result,
 .option {
+    max-width: 100%;
     padding: var(--size-gap-xxs, 8px) var(--size-gap-xxs, 8px);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .option {

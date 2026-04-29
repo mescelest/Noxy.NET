@@ -8,7 +8,6 @@ namespace Noxy.NET.EntityManagement.Database.Builders;
 public class SchemaSeedBuilder(DataContext context, TableSchema schema)
 {
     public DateTime Now { get; } = DateTime.UtcNow;
-    private Dictionary<string, int> OrderCollection { get; } = [];
 
     public static TableSchema CreateSchema(string name, string note = "", bool isActive = false, DateTime? timeActivated = null, DateTime? timeCreated = null)
     {
@@ -36,7 +35,22 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaParameterStyle AddDynamicValueStyleParameter(string identifier, string name, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false, DateTime? timeCreated = null)
+    public TableSchemaElement AddElement(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, int weight = 0, DateTime? timeCreated = null)
+    {
+        return context.SchemaElement.Add(new()
+        {
+            SchemaIdentifier = identifier,
+            Name = name,
+            Note = note,
+            Weight = weight,
+            SchemaID = schema.ID,
+            TitleTextParameterID = title.ID,
+            DescriptionTextParameterID = description?.ID,
+            TimeCreated = timeCreated ?? Now
+        }).Entity;
+    }
+
+    public TableSchemaParameterStyle AddParameterStyle(string identifier, string name, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false, DateTime? timeCreated = null)
     {
         return context.SchemaParameterStyle.Add(new()
         {
@@ -50,7 +64,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaParameterSystem AddDynamicValueSystemParameter(string identifier, string name, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false, DateTime? timeCreated = null)
+    public TableSchemaParameterSystem AddParameterSystem(string identifier, string name, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false, DateTime? timeCreated = null)
     {
         return context.SchemaParameterSystem.Add(new()
         {
@@ -64,7 +78,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaParameterText AddDynamicValueTextParameter(string identifier, string name, TextParameterTypeEnum type = TextParameterTypeEnum.Line, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false,
+    public TableSchemaParameterText AddParameterText(string identifier, string name, TextParameterTypeEnum type = TextParameterTypeEnum.Line, string note = "", bool isSystemDefined = false, bool isApprovalRequired = false,
         DateTime? timeCreated = null)
     {
         return context.SchemaParameterText.Add(new()
@@ -80,29 +94,14 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaElement AddElement(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, DateTime? timeCreated = null)
-    {
-        return context.SchemaElement.Add(new()
-        {
-            SchemaIdentifier = identifier,
-            Name = name,
-            Note = note,
-            Order = GetNextOrder(nameof(TableSchemaElement)),
-            SchemaID = schema.ID,
-            TitleTextParameterID = title.ID,
-            DescriptionTextParameterID = description?.ID,
-            TimeCreated = timeCreated ?? Now
-        }).Entity;
-    }
-
-    public TableSchemaPropertyBoolean AddPropertyBoolean(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, DateTime? timeCreated = null)
+    public TableSchemaPropertyBoolean AddPropertyBoolean(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, int weight = 0, DateTime? timeCreated = null)
     {
         return context.SchemaPropertyBoolean.Add(new()
         {
             SchemaIdentifier = identifier,
             Name = name,
             Note = note,
-            Order = GetNextOrder(nameof(TableSchemaProperty)),
+            Weight = weight,
             SchemaID = schema.ID,
             TitleTextParameterID = title.ID,
             DescriptionTextParameterID = description?.ID,
@@ -110,7 +109,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaPropertyDateTime AddPropertyDateTime(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, DateTimeTypeEnum type = DateTimeTypeEnum.Date,
+    public TableSchemaPropertyDateTime AddPropertyDateTime(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, int weight = 0, DateTimeTypeEnum type = DateTimeTypeEnum.Date,
         DateTime? timeCreated = null)
     {
         return context.SchemaPropertyDateTime.Add(new()
@@ -118,7 +117,7 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
             SchemaIdentifier = identifier,
             Name = name,
             Note = note,
-            Order = GetNextOrder(nameof(TableSchemaProperty)),
+            Weight = weight,
             Type = type,
             SchemaID = schema.ID,
             TitleTextParameterID = title.ID,
@@ -127,14 +126,14 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public TableSchemaPropertyString AddPropertyString(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, DateTime? timeCreated = null)
+    public TableSchemaPropertyString AddPropertyString(string identifier, string name, TableSchemaParameterText title, string note = "", TableSchemaParameterText? description = null, int weight = 0, DateTime? timeCreated = null)
     {
         return context.SchemaPropertyString.Add(new()
         {
             SchemaIdentifier = identifier,
             Name = name,
             Note = note,
-            Order = GetNextOrder(nameof(TableSchemaProperty)),
+            Weight = weight,
             SchemaID = schema.ID,
             TitleTextParameterID = title.ID,
             DescriptionTextParameterID = description?.ID,
@@ -142,11 +141,10 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         }).Entity;
     }
 
-    public void Relate(TableSchemaContext refContext, TableSchemaElement refElement, DateTime? timeCreated = null)
+    public void Relate(TableSchemaContext refContext, TableSchemaElement refElement, int weight = 0, DateTime? timeCreated = null)
     {
         context.SchemaContextHasElement.Add(new()
         {
-            Order = GetNextOrder(nameof(TableSchemaContext) + nameof(TableSchemaElement)),
             Entity = refContext,
             EntityID = refContext.ID,
             Relation = refElement,
@@ -155,26 +153,15 @@ public class SchemaSeedBuilder(DataContext context, TableSchema schema)
         });
     }
 
-    public void Relate(TableSchemaElement refElement, TableSchemaProperty refProperty, DateTime? timeCreated = null)
+    public void Relate(TableSchemaElement refElement, TableSchemaProperty refProperty, int weight = 0, DateTime? timeCreated = null)
     {
         context.SchemaElementHasProperty.Add(new()
         {
-            Order = GetNextOrder(nameof(TableSchemaElement) + nameof(TableSchemaProperty)),
             Entity = refElement,
             EntityID = refElement.ID,
             Relation = refProperty,
             RelationID = refProperty.ID,
             TimeCreated = timeCreated ?? Now
         });
-    }
-
-    private int GetNextOrder(string identifier)
-    {
-        if (!OrderCollection.TryGetValue(identifier, out int value))
-        {
-            OrderCollection[identifier] = value = 0;
-        }
-
-        return OrderCollection[identifier] = value + 1;
     }
 }

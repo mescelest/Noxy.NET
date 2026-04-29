@@ -12,7 +12,7 @@ public class TableSchemaPropertyString : TableSchemaProperty
             SchemaIdentifier = SchemaIdentifier,
             Name = Name,
             Note = Note,
-            Order = Order,
+            Weight = Weight,
             DescriptionTextParameterID = DescriptionTextParameterID,
             TitleTextParameterID = TitleTextParameterID,
         };

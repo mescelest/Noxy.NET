@@ -27,9 +27,9 @@ public class EntitySchemaElement : BaseEntitySchema, ISchemaMetadata, ISchemaPre
     public EntitySchemaParameterText? DescriptionTextParameter { get; set; }
     public Guid? DescriptionTextParameterID { get; set; }
 
-    [DisplayName(TextConstants.LabelFormOrder)]
-    [Description(TextConstants.HelpFormOrder)]
-    public int Order { get; set; } = DefaultOrder;
+    [DisplayName(TextConstants.LabelFormWeight)]
+    [Description(TextConstants.HelpFormWeight)]
+    public int Weight { get; set; } = DefaultWeight;
 
     public List<EntityJunctionSchemaElementHasProperty>? PropertyList { get; set; }
 

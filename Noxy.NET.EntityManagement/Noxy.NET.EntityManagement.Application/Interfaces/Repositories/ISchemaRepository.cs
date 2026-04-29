@@ -26,6 +26,12 @@ public interface ISchemaRepository
     Task<Guid> DeleteSchemaElement(Guid id);
 
     Task<EntitySchemaContext> GetSchemaContextByID(Guid id);
+    Task<List<EntitySchemaContext>> GetSchemaContextList(FilterSchemaContextList filter);
+    Task<EntitySchemaContext> CreateSchemaContext(EntitySchemaContext entity);
+    Task<EntitySchemaContext> UpdateSchemaContext(EntitySchemaContext entity);
+    Task<EntitySchemaContext> CloneSchemaContext(Guid id);
+    Task<Guid> DeleteSchemaContext(Guid id);
+
     Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id);
     Task<EntitySchemaParameterStyle> GetSchemaParameterStyleByID(Guid id);
     Task<EntitySchemaParameterSystem> GetSchemaParameterSystemByID(Guid id);
@@ -42,7 +48,6 @@ public interface ISchemaRepository
 
     Task<List<EntitySchemaContext>> GetSchemaContextListBySchemaID(Guid id);
     Task<List<EntitySchemaElement>> GetSchemaElementListBySchemaID(Guid id);
-    Task<List<EntitySchemaContext>> GetSchemaContextList(FilterSchemaContextList filter);
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter);
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id);
     Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id);
@@ -50,11 +55,9 @@ public interface ISchemaRepository
     Task<List<EntityJunctionSchemaContextHasElement>> GetSchemaContextHasElementListBySchemaID(Guid id);
     Task<List<EntityJunctionSchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id);
 
-    Task<EntitySchemaContext> Create(EntitySchemaContext entity);
     Task<EntitySchemaParameter.Discriminator> Create(EntitySchemaParameter entity);
     Task<EntitySchemaProperty.Discriminator> Create(EntitySchemaProperty entity);
 
-    void Update(EntitySchemaContext entity);
     void Update(EntitySchemaParameter entity);
     void Update(EntitySchemaProperty baseEntity);
 }

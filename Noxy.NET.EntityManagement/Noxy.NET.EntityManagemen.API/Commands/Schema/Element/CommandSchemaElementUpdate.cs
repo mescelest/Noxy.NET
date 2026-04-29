@@ -10,6 +10,7 @@ public class CommandSchemaElementUpdate(Guid id, RequestSchemaElementUpdate requ
     public string SchemaIdentifier { get; } = request.SchemaIdentifier;
     public string Name { get; } = request.Name;
     public string Note { get; } = request.Note;
+    public int? Weight { get; } = request.Weight;
     public Guid TitleParameterTextID { get; } = request.TitleParameterTextID;
     public Guid? DescriptionParameterTextID { get; } = request.DescriptionParameterTextID;
 }

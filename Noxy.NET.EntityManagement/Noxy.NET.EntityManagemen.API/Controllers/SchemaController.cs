@@ -4,6 +4,8 @@ using Noxy.NET.EntityManagement.API.Commands.Schema;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Context;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Element;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
+using Noxy.NET.EntityManagement.API.Queries.Schema.Context;
+using Noxy.NET.EntityManagement.API.Queries.Schema.Element;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
@@ -81,6 +83,24 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaContextCreate>> CreateSchemaContext(RequestSchemaContextCreate request)
     {
         return await mediator.Send(new CommandSchemaContextCreate(request));
+    }
+
+    [HttpPost("Context/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaContextUpdate>> UpdateSchemaContext(Guid id, RequestSchemaContextUpdate request)
+    {
+        return await mediator.Send(new CommandSchemaContextUpdate(id, request));
+    }
+
+    [HttpPost("Context/{id:guid}/Clone")]
+    public async Task<ActionResult<ResponseSchemaContextClone>> CloneSchemaContext(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaContextClone(id));
+    }
+
+    [HttpPost("Context/{id:guid}/Delete")]
+    public async Task<ActionResult<ResponseSchemaContextDelete>> DeleteSchemaContext(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaContextDelete(id));
     }
 
     [HttpPost("Element")]

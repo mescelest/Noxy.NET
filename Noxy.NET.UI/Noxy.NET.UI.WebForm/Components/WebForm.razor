@@ -18,6 +18,10 @@
     public required WebFormContext<T> Context { get; set; }
 
     [Parameter]
+    public bool? ResetAfterSubmit { get; set; }
+    private bool ResetAfterSubmitCurrent => ResetAfterSubmit ?? false;
+
+    [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
     [Parameter]
@@ -41,7 +45,10 @@
         {
             if (!Context.Validate()) return;
             await OnSubmit.InvokeAsync(Context);
-            Context.Reset();
+            if (ResetAfterSubmitCurrent)
+            {
+                Context.Reset();
+            }
         }
         finally
         {

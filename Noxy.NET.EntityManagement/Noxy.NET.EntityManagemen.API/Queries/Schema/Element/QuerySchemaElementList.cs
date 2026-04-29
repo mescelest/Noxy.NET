@@ -2,7 +2,7 @@ using MediatR;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
 
-namespace Noxy.NET.EntityManagement.API.Queries.Schema;
+namespace Noxy.NET.EntityManagement.API.Queries.Schema.Element;
 
 public class QuerySchemaElementList(RequestSchemaElementList request) : IRequest<ResponseSchemaElementList>
 {

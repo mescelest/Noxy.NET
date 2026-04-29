@@ -25,9 +25,14 @@ public class RequestSchemaElementUpdate : BaseRequestPost<ResponseSchemaElementU
     [Description(TextConstants.HelpFormName)]
     public string Name { get; set; } = string.Empty;
 
-    [DisplayName(TextConstants.LabelFormDescription)]
-    [Description(TextConstants.HelpFormDescription)]
+    [DisplayName(TextConstants.LabelFormNote)]
+    [Description(TextConstants.HelpFormNote)]
     public string Note { get; set; } = string.Empty;
+
+    [Required]
+    [DisplayName(TextConstants.LabelFormWeight)]
+    [Description(TextConstants.HelpFormWeight)]
+    public int? Weight { get; set; }
 
     [NotEmpty]
     [DisplayName(TextConstants.LabelFormTitle)]

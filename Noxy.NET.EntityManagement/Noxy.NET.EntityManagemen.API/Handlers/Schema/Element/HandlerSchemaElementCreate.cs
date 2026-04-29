@@ -1,6 +1,7 @@
 using MediatR;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Element;
 using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
 
@@ -18,6 +19,7 @@ public class HandlerSchemaElementCreate(IUnitOfWorkFactory serviceUoWFactory) : 
             SchemaIdentifier = request.SchemaIdentifier,
             Name = request.Name,
             Note = request.Note,
+            Weight = request.Weight ?? BaseEntity.DefaultWeight,
             TitleTextParameterID = request.TitleParameterTextID,
             DescriptionTextParameterID = request.DescriptionParameterTextID,
         });

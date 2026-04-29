@@ -267,7 +267,6 @@ public class TableToEntityMapper : ITableToEntityMapper
         EntityJunctionSchemaContextHasElement mapped = new()
         {
             ID = table.ID,
-            Order = table.Order,
             TimeCreated = table.TimeCreated,
             EntityID = table.EntityID,
             RelationID = table.RelationID
@@ -287,7 +286,6 @@ public class TableToEntityMapper : ITableToEntityMapper
         EntityJunctionSchemaElementHasProperty mapped = new()
         {
             ID = table.ID,
-            Order = table.Order,
             TimeCreated = table.TimeCreated,
             EntityID = table.EntityID,
             RelationID = table.RelationID
@@ -307,7 +305,6 @@ public class TableToEntityMapper : ITableToEntityMapper
         EntityJunctionSchemaPropertyCollectionHasProperty mapped = new()
         {
             ID = table.ID,
-            Order = table.Order,
             TimeCreated = table.TimeCreated,
             EntityID = table.EntityID,
             RelationID = table.RelationID
@@ -327,7 +324,6 @@ public class TableToEntityMapper : ITableToEntityMapper
         EntityJunctionSchemaPropertyTableHasProperty mapped = new()
         {
             ID = table.ID,
-            Order = table.Order,
             TimeCreated = table.TimeCreated,
             EntityID = table.EntityID,
             RelationID = table.RelationID
@@ -498,7 +494,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
-            Order = table.Order,
+            Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
             TitleTextParameterID = table.TitleTextParameterID,
@@ -539,7 +535,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
-            Order = table.Order,
+            Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
             TitleTextParameterID = table.TitleTextParameterID,
@@ -566,7 +562,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
-            Order = table.Order,
+            Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
             TitleTextParameterID = table.TitleTextParameterID,
@@ -596,7 +592,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
-            Order = table.Order,
+            Weight = table.Weight,
             Type = table.Type,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
@@ -626,7 +622,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
-            Order = table.Order,
+            Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
             TitleTextParameterID = table.TitleTextParameterID,
@@ -655,7 +651,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
-            Order = table.Order,
+            Weight = table.Weight,
             AllowedExtensions = table.AllowedExtensions,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
@@ -685,7 +681,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
-            Order = table.Order,
+            Weight = table.Weight,
             IsUnsigned = table.IsUnsigned,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
@@ -715,7 +711,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
-            Order = table.Order,
+            Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
             TitleTextParameterID = table.TitleTextParameterID,
@@ -744,7 +740,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
-            Order = table.Order,
+            Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
             TitleTextParameterID = table.TitleTextParameterID,

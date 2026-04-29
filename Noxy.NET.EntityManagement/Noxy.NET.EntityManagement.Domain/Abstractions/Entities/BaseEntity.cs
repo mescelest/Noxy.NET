@@ -5,7 +5,7 @@ public abstract class BaseEntity
     public Guid ID { get; init; } = CreateID();
     public DateTime? TimeCreated { get; set; } = DateTime.UtcNow;
 
-    public const int DefaultOrder = -1;
+    public const int DefaultWeight = -1;
 
     public override string ToString()
     {

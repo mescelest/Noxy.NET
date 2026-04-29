@@ -1,0 +1,37 @@
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Search for a context</DynamicHTMLTag>
+    <FormSchemaContextList SchemaID="SchemaID" OnSubmit="Submit">
+        <div class="action-list">
+            <Button Status="StatusEnum.Warning" type="button">
+                @TextService.Get(TextConstants.ButtonReset)
+            </Button>
+            <Button Status="StatusEnum.Info" type="submit">
+                @TextService.Get(TextConstants.ButtonFilter)
+            </Button>
+        </div>
+    </FormSchemaContextList>
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
+
+    private void Submit(IWebFormContext<RequestSchemaContextList> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.SchemaContextListAction(ContextCurrent, value.Model));
+    }
+
+}

@@ -66,7 +66,7 @@ public static class TextConstants
     public const string LabelFormNote = "Label:Form:Note";
     public const string LabelFormTitle = "Label:Form:Title";
     public const string LabelFormDescription = "Label:Form:Description";
-    public const string LabelFormOrder = "Label:Form:Order";
+    public const string LabelFormWeight = "Label:Form:Weight";
     public const string LabelFormIsSystemDefined = "Label:Form:IsSystemDefined";
     public const string LabelFormIsApprovalRequired = "Label:Form:IsApprovalRequired";
     public const string LabelFormParameterType = "Label:Form:ParameterType";
@@ -97,7 +97,7 @@ public static class TextConstants
     public const string HelpFormNote = "Help:Form:Note";
     public const string HelpFormTitle = "Help:Form:Title";
     public const string HelpFormDescription = "Help:Form:Description";
-    public const string HelpFormOrder = "Help:Form:Order";
+    public const string HelpFormWeight = "Help:Form:Weight";
     public const string HelpFormIsSystemDefined = "Help:Form:IsSystemDefined";
     public const string HelpFormIsApprovalRequired = "Help:Form:IsApprovalRequired";
     public const string HelpFormParameterType = "Help:Form:ParameterType";

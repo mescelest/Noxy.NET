@@ -12,13 +12,12 @@
             <span class="description">@Description</span>
         }
 
+        <MessageBox MessageList="ErrorList" Status="@StatusEnum.Error"/>
+
         <div class="control">
             @ChildContent
         </div>
     </DynamicHTMLTag>
-
-
-    <MessageBox MessageList="ErrorList" Status="@StatusEnum.Error"/>
 </div>
 
 @code {

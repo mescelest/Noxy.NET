@@ -28,6 +28,11 @@ public class RequestSchemaElementCreate : BaseRequestPost<ResponseSchemaElementC
     [Description(TextConstants.HelpFormNote)]
     public string Note { get; set; } = string.Empty;
 
+    [Required]
+    [DisplayName(TextConstants.LabelFormWeight)]
+    [Description(TextConstants.HelpFormWeight)]
+    public int? Weight { get; set; }
+
     [NotEmpty]
     [DisplayName(TextConstants.LabelFormTitle)]
     [Description(TextConstants.HelpFormTitle)]

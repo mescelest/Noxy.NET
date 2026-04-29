@@ -16,7 +16,7 @@ public class TableSchemaPropertyImage : TableSchemaProperty
             SchemaIdentifier = SchemaIdentifier,
             Name = Name,
             Note = Note,
-            Order = Order,
+            Weight = Weight,
             DescriptionTextParameterID = DescriptionTextParameterID,
             TitleTextParameterID = TitleTextParameterID,
             AllowedExtensions = AllowedExtensions,

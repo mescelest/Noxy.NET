@@ -24,8 +24,8 @@ public class RequestSchemaContextCreate : BaseRequestPost<ResponseSchemaContextC
     [Description(TextConstants.HelpFormName)]
     public string Name { get; set; } = string.Empty;
 
-    [DisplayName(TextConstants.LabelFormDescription)]
-    [Description(TextConstants.HelpFormDescription)]
+    [DisplayName(TextConstants.LabelFormNote)]
+    [Description(TextConstants.HelpFormNote)]
     public string? Note { get; set; } = string.Empty;
 
     [NotEmpty]
@@ -33,8 +33,7 @@ public class RequestSchemaContextCreate : BaseRequestPost<ResponseSchemaContextC
     [Description(TextConstants.HelpFormTitle)]
     public Guid TitleParameterTextID { get; set; }
 
-    [NotEmpty]
     [DisplayName(TextConstants.LabelFormDescription)]
     [Description(TextConstants.HelpFormDescription)]
-    public Guid DescriptionParameterTextID { get; set; }
+    public Guid? DescriptionParameterTextID { get; set; }
 }

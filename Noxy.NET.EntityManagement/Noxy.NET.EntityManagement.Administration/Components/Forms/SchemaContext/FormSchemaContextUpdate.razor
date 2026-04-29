@@ -1,7 +1,7 @@
-@inherits BaseRequestForm<RequestSchemaElementUpdate, ResponseSchemaElementUpdate>
+@inherits BaseRequestForm<RequestSchemaContextUpdate, ResponseSchemaContextUpdate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm T="RequestSchemaElementUpdate" Context="Context" OnSubmit="ForwardSubmit">
+    <WebForm T="RequestSchemaContextUpdate" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.SchemaIdentifier))" Description="@GetDescription(nameof(Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
 
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Context.Model.Name"/>
@@ -21,23 +21,23 @@
 @code {
 
     [Parameter, EditorRequired]
-    public EntitySchemaElement SchemaElement { get; set; }
+    public EntitySchemaContext SchemaContext { get; set; }
 
     private EntitySchemaParameterText? _valueTitle;
     private EntitySchemaParameterText? _valueDescription;
 
-    protected override WebFormContext<RequestSchemaElementUpdate> CreateContext()
+    protected override WebFormContext<RequestSchemaContextUpdate> CreateContext()
     {
-        _valueTitle = SchemaElement.TitleTextParameter;
-        _valueDescription = SchemaElement.DescriptionTextParameter;
+        _valueTitle = SchemaContext.TitleTextParameter;
+        _valueDescription = SchemaContext.DescriptionTextParameter;
         return new(new()
         {
-            ID = SchemaElement.ID,
-            SchemaIdentifier = SchemaElement.SchemaIdentifier,
-            Name = SchemaElement.Name,
-            Note = SchemaElement.Note,
-            TitleParameterTextID = SchemaElement.TitleTextParameterID,
-            DescriptionParameterTextID = SchemaElement.DescriptionTextParameterID,
+                ID = SchemaContext.ID,
+                SchemaIdentifier = SchemaContext.SchemaIdentifier,
+                Name = SchemaContext.Name,
+                Note = SchemaContext.Note,
+                TitleParameterTextID = SchemaContext.TitleTextParameterID,
+                DescriptionParameterTextID = SchemaContext.DescriptionTextParameterID,
         });
     }
 

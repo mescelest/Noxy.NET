@@ -17,7 +17,7 @@ public abstract class TableSchemaProperty : BaseTableSchemaPresentation, ISchema
     public string Note { get; set; } = string.Empty;
 
     [Required]
-    public required int Order { get; set; }
+    public required int Weight { get; set; }
 
     [Required]
     public TableSchemaParameterText? TitleTextParameter { get; set; }

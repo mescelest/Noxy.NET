@@ -4,7 +4,7 @@
     flex-flow: column;
     row-gap: var(--size-gap-md);
     padding: var(--size-gap-md);
-    background-color: color-mix(in srgb, transparent 96%, var(--color-mixin-complementary, #000000));
+    background-color: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
     border-radius: var(--size-border-radius-lg);
 }
 

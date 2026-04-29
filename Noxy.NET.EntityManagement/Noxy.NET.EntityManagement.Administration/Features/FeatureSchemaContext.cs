@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Fluxor;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
-using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
 using Noxy.NET.EntityManagement.Presentation.Services;
 using static Noxy.NET.EntityManagement.Administration.Features.FeatureSchemaContextReducers;
 
@@ -84,15 +84,6 @@ public static class FeatureSchemaContextReducers
     [ReducerMethod]
     public static FeatureSchemaContextState ReduceDeleteFailed(FeatureSchemaContextState state, SchemaContextFailedAction action) => FailedAction(state, action);
 
-    [ReducerMethod]
-    public static FeatureSchemaContextState ReduceActivate(FeatureSchemaContextState state, SchemaContextActivateAction action) => StartAction(state, action.Context, FeatureSchemaContextActionKind.Activate);
-
-    [ReducerMethod]
-    public static FeatureSchemaContextState ReduceActivateResult(FeatureSchemaContextState state, SchemaContextResultAction<Guid> action) => SuccessAction(state, action);
-
-    [ReducerMethod]
-    public static FeatureSchemaContextState ReduceActivateFailed(FeatureSchemaContextState state, SchemaContextFailedAction action) => FailedAction(state, action);
-
     private static Dictionary<TKey, TValue> Set<TKey, TValue>(Dictionary<TKey, TValue> source, TKey key, TValue value) where TKey : notnull
     {
         return source.TryGetValue(key, out TValue? existing) && EqualityComparer<TValue>.Default.Equals(existing, value)
@@ -137,15 +128,13 @@ public static class FeatureSchemaContextReducers
 
     public record SchemaContextListAction(string Context, RequestSchemaContextList Request);
 
-    public record SchemaContextAddAction(string Context, RequestSchemaCreate Request);
+    public record SchemaContextAddAction(string Context, RequestSchemaContextCreate Request);
 
-    public record SchemaContextUpdateAction(string Context, RequestSchemaUpdate Request);
+    public record SchemaContextUpdateAction(string Context, RequestSchemaContextUpdate Request);
 
-    public record SchemaContextCloneAction(string Context, RequestSchemaClone Request);
+    public record SchemaContextCloneAction(string Context, RequestSchemaContextClone Request);
 
-    public record SchemaContextDeleteAction(string Context, RequestSchemaDelete Request);
-
-    public record SchemaContextActivateAction(string Context, RequestSchemaActivate Request);
+    public record SchemaContextDeleteAction(string Context, RequestSchemaContextDelete Request);
 
     public record SchemaContextResultAction<T>(string Context, FeatureSchemaContextActionKind Kind, T Value);
 
@@ -182,12 +171,6 @@ public class FeatureSchemaContextListEffects(APIHttpClient client, IState<Featur
     public Task Handle(SchemaContextDeleteAction action, IDispatcher dispatcher)
     {
         return ExecuteWithRefresh(action.Context, FeatureSchemaContextActionKind.Delete, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
-    }
-
-    [EffectMethod]
-    public Task Handle(SchemaContextActivateAction action, IDispatcher dispatcher)
-    {
-        return ExecuteWithRefresh(action.Context, FeatureSchemaContextActionKind.Activate, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
     private static async Task Execute<TResult>(string context, FeatureSchemaContextActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)

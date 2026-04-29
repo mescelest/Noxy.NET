@@ -1,0 +1,119 @@
+@inject IState<FeatureSchemaContextState> StateSchemaContext
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="header">
+        <div class="title">
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@SchemaContext.Name</DynamicHTMLTag>
+            <NavLink href="@Link">
+                <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
+            </NavLink>
+        </div>
+
+        <div class="action-list">
+            @if (Schema.TimeActivated == null)
+            {
+                <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
+            }
+
+            <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
+            <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
+        </div>
+
+    </div>
+
+    @if (!_isEditMode)
+    {
+        <div>
+            <strong>Schema Identifier:</strong>
+            @SchemaContext.SchemaIdentifier
+        </div>
+        <div>
+            <strong>Name:</strong>
+            @SchemaContext.Name
+        </div>
+        <div>
+            <strong>Note:</strong>
+            @SchemaContext.Note
+        </div>
+        <div>
+            <strong>Created at:</strong>
+            @SchemaContext.TimeCreated
+        </div>
+        <div>
+            <strong>Title:</strong>
+            @SchemaContext.TitleTextParameter?.Name
+        </div>
+        <div>
+            <strong>Description:</strong>
+            @SchemaContext.DescriptionTextParameter?.Name
+        </div>
+    }
+    else
+    {
+        <FormSchemaContextUpdate SchemaContext="SchemaContext" OnSubmit="OnButtonEditSubmit">
+            <div class="action-list">
+                <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
+                    @TextService.Get(TextConstants.ButtonUpdate)
+                </Button>
+
+                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                    @TextService.Get(TextConstants.ButtonCancel)
+                </Button>
+            </div>
+        </FormSchemaContextUpdate>
+    }
+
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchema Schema { get; set; }
+
+    [Parameter, EditorRequired]
+    public required EntitySchemaContext SchemaContext { get; set; }
+
+    [Parameter]
+    public string? Context { get; set; }
+    private string ContextCurrent => Context ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H3;
+
+    private bool _isEditMode;
+
+    private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
+    private string Link => $"/schema/{Schema.ID}/context/{SchemaContext.ID}";
+    private bool IsLoadingUpdate => StateSchemaContext.Value.TryGetLoading(ContextCurrent, FeatureSchemaContextActionKind.Update, out bool value) && value;
+
+    private void OnButtonEditClick()
+    {
+        _isEditMode = true;
+    }
+
+    private void OnButtonEditSubmit(IWebFormContext<RequestSchemaContextUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.SchemaContextUpdateAction(ContextCurrent, value.Model));
+        _isEditMode = false;
+    }
+
+    private void OnButtonEditCancel()
+    {
+        _isEditMode = false;
+    }
+
+    private void OnButtonDeleteClick()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.SchemaContextDeleteAction(ContextCurrent, new() { ID = SchemaContext.ID }));
+    }
+
+    private void OnButtonCloneClick()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.SchemaContextCloneAction(ContextCurrent, new() { ID = SchemaContext.ID }));
+    }
+
+}

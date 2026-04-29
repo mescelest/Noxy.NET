@@ -1,18 +1,20 @@
-@inherits BaseRequestForm<RequestSchemaElementCreate, ResponseSchemaElementCreate>
+@inherits BaseRequestForm<RequestSchemaElementUpdate, ResponseSchemaElementUpdate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm T="RequestSchemaElementCreate" Context="Context" OnSubmit="ForwardSubmit">
+    <WebForm T="RequestSchemaElementUpdate" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.SchemaIdentifier))" Description="@GetDescription(nameof(Model.SchemaIdentifier))" @bind-Value="Context.Model.SchemaIdentifier"/>
 
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Context.Model.Name"/>
 
         <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Context.Model.Note"/>
 
+        <InputGroupInteger DisplayName="@GetDisplayName(nameof(Model.Weight))" Description="@GetDescription(nameof(Model.Weight))" @bind-Value="Context.Model.Weight"/>
+
         <InputGroupAutosuggestTextParameter Name="@nameof(Model.TitleParameterTextID)" DisplayName="@GetDisplayName(nameof(Model.TitleParameterTextID))" Description="@GetDescription(nameof(Model.TitleParameterTextID))"
-                                            SchemaID="SchemaID" @bind-Value:get="GetValueTitle()" @bind-Value:set="SetValueTitle"/>
+                                            @bind-Value:get="GetValueTitle()" @bind-Value:set="SetValueTitle"/>
 
         <InputGroupAutosuggestTextParameter Name="@nameof(Model.DescriptionParameterTextID)" DisplayName="@GetDisplayName(nameof(Model.DescriptionParameterTextID))" Description="@GetDescription(nameof(Model.DescriptionParameterTextID))"
-                                            SchemaID="SchemaID" @bind-Value:get="GetValueDescription()" @bind-Value:set="SetValueDescription"/>
+                                            @bind-Value:get="GetValueDescription()" @bind-Value:set="SetValueDescription"/>
 
         @ChildContent
     </WebForm>
@@ -20,15 +22,25 @@
 
 @code {
 
-    [Parameter]
-    public Guid? SchemaID { get; set; }
+    [Parameter, EditorRequired]
+    public EntitySchemaElement SchemaElement { get; set; }
 
     private EntitySchemaParameterText? _valueTitle;
     private EntitySchemaParameterText? _valueDescription;
 
-    protected override WebFormContext<RequestSchemaElementCreate> CreateContext()
+    protected override WebFormContext<RequestSchemaElementUpdate> CreateContext()
     {
-        return new(new() { SchemaID = SchemaID });
+        _valueTitle = SchemaElement.TitleTextParameter;
+        _valueDescription = SchemaElement.DescriptionTextParameter;
+        return new(new()
+        {
+                ID = SchemaElement.ID,
+                SchemaIdentifier = SchemaElement.SchemaIdentifier,
+                Name = SchemaElement.Name,
+                Note = SchemaElement.Note,
+                TitleParameterTextID = SchemaElement.TitleTextParameterID,
+                DescriptionParameterTextID = SchemaElement.DescriptionTextParameterID,
+        });
     }
 
     private EntitySchemaParameterText? GetValueTitle() => _valueTitle?.ID == Context.Model.TitleParameterTextID ? _valueTitle : null;

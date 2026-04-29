@@ -114,16 +114,6 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         #region -- Junctions --
 
-        modelBuilder.Entity<TableJunctionSchemaElementHasElement>()
-            .HasOne(e => e.Entity)
-            .WithMany(e => e.ElementList)
-            .HasForeignKey(x => x.EntityID);
-
-        modelBuilder.Entity<TableJunctionSchemaElementHasElement>()
-            .HasOne(e => e.Relation)
-            .WithMany(e => e.RelationElementList)
-            .HasForeignKey(x => x.RelationID);
-
         modelBuilder.Entity<TableJunctionSchemaPropertyCollectionHasProperty>()
             .HasOne(e => e.Entity)
             .WithMany(e => e.PropertyList)

@@ -4,7 +4,7 @@
     flex-flow: column;
     row-gap: var(--size-gap-md);
     padding: var(--size-gap-md);
-    background-color: color-mix(in srgb, transparent 96%, var(--color-mixin-complementary, #000000));
+    background-color: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
     border-radius: var(--size-border-radius-lg);
 }
 
@@ -12,8 +12,8 @@
     display: flex;
     flex: 1 1 auto;
     flex-flow: row wrap;
-    row-gap: var(--size-gap-md);
-    column-gap: var(--size-gap-md);
+    row-gap: var(--size-gap-xs);
+    column-gap: var(--size-gap-xs);
     align-items: center;
 }
 
@@ -29,5 +29,5 @@
     display: flex;
     flex: 0 0 auto;
     flex-flow: row wrap;
-    column-gap: var(--size-gap-md);
+    column-gap: var(--size-gap-xs);
 }
