@@ -3,7 +3,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementRadioSet @attributes="InputAttributes" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
+        <InputElementRadioSet @attributes="InputAttributes" TValue="TValue" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
                               Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
             @ChildContent(context)
         </InputElementRadioSet>

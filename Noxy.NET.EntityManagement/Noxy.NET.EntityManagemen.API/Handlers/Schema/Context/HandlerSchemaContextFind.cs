@@ -1,10 +1,10 @@
 using MediatR;
-using Noxy.NET.EntityManagement.API.Queries.Schema.Element;
+using Noxy.NET.EntityManagement.API.Queries.Schema.Context;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
-using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 
-namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Element;
+namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Context;
 
 public class HandlerSchemaContextFind(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<QuerySchemaContextFind, ResponseSchemaContextFind>
 {

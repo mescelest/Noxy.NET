@@ -6,7 +6,8 @@
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schema parameters</DynamicHTMLTag>
 
     <Loader Loading="IsLoading">
-        @foreach (EntiEntitySchemaParameter.Discriminator item in List      {
+        @foreach (EntitySchemaParameter.Discriminator item in List)
+        {
             @ChildContent(item)
         }
     </Loader>
@@ -14,10 +15,8 @@
 
 @code {
 
-  
-
     [Parameter, EditorRequired]
-    public RenderFragment<EntitySchemaParameter.Discriminator> ChildContent t; set; }
+    public RenderFragment<EntitySchemaParameter.Discriminator> ChildContent { get; set; }
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
@@ -32,11 +31,16 @@
     private string ScopeCurrent => Scope ?? GetComponentName();
 
     private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaParameterActionKind.List, out bool value) && value;
-    private IReadOnlprivate IReadOnlyList<EntitySchemaParameter.Discriminator> List r> State.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list    protected override void OnInitialized()
+    private IReadOnlyList<EntitySchemaParameter.Discriminator> List => State.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) ? list : [];
+
+    protected override void OnInitialized()
     {
         base.OnInitialized();
 
         if (List.Count == 0 && !IsLoading)
         {
-            Dispatcher.Dispatch(Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, RequestCurrent
+            Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, RequestCurrent));
+        }
+    }
+
 }

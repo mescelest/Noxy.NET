@@ -3,10 +3,10 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementSelect @attributes="InputAttributes" ID="@IDCurrent" class="textual" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
-                                Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
-                @ChildContent(context)
-            </InputElementSelect>
+        <InputElementSelect @attributes="InputAttributes" TValue="TValue" ID="@IDCurrent" class="textual" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
+                            Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+            @ChildContent(context)
+        </InputElementSelect>
     </TemplateInputGroup>
 </div>
 

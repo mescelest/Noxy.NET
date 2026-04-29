@@ -17,10 +17,10 @@
     <div class="table">
         <div class="header row">
             <b></b>
-            <b class="column left">@Presentation.Services.TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
-            <b class="column right">@Presentation.Services.TextService.Get(TextConstants.LabelTimeEffective, GetComponentName())</b>
-            <b class="column right">@Presentation.Services.TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
-            <b class="column right">@Presentation.Services.TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
+            <b class="column left">@TextService.Get(TextConstants.LabelValue, GetComponentName())</b>
+            <b class="column right">@TextService.Get(TextConstants.LabelTimeEffective, GetComponentName())</b>
+            <b class="column right">@TextService.Get(TextConstants.LabelTimeApproved, GetComponentName())</b>
+            <b class="column right">@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName())</b>
         </div>
 
         <div class="body">
@@ -47,9 +47,9 @@
                                 }
                             </span>
                         <span class="column left">@item.Value</span>
-                        <span class="column right">@Presentation.Services.SystemConstantService.AsDate(item.TimeEffective)</span>
-                        <span class="column right">@Presentation.Services.SystemConstantService.AsDate(item.TimeApproved)</span>
-                        <span class="column right">@Presentation.Services.SystemConstantService.AsDate(item.TimeCreated)</span>
+                        <span class="column right">@SystemConstantService.AsDate(item.TimeEffective)</span>
+                        <span class="column right">@SystemConstantService.AsDate(item.TimeApproved)</span>
+                        <span class="column right">@SystemConstantService.AsDate(item.TimeCreated)</span>
                     </div>
                 }
             }
@@ -89,7 +89,7 @@
     {
         try
         {
-            ResponseDataParameterDelete response = await Presentation.Services.APIHttpClient.SendRequest(new RequestDataParameterDelete { ID = entity.ID });
+            ResponseDataParameterDelete response = await APIHttpClient.SendRequest(new RequestDataParameterDelete { ID = entity.ID });
             Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.RemoveDataParameterListAction(SchemaParameter.SchemaIdentifier, response.ID));
             await InvokeAsync(StateHasChanged);
         }
@@ -103,7 +103,7 @@
     {
         try
         {
-            ResponseDataParameterSystemCreate response = await Presentation.Services.APIHttpClient.SendRequest(context.Model);
+            ResponseDataParameterSystemCreate response = await APIHttpClient.SendRequest(context.Model);
             Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.AddDataParameterListAction(SchemaParameter.SchemaIdentifier, response.Value));
             context.Reset();
             await InvokeAsync(StateHasChanged);

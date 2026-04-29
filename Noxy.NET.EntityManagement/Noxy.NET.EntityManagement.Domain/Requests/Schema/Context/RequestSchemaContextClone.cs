@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
-using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 
-namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
+namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
 
 public class RequestSchemaContextClone : BaseRequestPost<ResponseSchemaContextClone>
 {

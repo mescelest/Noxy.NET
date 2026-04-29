@@ -1,6 +1,6 @@
 using MediatR;
-using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
-using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 
 namespace Noxy.NET.EntityManagement.API.Commands.Schema.Context;
 
