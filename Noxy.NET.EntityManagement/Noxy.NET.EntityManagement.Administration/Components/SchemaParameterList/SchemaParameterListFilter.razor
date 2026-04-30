@@ -4,7 +4,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Search for a parameter</DynamicHTMLTag>
-    <FormSchemaParameterList OnSubmit="Submit">
+    <FormSchemaParameterList SchemaID="SchemaID" OnSubmit="Submit">
         <div class="action-list">
             <Button Status="StatusEnum.Warning" type="button">
                 @TextService.Get(TextConstants.ButtonReset)

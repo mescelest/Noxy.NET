@@ -1,28 +1,23 @@
-@inject IState<FeatureSchemaState> StateSchema
 @inject IState<FeatureSchemaParameterState> StateSchemaParameter
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @if (Schema != null)
-    {
-        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schema parameters for @Schema?.Name</DynamicHTMLTag>
+        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schema parameters</DynamicHTMLTag>
 
         @foreach (EntitySchemaParameter.Discriminator entitySchemaParameter in List)
         {
-            @ChildContent((Schema, entitySchemaParameter.GetValue()))
+                @ChildContent(entitySchemaParameter.GetValue())
         }
-    }
 </div>
 
 @code {
 
     [Parameter]
     public Guid? SchemaID { get; set; }
-    private Guid SchemaIDCurrent => SchemaID ?? Guid.Empty;
 
     [Parameter, EditorRequired]
-    public RenderFragment<(EntitySchema Schema, EntitySchemaParameter SchemaParameter)> ChildContent { get; set; }
+    public RenderFragment<EntitySchemaParameter> ChildContent { get; set; }
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
@@ -36,25 +31,13 @@
     public string? Scope { get; set; }
     private string ScopeCurrent => Scope ?? GetComponentName();
 
-    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Find, out bool value) && value;
-    private EntitySchema? Schema => StateSchema.Value.TryGetFind(ScopeCurrent, out EntitySchema? value) ? value : null;
-
-    private bool IsLoadingList => StateSchemaParameter.Value.TryGetLoading(ScopeCurrent, FeatureSchemaParameterActionKind.List, out bool value) && value;
     private IReadOnlyList<EntitySchemaParameter.Discriminator> List => StateSchemaParameter.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) ? list : [];
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        if (Schema == null && !IsLoadingSchema)
-        {
-            Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(ScopeCurrent, new() { ID = SchemaIDCurrent }));
-        }
-
-        if (List.Count == 0 && !IsLoadingList)
-        {
-            Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, RequestCurrent));
-        }
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, RequestCurrent));
     }
 
 }

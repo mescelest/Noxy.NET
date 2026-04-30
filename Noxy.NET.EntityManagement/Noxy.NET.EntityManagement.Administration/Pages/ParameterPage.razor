@@ -1,4 +1,5 @@
 ﻿@page "/Parameter"
+@using Noxy.NET.EntityManagement.Administration.Components.DataParameterList
 @inherits PageComponent
 
 <PageTitle>Administration | Parameter</PageTitle>
@@ -10,7 +11,7 @@
         </Left>
         <Content>
             <SchemaParameterListView Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H1">
-                <SchemaParameterListGroup Scope="@Scope" Schema="context.Schema" SchemaParameter="context.SchemaParameter" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                <DataParameterListGroup SchemaParameter="context"/>
             </SchemaParameterListView>
         </Content>
     </MagazineFrame>

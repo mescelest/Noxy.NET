@@ -18,8 +18,11 @@
                 <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
             }
 
-            <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
-            <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
+            @if (!Schema.IsActive)
+            {
+                <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
+                <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
+            }
         </div>
 
     </div>

@@ -1,29 +1,49 @@
 ﻿@page "/Schema/{ID:guid}/Context"
-@inherits PageComponent
+@inject IState<FeatureSchemaState> StateSchema
+@inject IDispatcher Dispatcher
+@inherits FluxorPageComponent
 
 <PageTitle>Administration | Context</PageTitle>
 
-<div class="@CssClass">
-    <MagazineFrame>
-        <Left>
-            <SchemaContextListFilter Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
-        </Left>
-        <Content>
-            <SchemaContextListView Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1">
-                <SchemaContextListGroup Schema="context.Schema" SchemaContext="context.SchemaContext" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
-            </SchemaContextListView>
-        </Content>
-        <Right>
-            <SchemaContextListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
-        </Right>
-    </MagazineFrame>
-</div>
+<Loader Loading="@IsLoading">
+    <div class="@CssClass">
+        @if (Schema != null)
+        {
+            <MagazineFrame>
+                <Left>
+                    <SchemaContextListFilter Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                </Left>
+                <Content>
+                    <SchemaContextListView Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1">
+                        <SchemaContextListGroup Schema="context.Schema" SchemaContext="context.SchemaContext" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                    </SchemaContextListView>
+                </Content>
+                <Right>
+                    @if (!Schema.IsActive)
+                    {
+                        <SchemaContextListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                    }
+                </Right>
+            </MagazineFrame>
+        }
+    </div>
+</Loader>
 
 @code {
 
     [Parameter]
     public Guid ID { get; set; }
 
-    private string Scope => ID.ToString();
+    private string Scope => $"{GetComponentName()}:{ID}";
+
+    private bool IsLoading => StateSchema.Value.TryGetLoading(Scope, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => StateSchema.Value.TryGetFind(Scope, out EntitySchema? value) ? value : null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(Scope, new() { ID = ID }));
+    }
 
 }

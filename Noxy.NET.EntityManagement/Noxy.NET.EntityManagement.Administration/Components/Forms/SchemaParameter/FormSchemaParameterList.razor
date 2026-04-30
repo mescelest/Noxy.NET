@@ -26,6 +26,9 @@
 
 @code {
 
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
     private readonly Dictionary<int, string> _collectionIsSystemDefined = new()
     {
         { -1, TextConstants.ValueIsSystemDefinedNeutral },
@@ -53,16 +56,16 @@
 
     protected override WebFormContext<RequestSchemaParameterList> CreateContext()
     {
-        return new(new());
+        return new(new() { SchemaID = SchemaID });
     }
 
     private int GetIsSystemDefined()
     {
         return Model.IsSystemDefined switch
         {
-                true => 1,
-                false => 0,
-                _ => -1
+            true => 1,
+            false => 0,
+            _ => -1
         };
     }
 
@@ -75,9 +78,9 @@
     {
         return Model.IsApprovalRequired switch
         {
-                true => 1,
-                false => 0,
-                _ => -1
+            true => 1,
+            false => 0,
+            _ => -1
         };
     }
 
@@ -95,6 +98,5 @@
     {
         Model.ParameterType = value;
     }
-
 
 }
