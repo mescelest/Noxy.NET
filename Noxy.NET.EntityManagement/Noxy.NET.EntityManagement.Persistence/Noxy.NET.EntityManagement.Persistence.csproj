@@ -28,4 +28,8 @@
         <ProjectReference Include="..\Noxy.NET.EntityManagement.Domain\Noxy.NET.EntityManagement.Domain.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Folder Include="Migrations\"/>
+    </ItemGroup>
+
 </Project>

@@ -1,10 +1,10 @@
 using MediatR;
-using Noxy.NET.EntityManagement.API.Queries.Schema;
+using Noxy.NET.EntityManagement.API.Queries.Schema.Parameter;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 
-namespace Noxy.NET.EntityManagement.API.Handlers.Schema;
+namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Parameter;
 
 public class HandlerSchemaParameterList(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<QuerySchemaParameterList, ResponseSchemaParameterList>
 {

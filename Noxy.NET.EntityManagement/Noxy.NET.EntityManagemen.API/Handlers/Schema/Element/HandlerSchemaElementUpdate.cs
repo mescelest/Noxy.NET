@@ -16,7 +16,7 @@ public class HandlerSchemaElementUpdate(IUnitOfWorkFactory serviceUoWFactory) : 
         EntitySchemaElement result = await uow.Schema.UpdateSchemaElement(new()
         {
             ID = request.ID,
-            SchemaID = await uow.Schema.GetCurrentSchemaID(),
+            SchemaID = Guid.Empty,
             SchemaIdentifier = request.SchemaIdentifier,
             Name = request.Name,
             Note = request.Note,

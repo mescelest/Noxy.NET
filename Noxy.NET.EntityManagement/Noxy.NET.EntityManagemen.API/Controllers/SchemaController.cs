@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.API.Commands.Schema;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Context;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Element;
+using Noxy.NET.EntityManagement.API.Commands.Schema.Parameter;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Context;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Element;
+using Noxy.NET.EntityManagement.API.Queries.Schema.Parameter;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
@@ -129,57 +131,51 @@ public class SchemaController(IMediator mediator) : ControllerBase
         return await mediator.Send(new CommandSchemaElementDelete(id));
     }
 
-    // [HttpPost("Parameter/Style")]
-    // public async Task<ActionResult<EntitySchemaParameter.Discriminator>> Create(FormModelSchemaParameterStyle model)
-    // {
-    //     return await serviceSchema.CreateOrUpdate(model);
-    // }
-    //
-    // [HttpPost("Parameter/System")]
-    // public async Task<ActionResult<EntitySchemaParameter.Discriminator>> Create(FormModelSchemaParameterSystem model)
-    // {
-    //     return await serviceSchema.CreateOrUpdate(model);
-    // }
-    //
-    // [HttpPost("Parameter/Text")]
-    // public async Task<ActionResult<EntitySchemaParameter.Discriminator>> Create(FormModelSchemaParameterText model)
-    // {
-    //     return await serviceSchema.CreateOrUpdate(model);
-    // }
-    //
-    // [HttpPost("Property/Boolean")]
-    // public async Task<ActionResult<EntitySchemaPropertyBoolean>> Create(FormModelSchemaPropertyBoolean model)
-    // {
-    //     return (await serviceSchema.CreateOrUpdate(model)).Boolean ?? throw new();
-    // }
-    //
-    // [HttpPost("Property/DateTime")]
-    // public async Task<ActionResult<EntitySchemaPropertyDateTime>> CreateOrUpdate(FormModelSchemaPropertyDateTime model)
-    // {
-    //     return (await serviceSchema.CreateOrUpdate(model)).DateTime ?? throw new();
-    // }
-    //
-    // [HttpPost("Property/Image")]
-    // public async Task<ActionResult<EntitySchemaPropertyImage>> CreateOrUpdate(FormModelSchemaPropertyImage model)
-    // {
-    //     return (await serviceSchema.CreateOrUpdate(model)).Image ?? throw new();
-    // }
-    //
-    // [HttpPost("Property/Decimal")]
-    // public async Task<ActionResult<EntitySchemaPropertyDecimal>> CreateOrUpdate(FormModelSchemaPropertyDecimal model)
-    // {
-    //     return (await serviceSchema.CreateOrUpdate(model)).Decimal ?? throw new();
-    // }
-    //
-    // [HttpPost("Property/Integer")]
-    // public async Task<ActionResult<EntitySchemaPropertyInteger>> CreateOrUpdate(FormModelSchemaPropertyInteger model)
-    // {
-    //     return (await serviceSchema.CreateOrUpdate(model)).Integer ?? throw new();
-    // }
-    //
-    // [HttpPost("Property/String")]
-    // public async Task<ActionResult<EntitySchemaPropertyString>> Create(FormModelSchemaPropertyString model)
-    // {
-    //     return (await serviceSchema.CreateOrUpdate(model)).String ?? throw new();
-    // }
+    [HttpPost("Parameter/Style")]
+    public async Task<ActionResult<ResponseSchemaParameterStyleCreate>> Create(RequestSchemaParameterStyleCreate model)
+    {
+        return await mediator.Send(new CommandSchemaParameterStyleCreate(model));
+    }
+
+    [HttpPost("Parameter/System")]
+    public async Task<ActionResult<ResponseSchemaParameterSystemCreate>> Create(RequestSchemaParameterSystemCreate model)
+    {
+        return await mediator.Send(new CommandSchemaParameterSystemCreate(model));
+    }
+
+    [HttpPost("Parameter/Text")]
+    public async Task<ActionResult<ResponseSchemaParameterTextCreate>> Create(RequestSchemaParameterTextCreate model)
+    {
+        return await mediator.Send(new CommandSchemaParameterTextCreate(model));
+    }
+
+    [HttpPost("Parameter/Style/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaParameterStyleUpdate>> Update(Guid id, RequestSchemaParameterStyleUpdate model)
+    {
+        return await mediator.Send(new CommandSchemaParameterStyleUpdate(id, model));
+    }
+
+    [HttpPost("Parameter/System/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaParameterSystemUpdate>> Update(Guid id, RequestSchemaParameterSystemUpdate model)
+    {
+        return await mediator.Send(new CommandSchemaParameterSystemUpdate(id, model));
+    }
+
+    [HttpPost("Parameter/Text/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaParameterTextUpdate>> Update(Guid id, RequestSchemaParameterTextUpdate model)
+    {
+        return await mediator.Send(new CommandSchemaParameterTextUpdate(id, model));
+    }
+
+    [HttpPost("Parameter/{id:guid}/Clone")]
+    public async Task<ActionResult<ResponseSchemaParameterClone>> CloneSchemaParameter(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaParameterClone(id));
+    }
+
+    [HttpPost("Parameter/{id:guid}/Delete")]
+    public async Task<ActionResult<ResponseSchemaParameterDelete>> DeleteSchemaParameter(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaParameterDelete(id));
+    }
 }

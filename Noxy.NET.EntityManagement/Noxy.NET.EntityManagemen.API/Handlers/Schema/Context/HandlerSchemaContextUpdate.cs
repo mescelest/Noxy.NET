@@ -15,7 +15,7 @@ public class HandlerSchemaContextUpdate(IUnitOfWorkFactory serviceUoWFactory) : 
         EntitySchemaContext result = await uow.Schema.UpdateSchemaContext(new()
         {
             ID = request.ID,
-            SchemaID = await uow.Schema.GetCurrentSchemaID(),
+            SchemaID = Guid.Empty,
             SchemaIdentifier = request.SchemaIdentifier,
             Name = request.Name,
             Note = request.Note,

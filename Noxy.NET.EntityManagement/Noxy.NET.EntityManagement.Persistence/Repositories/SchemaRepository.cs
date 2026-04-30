@@ -206,11 +206,10 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
             if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
         }
 
-        // result.SchemaID = entity.SchemaID;
         result.SchemaIdentifier = entity.SchemaIdentifier;
         result.Name = entity.Name;
         result.Note = entity.Note;
-        // result.Order = entity.Order;
+        result.Weight = entity.Weight;
         result.TitleTextParameterID = entity.TitleTextParameterID;
         result.DescriptionTextParameterID = entity.DescriptionTextParameterID;
         result.TimeUpdated = DateTime.UtcNow;
@@ -286,7 +285,6 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
             if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
         }
 
-        //result.SchemaID = entity.SchemaID;
         result.SchemaIdentifier = entity.SchemaIdentifier;
         result.Name = entity.Name;
         result.Note = entity.Note;
@@ -321,10 +319,144 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     #endregion -- SchemaContext --
 
+    #region -- SchemaParameter --
+
     public async Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id)
     {
-        return MapperT2E.Map(await Context.SchemaParameter.AsNoTracking().SingleAsync(x => x.ID == id));
+        TableSchemaParameter result = await Context.SchemaParameter
+            .AsNoTracking()
+            .SingleAsync(x => x.ID == id);
+        return MapperT2E.Map(result);
     }
+
+    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
+    {
+        IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
+
+        if (filter.ParameterType is { Count: > 0 })
+        {
+            List<Type> types = [.. filter.ParameterType.Select(key => TableSchemaParameter.TypeMap[key])];
+
+            ParameterExpression param = Expression.Parameter(typeof(TableSchemaParameter), "x");
+            Expression typeChecks = types.Select(Expression (t) => Expression.TypeIs(param, t)).Aggregate(Expression.OrElse);
+            Expression<Func<TableSchemaParameter, bool>> lambda = Expression.Lambda<Func<TableSchemaParameter, bool>>(typeChecks, param);
+            query = query.Where(lambda);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+        if (filter.IsSystemDefined is not null) query = query.Where(x => x.IsSystemDefined == filter.IsSystemDefined);
+        if (filter.IsApprovalRequired is not null) query = query.Where(x => x.IsApprovalRequired == filter.IsApprovalRequired);
+
+        List<TableSchemaParameter> result = await query
+            .OrderBy(x => x.Name)
+            .Skip(filter.PageNumber * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return [.. result.Select(MapperT2E.Map)];
+    }
+
+    public async Task<EntitySchemaParameterStyle> CreateSchemaParameterStyle(EntitySchemaParameterStyle entity)
+    {
+        EntityEntry<TableSchemaParameterStyle> result = await Context.SchemaParameterStyle.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaParameterSystem> CreateSchemaParameterSystem(EntitySchemaParameterSystem entity)
+    {
+        EntityEntry<TableSchemaParameterSystem> result = await Context.SchemaParameterSystem.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaParameterText> CreateSchemaParameterText(EntitySchemaParameterText entity)
+    {
+        EntityEntry<TableSchemaParameterText> result = await Context.SchemaParameterText.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaParameterStyle> UpdateSchemaParameterStyle(EntitySchemaParameterStyle entity)
+    {
+        TableSchemaParameterStyle result = await Context.SchemaParameterStyle.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        if (entity.SchemaIdentifier != result.SchemaIdentifier)
+        {
+            TableSchemaParameterStyle? valid = await Context.SchemaParameterStyle.AsNoTracking().FirstOrDefaultAsync(x => x.SchemaIdentifier == entity.SchemaIdentifier);
+            if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
+        }
+
+        result.SchemaIdentifier = entity.SchemaIdentifier;
+        result.Name = entity.Name;
+        result.Note = entity.Note;
+        result.IsApprovalRequired = entity.IsApprovalRequired;
+        result.IsSystemDefined = entity.IsSystemDefined;
+        result.TimeUpdated = DateTime.UtcNow;
+        Context.SchemaParameter.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaParameterSystem> UpdateSchemaParameterSystem(EntitySchemaParameterSystem entity)
+    {
+        TableSchemaParameterSystem result = await Context.SchemaParameterSystem.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        if (entity.SchemaIdentifier != result.SchemaIdentifier)
+        {
+            TableSchemaParameterSystem? valid = await Context.SchemaParameterSystem.AsNoTracking().FirstOrDefaultAsync(x => x.SchemaIdentifier == entity.SchemaIdentifier);
+            if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
+        }
+
+        result.SchemaIdentifier = entity.SchemaIdentifier;
+        result.Name = entity.Name;
+        result.Note = entity.Note;
+        result.IsApprovalRequired = entity.IsApprovalRequired;
+        result.IsSystemDefined = entity.IsSystemDefined;
+        result.TimeUpdated = DateTime.UtcNow;
+        Context.SchemaParameter.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaParameterText> UpdateSchemaParameterText(EntitySchemaParameterText entity)
+    {
+        TableSchemaParameterText result = await Context.SchemaParameterText.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        if (entity.SchemaIdentifier != result.SchemaIdentifier)
+        {
+            TableSchemaParameterText? valid = await Context.SchemaParameterText.AsNoTracking().FirstOrDefaultAsync(x => x.SchemaIdentifier == entity.SchemaIdentifier);
+            if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
+        }
+
+        result.SchemaIdentifier = entity.SchemaIdentifier;
+        result.Name = entity.Name;
+        result.Note = entity.Note;
+        result.Type = entity.Type;
+        result.IsApprovalRequired = entity.IsApprovalRequired;
+        result.IsSystemDefined = entity.IsSystemDefined;
+        result.TimeUpdated = DateTime.UtcNow;
+        Context.SchemaParameter.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaParameter.Discriminator> CloneSchemaParameter(Guid id)
+    {
+        TableSchemaParameter entity = await Context.SchemaParameter.AsNoTracking().FirstAsync(x => x.ID == id);
+        entity = entity.Clone();
+        entity.SchemaIdentifier = Guid.NewGuid().ToString("N");
+        await Context.SchemaParameter.AddAsync(entity);
+
+        return MapperT2E.Map(entity);
+    }
+
+    public async Task<Guid> DeleteSchemaParameter(Guid id)
+    {
+        TableSchemaParameter entity = await Context.SchemaParameter.AsNoTracking().FirstAsync(x => x.ID == id);
+        TableSchema schema = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entity.SchemaID);
+        if (schema.TimeActivated != null) throw new InvalidOperationException("Cannot delete schema element from schema that has been activated.");
+
+        Context.SchemaParameter.Remove(entity);
+
+        return entity.ID;
+    }
+
+    #endregion -- SchemaParameter --
 
     public async Task<EntitySchemaParameterStyle> GetSchemaParameterStyleByID(Guid id) => await GetEntityByID<TableSchemaParameterStyle, EntitySchemaParameterStyle>(id, MapperT2E.Map);
     public async Task<EntitySchemaParameterSystem> GetSchemaParameterSystemByID(Guid id) => await GetEntityByID<TableSchemaParameterSystem, EntitySchemaParameterSystem>(id, MapperT2E.Map);
@@ -366,32 +498,6 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return [.. result.Select(MapperT2E.Map)];
     }
 
-    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
-    {
-        IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
-
-        if (filter.ParameterType is { Count: > 0 })
-        {
-            List<Type> types = [.. filter.ParameterType.Select(key => TableSchemaParameter.TypeMap[key])];
-
-            ParameterExpression param = Expression.Parameter(typeof(TableSchemaParameter), "x");
-            Expression typeChecks = types.Select(Expression (t) => Expression.TypeIs(param, t)).Aggregate(Expression.OrElse);
-            Expression<Func<TableSchemaParameter, bool>> lambda = Expression.Lambda<Func<TableSchemaParameter, bool>>(typeChecks, param);
-            query = query.Where(lambda);
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
-        if (filter.IsSystemDefined is not null) query = query.Where(x => x.IsSystemDefined == filter.IsSystemDefined);
-        if (filter.IsApprovalRequired is not null) query = query.Where(x => x.IsApprovalRequired == filter.IsApprovalRequired);
-
-        List<TableSchemaParameter> result = await query
-            .OrderBy(x => x.Name)
-            .Skip(filter.PageNumber * filter.PageSize)
-            .Take(filter.PageSize)
-            .ToListAsync();
-
-        return [.. result.Select(MapperT2E.Map)];
-    }
 
     public async Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id)
     {
@@ -410,37 +516,6 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         List<TableJunctionSchemaElementHasProperty> result = await Context.SchemaElementHasProperty.AsNoTracking().Where(x => x.Entity!.SchemaID == id).ToListAsync();
         return [.. result.Select(MapperT2E.Map)];
     }
-
-    #region -- Create --
-
-    public async Task<EntitySchemaParameter.Discriminator> Create(EntitySchemaParameter entity)
-    {
-        EntityEntry<TableSchemaParameter> result = await Context.SchemaParameter.AddAsync(MapperE2T.Map(entity));
-        return MapperT2E.Map(result.Entity);
-    }
-
-    public async Task<EntitySchemaProperty.Discriminator> Create(EntitySchemaProperty entity)
-    {
-        await UpdateOrder<TableSchemaProperty, EntitySchemaProperty>(entity);
-        EntityEntry<TableSchemaProperty> result = await Context.SchemaProperty.AddAsync(MapperE2T.Map(entity));
-        return MapperT2E.Map(result.Entity);
-    }
-
-    #endregion -- Create --
-
-    #region -- Update --
-
-    public void Update(EntitySchemaParameter entity)
-    {
-        Context.SchemaParameter.Update(MapperE2T.Map(entity));
-    }
-
-    public void Update(EntitySchemaProperty baseEntity)
-    {
-        Context.SchemaProperty.Update(MapperE2T.Map(baseEntity));
-    }
-
-    #endregion -- Update --
 
     #region -- Private methods --
 

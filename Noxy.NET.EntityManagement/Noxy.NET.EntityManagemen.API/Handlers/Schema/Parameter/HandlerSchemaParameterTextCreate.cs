@@ -1,0 +1,30 @@
+using MediatR;
+using Noxy.NET.EntityManagement.API.Commands.Schema.Parameter;
+using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
+
+namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Parameter;
+
+public class HandlerSchemaParameterTextCreate(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandSchemaParameterTextCreate, ResponseSchemaParameterTextCreate>
+{
+    public async Task<ResponseSchemaParameterTextCreate> Handle(CommandSchemaParameterTextCreate request, CancellationToken cancellationToken)
+    {
+        await using IUnitOfWork uow = await serviceUoWFactory.Create();
+
+        EntitySchemaParameterText result = await uow.Schema.CreateSchemaParameterText(new()
+        {
+            SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
+            SchemaIdentifier = request.SchemaIdentifier,
+            Name = request.Name,
+            Note = request.Note,
+            Type = request.Type,
+            IsApprovalRequired = request.IsApprovalRequired,
+            IsSystemDefined = request.IsSystemDefined,
+        });
+
+        await uow.Commit();
+
+        return new() { Value = result };
+    }
+}
