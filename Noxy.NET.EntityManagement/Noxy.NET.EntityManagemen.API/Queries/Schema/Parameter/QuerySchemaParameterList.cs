@@ -6,6 +6,7 @@ namespace Noxy.NET.EntityManagement.API.Queries.Schema.Parameter;
 
 public class QuerySchemaParameterList(RequestSchemaParameterList request) : IRequest<ResponseSchemaParameterList>
 {
+    public Guid? SchemaID { get; } = request.SchemaID;
     public string? Search { get; } = request.Search;
     public bool? IsSystemDefined { get; } = request.IsSystemDefined;
     public bool? IsApprovalRequired { get; } = request.IsApprovalRequired;

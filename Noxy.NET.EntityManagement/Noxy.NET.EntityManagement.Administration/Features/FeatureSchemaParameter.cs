@@ -152,6 +152,12 @@ public class FeatureSchemaParameterEffects(APIHttpClient client, IState<FeatureS
     public Task Handle(ListAction action, IDispatcher dispatcher) => Execute(action.Scope, FeatureSchemaParameterActionKind.List, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
 
     [EffectMethod]
+    public Task Handle(AddStyleAction action, IDispatcher dispatcher) => ExecuteWithRefresh(action.Scope, FeatureSchemaParameterActionKind.Add, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+
+    [EffectMethod]
+    public Task Handle(AddSystemAction action, IDispatcher dispatcher) => ExecuteWithRefresh(action.Scope, FeatureSchemaParameterActionKind.Add, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+
+    [EffectMethod]
     public Task Handle(AddTextAction action, IDispatcher dispatcher) => ExecuteWithRefresh(action.Scope, FeatureSchemaParameterActionKind.Add, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
 
     [EffectMethod]
@@ -162,6 +168,13 @@ public class FeatureSchemaParameterEffects(APIHttpClient client, IState<FeatureS
 
     [EffectMethod]
     public Task Handle(UpdateTextAction action, IDispatcher dispatcher) => ExecuteWithRefresh(action.Scope, FeatureSchemaParameterActionKind.Update, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+
+    [EffectMethod]
+    public Task Handle(CloneAction action, IDispatcher dispatcher) => Execute(action.Scope, FeatureSchemaParameterActionKind.Clone, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+
+    [EffectMethod]
+    public Task Handle(DeleteAction action, IDispatcher dispatcher) => Execute(action.Scope, FeatureSchemaParameterActionKind.Delete, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+
 
     private static async Task Execute<TResult>(string scope, FeatureSchemaParameterActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
     {
