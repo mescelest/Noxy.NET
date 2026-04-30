@@ -1,7 +1,7 @@
-@inherits BaseRequestForm<RequestSchemaParameterTextCreate, ResponseSchemaParameterTextCreate>
+@inherits BaseRequestForm<RequestSchemaParameterTextUpdate, ResponseSchemaParameterTextUpdate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm T="RequestSchemaParameterTextCreate" Context="Context" ResetAfterSubmit="false" OnSubmit="ForwardSubmit">
+    <WebForm T="RequestSchemaParameterTextUpdate" Context="Context" ResetAfterSubmit="false" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.SchemaIdentifier))" Description="@GetDescription(nameof(Model.SchemaIdentifier))" @bind-Value="Model.SchemaIdentifier"/>
 
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Model.Name"/>
@@ -27,8 +27,8 @@
 
 @code {
 
-    [Parameter]
-    public Guid? SchemaID { get; set; }
+    [Parameter, EditorRequired]
+    public EntitySchemaParameterText SchemaParameter { get; set; }
 
     private readonly Dictionary<ParameterTextTypeEnum, string> _collectionType = new()
     {
@@ -39,9 +39,18 @@
 
     private HashSet<ParameterTextTypeEnum> ListType => _collectionType.Select(x => x.Key).ToHashSet();
 
-    protected override WebFormContext<RequestSchemaParameterTextCreate> CreateContext()
+    protected override WebFormContext<RequestSchemaParameterTextUpdate> CreateContext()
     {
-        return new(new() { SchemaID = SchemaID });
+        return new(new()
+        {
+            ID = SchemaParameter.ID,
+            SchemaIdentifier = SchemaParameter.SchemaIdentifier,
+            Name = SchemaParameter.Name,
+            Note = SchemaParameter.Note,
+            IsApprovalRequired = SchemaParameter.IsApprovalRequired,
+            IsSystemDefined = SchemaParameter.IsSystemDefined,
+            Type = SchemaParameter.Type,
+        });
     }
 
 }

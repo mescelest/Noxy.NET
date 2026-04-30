@@ -1,48 +1,170 @@
-@inject IState<FeatureSchemaParameterDataParameterListState> StateData
-@inject IState<FeatureTextState> StateText
+@inject IState<FeatureSchemaParameterState> StateSchemaParameter
 @inject IDispatcher Dispatcher
+@inject TextService TextService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
-        <Header>
-            <h3>@SchemaParameter.Name</h3>
-        </Header>
+    <div class="header">
+        <div class="title">
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@SchemaParameter.Name</DynamicHTMLTag>
+            <NavLink href="@Link">
+                <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
+            </NavLink>
+        </div>
 
-        <Content>
-            @switch (SchemaParameter)
+        <div class="action-list">
+            @if (Schema.TimeActivated == null)
             {
-                case EntitySchemaParameterStyle parameterStyle:
-                    <SchemaParameterListItemStyle SchemaParameter="@parameterStyle"/>
-                    break;
-                case EntitySchemaParameterSystem parameterSystem:
-                    <SchemaParameterListItemSystem SchemaParameter="@parameterSystem"/>
-                    break;
-                case EntitySchemaParameterText parameterText:
-                    <SchemaParameterListItemText SchemaParameter="@parameterText"/>
-                    break;
+                <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
             }
-        </Content>
-    </Collapsible>
+
+            <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
+            <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
+        </div>
+
+    </div>
+
+    @if (!_isEditMode)
+    {
+        <div>
+            <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier):</strong>
+            @SchemaParameter.SchemaIdentifier
+        </div>
+        <div>
+            <strong>@TextService.Get(TextConstants.LabelName):</strong>
+            @SchemaParameter.Name
+        </div>
+        <div>
+            <strong>@TextService.Get(TextConstants.LabelNote):</strong>
+            @SchemaParameter.Note
+        </div>
+
+        @if (SchemaParameter is EntitySchemaParameterText parameterText)
+        {
+            <div>
+                <strong>@TextService.Get(TextConstants.LabelParameterTextType):</strong>
+                @parameterText.Type
+            </div>
+        }
+
+        <div>
+            <strong>@TextService.Get(TextConstants.LabelIsApprovalRequired)</strong>
+            @SchemaParameter.IsApprovalRequired
+        </div>
+        <div>
+            <strong>@TextService.Get(TextConstants.LabelIsSystemDefined)</strong>
+            @SchemaParameter.IsSystemDefined
+        </div>
+        <div>
+            <strong>@TextService.Get(TextConstants.LabelTimeCreated):</strong>
+            @SchemaParameter.TimeCreated
+        </div>
+    }
+    else
+    {
+        switch (SchemaParameter)
+        {
+            case EntitySchemaParameterText parameterText:
+                <FormSchemaParameterTextUpdate SchemaParameter="parameterText" OnSubmit="OnButtonEditTextSubmit">
+                    <div class="action-list">
+                        <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
+                            @TextService.Get(TextConstants.ButtonUpdate)
+                        </Button>
+
+                        <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                            @TextService.Get(TextConstants.ButtonCancel)
+                        </Button>
+                    </div>
+                </FormSchemaParameterTextUpdate>
+                break;
+            case EntitySchemaParameterStyle parameterStyle:
+                <FormSchemaParameterStyleUpdate SchemaParameter="parameterStyle" OnSubmit="OnButtonEditStyleSubmit">
+                    <div class="action-list">
+                        <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
+                            @TextService.Get(TextConstants.ButtonUpdate)
+                        </Button>
+
+                        <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                            @TextService.Get(TextConstants.ButtonCancel)
+                        </Button>
+                    </div>
+                </FormSchemaParameterStyleUpdate>
+                break;
+            case EntitySchemaParameterSystem parameterSystem:
+                <FormSchemaParameterSystemUpdate SchemaParameter="parameterSystem" OnSubmit="OnButtonEditSystemSubmit">
+                    <div class="action-list">
+                        <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
+                            @TextService.Get(TextConstants.ButtonUpdate)
+                        </Button>
+
+                        <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                            @TextService.Get(TextConstants.ButtonCancel)
+                        </Button>
+                    </div>
+                </FormSchemaParameterSystemUpdate>
+                break;
+        }
+    }
 </div>
 
 @code {
 
     [Parameter, EditorRequired]
-    public required EntitySchemaParameter SchemaParameter { get; set; }
+    public EntitySchema Schema { get; set; }
 
-    private bool _isCollapsed = true;
+    [Parameter, EditorRequired]
+    public EntitySchemaParameter SchemaParameter { get; set; }
 
-    private bool IsLoading => StateData.Value.IsKeyLoading(SchemaParameter.SchemaIdentifier) || (StateData.Value.Cache.ContainsKey(SchemaParameter.SchemaIdentifier) && StateText.Value.IsScopeLoading(GetComponentName()));
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
 
-    private void SetCollapsed(bool value)
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H3;
+
+    private bool _isEditMode;
+
+    private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
+    private string Link => $"/schema/{Schema.ID}/parameter/{SchemaParameter.ID}";
+    private bool IsLoadingUpdate => StateSchemaParameter.Value.TryGetLoading(ScopeCurrent, FeatureSchemaParameterActionKind.Update, out bool value) && value;
+
+    private void OnButtonEditClick()
     {
-        _isCollapsed = value;
-        if (_isCollapsed) return;
-
-        string id = SchemaParameter.SchemaIdentifier;
-        if (StateData.Value.Cache.ContainsKey(id) || StateData.Value.IsKeyLoading(id)) return;
-
-        Dispatcher.Dispatch(new FeatureSchemaParameterDataParameterListReducers.LoadDataParameterListAction(id));
+        _isEditMode = true;
     }
+
+    private void OnButtonEditCancel()
+    {
+        _isEditMode = false;
+    }
+
+    private void OnButtonEditStyleSubmit(IWebFormContext<RequestSchemaParameterStyleUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.UpdateStyleAction(ScopeCurrent, value.Model));
+        _isEditMode = false;
+    }
+
+    private void OnButtonEditSystemSubmit(IWebFormContext<RequestSchemaParameterSystemUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.UpdateSystemAction(ScopeCurrent, value.Model));
+        _isEditMode = false;
+    }
+
+    private void OnButtonEditTextSubmit(IWebFormContext<RequestSchemaParameterTextUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.UpdateTextAction(ScopeCurrent, value.Model));
+        _isEditMode = false;
+    }
+
+    private void OnButtonDeleteClick()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.DeleteAction(ScopeCurrent, new() { ID = SchemaParameter.ID }));
+    }
+
+    private void OnButtonCloneClick()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.CloneAction(ScopeCurrent, new() { ID = SchemaParameter.ID }));
+    }
+
 }

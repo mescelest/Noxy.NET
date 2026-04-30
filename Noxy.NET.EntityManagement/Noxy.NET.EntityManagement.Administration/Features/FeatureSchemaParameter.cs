@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Fluxor;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
-using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 using Noxy.NET.EntityManagement.Presentation.Services;
 using static Noxy.NET.EntityManagement.Administration.Features.FeatureSchemaParameterReducers;
@@ -57,6 +56,33 @@ public static class FeatureSchemaParameterReducers
     [ReducerMethod]
     public static FeatureSchemaParameterState ReduceAddTextFailure(FeatureSchemaParameterState state, FailureAction action) => HandleFailureAction(state, action);
 
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceUpdateStyle(FeatureSchemaParameterState state, UpdateStyleAction action) => StartAction(state, action.Scope, FeatureSchemaParameterActionKind.Add);
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceUpdateStyleSuccess(FeatureSchemaParameterState state, SuccessAction<EntitySchemaParameterStyle> action) => HandleSuccessAction(state, action);
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceUpdateStyleFailure(FeatureSchemaParameterState state, FailureAction action) => HandleFailureAction(state, action);
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceUpdateSystem(FeatureSchemaParameterState state, UpdateSystemAction action) => StartAction(state, action.Scope, FeatureSchemaParameterActionKind.Add);
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceUpdateSystemSuccess(FeatureSchemaParameterState state, SuccessAction<EntitySchemaParameterSystem> action) => HandleSuccessAction(state, action);
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceUpdateSystemFailure(FeatureSchemaParameterState state, FailureAction action) => HandleFailureAction(state, action);
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceUpdateText(FeatureSchemaParameterState state, UpdateTextAction action) => StartAction(state, action.Scope, FeatureSchemaParameterActionKind.Add);
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceUpdateTextSuccess(FeatureSchemaParameterState state, SuccessAction<EntitySchemaParameterText> action) => HandleSuccessAction(state, action);
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceUpdateTextFailure(FeatureSchemaParameterState state, FailureAction action) => HandleFailureAction(state, action);
+
     private static Dictionary<TKey, TValue> Set<TKey, TValue>(Dictionary<TKey, TValue> source, TKey key, TValue value) where TKey : notnull
     {
         return source.TryGetValue(key, out TValue? existing) && EqualityComparer<TValue>.Default.Equals(existing, value) ? source : new(source) { [key] = value };
@@ -101,6 +127,16 @@ public static class FeatureSchemaParameterReducers
 
     public record AddTextAction(string Scope, RequestSchemaParameterTextCreate Request);
 
+    public record UpdateStyleAction(string Scope, RequestSchemaParameterStyleUpdate Request);
+
+    public record UpdateSystemAction(string Scope, RequestSchemaParameterSystemUpdate Request);
+
+    public record UpdateTextAction(string Scope, RequestSchemaParameterTextUpdate Request);
+
+    public record CloneAction(string Scope, RequestSchemaParameterClone Request);
+
+    public record DeleteAction(string Scope, RequestSchemaParameterDelete Request);
+
     public record SuccessAction<T>(string Scope, FeatureSchemaParameterActionKind Kind, T Value);
 
     public record FailureAction(string Scope, FeatureSchemaParameterActionKind Kind, string Error);
@@ -113,6 +149,15 @@ public class FeatureSchemaParameterEffects(APIHttpClient client, IState<FeatureS
 
     [EffectMethod]
     public Task Handle(AddTextAction action, IDispatcher dispatcher) => ExecuteWithRefresh(action.Scope, FeatureSchemaParameterActionKind.Add, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+
+    [EffectMethod]
+    public Task Handle(UpdateStyleAction action, IDispatcher dispatcher) => ExecuteWithRefresh(action.Scope, FeatureSchemaParameterActionKind.Update, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+
+    [EffectMethod]
+    public Task Handle(UpdateSystemAction action, IDispatcher dispatcher) => ExecuteWithRefresh(action.Scope, FeatureSchemaParameterActionKind.Update, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+
+    [EffectMethod]
+    public Task Handle(UpdateTextAction action, IDispatcher dispatcher) => ExecuteWithRefresh(action.Scope, FeatureSchemaParameterActionKind.Update, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
 
     private static async Task Execute<TResult>(string scope, FeatureSchemaParameterActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
     {

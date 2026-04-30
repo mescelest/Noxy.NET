@@ -9,9 +9,11 @@ using Noxy.NET.EntityManagement.API.Queries.Schema.Element;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 
 namespace Noxy.NET.EntityManagement.API.Controllers;
 

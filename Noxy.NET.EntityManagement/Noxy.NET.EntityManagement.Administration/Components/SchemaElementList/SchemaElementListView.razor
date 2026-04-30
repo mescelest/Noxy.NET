@@ -19,8 +19,9 @@
 
 @code {
 
-    [Parameter, EditorRequired]
-    public Guid SchemaID { get; set; }
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+    private Guid SchemaIDCurrent => SchemaID ?? Guid.Empty;
 
     [Parameter, EditorRequired]
     public RenderFragment<(EntitySchema Schema, EntitySchemaElement SchemaElement)> ChildContent { get; set; }
@@ -51,7 +52,7 @@
 
         if (Schema == null && !IsLoadingSchema)
         {
-            Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(ScopeCurrent, new() { ID = SchemaID }));
+            Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(ScopeCurrent, new() { ID = SchemaIDCurrent }));
         }
 
         if (List.Count == 0 && !IsLoadingList)

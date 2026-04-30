@@ -6,16 +6,18 @@
 <div class="@CssClass">
     <MagazineFrame>
         <Left>
-            <SchemaParameterListFilter/>
+            <SchemaParameterListFilter Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
         </Left>
         <Content>
-            <SchemaParameterListView>
-                <SchemaParameterListGroup SchemaParameter="context.GetValue()"/>
+            <SchemaParameterListView Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H1">
+                <SchemaParameterListGroup Scope="@Scope" Schema="context.Schema" SchemaParameter="context.SchemaParameter" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
             </SchemaParameterListView>
         </Content>
     </MagazineFrame>
 </div>
 
 @code {
-    
+
+    private string Scope => GetComponentName();
+
 }

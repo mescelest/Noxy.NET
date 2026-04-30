@@ -4,7 +4,7 @@ using Noxy.NET.EntityManagement.Domain.Interfaces;
 
 namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
-public class EntitySchemaParameter : BaseEntitySchemaPresentation, ISchemaMetadata
+public class EntitySchemaParameter : BaseEntitySchema, ISchemaMetadata
 {
     public required string Name { get; set; }
     public string Note { get; set; } = string.Empty;

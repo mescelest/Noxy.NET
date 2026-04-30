@@ -1,6 +1,6 @@
 using MediatR;
-using Noxy.NET.EntityManagement.Domain.Requests.Schema;
-using Noxy.NET.EntityManagement.Domain.Responses.Schema;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 
 namespace Noxy.NET.EntityManagement.API.Queries.Schema;
 

@@ -9,9 +9,9 @@
             <SchemaParameterListFilter Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
         </Left>
         <Content>
-            @* <SchemaContextListView Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1"> *@
-            @*     <SchemaContextListGroup Schema="context.Schema" SchemaContext="context.SchemaContext" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/> *@
-            @* </SchemaContextListView> *@
+            <SchemaParameterListView Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1">
+                <SchemaParameterListGroup Schema="context.Schema" SchemaParameter="context.SchemaParameter" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+            </SchemaParameterListView>
         </Content>
         <Right>
             <SchemaParameterListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>

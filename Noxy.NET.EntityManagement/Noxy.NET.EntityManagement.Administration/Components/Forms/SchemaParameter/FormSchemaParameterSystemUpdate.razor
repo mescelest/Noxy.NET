@@ -1,17 +1,12 @@
-@inherits BaseRequestForm<RequestSchemaParameterTextCreate, ResponseSchemaParameterTextCreate>
+@inherits BaseRequestForm<RequestSchemaParameterSystemUpdate, ResponseSchemaParameterSystemUpdate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm T="RequestSchemaParameterTextCreate" Context="Context" ResetAfterSubmit="false" OnSubmit="ForwardSubmit">
+    <WebForm T="RequestSchemaParameterSystemUpdate" Context="Context" ResetAfterSubmit="false" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.SchemaIdentifier))" Description="@GetDescription(nameof(Model.SchemaIdentifier))" @bind-Value="Model.SchemaIdentifier"/>
 
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Model.Name"/>
 
         <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Model.Note"/>
-
-        <InputGroupSelect OptionList="ListType" DisplayName="@GetDisplayName(nameof(Model.Type))" Description="@GetDescription(nameof(Model.Type))"
-                          Name="@nameof(Model.Type)" @bind-Value="Model.Type">
-            <span>@TextService.Get(_collectionType[context])</span>
-        </InputGroupSelect>
 
         <InputGroupCheckbox Option="true" @bind-Value="Model.IsApprovalRequired" DisplayName="@GetDisplayName(nameof(Model.IsApprovalRequired))" Description="@GetDescription(nameof(Model.IsApprovalRequired))">
             @TextService.Get(TextConstants.ValueOptionYes)
@@ -27,21 +22,20 @@
 
 @code {
 
-    [Parameter]
-    public Guid? SchemaID { get; set; }
+    [Parameter, EditorRequired]
+    public EntitySchemaParameterSystem SchemaParameter { get; set; }
 
-    private readonly Dictionary<ParameterTextTypeEnum, string> _collectionType = new()
+    protected override WebFormContext<RequestSchemaParameterSystemUpdate> CreateContext()
     {
-        { ParameterTextTypeEnum.Line, TextConstants.ValueParameterTextTypeLine },
-        { ParameterTextTypeEnum.Text, TextConstants.ValueParameterTextTypeText },
-        { ParameterTextTypeEnum.RichText, TextConstants.ValueParameterTextTypeRichText },
-    };
-
-    private HashSet<ParameterTextTypeEnum> ListType => _collectionType.Select(x => x.Key).ToHashSet();
-
-    protected override WebFormContext<RequestSchemaParameterTextCreate> CreateContext()
-    {
-        return new(new() { SchemaID = SchemaID });
+        return new(new()
+        {
+            ID = SchemaParameter.ID,
+            SchemaIdentifier = SchemaParameter.SchemaIdentifier,
+            Name = SchemaParameter.Name,
+            Note = SchemaParameter.Note,
+            IsApprovalRequired = SchemaParameter.IsApprovalRequired,
+            IsSystemDefined = SchemaParameter.IsSystemDefined,
+        });
     }
 
 }

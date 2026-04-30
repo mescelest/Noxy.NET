@@ -43,12 +43,15 @@ public static class TextConstants
     public const string LabelParameterStyle = "Label:ParameterStyle";
     public const string LabelParameterSystem = "Label:ParameterSystem";
     public const string LabelParameterText = "Label:ParameterText";
+    public const string LabelParameterTextType = "Label:ParameterTextType";
     public const string LabelCulture = "Label:Culture";
     public const string LabelSchemaIdentifier = "Label:SchemaIdentifier";
     public const string LabelName = "Label:Name";
     public const string LabelNote = "Label:Note";
     public const string LabelTitle = "Label:Title";
     public const string LabelDescription = "Label:Description";
+    public const string LabelIsApprovalRequired = "Label:IsApprovalRequired";
+    public const string LabelIsSystemDefined = "Label:IsSystemDefined";
     public const string LabelTimeApproved = "Label:TimeApproved";
     public const string LabelTimeCreated = "Label:TimeCreated";
     public const string LabelTimeEffective = "Label:TimeEffective";
@@ -73,7 +76,6 @@ public static class TextConstants
     public const string LabelFormDateEffective = "Label:Form:DateEffective";
     public const string LabelFormPageSize = "Label:Form:PageSize";
     public const string LabelFormPageNumber = "Label:Form:PageNumber";
-
     public const string LabelFormParameterTextType = "Label:Form:ParameterTextType";
     public const string LabelFormIsUnsigned = "Label:Form:IsUnsigned";
     public const string LabelFormAllowedExtensions = "Label:Form:AllowedExtensions";

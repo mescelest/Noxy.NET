@@ -1,22 +1,28 @@
-@inject IState<FeatureSchemaParameterState> State
+@inject IState<FeatureSchemaState> StateSchema
+@inject IState<FeatureSchemaParameterState> StateSchemaParameter
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schema parameters</DynamicHTMLTag>
+    @if (Schema != null)
+    {
+        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schema parameters for @Schema?.Name</DynamicHTMLTag>
 
-    <Loader Loading="IsLoading">
-        @foreach (EntitySchemaParameter.Discriminator item in List)
+        @foreach (EntitySchemaParameter.Discriminator entitySchemaParameter in List)
         {
-            @ChildContent(item)
+            @ChildContent((Schema, entitySchemaParameter.GetValue()))
         }
-    </Loader>
+    }
 </div>
 
 @code {
 
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+    private Guid SchemaIDCurrent => SchemaID ?? Guid.Empty;
+
     [Parameter, EditorRequired]
-    public RenderFragment<EntitySchemaParameter.Discriminator> ChildContent { get; set; }
+    public RenderFragment<(EntitySchema Schema, EntitySchemaParameter SchemaParameter)> ChildContent { get; set; }
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
@@ -24,20 +30,28 @@
 
     [Parameter]
     public RequestSchemaParameterList? Request { get; set; }
-    private RequestSchemaParameterList RequestCurrent => Request ?? new();
+    private RequestSchemaParameterList RequestCurrent => Request ?? new() { SchemaID = SchemaID };
 
     [Parameter]
     public string? Scope { get; set; }
     private string ScopeCurrent => Scope ?? GetComponentName();
 
-    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaParameterActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchemaParameter.Discriminator> List => State.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) ? list : [];
+    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => StateSchema.Value.TryGetFind(ScopeCurrent, out EntitySchema? value) ? value : null;
+
+    private bool IsLoadingList => StateSchemaParameter.Value.TryGetLoading(ScopeCurrent, FeatureSchemaParameterActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaParameter.Discriminator> List => StateSchemaParameter.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) ? list : [];
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        if (List.Count == 0 && !IsLoading)
+        if (Schema == null && !IsLoadingSchema)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(ScopeCurrent, new() { ID = SchemaIDCurrent }));
+        }
+
+        if (List.Count == 0 && !IsLoadingList)
         {
             Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, RequestCurrent));
         }

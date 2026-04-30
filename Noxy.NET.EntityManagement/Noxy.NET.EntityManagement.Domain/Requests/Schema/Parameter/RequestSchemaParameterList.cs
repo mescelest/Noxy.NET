@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
 using Noxy.NET.EntityManagement.Domain.Constants;
-using Noxy.NET.EntityManagement.Domain.Responses.Schema;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 
-namespace Noxy.NET.EntityManagement.Domain.Requests.Schema;
+namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 
 public class RequestSchemaParameterList : BaseRequestGet<ResponseSchemaParameterList>
 {
