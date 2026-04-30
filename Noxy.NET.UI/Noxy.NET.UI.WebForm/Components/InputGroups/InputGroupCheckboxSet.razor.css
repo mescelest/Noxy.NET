@@ -4,28 +4,16 @@
     flex-flow: column;
 }
 
-.InputGroupCheckboxSet ::deep .InputElementCheckbox {
-    display: none;
-}
-
-.InputGroupCheckboxSet ::deep .InputElementCheckbox:checked + .control {
-    background-color: black;
-    fill: white;
-}
-
-.InputGroupCheckboxSet ::deep .InputElementCheckbox:not(:checked) + .control > * {
-    display: none;
-}
-
-.control {
+.InputGroupCheckboxSet ::deep .InputElementCheckboxSet {
     display: flex;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-xs);
+}
+
+.InputGroupCheckboxSet ::deep .InputElementCheckboxSet > .option {
+    display: flex;
     flex-flow: row;
     align-items: center;
-    justify-content: center;
-    width: var(--size-control-xxs);
-    height: var(--size-control-xxs);
-    border: var(--size-border-width-sm) solid black;
-    border-radius: var(--size-border-radius-md);
-    box-sizing: border-box;
+    grid-column-gap: var(--size-gap-xxs);
 }

@@ -19,6 +19,8 @@
     width: var(--size-control-md, 42px);
     height: var(--size-control-md, 42px);
     cursor: pointer;
+    transition: transform var(--animation-length-medium) ease-in-out;
+    user-select: none;
 }
 
 .content-wrapper {
@@ -40,6 +42,10 @@
 
 .Collapsible[loading] .content-wrapper {
     transition: none;
+}
+
+.Collapsible[collapsed] .arrow {
+    transform: rotate(90deg);
 }
 
 .content {

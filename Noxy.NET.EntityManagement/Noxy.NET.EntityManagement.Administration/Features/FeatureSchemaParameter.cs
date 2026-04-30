@@ -125,6 +125,10 @@ public static class FeatureSchemaParameterReducers
 
     public record ListAction(string Scope, RequestSchemaParameterList Request);
 
+    public record AddStyleAction(string Scope, RequestSchemaParameterStyleCreate Request);
+
+    public record AddSystemAction(string Scope, RequestSchemaParameterSystemCreate Request);
+
     public record AddTextAction(string Scope, RequestSchemaParameterTextCreate Request);
 
     public record UpdateStyleAction(string Scope, RequestSchemaParameterStyleUpdate Request);

@@ -1,0 +1,15 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" checked="@Checked">
+    @if (Checked)
+    {
+        <span>✓</span>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public bool Checked { get; set; }
+
+}

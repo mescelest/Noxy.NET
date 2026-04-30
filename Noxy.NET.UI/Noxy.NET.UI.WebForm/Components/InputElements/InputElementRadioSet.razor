@@ -1,15 +1,26 @@
-﻿@inherits BaseInput<TValue>
-@typeparam TValue
+﻿@inherits BaseInput<TOption>
+@typeparam TOption
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @foreach (TValue item in OptionList)
+    @{
+        string name = GetName();
+    }
+    @foreach (TOption option in OptionList)
     {
         string id = Guid.NewGuid().ToString();
+        InputElementRadioSetProperties<TOption> properties = new(id, name, EqualityComparer<TOption>.Default.Equals(Value, option), option, OnChoiceChange);
 
         <label class="option" for="@id">
-            <InputElementRadio @attributes="OptionAttributes?.Invoke(item)" ID="@id" Name="@GetName()" Option="item" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" OnChange="OnRadioChanged"/>
+            @if (Control != null)
+            {
+                @Control(properties)
+            }
+            else
+            {
+                <InputElementRadio ID="@id" Name="@GetName()" Option="option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" OnChange="x => OnChoiceChange(x, option)"/>
+            }
 
-            @ChildContent(item)
+            @ChildContent(properties)
         </label>
     }
 </div>
@@ -17,17 +28,18 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required HashSet<TValue> OptionList { get; set; }
+    public required HashSet<TOption> OptionList { get; set; }
 
     [Parameter, EditorRequired]
-    public required RenderFragment<TValue> ChildContent { get; set; }
+    public required RenderFragment<InputElementRadioSetProperties<TOption>> ChildContent { get; set; }
 
     [Parameter]
-    public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+    public RenderFragment<InputElementRadioSetProperties<TOption>>? Control { get; set; }
 
-    private void OnRadioChanged(ChangeEventArgs args)
+    private void OnChoiceChange(ChangeEventArgs args, TOption option)
     {
         OnChange.InvokeAsync(args);
+        NotifyChange(option);
     }
 
 }

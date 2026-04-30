@@ -9,6 +9,9 @@
 
         </Left>
         <Content>
+            <InputGroupRadioSet TOption="string" OptionList="_list" @bind-Value:get="_value" @bind-Value:set="SetValue" DisplayName="Hello World" Description="This is a description">
+                Value @context.Option
+            </InputGroupRadioSet>
 
         </Content>
         <Right>
@@ -18,5 +21,13 @@
 </div>
 
 @code {
+
+    private string? _value;
+    private HashSet<string> _list = ["A", "B", "C"];
+
+    private void SetValue(string? value)
+    {
+        _value = value;
+    }
 
 }

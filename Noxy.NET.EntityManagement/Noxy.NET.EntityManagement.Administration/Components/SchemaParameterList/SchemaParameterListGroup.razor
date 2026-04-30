@@ -30,36 +30,36 @@
     @if (!_isEditMode)
     {
         <div>
-            <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier):</strong>
+            <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
             @SchemaParameter.SchemaIdentifier
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelName):</strong>
+            <strong>@TextService.Get(TextConstants.LabelName, GetComponentName()):</strong>
             @SchemaParameter.Name
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelNote):</strong>
+            <strong>@TextService.Get(TextConstants.LabelNote, GetComponentName()):</strong>
             @SchemaParameter.Note
         </div>
 
         @if (SchemaParameter is EntitySchemaParameterText parameterText)
         {
             <div>
-                <strong>@TextService.Get(TextConstants.LabelParameterTextType):</strong>
+                <strong>@TextService.Get(TextConstants.LabelParameterTextType, GetComponentName()):</strong>
                 @parameterText.Type
             </div>
         }
 
         <div>
-            <strong>@TextService.Get(TextConstants.LabelIsApprovalRequired)</strong>
+            <strong>@TextService.Get(TextConstants.LabelIsApprovalRequired, GetComponentName())</strong>
             @SchemaParameter.IsApprovalRequired
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelIsSystemDefined)</strong>
+            <strong>@TextService.Get(TextConstants.LabelIsSystemDefined, GetComponentName())</strong>
             @SchemaParameter.IsSystemDefined
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelTimeCreated):</strong>
+            <strong>@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName()):</strong>
             @SchemaParameter.TimeCreated
         </div>
     }
@@ -69,41 +69,17 @@
         {
             case EntitySchemaParameterText parameterText:
                 <FormSchemaParameterTextUpdate SchemaParameter="parameterText" OnSubmit="OnButtonEditTextSubmit">
-                    <div class="action-list">
-                        <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                            @TextService.Get(TextConstants.ButtonUpdate)
-                        </Button>
-
-                        <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
-                            @TextService.Get(TextConstants.ButtonCancel)
-                        </Button>
-                    </div>
+                    @GetSubmitAction()
                 </FormSchemaParameterTextUpdate>
                 break;
             case EntitySchemaParameterStyle parameterStyle:
                 <FormSchemaParameterStyleUpdate SchemaParameter="parameterStyle" OnSubmit="OnButtonEditStyleSubmit">
-                    <div class="action-list">
-                        <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                            @TextService.Get(TextConstants.ButtonUpdate)
-                        </Button>
-
-                        <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
-                            @TextService.Get(TextConstants.ButtonCancel)
-                        </Button>
-                    </div>
+                    @GetSubmitAction()
                 </FormSchemaParameterStyleUpdate>
                 break;
             case EntitySchemaParameterSystem parameterSystem:
                 <FormSchemaParameterSystemUpdate SchemaParameter="parameterSystem" OnSubmit="OnButtonEditSystemSubmit">
-                    <div class="action-list">
-                        <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                            @TextService.Get(TextConstants.ButtonUpdate)
-                        </Button>
-
-                        <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
-                            @TextService.Get(TextConstants.ButtonCancel)
-                        </Button>
-                    </div>
+                    @GetSubmitAction()
                 </FormSchemaParameterSystemUpdate>
                 break;
         }
@@ -168,6 +144,20 @@
     private void OnButtonCloneClick()
     {
         Dispatcher.Dispatch(new FeatureSchemaParameterReducers.CloneAction(ScopeCurrent, new() { ID = SchemaParameter.ID }));
+    }
+
+    private RenderFragment GetSubmitAction()
+    {
+        return
+                @<div class="action-list">
+                    <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
+                        @TextService.Get(TextConstants.ButtonUpdate, GetComponentName())
+                    </Button>
+
+                    <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                        @TextService.Get(TextConstants.ButtonCancel, GetComponentName())
+                    </Button>
+                </div>;
     }
 
 }

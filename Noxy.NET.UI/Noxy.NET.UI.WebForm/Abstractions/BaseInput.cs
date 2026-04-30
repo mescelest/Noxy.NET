@@ -32,8 +32,8 @@ public abstract class BaseInput : ElementComponent
 
 public abstract class BaseInput<TValue> : BaseInput
 {
-    [Parameter, EditorRequired]
-    public required TValue? Value { get; set; }
+    [Parameter]
+    public TValue? Value { get; set; }
 
     [Parameter]
     public EventCallback<TValue?> ValueChanged { get; set; }

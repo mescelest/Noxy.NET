@@ -3,29 +3,36 @@
 @typeparam TValue where TValue : ISet<TOption>, new()
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @foreach (TOption item in OptionList)
-    {
-        string id = Guid.NewGuid().ToString();
+    @{
+        string name = GetName();
 
-        <label class="option" for="@id">
-            <InputElementCheckbox @attributes="OptionAttributes?.Invoke(item)" ID="@id" Name="@GetName()" Option="item" Checked="@IsChecked(item)" OnChange="x => OnCheckboxChanged(x, item)"/>
+        foreach (TOption option in OptionList)
+        {
+            string id = Guid.NewGuid().ToString();
+            InputElementCheckboxSetScope<TOption> scope = new(id, name, IsChecked(option), option, OnChoiceChange);
 
-            @ChildContent(item)
-        </label>
+            <label class="option" for="@id">
+                @if (Control != null)
+                {
+                    @Control(scope)
+                }
+                else
+                {
+                    <InputElementCheckbox TValue="TOption" ID="@ID" Name="@GetName()" Option="option" Checked="@IsChecked(option)" OnChange="x => OnChoiceChange(x, option)"/>
+                }
+
+                @ChildContent(scope)
+            </label>
+        }
     }
 </div>
 
 @code {
 
     [Parameter, EditorRequired]
-    public required RenderFragment<TOption> ChildContent { get; set; }
+    public required RenderFragment<InputElementCheckboxSetScope<TOption>> ChildContent { get; set; }
 
     [Parameter]
-    public Func<TOption, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
-
-    private void OnCheckboxChanged(ChangeEventArgs args, TOption item)
-    {
-        OnInputChange(args, item);
-    }
+    public RenderFragment<InputElementCheckboxSetScope<TOption>>? Control { get; set; }
 
 }

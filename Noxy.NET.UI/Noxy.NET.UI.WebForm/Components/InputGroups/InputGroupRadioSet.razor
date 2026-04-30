@@ -1,11 +1,23 @@
-﻿@inherits BaseInputGroup<TValue>
-@typeparam TValue
+﻿@inherits BaseInputGroup<TOption>
+@typeparam TOption
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementRadioSet @attributes="InputAttributes" TValue="TValue" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
-                              Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
-            @ChildContent(context)
+        <InputElementRadioSet @attributes="InputAttributes" TOption="TOption" Name="@GetName()" OptionList="OptionList" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+            <ChildContent>
+                @ChildContent(context)
+            </ChildContent>
+            <Control>
+                @if (Control != null)
+                {
+                    @Control(context)
+                }
+                else
+                {
+                    <InputControlRadio Checked="@context.Checked"/>
+                    <InputElementRadio ID="@context.ID" Name="@context.Name" Option="@context.Option" OnChange="x => context.OnChange(x, context.Option)"/>
+                }
+            </Control>
         </InputElementRadioSet>
     </TemplateInputGroup>
 </div>
@@ -13,12 +25,12 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required RenderFragment<TValue?> ChildContent { get; set; }
-
-    [Parameter, EditorRequired]
-    public required HashSet<TValue> OptionList { get; set; }
+    public required RenderFragment<InputElementRadioSetProperties<TOption>> ChildContent { get; set; }
 
     [Parameter]
-    public Func<TValue?, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+    public RenderFragment<InputElementRadioSetProperties<TOption>>? Control { get; set; }
+
+    [Parameter, EditorRequired]
+    public required HashSet<TOption> OptionList { get; set; }
 
 }

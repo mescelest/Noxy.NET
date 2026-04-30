@@ -1,0 +1,19 @@
+.InputControlCheckbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-control-xxs);
+    height: var(--size-control-xxs);
+    border: var(--size-border-width-sm) solid var(--color-complementary);
+    border-radius: var(--size-border-radius-md);
+    color: var(--color-primary);
+    user-select: none;
+}
+
+.InputControlCheckbox[checked] {
+    background-color: var(--color-complementary);
+}
+
+.InputControlCheckbox ::deep + input[type="checkbox"] {
+    display: none;
+}

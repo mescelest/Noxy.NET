@@ -1,22 +1,35 @@
-﻿@inherits BaseInputGroup<TValue?>
-@typeparam TValue
+﻿@inherits BaseInputGroup<TOption>
+@typeparam TOption
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@IDCurrent" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <div class="group">
-            <InputElementRadio @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Option="Option"
-                               Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
-            @ChildContent
-        </div>
+        @{
+            InputElementRadioScope<TOption> context = new(IDCurrent, GetName(), EqualityComparer<TOption>.Default.Equals(Value, Option), Option, Value, ValueChanged, ValueExpression);
+            if (Control != null)
+            {
+                @Control(context)
+            }
+            else
+            {
+                <InputControlRadio Checked="@context.Checked"/>
+                <InputElementRadio @attributes="InputAttributes" ID="@context.ID" Name="@context.Name" Option="@context.Option"
+                                   Value="@context.Value" ValueChanged="@context.ValueChanged" ValueExpression="@context.ValueExpression"/>
+            }
+        }
+
+        @ChildContent
     </TemplateInputGroup>
 </div>
 
 @code {
 
     [Parameter, EditorRequired]
-    public required TValue Option { get; set; }
+    public required TOption Option { get; set; }
 
     [Parameter, EditorRequired]
     public required RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment<InputElementRadioScope<TOption>>? Control { get; set; }
 
 }

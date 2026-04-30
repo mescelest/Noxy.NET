@@ -1,14 +1,16 @@
-﻿@inherits BaseInput<TValue>
-@typeparam TValue
+﻿@inherits BaseInput<TOption>
+@typeparam TOption
 
 <input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="radio" checked="@Checked" @onclick="OnInputClick" @onchange="OnInputChange"/>
 
 @code {
 
     [Parameter, EditorRequired]
-    public required TValue Option { get; set; }
+    public required TOption Option { get; set; }
 
-    private bool Checked => EqualityComparer<TValue>.Default.Equals(Value, Option);
+    [Parameter]
+    public bool? Checked { get; set; }
+    private bool CheckedCurrent => Checked ?? EqualityComparer<TOption>.Default.Equals(Value, Option);
 
     private bool _internalNullable;
 
@@ -16,20 +18,20 @@
     {
         base.OnInitialized();
 
-        _internalNullable = Nullable.GetUnderlyingType(typeof(TValue)) != null;
+        _internalNullable = Nullable.GetUnderlyingType(typeof(TOption)) != null;
     }
 
     private void OnInputClick(MouseEventArgs args)
     {
-        if (!_internalNullable || !Checked) return;
+        if (!_internalNullable || !CheckedCurrent) return;
 
-        ValueChanged.InvokeAsync(default);
+        NotifyChange(default);
     }
 
     private void OnInputChange(ChangeEventArgs args)
     {
         OnChange.InvokeAsync(args);
-        ValueChanged.InvokeAsync(Option);
+        NotifyChange(Option);
     }
 
 }

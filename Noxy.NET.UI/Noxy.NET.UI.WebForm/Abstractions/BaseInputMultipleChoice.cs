@@ -10,7 +10,7 @@ public abstract class BaseInputMultipleChoice<TOption, TValue> : BaseInput<TValu
     [Parameter]
     public Func<TOption, IReadOnlyDictionary<string, object>?>? InputAttributes { get; set; }
 
-    protected void OnInputChange(ChangeEventArgs args, TOption option)
+    protected void OnChoiceChange(ChangeEventArgs args, TOption option)
     {
         bool isChecked = GetEventValue(args);
         TValue set = Value ?? [];

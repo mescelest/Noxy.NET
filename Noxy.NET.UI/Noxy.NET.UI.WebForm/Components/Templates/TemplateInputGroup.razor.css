@@ -18,7 +18,13 @@
     flex-flow: row;
 }
 
-.control ::deep > .textual {
+.control ::deep > .InputElementDate,
+.control ::deep > .InputElementDecimal,
+.control ::deep > .InputElementInteger,
+.control ::deep > .InputElementPassword,
+.control ::deep > .InputElementSelect,
+.control ::deep > .InputElementText,
+.control ::deep > .InputElementTextArea {
     max-width: 100%;
     min-height: var(--size-control-md, 42px);
     margin: 0;

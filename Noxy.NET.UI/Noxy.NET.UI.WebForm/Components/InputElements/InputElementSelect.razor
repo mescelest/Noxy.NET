@@ -7,7 +7,7 @@
         TValue item = OptionList.ElementAt(i);
         bool isChecked = EqualityComparer<TValue>.Default.Equals(Value, item);
 
-        <option @attributes="OptionAttributes?.Invoke(item)" value="@i" selected="@isChecked">
+        <option value="@i" selected="@isChecked">
             @ChildContent(item)
         </option>
     }

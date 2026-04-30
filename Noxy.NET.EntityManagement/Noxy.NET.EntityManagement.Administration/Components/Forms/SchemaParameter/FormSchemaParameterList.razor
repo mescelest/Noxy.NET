@@ -17,7 +17,7 @@
 
         <InputGroupCheckboxSet OptionList="ListTypeKey" DisplayName="@GetDisplayName(nameof(Model.ParameterType))" Description="@GetDescription(nameof(Model.ParameterType))"
                                @bind-Value:get="GetParameterType()" @bind-Value:set="SetParameterType">
-            <span>@TextService.Get(_collectionType[context])</span>
+            <span>@TextService.Get(_collectionType[context.Option])</span>
         </InputGroupCheckboxSet>
 
         @ChildContent

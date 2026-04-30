@@ -107,15 +107,15 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.LabelParameterStyle, "Style parameter");
         RegisterText(TextConstants.LabelParameterSystem, "System parameter");
         RegisterText(TextConstants.LabelParameterText, "Text parameter");
+        RegisterText(TextConstants.LabelParameterTextType, "Text parameter type");
         RegisterText(TextConstants.LabelCulture, "Culture");
         RegisterText(TextConstants.LabelSchemaIdentifier, "Schema Identifier");
         RegisterText(TextConstants.LabelName, "Name");
         RegisterText(TextConstants.LabelNote, "Note");
         RegisterText(TextConstants.LabelTitle, "Title");
         RegisterText(TextConstants.LabelDescription, "Description");
-        RegisterText(TextConstants.LabelIsSystemDefined, "Is system defined?");
         RegisterText(TextConstants.LabelIsApprovalRequired, "Is approval required?");
-        RegisterText(TextConstants.LabelParameterTextType, "Text parameter type");
+        RegisterText(TextConstants.LabelIsSystemDefined, "Is system defined?");
         RegisterText(TextConstants.LabelTimeApproved, "Approved at");
         RegisterText(TextConstants.LabelTimeCreated, "Created at");
         RegisterText(TextConstants.LabelTimeEffective, "Effective at");

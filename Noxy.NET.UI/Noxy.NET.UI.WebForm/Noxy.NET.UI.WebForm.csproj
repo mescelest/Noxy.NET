@@ -37,4 +37,19 @@
         <UpToDateCheckInput Remove="Templates\TemplateInputField.razor"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Update="Components\InputControls\InputControlCheckbox.razor.css">
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </Content>
+        <Content Update="Components\InputGroups\InputGroupCheckbox.razor.css">
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </Content>
+        <Content Update="Components\InputGroups\InputGroupRadioSet.razor.css">
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </Content>
+        <Content Update="Components\InputGroups\InputGroupRadio.razor.css">
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </Content>
+    </ItemGroup>
+
 </Project>

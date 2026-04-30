@@ -1,17 +1,24 @@
-﻿@inherits BaseInputGroup<TValueList>
-@typeparam TValue
-@typeparam TValueList where TValueList : ISet<TValue>, new()
+﻿@inherits BaseInputGroup<TValue>
+@typeparam TOption
+@typeparam TValue where TValue : ISet<TOption>, new()
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementCheckboxSet @attributes="InputAttributes" class="input" Name="@GetName()" OptionList="OptionList" OptionAttributes="OptionAttributes"
-                                 Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
-
-            <div class="control">
-                <IconChevronDown Size="IconSizeEnum.ExtraSmall"/>
-            </div>
-
-            @ChildContent(context)
+        <InputElementCheckboxSet @attributes="InputAttributes" Name="@GetName()" OptionList="OptionList" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+            <ChildContent>
+                @ChildContent(context)
+            </ChildContent>
+            <Control>
+                @if (Control != null)
+                {
+                    @Control(context)
+                }
+                else
+                {
+                    <InputControlCheckbox Checked="@context.Checked"/>
+                    <InputElementCheckbox ID="@context.ID" Name="@context.Name" Option="@context.Option" Checked="@context.Checked" OnChange="x => context.OnChange(x, context.Option)"/>
+                }
+            </Control>
         </InputElementCheckboxSet>
     </TemplateInputGroup>
 </div>
@@ -19,12 +26,12 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required RenderFragment<TValue> ChildContent { get; set; }
-
-    [Parameter, EditorRequired]
-    public required HashSet<TValue> OptionList { get; set; }
+    public required RenderFragment<InputElementCheckboxSetScope<TOption>> ChildContent { get; set; }
 
     [Parameter]
-    public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+    public RenderFragment<InputElementCheckboxSetScope<TOption>>? Control { get; set; }
+
+    [Parameter, EditorRequired]
+    public required HashSet<TOption> OptionList { get; set; }
 
 }

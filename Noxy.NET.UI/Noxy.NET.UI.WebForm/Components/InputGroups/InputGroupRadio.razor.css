@@ -1,0 +1,13 @@
+﻿.InputGroupRadio {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+}
+
+.InputGroupRadio ::deep .TemplateInputGroup > .wrapper > .control {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    align-items: center;
+    grid-column-gap: var(--size-gap-xxs);
+}

@@ -10,23 +10,20 @@
 
             @if (LoadingCurrent)
             {
-                @* <span>LOADING</span> *@
                 <Loader Width="40" Height="40"/>
-            }
-            else if (Arrow != null)
-            {
-                @Arrow(IsCollapsed)
             }
             else
             {
-                @if (IsCollapsed)
-                {
-                    <IconChevronDown Size="IconSizeEnum.Small"/>
-                }
-                else
-                {
-                    <IconChevronUp Size="IconSizeEnum.Small"/>
-                }
+                <div class="arrow">
+                    @if (Arrow != null)
+                    {
+                        @Arrow(IsCollapsed)
+                    }
+                    else
+                    {
+                        <span>▲</span>
+                    }
+                </div>
             }
         </div>
     </div>
