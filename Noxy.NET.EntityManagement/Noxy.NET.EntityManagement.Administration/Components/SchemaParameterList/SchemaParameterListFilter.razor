@@ -1,6 +1,6 @@
 @inject IDispatcher Dispatcher
 @inject TextService TextService
-@inherits ElementComponent
+@inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Search for a parameter</DynamicHTMLTag>

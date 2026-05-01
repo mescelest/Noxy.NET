@@ -48,6 +48,7 @@ public static class TextConstants
     public const string LabelSchemaIdentifier = "Label:SchemaIdentifier";
     public const string LabelName = "Label:Name";
     public const string LabelNote = "Label:Note";
+    public const string LabelWeight = "Label:Weight";
     public const string LabelTitle = "Label:Title";
     public const string LabelDescription = "Label:Description";
     public const string LabelIsApprovalRequired = "Label:IsApprovalRequired";

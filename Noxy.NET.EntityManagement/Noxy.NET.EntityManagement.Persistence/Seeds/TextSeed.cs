@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
@@ -112,6 +111,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.LabelSchemaIdentifier, "Schema Identifier");
         RegisterText(TextConstants.LabelName, "Name");
         RegisterText(TextConstants.LabelNote, "Note");
+        RegisterText(TextConstants.LabelWeight, "Weight");
         RegisterText(TextConstants.LabelTitle, "Title");
         RegisterText(TextConstants.LabelDescription, "Description");
         RegisterText(TextConstants.LabelIsApprovalRequired, "Is approval required?");

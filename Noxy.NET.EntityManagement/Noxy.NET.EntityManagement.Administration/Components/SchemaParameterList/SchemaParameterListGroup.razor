@@ -16,10 +16,6 @@
             @if (Schema.TimeActivated == null)
             {
                 <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
-            }
-
-            @if (!Schema.IsActive)
-            {
                 <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
                 <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
             }

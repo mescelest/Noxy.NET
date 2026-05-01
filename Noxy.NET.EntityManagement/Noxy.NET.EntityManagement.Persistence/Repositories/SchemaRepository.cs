@@ -1,6 +1,4 @@
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Models;
@@ -43,7 +41,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
 
         List<TableSchema> result = await query
-            .OrderBy(x => x.Name)
+            .OrderByDescending(x => x.TimeCreated)
             .Skip(filter.PageNumber * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();

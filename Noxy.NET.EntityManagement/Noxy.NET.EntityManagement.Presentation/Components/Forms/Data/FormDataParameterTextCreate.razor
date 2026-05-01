@@ -21,7 +21,7 @@
 
         <InputGroupRadioSet OptionList="OptionSet" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
                             @bind-Value="Model.TimeEffective">
-            @if (context == null)
+            @if (context.Option == null)
             {
                 <span>Immediately</span>
             }

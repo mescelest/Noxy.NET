@@ -20,7 +20,7 @@
                     </SchemaElementListView>
                 </Content>
                 <Right>
-                    @if (!Schema.IsActive)
+                    @if (Schema.TimeActivated == null)
                     {
                         <SchemaParameterListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     }

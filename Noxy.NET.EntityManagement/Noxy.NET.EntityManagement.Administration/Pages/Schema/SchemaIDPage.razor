@@ -1,18 +1,30 @@
 @page "/Schema/{ID:guid}"
-@inherits PageComponent
+@inject IState<FeatureSchemaState> StateSchema
+@inject IDispatcher Dispatcher
+@inherits FluxorPageComponent
 
 <PageTitle>Administration | Schema</PageTitle>
 
+<Loader Loading="@IsLoading">
+    <div class="@CssClass">
+        @if (Schema != null)
+        {
+            <MagazineFrame>
+                <Left>
+                </Left>
+                <Content>
+                    <SchemaEntityView Schema="Schema" Scope="@Scope" ID="ID"/>
+                </Content>
+                <Right>
+                    <SchemaEntityUpdate Schema="Schema" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                </Right>
+            </MagazineFrame>
+        }
+    </div>
+</Loader>
+
 <div class="@CssClass">
-    <MagazineFrame>
-        <Left>
-        </Left>
-        <Content>
-            <SchemaEntityView Context="@Scope" ID="ID"/>
-        </Content>
-        <Right>
-        </Right>
-    </MagazineFrame>
+
 </div>
 
 @code {
@@ -20,6 +32,16 @@
     [Parameter]
     public Guid ID { get; set; }
 
-    private string Scope => ID.ToString();
+    private string Scope => $"{GetComponentName()}:{ID}";
+
+    private bool IsLoading => StateSchema.Value.TryGetLoading(Scope, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => StateSchema.Value.TryGetFind(Scope, out EntitySchema? value) ? value : null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(Scope, new() { ID = ID }));
+    }
 
 }

@@ -3,36 +3,20 @@
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Loader Loading="IsLoading">
-        @if (Schema != null)
-        {
-            @Schema.Name
-            
-            @* <SchemaEntityElementView></SchemaEntityElementView> *@
-        }
-    </Loader>
+    <SchemaEntityElementView Schema="Schema" Scope="@ScopeCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
 </div>
 
 @code {
 
     [Parameter, EditorRequired]
-    public Guid ID { get; set; }
+    public EntitySchema Schema { get; set; }
 
     [Parameter]
-    public string? Context { get; set; }
-    private string ContextCurrent => Context ?? GetComponentName();
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
 
-    private bool IsLoading => State.Value.TryGetLoading(ContextCurrent, FeatureSchemaActionKind.Find, out bool value) && value;
-    private EntitySchema? Schema => State.Value.TryGetFind(ContextCurrent, out EntitySchema? value) ? value : null;
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        if (Schema == null && !IsLoading)
-        {
-            Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(ContextCurrent, new() { ID = ID }));
-        }
-    }
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
 
 }

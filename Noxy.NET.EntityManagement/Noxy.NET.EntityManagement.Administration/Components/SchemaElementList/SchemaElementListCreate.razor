@@ -1,7 +1,7 @@
 @inject IState<FeatureSchemaState> State
 @inject IDispatcher Dispatcher
 @inject TextService TextService
-@inherits ElementComponent
+@inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new element</DynamicHTMLTag>

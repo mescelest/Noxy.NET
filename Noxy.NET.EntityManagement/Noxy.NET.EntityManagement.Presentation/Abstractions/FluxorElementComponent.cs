@@ -1,6 +1,4 @@
 using System.Reflection;
-using Fluxor;
-using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions;
 
@@ -36,7 +34,9 @@ public abstract class FluxorElementComponent : ElementComponent, IDisposable
         }
     }
 
-    private static bool IsIState(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IState<>);
+    private static bool IsIState(Type type) =>
+        type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IState<>)
+        || type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IState<>));
 
     private void SubscribeToState(object stateObj)
     {

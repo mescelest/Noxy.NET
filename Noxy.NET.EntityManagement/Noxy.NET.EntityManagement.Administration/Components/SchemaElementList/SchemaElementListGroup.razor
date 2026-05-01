@@ -16,10 +16,6 @@
             @if (Schema.TimeActivated == null)
             {
                 <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
-            }
-
-            @if (!Schema.IsActive)
-            {
                 <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
                 <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
             }
@@ -30,31 +26,31 @@
     @if (!_isEditMode)
     {
         <div>
-            <strong>Schema Identifier:</strong>
+            <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
             @SchemaElement.SchemaIdentifier
         </div>
         <div>
-            <strong>Name:</strong>
+            <strong>@TextService.Get(TextConstants.LabelName, GetComponentName()):</strong>
             @SchemaElement.Name
         </div>
         <div>
-            <strong>Note:</strong>
+            <strong>@TextService.Get(TextConstants.LabelNote, GetComponentName()):</strong>
             @SchemaElement.Note
         </div>
         <div>
-            <strong>Weight:</strong>
+            <strong>@TextService.Get(TextConstants.LabelWeight, GetComponentName()):</strong>
             @SchemaElement.Weight
         </div>
         <div>
-            <strong>Title:</strong>
+            <strong>@TextService.Get(TextConstants.LabelTitle, GetComponentName()):</strong>
             @SchemaElement.TitleTextParameter?.Name
         </div>
         <div>
-            <strong>Description:</strong>
+            <strong>@TextService.Get(TextConstants.LabelDescription, GetComponentName()):</strong>
             @SchemaElement.DescriptionTextParameter?.Name
         </div>
         <div>
-            <strong>Created at:</strong>
+            <strong>@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName()):</strong>
             @SchemaElement.TimeCreated
         </div>
     }

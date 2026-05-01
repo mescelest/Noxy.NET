@@ -19,7 +19,7 @@
                     </SchemaContextListView>
                 </Content>
                 <Right>
-                    @if (!Schema.IsActive)
+                    @if (Schema.TimeActivated == null)
                     {
                         <SchemaContextListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     }
