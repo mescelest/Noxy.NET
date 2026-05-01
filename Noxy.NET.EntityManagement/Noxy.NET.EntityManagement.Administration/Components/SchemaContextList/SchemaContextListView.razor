@@ -36,7 +36,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? GetComponentName();
+    private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{SchemaID}";
 
     private bool IsLoading => IsLoadingSchema || IsLoadingList;
 

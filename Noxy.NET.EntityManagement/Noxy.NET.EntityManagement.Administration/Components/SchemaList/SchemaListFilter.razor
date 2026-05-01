@@ -6,14 +6,14 @@
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Search for a schema</DynamicHTMLTag>
 
     <FormSchemaList OnSubmit="Submit">
-        <div class="action-list">
+        <ButtonList Alignment="ButtonListAlignmentEnum.Right">
             <Button Status="StatusEnum.Warning" type="button">
                 @TextService.Get(TextConstants.ButtonReset)
             </Button>
             <Button Status="StatusEnum.Info" type="submit">
                 @TextService.Get(TextConstants.ButtonFilter)
             </Button>
-        </div>
+        </ButtonList>
     </FormSchemaList>
 </div>
 

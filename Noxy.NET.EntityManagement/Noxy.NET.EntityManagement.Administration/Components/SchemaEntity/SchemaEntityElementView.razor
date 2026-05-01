@@ -8,27 +8,28 @@
             <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Element list</DynamicHTMLTag>
         </Header>
         <Content>
-            <table>
-                <tr>
-                    <th>Name</th>
-                    <th>Note</th>
-                    <th>Schema Identifier</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Created at</th>
-                </tr>
+            <div class="grid">
+                <div class="grid-header">
+                    <strong>Name</strong>
+                    <strong>Note</strong>
+                    <strong>Schema Identifier</strong>
+                    <strong>Title</strong>
+                    <strong>Description</strong>
+                    <strong>Created at</strong>
+                </div>
+
                 @foreach (EntitySchemaElement item in List)
                 {
-                    <tr>
-                        <th>@item.Name</th>
-                        <th>@item.Note</th>
-                        <th>@item.SchemaIdentifier</th>
-                        <th>@item.TitleTextParameter?.Name</th>
-                        <th>@item.DescriptionTextParameter?.Name</th>
-                        <th>@item.TimeCreated</th>
-                    </tr>
+                    <div class="grid-row">
+                        <span>@item.Name</span>
+                        <span>@item.Note</span>
+                        <span>@item.SchemaIdentifier</span>
+                        <span>@item.TitleTextParameter?.Name</span>
+                        <span>@item.DescriptionTextParameter?.Name</span>
+                        <span>@item.TimeCreated</span>
+                    </div>
                 }
-            </table>
+            </div>
         </Content>
     </Collapsible>
 </div>
@@ -40,7 +41,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? GetComponentName();
+    private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{Schema.ID}";
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
@@ -54,8 +55,10 @@
     private void SetCollapsed(bool value)
     {
         _isCollapsed = value;
-        if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ScopeCurrent) || IsLoading) return;
-        Dispatcher.Dispatch(new FeatureSchemaElementReducers.ListAction(ScopeCurrent, new()));
+        if (!_isCollapsed && !StateContext.Value.Cache.ContainsKey(ScopeCurrent) && !IsLoading)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaElementReducers.ListAction(ScopeCurrent, new() { SchemaID = Schema.ID }));
+        }
     }
 
 }

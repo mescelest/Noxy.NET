@@ -1,0 +1,23 @@
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@Schema.Name</DynamicHTMLTag>
+
+    <SchemaEntityElementView Schema="Schema" Scope="@ScopeCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+    <SchemaElementEntityContextView Schema="Schema" Scope="@ScopeCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public EntitySchema Schema { get; set; }
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{Schema.ID}";
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
+
+}

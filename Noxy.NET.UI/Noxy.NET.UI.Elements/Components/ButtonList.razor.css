@@ -1,0 +1,24 @@
+.ButtonList {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row wrap;
+    align-items: center;
+    row-gap: var(--size-gap-md);
+    column-gap: var(--size-gap-md);
+}
+
+.ButtonList[alignment="left"] {
+    justify-content: flex-start;
+}
+
+.ButtonList[alignment="center"] {
+    justify-content: center;
+}
+
+.ButtonList[alignment="right"] {
+    justify-content: flex-end;
+}
+
+.ButtonList ::deep > .Button {
+    min-width: 120px;
+}

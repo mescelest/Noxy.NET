@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
@@ -69,34 +70,34 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
 
         RegisterText(TextConstants.HeaderFormSignIn, "...Or sign in");
         RegisterText(TextConstants.HeaderFormSignUp, "Create an account");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchema, "Create Schema");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaContext, "Create Schema Context");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaElement, "Create Schema Element");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaParameterStyle, "Create Schema Style Parameter");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaParameterSystem, "Create Schema System Parameter");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaParameterText, "Create Schema Text Parameter");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaPropertyBoolean, "Create Schema Boolean Property");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaPropertyCollection, "Create Schema Collection Property");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaPropertyDateTime, "Create Schema DateTime Property");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaPropertyDecimal, "Create Schema Decimal Property");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaPropertyImage, "Create Schema Image Property");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaPropertyInteger, "Create Schema Integer Property");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaPropertyString, "Create Schema String Property");
-        RegisterText(TextConstants.HeaderFormCreateEntitySchemaPropertyTable, "Create Schema Table Property");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchema, "Update Schema");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaContext, "Update Schema Context");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaElement, "Update Schema Element");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaParameterStyle, "Update Schema Style Parameter");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaParameterSystem, "Update Schema System Parameter");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaParameterText, "Update Schema Text Parameter");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaPropertyBoolean, "Update Schema Boolean Property");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaPropertyCollection, "Update Schema Collection Property");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaPropertyDateTime, "Update Schema DateTime Property");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaPropertyDecimal, "Update Schema Decimal Property");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaPropertyImage, "Update Schema Image Property");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaPropertyInteger, "Update Schema Integer Property");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaPropertyString, "Update Schema String Property");
-        RegisterText(TextConstants.HeaderFormUpdateEntitySchemaPropertyTable, "Update Schema Table Property");
+        RegisterText(TextConstants.HeaderFormCreateSchema, "Create Schema");
+        RegisterText(TextConstants.HeaderFormCreateSchemaContext, "Create Schema Context");
+        RegisterText(TextConstants.HeaderFormCreateSchemaElement, "Create Schema Element");
+        RegisterText(TextConstants.HeaderFormCreateSchemaParameterStyle, "Create Schema Style Parameter");
+        RegisterText(TextConstants.HeaderFormCreateSchemaParameterSystem, "Create Schema System Parameter");
+        RegisterText(TextConstants.HeaderFormCreateSchemaParameterText, "Create Schema Text Parameter");
+        RegisterText(TextConstants.HeaderFormCreateSchemaPropertyBoolean, "Create Schema Boolean Property");
+        RegisterText(TextConstants.HeaderFormCreateSchemaPropertyCollection, "Create Schema Collection Property");
+        RegisterText(TextConstants.HeaderFormCreateSchemaPropertyDateTime, "Create Schema DateTime Property");
+        RegisterText(TextConstants.HeaderFormCreateSchemaPropertyDecimal, "Create Schema Decimal Property");
+        RegisterText(TextConstants.HeaderFormCreateSchemaPropertyImage, "Create Schema Image Property");
+        RegisterText(TextConstants.HeaderFormCreateSchemaPropertyInteger, "Create Schema Integer Property");
+        RegisterText(TextConstants.HeaderFormCreateSchemaPropertyString, "Create Schema String Property");
+        RegisterText(TextConstants.HeaderFormCreateSchemaPropertyTable, "Create Schema Table Property");
+        RegisterText(TextConstants.HeaderFormUpdateSchema, "Update Schema");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaContext, "Update Schema Context");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaElement, "Update Schema Element");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaParameterStyle, "Update Schema Style Parameter");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaParameterSystem, "Update Schema System Parameter");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaParameterText, "Update Schema Text Parameter");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaPropertyBoolean, "Update Schema Boolean Property");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaPropertyCollection, "Update Schema Collection Property");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaPropertyDateTime, "Update Schema DateTime Property");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaPropertyDecimal, "Update Schema Decimal Property");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaPropertyImage, "Update Schema Image Property");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaPropertyInteger, "Update Schema Integer Property");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaPropertyString, "Update Schema String Property");
+        RegisterText(TextConstants.HeaderFormUpdateSchemaPropertyTable, "Update Schema Table Property");
 
         #endregion
 

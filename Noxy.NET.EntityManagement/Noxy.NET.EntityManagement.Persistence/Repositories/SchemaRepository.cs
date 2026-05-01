@@ -1,4 +1,6 @@
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Models;

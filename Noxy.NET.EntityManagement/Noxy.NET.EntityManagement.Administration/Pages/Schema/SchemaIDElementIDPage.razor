@@ -1,0 +1,57 @@
+@page "/Schema/{SchemaID:guid}/Element/{ElementID:guid}"
+@inject IState<FeatureSchemaState> StateSchema
+@inject IState<FeatureSchemaElementState> StateSchemaElement
+@inject IDispatcher Dispatcher
+@inherits FluxorPageComponent
+
+<PageTitle>Administration | Schema</PageTitle>
+
+<Loader Loading="@IsLoading">
+    <div class="@CssClass">
+        @if (Schema != null && SchemaElement != null)
+        {
+            <MagazineFrame>
+                <Left>
+                </Left>
+                <Content>
+                    <SchemaElementEntityView Schema="Schema" SchemaElement="SchemaElement" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
+                </Content>
+                <Right>
+                    <SchemaElementEntityUpdate SchemaElement="SchemaElement" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                </Right>
+            </MagazineFrame>
+        }
+    </div>
+</Loader>
+
+<div class="@CssClass">
+
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid SchemaID { get; set; }
+
+    [Parameter]
+    public Guid ElementID { get; set; }
+
+    private string Scope => $"{GetComponentName()}:{SchemaID}:{ElementID}";
+
+    private bool IsLoadingElement => StateSchema.Value.TryGetLoading(Scope, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => StateSchema.Value.TryGetFind(Scope, out EntitySchema? value) ? value : null;
+
+    private bool IsLoadingSchema => StateSchemaElement.Value.TryGetLoading(Scope, FeatureSchemaElementActionKind.Find, out bool value) && value;
+    private EntitySchemaElement? SchemaElement => StateSchemaElement.Value.TryGetFind(Scope, out EntitySchemaElement? value) ? value : null;
+
+    private bool IsLoading => IsLoadingSchema || IsLoadingElement;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Dispatcher.DDispatcher.Dispatch(new FeatureSchemaReducers.FindAction(Scope, new(emaID }));
+        Dispatcher.DDispatcher.Dispatch(new FeatureSchemaElementReducers.FindAction(Scope, new(mentID }));
+    }
+
+}

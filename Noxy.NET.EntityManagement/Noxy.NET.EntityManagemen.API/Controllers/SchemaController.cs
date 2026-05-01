@@ -41,16 +41,34 @@ public class SchemaController(IMediator mediator) : ControllerBase
         return await mediator.Send(new QuerySchemaContextList(request));
     }
 
+    [HttpGet("Context/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaContextFind>> GetSchemaContextByID(Guid id)
+    {
+        return await mediator.Send(new QuerySchemaContextFind(id));
+    }
+
     [HttpGet("Element")]
-    public async Task<ActionResult<ResponseSchemaElementList>> GetSchemaParameterList([FromQuery] RequestSchemaElementList request)
+    public async Task<ActionResult<ResponseSchemaElementList>> GetSchemaElementList([FromQuery] RequestSchemaElementList request)
     {
         return await mediator.Send(new QuerySchemaElementList(request));
+    }
+
+    [HttpGet("Element/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaElementFind>> GetSchemaElementByID(Guid id)
+    {
+        return await mediator.Send(new QuerySchemaElementFind(id));
     }
 
     [HttpGet("Parameter")]
     public async Task<ActionResult<ResponseSchemaParameterList>> GetSchemaParameterList([FromQuery] RequestSchemaParameterList request)
     {
         return await mediator.Send(new QuerySchemaParameterList(request));
+    }
+
+    [HttpGet("Parameter/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaParameterFind>> GetSchemaParameterByID(Guid id)
+    {
+        return await mediator.Send(new QuerySchemaParameterFind(id));
     }
 
     [HttpPost("")]

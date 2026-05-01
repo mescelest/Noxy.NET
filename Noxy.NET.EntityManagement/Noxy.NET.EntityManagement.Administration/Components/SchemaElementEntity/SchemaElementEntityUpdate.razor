@@ -4,21 +4,21 @@
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@TextService.Get(TextConstants.HeaderFormUpdateEntitySchema)</DynamicHTMLTag>
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@TextService.Get(TextConstants.HeaderFormUpdateSchemaElement)</DynamicHTMLTag>
 
-    <FormSchemaUpdate Schema="Schema" OnSubmit="Submit">
-        <div class="action-list">
+    <FormSchemaElementUpdate SchemaElement="SchemaElement" OnSubmit="Submit">
+        <ButtonList Alignment="ButtonListAlignmentEnum.Right">
             <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
                 @TextService.Get(TextConstants.ButtonUpdate)
             </Button>
-        </div>
-    </FormSchemaUpdate>
+        </ButtonList>
+    </FormSchemaElementUpdate>
 </div>
 
 @code {
 
     [Parameter, EditorRequired]
-    public required EntitySchema Schema { get; set; }
+    public required EntitySchemaElement SchemaElement { get; set; }
 
     [Parameter]
     public string? Scope { get; set; }
@@ -30,9 +30,9 @@
 
     private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
 
-    private void Submit(IWebFormContext<RequestSchemaUpdate> value)
+    private void Submit(IWebFormContext<RequestSchemaElementUpdate> value)
     {
-        Dispatcher.Dispatch(new FeatureSchemaReducers.UpdateAction(ScopeCurrent, value.Model));
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.UpdateAction(ScopeCurrent, value.Model));
     }
 
 }

@@ -1,9 +1,0 @@
-.SchemaEntityElementView {
-    display: flex;
-    flex: 1 1 auto;
-    flex-flow: column;
-    row-gap: var(--size-gap-md);
-    padding: var(--size-gap-md);
-    background-color: var(--color-offset-primary);
-    border-radius: var(--size-border-radius-lg);
-}

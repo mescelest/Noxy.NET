@@ -11,6 +11,7 @@ public readonly record struct FeatureSchemaElementKey(string Scope, FeatureSchem
 
 public enum FeatureSchemaElementActionKind
 {
+    Find,
     List,
     Add,
     Update,
@@ -23,18 +24,31 @@ public record FeatureSchemaElementState
 {
     public Dictionary<FeatureSchemaElementKey, bool> Loading { get; init; } = [];
     public Dictionary<FeatureSchemaElementKey, string?> Error { get; init; } = [];
+    public Dictionary<string, EntitySchemaElement> Find { get; init; } = [];
     public Dictionary<string, IReadOnlyList<EntitySchemaElement>> Cache { get; init; } = [];
     public Dictionary<string, RequestSchemaElementList> Request { get; init; } = [];
 
     public bool TryGetLoading(string scope, FeatureSchemaElementActionKind kind, out bool value) => Loading.TryGetValue(new(scope, kind), out value);
     public bool TryGetError(string scope, FeatureSchemaElementActionKind kind, out string? error) => Error.TryGetValue(new(scope, kind), out error);
 
+    public bool TryGetFind(string scope, [NotNullWhen(true)] out EntitySchemaElement? value) => Find.TryGetValue(scope, out value);
     public bool TryGetList(string scope, [NotNullWhen(true)] out IReadOnlyList<EntitySchemaElement>? list) => Cache.TryGetValue(scope, out list);
     public bool TryGetRequest(string scope, [NotNullWhen(true)] out RequestSchemaElementList? request) => Request.TryGetValue(scope, out request);
 }
 
 public static class FeatureSchemaElementReducers
 {
+    [ReducerMethod]
+    public static FeatureSchemaElementState ReduceFind(FeatureSchemaElementState state, FindAction action) =>
+        StartAction(state, action.Scope, FeatureSchemaElementActionKind.Find);
+
+    [ReducerMethod]
+    public static FeatureSchemaElementState ReduceFindSuccess(FeatureSchemaElementState state, SuccessAction<EntitySchemaElement> action) =>
+        HandleSuccessAction(state, action, (next, value) => next with { Find = Set(next.Find, action.Scope, value) });
+
+    [ReducerMethod]
+    public static FeatureSchemaElementState ReduceFindFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
+
     [ReducerMethod]
     public static FeatureSchemaElementState ReduceList(FeatureSchemaElementState state, ListAction action) =>
         StartAction(state, action.Scope, FeatureSchemaElementActionKind.List, (next) => next with { Request = Set(next.Request, action.Scope, action.Request) });
@@ -122,6 +136,8 @@ public static class FeatureSchemaElementReducers
         return cb != null ? cb(newState, action) : newState;
     }
 
+    public record FindAction(string Scope, RequestSchemaElementFind Request);
+
     public record ListAction(string Scope, RequestSchemaElementList Request);
 
     public record AddAction(string Scope, RequestSchemaElementCreate Request);
@@ -139,6 +155,12 @@ public static class FeatureSchemaElementReducers
 
 public class FeatureSchemaElementEffects(APIHttpClient client, IState<FeatureSchemaElementState> state)
 {
+    [EffectMethod]
+    public Task Handle(FindAction action, IDispatcher dispatcher)
+    {
+        return Execute(action.Scope, FeatureSchemaElementActionKind.Find, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
+    }
+
     [EffectMethod]
     public Task Handle(ListAction action, IDispatcher dispatcher)
     {

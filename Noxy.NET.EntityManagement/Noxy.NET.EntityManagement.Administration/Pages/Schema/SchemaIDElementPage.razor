@@ -10,7 +10,6 @@
         @if (Schema != null)
         {
             <MagazineFrame>
-
                 <Left>
                     <SchemaElementListFilter Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                 </Left>
@@ -22,7 +21,7 @@
                 <Right>
                     @if (Schema.TimeActivated == null)
                     {
-                        <SchemaParameterListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                        <SchemaElementListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     }
                 </Right>
             </MagazineFrame>

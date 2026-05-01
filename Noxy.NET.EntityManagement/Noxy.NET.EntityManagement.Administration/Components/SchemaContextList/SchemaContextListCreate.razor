@@ -6,11 +6,11 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new context</DynamicHTMLTag>
     <FormSchemaContextCreate SchemaID="SchemaID" OnSubmit="Submit">
-        <div class="action-list">
+        <ButtonList Alignment="ButtonListAlignmentEnum.Right">
             <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
                 @TextService.Get(TextConstants.ButtonCreate)
             </Button>
-        </div>
+        </ButtonList>
     </FormSchemaContextCreate>
 </div>
 

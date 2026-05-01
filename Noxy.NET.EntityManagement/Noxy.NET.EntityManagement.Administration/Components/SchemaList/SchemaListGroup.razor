@@ -11,7 +11,7 @@
                 <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
             </NavLink>
         </div>
-        <div class="action-list">
+        <ButtonList Alignment="ButtonListAlignmentEnum.Right">
             @if (!Schema.IsActive)
             {
                 <Button Status="StatusEnum.Success" @onclick="OnButtonActivateClick">Activate</Button>
@@ -24,7 +24,7 @@
             }
 
             <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
-        </div>
+        </ButtonList>
 
     </div>
 

@@ -1,3 +1,4 @@
+using Fluxor;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Requests.Data;
 using Noxy.NET.EntityManagement.Domain.Responses.Data;

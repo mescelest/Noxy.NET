@@ -1,0 +1,16 @@
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" alignment="@AlignmentString">
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter]
+    public ButtonListAlignmentEnum? Alignment { get; set; }
+    private string AlignmentString => (Alignment ?? ButtonListAlignmentEnum.Left).ToText();
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+} 

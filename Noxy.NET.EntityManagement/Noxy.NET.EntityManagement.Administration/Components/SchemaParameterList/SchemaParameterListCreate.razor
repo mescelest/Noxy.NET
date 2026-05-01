@@ -6,7 +6,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new parameter</DynamicHTMLTag>
 
-    <InputGroupSelect OptionList="_setType" DisplayName="@TextService.Get(TextConstants.LabelFormParameterType)" Description="@TextService.Get(TextConstants.HelpFormParameterType)"
+    <InputGroupSelect OptionList="_setType" DisplayName="@TextService.Get(TextConstants.LabelFormParameterType)" Description="@TextService.Get(TextConstants.HelpFormParameterType)" 
                       Name="@nameof(_valueType)" @bind-Value="_valueType">
         <span>@TextService.Get(context)</span>
     </InputGroupSelect>
