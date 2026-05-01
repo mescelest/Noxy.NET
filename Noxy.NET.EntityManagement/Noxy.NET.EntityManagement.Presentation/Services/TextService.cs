@@ -9,13 +9,13 @@ public class TextService(IServiceProvider provider)
     private IState<FeatureTextState> State => field ??= provider.GetRequiredService<IState<FeatureTextState>>();
     private IDispatcher Dispatcher => field ??= provider.GetRequiredService<IDispatcher>();
 
-    public string Get(string? key, string? scope = null)
+    public string Get(string? key, string scope = "")
     {
         if (key == null) return "[KEY MISSING]";
 
         FeatureTextState state = State.Value;
         if (state.ResolvedTextCollection.TryGetValue(key, out string? value)) return value;
-        if (!state.PendingKeys.Contains(key)) Dispatcher.Dispatch(new FeatureTextReducers.RequestTextKeyAction(key, scope));
-        return string.Empty;
+        if (!state.PendingByScope.TryGetValue(scope, out HashSet<string>? set) || !set.Contains(key)) Dispatcher.Dispatch(new FeatureTextReducers.RequestTextKeyAction(key, scope));
+        return "Loading…";
     }
 }

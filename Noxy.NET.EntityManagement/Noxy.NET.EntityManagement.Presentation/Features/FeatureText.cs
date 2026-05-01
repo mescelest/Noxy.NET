@@ -10,10 +10,8 @@ namespace Noxy.NET.EntityManagement.Presentation.Features;
 public record FeatureTextState
 {
     public IReadOnlyDictionary<string, string> ResolvedTextCollection { get; init; } = new Dictionary<string, string>();
-    public HashSet<string> PendingKeys { get; init; } = [];
     public Dictionary<string, HashSet<string>> PendingByScope { get; init; } = [];
 
-    public bool IsLoading => PendingKeys.Count > 0;
     public bool IsScopeLoading(string scope) => PendingByScope.TryGetValue(scope, out HashSet<string>? set) && set.Count > 0;
 }
 
@@ -23,22 +21,15 @@ public static class FeatureTextReducers
     public static FeatureTextState ReduceRequestKey(FeatureTextState state, RequestTextKeyAction action)
     {
         string key = action.Key;
-        string? scope = action.Scope;
+        string scope = action.Scope;
 
-        bool pendingGlobally = state.PendingKeys.Contains(key);
-        bool pendingInScope = scope is not null && state.PendingByScope.TryGetValue(scope, out HashSet<string>? scopedSet) && scopedSet.Contains(key);
-        if (pendingGlobally && (scope is null || pendingInScope)) return state;
-
-        HashSet<string> pending = [.. state.PendingKeys, key];
-        if (scope is null) return state with { PendingKeys = pending };
+        if (state.PendingByScope.TryGetValue(scope, out HashSet<string>? set) && set.Contains(key)) return state;
 
         Dictionary<string, HashSet<string>> pendingByScope = state.PendingByScope.ToDictionary(kv => kv.Key, kv => new HashSet<string>(kv.Value));
-        if (!pendingByScope.TryGetValue(scope, out HashSet<string>? set)) pendingByScope[scope] = set = [];
+        pendingByScope[scope] = [..set ?? [], key];
 
-        set.Add(key);
         return state with
         {
-            PendingKeys = pending,
             PendingByScope = pendingByScope
         };
     }
@@ -52,34 +43,34 @@ public static class FeatureTextReducers
             merged[kv.Key] = kv.Value;
         }
 
-        return state with { ResolvedTextCollection = merged, PendingKeys = [], PendingByScope = [] };
+        return state with { ResolvedTextCollection = merged, PendingByScope = [] };
     }
 
-    public record RequestTextKeyAction(string Key, string? Scope = null);
+    public record RequestTextKeyAction(string Key, string Scope = "");
 
     public record TextCompletedAction(Dictionary<string, string> ResolvedTexts);
 }
 
 public class FeatureTextEffects(IState<FeatureTextState> state, APIHttpClient http, IDebouncerService debouncer)
 {
-    private int _lastPendingCount;
+    private Dictionary<string, int> _lastPendingCount = [];
 
     [EffectMethod]
     public Task Handle(FeatureTextReducers.RequestTextKeyAction action, IDispatcher dispatcher)
     {
-        int current = state.Value.PendingKeys.Count;
-        if (current == _lastPendingCount) return Task.CompletedTask;
+        if (!state.Value.PendingByScope.TryGetValue(action.Scope, out HashSet<string>? set) || !_lastPendingCount.TryGetValue(action.Scope, out int last) || set.Count == last) return Task.CompletedTask;
 
-        _lastPendingCount = current;
-        debouncer.Debounce(() => ResolveInternal(dispatcher));
+        string scope = $"{nameof(FeatureTextReducers)}.{nameof(FeatureTextReducers.RequestTextKeyAction)}:{action.Scope}";
+        _lastPendingCount[action.Scope] = set.Count;
+        debouncer.Debounce(() => ResolveInternal(action.Scope, dispatcher), scope);
         return Task.CompletedTask;
     }
 
-
-    private async Task ResolveInternal(IDispatcher dispatcher)
+    private async Task ResolveInternal(string scope, IDispatcher dispatcher)
     {
-        string[] snapshot = [.. state.Value.PendingKeys];
-        if (snapshot.Length == 0) return;
+        if (!state.Value.PendingByScope.TryGetValue(scope, out HashSet<string>? set) || set.Count == 0) return;
+
+        string[] snapshot = [.. set];
 
         RequestDataParameterTextResolveList request = new() { SchemaIdentifierList = snapshot };
         ResponseDataParameterResolveList response = await http.SendRequest(request);
