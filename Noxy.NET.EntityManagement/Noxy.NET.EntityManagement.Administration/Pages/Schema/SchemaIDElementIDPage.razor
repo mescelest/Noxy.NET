@@ -17,7 +17,10 @@
                     <SchemaElementEntityView Schema="Schema" SchemaElement="SchemaElement" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
                 </Content>
                 <Right>
-                    <SchemaElementEntityUpdate SchemaElement="SchemaElement" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                    @if (Schema.TimeActivated == null)
+                    {
+                        <SchemaElementEntityUpdate SchemaElement="SchemaElement" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                    }
                 </Right>
             </MagazineFrame>
         }
@@ -50,8 +53,8 @@
     {
         base.OnInitialized();
 
-        Dispatcher.DDispatcher.Dispatch(new FeatureSchemaReducers.FindAction(Scope, new(emaID }));
-        Dispatcher.DDispatcher.Dispatch(new FeatureSchemaElementReducers.FindAction(Scope, new(mentID }));
+        Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(Scope, new() { ID = SchemaID }));
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.FindAction(Scope, new() { ID = ElementID }));
     }
 
 }

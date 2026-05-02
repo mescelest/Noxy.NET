@@ -19,13 +19,13 @@ public abstract class EntitySchemaProperty : BaseEntitySchema, ISchemaMetadata, 
     public Guid? DescriptionTextParameterID { get; set; }
 
     [JsonIgnore]
-    public ICollection<EntityJunctionSchemaElementHasProperty>? RelationElementList { get; set; }
+    public ICollection<EntitySchemaElementHasProperty>? RelationElementList { get; set; }
 
     [JsonIgnore]
-    public ICollection<EntityJunctionSchemaPropertyCollectionHasProperty>? RelationPropertyCollectionList { get; set; }
+    public ICollection<EntitySchemaPropertyCollectionHasProperty>? RelationPropertyCollectionList { get; set; }
 
     [JsonIgnore]
-    public ICollection<EntityJunctionSchemaPropertyTableHasProperty>? RelationPropertyTableList { get; set; }
+    public ICollection<EntitySchemaPropertyTableHasProperty>? RelationPropertyTableList { get; set; }
 
     public class Discriminator : BaseEntity
     {

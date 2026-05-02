@@ -39,8 +39,8 @@ public interface ITableToEntityMapper
 
     #region -- Many-To-Many --
 
-    EntityJunctionSchemaContextHasElement Map(TableJunctionSchemaContextHasElement table);
-    EntityJunctionSchemaElementHasProperty Map(TableJunctionSchemaElementHasProperty table);
+    EntitySchemaContextHasElement Map(TableSchemaContextHasElement table);
+    EntitySchemaElementHasProperty Map(TableSchemaElementHasProperty table);
 
     #endregion -- Many-To-Many --
 

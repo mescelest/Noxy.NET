@@ -47,8 +47,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableSchemaPropertyString> SchemaPropertyString { get; set; } = null!;
     public DbSet<TableSchemaPropertyTable> SchemaPropertyTable { get; set; } = null!;
 
-    public DbSet<TableJunctionSchemaContextHasElement> SchemaContextHasElement { get; set; } = null!;
-    public DbSet<TableJunctionSchemaElementHasProperty> SchemaElementHasProperty { get; set; } = null!;
+    public DbSet<TableSchemaContextHasElement> SchemaContextHasElement { get; set; } = null!;
+    public DbSet<TableSchemaElementHasProperty> SchemaElementHasProperty { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -114,22 +114,22 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         #region -- Junctions --
 
-        modelBuilder.Entity<TableJunctionSchemaPropertyCollectionHasProperty>()
+        modelBuilder.Entity<TableSchemaPropertyCollectionHasProperty>()
             .HasOne(e => e.Entity)
             .WithMany(e => e.PropertyList)
             .HasForeignKey(x => x.EntityID);
 
-        modelBuilder.Entity<TableJunctionSchemaPropertyCollectionHasProperty>()
+        modelBuilder.Entity<TableSchemaPropertyCollectionHasProperty>()
             .HasOne(e => e.Relation)
             .WithMany(e => e.RelationPropertyCollectionList)
             .HasForeignKey(x => x.RelationID);
 
-        modelBuilder.Entity<TableJunctionSchemaPropertyTableHasProperty>()
+        modelBuilder.Entity<TableSchemaPropertyTableHasProperty>()
             .HasOne(e => e.Entity)
             .WithMany(e => e.PropertyList)
             .HasForeignKey(x => x.EntityID);
 
-        modelBuilder.Entity<TableJunctionSchemaPropertyTableHasProperty>()
+        modelBuilder.Entity<TableSchemaPropertyTableHasProperty>()
             .HasOne(e => e.Relation)
             .WithMany(e => e.RelationPropertyTableList)
             .HasForeignKey(x => x.RelationID);

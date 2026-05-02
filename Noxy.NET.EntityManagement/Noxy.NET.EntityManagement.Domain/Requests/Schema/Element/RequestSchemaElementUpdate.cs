@@ -11,7 +11,7 @@ public class RequestSchemaElementUpdate : BaseRequestPost<ResponseSchemaElementU
 {
     public override string APIEndpoint => $"Schema/Element/{ID}";
 
-    [Required]
+    [NotEmptyGuid]
     public required Guid ID { get; init; }
 
     [Required]
@@ -34,7 +34,7 @@ public class RequestSchemaElementUpdate : BaseRequestPost<ResponseSchemaElementU
     [Description(TextConstants.HelpFormWeight)]
     public int? Weight { get; set; }
 
-    [NotEmpty]
+    [NotEmptyGuid]
     [DisplayName(TextConstants.LabelFormTitle)]
     [Description(TextConstants.HelpFormTitle)]
     public Guid TitleParameterTextID { get; set; }

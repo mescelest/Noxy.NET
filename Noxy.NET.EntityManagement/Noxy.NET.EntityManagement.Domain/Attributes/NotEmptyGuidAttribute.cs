@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Noxy.NET.EntityManagement.Domain.Attributes;
 
-public class NotEmptyAttribute : ValidationAttribute
+public class NotEmptyGuidAttribute : ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {

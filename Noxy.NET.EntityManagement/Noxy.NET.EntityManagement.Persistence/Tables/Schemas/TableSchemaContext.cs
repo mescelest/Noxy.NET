@@ -24,7 +24,7 @@ public class TableSchemaContext : BaseTableSchema, ISchemaMetadata, ISchemaPrese
     public TableSchemaParameterText? DescriptionTextParameter { get; set; }
     public Guid? DescriptionTextParameterID { get; set; }
 
-    public ICollection<TableJunctionSchemaContextHasElement>? ElementList { get; set; }
+    public ICollection<TableSchemaContextHasElement>? ElementList { get; set; }
 
     public TableSchemaContext Clone(Guid? schemaID = null)
     {

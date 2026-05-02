@@ -6,14 +6,17 @@ using Noxy.NET.EntityManagement.API.Commands.Schema.Element;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Parameter;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Context;
+using Noxy.NET.EntityManagement.API.Queries.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Element;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Parameter;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 
@@ -45,6 +48,18 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaContextFind>> GetSchemaContextByID(Guid id)
     {
         return await mediator.Send(new QuerySchemaContextFind(id));
+    }
+
+    [HttpGet("Context/Element")]
+    public async Task<ActionResult<ResponseSchemaContextHasElementList>> GetSchemaContextHaselementList([FromQuery] RequestSchemaContextHasElementList request)
+    {
+        return await mediator.Send(new QuerySchemaContextHasElementList(request));
+    }
+
+    [HttpGet("Context/Element/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaContextHasElementFind>> GetSchemaContextHasElementByID(Guid id)
+    {
+        return await mediator.Send(new QuerySchemaContextHasElementFind(id));
     }
 
     [HttpGet("Element")]

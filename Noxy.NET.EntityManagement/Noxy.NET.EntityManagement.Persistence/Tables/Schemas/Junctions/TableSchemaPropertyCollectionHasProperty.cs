@@ -4,7 +4,7 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
 
-[Table(nameof(TableJunctionSchemaPropertyTableHasProperty))]
-public class TableJunctionSchemaPropertyTableHasProperty : BaseTableManyToMany<TableSchemaPropertyTable, TableSchemaProperty>
+[Table(nameof(TableSchemaPropertyCollectionHasProperty))]
+public class TableSchemaPropertyCollectionHasProperty : BaseTableManyToMany<TableSchemaPropertyCollection, TableSchemaProperty>
 {
 }

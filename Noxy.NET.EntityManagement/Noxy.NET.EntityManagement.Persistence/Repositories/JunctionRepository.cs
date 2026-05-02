@@ -18,9 +18,9 @@ public class JunctionRepository(DataContext context, IDependencyInjectionService
         await Context.SchemaContextHasElement.Where(x => x.EntityID == id).ExecuteDeleteAsync();
     }
 
-    public async Task<EntityJunctionSchemaContextHasElement> Create(EntityJunctionSchemaContextHasElement entity)
+    public async Task<EntitySchemaContextHasElement> Create(EntitySchemaContextHasElement entity)
     {
-        EntityEntry<TableJunctionSchemaContextHasElement> result = await Context.SchemaContextHasElement.AddAsync(MapperE2T.Map(entity));
+        EntityEntry<TableSchemaContextHasElement> result = await Context.SchemaContextHasElement.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
 
@@ -29,21 +29,21 @@ public class JunctionRepository(DataContext context, IDependencyInjectionService
         await Context.SchemaElementHasProperty.Where(x => x.EntityID == id).ExecuteDeleteAsync();
     }
 
-    public async Task<EntityJunctionSchemaElementHasProperty> Create(EntityJunctionSchemaElementHasProperty entity)
+    public async Task<EntitySchemaElementHasProperty> Create(EntitySchemaElementHasProperty entity)
     {
-        EntityEntry<TableJunctionSchemaElementHasProperty> result = await Context.SchemaElementHasProperty.AddAsync(MapperE2T.Map(entity));
+        EntityEntry<TableSchemaElementHasProperty> result = await Context.SchemaElementHasProperty.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
 
-    public async Task<List<EntityJunctionSchemaElementHasProperty>> RelateElementToPropertyList(Guid entityGuid, IEnumerable<Guid> listGuid)
+    public async Task<List<EntitySchemaElementHasProperty>> RelateElementToPropertyList(Guid entityGuid, IEnumerable<Guid> listGuid)
     {
-        List<TableJunctionSchemaElementHasProperty> list = await Relate<TableJunctionSchemaElementHasProperty, TableSchemaElement, TableSchemaProperty>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y });
+        List<TableSchemaElementHasProperty> list = await Relate<TableSchemaElementHasProperty, TableSchemaElement, TableSchemaProperty>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y });
         return [.. list.Select(MapperT2E.Map)];
     }
 
-    public async Task<List<EntityJunctionSchemaContextHasElement>> RelateContextToElement(Guid entityGuid, IEnumerable<Guid> listGuid)
+    public async Task<List<EntitySchemaContextHasElement>> RelateContextToElement(Guid entityGuid, IEnumerable<Guid> listGuid)
     {
-        List<TableJunctionSchemaContextHasElement> list = await Relate<TableJunctionSchemaContextHasElement, TableSchemaContext, TableSchemaElement>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y });
+        List<TableSchemaContextHasElement> list = await Relate<TableSchemaContextHasElement, TableSchemaContext, TableSchemaElement>(entityGuid, listGuid, (x, y) => new() { EntityID = x, RelationID = y });
         return [.. list.Select(MapperT2E.Map)];
     }
 

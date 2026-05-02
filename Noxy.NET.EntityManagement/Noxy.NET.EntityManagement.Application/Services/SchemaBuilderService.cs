@@ -30,8 +30,8 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
             uow.Schema.GetSchemaPropertyListBySchemaID(id.Value)
         );
 
-        Dictionary<Guid, List<EntityJunctionSchemaContextHasElement>> collectionContextHasElement = new(schema.ContextList.Count + schema.ElementList.Count);
-        Dictionary<Guid, List<EntityJunctionSchemaElementHasProperty>> collectionElementHasProperty = new(schema.ElementList.Count + schema.PropertyList.Count);
+        Dictionary<Guid, List<EntitySchemaContextHasElement>> collectionContextHasElement = new(schema.ContextList.Count + schema.ElementList.Count);
+        Dictionary<Guid, List<EntitySchemaElementHasProperty>> collectionElementHasProperty = new(schema.ElementList.Count + schema.PropertyList.Count);
 
         Dictionary<Guid, EntitySchemaContext> collectionContext = schema.ContextList.ToDictionary(x => x.ID, y => y);
         Dictionary<Guid, EntitySchemaElement> collectionElement = schema.ElementList.ToDictionary(x => x.ID, y => y);
@@ -93,9 +93,9 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
 
         // Junction
 
-        foreach (EntityJunctionSchemaContextHasElement junction in await uow.Schema.GetSchemaContextHasElementListBySchemaID(id.Value))
+        foreach (EntitySchemaContextHasElement junction in await uow.Schema.GetSchemaContextHasElementListBySchemaID(id.Value))
         {
-            if (!collectionContextHasElement.TryGetValue(junction.EntityID, out List<EntityJunctionSchemaContextHasElement>? listEntity))
+            if (!collectionContextHasElement.TryGetValue(junction.EntityID, out List<EntitySchemaContextHasElement>? listEntity))
             {
                 collectionContextHasElement[junction.EntityID] = listEntity = [];
             }
@@ -104,7 +104,7 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
             junction.Entity.ElementList = listEntity;
             listEntity.Add(junction);
 
-            if (!collectionContextHasElement.TryGetValue(junction.RelationID, out List<EntityJunctionSchemaContextHasElement>? listRelation))
+            if (!collectionContextHasElement.TryGetValue(junction.RelationID, out List<EntitySchemaContextHasElement>? listRelation))
             {
                 collectionContextHasElement[junction.RelationID] = listRelation = [];
             }
@@ -114,9 +114,9 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
             listRelation.Add(junction);
         }
 
-        foreach (EntityJunctionSchemaElementHasProperty junction in await uow.Schema.GetSchemaElementHasPropertyListBySchemaID(id.Value))
+        foreach (EntitySchemaElementHasProperty junction in await uow.Schema.GetSchemaElementHasPropertyListBySchemaID(id.Value))
         {
-            if (!collectionElementHasProperty.TryGetValue(junction.EntityID, out List<EntityJunctionSchemaElementHasProperty>? listEntity))
+            if (!collectionElementHasProperty.TryGetValue(junction.EntityID, out List<EntitySchemaElementHasProperty>? listEntity))
             {
                 collectionElementHasProperty[junction.EntityID] = listEntity = [];
             }
@@ -125,7 +125,7 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
             junction.Entity.PropertyList = listEntity;
             listEntity.Add(junction);
 
-            if (!collectionElementHasProperty.TryGetValue(junction.RelationID, out List<EntityJunctionSchemaElementHasProperty>? listRelation))
+            if (!collectionElementHasProperty.TryGetValue(junction.RelationID, out List<EntitySchemaElementHasProperty>? listRelation))
             {
                 collectionElementHasProperty[junction.RelationID] = listRelation = [];
             }

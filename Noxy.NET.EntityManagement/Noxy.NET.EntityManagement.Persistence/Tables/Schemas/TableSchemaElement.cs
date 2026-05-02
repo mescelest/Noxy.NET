@@ -27,9 +27,9 @@ public class TableSchemaElement : BaseTableSchema, ISchemaMetadata, ISchemaOrder
     public TableSchemaParameterText? DescriptionTextParameter { get; set; }
     public Guid? DescriptionTextParameterID { get; set; }
 
-    public ICollection<TableJunctionSchemaElementHasProperty>? PropertyList { get; set; }
+    public ICollection<TableSchemaElementHasProperty>? PropertyList { get; set; }
 
-    public ICollection<TableJunctionSchemaContextHasElement>? RelationContextList { get; set; }
+    public ICollection<TableSchemaContextHasElement>? RelationContextList { get; set; }
 
     public TableSchemaElement Clone(Guid? schemaID = null)
     {

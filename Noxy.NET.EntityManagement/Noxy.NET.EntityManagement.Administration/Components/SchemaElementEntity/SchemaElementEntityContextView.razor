@@ -1,9 +1,11 @@
 @inject IState<FeatureSchemaContextState> StateContext
+@inject IState<FeatureSchemaContextHasElementState> StateContextHasElement
 @inject IDispatcher Dispatcher
+@using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+    <Collapsible Loading="IsLoadingList" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
             <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Context list</DynamicHTMLTag>
         </Header>
@@ -39,6 +41,9 @@
     [Parameter, EditorRequired]
     public EntitySchema Schema { get; set; }
 
+    [Parameter, EditorRequired]
+    public EntitySchemaElement SchemaElement { get; set; }
+
     [Parameter]
     public string? Scope { get; set; }
     private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{Schema.ID}";
@@ -49,16 +54,20 @@
 
     private bool _isCollapsed = true;
 
-    private bool IsLoading => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
+    private bool IsLoading => IsLoadingList || IsLoadingJunction;
+    private bool IsLoadingList => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
     private IReadOnlyList<EntitySchemaContext> List => StateContext.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaContext>? value) ? value : [];
+
+    private bool IsLoadingJunction => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaContextHasElement> Junction => StateContextHasElement.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaContextHasElement>? value) ? value : [];
 
     private void SetCollapsed(bool value)
     {
         _isCollapsed = value;
-        if (!_isCollapsed && !StateContext.Value.Cache.ContainsKey(ScopeCurrent) && !IsLoading)
-        {
-            Dispatcher.Dispatch(new FeatureSchemaContextReducers.ListAction(ScopeCurrent, new() { SchemaID = Schema.ID }));
-        }
+
+        if (_isCollapsed || StateContext.Value.List.ContainsKey(ScopeCurrent) || IsLoading) return;
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.ListAction(ScopeCurrent, new() { SchemaID = Schema.ID }));
+        Dispatcher.Dispatch(new FeatureSchemaContextHasElementReducers.ListAction(ScopeCurrent, new() { SchemaElementID = SchemaElement.ID }));
     }
 
 }

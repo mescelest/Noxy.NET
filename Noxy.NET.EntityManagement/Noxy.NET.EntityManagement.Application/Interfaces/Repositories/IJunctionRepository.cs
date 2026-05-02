@@ -5,11 +5,11 @@ namespace Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
 public interface IJunctionRepository
 {
     Task ClearSchemaContextHasElementByEntityID(Guid id);
-    Task<EntityJunctionSchemaContextHasElement> Create(EntityJunctionSchemaContextHasElement entity);
+    Task<EntitySchemaContextHasElement> Create(EntitySchemaContextHasElement entity);
 
     Task ClearSchemaElementHasPropertyByEntityID(Guid id);
-    Task<EntityJunctionSchemaElementHasProperty> Create(EntityJunctionSchemaElementHasProperty entity);
+    Task<EntitySchemaElementHasProperty> Create(EntitySchemaElementHasProperty entity);
 
-    Task<List<EntityJunctionSchemaElementHasProperty>> RelateElementToPropertyList(Guid entityGuid, IEnumerable<Guid> listGuid);
-    Task<List<EntityJunctionSchemaContextHasElement>> RelateContextToElement(Guid entityGuid, IEnumerable<Guid> listGuid);
+    Task<List<EntitySchemaElementHasProperty>> RelateElementToPropertyList(Guid entityGuid, IEnumerable<Guid> listGuid);
+    Task<List<EntitySchemaContextHasElement>> RelateContextToElement(Guid entityGuid, IEnumerable<Guid> listGuid);
 }

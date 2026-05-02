@@ -5,5 +5,5 @@ namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 public class EntitySchemaPropertyCollection : EntitySchemaProperty
 {
-    public ICollection<EntityJunctionSchemaPropertyCollectionHasProperty>? PropertyList { get; set; }
+    public ICollection<EntitySchemaPropertyCollectionHasProperty>? PropertyList { get; set; }
 }

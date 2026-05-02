@@ -57,7 +57,7 @@ public class EntityToTableMapper : IEntityToTableMapper
 
     #region -- Many-To-Many --
 
-    public TableJunctionSchemaContextHasElement Map(EntityJunctionSchemaContextHasElement entity)
+    public TableSchemaContextHasElement Map(EntitySchemaContextHasElement entity)
     {
         return new()
         {
@@ -68,7 +68,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TableJunctionSchemaElementHasProperty Map(EntityJunctionSchemaElementHasProperty entity)
+    public TableSchemaElementHasProperty Map(EntitySchemaElementHasProperty entity)
     {
         return new()
         {

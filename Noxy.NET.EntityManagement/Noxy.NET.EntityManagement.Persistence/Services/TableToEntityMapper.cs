@@ -256,15 +256,15 @@ public class TableToEntityMapper : ITableToEntityMapper
 
     #region -- Many-To-Many --
 
-    public EntityJunctionSchemaContextHasElement Map(TableJunctionSchemaContextHasElement? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityJunctionSchemaElementHasProperty Map(TableJunctionSchemaElementHasProperty? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityJunctionSchemaPropertyCollectionHasProperty Map(TableJunctionSchemaPropertyCollectionHasProperty? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaContextHasElement Map(TableSchemaContextHasElement? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaElementHasProperty Map(TableSchemaElementHasProperty? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntitySchemaPropertyCollectionHasProperty Map(TableSchemaPropertyCollectionHasProperty? table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
 
-    private static EntityJunctionSchemaContextHasElement? MapInternal(TableJunctionSchemaContextHasElement? table, Guid[]? listVisitedRelation = null)
+    private static EntitySchemaContextHasElement? MapInternal(TableSchemaContextHasElement? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
-        EntityJunctionSchemaContextHasElement mapped = new()
+        EntitySchemaContextHasElement mapped = new()
         {
             ID = table.ID,
             TimeCreated = table.TimeCreated,
@@ -279,11 +279,11 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityJunctionSchemaElementHasProperty? MapInternal(TableJunctionSchemaElementHasProperty? table, Guid[]? listVisitedRelation = null)
+    private static EntitySchemaElementHasProperty? MapInternal(TableSchemaElementHasProperty? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
-        EntityJunctionSchemaElementHasProperty mapped = new()
+        EntitySchemaElementHasProperty mapped = new()
         {
             ID = table.ID,
             TimeCreated = table.TimeCreated,
@@ -298,11 +298,11 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityJunctionSchemaPropertyCollectionHasProperty? MapInternal(TableJunctionSchemaPropertyCollectionHasProperty? table, Guid[]? listVisitedRelation = null)
+    private static EntitySchemaPropertyCollectionHasProperty? MapInternal(TableSchemaPropertyCollectionHasProperty? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
-        EntityJunctionSchemaPropertyCollectionHasProperty mapped = new()
+        EntitySchemaPropertyCollectionHasProperty mapped = new()
         {
             ID = table.ID,
             TimeCreated = table.TimeCreated,
@@ -317,11 +317,11 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityJunctionSchemaPropertyTableHasProperty? MapInternal(TableJunctionSchemaPropertyTableHasProperty? table, Guid[]? listVisitedRelation = null)
+    private static EntitySchemaPropertyTableHasProperty? MapInternal(TableSchemaPropertyTableHasProperty? table, Guid[]? listVisitedRelation = null)
     {
         if (table == null) return null;
 
-        EntityJunctionSchemaPropertyTableHasProperty mapped = new()
+        EntitySchemaPropertyTableHasProperty mapped = new()
         {
             ID = table.ID,
             TimeCreated = table.TimeCreated,

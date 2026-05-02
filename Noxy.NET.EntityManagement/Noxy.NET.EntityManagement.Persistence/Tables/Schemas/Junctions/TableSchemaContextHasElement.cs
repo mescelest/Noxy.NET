@@ -1,13 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
-using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
 
-[Table(nameof(TableJunctionSchemaElementHasProperty))]
-public class TableJunctionSchemaElementHasProperty : BaseTableManyToMany<TableSchemaElement, TableSchemaProperty>
+[Table(nameof(TableSchemaContextHasElement))]
+public class TableSchemaContextHasElement : BaseTableManyToMany<TableSchemaContext, TableSchemaElement>
 {
-    public TableJunctionSchemaElementHasProperty Clone(Guid? entityID = null, Guid? relationID = null)
+    public TableSchemaContextHasElement Clone(Guid? entityID = null, Guid? relationID = null)
     {
         return new()
         {

@@ -96,10 +96,10 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         // Dictionary<Guid, Guid> mapParameter = listParameter.Zip(listParameterClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
         Dictionary<Guid, Guid> mapProperty = listProperty.Zip(listPropertyClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
 
-        List<TableJunctionSchemaElementHasProperty> listJunctionElement = await Context.SchemaElementHasProperty.Where(x => mapElement.Keys.Contains(x.EntityID)).ToListAsync();
+        List<TableSchemaElementHasProperty> listJunctionElement = await Context.SchemaElementHasProperty.Where(x => mapElement.Keys.Contains(x.EntityID)).ToListAsync();
         await Context.SchemaElementHasProperty.AddRangeAsync(listJunctionElement.Select(j => j.Clone(mapElement[j.EntityID], mapProperty[j.RelationID])));
 
-        List<TableJunctionSchemaContextHasElement> listJunctionContext = await Context.SchemaContextHasElement.Where(x => mapContext.Keys.Contains(x.EntityID)).ToListAsync();
+        List<TableSchemaContextHasElement> listJunctionContext = await Context.SchemaContextHasElement.Where(x => mapContext.Keys.Contains(x.EntityID)).ToListAsync();
         await Context.SchemaContextHasElement.AddRangeAsync(listJunctionContext.Select(j => j.Clone(mapElement[j.EntityID], mapProperty[j.RelationID])));
 
         return MapperT2E.Map(entitySchemaClone);
@@ -319,6 +319,51 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     #endregion -- SchemaContext --
 
+    #region -- SchemaContextHasElement --
+
+    public async Task<EntitySchemaContextHasElement> GetSchemaContextHasElementByID(Guid id)
+    {
+        TableSchemaContextHasElement result = await Context.SchemaContextHasElement
+            .AsNoTracking()
+            .Include(x => x.Entity)
+            .Include(x => x.Relation)
+            .SingleAsync(x => x.ID == id);
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<List<EntitySchemaContextHasElement>> GetSchemaContextHasElementList(FilterSchemaContextHasElementList filter)
+    {
+        IQueryable<TableSchemaContextHasElement> query = Context.SchemaContextHasElement.AsNoTracking();
+
+        if (filter.SchemaContextID.HasValue) query = query.Where(x => x.EntityID == filter.SchemaContextID);
+        if (filter.SchemaElementID.HasValue) query = query.Where(x => x.RelationID == filter.SchemaElementID);
+
+        List<TableSchemaContextHasElement> result = await query.ToListAsync();
+
+        return [.. result.Select(MapperT2E.Map)];
+    }
+
+    public async Task<EntitySchemaContextHasElement> CreateSchemaContextHasElement(EntitySchemaContextHasElement entity)
+    {
+        EntityEntry<TableSchemaContextHasElement> result = await Context.SchemaContextHasElement.AddAsync(MapperE2T.Map(entity));
+        // todo: Should check if elements are in same schema
+
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<Guid> DeleteSchemaContextHasElement(Guid id)
+    {
+        TableSchemaContextHasElement entity = await Context.SchemaContextHasElement.AsNoTracking().FirstAsync(x => x.ID == id);
+
+        // todo: Should check if elements are in an active schema
+
+        Context.SchemaContextHasElement.Remove(entity);
+
+        return entity.ID;
+    }
+
+    #endregion -- SchemaContextHasElement --
+
     #region -- SchemaParameter --
 
     public async Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id)
@@ -505,15 +550,15 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return [.. result.Select(MapperT2E.Map)];
     }
 
-    public async Task<List<EntityJunctionSchemaContextHasElement>> GetSchemaContextHasElementListBySchemaID(Guid id)
+    public async Task<List<EntitySchemaContextHasElement>> GetSchemaContextHasElementListBySchemaID(Guid id)
     {
-        List<TableJunctionSchemaContextHasElement> result = await Context.SchemaContextHasElement.AsNoTracking().Where(x => x.Entity!.SchemaID == id).ToListAsync();
+        List<TableSchemaContextHasElement> result = await Context.SchemaContextHasElement.AsNoTracking().Where(x => x.Entity!.SchemaID == id).ToListAsync();
         return [.. result.Select(MapperT2E.Map)];
     }
 
-    public async Task<List<EntityJunctionSchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id)
+    public async Task<List<EntitySchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id)
     {
-        List<TableJunctionSchemaElementHasProperty> result = await Context.SchemaElementHasProperty.AsNoTracking().Where(x => x.Entity!.SchemaID == id).ToListAsync();
+        List<TableSchemaElementHasProperty> result = await Context.SchemaElementHasProperty.AsNoTracking().Where(x => x.Entity!.SchemaID == id).ToListAsync();
         return [.. result.Select(MapperT2E.Map)];
     }
 

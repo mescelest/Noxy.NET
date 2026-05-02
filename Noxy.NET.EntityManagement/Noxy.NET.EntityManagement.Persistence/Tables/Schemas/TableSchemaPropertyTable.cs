@@ -5,7 +5,7 @@ namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
 public class TableSchemaPropertyTable : TableSchemaProperty
 {
-    public ICollection<TableJunctionSchemaPropertyTableHasProperty>? PropertyList { get; set; }
+    public ICollection<TableSchemaPropertyTableHasProperty>? PropertyList { get; set; }
 
     public override TableSchemaPropertyTable Clone(Guid? schemaID = null)
     {

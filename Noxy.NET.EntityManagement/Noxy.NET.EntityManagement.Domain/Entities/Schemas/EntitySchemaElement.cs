@@ -17,8 +17,8 @@ public class EntitySchemaElement : BaseEntitySchema, ISchemaMetadata, ISchemaPre
     public EntitySchemaParameterText? DescriptionTextParameter { get; set; }
     public Guid? DescriptionTextParameterID { get; set; }
 
-    public List<EntityJunctionSchemaElementHasProperty>? PropertyList { get; set; }
+    public List<EntitySchemaElementHasProperty>? PropertyList { get; set; }
 
     [JsonIgnore]
-    public List<EntityJunctionSchemaContextHasElement>? ContextList { get; set; }
+    public List<EntitySchemaContextHasElement>? ContextList { get; set; }
 }

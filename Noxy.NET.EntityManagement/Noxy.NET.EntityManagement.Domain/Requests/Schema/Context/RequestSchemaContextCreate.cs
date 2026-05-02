@@ -28,7 +28,7 @@ public class RequestSchemaContextCreate : BaseRequestPost<ResponseSchemaContextC
     [Description(TextConstants.HelpFormNote)]
     public string? Note { get; set; } = string.Empty;
 
-    [NotEmpty]
+    [NotEmptyGuid]
     [DisplayName(TextConstants.LabelFormTitle)]
     [Description(TextConstants.HelpFormTitle)]
     public Guid TitleParameterTextID { get; set; }

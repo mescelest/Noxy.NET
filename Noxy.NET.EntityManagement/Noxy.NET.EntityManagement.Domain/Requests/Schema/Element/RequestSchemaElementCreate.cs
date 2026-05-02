@@ -33,7 +33,7 @@ public class RequestSchemaElementCreate : BaseRequestPost<ResponseSchemaElementC
     [Description(TextConstants.HelpFormWeight)]
     public int? Weight { get; set; }
 
-    [NotEmpty]
+    [NotEmptyGuid]
     [DisplayName(TextConstants.LabelFormTitle)]
     [Description(TextConstants.HelpFormTitle)]
     public Guid TitleParameterTextID { get; set; }

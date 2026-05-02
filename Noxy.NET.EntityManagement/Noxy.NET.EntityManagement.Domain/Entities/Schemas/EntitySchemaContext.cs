@@ -9,5 +9,5 @@ public class EntitySchemaContext : BaseEntitySchemaPresentation, ISchemaMetadata
     public required string Name { get; set; }
     public string Note { get; set; } = string.Empty;
 
-    public List<EntityJunctionSchemaContextHasElement>? ElementList { get; set; }
+    public List<EntitySchemaContextHasElement>? ElementList { get; set; }
 }

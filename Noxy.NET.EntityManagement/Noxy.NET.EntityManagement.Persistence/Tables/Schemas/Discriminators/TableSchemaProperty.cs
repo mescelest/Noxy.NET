@@ -26,9 +26,9 @@ public abstract class TableSchemaProperty : BaseTableSchemaPresentation, ISchema
     public TableSchemaParameterText? DescriptionTextParameter { get; set; }
     public Guid? DescriptionTextParameterID { get; set; }
 
-    public ICollection<TableJunctionSchemaElementHasProperty>? RelationElementList { get; set; }
-    public ICollection<TableJunctionSchemaPropertyCollectionHasProperty>? RelationPropertyCollectionList { get; set; }
-    public ICollection<TableJunctionSchemaPropertyTableHasProperty>? RelationPropertyTableList { get; set; }
+    public ICollection<TableSchemaElementHasProperty>? RelationElementList { get; set; }
+    public ICollection<TableSchemaPropertyCollectionHasProperty>? RelationPropertyCollectionList { get; set; }
+    public ICollection<TableSchemaPropertyTableHasProperty>? RelationPropertyTableList { get; set; }
 
     public static readonly IReadOnlyDictionary<string, Type> TypeMap = new Dictionary<string, Type>
     {

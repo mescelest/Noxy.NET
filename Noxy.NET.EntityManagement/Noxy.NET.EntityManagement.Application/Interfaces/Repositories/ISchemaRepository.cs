@@ -44,6 +44,15 @@ public interface ISchemaRepository
 
     #endregion -- SchemaContext --
 
+    #region -- SchemaContextHasElement --
+
+    Task<EntitySchemaContextHasElement> GetSchemaContextHasElementByID(Guid id);
+    Task<List<EntitySchemaContextHasElement>> GetSchemaContextHasElementList(FilterSchemaContextHasElementList filter);
+    Task<EntitySchemaContextHasElement> CreateSchemaContextHasElement(EntitySchemaContextHasElement entity);
+    Task<Guid> DeleteSchemaContextHasElement(Guid id);
+
+    #endregion -- SchemaContextHasElement --
+
     #region -- SchemaParameter --
 
     Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id);
@@ -78,6 +87,6 @@ public interface ISchemaRepository
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id);
     Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id);
 
-    Task<List<EntityJunctionSchemaContextHasElement>> GetSchemaContextHasElementListBySchemaID(Guid id);
-    Task<List<EntityJunctionSchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id);
+    Task<List<EntitySchemaContextHasElement>> GetSchemaContextHasElementListBySchemaID(Guid id);
+    Task<List<EntitySchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id);
 }

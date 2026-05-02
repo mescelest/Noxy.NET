@@ -3,7 +3,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 
-public class EntityJunctionSchemaPropertyCollectionHasProperty : BaseEntityManyToMany<EntitySchemaPropertyCollection, EntitySchemaProperty.Discriminator>
+public class EntitySchemaPropertyTableHasProperty : BaseEntityManyToMany<EntitySchemaPropertyTable, EntitySchemaProperty.Discriminator>
 {
     public override string ToString()
     {

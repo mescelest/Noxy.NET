@@ -64,7 +64,7 @@
     private void SetCollapsed(bool value)
     {
         _isCollapsed = value;
-        if (_isCollapsed || StateContext.Value.Cache.ContainsKey(ScopeCurrent) || IsLoading) return;
+        if (_isCollapsed || StateContext.Value.List.ContainsKey(ScopeCurrent) || IsLoading) return;
         Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, new() { SchemaID = SchemaID }));
     }
 

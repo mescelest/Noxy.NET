@@ -1,13 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using Fluxor;
+using Noxy.NET.EntityManagement.Administration.Abstractions;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
 using Noxy.NET.EntityManagement.Presentation.Services;
 using static Noxy.NET.EntityManagement.Administration.Features.FeatureSchemaElementReducers;
 
 namespace Noxy.NET.EntityManagement.Administration.Features;
-
-public readonly record struct FeatureSchemaElementKey(string Scope, FeatureSchemaElementActionKind Kind);
 
 public enum FeatureSchemaElementActionKind
 {
@@ -20,23 +19,21 @@ public enum FeatureSchemaElementActionKind
 }
 
 [FeatureState]
-public record FeatureSchemaElementState
+public record FeatureSchemaElementState : BaseFeatureStateRequest<FeatureSchemaElementActionKind>
 {
-    public Dictionary<FeatureSchemaElementKey, bool> Loading { get; init; } = [];
-    public Dictionary<FeatureSchemaElementKey, string?> Error { get; init; } = [];
     public Dictionary<string, EntitySchemaElement> Find { get; init; } = [];
-    public Dictionary<string, IReadOnlyList<EntitySchemaElement>> Cache { get; init; } = [];
+    public Dictionary<string, IReadOnlyList<EntitySchemaElement>> List { get; init; } = [];
     public Dictionary<string, RequestSchemaElementList> Request { get; init; } = [];
 
     public bool TryGetLoading(string scope, FeatureSchemaElementActionKind kind, out bool value) => Loading.TryGetValue(new(scope, kind), out value);
     public bool TryGetError(string scope, FeatureSchemaElementActionKind kind, out string? error) => Error.TryGetValue(new(scope, kind), out error);
 
     public bool TryGetFind(string scope, [NotNullWhen(true)] out EntitySchemaElement? value) => Find.TryGetValue(scope, out value);
-    public bool TryGetList(string scope, [NotNullWhen(true)] out IReadOnlyList<EntitySchemaElement>? list) => Cache.TryGetValue(scope, out list);
+    public bool TryGetList(string scope, [NotNullWhen(true)] out IReadOnlyList<EntitySchemaElement>? list) => List.TryGetValue(scope, out list);
     public bool TryGetRequest(string scope, [NotNullWhen(true)] out RequestSchemaElementList? request) => Request.TryGetValue(scope, out request);
 }
 
-public static class FeatureSchemaElementReducers
+public class FeatureSchemaElementReducers : BaseFeatureReducerRequest<FeatureSchemaElementState, FeatureSchemaElementActionKind>
 {
     [ReducerMethod]
     public static FeatureSchemaElementState ReduceFind(FeatureSchemaElementState state, FindAction action) =>
@@ -51,11 +48,11 @@ public static class FeatureSchemaElementReducers
 
     [ReducerMethod]
     public static FeatureSchemaElementState ReduceList(FeatureSchemaElementState state, ListAction action) =>
-        StartAction(state, action.Scope, FeatureSchemaElementActionKind.List, (next) => next with { Request = Set(next.Request, action.Scope, action.Request) });
+        StartAction(state, action.Scope, FeatureSchemaElementActionKind.List, next => next with { Request = Set(next.Request, action.Scope, action.Request) });
 
     [ReducerMethod]
     public static FeatureSchemaElementState ReduceListSuccess(FeatureSchemaElementState state, SuccessAction<List<EntitySchemaElement>> action) =>
-        HandleSuccessAction(state, action, (next, value) => next with { Cache = Set(next.Cache, action.Scope, value) });
+        HandleSuccessAction(state, action, (next, value) => next with { List = Set(next.List, action.Scope, value) });
 
     [ReducerMethod]
     public static FeatureSchemaElementState ReduceListFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
@@ -96,46 +93,6 @@ public static class FeatureSchemaElementReducers
     [ReducerMethod]
     public static FeatureSchemaElementState ReduceDeleteFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
 
-    private static Dictionary<TKey, TValue> Set<TKey, TValue>(Dictionary<TKey, TValue> source, TKey key, TValue value) where TKey : notnull
-    {
-        return source.TryGetValue(key, out TValue? existing) && EqualityComparer<TValue>.Default.Equals(existing, value) ? source : new(source) { [key] = value };
-    }
-
-    private static FeatureSchemaElementState StartAction(FeatureSchemaElementState state, string scope, FeatureSchemaElementActionKind kind, Func<FeatureSchemaElementState, FeatureSchemaElementState>? cb = null)
-    {
-        FeatureSchemaElementKey key = new(scope, kind);
-        FeatureSchemaElementState newState = state with
-        {
-            Loading = Set(state.Loading, key, true),
-            Error = Set(state.Error, key, null)
-        };
-
-        return cb != null ? cb(newState) : newState;
-    }
-
-    private static FeatureSchemaElementState HandleSuccessAction<T>(FeatureSchemaElementState state, SuccessAction<T> action, Func<FeatureSchemaElementState, T, FeatureSchemaElementState>? cb = null)
-    {
-        FeatureSchemaElementKey key = new(action.Scope, action.Kind);
-        FeatureSchemaElementState newState = state with
-        {
-            Loading = Set(state.Loading, key, false)
-        };
-
-        return cb != null ? cb(newState, action.Value) : newState;
-    }
-
-    private static FeatureSchemaElementState HandleFailureAction(FeatureSchemaElementState state, FailureAction action, Func<FeatureSchemaElementState, FailureAction, FeatureSchemaElementState>? cb = null)
-    {
-        FeatureSchemaElementKey key = new(action.Scope, action.Kind);
-        FeatureSchemaElementState newState = state with
-        {
-            Loading = Set(state.Loading, key, false),
-            Error = Set(state.Error, key, action.Error)
-        };
-
-        return cb != null ? cb(newState, action) : newState;
-    }
-
     public record FindAction(string Scope, RequestSchemaElementFind Request);
 
     public record ListAction(string Scope, RequestSchemaElementList Request);
@@ -147,13 +104,9 @@ public static class FeatureSchemaElementReducers
     public record CloneAction(string Scope, RequestSchemaElementClone Request);
 
     public record DeleteAction(string Scope, RequestSchemaElementDelete Request);
-
-    public record SuccessAction<T>(string Scope, FeatureSchemaElementActionKind Kind, T Value);
-
-    public record FailureAction(string Scope, FeatureSchemaElementActionKind Kind, string Error);
 }
 
-public class FeatureSchemaElementEffects(APIHttpClient client, IState<FeatureSchemaElementState> state)
+public class FeatureSchemaElementEffects(APIHttpClient client, IState<FeatureSchemaElementState> state) : BaseFeatureEffectRequest<FeatureSchemaElementState, FeatureSchemaElementActionKind>
 {
     [EffectMethod]
     public Task Handle(FindAction action, IDispatcher dispatcher)
@@ -191,40 +144,7 @@ public class FeatureSchemaElementEffects(APIHttpClient client, IState<FeatureSch
         return ExecuteWithRefresh(action.Scope, FeatureSchemaElementActionKind.Delete, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
     }
 
-    private static async Task Execute<TResult>(string scope, FeatureSchemaElementActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
-    {
-        (bool success, TResult? result) = await TryExecute(scope, kind, dispatcher, operation);
-        if (success)
-        {
-            dispatcher.Dispatch(new SuccessAction<TResult>(scope, kind, result!));
-        }
-    }
-
-    private async Task ExecuteWithRefresh<TResult>(string scope, FeatureSchemaElementActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
-    {
-        (bool success, TResult? result) = await TryExecute(scope, kind, dispatcher, operation);
-        if (success)
-        {
-            dispatcher.Dispatch(new SuccessAction<TResult>(scope, kind, result!));
-            RefreshList(scope, dispatcher);
-        }
-    }
-
-    private static async Task<(bool Success, TResult? Result)> TryExecute<TResult>(string scope, FeatureSchemaElementActionKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
-    {
-        try
-        {
-            TResult result = await operation();
-            return (true, result);
-        }
-        catch (Exception ex)
-        {
-            dispatcher.Dispatch(new FailureAction(scope, kind, ex.Message));
-            return (false, default);
-        }
-    }
-
-    private void RefreshList(string scope, IDispatcher dispatcher)
+    protected override void RefreshList(string scope, IDispatcher dispatcher)
     {
         if (state.Value.TryGetRequest(scope, out RequestSchemaElementList? request))
         {
