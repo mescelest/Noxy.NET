@@ -1,12 +1,12 @@
-@inject IState<FeatureSchemaContextState> StateContext
-@inject IState<FeatureSchemaContextHasElementState> StateContextHasElement
+@inject IState<FeatureSchemaPropertyState> StateProperty
+@inject IState<FeatureSchemaElementHasPropertyState> StateElementHasProperty
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <Collapsible Loading="IsLoadingList" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
-            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Context list</DynamicHTMLTag>
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Property list</DynamicHTMLTag>
         </Header>
         <Content>
             <div class="grid">
@@ -19,7 +19,7 @@
                     <strong>Created at</strong>
                 </div>
 
-                @foreach (EntitySchemaContext item in List)
+                @foreach (EntitySchemaProperty item in List)
                 {
                     <div class="grid-row">
                         <span>
@@ -55,27 +55,27 @@
     private bool _isCollapsed = true;
 
     private bool IsLoading => IsLoadingList || IsLoadingJunction;
-    private bool IsLoadingList => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchemaContext> List => StateContext.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaContext>? value) ? value : [];
+    private bool IsLoadingList => StateProperty.Value.TryGetLoading(ScopeCurrent, FeatureSchemaPropertyActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaProperty> List => StateProperty.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaProperty.Discriminator>? value) ? [..value.Select(x => x.GetValue())] : [];
 
-    private bool IsLoadingJunction => StateContextHasElement.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextHasElementActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchemaContextHasElement> Junction => StateContextHasElement.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaContextHasElement>? value) ? value : [];
+    private bool IsLoadingJunction => StateElementHasProperty.Value.TryGetLoading(ScopeCurrent, FeatureSchemaElementHasPropertyActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaElementHasProperty> Junction => StateElementHasProperty.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaElementHasProperty>? value) ? value : [];
 
     private bool IsChecked(Guid id)
     {
-        return Junction.Any(x => x.EntityID == id);
+        return Junction.Any(x => x.RelationID == id);
     }
 
     private void SetChecked(bool value, Guid id)
     {
         if (value)
         {
-            Dispatcher.Dispatch(new FeatureSchemaContextHasElementReducers.AddAction(ScopeCurrent, new() { SchemaContextID = id, SchemaElementID = SchemaElement.ID }));
+            Dispatcher.Dispatch(new FeatureSchemaElementHasPropertyReducers.AddAction(ScopeCurrent, new() { SchemaElementID = SchemaElement.ID, SchemaPropertyID = id }));
         }
         else
         {
-            EntitySchemaContextHasElement junction = Junction.Single(x => x.EntityID == id && x.RelationID == SchemaElement.ID);
-            Dispatcher.Dispatch(new FeatureSchemaContextHasElementReducers.DeleteAction(ScopeCurrent, new() { ID = junction.ID }));
+            EntitySchemaElementHasProperty junction = Junction.Single(x => x.EntityID == SchemaElement.ID && x.RelationID == id);
+            Dispatcher.Dispatch(new FeatureSchemaElementHasPropertyReducers.DeleteAction(ScopeCurrent, new() { ID = junction.ID }));
         }
     }
 
@@ -83,9 +83,9 @@
     {
         _isCollapsed = value;
 
-        if (_isCollapsed || StateContext.Value.List.ContainsKey(ScopeCurrent) || IsLoading) return;
-        Dispatcher.Dispatch(new FeatureSchemaContextReducers.ListAction(ScopeCurrent, new() { SchemaID = Schema.ID }));
-        Dispatcher.Dispatch(new FeatureSchemaContextHasElementReducers.ListAction(ScopeCurrent, new() { SchemaElementID = SchemaElement.ID }));
+        if (_isCollapsed || StateProperty.Value.List.ContainsKey(ScopeCurrent) || IsLoading) return;
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.ListAction(ScopeCurrent, new() { SchemaID = Schema.ID }));
+        Dispatcher.Dispatch(new FeatureSchemaElementHasPropertyReducers.ListAction(ScopeCurrent, new() { SchemaElementID = SchemaElement.ID }));
     }
 
 }

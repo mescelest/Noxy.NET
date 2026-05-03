@@ -4,6 +4,7 @@
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@SchemaElement.Name</DynamicHTMLTag>
 
     <SchemaElementEntityContextView Schema="Schema" SchemaElement="SchemaElement" Scope="@ScopeCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+    <SchemaElementEntityPropertyView Schema="Schema" SchemaElement="SchemaElement" Scope="@ScopeCurrent" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
 </div>
 
 @code {

@@ -46,10 +46,5 @@
         </Reference>
     </ItemGroup>
 
-    <ItemGroup>
-        <AdditionalFiles Include="Components\SchemaPropertyEntity\SchemaPropertyEntityContextView.razor"/>
-        <AdditionalFiles Include="Components\SchemaPropertyEntity\SchemaPropertyEntityUpdate.razor"/>
-        <AdditionalFiles Include="Components\SchemaPropertyEntity\SchemaPropertyEntityView.razor"/>
-    </ItemGroup>
 
 </Project>
