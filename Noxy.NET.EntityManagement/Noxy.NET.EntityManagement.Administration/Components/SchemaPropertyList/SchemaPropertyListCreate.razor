@@ -6,9 +6,9 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new property</DynamicHTMLTag>
 
-    <InputGroupSelect OptionList="_setType" DisplayName="@Presentation.Services.TextService.Get(TextConstants.LabelFormPropertyType)" Description="@Presentation.Services.TextService.Get(TextConstants.HelpFormPropertyType)"
+    <InputGroupSelect OptionList="_setType" DisplayName="@TextService.Get(TextConstants.LabelFormPropertyType)" Description="@TextService.Get(TextConstants.HelpFormPropertyType)"
                       Name="@nameof(_valueType)" @bind-Value="_valueType">
-        <span>@Presentation.Services.TextService.Get(context)</span>
+        <span>@TextService.Get(context)</span>
     </InputGroupSelect>
 
     @switch (_valueType)
@@ -108,7 +108,7 @@
         return
                 @<div class="action-list">
                     <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
-                        @Presentation.Services.TextService.Get(TextConstants.ButtonCreate)
+                        @TextService.Get(TextConstants.ButtonCreate)
                     </Button>
                 </div>;
     }

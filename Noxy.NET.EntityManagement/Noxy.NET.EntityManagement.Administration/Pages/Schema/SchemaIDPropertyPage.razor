@@ -7,7 +7,7 @@
 
 <Loader Loading="@IsLoading">
     <div class="@CssClass">
-        @if (Pages.Schema != null)
+        @if (Schema != null)
         {
             <MagazineFrame>
                 <Left>
@@ -15,11 +15,11 @@
                 </Left>
                 <Content>
                     <SchemaPropertyListView Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H1">
-                        <SchemaPropertyListGroup Schema="Pages.Schema" SchemaProperty="context" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                        <SchemaPropertyListGroup Schema="Schema" SchemaProperty="context" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     </SchemaPropertyListView>
                 </Content>
                 <Right>
-                    @if (Pages.Schema.TimeActivated == null)
+                    @if (Schema.TimeActivated == null)
                     {
                         <SchemaPropertyListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     }
