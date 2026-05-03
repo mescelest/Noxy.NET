@@ -17,9 +17,9 @@ public class TableSchemaPropertyImage : TableSchemaProperty
             Name = Name,
             Note = Note,
             Weight = Weight,
-            DescriptionTextParameterID = DescriptionTextParameterID,
-            TitleTextParameterID = TitleTextParameterID,
             AllowedExtensions = AllowedExtensions,
+            TitleTextParameterID = TitleTextParameterID,
+            DescriptionTextParameterID = DescriptionTextParameterID,
         };
     }
 }

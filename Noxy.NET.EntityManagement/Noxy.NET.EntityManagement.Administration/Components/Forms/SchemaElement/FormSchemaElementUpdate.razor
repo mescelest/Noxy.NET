@@ -28,6 +28,12 @@
     private EntitySchemaParameterText? _valueTitle;
     private EntitySchemaParameterText? _valueDescription;
 
+    private EntitySchemaParameterText? GetValueTitle() => _valueTitle?.ID == Model.TitleParameterTextID ? _valueTitle : null;
+    private void SetValueTitle(EntitySchemaParameterText? obj) => Model.TitleParameterTextID = (_valueTitle = obj)?.ID ?? Guid.Empty;
+
+    private EntitySchemaParameterText? GetValueDescription() => _valueDescription?.ID == Model.DescriptionParameterTextID ? _valueDescription : null;
+    private void SetValueDescription(EntitySchemaParameterText? obj) => Model.DescriptionParameterTextID = (_valueDescription = obj)?.ID ?? Guid.Empty;
+
     protected override WebFormContext<RequestSchemaElementUpdate> CreateContext()
     {
         _valueTitle = SchemaElement.TitleTextParameter;
@@ -43,11 +49,5 @@
                 DescriptionParameterTextID = SchemaElement.DescriptionTextParameterID,
         });
     }
-
-    private EntitySchemaParameterText? GetValueTitle() => _valueTitle?.ID == Model.TitleParameterTextID ? _valueTitle : null;
-    private void SetValueTitle(EntitySchemaParameterText? obj) => Model.TitleParameterTextID = (_valueTitle = obj)?.ID ?? Guid.Empty;
-
-    private EntitySchemaParameterText? GetValueDescription() => _valueDescription?.ID == Model.DescriptionParameterTextID ? _valueDescription : null;
-    private void SetValueDescription(EntitySchemaParameterText? obj) => Model.DescriptionParameterTextID = (_valueDescription = obj)?.ID ?? Guid.Empty;
 
 }

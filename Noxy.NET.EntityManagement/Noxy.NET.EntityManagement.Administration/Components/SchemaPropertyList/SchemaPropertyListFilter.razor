@@ -1,0 +1,37 @@
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Search for a property</DynamicHTMLTag>
+    <FormSchemaPropertyList SchemaID="SchemaID" OnSubmit="Submit">
+        <ButtonList Alignment="ButtonListAlignmentEnum.Right">
+            <Button Status="StatusEnum.Warning" type="button">
+                @TextService.Get(TextConstants.ButtonReset)
+            </Button>
+            <Button Status="StatusEnum.Info" type="submit">
+                @TextService.Get(TextConstants.ButtonFilter)
+            </Button>
+        </ButtonList>
+    </FormSchemaPropertyList>
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
+
+    private void Submit(IWebFormContext<RequestSchemaPropertyList> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.ListAction(ScopeCurrent, value.Model));
+    }
+
+}

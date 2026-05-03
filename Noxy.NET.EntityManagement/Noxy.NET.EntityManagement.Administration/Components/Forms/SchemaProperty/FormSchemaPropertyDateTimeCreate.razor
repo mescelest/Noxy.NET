@@ -1,0 +1,56 @@
+@inherits BaseRequestForm<RequestSchemaPropertyDateTimeCreate, ResponseSchemaPropertyDateTimeCreate>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="RequestSchemaPropertyDateTimeCreate" Context="Context" ResetAfterSubmit="true" OnSubmit="ForwardSubmit">
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.SchemaIdentifier))" Description="@GetDescription(nameof(Model.SchemaIdentifier))" @bind-Value="Model.SchemaIdentifier"/>
+
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Name))" Description="@GetDescription(nameof(Model.Name))" @bind-Value="Model.Name"/>
+
+        <InputGroupTextArea DisplayName="@GetDisplayName(nameof(Model.Note))" Description="@GetDescription(nameof(Model.Note))" @bind-Value="Model.Note"/>
+
+        <InputGroupSelect OptionList="ListType" DisplayName="@GetDisplayName(nameof(Model.Type))" Description="@GetDescription(nameof(Model.Type))"
+                          Name="@nameof(Model.Type)" @bind-Value="Model.Type">
+            <span>@TextService.Get(_collectionType[context])</span>
+        </InputGroupSelect>
+
+        <InputGroupInteger DisplayName="@GetDisplayName(nameof(Model.Weight))" Description="@GetDescription(nameof(Model.Weight))" @bind-Value="Model.Weight"/>
+
+        <InputGroupAutosuggestTextParameter Name="@nameof(Model.TitleParameterTextID)" DisplayName="@GetDisplayName(nameof(Model.TitleParameterTextID))" Description="@GetDescription(nameof(Model.TitleParameterTextID))"
+                                            SchemaID="SchemaID" @bind-Value:get="GetValueTitle()" @bind-Value:set="SetValueTitle"/>
+
+        <InputGroupAutosuggestTextParameter Name="@nameof(Model.DescriptionParameterTextID)" DisplayName="@GetDisplayName(nameof(Model.DescriptionParameterTextID))" Description="@GetDescription(nameof(Model.DescriptionParameterTextID))"
+                                            SchemaID="SchemaID" @bind-Value:get="GetValueDescription()" @bind-Value:set="SetValueDescription"/>
+
+        @ChildContent
+    </WebForm>
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    private EntitySchemaParameterText? _valueTitle;
+    private EntitySchemaParameterText? _valueDescription;
+
+    private readonly Dictionary<DateTimeTypeEnum, string> _collectionType = new()
+    {
+            { DateTimeTypeEnum.Time, TextConstants.ValuePropertyDateTimeTypeTime },
+            { DateTimeTypeEnum.Date, TextConstants.ValuePropertyDateTimeTypeDate },
+            { DateTimeTypeEnum.DateAndTime, TextConstants.ValuePropertyDateTimeTypeDateTime },
+    };
+
+    private HashSet<DateTimeTypeEnum> ListType => _collectionType.Select(x => x.Key).ToHashSet();
+
+    private EntitySchemaParameterText? GetValueTitle() => _valueTitle?.ID == Model.TitleParameterTextID ? _valueTitle : null;
+    private void SetValueTitle(EntitySchemaParameterText? obj) => Model.TitleParameterTextID = (_valueTitle = obj)?.ID ?? Guid.Empty;
+
+    private EntitySchemaParameterText? GetValueDescription() => _valueDescription?.ID == Model.DescriptionParameterTextID ? _valueDescription : null;
+    private void SetValueDescription(EntitySchemaParameterText? obj) => Model.DescriptionParameterTextID = (_valueDescription = obj)?.ID ?? Guid.Empty;
+
+    protected override WebFormContext<RequestSchemaPropertyDateTimeCreate> CreateContext()
+    {
+        return new(new() { SchemaID = SchemaID });
+    }
+
+}

@@ -7,7 +7,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 
 public class RequestSchemaPropertyList : BaseRequestGet<ResponseSchemaPropertyList>
 {
-    public override string APIEndpoint => "Schema/Parameter";
+    public override string APIEndpoint => "Schema/Property";
 
     public Guid? SchemaID { get; set; }
 
@@ -15,17 +15,9 @@ public class RequestSchemaPropertyList : BaseRequestGet<ResponseSchemaPropertyLi
     [Description(TextConstants.HelpFormSearch)]
     public string? Search { get; set; }
 
-    [DisplayName(TextConstants.LabelFormIsSystemDefined)]
-    [Description(TextConstants.HelpFormIsSystemDefined)]
-    public bool? IsSystemDefined { get; set; }
-
-    [DisplayName(TextConstants.LabelFormIsApprovalRequired)]
-    [Description(TextConstants.HelpFormIsApprovalRequired)]
-    public bool? IsApprovalRequired { get; set; }
-
-    [DisplayName(TextConstants.LabelFormParameterType)]
-    [Description(TextConstants.HelpFormParameterType)]
-    public HashSet<string>? ParameterType { get; set; }
+    [DisplayName(TextConstants.LabelFormPropertyType)]
+    [Description(TextConstants.HelpFormPropertyType)]
+    public HashSet<string>? PropertyType { get; set; }
 
     [DisplayName(TextConstants.LabelFormPageSize)]
     [Description(TextConstants.HelpFormPageSize)]
@@ -41,9 +33,7 @@ public class RequestSchemaPropertyList : BaseRequestGet<ResponseSchemaPropertyLi
         {
             [nameof(SchemaID)] = SchemaID,
             [nameof(Search)] = Search,
-            [nameof(IsSystemDefined)] = IsSystemDefined,
-            [nameof(IsApprovalRequired)] = IsApprovalRequired,
-            [nameof(ParameterType)] = ParameterType,
+            [nameof(PropertyType)] = PropertyType,
             [nameof(PageSize)] = PageSize,
             [nameof(PageNumber)] = PageNumber
         };

@@ -18,9 +18,9 @@ public class TableSchemaPropertyDateTime : TableSchemaProperty
             Name = Name,
             Note = Note,
             Weight = Weight,
-            DescriptionTextParameterID = DescriptionTextParameterID,
+            Type = Type,
             TitleTextParameterID = TitleTextParameterID,
-            Type = Type
+            DescriptionTextParameterID = DescriptionTextParameterID,
         };
     }
 }

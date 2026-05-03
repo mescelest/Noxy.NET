@@ -14,7 +14,7 @@ public class HandlerSchemaList(IUnitOfWorkFactory serviceUoWFactory) : IRequestH
 
         List<EntitySchema> result = await uow.Schema.GetSchemaList(new()
         {
-            Search = request.Search,
+            Search = request.Search?.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_"),
             PageSize = request.PageSize ?? 10,
             PageNumber = request.PageNumber ?? 0,
         });

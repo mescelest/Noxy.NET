@@ -1,0 +1,116 @@
+@inject IState<FeatureSchemaState> State
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new property</DynamicHTMLTag>
+
+    <InputGroupSelect OptionList="_setType" DisplayName="@Presentation.Services.TextService.Get(TextConstants.LabelFormPropertyType)" Description="@Presentation.Services.TextService.Get(TextConstants.HelpFormPropertyType)"
+                      Name="@nameof(_valueType)" @bind-Value="_valueType">
+        <span>@Presentation.Services.TextService.Get(context)</span>
+    </InputGroupSelect>
+
+    @switch (_valueType)
+    {
+        case TextConstants.LabelPropertyBoolean:
+            <FormSchemaPropertyBooleanCreate SchemaID="SchemaID" OnSubmit="SubmitBoolean">
+                @SubmitAction()
+            </FormSchemaPropertyBooleanCreate>
+            break;
+        case TextConstants.LabelPropertyDateTime:
+            <FormSchemaPropertyDateTimeCreate SchemaID="SchemaID" OnSubmit="SubmitDateTime">
+                @SubmitAction()
+            </FormSchemaPropertyDateTimeCreate>
+            break;
+        case TextConstants.LabelPropertyDecimal:
+            <FormSchemaPropertyDecimalCreate SchemaID="SchemaID" OnSubmit="SubmitDecimal">
+                @SubmitAction()
+            </FormSchemaPropertyDecimalCreate>
+            break;
+        case TextConstants.LabelPropertyImage:
+            <FormSchemaPropertyImageCreate SchemaID="SchemaID" OnSubmit="SubmitImage">
+                @SubmitAction()
+            </FormSchemaPropertyImageCreate>
+            break;
+        case TextConstants.LabelPropertyInteger:
+            <FormSchemaPropertyIntegerCreate SchemaID="SchemaID" OnSubmit="SubmitInteger">
+                @SubmitAction()
+            </FormSchemaPropertyIntegerCreate>
+            break;
+        case TextConstants.LabelPropertyString:
+            <FormSchemaPropertyStringCreate SchemaID="SchemaID" OnSubmit="SubmitString">
+                @SubmitAction()
+            </FormSchemaPropertyStringCreate>
+            break;
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid SchemaID { get; set; }
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
+
+    private string _valueType = TextConstants.LabelPropertyBoolean;
+
+    private readonly HashSet<string> _setType =
+    [
+            TextConstants.LabelPropertyBoolean,
+            TextConstants.LabelPropertyDateTime,
+            TextConstants.LabelPropertyDecimal,
+            TextConstants.LabelPropertyImage,
+            TextConstants.LabelPropertyInteger,
+            TextConstants.LabelPropertyString,
+    ];
+
+    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
+
+    private void SubmitBoolean(IWebFormContext<RequestSchemaPropertyBooleanCreate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.AddBooleanAction(ScopeCurrent, value.Model));
+    }
+
+    private void SubmitDateTime(IWebFormContext<RequestSchemaPropertyDateTimeCreate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.AddDateTimeAction(ScopeCurrent, value.Model));
+    }
+
+    private void SubmitDecimal(IWebFormContext<RequestSchemaPropertyDecimalCreate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.AddDecimalAction(ScopeCurrent, value.Model));
+    }
+
+    private void SubmitImage(IWebFormContext<RequestSchemaPropertyImageCreate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.AddImageAction(ScopeCurrent, value.Model));
+    }
+
+    private void SubmitInteger(IWebFormContext<RequestSchemaPropertyIntegerCreate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.AddIntegerAction(ScopeCurrent, value.Model));
+    }
+
+    private void SubmitString(IWebFormContext<RequestSchemaPropertyStringCreate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.AddStringAction(ScopeCurrent, value.Model));
+    }
+
+    private RenderFragment SubmitAction()
+    {
+        return
+                @<div class="action-list">
+                    <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
+                        @Presentation.Services.TextService.Get(TextConstants.ButtonCreate)
+                    </Button>
+                </div>;
+    }
+
+}

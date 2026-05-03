@@ -38,24 +38,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <_ContentIncludedByDefault Remove="Pages\ContextPages\IDPage.razor"/>
-        <_ContentIncludedByDefault Remove="Pages\SchemaPages\IDPage.razor"/>
-        <_ContentIncludedByDefault Remove="Pages\SchemaPages\IndexPage.razor"/>
-    </ItemGroup>
-
-    <ItemGroup>
         <Reference Include="Microsoft.AspNetCore.Hosting.Abstractions">
             <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\10.0.2\Microsoft.AspNetCore.Hosting.Abstractions.dll</HintPath>
         </Reference>
         <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
             <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\10.0.2\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
         </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <AdditionalFiles Include="Components\SchemaContextEntity\SchemaContextEntityContextView.razor"/>
-        <AdditionalFiles Include="Components\SchemaElementEntity\SchemaElementEntityUpdate.razor"/>
-        <AdditionalFiles Include="Components\SchemaElementEntity\SchemaElementEntityView.razor"/>
     </ItemGroup>
 
 </Project>

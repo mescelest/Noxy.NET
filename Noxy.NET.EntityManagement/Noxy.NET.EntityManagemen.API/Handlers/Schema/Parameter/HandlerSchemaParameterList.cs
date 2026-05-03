@@ -15,7 +15,7 @@ public class HandlerSchemaParameterList(IUnitOfWorkFactory serviceUoWFactory) : 
         List<EntitySchemaParameter.Discriminator> result = await uow.Schema.GetSchemaParameterList(new()
         {
             SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
-            Search = request.Search,
+            Search = request.Search?.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_"),
             IsSystemDefined = request.IsSystemDefined,
             IsApprovalRequired = request.IsApprovalRequired,
             ParameterType = request.ParameterType,

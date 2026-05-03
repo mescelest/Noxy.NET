@@ -3,14 +3,13 @@ using System.ComponentModel.DataAnnotations;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
 using Noxy.NET.EntityManagement.Domain.Attributes;
 using Noxy.NET.EntityManagement.Domain.Constants;
-using Noxy.NET.EntityManagement.Domain.Enums;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 
 public class RequestSchemaPropertyDecimalCreate : BaseRequestPost<ResponseSchemaPropertyDecimalCreate>
 {
-    public override string APIEndpoint => "Schema/Parameter/Decimal";
+    public override string APIEndpoint => "Schema/Property/Decimal";
 
     public Guid? SchemaID { get; set; }
 
@@ -30,17 +29,16 @@ public class RequestSchemaPropertyDecimalCreate : BaseRequestPost<ResponseSchema
     public string Note { get; set; } = string.Empty;
 
     [Required]
-    [DisplayName(TextConstants.LabelFormParameterTextType)]
-    [Description(TextConstants.HelpFormParameterTextType)]
-    public ParameterTextTypeEnum Type { get; set; } = ParameterTextTypeEnum.Line;
+    [DisplayName(TextConstants.LabelFormWeight)]
+    [Description(TextConstants.HelpFormWeight)]
+    public int? Weight { get; set; }
 
-    [Required]
-    [DisplayName(TextConstants.LabelFormIsSystemDefined)]
-    [Description(TextConstants.HelpFormIsSystemDefined)]
-    public bool IsSystemDefined { get; set; }
+    [NotEmptyGuid]
+    [DisplayName(TextConstants.LabelFormTitle)]
+    [Description(TextConstants.HelpFormTitle)]
+    public Guid TitleParameterTextID { get; set; }
 
-    [Required]
-    [DisplayName(TextConstants.LabelFormIsApprovalRequired)]
-    [Description(TextConstants.HelpFormIsApprovalRequired)]
-    public bool IsApprovalRequired { get; set; }
+    [DisplayName(TextConstants.LabelFormDescription)]
+    [Description(TextConstants.HelpFormDescription)]
+    public Guid? DescriptionParameterTextID { get; set; }
 }

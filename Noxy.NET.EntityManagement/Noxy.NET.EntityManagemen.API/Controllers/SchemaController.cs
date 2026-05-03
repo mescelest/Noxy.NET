@@ -5,21 +5,25 @@ using Noxy.NET.EntityManagement.API.Commands.Schema.Context;
 using Noxy.NET.EntityManagement.API.Commands.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Element;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Parameter;
+using Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Context;
 using Noxy.NET.EntityManagement.API.Queries.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Element;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Parameter;
+using Noxy.NET.EntityManagement.API.Queries.Schema.Property;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Controllers;
 
@@ -85,6 +89,18 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaParameterFind>> GetSchemaParameterByID(Guid id)
     {
         return await mediator.Send(new QuerySchemaParameterFind(id));
+    }
+
+    [HttpGet("Property")]
+    public async Task<ActionResult<ResponseSchemaPropertyList>> GetSchemaPropertyList([FromQuery] RequestSchemaPropertyList request)
+    {
+        return await mediator.Send(new QuerySchemaPropertyList(request));
+    }
+
+    [HttpGet("Property/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaPropertyFind>> GetSchemaPropertyByID(Guid id)
+    {
+        return await mediator.Send(new QuerySchemaPropertyFind(id));
     }
 
     [HttpPost("")]
@@ -223,5 +239,71 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaParameterDelete>> DeleteSchemaParameter(Guid id)
     {
         return await mediator.Send(new CommandSchemaParameterDelete(id));
+    }
+
+    [HttpPost("Property/Boolean")]
+    public async Task<ActionResult<ResponseSchemaPropertyBooleanCreate>> Create(RequestSchemaPropertyBooleanCreate model)
+    {
+        return await mediator.Send(new CommandSchemaPropertyBooleanCreate(model));
+    }
+
+    [HttpPost("Property/DateTime")]
+    public async Task<ActionResult<ResponseSchemaPropertyDateTimeCreate>> Create(RequestSchemaPropertyDateTimeCreate model)
+    {
+        return await mediator.Send(new CommandSchemaPropertyDateTimeCreate(model));
+    }
+
+    [HttpPost("Property/Decimal")]
+    public async Task<ActionResult<ResponseSchemaPropertyDecimalCreate>> Create(RequestSchemaPropertyDecimalCreate model)
+    {
+        return await mediator.Send(new CommandSchemaPropertyDecimalCreate(model));
+    }
+
+    [HttpPost("Property/Boolean/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaPropertyBooleanUpdate>> Update(Guid id, RequestSchemaPropertyBooleanUpdate model)
+    {
+        return await mediator.Send(new CommandSchemaPropertyBooleanUpdate(id, model));
+    }
+
+    [HttpPost("Property/DateTime/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaPropertyDateTimeUpdate>> Update(Guid id, RequestSchemaPropertyDateTimeUpdate model)
+    {
+        return await mediator.Send(new CommandSchemaPropertyDateTimeUpdate(id, model));
+    }
+
+    [HttpPost("Property/Decimal/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaPropertyDecimalUpdate>> Update(Guid id, RequestSchemaPropertyDecimalUpdate model)
+    {
+        return await mediator.Send(new CommandSchemaPropertyDecimalUpdate(id, model));
+    }
+
+    [HttpPost("Property/Image/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaPropertyImageUpdate>> Update(Guid id, RequestSchemaPropertyImageUpdate model)
+    {
+        return await mediator.Send(new CommandSchemaPropertyImageUpdate(id, model));
+    }
+
+    [HttpPost("Property/Integer/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaPropertyIntegerUpdate>> Update(Guid id, RequestSchemaPropertyIntegerUpdate model)
+    {
+        return await mediator.Send(new CommandSchemaPropertyIntegerUpdate(id, model));
+    }
+
+    [HttpPost("Property/String/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaPropertyStringUpdate>> Update(Guid id, RequestSchemaPropertyStringUpdate model)
+    {
+        return await mediator.Send(new CommandSchemaPropertyStringUpdate(id, model));
+    }
+
+    [HttpPost("Property/{id:guid}/Clone")]
+    public async Task<ActionResult<ResponseSchemaPropertyClone>> CloneSchemaProperty(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaPropertyClone(id));
+    }
+
+    [HttpPost("Property/{id:guid}/Delete")]
+    public async Task<ActionResult<ResponseSchemaPropertyDelete>> DeleteSchemaProperty(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaPropertyDelete(id));
     }
 }

@@ -16,8 +16,8 @@ public class TableSchemaPropertyCollection : TableSchemaProperty
             Name = Name,
             Note = Note,
             Weight = Weight,
-            DescriptionTextParameterID = DescriptionTextParameterID,
             TitleTextParameterID = TitleTextParameterID,
+            DescriptionTextParameterID = DescriptionTextParameterID,
         };
     }
 }

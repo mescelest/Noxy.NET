@@ -68,19 +68,26 @@ public interface ISchemaRepository
 
     #endregion -- SchemaParameter --
 
+    #region -- SchemaProperty --
 
-    Task<EntitySchemaParameterStyle> GetSchemaParameterStyleByID(Guid id);
-    Task<EntitySchemaParameterSystem> GetSchemaParameterSystemByID(Guid id);
-    Task<EntitySchemaParameterText> GetSchemaParameterTextByID(Guid id);
     Task<EntitySchemaProperty.Discriminator> GetSchemaPropertyByID(Guid id);
-    Task<EntitySchemaPropertyBoolean> GetSchemaPropertyBooleanByID(Guid id);
-    Task<EntitySchemaPropertyCollection> GetSchemaPropertyCollectionByID(Guid id);
-    Task<EntitySchemaPropertyDateTime> GetSchemaPropertyDateTimeByID(Guid id);
-    Task<EntitySchemaPropertyDecimal> GetSchemaPropertyDecimalByID(Guid id);
-    Task<EntitySchemaPropertyImage> GetSchemaPropertyImageByID(Guid id);
-    Task<EntitySchemaPropertyInteger> GetSchemaPropertyIntegerByID(Guid id);
-    Task<EntitySchemaPropertyString> GetSchemaPropertyStringByID(Guid id);
-    Task<EntitySchemaPropertyTable> GetSchemaPropertyTableByID(Guid id);
+    Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyList(FilterSchemaPropertyList filter);
+    Task<EntitySchemaPropertyBoolean> CreateSchemaPropertyBoolean(EntitySchemaPropertyBoolean entity);
+    Task<EntitySchemaPropertyDateTime> CreateSchemaPropertyDateTime(EntitySchemaPropertyDateTime entity);
+    Task<EntitySchemaPropertyDecimal> CreateSchemaPropertyDecimal(EntitySchemaPropertyDecimal entity);
+    Task<EntitySchemaPropertyImage> CreateSchemaPropertyImage(EntitySchemaPropertyImage entity);
+    Task<EntitySchemaPropertyInteger> CreateSchemaPropertyInteger(EntitySchemaPropertyInteger entity);
+    Task<EntitySchemaPropertyString> CreateSchemaPropertyString(EntitySchemaPropertyString entity);
+    Task<EntitySchemaPropertyBoolean> UpdateSchemaPropertyBoolean(EntitySchemaPropertyBoolean entity);
+    Task<EntitySchemaPropertyDateTime> UpdateSchemaPropertyDateTime(EntitySchemaPropertyDateTime entity);
+    Task<EntitySchemaPropertyDecimal> UpdateSchemaPropertyDecimal(EntitySchemaPropertyDecimal entity);
+    Task<EntitySchemaPropertyImage> UpdateSchemaPropertyImage(EntitySchemaPropertyImage entity);
+    Task<EntitySchemaPropertyInteger> UpdateSchemaPropertyInteger(EntitySchemaPropertyInteger entity);
+    Task<EntitySchemaPropertyString> UpdateSchemaPropertyString(EntitySchemaPropertyString entity);
+    Task<EntitySchemaProperty.Discriminator> CloneSchemaProperty(Guid id);
+    Task<Guid> DeleteSchemaProperty(Guid id);
+
+    #endregion -- SchemaProperty --
 
     Task<List<EntitySchemaContext>> GetSchemaContextListBySchemaID(Guid id);
     Task<List<EntitySchemaElement>> GetSchemaElementListBySchemaID(Guid id);

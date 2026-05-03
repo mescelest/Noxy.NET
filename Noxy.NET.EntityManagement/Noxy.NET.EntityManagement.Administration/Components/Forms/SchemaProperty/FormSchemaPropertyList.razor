@@ -1,0 +1,49 @@
+@inherits BaseRequestForm<RequestSchemaPropertyList, ResponseSchemaPropertyList>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="RequestSchemaPropertyList" Context="Context" OnSubmit="ForwardSubmit">
+        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Search))" Description="@GetDescription(nameof(Model.Search))"
+                        @bind-Value="Model.Search"/>
+
+        <InputGroupCheckboxSet OptionList="ListTypeKey" DisplayName="@GetDisplayName(nameof(Model.PropertyType))" Description="@GetDescription(nameof(Model.PropertyType))"
+                               @bind-Value:get="GetPropertyType()" @bind-Value:set="SetPropertyType">
+            <span>@TextService.Get(_collectionType[context.Option])</span>
+        </InputGroupCheckboxSet>
+
+        @ChildContent
+    </WebForm>
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    private readonly Dictionary<string, string> _collectionType = new()
+    {
+        { nameof(EntitySchemaPropertyBoolean), TextConstants.LabelPropertyBoolean },
+        { nameof(EntitySchemaPropertyDateTime), TextConstants.LabelPropertyDateTime },
+        { nameof(EntitySchemaPropertyDecimal), TextConstants.LabelPropertyDecimal },
+        { nameof(EntitySchemaPropertyImage), TextConstants.LabelPropertyImage },
+        { nameof(EntitySchemaPropertyInteger), TextConstants.LabelPropertyInteger },
+        { nameof(EntitySchemaPropertyString), TextConstants.LabelPropertyString },
+    };
+
+    private HashSet<string> ListTypeKey => _collectionType.Select(x => x.Key).ToHashSet();
+
+    protected override WebFormContext<RequestSchemaPropertyList> CreateContext()
+    {
+        return new(new() { SchemaID = SchemaID });
+    }
+
+    private HashSet<string> GetPropertyType()
+    {
+        return Model.PropertyType ?? [];
+    }
+
+    private void SetPropertyType(HashSet<string>? value)
+    {
+        Model.PropertyType = value;
+    }
+
+}

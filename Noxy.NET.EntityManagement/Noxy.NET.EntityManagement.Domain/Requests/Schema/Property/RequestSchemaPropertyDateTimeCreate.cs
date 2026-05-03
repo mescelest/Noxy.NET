@@ -10,7 +10,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 
 public class RequestSchemaPropertyDateTimeCreate : BaseRequestPost<ResponseSchemaPropertyDateTimeCreate>
 {
-    public override string APIEndpoint => "Schema/Parameter/DateTime";
+    public override string APIEndpoint => "Schema/Property/DateTime";
 
     public Guid? SchemaID { get; set; }
 
@@ -30,17 +30,21 @@ public class RequestSchemaPropertyDateTimeCreate : BaseRequestPost<ResponseSchem
     public string Note { get; set; } = string.Empty;
 
     [Required]
-    [DisplayName(TextConstants.LabelFormParameterTextType)]
-    [Description(TextConstants.HelpFormParameterTextType)]
-    public ParameterTextTypeEnum Type { get; set; } = ParameterTextTypeEnum.Line;
+    [DisplayName(TextConstants.LabelFormWeight)]
+    [Description(TextConstants.HelpFormWeight)]
+    public int? Weight { get; set; }
 
     [Required]
-    [DisplayName(TextConstants.LabelFormIsSystemDefined)]
-    [Description(TextConstants.HelpFormIsSystemDefined)]
-    public bool IsSystemDefined { get; set; }
+    [DisplayName(TextConstants.LabelFormDateTimeType)]
+    [Description(TextConstants.HelpFormDateTimeType)]
+    public DateTimeTypeEnum Type { get; set; }
 
-    [Required]
-    [DisplayName(TextConstants.LabelFormIsApprovalRequired)]
-    [Description(TextConstants.HelpFormIsApprovalRequired)]
-    public bool IsApprovalRequired { get; set; }
+    [NotEmptyGuid]
+    [DisplayName(TextConstants.LabelFormTitle)]
+    [Description(TextConstants.HelpFormTitle)]
+    public Guid TitleParameterTextID { get; set; }
+
+    [DisplayName(TextConstants.LabelFormDescription)]
+    [Description(TextConstants.HelpFormDescription)]
+    public Guid? DescriptionParameterTextID { get; set; }
 }

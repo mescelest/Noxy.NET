@@ -108,6 +108,13 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.LabelParameterSystem, "System parameter");
         RegisterText(TextConstants.LabelParameterText, "Text parameter");
         RegisterText(TextConstants.LabelParameterTextType, "Text parameter type");
+        RegisterText(TextConstants.LabelPropertyBoolean, "Boolean property");
+        RegisterText(TextConstants.LabelPropertyDateTime, "DateTime property");
+        RegisterText(TextConstants.LabelPropertyDecimal, "Decimal property");
+        RegisterText(TextConstants.LabelPropertyImage, "Image property");
+        RegisterText(TextConstants.LabelPropertyInteger, "Integer property");
+        RegisterText(TextConstants.LabelPropertyString, "String property");
+        RegisterText(TextConstants.LabelPropertyDateTimeType, "DateTime property type");
         RegisterText(TextConstants.LabelCulture, "Culture");
         RegisterText(TextConstants.LabelSchemaIdentifier, "Schema Identifier");
         RegisterText(TextConstants.LabelName, "Name");
@@ -139,9 +146,11 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.LabelFormTitle, "Title");
         RegisterText(TextConstants.LabelFormDescription, "Description");
         RegisterText(TextConstants.LabelFormWeight, "Weight");
+        RegisterText(TextConstants.LabelFormDateTimeType, "DateTime type");
         RegisterText(TextConstants.LabelFormIsSystemDefined, "Is system defined?");
         RegisterText(TextConstants.LabelFormIsApprovalRequired, "Is approval required?");
         RegisterText(TextConstants.LabelFormParameterType, "Parameter type");
+        RegisterText(TextConstants.LabelFormPropertyType, "Property type");
         RegisterText(TextConstants.LabelFormDateEffective, "Effective date");
         RegisterText(TextConstants.LabelFormPageNumber, "Page");
         RegisterText(TextConstants.LabelFormPageSize, "Rows");
@@ -171,9 +180,11 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.HelpFormTitle, "The title used when displaying an entity of this type.");
         RegisterText(TextConstants.HelpFormDescription, "The description used when displaying an entity of this type.");
         RegisterText(TextConstants.HelpFormWeight, "The sorting weight of this entity type when it is being ordered.");
+        RegisterText(TextConstants.HelpFormDateTimeType, "The type of DateTime property.");
         RegisterText(TextConstants.HelpFormIsSystemDefined, "Determines if the entity is system defined and therefore cannot be changed.");
         RegisterText(TextConstants.HelpFormIsApprovalRequired, "Determines if another user must approve a text parameter value before it becomes active.");
         RegisterText(TextConstants.HelpFormParameterType, "The specific type of parameter to be used.");
+        RegisterText(TextConstants.HelpFormPropertyType, "The type of property.");
         RegisterText(TextConstants.HelpFormDateEffective, "The date from which this entity should become active.");
         RegisterText(TextConstants.HelpFormPageNumber, "The current page being shown");
         RegisterText(TextConstants.HelpFormPageSize, "The number of rows shown on each page");
@@ -196,6 +207,9 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.ValueParameterTextTypeLine, "Line");
         RegisterText(TextConstants.ValueParameterTextTypeText, "Text");
         RegisterText(TextConstants.ValueParameterTextTypeRichText, "Rich text");
+        RegisterText(TextConstants.ValuePropertyDateTimeTypeTime, "Time");
+        RegisterText(TextConstants.ValuePropertyDateTimeTypeDate, "Date");
+        RegisterText(TextConstants.ValuePropertyDateTimeTypeDateTime, "Date and time");
         RegisterText(TextConstants.ValueIsSystemDefinedNeutral, "Either");
         RegisterText(TextConstants.ValueIsSystemDefinedYes, "System defined");
         RegisterText(TextConstants.ValueIsSystemDefinedNo, "User defined");

@@ -6,7 +6,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 
 public class RequestSchemaParameterClone : BaseRequestPost<ResponseSchemaParameterClone>
 {
-    public override string APIEndpoint => $"Schema/Element/{ID}/Clone";
+    public override string APIEndpoint => $"Schema/Parameter/{ID}/Clone";
 
     [Required]
     public required Guid ID { get; init; }

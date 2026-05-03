@@ -19,7 +19,7 @@
 
             @if (Schema.TimeActivated == null)
             {
-                <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
+                <Button Status="StatusEnum.Warning" @onclick="ButtonEditClickerHandler">Edit</Button>
                 <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
             }
 
@@ -53,13 +53,13 @@
     }
     else
     {
-        <FormSchemaUpdate Schema="Schema" OnSubmit="OnButtonEditSubmit">
+        <FormSchemaUpdate Schema="Schema" OnSubmit="FormEditSubmitHandler">
             <div class="action-list">
                 <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
                     @TextService.Get(TextConstants.ButtonUpdate)
                 </Button>
 
-                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
                     @TextService.Get(TextConstants.ButtonCancel)
                 </Button>
             </div>
@@ -71,6 +71,8 @@
     <SchemaListContextView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
 
     <SchemaListParameterView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+
+    <SchemaListPropertyView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
 
 </div>
 
@@ -93,18 +95,18 @@
     private string Link => $"/schema/{Schema.ID}";
     private bool IsLoadingUpdate => StateSchema.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Update, out bool value) && value;
 
-    private void OnButtonEditClick()
+    private void ButtonEditClickerHandler()
     {
         _isEditMode = true;
     }
 
-    private void OnButtonEditSubmit(IWebFormContext<RequestSchemaUpdate> value)
+    private void FormEditSubmitHandler(IWebFormContext<RequestSchemaUpdate> value)
     {
         Dispatcher.Dispatch(new FeatureSchemaReducers.UpdateAction(ScopeCurrent, value.Model));
         _isEditMode = false;
     }
 
-    private void OnButtonEditCancel()
+    private void ButtonEditCancelHandler()
     {
         _isEditMode = false;
     }

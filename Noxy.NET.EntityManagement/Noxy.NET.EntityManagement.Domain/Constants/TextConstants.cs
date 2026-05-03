@@ -44,6 +44,13 @@ public static class TextConstants
     public const string LabelParameterSystem = "Label:ParameterSystem";
     public const string LabelParameterText = "Label:ParameterText";
     public const string LabelParameterTextType = "Label:ParameterTextType";
+    public const string LabelPropertyBoolean = "Label:PropertyBoolean";
+    public const string LabelPropertyDateTime = "Label:PropertyDateTime";
+    public const string LabelPropertyDecimal = "Label:PropertyDecimal";
+    public const string LabelPropertyInteger = "Label:PropertyInteger";
+    public const string LabelPropertyImage = "Label:PropertyImage";
+    public const string LabelPropertyString = "Label:PropertyString";
+    public const string LabelPropertyDateTimeType = "Label:PropertyDateTimeType";
     public const string LabelCulture = "Label:Culture";
     public const string LabelSchemaIdentifier = "Label:SchemaIdentifier";
     public const string LabelName = "Label:Name";
@@ -71,9 +78,11 @@ public static class TextConstants
     public const string LabelFormTitle = "Label:Form:Title";
     public const string LabelFormDescription = "Label:Form:Description";
     public const string LabelFormWeight = "Label:Form:Weight";
+    public const string LabelFormDateTimeType = "Label:Form:DateTimeType";
     public const string LabelFormIsSystemDefined = "Label:Form:IsSystemDefined";
     public const string LabelFormIsApprovalRequired = "Label:Form:IsApprovalRequired";
     public const string LabelFormParameterType = "Label:Form:ParameterType";
+    public const string LabelFormPropertyType = "Label:Form:PropertyType";
     public const string LabelFormDateEffective = "Label:Form:DateEffective";
     public const string LabelFormPageSize = "Label:Form:PageSize";
     public const string LabelFormPageNumber = "Label:Form:PageNumber";
@@ -101,13 +110,14 @@ public static class TextConstants
     public const string HelpFormTitle = "Help:Form:Title";
     public const string HelpFormDescription = "Help:Form:Description";
     public const string HelpFormWeight = "Help:Form:Weight";
+    public const string HelpFormDateTimeType = "Help:Form:DateTimeType";
     public const string HelpFormIsSystemDefined = "Help:Form:IsSystemDefined";
     public const string HelpFormIsApprovalRequired = "Help:Form:IsApprovalRequired";
     public const string HelpFormParameterType = "Help:Form:ParameterType";
+    public const string HelpFormPropertyType = "Help:Form:PropertyType";
     public const string HelpFormDateEffective = "Help:Form:DateEffective";
     public const string HelpFormPageSize = "Help:Form:PageSize";
     public const string HelpFormPageNumber = "Help:Form:PageNumber";
-
     public const string HelpFormParameterTextType = "Help:Form:ParameterTextType";
     public const string HelpFormIsUnsigned = "Help:Form:IsUnsigned";
     public const string HelpFormAllowedExtensions = "Help:Form:AllowedExtensions";
@@ -125,6 +135,9 @@ public static class TextConstants
     public const string ValueParameterTextTypeLine = "Value:ParameterTextType:Line";
     public const string ValueParameterTextTypeText = "Value:ParameterTextType:Text";
     public const string ValueParameterTextTypeRichText = "Value:ParameterTextType:RichText";
+    public const string ValuePropertyDateTimeTypeTime = "Value:PropertyDateTimeType:Time";
+    public const string ValuePropertyDateTimeTypeDate = "Value:PropertyDateTimeType:Date";
+    public const string ValuePropertyDateTimeTypeDateTime = "Value:PropertyDateTimeType:DateTime";
     public const string ValueIsSystemDefinedNeutral = "Value:IsSystemDefined:Neutral";
     public const string ValueIsSystemDefinedYes = "Value:IsSystemDefined:Yes";
     public const string ValueIsSystemDefinedNo = "Value:IsSystemDefined:No";

@@ -1,0 +1,43 @@
+@inject IState<FeatureSchemaPropertyState> StateSchemaProperty
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schema properties</DynamicHTMLTag>
+
+    @foreach (EntitySchemaProperty.Discriminator entitySchemaProperty in List)
+    {
+        @ChildContent(entitySchemaProperty.GetValue())
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment<EntitySchemaProperty> ChildContent { get; set; }
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
+
+    [Parameter]
+    public RequestSchemaPropertyList? Request { get; set; }
+    private RequestSchemaPropertyList RequestCurrent => Request ?? new() { SchemaID = SchemaID };
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
+
+    private IReadOnlyList<EntitySchemaProperty.Discriminator> List => StateSchemaProperty.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaProperty.Discriminator>? list) ? list : [];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.ListAction(ScopeCurrent, RequestCurrent));
+    }
+
+}

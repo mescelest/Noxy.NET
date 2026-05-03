@@ -17,7 +17,7 @@
             {
                 <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
                 <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
-                <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
+                <Button Status="StatusEnum.Warning" @onclick="ButtonEditClickerHandler">Edit</Button>
             }
         </ButtonList>
 
@@ -64,17 +64,17 @@
         switch (SchemaParameter)
         {
             case EntitySchemaParameterText parameterText:
-                <FormSchemaParameterTextUpdate SchemaParameter="parameterText" OnSubmit="OnButtonEditTextSubmit">
+                <FormSchemaParameterTextUpdate SchemaParameter="parameterText" OnSubmit="FormEditTextSubmitHandler">
                     @GetSubmitAction()
                 </FormSchemaParameterTextUpdate>
                 break;
             case EntitySchemaParameterStyle parameterStyle:
-                <FormSchemaParameterStyleUpdate SchemaParameter="parameterStyle" OnSubmit="OnButtonEditStyleSubmit">
+                <FormSchemaParameterStyleUpdate SchemaParameter="parameterStyle" OnSubmit="FormEditStyleSubmitHandler">
                     @GetSubmitAction()
                 </FormSchemaParameterStyleUpdate>
                 break;
             case EntitySchemaParameterSystem parameterSystem:
-                <FormSchemaParameterSystemUpdate SchemaParameter="parameterSystem" OnSubmit="OnButtonEditSystemSubmit">
+                <FormSchemaParameterSystemUpdate SchemaParameter="parameterSystem" OnSubmit="FormEditSystemSubmitHandler">
                     @GetSubmitAction()
                 </FormSchemaParameterSystemUpdate>
                 break;
@@ -104,29 +104,29 @@
     private string Link => $"/schema/{Schema.ID}/parameter/{SchemaParameter.ID}";
     private bool IsLoadingUpdate => StateSchemaParameter.Value.TryGetLoading(ScopeCurrent, FeatureSchemaParameterActionKind.Update, out bool value) && value;
 
-    private void OnButtonEditClick()
+    private void ButtonEditClickerHandler()
     {
         _isEditMode = true;
     }
 
-    private void OnButtonEditCancel()
+    private void ButtonEditCancelHandler()
     {
         _isEditMode = false;
     }
 
-    private void OnButtonEditStyleSubmit(IWebFormContext<RequestSchemaParameterStyleUpdate> value)
+    private void FormEditStyleSubmitHandler(IWebFormContext<RequestSchemaParameterStyleUpdate> value)
     {
         Dispatcher.Dispatch(new FeatureSchemaParameterReducers.UpdateStyleAction(ScopeCurrent, value.Model));
         _isEditMode = false;
     }
 
-    private void OnButtonEditSystemSubmit(IWebFormContext<RequestSchemaParameterSystemUpdate> value)
+    private void FormEditSystemSubmitHandler(IWebFormContext<RequestSchemaParameterSystemUpdate> value)
     {
         Dispatcher.Dispatch(new FeatureSchemaParameterReducers.UpdateSystemAction(ScopeCurrent, value.Model));
         _isEditMode = false;
     }
 
-    private void OnButtonEditTextSubmit(IWebFormContext<RequestSchemaParameterTextUpdate> value)
+    private void FormEditTextSubmitHandler(IWebFormContext<RequestSchemaParameterTextUpdate> value)
     {
         Dispatcher.Dispatch(new FeatureSchemaParameterReducers.UpdateTextAction(ScopeCurrent, value.Model));
         _isEditMode = false;
@@ -150,7 +150,7 @@
                     @TextService.Get(TextConstants.ButtonUpdate, GetComponentName())
                 </Button>
 
-                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
                     @TextService.Get(TextConstants.ButtonCancel, GetComponentName())
                 </Button>
             </div>;

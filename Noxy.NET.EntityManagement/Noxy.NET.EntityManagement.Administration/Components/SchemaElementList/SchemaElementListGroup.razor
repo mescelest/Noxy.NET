@@ -17,7 +17,7 @@
             {
                 <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
                 <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
-                <Button Status="StatusEnum.Warning" @onclick="OnButtonEditClick">Edit</Button>
+                <Button Status="StatusEnum.Warning" @onclick="ButtonEditClickerHandler">Edit</Button>
             }
         </ButtonList>
 
@@ -56,13 +56,13 @@
     }
     else
     {
-        <FormSchemaElementUpdate SchemaElement="SchemaElement" OnSubmit="OnButtonEditSubmit">
+        <FormSchemaElementUpdate SchemaElement="SchemaElement" OnSubmit="FormEditSubmitHandler">
             <div class="action-list">
                 <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
                     @TextService.Get(TextConstants.ButtonUpdate)
                 </Button>
 
-                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="OnButtonEditCancel">
+                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
                     @TextService.Get(TextConstants.ButtonCancel)
                 </Button>
             </div>
@@ -93,18 +93,18 @@
     private string Link => $"/schema/{Schema.ID}/element/{SchemaElement.ID}";
     private bool IsLoadingUpdate => StateSchemaElement.Value.TryGetLoading(ScopeCurrent, FeatureSchemaElementActionKind.Update, out bool value) && value;
 
-    private void OnButtonEditClick()
+    private void ButtonEditClickerHandler()
     {
         _isEditMode = true;
     }
 
-    private void OnButtonEditSubmit(IWebFormContext<RequestSchemaElementUpdate> value)
+    private void FormEditSubmitHandler(IWebFormContext<RequestSchemaElementUpdate> value)
     {
         Dispatcher.Dispatch(new FeatureSchemaElementReducers.UpdateAction(ScopeCurrent, value.Model));
         _isEditMode = false;
     }
 
-    private void OnButtonEditCancel()
+    private void ButtonEditCancelHandler()
     {
         _isEditMode = false;
     }

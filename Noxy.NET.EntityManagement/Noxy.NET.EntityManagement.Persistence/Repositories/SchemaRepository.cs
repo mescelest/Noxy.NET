@@ -4,13 +4,10 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Models;
-using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
-using Noxy.NET.EntityManagement.Domain.Interfaces;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
-using Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
@@ -75,32 +72,50 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         TableSchema entitySchemaClone = entitySchema.Clone();
         await Context.Schema.AddAsync(entitySchemaClone);
 
-        List<TableSchemaElement> listElement = await Context.SchemaElement.Where(x => x.SchemaID == id).ToListAsync();
+        List<TableSchemaElement> listElement = await Context.SchemaElement.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         List<TableSchemaElement> listElementClone = [.. listElement.Select(x => x.Clone(entitySchemaClone.ID))];
         await Context.SchemaElement.AddRangeAsync(listElementClone);
 
-        List<TableSchemaContext> listContext = await Context.SchemaContext.Where(x => x.SchemaID == id).ToListAsync();
+        List<TableSchemaContext> listContext = await Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         List<TableSchemaContext> listContextClone = [.. listContext.Select(x => x.Clone(entitySchemaClone.ID))];
         await Context.SchemaContext.AddRangeAsync(listContextClone);
 
-        List<TableSchemaParameter> listParameter = await Context.SchemaParameter.Where(x => x.SchemaID == id).ToListAsync();
+        List<TableSchemaParameter> listParameter = await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         List<TableSchemaParameter> listParameterClone = [.. listParameter.Select(x => x.Clone(entitySchemaClone.ID))];
         await Context.SchemaParameter.AddRangeAsync(listParameterClone);
 
-        List<TableSchemaProperty> listProperty = await Context.SchemaProperty.Where(x => x.SchemaID == id).ToListAsync();
+        List<TableSchemaProperty> listProperty = await Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         List<TableSchemaProperty> listPropertyClone = [.. listProperty.Select(x => x.Clone(entitySchemaClone.ID))];
         await Context.SchemaProperty.AddRangeAsync(listPropertyClone);
 
         Dictionary<Guid, Guid> mapElement = listElement.Zip(listElementClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
         Dictionary<Guid, Guid> mapContext = listContext.Zip(listContextClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
-        // Dictionary<Guid, Guid> mapParameter = listParameter.Zip(listParameterClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
+        Dictionary<Guid, Guid> mapParameter = listParameter.Zip(listParameterClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
         Dictionary<Guid, Guid> mapProperty = listProperty.Zip(listPropertyClone, (old, clone) => (Old: old.ID, Clone: clone.ID)).ToDictionary(x => x.Old, x => x.Clone);
 
-        List<TableSchemaElementHasProperty> listJunctionElement = await Context.SchemaElementHasProperty.Where(x => mapElement.Keys.Contains(x.EntityID)).ToListAsync();
+        foreach (TableSchemaElement element in listElementClone)
+        {
+            element.TitleTextParameterID = GetClonedParameterID(mapParameter, element.TitleTextParameterID);
+            if (element.DescriptionTextParameterID is not null) element.DescriptionTextParameterID = mapParameter[element.DescriptionTextParameterID.Value];
+        }
+
+        foreach (TableSchemaContext context in listContextClone)
+        {
+            context.TitleTextParameterID = GetClonedParameterID(mapParameter, context.TitleTextParameterID);
+            if (context.DescriptionTextParameterID is not null) context.DescriptionTextParameterID = mapParameter[context.DescriptionTextParameterID.Value];
+        }
+
+        foreach (TableSchemaProperty property in listPropertyClone)
+        {
+            property.TitleTextParameterID = GetClonedParameterID(mapParameter, property.TitleTextParameterID);
+            if (property.DescriptionTextParameterID is not null) property.DescriptionTextParameterID = mapParameter[property.DescriptionTextParameterID.Value];
+        }
+
+        List<TableSchemaElementHasProperty> listJunctionElement = await Context.SchemaElementHasProperty.AsNoTracking().Where(x => mapElement.Keys.Contains(x.EntityID)).ToListAsync();
         await Context.SchemaElementHasProperty.AddRangeAsync(listJunctionElement.Select(j => j.Clone(mapElement[j.EntityID], mapProperty[j.RelationID])));
 
-        List<TableSchemaContextHasElement> listJunctionContext = await Context.SchemaContextHasElement.Where(x => mapContext.Keys.Contains(x.EntityID)).ToListAsync();
-        await Context.SchemaContextHasElement.AddRangeAsync(listJunctionContext.Select(j => j.Clone(mapElement[j.EntityID], mapProperty[j.RelationID])));
+        List<TableSchemaContextHasElement> listJunctionContext = await Context.SchemaContextHasElement.AsNoTracking().Where(x => mapContext.Keys.Contains(x.EntityID)).ToListAsync();
+        await Context.SchemaContextHasElement.AddRangeAsync(listJunctionContext.Select(j => j.Clone(mapContext[j.EntityID], mapElement[j.RelationID])));
 
         return MapperT2E.Map(entitySchemaClone);
     }
@@ -145,16 +160,11 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         TableSchema entity = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == id);
         if (entity.IsActive) throw new InvalidOperationException("Cannot activate schema that is already active.");
 
+        await Context.Schema.Where(x => x.ID != id && x.IsActive).ExecuteUpdateAsync(setters => setters.SetProperty(x => x.IsActive, false));
+
         entity.IsActive = true;
         entity.TimeActivated = DateTime.UtcNow;
         Context.Schema.Update(entity);
-
-        List<TableSchema> list = await Context.Schema.AsNoTracking().Where(x => x.ID != id && x.IsActive).ToListAsync();
-        foreach (TableSchema item in list)
-        {
-            item.IsActive = false;
-            Context.Schema.Update(item);
-        }
 
         return MapperT2E.Map(entity);
     }
@@ -192,7 +202,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<EntitySchemaElement> CreateSchemaElement(EntitySchemaElement entity)
     {
-        await UpdateOrder<TableSchemaElement, EntitySchemaElement>(entity);
+        await ThrowIfSchemaActivated(entity.SchemaID);
         EntityEntry<TableSchemaElement> result = await Context.SchemaElement.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
@@ -200,11 +210,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchemaElement> UpdateSchemaElement(EntitySchemaElement entity)
     {
         TableSchemaElement result = await Context.SchemaElement.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
-        if (entity.SchemaIdentifier != result.SchemaIdentifier)
-        {
-            TableSchemaElement? valid = await Context.SchemaElement.AsNoTracking().FirstOrDefaultAsync(x => x.SchemaIdentifier == entity.SchemaIdentifier);
-            if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
-        }
+        await ThrowIfSchemaActivated(result.SchemaID);
 
         result.SchemaIdentifier = entity.SchemaIdentifier;
         result.Name = entity.Name;
@@ -221,6 +227,8 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchemaElement> CloneSchemaElement(Guid id)
     {
         TableSchemaElement entity = await Context.SchemaElement.AsNoTracking().FirstAsync(x => x.ID == id);
+        await ThrowIfSchemaActivated(entity.SchemaID);
+
         entity = entity.Clone();
         entity.SchemaIdentifier = Guid.NewGuid().ToString("N");
         await Context.SchemaElement.AddAsync(entity);
@@ -231,8 +239,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<Guid> DeleteSchemaElement(Guid id)
     {
         TableSchemaElement entity = await Context.SchemaElement.AsNoTracking().FirstAsync(x => x.ID == id);
-        TableSchema schema = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entity.SchemaID);
-        if (schema.TimeActivated != null) throw new InvalidOperationException("Cannot delete schema element from schema that has been activated.");
+        await ThrowIfSchemaActivated(entity.SchemaID);
 
         Context.SchemaElement.Remove(entity);
 
@@ -272,6 +279,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<EntitySchemaContext> CreateSchemaContext(EntitySchemaContext entity)
     {
+        await ThrowIfSchemaActivated(entity.SchemaID);
         EntityEntry<TableSchemaContext> result = await Context.SchemaContext.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
@@ -279,11 +287,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchemaContext> UpdateSchemaContext(EntitySchemaContext entity)
     {
         TableSchemaContext result = await Context.SchemaContext.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
-        if (entity.SchemaIdentifier != result.SchemaIdentifier)
-        {
-            TableSchemaContext? valid = await Context.SchemaContext.AsNoTracking().FirstOrDefaultAsync(x => x.SchemaIdentifier == entity.SchemaIdentifier);
-            if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
-        }
+        await ThrowIfSchemaActivated(result.SchemaID);
 
         result.SchemaIdentifier = entity.SchemaIdentifier;
         result.Name = entity.Name;
@@ -299,6 +303,8 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchemaContext> CloneSchemaContext(Guid id)
     {
         TableSchemaContext entity = await Context.SchemaContext.AsNoTracking().FirstAsync(x => x.ID == id);
+        await ThrowIfSchemaActivated(entity.SchemaID);
+
         entity = entity.Clone();
         entity.SchemaIdentifier = Guid.NewGuid().ToString("N");
         await Context.SchemaContext.AddAsync(entity);
@@ -309,8 +315,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<Guid> DeleteSchemaContext(Guid id)
     {
         TableSchemaContext entity = await Context.SchemaContext.AsNoTracking().FirstAsync(x => x.ID == id);
-        TableSchema schema = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entity.SchemaID);
-        if (schema.TimeActivated != null) throw new InvalidOperationException("Cannot delete schema element from schema that has been activated.");
+        await ThrowIfSchemaActivated(entity.SchemaID);
 
         Context.SchemaContext.Remove(entity);
 
@@ -349,8 +354,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         TableSchemaElement entityElement = await Context.SchemaElement.AsNoTracking().FirstAsync(x => x.ID == entity.RelationID);
         if (entityContext.SchemaID != entityElement.SchemaID) throw new InvalidOperationException("SchemaElement and SchemaContext must be in same schema.");
 
-        TableSchema entitySchema = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entityContext.SchemaID);
-        if (entitySchema.TimeActivated != null) throw new InvalidOperationException("Cannot add element to schema context that has been activated.");
+        await ThrowIfSchemaActivated(entityContext.SchemaID);
 
         EntityEntry<TableSchemaContextHasElement> result = await Context.SchemaContextHasElement.AddAsync(MapperE2T.Map(entity));
 
@@ -411,18 +415,21 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<EntitySchemaParameterStyle> CreateSchemaParameterStyle(EntitySchemaParameterStyle entity)
     {
+        await ThrowIfSchemaActivated(entity.SchemaID);
         EntityEntry<TableSchemaParameterStyle> result = await Context.SchemaParameterStyle.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
 
     public async Task<EntitySchemaParameterSystem> CreateSchemaParameterSystem(EntitySchemaParameterSystem entity)
     {
+        await ThrowIfSchemaActivated(entity.SchemaID);
         EntityEntry<TableSchemaParameterSystem> result = await Context.SchemaParameterSystem.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
 
     public async Task<EntitySchemaParameterText> CreateSchemaParameterText(EntitySchemaParameterText entity)
     {
+        await ThrowIfSchemaActivated(entity.SchemaID);
         EntityEntry<TableSchemaParameterText> result = await Context.SchemaParameterText.AddAsync(MapperE2T.Map(entity));
         return MapperT2E.Map(result.Entity);
     }
@@ -430,18 +437,9 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchemaParameterStyle> UpdateSchemaParameterStyle(EntitySchemaParameterStyle entity)
     {
         TableSchemaParameterStyle result = await Context.SchemaParameterStyle.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
-        if (entity.SchemaIdentifier != result.SchemaIdentifier)
-        {
-            TableSchemaParameterStyle? valid = await Context.SchemaParameterStyle.AsNoTracking().FirstOrDefaultAsync(x => x.SchemaIdentifier == entity.SchemaIdentifier);
-            if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
-        }
+        await ThrowIfSchemaActivated(result.SchemaID);
 
-        result.SchemaIdentifier = entity.SchemaIdentifier;
-        result.Name = entity.Name;
-        result.Note = entity.Note;
-        result.IsApprovalRequired = entity.IsApprovalRequired;
-        result.IsSystemDefined = entity.IsSystemDefined;
-        result.TimeUpdated = DateTime.UtcNow;
+        AssignSchemaParameter(result, entity);
         Context.SchemaParameter.Update(result);
 
         return MapperT2E.Map(result);
@@ -450,18 +448,9 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchemaParameterSystem> UpdateSchemaParameterSystem(EntitySchemaParameterSystem entity)
     {
         TableSchemaParameterSystem result = await Context.SchemaParameterSystem.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
-        if (entity.SchemaIdentifier != result.SchemaIdentifier)
-        {
-            TableSchemaParameterSystem? valid = await Context.SchemaParameterSystem.AsNoTracking().FirstOrDefaultAsync(x => x.SchemaIdentifier == entity.SchemaIdentifier);
-            if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
-        }
+        await ThrowIfSchemaActivated(result.SchemaID);
 
-        result.SchemaIdentifier = entity.SchemaIdentifier;
-        result.Name = entity.Name;
-        result.Note = entity.Note;
-        result.IsApprovalRequired = entity.IsApprovalRequired;
-        result.IsSystemDefined = entity.IsSystemDefined;
-        result.TimeUpdated = DateTime.UtcNow;
+        AssignSchemaParameter(result, entity);
         Context.SchemaParameter.Update(result);
 
         return MapperT2E.Map(result);
@@ -470,19 +459,10 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchemaParameterText> UpdateSchemaParameterText(EntitySchemaParameterText entity)
     {
         TableSchemaParameterText result = await Context.SchemaParameterText.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
-        if (entity.SchemaIdentifier != result.SchemaIdentifier)
-        {
-            TableSchemaParameterText? valid = await Context.SchemaParameterText.AsNoTracking().FirstOrDefaultAsync(x => x.SchemaIdentifier == entity.SchemaIdentifier);
-            if (valid != null) throw new InvalidOperationException("SchemaIdentifier for element already exists.");
-        }
+        await ThrowIfSchemaActivated(result.SchemaID);
 
-        result.SchemaIdentifier = entity.SchemaIdentifier;
-        result.Name = entity.Name;
-        result.Note = entity.Note;
+        AssignSchemaParameter(result, entity);
         result.Type = entity.Type;
-        result.IsApprovalRequired = entity.IsApprovalRequired;
-        result.IsSystemDefined = entity.IsSystemDefined;
-        result.TimeUpdated = DateTime.UtcNow;
         Context.SchemaParameter.Update(result);
 
         return MapperT2E.Map(result);
@@ -491,6 +471,8 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchemaParameter.Discriminator> CloneSchemaParameter(Guid id)
     {
         TableSchemaParameter entity = await Context.SchemaParameter.AsNoTracking().FirstAsync(x => x.ID == id);
+        await ThrowIfSchemaActivated(entity.SchemaID);
+
         entity = entity.Clone();
         entity.SchemaIdentifier = Guid.NewGuid().ToString("N");
         await Context.SchemaParameter.AddAsync(entity);
@@ -501,8 +483,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<Guid> DeleteSchemaParameter(Guid id)
     {
         TableSchemaParameter entity = await Context.SchemaParameter.AsNoTracking().FirstAsync(x => x.ID == id);
-        TableSchema schema = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entity.SchemaID);
-        if (schema.TimeActivated != null) throw new InvalidOperationException("Cannot delete schema element from schema that has been activated.");
+        await ThrowIfSchemaActivated(entity.SchemaID);
 
         Context.SchemaParameter.Remove(entity);
 
@@ -511,22 +492,173 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     #endregion -- SchemaParameter --
 
-    public async Task<EntitySchemaParameterStyle> GetSchemaParameterStyleByID(Guid id) => await GetEntityByID<TableSchemaParameterStyle, EntitySchemaParameterStyle>(id, MapperT2E.Map);
-    public async Task<EntitySchemaParameterSystem> GetSchemaParameterSystemByID(Guid id) => await GetEntityByID<TableSchemaParameterSystem, EntitySchemaParameterSystem>(id, MapperT2E.Map);
-    public async Task<EntitySchemaParameterText> GetSchemaParameterTextByID(Guid id) => await GetEntityByID<TableSchemaParameterText, EntitySchemaParameterText>(id, MapperT2E.Map);
+    #region -- SchemaProperty --
 
     public async Task<EntitySchemaProperty.Discriminator> GetSchemaPropertyByID(Guid id)
     {
-        return MapperT2E.Map(await Context.SchemaProperty.AsNoTracking().SingleAsync(x => x.ID == id));
+        TableSchemaProperty result = await Context.SchemaProperty
+            .AsNoTracking()
+            .SingleAsync(x => x.ID == id);
+        return MapperT2E.Map(result);
     }
 
-    public async Task<EntitySchemaPropertyBoolean> GetSchemaPropertyBooleanByID(Guid id) => await GetEntityByID<TableSchemaPropertyBoolean, EntitySchemaPropertyBoolean>(id, MapperT2E.Map);
-    public async Task<EntitySchemaPropertyCollection> GetSchemaPropertyCollectionByID(Guid id) => await GetEntityByID<TableSchemaPropertyCollection, EntitySchemaPropertyCollection>(id, MapperT2E.Map);
-    public async Task<EntitySchemaPropertyDateTime> GetSchemaPropertyDateTimeByID(Guid id) => await GetEntityByID<TableSchemaPropertyDateTime, EntitySchemaPropertyDateTime>(id, MapperT2E.Map);
-    public async Task<EntitySchemaPropertyDecimal> GetSchemaPropertyDecimalByID(Guid id) => await GetEntityByID<TableSchemaPropertyDecimal, EntitySchemaPropertyDecimal>(id, MapperT2E.Map);
-    public async Task<EntitySchemaPropertyImage> GetSchemaPropertyImageByID(Guid id) => await GetEntityByID<TableSchemaPropertyImage, EntitySchemaPropertyImage>(id, MapperT2E.Map);
-    public async Task<EntitySchemaPropertyInteger> GetSchemaPropertyIntegerByID(Guid id) => await GetEntityByID<TableSchemaPropertyInteger, EntitySchemaPropertyInteger>(id, MapperT2E.Map);
-    public async Task<EntitySchemaPropertyString> GetSchemaPropertyStringByID(Guid id) => await GetEntityByID<TableSchemaPropertyString, EntitySchemaPropertyString>(id, MapperT2E.Map);
+    public async Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyList(FilterSchemaPropertyList filter)
+    {
+        IQueryable<TableSchemaProperty> query = Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
+
+        if (filter.PropertyType is { Count: > 0 })
+        {
+            List<Type> types = [.. filter.PropertyType.Select(key => TableSchemaProperty.TypeMap[key])];
+
+            ParameterExpression param = Expression.Parameter(typeof(TableSchemaProperty), "x");
+            Expression typeChecks = types.Select(Expression (t) => Expression.TypeIs(param, t)).Aggregate(Expression.OrElse);
+            Expression<Func<TableSchemaProperty, bool>> lambda = Expression.Lambda<Func<TableSchemaProperty, bool>>(typeChecks, param);
+            query = query.Where(lambda);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+
+        List<TableSchemaProperty> result = await query
+            .OrderBy(x => x.Name)
+            .Skip(filter.PageNumber * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return [.. result.Select(MapperT2E.Map)];
+    }
+
+    public async Task<EntitySchemaPropertyBoolean> CreateSchemaPropertyBoolean(EntitySchemaPropertyBoolean entity)
+    {
+        await ThrowIfSchemaActivated(entity.SchemaID);
+        EntityEntry<TableSchemaPropertyBoolean> result = await Context.SchemaPropertyBoolean.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaPropertyDateTime> CreateSchemaPropertyDateTime(EntitySchemaPropertyDateTime entity)
+    {
+        await ThrowIfSchemaActivated(entity.SchemaID);
+        EntityEntry<TableSchemaPropertyDateTime> result = await Context.SchemaPropertyDateTime.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaPropertyDecimal> CreateSchemaPropertyDecimal(EntitySchemaPropertyDecimal entity)
+    {
+        await ThrowIfSchemaActivated(entity.SchemaID);
+        EntityEntry<TableSchemaPropertyDecimal> result = await Context.SchemaPropertyDecimal.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaPropertyImage> CreateSchemaPropertyImage(EntitySchemaPropertyImage entity)
+    {
+        await ThrowIfSchemaActivated(entity.SchemaID);
+        EntityEntry<TableSchemaPropertyImage> result = await Context.SchemaPropertyImage.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaPropertyInteger> CreateSchemaPropertyInteger(EntitySchemaPropertyInteger entity)
+    {
+        await ThrowIfSchemaActivated(entity.SchemaID);
+        EntityEntry<TableSchemaPropertyInteger> result = await Context.SchemaPropertyInteger.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaPropertyString> CreateSchemaPropertyString(EntitySchemaPropertyString entity)
+    {
+        await ThrowIfSchemaActivated(entity.SchemaID);
+        EntityEntry<TableSchemaPropertyString> result = await Context.SchemaPropertyString.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
+    }
+
+    public async Task<EntitySchemaPropertyBoolean> UpdateSchemaPropertyBoolean(EntitySchemaPropertyBoolean entity)
+    {
+        TableSchemaPropertyBoolean result = await Context.SchemaPropertyBoolean.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        await ThrowIfSchemaActivated(result.SchemaID);
+
+        AssignSchemaProperty(result, entity);
+        Context.SchemaProperty.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaPropertyDateTime> UpdateSchemaPropertyDateTime(EntitySchemaPropertyDateTime entity)
+    {
+        TableSchemaPropertyDateTime result = await Context.SchemaPropertyDateTime.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        await ThrowIfSchemaActivated(result.SchemaID);
+
+        AssignSchemaProperty(result, entity);
+        result.Type = entity.Type;
+        Context.SchemaProperty.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaPropertyDecimal> UpdateSchemaPropertyDecimal(EntitySchemaPropertyDecimal entity)
+    {
+        TableSchemaPropertyDecimal result = await Context.SchemaPropertyDecimal.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        await ThrowIfSchemaActivated(result.SchemaID);
+
+        AssignSchemaProperty(result, entity);
+        Context.SchemaProperty.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaPropertyImage> UpdateSchemaPropertyImage(EntitySchemaPropertyImage entity)
+    {
+        TableSchemaPropertyImage result = await Context.SchemaPropertyImage.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        await ThrowIfSchemaActivated(result.SchemaID);
+
+        AssignSchemaProperty(result, entity);
+        Context.SchemaProperty.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaPropertyInteger> UpdateSchemaPropertyInteger(EntitySchemaPropertyInteger entity)
+    {
+        TableSchemaPropertyInteger result = await Context.SchemaPropertyInteger.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        await ThrowIfSchemaActivated(result.SchemaID);
+
+        AssignSchemaProperty(result, entity);
+        Context.SchemaProperty.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaPropertyString> UpdateSchemaPropertyString(EntitySchemaPropertyString entity)
+    {
+        TableSchemaPropertyString result = await Context.SchemaPropertyString.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        await ThrowIfSchemaActivated(result.SchemaID);
+
+        AssignSchemaProperty(result, entity);
+        Context.SchemaProperty.Update(result);
+
+        return MapperT2E.Map(result);
+    }
+
+    public async Task<EntitySchemaProperty.Discriminator> CloneSchemaProperty(Guid id)
+    {
+        TableSchemaProperty entity = await Context.SchemaProperty.AsNoTracking().FirstAsync(x => x.ID == id);
+        await ThrowIfSchemaActivated(entity.SchemaID);
+
+        entity = entity.Clone();
+        entity.SchemaIdentifier = Guid.NewGuid().ToString("N");
+        await Context.SchemaProperty.AddAsync(entity);
+
+        return MapperT2E.Map(entity);
+    }
+
+    public async Task<Guid> DeleteSchemaProperty(Guid id)
+    {
+        TableSchemaProperty entity = await Context.SchemaProperty.AsNoTracking().FirstAsync(x => x.ID == id);
+        await ThrowIfSchemaActivated(entity.SchemaID);
+
+        Context.SchemaProperty.Remove(entity);
+
+        return entity.ID;
+    }
+
+    #endregion -- SchemaProperty --
 
     public async Task<EntitySchemaPropertyTable> GetSchemaPropertyTableByID(Guid id)
     {
@@ -551,7 +683,6 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return [.. result.Select(MapperT2E.Map)];
     }
 
-
     public async Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id)
     {
         List<TableSchemaProperty> result = await Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
@@ -570,18 +701,40 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return [.. result.Select(MapperT2E.Map)];
     }
 
-    #region -- Private methods --
-
-    private async Task<TEntity> GetEntityByID<TTable, TEntity>(Guid id, Func<TTable, TEntity> mapT2E) where TTable : BaseTableSchema where TEntity : BaseEntitySchema
+    private static Guid GetClonedParameterID(IReadOnlyDictionary<Guid, Guid> mapParameter, Guid parameterId)
     {
-        return mapT2E(await Context.Set<TTable>().AsNoTracking().SingleAsync(x => x.ID == id));
+        return mapParameter.TryGetValue(parameterId, out Guid clonedParameterId)
+            ? clonedParameterId
+            : throw new InvalidOperationException($"Unable to clone schema because parameter '{parameterId}' was not found in the cloned parameter map.");
     }
 
-    private async Task UpdateOrder<TTable, TEntity>(TEntity entity) where TTable : BaseTableSchema where TEntity : BaseEntitySchema, ISchemaOrdering
+    private async Task ThrowIfSchemaActivated(Guid schemaId)
     {
-        if (entity.Weight != BaseEntity.DefaultWeight) return;
-        entity.Weight = await Context.Set<TTable>().CountAsync(x => x.SchemaID == entity.SchemaID);
+        bool isActivated = await Context.Schema
+            .AsNoTracking()
+            .AnyAsync(x => x.ID == schemaId && x.TimeActivated != null);
+
+        if (isActivated) throw new InvalidOperationException("Cannot delete from a schema that has been activated.");
     }
 
-    #endregion
+    private static void AssignSchemaParameter(TableSchemaParameter table, EntitySchemaParameter entity)
+    {
+        table.SchemaIdentifier = entity.SchemaIdentifier;
+        table.Name = entity.Name;
+        table.Note = entity.Note;
+        table.IsApprovalRequired = entity.IsApprovalRequired;
+        table.IsSystemDefined = entity.IsSystemDefined;
+        table.TimeUpdated = DateTime.UtcNow;
+    }
+
+    private static void AssignSchemaProperty(TableSchemaProperty table, EntitySchemaProperty entity)
+    {
+        table.SchemaIdentifier = entity.SchemaIdentifier;
+        table.Name = entity.Name;
+        table.Note = entity.Note;
+        table.Weight = entity.Weight;
+        table.TitleTextParameterID = entity.TitleTextParameterID;
+        table.DescriptionTextParameterID = entity.DescriptionTextParameterID;
+        table.TimeUpdated = DateTime.UtcNow;
+    }
 }
