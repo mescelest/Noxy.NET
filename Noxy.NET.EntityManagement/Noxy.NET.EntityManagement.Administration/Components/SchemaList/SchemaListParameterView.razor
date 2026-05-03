@@ -14,29 +14,24 @@
             </div>
         </Header>
         <Content>
-            <div class="grid">
-                <div class="grid-header">
+            <Table class="grid" List="List">
+                <TableHeader>
                     <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier)</strong>
                     <strong>@TextService.Get(TextConstants.LabelName)</strong>
                     <strong>@TextService.Get(TextConstants.LabelNote)</strong>
-                    <strong>@TextService.Get(TextConstants.LabelIsApprovalRequired)</strong>
-                    <strong>@TextService.Get(TextConstants.LabelIsSystemDefined)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelTitle)</strong>
+                    <strong>@TextService.Get(TextConstants.LabelDescription)</strong>
                     <strong>@TextService.Get(TextConstants.LabelTimeCreated)</strong>
-                </div>
-                @foreach (EntitySchemaParameter.Discriminator item in List)
-                {
-                    EntitySchemaParameter parameter = @item.GetValue();
-
-                    <div class="grid-row">
-                        <span>@parameter.SchemaIdentifier</span>
-                        <span>@parameter.Name</span>
-                        <span>@parameter.Note</span>
-                        <span>@parameter.IsApprovalRequired</span>
-                        <span>@parameter.IsSystemDefined</span>
-                        <span>@parameter.TimeCreated</span>
-                    </div>
-                }
-            </div>
+                </TableHeader>
+                <TableRow>
+                    <span>@context.SchemaIdentifier</span>
+                    <span>@context.Name</span>
+                    <span>@context.Note</span>
+                    <span>@(context.IsApprovalRequired ? TextService.Get(TextConstants.ValueOptionYes) : TextService.Get(TextConstants.ValueOptionNo))</span>
+                    <span>@(context.IsSystemDefined ? TextService.Get(TextConstants.ValueOptionYes) : TextService.Get(TextConstants.ValueOptionNo))</span>
+                    <span>@context.TimeCreated</span>
+                </TableRow>
+            </Table>
         </Content>
     </Collapsible>
 </div>
@@ -59,7 +54,7 @@
     private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
     private string Link => $"/schema/{SchemaID}/parameter";
     private bool IsLoading => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaParameterActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchemaParameter.Discriminator> List => StateContext.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? value) ? value : [];
+    private IReadOnlyList<EntitySchemaParameter> List => StateContext.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? value) ? [..value.Select(x => x.GetValue())] : [];
 
     private void SetCollapsed(bool value)
     {

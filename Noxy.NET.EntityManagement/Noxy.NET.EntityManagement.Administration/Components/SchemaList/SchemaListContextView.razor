@@ -14,27 +14,24 @@
             </div>
         </Header>
         <Content>
-            <div class="grid">
-                <div class="grid-header">
+            <Table class="grid" List="List">
+                <TableHeader>
                     <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier)</strong>
                     <strong>@TextService.Get(TextConstants.LabelName)</strong>
                     <strong>@TextService.Get(TextConstants.LabelNote)</strong>
                     <strong>@TextService.Get(TextConstants.LabelTitle)</strong>
                     <strong>@TextService.Get(TextConstants.LabelDescription)</strong>
                     <strong>@TextService.Get(TextConstants.LabelTimeCreated)</strong>
-                </div>
-                @foreach (EntitySchemaContext item in List)
-                {
-                    <div class="grid-row">
-                        <span>@item.SchemaIdentifier</span>
-                        <span>@item.Name</span>
-                        <span>@item.Note</span>
-                        <span>@item.TitleTextParameter?.Name</span>
-                        <span>@item.DescriptionTextParameter?.Name</span>
-                        <span>@item.TimeCreated</span>
-                    </div>
-                }
-            </div>
+                </TableHeader>
+                <TableRow>
+                    <span>@context.SchemaIdentifier</span>
+                    <span>@context.Name</span>
+                    <span>@context.Note</span>
+                    <span>@context.TitleTextParameter?.Name</span>
+                    <span>@context.DescriptionTextParameter?.Name</span>
+                    <span>@context.TimeCreated</span>
+                </TableRow>
+            </Table>
         </Content>
     </Collapsible>
 </div>

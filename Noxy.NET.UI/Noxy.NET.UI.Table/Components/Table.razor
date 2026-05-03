@@ -6,7 +6,7 @@
         @TableHeader
     </div>
 
-    @if (TableRow != null && List != null)
+    @if (List.Any())
     {
         @foreach (T element in List)
         {
@@ -23,16 +23,16 @@
 
 @code {
 
-    [Parameter]
-    public RenderFragment<T>? TableRow { get; set; }
+    [Parameter, EditorRequired]
+    public IEnumerable<T> List { get; set; }
 
-    [Parameter]
-    public RenderFragment? TableHeader { get; set; }
+    [Parameter, EditorRequired]
+    public RenderFragment<T> TableRow { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment TableHeader { get; set; }
 
     [Parameter]
     public RenderFragment? Placeholder { get; set; }
-
-    [Parameter]
-    public IEnumerable<T>? List { get; set; }
 
 }

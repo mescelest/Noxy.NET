@@ -2,8 +2,9 @@
     display: grid;
     grid-auto-rows: max-content;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    border: var(--size-border-width) solid var(--color-control-border);
-    border-radius: var(--size-border-radius);
+    column-gap: var(--size-gap-xs);
+    row-gap: var(--size-gap-xs);
+    padding: var(--size-gap-xxs);
     overflow: auto;
 }
 
@@ -11,52 +12,24 @@
     display: grid;
     grid-column: 1 / max;
     grid-template-columns: subgrid;
+    padding: var(--size-gap-xxs);
+    margin: calc(-1 * var(--size-gap-xxs));
+    margin-bottom: calc(-1 * var(--size-border-width-md));
     position: sticky;
-    top: 0;
+    top: calc(-1 * var(--size-gap-xxs));
     left: 0;
-    font-weight: bold;
-    border-bottom: var(--size-border-width) solid var(--color-primary-border);
-    background-color: var(--color-primary-background);
+    border-bottom: var(--size-border-width-md) solid var(--color-offset-primary-lg);
+    background-color: var(--color-offset-primary-sm);
 }
 
-.header,
 .row {
     display: grid;
     grid-column: 1 / max;
     grid-template-columns: subgrid;
-    column-gap: 10px;
+    padding: var(--size-gap-xxs);
+    margin: calc(-1 * var(--size-gap-xxs));
 }
 
-.row:nth-child(2n+1) {
-    background-color: var(--color-secondary-background);
-}
-
-@media (prefers-color-scheme: light) {
-    .Table {
-        border-color: var(--color-control-border-light);
-    }
-
-    .header {
-        border-color: var(--color-primary-border-light);
-        background-color: var(--color-primary-background-light);
-    }
-
-    .row:nth-child(2n+1) {
-        background-color: var(--color-secondary-background-light);
-    }
-}
-
-@media (prefers-color-scheme: dark) {
-    .Table {
-        border-color: var(--color-control-border-dark);
-    }
-
-    .header {
-        border-color: var(--color-primary-border-light);
-        background-color: var(--color-primary-background-light);
-    }
-
-    .row:nth-child(2n+1) {
-        background-color: var(--color-secondary-background-light);
-    }
+.row:nth-of-type(2n+1) {
+    background-color: var(--color-offset-primary-sm);
 }

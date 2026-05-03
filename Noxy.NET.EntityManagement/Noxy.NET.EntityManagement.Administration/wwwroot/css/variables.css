@@ -84,8 +84,12 @@
 :root {
     --color-primary: var(--color-light);
     --color-complementary: var(--color-dark);
-    --color-offset-primary: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
-    --color-offset-complementary: color-mix(in srgb, transparent 96%, var(--color-primary, #FFFFFF));
+    --color-offset-primary-sm: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
+    --color-offset-primary-md: color-mix(in srgb, transparent 90%, var(--color-complementary, #000000));
+    --color-offset-primary-lg: color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
+    --color-offset-complementary-sm: color-mix(in srgb, transparent 90%, var(--color-primary, #FFFFFF));
+    --color-offset-complementary-md: color-mix(in srgb, transparent 80%, var(--color-primary, #FFFFFF));
+    --color-offset-complementary-lg: color-mix(in srgb, transparent 50%, var(--color-primary, #FFFFFF));
 }
 
 /*!* Color mix-in *!*/
