@@ -3,6 +3,7 @@ using Fluxor;
 using Noxy.NET.EntityManagement.Administration.Abstractions;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
 using Noxy.NET.EntityManagement.Presentation.Services;
 using static Noxy.NET.EntityManagement.Administration.Features.FeatureSchemaElementReducers;
 
@@ -36,62 +37,37 @@ public record FeatureSchemaElementState : BaseFeatureStateRequest<FeatureSchemaE
 public class FeatureSchemaElementReducers : BaseFeatureReducerRequest<FeatureSchemaElementState, FeatureSchemaElementActionKind>
 {
     [ReducerMethod]
-    public static FeatureSchemaElementState ReduceFind(FeatureSchemaElementState state, FindAction action) =>
-        StartAction(state, action.Scope, FeatureSchemaElementActionKind.Find);
+    public static FeatureSchemaElementState ReduceFind(FeatureSchemaElementState state, FindAction action) => StartAction(state, action.Scope, FeatureSchemaElementActionKind.Find);
 
     [ReducerMethod]
-    public static FeatureSchemaElementState ReduceFindSuccess(FeatureSchemaElementState state, SuccessAction<EntitySchemaElement> action) =>
-        HandleSuccessAction(state, action, (next, value) => next with { Find = Set(next.Find, action.Scope, value) });
-
-    [ReducerMethod]
-    public static FeatureSchemaElementState ReduceFindFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
+    public static FeatureSchemaElementState ReduceFindSuccess(FeatureSchemaElementState state, SuccessAction<ResponseSchemaElementFind> action) =>
+        HandleSuccessAction(state, action, (next, value) => next with { Find = Set(next.Find, action.Scope, value.Value) });
 
     [ReducerMethod]
     public static FeatureSchemaElementState ReduceList(FeatureSchemaElementState state, ListAction action) =>
         StartAction(state, action.Scope, FeatureSchemaElementActionKind.List, next => next with { Request = Set(next.Request, action.Scope, action.Request) });
 
     [ReducerMethod]
-    public static FeatureSchemaElementState ReduceListSuccess(FeatureSchemaElementState state, SuccessAction<List<EntitySchemaElement>> action) =>
-        HandleSuccessAction(state, action, (next, value) => next with { List = Set(next.List, action.Scope, value) });
-
-    [ReducerMethod]
-    public static FeatureSchemaElementState ReduceListFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
+    public static FeatureSchemaElementState ReduceListSuccess(FeatureSchemaElementState state, SuccessAction<ResponseSchemaElementList> action) =>
+        HandleSuccessAction(state, action, (next, value) => next with { List = Set(next.List, action.Scope, value.Value) });
 
     [ReducerMethod]
     public static FeatureSchemaElementState ReduceAdd(FeatureSchemaElementState state, AddAction action) => StartAction(state, action.Scope, FeatureSchemaElementActionKind.Add);
 
     [ReducerMethod]
-    public static FeatureSchemaElementState ReduceAddSuccess(FeatureSchemaElementState state, SuccessAction<Guid> action) => HandleSuccessAction(state, action);
-
-    [ReducerMethod]
-    public static FeatureSchemaElementState ReduceAddFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
-
-    [ReducerMethod]
     public static FeatureSchemaElementState ReduceUpdate(FeatureSchemaElementState state, UpdateAction action) => StartAction(state, action.Scope, FeatureSchemaElementActionKind.Update);
-
-    [ReducerMethod]
-    public static FeatureSchemaElementState ReduceUpdateSuccess(FeatureSchemaElementState state, SuccessAction<Guid> action) => HandleSuccessAction(state, action);
-
-    [ReducerMethod]
-    public static FeatureSchemaElementState ReduceUpdateFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
 
     [ReducerMethod]
     public static FeatureSchemaElementState ReduceClone(FeatureSchemaElementState state, CloneAction action) => StartAction(state, action.Scope, FeatureSchemaElementActionKind.Clone);
 
     [ReducerMethod]
-    public static FeatureSchemaElementState ReduceCloneSuccess(FeatureSchemaElementState state, SuccessAction<Guid> action) => HandleSuccessAction(state, action);
-
-    [ReducerMethod]
-    public static FeatureSchemaElementState ReduceCloneFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
-
-    [ReducerMethod]
     public static FeatureSchemaElementState ReduceDelete(FeatureSchemaElementState state, DeleteAction action) => StartAction(state, action.Scope, FeatureSchemaElementActionKind.Delete);
 
     [ReducerMethod]
-    public static FeatureSchemaElementState ReduceDeleteSuccess(FeatureSchemaElementState state, SuccessAction<Guid> action) => HandleSuccessAction(state, action);
+    public static FeatureSchemaElementState ReduceSuccess(FeatureSchemaElementState state, SuccessAction action) => HandleSuccessAction(state, action);
 
     [ReducerMethod]
-    public static FeatureSchemaElementState ReduceDeleteFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
+    public static FeatureSchemaElementState ReduceFailure(FeatureSchemaElementState state, FailureAction action) => HandleFailureAction(state, action);
 
     public record FindAction(string Scope, RequestSchemaElementFind Request);
 
@@ -109,40 +85,28 @@ public class FeatureSchemaElementReducers : BaseFeatureReducerRequest<FeatureSch
 public class FeatureSchemaElementEffects(APIHttpClient client, IState<FeatureSchemaElementState> state) : BaseFeatureEffectRequest<FeatureSchemaElementState, FeatureSchemaElementActionKind>
 {
     [EffectMethod]
-    public Task Handle(FindAction action, IDispatcher dispatcher)
-    {
-        return Execute(action.Scope, FeatureSchemaElementActionKind.Find, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
-    }
+    public Task Handle(FindAction action, IDispatcher dispatcher) =>
+        Execute(new(action.Scope, FeatureSchemaElementActionKind.Find, false, false), dispatcher, async () => await client.SendRequest(action.Request));
 
     [EffectMethod]
-    public Task Handle(ListAction action, IDispatcher dispatcher)
-    {
-        return Execute(action.Scope, FeatureSchemaElementActionKind.List, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
-    }
+    public Task Handle(ListAction action, IDispatcher dispatcher) =>
+        Execute(new(action.Scope, FeatureSchemaElementActionKind.List, false, false), dispatcher, async () => await client.SendRequest(action.Request));
 
     [EffectMethod]
-    public Task Handle(AddAction action, IDispatcher dispatcher)
-    {
-        return ExecuteWithRefresh(action.Scope, FeatureSchemaElementActionKind.Add, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
-    }
+    public Task Handle(AddAction action, IDispatcher dispatcher) =>
+        Execute(new(action.Scope, FeatureSchemaElementActionKind.Add), dispatcher, async () => await client.SendRequest(action.Request));
 
     [EffectMethod]
-    public Task Handle(UpdateAction action, IDispatcher dispatcher)
-    {
-        return ExecuteWithRefresh(action.Scope, FeatureSchemaElementActionKind.Update, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
-    }
+    public Task Handle(UpdateAction action, IDispatcher dispatcher) =>
+        Execute(new(action.Scope, FeatureSchemaElementActionKind.Update), dispatcher, async () => await client.SendRequest(action.Request));
 
     [EffectMethod]
-    public Task Handle(CloneAction action, IDispatcher dispatcher)
-    {
-        return ExecuteWithRefresh(action.Scope, FeatureSchemaElementActionKind.Clone, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
-    }
+    public Task Handle(CloneAction action, IDispatcher dispatcher) =>
+        Execute(new(action.Scope, FeatureSchemaElementActionKind.Clone), dispatcher, async () => await client.SendRequest(action.Request));
 
     [EffectMethod]
-    public Task Handle(DeleteAction action, IDispatcher dispatcher)
-    {
-        return ExecuteWithRefresh(action.Scope, FeatureSchemaElementActionKind.Delete, dispatcher, async () => (await client.SendRequest(action.Request)).Value);
-    }
+    public Task Handle(DeleteAction action, IDispatcher dispatcher) =>
+        Execute(new(action.Scope, FeatureSchemaElementActionKind.Delete), dispatcher, async () => await client.SendRequest(action.Request));
 
     protected override void RefreshList(string scope, IDispatcher dispatcher)
     {

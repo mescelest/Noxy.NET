@@ -11,7 +11,7 @@ public class HandlerSchemaContextHasElementDelete(IUnitOfWorkFactory serviceUoWF
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        Guid result = await uow.Schema.DeleteSchemaContext(request.ID);
+        Guid result = await uow.Schema.DeleteSchemaContextHasElement(request.ID);
 
         await uow.Commit();
 

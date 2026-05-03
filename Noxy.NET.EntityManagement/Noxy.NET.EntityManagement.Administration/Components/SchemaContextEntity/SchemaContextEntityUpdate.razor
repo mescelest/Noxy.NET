@@ -1,0 +1,38 @@
+@inject IState<FeatureSchemaState> State
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@TextService.Get(TextConstants.HeaderFormUpdateSchemaContext)</DynamicHTMLTag>
+
+    <FormSchemaContextUpdate SchemaContext="SchemaContext" OnSubmit="Submit">
+        <ButtonList Alignment="ButtonListAlignmentEnum.Right">
+            <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
+                @TextService.Get(TextConstants.ButtonUpdate)
+            </Button>
+        </ButtonList>
+    </FormSchemaContextUpdate>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required EntitySchemaContext SchemaContext { get; set; }
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
+
+    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Update, out bool value) && value;
+
+    private void Submit(IWebFormContext<RequestSchemaContextUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.UpdateAction(ScopeCurrent, value.Model));
+    }
+
+}

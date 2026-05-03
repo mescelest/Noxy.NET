@@ -3,7 +3,7 @@
 @inject IDispatcher Dispatcher
 @inherits FluxorPageComponent
 
-<PageTitle>Administration | Schema</PageTitle>
+<PageTitle>@(Schema?.Name ?? "Schema") | Administration</PageTitle>
 
 <Loader Loading="@IsLoading">
     <div class="@CssClass">

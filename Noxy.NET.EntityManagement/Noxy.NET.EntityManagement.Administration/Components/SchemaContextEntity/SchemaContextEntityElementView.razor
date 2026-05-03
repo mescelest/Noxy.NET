@@ -1,0 +1,91 @@
+@inject IState<FeatureSchemaElementState> StateElement
+@inject IState<FeatureSchemaContextHasElementState> StateContextHasElement
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Collapsible Loading="IsLoadingList" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+        <Header>
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Element list</DynamicHTMLTag>
+        </Header>
+        <Content>
+            <div class="grid">
+                <div class="grid-header">
+                    <strong>
+                    </strong>
+                    <strong>Name</strong>
+                    <strong>Note</strong>
+                    <strong>Schema Identifier</strong>
+                    <strong>Created at</strong>
+                </div>
+
+                @foreach (EntitySchemaElement item in List)
+                {
+                    <div class="grid-row">
+                        <span>
+                            <InputElementCheckbox Option="true" @bind-Value:get="@IsChecked(item.ID)" @bind-Value:set="x => SetChecked(x, item.ID)"/>
+                        </span>
+                        <span>@item.Name</span>
+                        <span>@item.Note</span>
+                        <span>@item.SchemaIdentifier</span>
+                        <span>@item.TimeCreated</span>
+                    </div>
+                }
+            </div>
+        </Content>
+    </Collapsible>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public EntitySchema Schema { get; set; }
+
+    [Parameter, EditorRequired]
+    public EntitySchemaContext SchemaContext { get; set; }
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{Schema.ID}";
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H4;
+
+    private bool _isCollapsed = true;
+
+    private bool IsLoading => IsLoadingList || IsLoadingJunction;
+    private bool IsLoadingList => StateElement.Value.TryGetLoading(ScopeCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaElement> List => StateElement.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaElement>? value) ? value : [];
+
+    private bool IsLoadingJunction => StateContextHasElement.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextHasElementActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaContextHasElement> Junction => StateContextHasElement.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaContextHasElement>? value) ? value : [];
+
+    private bool IsChecked(Guid id)
+    {
+        return Junction.Any(x => x.RelationID == id);
+    }
+
+    private void SetChecked(bool value, Guid id)
+    {
+        if (value)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaContextHasElementReducers.AddAction(ScopeCurrent, new() { SchemaContextID = SchemaContext.ID, SchemaElementID = id }));
+        }
+        else
+        {
+            EntitySchemaContextHasElement junction = Junction.Single(x => x.EntityID == SchemaContext.ID && x.RelationID == id);
+            Dispatcher.Dispatch(new FeatureSchemaContextHasElementReducers.DeleteAction(ScopeCurrent, new() { ID = junction.ID }));
+        }
+    }
+
+    private void SetCollapsed(bool value)
+    {
+        _isCollapsed = value;
+
+        if (_isCollapsed || StateElement.Value.List.ContainsKey(ScopeCurrent) || IsLoading) return;
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.ListAction(ScopeCurrent, new() { SchemaID = Schema.ID }));
+        Dispatcher.Dispatch(new FeatureSchemaContextHasElementReducers.ListAction(ScopeCurrent, new() { SchemaContextID = SchemaContext.ID }));
+    }
+
+}

@@ -345,21 +345,29 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     public async Task<EntitySchemaContextHasElement> CreateSchemaContextHasElement(EntitySchemaContextHasElement entity)
     {
+        TableSchemaContext entityContext = await Context.SchemaContext.AsNoTracking().FirstAsync(x => x.ID == entity.EntityID);
+        TableSchemaElement entityElement = await Context.SchemaElement.AsNoTracking().FirstAsync(x => x.ID == entity.RelationID);
+        if (entityContext.SchemaID != entityElement.SchemaID) throw new InvalidOperationException("SchemaElement and SchemaContext must be in same schema.");
+
+        TableSchema entitySchema = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entityContext.SchemaID);
+        if (entitySchema.TimeActivated != null) throw new InvalidOperationException("Cannot add element to schema context that has been activated.");
+
         EntityEntry<TableSchemaContextHasElement> result = await Context.SchemaContextHasElement.AddAsync(MapperE2T.Map(entity));
-        // todo: Should check if elements are in same schema
 
         return MapperT2E.Map(result.Entity);
     }
 
     public async Task<Guid> DeleteSchemaContextHasElement(Guid id)
     {
-        TableSchemaContextHasElement entity = await Context.SchemaContextHasElement.AsNoTracking().FirstAsync(x => x.ID == id);
+        bool schemaActivated = await Context.SchemaContextHasElement
+            .AsNoTracking()
+            .Where(x => x.ID == id)
+            .AnyAsync(x => x.Entity!.Schema!.TimeActivated != null);
+        if (schemaActivated) throw new InvalidOperationException("Cannot delete schema element from schema that has been activated.");
 
-        // todo: Should check if elements are in an active schema
+        await Context.SchemaContextHasElement.Where(x => x.ID == id).ExecuteDeleteAsync();
 
-        Context.SchemaContextHasElement.Remove(entity);
-
-        return entity.ID;
+        return id;
     }
 
     #endregion -- SchemaContextHasElement --

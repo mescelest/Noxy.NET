@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.API.Commands.Schema;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Context;
+using Noxy.NET.EntityManagement.API.Commands.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Element;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Parameter;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
@@ -138,6 +139,18 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaContextDelete>> DeleteSchemaContext(Guid id)
     {
         return await mediator.Send(new CommandSchemaContextDelete(id));
+    }
+
+    [HttpPost("Context/Element")]
+    public async Task<ActionResult<ResponseSchemaContextHasElementCreate>> CreateSchemaContextHasElement(RequestSchemaContextHasElementCreate request)
+    {
+        return await mediator.Send(new CommandSchemaContextHasElementCreate(request));
+    }
+
+    [HttpPost("Context/Element/{id:guid}/Delete")]
+    public async Task<ActionResult<ResponseSchemaContextHasElementDelete>> CreateSchemaContextHasElement(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaContextHasElementDelete(id));
     }
 
     [HttpPost("Element")]

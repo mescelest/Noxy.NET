@@ -1,10 +1,10 @@
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
 using Noxy.NET.EntityManagement.Domain.Attributes;
-using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.ContextHasElement;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.ContextHasElement;
 
-public class RequestSchemaContextHasElementCreate : BaseRequestPost<ResponseSchemaContextCreate>
+public class RequestSchemaContextHasElementCreate : BaseRequestPost<ResponseSchemaContextHasElementCreate>
 {
     public override string APIEndpoint => "Schema/Context/Element";
 

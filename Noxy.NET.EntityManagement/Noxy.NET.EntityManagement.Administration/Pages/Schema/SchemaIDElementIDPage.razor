@@ -4,7 +4,7 @@
 @inject IDispatcher Dispatcher
 @inherits FluxorPageComponent
 
-<PageTitle>Administration | Schema</PageTitle>
+<PageTitle>@(SchemaElement?.Name ?? "Element") | Administration</PageTitle>
 
 <Loader Loading="@IsLoading">
     <div class="@CssClass">
@@ -41,10 +41,10 @@
 
     private string Scope => $"{GetComponentName()}:{SchemaID}:{ElementID}";
 
-    private bool IsLoadingElement => StateSchema.Value.TryGetLoading(Scope, FeatureSchemaActionKind.Find, out bool value) && value;
+    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(Scope, FeatureSchemaActionKind.Find, out bool value) && value;
     private EntitySchema? Schema => StateSchema.Value.TryGetFind(Scope, out EntitySchema? value) ? value : null;
 
-    private bool IsLoadingSchema => StateSchemaElement.Value.TryGetLoading(Scope, FeatureSchemaElementActionKind.Find, out bool value) && value;
+    private bool IsLoadingElement => StateSchemaElement.Value.TryGetLoading(Scope, FeatureSchemaElementActionKind.Find, out bool value) && value;
     private EntitySchemaElement? SchemaElement => StateSchemaElement.Value.TryGetFind(Scope, out EntitySchemaElement? value) ? value : null;
 
     private bool IsLoading => IsLoadingSchema || IsLoadingElement;

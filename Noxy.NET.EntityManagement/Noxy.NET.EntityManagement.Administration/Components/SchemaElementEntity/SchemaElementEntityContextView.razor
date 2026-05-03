@@ -1,7 +1,6 @@
 @inject IState<FeatureSchemaContextState> StateContext
 @inject IState<FeatureSchemaContextHasElementState> StateContextHasElement
 @inject IDispatcher Dispatcher
-@using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -12,22 +11,23 @@
         <Content>
             <div class="grid">
                 <div class="grid-header">
+                    <strong>
+                    </strong>
                     <strong>Name</strong>
                     <strong>Note</strong>
                     <strong>Schema Identifier</strong>
-                    <strong>Title</strong>
-                    <strong>Description</strong>
                     <strong>Created at</strong>
                 </div>
 
                 @foreach (EntitySchemaContext item in List)
                 {
                     <div class="grid-row">
+                        <span>
+                            <InputElementCheckbox Option="true" @bind-Value:get="@IsChecked(item.ID)" @bind-Value:set="x => SetChecked(x, item.ID)"/>
+                        </span>
                         <span>@item.Name</span>
                         <span>@item.Note</span>
                         <span>@item.SchemaIdentifier</span>
-                        <span>@item.TitleTextParameter?.Name</span>
-                        <span>@item.DescriptionTextParameter?.Name</span>
                         <span>@item.TimeCreated</span>
                     </div>
                 }
@@ -60,6 +60,24 @@
 
     private bool IsLoadingJunction => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
     private IReadOnlyList<EntitySchemaContextHasElement> Junction => StateContextHasElement.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaContextHasElement>? value) ? value : [];
+
+    private bool IsChecked(Guid id)
+    {
+        return Junction.Any(x => x.EntityID == id);
+    }
+
+    private void SetChecked(bool value, Guid id)
+    {
+        if (value)
+        {
+            Dispatcher.Dispatch(new FeatureSchemaContextHasElementReducers.AddAction(ScopeCurrent, new() { SchemaContextID = id, SchemaElementID = SchemaElement.ID }));
+        }
+        else
+        {
+            EntitySchemaContextHasElement junction = Junction.Single(x => x.EntityID == id && x.RelationID == SchemaElement.ID);
+            Dispatcher.Dispatch(new FeatureSchemaContextHasElementReducers.DeleteAction(ScopeCurrent, new() { ID = junction.ID }));
+        }
+    }
 
     private void SetCollapsed(bool value)
     {

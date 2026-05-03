@@ -59,14 +59,14 @@
 
     [Parameter]
     public bool? ShowHeader { get; set; }
-    private bool ShowHeaderCurrent => ShowHeader ?? (Header != null);
+    private bool ShowHeaderCurrent => ShowHeader ?? Header != null;
 
     [Parameter]
     public bool? ShowContent { get; set; }
-    private bool ShowContentCurrent => ShowContent ?? (Content != null);
+    private bool ShowContentCurrent => ShowContent ?? Content != null;
 
     [Parameter]
     public bool? ShowFooter { get; set; }
-    private bool ShowFooterCurrent => ShowFooter ?? (Footer != null);
+    private bool ShowFooterCurrent => ShowFooter ?? Footer != null;
 
 }

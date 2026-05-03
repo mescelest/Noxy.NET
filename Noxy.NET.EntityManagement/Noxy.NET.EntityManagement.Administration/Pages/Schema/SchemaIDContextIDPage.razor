@@ -1,0 +1,56 @@
+@page "/Schema/{SchemaID:guid}/Context/{ContextID:guid}"
+@inject IState<FeatureSchemaState> StateSchema
+@inject IState<FeatureSchemaContextState> StateSchemaContext
+@inject IDispatcher Dispatcher
+@inherits FluxorPageComponent
+
+<PageTitle>@(SchemaContext?.Name ?? "Context") | Administration</PageTitle>
+
+<Loader Loading="@IsLoading">
+    <div class="@CssClass">
+        @if (Schema != null && SchemaContext != null)
+        {
+            <MagazineFrame>
+                <Left>
+                </Left>
+                <Content>
+                    <SchemaContextEntityView Schema="Schema" SchemaContext="SchemaContext" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
+                </Content>
+                <Right>
+                    @if (Schema.TimeActivated == null)
+                    {
+                        <SchemaContextEntityUpdate SchemaContext="SchemaContext" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                    }
+                </Right>
+            </MagazineFrame>
+        }
+    </div>
+</Loader>
+
+@code {
+
+    [Parameter]
+    public Guid SchemaID { get; set; }
+
+    [Parameter]
+    public Guid ContextID { get; set; }
+
+    private string Scope => $"{GetComponentName()}:{SchemaID}:{ContextID}";
+
+    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(Scope, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => StateSchema.Value.TryGetFind(Scope, out EntitySchema? value) ? value : null;
+
+    private bool IsLoadingContext => StateSchemaContext.Value.TryGetLoading(Scope, FeatureSchemaContextActionKind.Find, out bool value) && value;
+    private EntitySchemaContext? SchemaContext => StateSchemaContext.Value.TryGetFind(Scope, out EntitySchemaContext? value) ? value : null;
+
+    private bool IsLoading => IsLoadingSchema || IsLoadingContext;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(Scope, new() { ID = SchemaID }));
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.FindAction(Scope, new() { ID = ContextID }));
+    }
+
+}

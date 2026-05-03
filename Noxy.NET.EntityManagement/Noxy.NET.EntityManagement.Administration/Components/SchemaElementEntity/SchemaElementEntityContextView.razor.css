@@ -10,7 +10,7 @@
 
 .grid {
     display: grid;
-    grid-template-columns: max-content 1fr max-content max-content max-content max-content;
+    grid-template-columns: max-content max-content 1fr max-content max-content;
     column-gap: var(--size-gap-xs, 12px);
     row-gap: var(--size-gap-xs, 12px);
     padding: var(--size-gap-xxs, 8px);

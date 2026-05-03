@@ -4,28 +4,31 @@ namespace Noxy.NET.EntityManagement.Administration.Abstractions;
 
 public abstract class BaseFeatureEffectRequest<TState, TKind> where TState : BaseFeatureStateRequest<TKind> where TKind : struct, Enum
 {
-    protected static async Task Execute<TResult>(string scope, TKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
+    protected record ExecuteConfiguration(string Scope, TKind Kind, bool Refresh = true, bool Discard = true);
+
+    protected async Task Execute<TResult>(ExecuteConfiguration config, IDispatcher dispatcher, Func<Task<TResult>> operation)
     {
-        (bool success, TResult? result) = await TryExecute(scope, kind, dispatcher, operation);
+        (bool success, TResult? result) = await TryExecute(config, dispatcher, operation);
 
         if (success)
         {
-            dispatcher.Dispatch(new BaseFeatureReducerRequest<TState, TKind>.SuccessAction<TResult>(scope, kind, result!));
+            if (!config.Discard)
+            {
+                dispatcher.Dispatch(new BaseFeatureReducerRequest<TState, TKind>.SuccessAction<TResult>(config.Scope, config.Kind, result!));
+            }
+            else
+            {
+                dispatcher.Dispatch(new BaseFeatureReducerRequest<TState, TKind>.SuccessAction(config.Scope, config.Kind));
+            }
+
+            if (config.Refresh)
+            {
+                RefreshList(config.Scope, dispatcher);
+            }
         }
     }
 
-    protected async Task ExecuteWithRefresh<TResult>(string scope, TKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
-    {
-        (bool success, TResult? result) = await TryExecute(scope, kind, dispatcher, operation);
-
-        if (success)
-        {
-            dispatcher.Dispatch(new BaseFeatureReducerRequest<TState, TKind>.SuccessAction<TResult>(scope, kind, result!));
-            RefreshList(scope, dispatcher);
-        }
-    }
-
-    private static async Task<(bool Success, TResult? Result)> TryExecute<TResult>(string scope, TKind kind, IDispatcher dispatcher, Func<Task<TResult>> operation)
+    private static async Task<(bool Success, TResult? Result)> TryExecute<TResult>(ExecuteConfiguration config, IDispatcher dispatcher, Func<Task<TResult>> operation)
     {
         try
         {
@@ -34,7 +37,7 @@ public abstract class BaseFeatureEffectRequest<TState, TKind> where TState : Bas
         }
         catch (Exception ex)
         {
-            dispatcher.Dispatch(new BaseFeatureReducerRequest<TState, TKind>.FailureAction(scope, kind, ex.Message));
+            dispatcher.Dispatch(new BaseFeatureReducerRequest<TState, TKind>.FailureAction(config.Scope, config.Kind, ex.Message));
             return (false, default);
         }
     }

@@ -53,6 +53,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <AdditionalFiles Include="Components\SchemaContextEntity\SchemaContextEntityContextView.razor"/>
         <AdditionalFiles Include="Components\SchemaElementEntity\SchemaElementEntityUpdate.razor"/>
         <AdditionalFiles Include="Components\SchemaElementEntity\SchemaElementEntityView.razor"/>
     </ItemGroup>
