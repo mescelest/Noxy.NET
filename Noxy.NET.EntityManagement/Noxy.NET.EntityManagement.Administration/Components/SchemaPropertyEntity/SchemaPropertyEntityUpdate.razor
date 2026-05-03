@@ -1,0 +1,102 @@
+@inject IState<FeatureSchemaState> State
+@inject IDispatcher Dispatcher
+@inject TextService TextService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@TextService.Get(TextConstants.HeaderFormUpdateSchemaPropertyBoolean)</DynamicHTMLTag>
+
+    @switch (SchemaProperty)
+    {
+        case EntitySchemaPropertyBoolean propertyBoolean:
+            <FormSchemaPropertyBooleanUpdate SchemaID="SchemaID" SchemaProperty="propertyBoolean" OnSubmit="SubmitBoolean">
+                @SubmitAction()
+            </FormSchemaPropertyBooleanUpdate>
+            break;
+        case EntitySchemaPropertyDateTime propertyDateTime:
+            <FormSchemaPropertyDateTimeUpdate SchemaID="SchemaID" SchemaProperty="propertyDateTime" OnSubmit="SubmitDateTime">
+                @SubmitAction()
+            </FormSchemaPropertyDateTimeUpdate>
+            break;
+        case EntitySchemaPropertyDecimal propertyDecimal:
+            <FormSchemaPropertyDecimalUpdate SchemaID="SchemaID" SchemaProperty="propertyDecimal" OnSubmit="SubmitDecimal">
+                @SubmitAction()
+            </FormSchemaPropertyDecimalUpdate>
+            break;
+        case EntitySchemaPropertyImage propertyImage:
+            <FormSchemaPropertyImageUpdate SchemaID="SchemaID" SchemaProperty="propertyImage" OnSubmit="SubmitImage">
+                @SubmitAction()
+            </FormSchemaPropertyImageUpdate>
+            break;
+        case EntitySchemaPropertyInteger propertyInteger:
+            <FormSchemaPropertyIntegerUpdate SchemaID="SchemaID" SchemaProperty="propertyInteger" OnSubmit="SubmitInteger">
+                @SubmitAction()
+            </FormSchemaPropertyIntegerUpdate>
+            break;
+        case EntitySchemaPropertyString propertyString:
+            <FormSchemaPropertyStringUpdate SchemaID="SchemaID" SchemaProperty="propertyString" OnSubmit="SubmitString">
+                @SubmitAction()
+            </FormSchemaPropertyStringUpdate>
+            break;
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid? SchemaID { get; set; }
+
+    [Parameter, EditorRequired]
+    public required EntitySchemaProperty SchemaProperty { get; set; }
+
+    [Parameter]
+    public string? Scope { get; set; }
+    private string ScopeCurrent => Scope ?? GetComponentName();
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
+    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
+
+    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Update, out bool value) && value;
+
+    private void SubmitBoolean(IWebFormContext<RequestSchemaPropertyBooleanUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.UpdateBooleanAction(ScopeCurrent, value.Model));
+    }
+
+    private void SubmitDateTime(IWebFormContext<RequestSchemaPropertyDateTimeUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.UpdateDateTimeAction(ScopeCurrent, value.Model));
+    }
+
+    private void SubmitDecimal(IWebFormContext<RequestSchemaPropertyDecimalUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.UpdateDecimalAction(ScopeCurrent, value.Model));
+    }
+
+    private void SubmitImage(IWebFormContext<RequestSchemaPropertyImageUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.UpdateImageAction(ScopeCurrent, value.Model));
+    }
+
+    private void SubmitInteger(IWebFormContext<RequestSchemaPropertyIntegerUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.UpdateIntegerAction(ScopeCurrent, value.Model));
+    }
+    
+    private void SubmitString(IWebFormContext<RequestSchemaPropertyStringUpdate> value)
+    {
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.UpdateStringAction(ScopeCurrent, value.Model));
+    }
+
+    private RenderFragment SubmitAction()
+    {
+        return
+            @<ButtonList Alignment="ButtonListAlignmentEnum.Right">
+                <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
+                    @TextService.Get(TextConstants.ButtonCreate)
+                </Button>
+            </ButtonList>;
+    }
+
+}

@@ -32,7 +32,11 @@ public class RequestSchemaPropertyIntegerUpdate : BaseRequestPost<ResponseSchema
     [Required]
     [DisplayName(TextConstants.LabelFormWeight)]
     [Description(TextConstants.HelpFormWeight)]
-    public int? Weight { get; set; }
+    public int? Weight { get; set; } = 0;
+
+    [DisplayName(TextConstants.LabelFormIsUnsigned)]
+    [Description(TextConstants.HelpFormIsUnsigned)]
+    public bool IsUnsigned { get; set; }
 
     [NotEmptyGuid]
     [DisplayName(TextConstants.LabelFormTitle)]

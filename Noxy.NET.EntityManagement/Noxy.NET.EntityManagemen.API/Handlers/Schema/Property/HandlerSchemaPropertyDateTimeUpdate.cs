@@ -1,6 +1,7 @@
 using MediatR;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
@@ -20,6 +21,9 @@ public class HandlerSchemaPropertyDateTimeUpdate(IUnitOfWorkFactory serviceUoWFa
             Name = request.Name,
             Note = request.Note,
             Type = request.Type,
+            Weight = request.Weight ?? BaseEntity.DefaultWeight,
+            TitleTextParameterID = request.TitleParameterTextID,
+            DescriptionTextParameterID = request.DescriptionParameterTextID,
         });
 
         await uow.Commit();

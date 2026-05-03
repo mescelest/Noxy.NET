@@ -23,7 +23,6 @@ public sealed class UnitOfWork(DataContext context, IDependencyInjectionService 
     private static Dictionary<Type, RepositoryInstanceGeneratorFunc> GeneratorCollection { get; } = [];
     public IAuthenticationRepository Authentication => GetRepository<AuthenticationRepository>();
     public IDataRepository Data => GetRepository<DataRepository>();
-    public IJunctionRepository Junction => GetRepository<JunctionRepository>();
     public ISchemaRepository Schema => GetRepository<SchemaRepository>();
 
     public async Task Commit(bool useClearTracking = false)

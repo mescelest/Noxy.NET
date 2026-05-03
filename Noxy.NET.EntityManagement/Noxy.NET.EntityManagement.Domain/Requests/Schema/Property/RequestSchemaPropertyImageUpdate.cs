@@ -32,7 +32,11 @@ public class RequestSchemaPropertyImageUpdate : BaseRequestPost<ResponseSchemaPr
     [Required]
     [DisplayName(TextConstants.LabelFormWeight)]
     [Description(TextConstants.HelpFormWeight)]
-    public int? Weight { get; set; }
+    public int? Weight { get; set; } = 0;
+
+    [DisplayName(TextConstants.LabelFormAllowedExtensions)]
+    [Description(TextConstants.HelpFormAllowedExtensions)]
+    public string AllowedExtensions { get; set; } = string.Empty;
 
     [NotEmptyGuid]
     [DisplayName(TextConstants.LabelFormTitle)]

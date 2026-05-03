@@ -70,7 +70,7 @@ public class FeatureSchemaContextHasElementReducers : BaseFeatureReducerRequest<
     public record DeleteAction(string Scope, RequestSchemaContextHasElementDelete Request);
 }
 
-public class FeatureSchemaContextHasElementListEffects(APIHttpClient client, IState<FeatureSchemaContextHasElementState> state) : BaseFeatureEffectRequest<FeatureSchemaContextHasElementState, FeatureSchemaContextHasElementActionKind>
+public class FeatureSchemaContextHasElementEffects(APIHttpClient client, IState<FeatureSchemaContextHasElementState> state) : BaseFeatureEffectRequest<FeatureSchemaContextHasElementState, FeatureSchemaContextHasElementActionKind>
 {
     [EffectMethod]
     public Task Handle(FindAction action, IDispatcher dispatcher) =>

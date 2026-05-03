@@ -73,11 +73,11 @@
     private RenderFragment SubmitAction()
     {
         return
-            @<div class="action-list">
+            @<ButtonList Alignment="ButtonListAlignmentEnum.Right">
                 <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
                     @TextService.Get(TextConstants.ButtonCreate)
                 </Button>
-            </div>;
+            </ButtonList>;
     }
 
 }

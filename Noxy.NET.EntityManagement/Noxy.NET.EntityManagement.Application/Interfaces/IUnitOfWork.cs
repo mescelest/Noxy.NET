@@ -6,7 +6,6 @@ public interface IUnitOfWork : IAsyncDisposable
 {
     IAuthenticationRepository Authentication { get; }
     IDataRepository Data { get; }
-    IJunctionRepository Junction { get; }
     ISchemaRepository Schema { get; }
 
     Task Commit(bool useClearTracking = false);

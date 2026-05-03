@@ -4,24 +4,28 @@ using Noxy.NET.EntityManagement.API.Commands.Schema;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Context;
 using Noxy.NET.EntityManagement.API.Commands.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Element;
+using Noxy.NET.EntityManagement.API.Commands.Schema.ElementHasProperty;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Parameter;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Context;
 using Noxy.NET.EntityManagement.API.Queries.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Element;
+using Noxy.NET.EntityManagement.API.Queries.Schema.ElementHasProperty;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Parameter;
 using Noxy.NET.EntityManagement.API.Queries.Schema.Property;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
+using Noxy.NET.EntityManagement.Domain.Requests.Schema.ElementHasProperty;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
+using Noxy.NET.EntityManagement.Domain.Responses.Schema.ElementHasProperty;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
@@ -56,7 +60,7 @@ public class SchemaController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("Context/Element")]
-    public async Task<ActionResult<ResponseSchemaContextHasElementList>> GetSchemaContextHaselementList([FromQuery] RequestSchemaContextHasElementList request)
+    public async Task<ActionResult<ResponseSchemaContextHasElementList>> GetSchemaContextHasElementList([FromQuery] RequestSchemaContextHasElementList request)
     {
         return await mediator.Send(new QuerySchemaContextHasElementList(request));
     }
@@ -77,6 +81,18 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaElementFind>> GetSchemaElementByID(Guid id)
     {
         return await mediator.Send(new QuerySchemaElementFind(id));
+    }
+
+    [HttpGet("Element/Property")]
+    public async Task<ActionResult<ResponseSchemaElementHasPropertyList>> GetSchemaElementHasPropertyList([FromQuery] RequestSchemaElementHasPropertyList request)
+    {
+        return await mediator.Send(new QuerySchemaElementHasPropertyList(request));
+    }
+
+    [HttpGet("Element/Property/{id:guid}")]
+    public async Task<ActionResult<ResponseSchemaElementHasPropertyFind>> GetSchemaElementHasPropertyByID(Guid id)
+    {
+        return await mediator.Send(new QuerySchemaElementHasPropertyFind(id));
     }
 
     [HttpGet("Parameter")]
@@ -191,6 +207,18 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaElementDelete>> DeleteSchemaElement(Guid id)
     {
         return await mediator.Send(new CommandSchemaElementDelete(id));
+    }
+
+    [HttpPost("Element/Property")]
+    public async Task<ActionResult<ResponseSchemaElementHasPropertyCreate>> CreateSchemaElementHasProperty(RequestSchemaElementHasPropertyCreate request)
+    {
+        return await mediator.Send(new CommandSchemaElementHasPropertyCreate(request));
+    }
+
+    [HttpPost("Element/Property/{id:guid}/Delete")]
+    public async Task<ActionResult<ResponseSchemaElementHasPropertyDelete>> CreateSchemaElementHasProperty(Guid id)
+    {
+        return await mediator.Send(new CommandSchemaElementHasPropertyDelete(id));
     }
 
     [HttpPost("Parameter/Style")]

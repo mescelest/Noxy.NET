@@ -32,7 +32,7 @@ public class RequestSchemaElementUpdate : BaseRequestPost<ResponseSchemaElementU
     [Required]
     [DisplayName(TextConstants.LabelFormWeight)]
     [Description(TextConstants.HelpFormWeight)]
-    public int? Weight { get; set; }
+    public int? Weight { get; set; } = 0;
 
     [NotEmptyGuid]
     [DisplayName(TextConstants.LabelFormTitle)]

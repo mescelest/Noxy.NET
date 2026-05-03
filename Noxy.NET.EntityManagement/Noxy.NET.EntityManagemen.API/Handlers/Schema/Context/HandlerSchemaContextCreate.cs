@@ -12,7 +12,7 @@ public class HandlerSchemaContextCreate(IUnitOfWorkFactory serviceUoWFactory) : 
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaContext result = await uow.Schema.CreateSchemaContext(new EntitySchemaContext
+        EntitySchemaContext result = await uow.Schema.CreateSchemaContext(new()
         {
             SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
             SchemaIdentifier = request.SchemaIdentifier,

@@ -116,7 +116,7 @@
     private bool _isEditMode;
 
     private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
-    private string Link => $"/schema/{Schema.ID}/Property/{SchemaProperty.ID}";
+    private string Link => $"/schema/{Schema.ID}/property/{SchemaProperty.ID}";
     private bool IsLoadingUpdate => StateSchemaProperty.Value.TryGetLoading(ScopeCurrent, FeatureSchemaPropertyActionKind.Update, out bool value) && value;
 
     private void ButtonEditClickerHandler()

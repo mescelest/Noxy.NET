@@ -7,7 +7,7 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
 [Table(nameof(TableSchemaElement))]
-public class TableSchemaElement : BaseTableSchema, ISchemaMetadata, ISchemaOrdering, ISchemaPresentation
+public class TableSchemaElement : BaseTableSchemaPresentation, ISchemaMetadata, ISchemaOrdering, ISchemaPresentation
 {
     [Required]
     [MaxLength(DefaultNameLength)]
@@ -19,13 +19,6 @@ public class TableSchemaElement : BaseTableSchema, ISchemaMetadata, ISchemaOrder
 
     [Required]
     public required int Weight { get; set; }
-
-    [Required]
-    public TableSchemaParameterText? TitleTextParameter { get; set; }
-    public Guid TitleTextParameterID { get; set; }
-
-    public TableSchemaParameterText? DescriptionTextParameter { get; set; }
-    public Guid? DescriptionTextParameterID { get; set; }
 
     public ICollection<TableSchemaElementHasProperty>? PropertyList { get; set; }
 

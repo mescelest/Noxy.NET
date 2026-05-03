@@ -108,7 +108,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         modelBuilder.Entity<TableSchema>()
             .HasMany(e => e.PropertyList)
             .WithOne(e => e.Schema)
-            .HasForeignKey(x => x.ID);
+            .HasForeignKey(x => x.SchemaID);
 
         #endregion -- Schema --
 

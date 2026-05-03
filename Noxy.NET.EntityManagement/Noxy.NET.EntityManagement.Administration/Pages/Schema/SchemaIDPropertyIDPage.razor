@@ -1,0 +1,61 @@
+@page "/Schema/{SchemaID:guid}/Property/{PropertyID:guid}"
+@inject IState<FeatureSchemaState> StateSchema
+@inject IState<FeatureSchemaPropertyState> StateSchemaProperty
+@inject IDispatcher Dispatcher
+@using Noxy.NET.EntityManagement.Administration.Components.SchemaPropertyEntity
+@inherits FluxorPageComponent
+
+<PageTitle>@(SchemaProperty?.Name ?? "Property") | Administration</PageTitle>
+
+<Loader Loading="@IsLoading">
+    <div class="@CssClass">
+        @if (Schema != null && SchemaProperty != null)
+        {
+            <MagazineFrame>
+                <Left>
+                </Left>
+                <Content>
+                    <SchemaPropertyEntityView Schema="Schema" SchemaProperty="SchemaProperty" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
+                </Content>
+                <Right>
+                    @if (Schema.TimeActivated == null)
+                    {
+                        <SchemaPropertyEntityUpdate SchemaProperty="SchemaProperty" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
+                    }
+                </Right>
+            </MagazineFrame>
+        }
+    </div>
+</Loader>
+
+<div class="@CssClass">
+
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid SchemaID { get; set; }
+
+    [Parameter]
+    public Guid PropertyID { get; set; }
+
+    private string Scope => $"{GetComponentName()}:{SchemaID}:{PropertyID}";
+
+    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(Scope, FeatureSchemaActionKind.Find, out bool value) && value;
+    private EntitySchema? Schema => StateSchema.Value.TryGetFind(Scope, out EntitySchema? value) ? value : null;
+
+    private bool IsLoadingProperty => StateSchemaProperty.Value.TryGetLoading(Scope, FeatureSchemaPropertyActionKind.Find, out bool value) && value;
+    private EntitySchemaProperty? SchemaProperty => StateSchemaProperty.Value.TryGetFind(Scope, out EntitySchemaProperty.Discriminator? value) ? value.GetValue() : null;
+
+    private bool IsLoading => IsLoadingSchema || IsLoadingProperty;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(Scope, new() { ID = SchemaID }));
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.FindAction(Scope, new() { ID = PropertyID }));
+    }
+
+}

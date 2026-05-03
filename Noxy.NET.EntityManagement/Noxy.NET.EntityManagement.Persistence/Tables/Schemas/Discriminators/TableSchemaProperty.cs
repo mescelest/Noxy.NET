@@ -19,13 +19,6 @@ public abstract class TableSchemaProperty : BaseTableSchemaPresentation, ISchema
     [Required]
     public required int Weight { get; set; }
 
-    [Required]
-    public TableSchemaParameterText? TitleTextParameter { get; set; }
-    public Guid TitleTextParameterID { get; set; }
-
-    public TableSchemaParameterText? DescriptionTextParameter { get; set; }
-    public Guid? DescriptionTextParameterID { get; set; }
-
     public ICollection<TableSchemaElementHasProperty>? RelationElementList { get; set; }
     public ICollection<TableSchemaPropertyCollectionHasProperty>? RelationPropertyCollectionList { get; set; }
     public ICollection<TableSchemaPropertyTableHasProperty>? RelationPropertyTableList { get; set; }

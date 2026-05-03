@@ -7,7 +7,7 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
 [Table(nameof(TableSchemaContext))]
-public class TableSchemaContext : BaseTableSchema, ISchemaMetadata, ISchemaPresentation
+public class TableSchemaContext : BaseTableSchemaPresentation, ISchemaMetadata, ISchemaPresentation
 {
     [Required]
     [MaxLength(DefaultNameLength)]
@@ -16,13 +16,6 @@ public class TableSchemaContext : BaseTableSchema, ISchemaMetadata, ISchemaPrese
     [Required]
     [MaxLength(DefaultNoteLength)]
     public string Note { get; set; } = string.Empty;
-
-    [Required]
-    public TableSchemaParameterText? TitleTextParameter { get; set; }
-    public Guid TitleTextParameterID { get; set; }
-
-    public TableSchemaParameterText? DescriptionTextParameter { get; set; }
-    public Guid? DescriptionTextParameterID { get; set; }
 
     public ICollection<TableSchemaContextHasElement>? ElementList { get; set; }
 

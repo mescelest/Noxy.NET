@@ -47,8 +47,8 @@ public static class TextConstants
     public const string LabelPropertyBoolean = "Label:PropertyBoolean";
     public const string LabelPropertyDateTime = "Label:PropertyDateTime";
     public const string LabelPropertyDecimal = "Label:PropertyDecimal";
-    public const string LabelPropertyInteger = "Label:PropertyInteger";
     public const string LabelPropertyImage = "Label:PropertyImage";
+    public const string LabelPropertyInteger = "Label:PropertyInteger";
     public const string LabelPropertyString = "Label:PropertyString";
     public const string LabelPropertyDateTimeType = "Label:PropertyDateTimeType";
     public const string LabelCulture = "Label:Culture";

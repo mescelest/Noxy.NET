@@ -11,6 +11,7 @@ public class CommandSchemaPropertyIntegerCreate(RequestSchemaPropertyIntegerCrea
     public string Name { get; } = request.Name;
     public string Note { get; } = request.Note;
     public int? Weight { get; } = request.Weight;
+    public bool IsUnsigned { get; set; } = request.IsUnsigned;
     public Guid TitleParameterTextID { get; } = request.TitleParameterTextID;
     public Guid? DescriptionParameterTextID { get; } = request.DescriptionParameterTextID;
 }

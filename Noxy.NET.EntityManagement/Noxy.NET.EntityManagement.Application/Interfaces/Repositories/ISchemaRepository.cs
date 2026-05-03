@@ -22,17 +22,6 @@ public interface ISchemaRepository
 
     #endregion -- Schema --
 
-    #region -- SchemaElement --
-
-    Task<EntitySchemaElement> GetSchemaElementByID(Guid id);
-    Task<List<EntitySchemaElement>> GetSchemaElementList(FilterSchemaElementList filter);
-    Task<EntitySchemaElement> CreateSchemaElement(EntitySchemaElement entity);
-    Task<EntitySchemaElement> UpdateSchemaElement(EntitySchemaElement entity);
-    Task<EntitySchemaElement> CloneSchemaElement(Guid id);
-    Task<Guid> DeleteSchemaElement(Guid id);
-
-    #endregion -- SchemaElement --
-
     #region -- SchemaContext --
 
     Task<EntitySchemaContext> GetSchemaContextByID(Guid id);
@@ -52,6 +41,26 @@ public interface ISchemaRepository
     Task<Guid> DeleteSchemaContextHasElement(Guid id);
 
     #endregion -- SchemaContextHasElement --
+
+    #region -- SchemaElement --
+
+    Task<EntitySchemaElement> GetSchemaElementByID(Guid id);
+    Task<List<EntitySchemaElement>> GetSchemaElementList(FilterSchemaElementList filter);
+    Task<EntitySchemaElement> CreateSchemaElement(EntitySchemaElement entity);
+    Task<EntitySchemaElement> UpdateSchemaElement(EntitySchemaElement entity);
+    Task<EntitySchemaElement> CloneSchemaElement(Guid id);
+    Task<Guid> DeleteSchemaElement(Guid id);
+
+    #endregion -- SchemaElement --
+
+    #region -- SchemaElementHasProperty --
+
+    Task<EntitySchemaElementHasProperty> GetSchemaElementHasPropertyByID(Guid id);
+    Task<List<EntitySchemaElementHasProperty>> GetSchemaElementHasPropertyList(FilterSchemaElementHasPropertyList filter);
+    Task<EntitySchemaElementHasProperty> CreateSchemaElementHasProperty(EntitySchemaElementHasProperty entity);
+    Task<Guid> DeleteSchemaElementHasProperty(Guid id);
+
+    #endregion -- SchemaElementHasProperty --
 
     #region -- SchemaParameter --
 
