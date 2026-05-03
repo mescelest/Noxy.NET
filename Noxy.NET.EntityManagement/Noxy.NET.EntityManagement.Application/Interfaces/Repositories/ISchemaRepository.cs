@@ -14,6 +14,7 @@ public interface ISchemaRepository
 
     Task<EntitySchema> GetSchemaByID(Guid id);
     Task<List<EntitySchema>> GetSchemaList(FilterSchemaList filter);
+    Task<int> GetSchemaCount(FilterSchemaCount filter);
     Task<EntitySchema> CreateSchema(EntitySchema entity);
     Task<EntitySchema> UpdateSchema(EntitySchema entity);
     Task<EntitySchema> CloneSchema(Guid id);
@@ -26,6 +27,7 @@ public interface ISchemaRepository
 
     Task<EntitySchemaContext> GetSchemaContextByID(Guid id);
     Task<List<EntitySchemaContext>> GetSchemaContextList(FilterSchemaContextList filter);
+    Task<int> GetSchemaContextCount(FilterSchemaContextCount filter);
     Task<EntitySchemaContext> CreateSchemaContext(EntitySchemaContext entity);
     Task<EntitySchemaContext> UpdateSchemaContext(EntitySchemaContext entity);
     Task<EntitySchemaContext> CloneSchemaContext(Guid id);
@@ -46,6 +48,7 @@ public interface ISchemaRepository
 
     Task<EntitySchemaElement> GetSchemaElementByID(Guid id);
     Task<List<EntitySchemaElement>> GetSchemaElementList(FilterSchemaElementList filter);
+    Task<int> GetSchemaElementCount(FilterSchemaElementCount filter);
     Task<EntitySchemaElement> CreateSchemaElement(EntitySchemaElement entity);
     Task<EntitySchemaElement> UpdateSchemaElement(EntitySchemaElement entity);
     Task<EntitySchemaElement> CloneSchemaElement(Guid id);
@@ -66,6 +69,7 @@ public interface ISchemaRepository
 
     Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id);
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter);
+    Task<int> GetSchemaParameterCount(FilterSchemaParameterCount filter);
     Task<EntitySchemaParameterStyle> CreateSchemaParameterStyle(EntitySchemaParameterStyle entity);
     Task<EntitySchemaParameterSystem> CreateSchemaParameterSystem(EntitySchemaParameterSystem entity);
     Task<EntitySchemaParameterText> CreateSchemaParameterText(EntitySchemaParameterText entity);
@@ -81,6 +85,7 @@ public interface ISchemaRepository
 
     Task<EntitySchemaProperty.Discriminator> GetSchemaPropertyByID(Guid id);
     Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyList(FilterSchemaPropertyList filter);
+    Task<int> GetSchemaPropertyCount(FilterSchemaPropertyCount filter);
     Task<EntitySchemaPropertyBoolean> CreateSchemaPropertyBoolean(EntitySchemaPropertyBoolean entity);
     Task<EntitySchemaPropertyDateTime> CreateSchemaPropertyDateTime(EntitySchemaPropertyDateTime entity);
     Task<EntitySchemaPropertyDecimal> CreateSchemaPropertyDecimal(EntitySchemaPropertyDecimal entity);

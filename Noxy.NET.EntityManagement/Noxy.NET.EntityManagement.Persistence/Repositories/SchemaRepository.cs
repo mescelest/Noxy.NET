@@ -48,6 +48,15 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return [.. result.Select(MapperT2E.Map)];
     }
 
+    public async Task<int> GetSchemaCount(FilterSchemaCount filter)
+    {
+        IQueryable<TableSchema> query = Context.Schema.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+
+        return await query.CountAsync();
+    }
+
     public async Task<EntitySchema> CreateSchema(EntitySchema entity)
     {
         EntityEntry<TableSchema> result = await Context.Schema.AddAsync(MapperE2T.Map(entity));
@@ -200,6 +209,15 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return [.. result.Select(MapperT2E.Map)];
     }
 
+    public async Task<int> GetSchemaContextCount(FilterSchemaContextCount filter)
+    {
+        IQueryable<TableSchemaContext> query = Context.SchemaContext.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+
+        return await query.CountAsync();
+    }
+
     public async Task<EntitySchemaContext> CreateSchemaContext(EntitySchemaContext entity)
     {
         await ThrowIfSchemaActivated(entity.SchemaID);
@@ -325,6 +343,15 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
             .ToListAsync();
 
         return [.. result.Select(MapperT2E.Map)];
+    }
+
+    public async Task<int> GetSchemaElementCount(FilterSchemaElementCount filter)
+    {
+        IQueryable<TableSchemaElement> query = Context.SchemaElement.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+
+        return await query.CountAsync();
     }
 
     public async Task<EntitySchemaElement> CreateSchemaElement(EntitySchemaElement entity)
@@ -464,6 +491,27 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return [.. result.Select(MapperT2E.Map)];
     }
 
+    public async Task<int> GetSchemaParameterCount(FilterSchemaParameterCount filter)
+    {
+        IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
+
+        if (filter.ParameterType is { Count: > 0 })
+        {
+            List<Type> types = [.. filter.ParameterType.Select(key => TableSchemaParameter.TypeMap[key])];
+
+            ParameterExpression param = Expression.Parameter(typeof(TableSchemaParameter), "x");
+            Expression typeChecks = types.Select(Expression (t) => Expression.TypeIs(param, t)).Aggregate(Expression.OrElse);
+            Expression<Func<TableSchemaParameter, bool>> lambda = Expression.Lambda<Func<TableSchemaParameter, bool>>(typeChecks, param);
+            query = query.Where(lambda);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+        if (filter.IsSystemDefined is not null) query = query.Where(x => x.IsSystemDefined == filter.IsSystemDefined);
+        if (filter.IsApprovalRequired is not null) query = query.Where(x => x.IsApprovalRequired == filter.IsApprovalRequired);
+
+        return await query.CountAsync();
+    }
+
     public async Task<EntitySchemaParameterStyle> CreateSchemaParameterStyle(EntitySchemaParameterStyle entity)
     {
         await ThrowIfSchemaActivated(entity.SchemaID);
@@ -549,6 +597,8 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     {
         TableSchemaProperty result = await Context.SchemaProperty
             .AsNoTracking()
+            .Include(x => x.TitleTextParameter)
+            .Include(x => x.DescriptionTextParameter)
             .SingleAsync(x => x.ID == id);
         return MapperT2E.Map(result);
     }
@@ -570,12 +620,33 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
 
         List<TableSchemaProperty> result = await query
+            .Include(x => x.TitleTextParameter)
+            .Include(x => x.DescriptionTextParameter)
             .OrderBy(x => x.Name)
             .Skip(filter.PageNumber * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
 
         return [.. result.Select(MapperT2E.Map)];
+    }
+
+    public async Task<int> GetSchemaPropertyCount(FilterSchemaPropertyCount filter)
+    {
+        IQueryable<TableSchemaProperty> query = Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
+
+        if (filter.PropertyType is { Count: > 0 })
+        {
+            List<Type> types = [.. filter.PropertyType.Select(key => TableSchemaProperty.TypeMap[key])];
+
+            ParameterExpression param = Expression.Parameter(typeof(TableSchemaProperty), "x");
+            Expression typeChecks = types.Select(Expression (t) => Expression.TypeIs(param, t)).Aggregate(Expression.OrElse);
+            Expression<Func<TableSchemaProperty, bool>> lambda = Expression.Lambda<Func<TableSchemaProperty, bool>>(typeChecks, param);
+            query = query.Where(lambda);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+
+        return await query.CountAsync();
     }
 
     public async Task<EntitySchemaPropertyBoolean> CreateSchemaPropertyBoolean(EntitySchemaPropertyBoolean entity)

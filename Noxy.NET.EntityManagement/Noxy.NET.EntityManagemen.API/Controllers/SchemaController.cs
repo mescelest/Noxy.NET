@@ -41,6 +41,12 @@ public class SchemaController(IMediator mediator) : ControllerBase
         return await mediator.Send(new QuerySchemaList(request));
     }
 
+    [HttpGet("/Count")]
+    public async Task<ActionResult<ResponseSchemaCount>> GetSchemaCount([FromQuery] RequestSchemaCount request)
+    {
+        return await mediator.Send(new QuerySchemaCount(request));
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ResponseSchemaFind>> GetSchemaList(Guid id)
     {
@@ -51,6 +57,12 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaContextList>> GetSchemaContextList([FromQuery] RequestSchemaContextList request)
     {
         return await mediator.Send(new QuerySchemaContextList(request));
+    }
+
+    [HttpGet("Context/List")]
+    public async Task<ActionResult<ResponseSchemaContextCount>> GetSchemaContextCount([FromQuery] RequestSchemaContextCount request)
+    {
+        return await mediator.Send(new QuerySchemaContextCount(request));
     }
 
     [HttpGet("Context/{id:guid}")]
@@ -77,6 +89,12 @@ public class SchemaController(IMediator mediator) : ControllerBase
         return await mediator.Send(new QuerySchemaElementList(request));
     }
 
+    [HttpGet("Element/Count")]
+    public async Task<ActionResult<ResponseSchemaElementCount>> GetSchemaElementCount([FromQuery] RequestSchemaElementCount request)
+    {
+        return await mediator.Send(new QuerySchemaElementCount(request));
+    }
+
     [HttpGet("Element/{id:guid}")]
     public async Task<ActionResult<ResponseSchemaElementFind>> GetSchemaElementByID(Guid id)
     {
@@ -101,6 +119,12 @@ public class SchemaController(IMediator mediator) : ControllerBase
         return await mediator.Send(new QuerySchemaParameterList(request));
     }
 
+    [HttpGet("Parameter/Count")]
+    public async Task<ActionResult<ResponseSchemaParameterCount>> GetSchemaParameterCount([FromQuery] RequestSchemaParameterCount request)
+    {
+        return await mediator.Send(new QuerySchemaParameterCount(request));
+    }
+
     [HttpGet("Parameter/{id:guid}")]
     public async Task<ActionResult<ResponseSchemaParameterFind>> GetSchemaParameterByID(Guid id)
     {
@@ -111,6 +135,12 @@ public class SchemaController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<ResponseSchemaPropertyList>> GetSchemaPropertyList([FromQuery] RequestSchemaPropertyList request)
     {
         return await mediator.Send(new QuerySchemaPropertyList(request));
+    }
+
+    [HttpGet("Property/Count")]
+    public async Task<ActionResult<ResponseSchemaPropertyCount>> GetSchemaPropertyCount([FromQuery] RequestSchemaPropertyCount request)
+    {
+        return await mediator.Send(new QuerySchemaPropertyCount(request));
     }
 
     [HttpGet("Property/{id:guid}")]

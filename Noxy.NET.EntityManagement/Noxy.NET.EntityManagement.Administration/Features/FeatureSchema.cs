@@ -13,6 +13,7 @@ public enum FeatureSchemaActionKind
 {
     Find,
     List,
+    Count,
     Add,
     Update,
     Delete,
@@ -23,6 +24,7 @@ public enum FeatureSchemaActionKind
 [FeatureState]
 public record FeatureSchemaState : BaseFeatureStateRequest<FeatureSchemaActionKind>
 {
+    public Dictionary<string, int> Count { get; init; } = [];
     public Dictionary<string, EntitySchema> Find { get; init; } = [];
     public Dictionary<string, IReadOnlyList<EntitySchema>> List { get; init; } = [];
     public Dictionary<string, RequestSchemaList> Request { get; init; } = [];
@@ -30,6 +32,7 @@ public record FeatureSchemaState : BaseFeatureStateRequest<FeatureSchemaActionKi
     public bool TryGetLoading(string scope, FeatureSchemaActionKind kind, out bool value) => Loading.TryGetValue(new(scope, kind), out value);
     public bool TryGetError(string scope, FeatureSchemaActionKind kind, out string? error) => Error.TryGetValue(new(scope, kind), out error);
 
+    public bool TryGetCount(string scope, out int value) => Count.TryGetValue(scope, out value);
     public bool TryGetFind(string scope, [NotNullWhen(true)] out EntitySchema? value) => Find.TryGetValue(scope, out value);
     public bool TryGetList(string scope, [NotNullWhen(true)] out IReadOnlyList<EntitySchema>? list) => List.TryGetValue(scope, out list);
     public bool TryGetRequest(string scope, [NotNullWhen(true)] out RequestSchemaList? request) => Request.TryGetValue(scope, out request);
@@ -51,6 +54,13 @@ public class FeatureSchemaReducers : BaseFeatureReducerRequest<FeatureSchemaStat
     [ReducerMethod]
     public static FeatureSchemaState ReduceListSuccess(FeatureSchemaState state, SuccessAction<ResponseSchemaList> action) =>
         HandleSuccessAction(state, action, (next, value) => next with { List = Set(next.List, action.Scope, value.Value) });
+
+    [ReducerMethod]
+    public static FeatureSchemaState ReduceCount(FeatureSchemaState state, CountAction action) => StartAction(state, action.Scope, FeatureSchemaActionKind.Count);
+
+    [ReducerMethod]
+    public static FeatureSchemaState ReduceCountSuccess(FeatureSchemaState state, SuccessAction<ResponseSchemaCount> action) =>
+        HandleSuccessAction(state, action, (next, value) => next with { Count = Set(next.Count, action.Scope, value.Value) });
 
     [ReducerMethod]
     public static FeatureSchemaState ReduceAdd(FeatureSchemaState state, AddAction action) => StartAction(state, action.Scope, FeatureSchemaActionKind.Add);
@@ -77,6 +87,8 @@ public class FeatureSchemaReducers : BaseFeatureReducerRequest<FeatureSchemaStat
 
     public record ListAction(string Scope, RequestSchemaList Request);
 
+    public record CountAction(string Scope, RequestSchemaCount Request);
+
     public record AddAction(string Scope, RequestSchemaCreate Request);
 
     public record UpdateAction(string Scope, RequestSchemaUpdate Request);
@@ -97,6 +109,10 @@ public class FeatureSchemaListEffects(APIHttpClient client, IState<FeatureSchema
     [EffectMethod]
     public Task Handle(ListAction action, IDispatcher dispatcher) =>
         Execute(new(action.Scope, FeatureSchemaActionKind.List, false, false), dispatcher, async () => await client.SendRequest(action.Request));
+
+    [EffectMethod]
+    public Task Handle(CountAction action, IDispatcher dispatcher) =>
+        Execute(new(action.Scope, FeatureSchemaActionKind.Count, false, false), dispatcher, async () => await client.SendRequest(action.Request));
 
     [EffectMethod]
     public Task Handle(AddAction action, IDispatcher dispatcher) =>
@@ -120,9 +136,8 @@ public class FeatureSchemaListEffects(APIHttpClient client, IState<FeatureSchema
 
     protected override void RefreshList(string scope, IDispatcher dispatcher)
     {
-        if (state.Value.TryGetRequest(scope, out RequestSchemaList? request))
-        {
-            dispatcher.Dispatch(new ListAction(scope, request));
-        }
+        if (!state.Value.TryGetRequest(scope, out RequestSchemaList? request)) return;
+        dispatcher.Dispatch(new ListAction(scope, request));
+        dispatcher.Dispatch(new CountAction(scope, new() { Search = request.Search }));
     }
 }

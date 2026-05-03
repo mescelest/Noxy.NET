@@ -11,6 +11,7 @@ namespace Noxy.NET.EntityManagement.Administration.Features;
 
 public enum FeatureSchemaPropertyActionKind
 {
+    Count,
     Find,
     List,
     Add,
@@ -22,6 +23,7 @@ public enum FeatureSchemaPropertyActionKind
 [FeatureState]
 public record FeatureSchemaPropertyState : BaseFeatureStateRequest<FeatureSchemaPropertyActionKind>
 {
+    public Dictionary<string, int> Count { get; init; } = [];
     public Dictionary<string, EntitySchemaProperty.Discriminator> Find { get; init; } = [];
     public Dictionary<string, IReadOnlyList<EntitySchemaProperty.Discriminator>> List { get; init; } = [];
     public Dictionary<string, RequestSchemaPropertyList> Request { get; init; } = [];
@@ -29,6 +31,7 @@ public record FeatureSchemaPropertyState : BaseFeatureStateRequest<FeatureSchema
     public bool TryGetLoading(string scope, FeatureSchemaPropertyActionKind kind, out bool value) => Loading.TryGetValue(new(scope, kind), out value);
     public bool TryGetError(string scope, FeatureSchemaPropertyActionKind kind, out string? error) => Error.TryGetValue(new(scope, kind), out error);
 
+    public bool TryGetCount(string scope, out int value) => Count.TryGetValue(scope, out value);
     public bool TryGetFind(string scope, [NotNullWhen(true)] out EntitySchemaProperty.Discriminator? value) => Find.TryGetValue(scope, out value);
     public bool TryGetList(string scope, [NotNullWhen(true)] out IReadOnlyList<EntitySchemaProperty.Discriminator>? list) => List.TryGetValue(scope, out list);
     public bool TryGetRequest(string scope, [NotNullWhen(true)] out RequestSchemaPropertyList? request) => Request.TryGetValue(scope, out request);
@@ -51,6 +54,14 @@ public class FeatureSchemaPropertyReducers : BaseFeatureReducerRequest<FeatureSc
     [ReducerMethod]
     public static FeatureSchemaPropertyState ReduceListSuccess(FeatureSchemaPropertyState state, SuccessAction<ResponseSchemaPropertyList> action) =>
         HandleSuccessAction(state, action, (next, value) => next with { List = Set(next.List, action.Scope, value.Value) });
+
+    [ReducerMethod]
+    public static FeatureSchemaPropertyState ReduceCount(FeatureSchemaPropertyState state, CountAction action) =>
+        StartAction(state, action.Scope, FeatureSchemaPropertyActionKind.Count);
+
+    [ReducerMethod]
+    public static FeatureSchemaPropertyState ReduceCountSuccess(FeatureSchemaPropertyState state, SuccessAction<ResponseSchemaPropertyCount> action) =>
+        HandleSuccessAction(state, action, (next, value) => next with { Count = Set(next.Count, action.Scope, value.Value) });
 
     [ReducerMethod]
     public static FeatureSchemaPropertyState ReduceAddBoolean(FeatureSchemaPropertyState state, AddBooleanAction action) => StartAction(state, action.Scope, FeatureSchemaPropertyActionKind.Add);
@@ -104,6 +115,8 @@ public class FeatureSchemaPropertyReducers : BaseFeatureReducerRequest<FeatureSc
 
     public record ListAction(string Scope, RequestSchemaPropertyList Request);
 
+    public record CountAction(string Scope, RequestSchemaPropertyCount Request);
+
     public record AddBooleanAction(string Scope, RequestSchemaPropertyBooleanCreate Request);
 
     public record AddDateTimeAction(string Scope, RequestSchemaPropertyDateTimeCreate Request);
@@ -142,6 +155,10 @@ public class FeatureSchemaPropertyEffects(APIHttpClient client, IState<FeatureSc
     [EffectMethod]
     public Task Handle(ListAction action, IDispatcher dispatcher) =>
         Execute(new(action.Scope, FeatureSchemaPropertyActionKind.List, false, false), dispatcher, async () => await client.SendRequest(action.Request));
+
+    [EffectMethod]
+    public Task Handle(CountAction action, IDispatcher dispatcher) =>
+        Execute(new(action.Scope, FeatureSchemaPropertyActionKind.Count, false, false), dispatcher, async () => await client.SendRequest(action.Request));
 
     [EffectMethod]
     public Task Handle(AddBooleanAction action, IDispatcher dispatcher) =>
@@ -201,9 +218,8 @@ public class FeatureSchemaPropertyEffects(APIHttpClient client, IState<FeatureSc
 
     protected override void RefreshList(string scope, IDispatcher dispatcher)
     {
-        if (state.Value.TryGetRequest(scope, out RequestSchemaPropertyList? request))
-        {
-            dispatcher.Dispatch(new ListAction(scope, request));
-        }
+        if (!state.Value.TryGetRequest(scope, out RequestSchemaPropertyList? request)) return;
+        dispatcher.Dispatch(new ListAction(scope, request));
+        dispatcher.Dispatch(new CountAction(scope, new() { Search = request.Search }));
     }
 }

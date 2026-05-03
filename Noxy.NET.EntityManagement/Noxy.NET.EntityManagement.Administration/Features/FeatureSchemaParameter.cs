@@ -13,6 +13,7 @@ public enum FeatureSchemaParameterActionKind
 {
     Find,
     List,
+    Count,
     Add,
     Update,
     Delete,
@@ -22,6 +23,7 @@ public enum FeatureSchemaParameterActionKind
 [FeatureState]
 public record FeatureSchemaParameterState : BaseFeatureStateRequest<FeatureSchemaParameterActionKind>
 {
+    public Dictionary<string, int> Count { get; init; } = [];
     public Dictionary<string, EntitySchemaParameter.Discriminator> Find { get; init; } = [];
     public Dictionary<string, IReadOnlyList<EntitySchemaParameter.Discriminator>> List { get; init; } = [];
     public Dictionary<string, RequestSchemaParameterList> Request { get; init; } = [];
@@ -29,6 +31,7 @@ public record FeatureSchemaParameterState : BaseFeatureStateRequest<FeatureSchem
     public bool TryGetLoading(string scope, FeatureSchemaParameterActionKind kind, out bool value) => Loading.TryGetValue(new(scope, kind), out value);
     public bool TryGetError(string scope, FeatureSchemaParameterActionKind kind, out string? error) => Error.TryGetValue(new(scope, kind), out error);
 
+    public bool TryGetCount(string scope, out int value) => Count.TryGetValue(scope, out value);
     public bool TryGetFind(string scope, [NotNullWhen(true)] out EntitySchemaParameter.Discriminator? value) => Find.TryGetValue(scope, out value);
     public bool TryGetList(string scope, [NotNullWhen(true)] out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) => List.TryGetValue(scope, out list);
     public bool TryGetRequest(string scope, [NotNullWhen(true)] out RequestSchemaParameterList? request) => Request.TryGetValue(scope, out request);
@@ -51,6 +54,14 @@ public class FeatureSchemaParameterReducers : BaseFeatureReducerRequest<FeatureS
     [ReducerMethod]
     public static FeatureSchemaParameterState ReduceListSuccess(FeatureSchemaParameterState state, SuccessAction<ResponseSchemaParameterList> action) =>
         HandleSuccessAction(state, action, (next, value) => next with { List = Set(next.List, action.Scope, value.Value) });
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceCount(FeatureSchemaParameterState state, CountAction action) =>
+        StartAction(state, action.Scope, FeatureSchemaParameterActionKind.Count);
+
+    [ReducerMethod]
+    public static FeatureSchemaParameterState ReduceCountSuccess(FeatureSchemaParameterState state, SuccessAction<ResponseSchemaParameterCount> action) =>
+        HandleSuccessAction(state, action, (next, value) => next with { Count = Set(next.Count, action.Scope, value.Value) });
 
     [ReducerMethod]
     public static FeatureSchemaParameterState ReduceAddStyle(FeatureSchemaParameterState state, AddStyleAction action) => StartAction(state, action.Scope, FeatureSchemaParameterActionKind.Add);
@@ -86,6 +97,8 @@ public class FeatureSchemaParameterReducers : BaseFeatureReducerRequest<FeatureS
 
     public record ListAction(string Scope, RequestSchemaParameterList Request);
 
+    public record CountAction(string Scope, RequestSchemaParameterCount Request);
+
     public record AddStyleAction(string Scope, RequestSchemaParameterStyleCreate Request);
 
     public record AddSystemAction(string Scope, RequestSchemaParameterSystemCreate Request);
@@ -112,6 +125,10 @@ public class FeatureSchemaParameterEffects(APIHttpClient client, IState<FeatureS
     [EffectMethod]
     public Task Handle(ListAction action, IDispatcher dispatcher) =>
         Execute(new(action.Scope, FeatureSchemaParameterActionKind.List, false, false), dispatcher, async () => await client.SendRequest(action.Request));
+
+    [EffectMethod]
+    public Task Handle(CountAction action, IDispatcher dispatcher) =>
+        Execute(new(action.Scope, FeatureSchemaParameterActionKind.Count, false, false), dispatcher, async () => await client.SendRequest(action.Request));
 
     [EffectMethod]
     public Task Handle(AddStyleAction action, IDispatcher dispatcher) =>
@@ -147,9 +164,8 @@ public class FeatureSchemaParameterEffects(APIHttpClient client, IState<FeatureS
 
     protected override void RefreshList(string scope, IDispatcher dispatcher)
     {
-        if (state.Value.TryGetRequest(scope, out RequestSchemaParameterList? request))
-        {
-            dispatcher.Dispatch(new ListAction(scope, request));
-        }
+        if (!state.Value.TryGetRequest(scope, out RequestSchemaParameterList? request)) return;
+        dispatcher.Dispatch(new ListAction(scope, request));
+        dispatcher.Dispatch(new CountAction(scope, new() { Search = request.Search }));
     }
 }

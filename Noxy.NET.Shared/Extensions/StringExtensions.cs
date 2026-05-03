@@ -29,4 +29,9 @@ public static class StringExtensions
 
         return new([.. hash.Take(16)]);
     }
+
+    public static string ToEscapedSqlLike(this string sql)
+    {
+        return sql.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
+    }
 }
