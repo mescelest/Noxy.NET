@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using MediatR;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
@@ -9,4 +10,6 @@ public class QuerySchemaList(RequestSchemaList request) : IRequest<ResponseSchem
     public string? Search { get; } = request.Search;
     public int? PageNumber { get; } = request.PageNumber;
     public int? PageSize { get; } = request.PageSize;
+    public string? SortColumn { get; set; } = request.SortColumn;
+    public ListSortDirection? SortDirection { get; set; } = request.SortDirection;
 }

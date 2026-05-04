@@ -48,11 +48,11 @@
 
         <div>
             <strong>@TextService.Get(TextConstants.LabelIsApprovalRequired, GetComponentName())</strong>
-            @(SchemaParameter.IsApprovalRequired ? TextService.Get(TextConstants.ValueOptionYes) : TextService.Get(TextConstants.ValueOptionNo))
+            @(SchemaParameter.IsApprovalRequired ? TextService.Get(TextConstants.ValueYes) : TextService.Get(TextConstants.ValueNo))
         </div>
         <div>
             <strong>@TextService.Get(TextConstants.LabelIsSystemDefined, GetComponentName())</strong>
-            @(SchemaParameter.IsSystemDefined ? TextService.Get(TextConstants.ValueOptionYes) : TextService.Get(TextConstants.ValueOptionNo))
+            @(SchemaParameter.IsSystemDefined ? TextService.Get(TextConstants.ValueYes) : TextService.Get(TextConstants.ValueNo))
         </div>
         <div>
             <strong>@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName()):</strong>

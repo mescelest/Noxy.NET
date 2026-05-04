@@ -2,25 +2,19 @@
 @typeparam TOption
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @{
-        string name = GetName();
-    }
-    @foreach (TOption option in OptionList)
+    @foreach (InputElementRadioSetProperties<TOption> item in _cacheList)
     {
-        string id = Guid.NewGuid().ToString();
-        InputElementRadioSetProperties<TOption> properties = new(id, name, EqualityComparer<TOption>.Default.Equals(Value, option), option, OnChoiceChange);
-
-        <label class="option" for="@id">
+        <label class="option" for="@item.ID">
             @if (Control != null)
             {
-                @Control(properties)
+                @Control(item)
             }
             else
             {
-                <InputElementRadio ID="@id" Name="@GetName()" Option="option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" OnChange="x => OnChoiceChange(x, option)"/>
+                <InputElementRadio ID="@item.ID" Name="@item.Name" Option="item.Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" OnChange="x => OnChoiceChange(x, item.Option)"/>
             }
 
-            @ChildContent(properties)
+            @ChildContent(item)
         </label>
     }
 </div>
@@ -28,13 +22,29 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required HashSet<TOption> OptionList { get; set; }
+    public HashSet<TOption> OptionList { get; set; }
 
     [Parameter, EditorRequired]
-    public required RenderFragment<InputElementRadioSetProperties<TOption>> ChildContent { get; set; }
+    public RenderFragment<InputElementRadioSetProperties<TOption>> ChildContent { get; set; }
 
     [Parameter]
     public RenderFragment<InputElementRadioSetProperties<TOption>>? Control { get; set; }
+
+    private HashSet<TOption> _cacheSet = [];
+    private InputElementRadioSetProperties<TOption>[] _cacheList = [];
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (_cacheSet.Count == OptionList.Count && _cacheSet.SequenceEqual(OptionList)) return;
+
+        string name = GetName();
+        _cacheSet = new(OptionList);
+        _cacheList = OptionList.Select(x => new InputElementRadioSetProperties<TOption>(Guid.NewGuid().ToString(), name, x, OnChoiceChange)).ToArray();
+    }
+
+    private bool IsChecked(TOption option) => EqualityComparer<TOption>.Default.Equals(Value, option);
 
     private void OnChoiceChange(ChangeEventArgs args, TOption option)
     {

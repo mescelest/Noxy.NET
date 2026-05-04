@@ -15,8 +15,8 @@
                 }
                 else
                 {
-                    <InputControlCheckbox Checked="@context.Checked"/>
-                    <InputElementCheckbox ID="@context.ID" Name="@context.Name" Option="@context.Option" Checked="@context.Checked" OnChange="x => context.OnChange(x, context.Option)"/>
+                    <InputControlCheckbox Checked="IsChecked(context.Option)"/>
+                    <InputElementCheckbox ID="@context.ID" Name="@context.Name" Option="@context.Option" OnChange="x => context.OnChange(x, context.Option)"/>
                 }
             </Control>
         </InputElementCheckboxSet>
@@ -26,12 +26,14 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required RenderFragment<InputElementCheckboxSetScope<TOption>> ChildContent { get; set; }
+    public HashSet<TOption> OptionList { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment<InputElementCheckboxSetScope<TOption>> ChildContent { get; set; }
 
     [Parameter]
     public RenderFragment<InputElementCheckboxSetScope<TOption>>? Control { get; set; }
 
-    [Parameter, EditorRequired]
-    public required HashSet<TOption> OptionList { get; set; }
+    private bool IsChecked(TOption option) => Value?.Contains(option) == true;
 
 }

@@ -39,6 +39,7 @@ public static class TextConstants
     public const string HeaderPropertyString = "Header:Property:String";
     public const string HeaderPropertyTable = "Header:Property:Table";
 
+    public const string LabelID = "Label:ID";
     public const string LabelValue = "Label:Value";
     public const string LabelParameterStyle = "Label:ParameterStyle";
     public const string LabelParameterSystem = "Label:ParameterSystem";
@@ -61,6 +62,7 @@ public static class TextConstants
     public const string LabelIsApprovalRequired = "Label:IsApprovalRequired";
     public const string LabelIsSystemDefined = "Label:IsSystemDefined";
     public const string LabelTimeApproved = "Label:TimeApproved";
+    public const string LabelTimeActivated = "Label:TimeActivated";
     public const string LabelTimeCreated = "Label:TimeCreated";
     public const string LabelTimeEffective = "Label:TimeEffective";
     public const string LabelTimeEffectiveFrom = "Label:TimeEffectiveFrom";
@@ -86,6 +88,8 @@ public static class TextConstants
     public const string LabelFormDateEffective = "Label:Form:DateEffective";
     public const string LabelFormPageSize = "Label:Form:PageSize";
     public const string LabelFormPageNumber = "Label:Form:PageNumber";
+    public const string LabelFormSortColumn = "Label:Form:SortColumn";
+    public const string LabelFormSortDirection = "Label:Form:SortDirection";
     public const string LabelFormParameterTextType = "Label:Form:ParameterTextType";
     public const string LabelFormIsUnsigned = "Label:Form:IsUnsigned";
     public const string LabelFormAllowedExtensions = "Label:Form:AllowedExtensions";
@@ -118,6 +122,8 @@ public static class TextConstants
     public const string HelpFormDateEffective = "Help:Form:DateEffective";
     public const string HelpFormPageSize = "Help:Form:PageSize";
     public const string HelpFormPageNumber = "Help:Form:PageNumber";
+    public const string HelpFormSortColumn = "Help:Form:Column";
+    public const string HelpFormSortDirection = "Help:Form:Direction";
     public const string HelpFormParameterTextType = "Help:Form:ParameterTextType";
     public const string HelpFormIsUnsigned = "Help:Form:IsUnsigned";
     public const string HelpFormAllowedExtensions = "Help:Form:AllowedExtensions";
@@ -130,8 +136,10 @@ public static class TextConstants
     public const string HelpFormParameterSystem = "Help:Form:ParameterSystem";
     public const string HelpFormParameterText = "Help:Form:ParameterText";
 
-    public const string ValueOptionYes = "Value:Option:Yes";
-    public const string ValueOptionNo = "Value:Option:No";
+    public const string ValueYes = "Value:Yes";
+    public const string ValueNo = "Value:No";
+    public const string ValueAscending = "Value:Ascending";
+    public const string ValueDescending = "Value:Descending";
     public const string ValueParameterTextTypeLine = "Value:ParameterTextType:Line";
     public const string ValueParameterTextTypeText = "Value:ParameterTextType:Text";
     public const string ValueParameterTextTypeRichText = "Value:ParameterTextType:RichText";

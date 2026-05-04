@@ -21,13 +21,23 @@ public class RequestSchemaList : BaseRequestGet<ResponseSchemaList>
     [Description(TextConstants.HelpFormPageNumber)]
     public int? PageNumber { get; set; }
 
+    [DisplayName(TextConstants.LabelFormSortColumn)]
+    [Description(TextConstants.HelpFormSortColumn)]
+    public string? SortColumn { get; set; }
+
+    [DisplayName(TextConstants.LabelFormSortDirection)]
+    [Description(TextConstants.HelpFormSortDirection)]
+    public ListSortDirection? SortDirection { get; set; }
+
     public override Dictionary<string, object?> ToQueryParameters()
     {
         return new()
         {
             [nameof(Search)] = Search,
             [nameof(PageSize)] = PageSize,
-            [nameof(PageNumber)] = PageNumber
+            [nameof(PageNumber)] = PageNumber,
+            [nameof(SortColumn)] = SortColumn,
+            [nameof(SortDirection)] = SortDirection,
         };
     }
 }

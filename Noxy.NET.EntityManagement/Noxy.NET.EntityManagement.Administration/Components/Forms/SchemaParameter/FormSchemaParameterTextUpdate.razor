@@ -14,11 +14,11 @@
         </InputGroupSelect>
 
         <InputGroupCheckbox Option="true" @bind-Value="Model.IsApprovalRequired" DisplayName="@GetDisplayName(nameof(Model.IsApprovalRequired))" Description="@GetDescription(nameof(Model.IsApprovalRequired))">
-            @TextService.Get(TextConstants.ValueOptionYes)
+            @TextService.Get(TextConstants.ValueYes)
         </InputGroupCheckbox>
 
         <InputGroupCheckbox Option="true" @bind-Value="Model.IsSystemDefined" DisplayName="@GetDisplayName(nameof(Model.IsSystemDefined))" Description="@GetDescription(nameof(Model.IsSystemDefined))">
-            @TextService.Get(TextConstants.ValueOptionYes)
+            @TextService.Get(TextConstants.ValueYes)
         </InputGroupCheckbox>
 
         @ChildContent

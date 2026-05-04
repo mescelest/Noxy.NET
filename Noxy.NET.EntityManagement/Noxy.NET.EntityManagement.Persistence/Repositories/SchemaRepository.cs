@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -8,6 +9,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
+using Noxy.NET.EntityManagement.Persistence.Extensions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
@@ -40,7 +42,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
 
         List<TableSchema> result = await query
-            .OrderByDescending(x => x.TimeCreated)
+            .OrderByDynamic(filter.SortColumn, filter.SortDirection == ListSortDirection.Descending)
             .Skip(filter.PageNumber * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();

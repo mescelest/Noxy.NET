@@ -1,13 +1,12 @@
-﻿@inherits BaseInput<TValue>
-@typeparam TValue
+﻿@inherits BaseInput<TOption>
+@typeparam TOption
 
 <select @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" @onchange="OnInputChange">
-    @for (int i = 0; i < OptionList.Count(); i++)
+    @for (int i = 0; i < _cacheList.Length; i++)
     {
-        TValue item = OptionList.ElementAt(i);
-        bool isChecked = EqualityComparer<TValue>.Default.Equals(Value, item);
+        TOption item = _cacheList[i];
 
-        <option value="@i" selected="@isChecked">
+        <option value="@i" selected="@IsChecked(item)">
             @ChildContent(item)
         </option>
     }
@@ -16,13 +15,22 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required HashSet<TValue> OptionList { get; set; }
+    public HashSet<TOption> OptionList { get; set; }
 
     [Parameter, EditorRequired]
-    public required RenderFragment<TValue> ChildContent { get; set; }
+    public RenderFragment<TOption> ChildContent { get; set; }
 
-    [Parameter]
-    public Func<TValue, IReadOnlyDictionary<string, object>?>? OptionAttributes { get; set; }
+    private TOption[] _cacheList = [];
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (_cacheList.Length == OptionList.Count && _cacheList.SequenceEqual(OptionList)) return;
+        _cacheList = OptionList.ToArray();
+    }
+
+    private bool IsChecked(TOption option) => EqualityComparer<TOption>.Default.Equals(Value, option);
 
     private void OnInputChange(ChangeEventArgs args)
     {

@@ -103,6 +103,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
 
         #region Label
 
+        RegisterText(TextConstants.LabelID, "ID");
         RegisterText(TextConstants.LabelValue, "Value");
         RegisterText(TextConstants.LabelParameterStyle, "Style parameter");
         RegisterText(TextConstants.LabelParameterSystem, "System parameter");
@@ -125,6 +126,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.LabelIsApprovalRequired, "Is approval required?");
         RegisterText(TextConstants.LabelIsSystemDefined, "Is system defined?");
         RegisterText(TextConstants.LabelTimeApproved, "Approved at");
+        RegisterText(TextConstants.LabelTimeActivated, "Activated at");
         RegisterText(TextConstants.LabelTimeCreated, "Created at");
         RegisterText(TextConstants.LabelTimeEffective, "Effective at");
         RegisterText(TextConstants.LabelTimeEffectiveFrom, "Effective from");
@@ -152,8 +154,10 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.LabelFormParameterType, "Parameter type");
         RegisterText(TextConstants.LabelFormPropertyType, "Property type");
         RegisterText(TextConstants.LabelFormDateEffective, "Effective date");
-        RegisterText(TextConstants.LabelFormPageNumber, "Page");
         RegisterText(TextConstants.LabelFormPageSize, "Rows");
+        RegisterText(TextConstants.LabelFormPageNumber, "Page");
+        RegisterText(TextConstants.LabelFormSortColumn, "Sorting column");
+        RegisterText(TextConstants.LabelFormSortDirection, "Sorting direction");
         RegisterText(TextConstants.LabelFormParameterTextType, "Text parameter type");
         RegisterText(TextConstants.LabelFormBoolean, "Boolean");
         RegisterText(TextConstants.LabelFormDateTime, "DateTime");
@@ -187,6 +191,8 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.HelpFormPropertyType, "The type of property.");
         RegisterText(TextConstants.HelpFormDateEffective, "The date from which this entity should become active.");
         RegisterText(TextConstants.HelpFormPageNumber, "The current page being shown");
+        RegisterText(TextConstants.HelpFormSortColumn, "The column which the page is sorted by");
+        RegisterText(TextConstants.HelpFormSortDirection, "The direction which the page is sorted by");
         RegisterText(TextConstants.HelpFormPageSize, "The number of rows shown on each page");
         RegisterText(TextConstants.HelpFormParameterTextType, "The type of text parameter.");
         RegisterText(TextConstants.HelpFormBoolean, "Represents a boolean value.");
@@ -202,8 +208,10 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
 
         #region Value
 
-        RegisterText(TextConstants.ValueOptionYes, "Yes");
-        RegisterText(TextConstants.ValueOptionNo, "No");
+        RegisterText(TextConstants.ValueYes, "Yes");
+        RegisterText(TextConstants.ValueNo, "No");
+        RegisterText(TextConstants.ValueAscending, "Ascending");
+        RegisterText(TextConstants.ValueDescending, "Descending");
         RegisterText(TextConstants.ValueParameterTextTypeLine, "Line");
         RegisterText(TextConstants.ValueParameterTextTypeText, "Text");
         RegisterText(TextConstants.ValueParameterTextTypeRichText, "Rich text");

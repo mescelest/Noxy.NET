@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using MediatR;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.Application.Interfaces;
@@ -18,6 +19,8 @@ public class HandlerSchemaList(IUnitOfWorkFactory serviceUoWFactory) : IRequestH
             Search = request.Search?.ToEscapedSqlLike(),
             PageSize = request.PageSize ?? 10,
             PageNumber = request.PageNumber ?? 0,
+            SortColumn = request.SortColumn ?? nameof(EntitySchema.TimeCreated),
+            SortDirection = request.SortDirection ?? ListSortDirection.Descending,
         });
 
         return new() { Value = result };

@@ -4,11 +4,49 @@
     <WebForm T="RequestSchemaList" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Search))" Description="@GetDescription(nameof(Model.Search))"
                         @bind-Value="Model.Search"/>
+
+        <InputGroupSelect OptionList="_sortOptionSet" Name="@nameof(Model.SortColumn)" DisplayName="@GetDisplayName(nameof(Model.SortColumn))" Description="@GetDescription(nameof(Model.SortColumn))"
+                          @bind-Value:get="GetSortValue()" @bind-Value:set="SetSortValue">
+            @if (context != null)
+            {
+                @($"{TextService.Get(context.Label)} {(context.Direction == ListSortDirection.Ascending ? "⇡" : "⇣")}")
+            }
+            else
+            {
+                @string.Empty
+            }
+        </InputGroupSelect>
+
         @ChildContent
     </WebForm>
 </div>
 
 @code {
+
+    private readonly HashSet<SortOption?> _sortOptionSet =
+    [
+        null,
+        new(nameof(EntitySchema.ID), ListSortDirection.Ascending, TextConstants.LabelID),
+        new(nameof(EntitySchema.ID), ListSortDirection.Descending, TextConstants.LabelID),
+        new(nameof(EntitySchema.Name), ListSortDirection.Ascending, TextConstants.LabelName),
+        new(nameof(EntitySchema.Name), ListSortDirection.Descending, TextConstants.LabelName),
+        new(nameof(EntitySchema.TimeCreated), ListSortDirection.Ascending, TextConstants.LabelTimeCreated),
+        new(nameof(EntitySchema.TimeCreated), ListSortDirection.Descending, TextConstants.LabelTimeCreated),
+        new(nameof(EntitySchema.TimeActivated), ListSortDirection.Ascending, TextConstants.LabelTimeActivated),
+        new(nameof(EntitySchema.TimeActivated), ListSortDirection.Ascending, TextConstants.LabelTimeActivated),
+        new(nameof(EntitySchema.TimeActivated), ListSortDirection.Descending, TextConstants.LabelTimeActivated),
+    ];
+
+    private SortOption? GetSortValue()
+    {
+        return !string.IsNullOrWhiteSpace(Model.SortColumn) && Model.SortDirection.HasValue ? _sortOptionSet.First(x => x != null && x.Column == Model.SortColumn && x.Direction == Model.SortDirection) : null;
+    }
+
+    private void SetSortValue(SortOption? value)
+    {
+        Model.SortColumn = value?.Column;
+        Model.SortDirection = value?.Direction;
+    }
 
     protected override WebFormContext<RequestSchemaList> CreateContext()
     {

@@ -27,8 +27,8 @@
                     <span>@context.SchemaIdentifier</span>
                     <span>@context.Name</span>
                     <span>@context.Note</span>
-                    <span>@(context.IsApprovalRequired ? TextService.Get(TextConstants.ValueOptionYes) : TextService.Get(TextConstants.ValueOptionNo))</span>
-                    <span>@(context.IsSystemDefined ? TextService.Get(TextConstants.ValueOptionYes) : TextService.Get(TextConstants.ValueOptionNo))</span>
+                    <span>@(context.IsApprovalRequired ? TextService.Get(TextConstants.ValueYes) : TextService.Get(TextConstants.ValueNo))</span>
+                    <span>@(context.IsSystemDefined ? TextService.Get(TextConstants.ValueYes) : TextService.Get(TextConstants.ValueNo))</span>
                     <span>@context.TimeCreated</span>
                 </TableRow>
             </Table>

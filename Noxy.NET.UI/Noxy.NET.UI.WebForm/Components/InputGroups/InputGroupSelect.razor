@@ -1,19 +1,21 @@
-﻿@inherits BaseInputGroup<TValue>
-@typeparam TValue
+﻿@inherits BaseInputGroup<TOption>
+@typeparam TOption
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementSelect @attributes="InputAttributes" TValue="TValue" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" ChildContent="ChildContent"
-                            Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+        <InputElementSelect @attributes="InputAttributes" TOption="TOption" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" ChildContent="ChildContent"
+                            Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+        </InputElementSelect>
+        @ChildContent
     </TemplateInputGroup>
 </div>
 
 @code {
 
     [Parameter, EditorRequired]
-    public required RenderFragment<TValue?> ChildContent { get; set; }
+    public RenderFragment<TOption?> ChildContent { get; set; }
 
     [Parameter, EditorRequired]
-    public required HashSet<TValue> OptionList { get; set; }
+    public HashSet<TOption> OptionList { get; set; }
 
 } 

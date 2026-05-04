@@ -3,36 +3,43 @@
 @typeparam TValue where TValue : ISet<TOption>, new()
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @{
-        string name = GetName();
+    @foreach (InputElementCheckboxSetScope<TOption> item in _cacheList)
+    {
+        <label class="option" for="@item.ID">
+            @if (Control != null)
+            {
+                @Control(item)
+            }
+            else
+            {
+                <InputElementCheckbox TValue="TOption" ID="@item.ID" Name="@item.Name" Option="item.Option" Checked="@IsChecked(item.Option)" OnChange="x => OnChoiceChange(x, item.Option)"/>
+            }
 
-        foreach (TOption option in OptionList)
-        {
-            string id = Guid.NewGuid().ToString();
-            InputElementCheckboxSetScope<TOption> scope = new(id, name, IsChecked(option), option, OnChoiceChange);
-
-            <label class="option" for="@id">
-                @if (Control != null)
-                {
-                    @Control(scope)
-                }
-                else
-                {
-                    <InputElementCheckbox TValue="TOption" ID="@ID" Name="@GetName()" Option="option" Checked="@IsChecked(option)" OnChange="x => OnChoiceChange(x, option)"/>
-                }
-
-                @ChildContent(scope)
-            </label>
-        }
+            @ChildContent(item)
+        </label>
     }
 </div>
 
 @code {
 
     [Parameter, EditorRequired]
-    public required RenderFragment<InputElementCheckboxSetScope<TOption>> ChildContent { get; set; }
+    public RenderFragment<InputElementCheckboxSetScope<TOption>> ChildContent { get; set; }
 
     [Parameter]
     public RenderFragment<InputElementCheckboxSetScope<TOption>>? Control { get; set; }
+
+    private HashSet<TOption> _cacheSet = [];
+    private InputElementCheckboxSetScope<TOption>[] _cacheList = [];
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (_cacheSet.Count == OptionList.Count && _cacheSet.SequenceEqual(OptionList)) return;
+
+        string name = GetName();
+        _cacheSet = new(OptionList);
+        _cacheList = OptionList.Select(x => new InputElementCheckboxSetScope<TOption>(Guid.NewGuid().ToString(), name, x, OnChoiceChange)).ToArray();
+    }
 
 }

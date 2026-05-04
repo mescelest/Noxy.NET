@@ -24,10 +24,10 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required TOption Option { get; set; }
+    public TOption Option { get; set; }
 
     [Parameter, EditorRequired]
-    public required RenderFragment ChildContent { get; set; }
+    public RenderFragment ChildContent { get; set; }
 
     [Parameter]
     public RenderFragment<InputElementRadioScope<TOption>>? Control { get; set; }

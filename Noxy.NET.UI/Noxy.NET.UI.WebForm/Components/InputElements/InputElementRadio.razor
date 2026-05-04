@@ -6,7 +6,7 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required TOption Option { get; set; }
+    public TOption Option { get; set; }
 
     [Parameter]
     public bool? Checked { get; set; }
