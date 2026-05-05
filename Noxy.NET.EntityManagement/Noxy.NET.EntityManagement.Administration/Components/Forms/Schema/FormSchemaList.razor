@@ -5,17 +5,16 @@
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Search))" Description="@GetDescription(nameof(Model.Search))"
                         @bind-Value="Model.Search"/>
 
-        <InputGroupSelect OptionList="_sortOptionSet" Name="@nameof(Model.SortColumn)" DisplayName="@GetDisplayName(nameof(Model.SortColumn))" Description="@GetDescription(nameof(Model.SortColumn))"
-                          @bind-Value:get="GetSortValue()" @bind-Value:set="SetSortValue">
-            @if (context != null)
-            {
-                @($"{TextService.Get(context.Label)} {(context.Direction == ListSortDirection.Ascending ? "⇡" : "⇣")}")
-            }
-            else
-            {
-                @string.Empty
-            }
+        <InputGroupSelectSorting OptionSet="_sortOptionSet" Name="@nameof(Model.Sorting)" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>
+
+        <InputGroupSelect OptionList="_sortPageSize" Name="@nameof(Model.PageSize)" DisplayName="@GetDisplayName(nameof(Model.PageSize))" Description="@GetDescription(nameof(Model.PageSize))"
+                          @bind-Value="Model.PageSize">
+            @context
         </InputGroupSelect>
+
+        @* <Pagination > *@
+        @* *@
+        @* </Pagination> *@
 
         @ChildContent
     </WebForm>
@@ -23,30 +22,21 @@
 
 @code {
 
-    private readonly HashSet<SortOption?> _sortOptionSet =
+    private readonly Dictionary<string, string> _sortOptionSet = new()
+    {
+        { nameof(EntitySchema.ID), TextConstants.LabelID },
+        { nameof(EntitySchema.Name), TextConstants.LabelName },
+        { nameof(EntitySchema.TimeCreated), TextConstants.LabelTimeCreated },
+        { nameof(EntitySchema.TimeActivated), TextConstants.LabelTimeActivated },
+    };
+
+    private readonly HashSet<int?> _sortPageSize =
     [
-        null,
-        new(nameof(EntitySchema.ID), ListSortDirection.Ascending, TextConstants.LabelID),
-        new(nameof(EntitySchema.ID), ListSortDirection.Descending, TextConstants.LabelID),
-        new(nameof(EntitySchema.Name), ListSortDirection.Ascending, TextConstants.LabelName),
-        new(nameof(EntitySchema.Name), ListSortDirection.Descending, TextConstants.LabelName),
-        new(nameof(EntitySchema.TimeCreated), ListSortDirection.Ascending, TextConstants.LabelTimeCreated),
-        new(nameof(EntitySchema.TimeCreated), ListSortDirection.Descending, TextConstants.LabelTimeCreated),
-        new(nameof(EntitySchema.TimeActivated), ListSortDirection.Ascending, TextConstants.LabelTimeActivated),
-        new(nameof(EntitySchema.TimeActivated), ListSortDirection.Ascending, TextConstants.LabelTimeActivated),
-        new(nameof(EntitySchema.TimeActivated), ListSortDirection.Descending, TextConstants.LabelTimeActivated),
+        10,
+        25,
+        50,
+        100
     ];
-
-    private SortOption? GetSortValue()
-    {
-        return !string.IsNullOrWhiteSpace(Model.SortColumn) && Model.SortDirection.HasValue ? _sortOptionSet.First(x => x != null && x.Column == Model.SortColumn && x.Direction == Model.SortDirection) : null;
-    }
-
-    private void SetSortValue(SortOption? value)
-    {
-        Model.SortColumn = value?.Column;
-        Model.SortDirection = value?.Direction;
-    }
 
     protected override WebFormContext<RequestSchemaList> CreateContext()
     {

@@ -1,18 +1,18 @@
-@inject IState<FeatureSchemaState> StateSchema
-@inject IState<FeatureSchemaContextState> StateElement
+@inject IState<FeatureSchemaContextState> StateContext
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <Loader Loading="IsLoading">
-        @if (Schema != null)
-        {
-            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of contexts for @Schema?.Name</DynamicHTMLTag>
 
-            @foreach (EntitySchemaContext entitySchemaContext in List)
-            {
-                @ChildContent((Schema, entitySchemaContext))
-            }
+        <div class="header">
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of contexts</DynamicHTMLTag>
+            <InputElementPagination PageSize="@(Request.PageSize ?? 10)" Count="Count" @bind-Value="Request.PageNumber" @bind-Value:after="Callback"/>
+        </div>
+
+        @foreach (EntitySchemaContext entitySchemaContext in List)
+        {
+            @ChildContent(entitySchemaContext)
         }
     </Loader>
 </div>
@@ -21,44 +21,38 @@
 
     [Parameter]
     public Guid? SchemaID { get; set; }
-    private Guid SchemaIDCurrent => SchemaID ?? Guid.Empty;
 
     [Parameter, EditorRequired]
-    public RenderFragment<(EntitySchema Schema, EntitySchemaContext SchemaContext)> ChildContent { get; set; }
+    public RenderFragment<EntitySchemaContext> ChildContent { get; set; }
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
 
     [Parameter]
-    public RequestSchemaContextList? Request { get; set; }
-    private RequestSchemaContextList RequestCurrent => Request ?? new() { SchemaID = SchemaID };
+    public RequestSchemaContextList? InitialRequest { get; set; }
+    private RequestSchemaContextList InitialRequestCurrent => InitialRequest ?? new() { SchemaID = SchemaID };
 
     [Parameter]
     public string? Scope { get; set; }
     private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{SchemaID}";
 
-    private bool IsLoading => IsLoadingSchema || IsLoadingList;
-
-    private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Find, out bool value) && value;
-    private EntitySchema? Schema => StateSchema.Value.TryGetFind(ScopeCurrent, out EntitySchema? value) ? value : null;
-
-    private bool IsLoadingList => StateElement.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchemaContext> List => StateElement.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaContext>? list) ? list : [];
+    private bool IsLoading => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchemaContext> List => StateContext.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaContext>? list) ? list : [];
+    private RequestSchemaContextList Request => StateContext.Value.TryGetRequest(ScopeCurrent, out RequestSchemaContextList? request) ? request : InitialRequestCurrent;
+    private int Count => StateContext.Value.TryGetCount(ScopeCurrent, out int count) ? count : 0;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        if (Schema == null && !IsLoadingSchema)
-        {
-            Dispatcher.Dispatch(new FeatureSchemaReducers.FindAction(ScopeCurrent, new() { ID = SchemaIDCurrent }));
-        }
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.ListAction(ScopeCurrent, InitialRequestCurrent));
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.CountAction(ScopeCurrent, new()));
+    }
 
-        if (List.Count == 0 && !IsLoadingList)
-        {
-            Dispatcher.Dispatch(new FeatureSchemaContextReducers.ListAction(ScopeCurrent, RequestCurrent));
-        }
+    private void Callback()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaContextReducers.ListAction(ScopeCurrent, Request));
     }
 
 }

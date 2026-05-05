@@ -1,4 +1,4 @@
-﻿@inherits BaseInput<int>
+﻿@inherits BaseInput<int?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
 
@@ -24,7 +24,7 @@
         }
     </Button>
 
-    @* <InputFieldNumber class="page" DisplayName="@DisplayName" OptionList="OptionList" Min="MinPageValue" Max="MaxPageValue" @bind-Value:get="GetValue()" @bind-Value:set="SetValue" /> *@
+    @* <InputElementInteger class="page" Min="MinPageValue" Max="MaxPageValue" @bind-Value:get="GetValue()" @bind-Value:set="SetValue" /> *@
 
     <Button class="next" disabled="@NextDisabled" @onclick="NextButtonClickHandler">
         @if (Next == null)
@@ -54,7 +54,7 @@
 
     [Parameter, EditorRequired]
     public int PageSize { get; set; }
-    private int PageSizeCurrent => Math.Max(PageSize, MinPageValue);
+    private int PageSizeCurrent => Math.Max(PageSize, MinPageSize);
 
     [Parameter, EditorRequired]
     public int Count { get; set; }
@@ -80,28 +80,21 @@
     private bool DisabledCurrent => Disabled ?? false;
 
     private const int MinCount = 0;
-    private const int MinPageValue = 1;
-    private int MaxPageValue => Math.Max(MinPageValue, (CountCurrent - 1) / PageSizeCurrent + 1);
+    private const int MinPageValue = 0;
+    private const int MinPageSize = 1;
 
-    private bool FirstDisabled => DisabledCurrent || Value == MinPageValue;
-    private bool PreviousDisabled => DisabledCurrent || Value == MinPageValue;
-    private bool NextDisabled => DisabledCurrent || Value == MaxPageValue;
-    private bool LastDisabled => DisabledCurrent || Value == MaxPageValue;
+    private int ValueCurrent => Value ?? MinPageValue;
+    private int MaxPageValue => Math.Max(MinPageValue, (CountCurrent + PageSizeCurrent - 1) / PageSizeCurrent - 1);
 
-    private double? GetValue()
-    {
-        return (double)Value;
-    }
-
-    private void SetValue(double? value)
-    {
-        ValueChanged.InvokeAsync((int)(value ?? MinPageValue));
-    }
+    private bool FirstDisabled => DisabledCurrent || ValueCurrent == MinPageValue;
+    private bool PreviousDisabled => DisabledCurrent || ValueCurrent == MinPageValue;
+    private bool NextDisabled => DisabledCurrent || ValueCurrent == MaxPageValue;
+    private bool LastDisabled => DisabledCurrent || ValueCurrent == MaxPageValue;
 
     private void Commit(int? value)
     {
         int page = ClampPage(value);
-        ValueChanged.InvokeAsync(page);
+        NotifyChange(page);
     }
 
     private int ClampPage(int? value)
@@ -116,12 +109,12 @@
 
     private void PreviousButtonClickHandler()
     {
-        Commit(Value - 1);
+        Commit(ValueCurrent - 1);
     }
 
     private void NextButtonClickHandler()
     {
-        Commit(Value + 1);
+        Commit(ValueCurrent + 1);
     }
 
     private void LastButtonClickHandler()

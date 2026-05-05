@@ -4,3 +4,9 @@
     flex-flow: column;
     row-gap: var(--size-gap-md);
 }
+
+.header {
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: space-between;
+}

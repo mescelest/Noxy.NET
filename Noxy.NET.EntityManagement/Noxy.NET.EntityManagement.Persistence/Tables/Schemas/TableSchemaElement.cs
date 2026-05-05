@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using Noxy.NET.EntityManagement.Domain.Interfaces;
 using Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
@@ -7,6 +8,8 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
 [Table(nameof(TableSchemaElement))]
+[Index(nameof(Name))]
+[Index(nameof(Weight))]
 public class TableSchemaElement : BaseTableSchemaPresentation, ISchemaMetadata, ISchemaOrdering, ISchemaPresentation
 {
     [Required]

@@ -1,10 +1,13 @@
-@inject IState<FeatureSchemaState> State
+@inject IState<FeatureSchemaState> StateSchema
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <Loader Loading="IsLoading">
-        <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schemas</DynamicHTMLTag>
+        <div class="header">
+            <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schemas</DynamicHTMLTag>
+            <InputElementPagination PageSize="@(Request.PageSize ?? 10)" Count="Count" @bind-Value="Request.PageNumber" @bind-Value:after="Callback"/>
+        </div>
 
         @foreach (EntitySchema item in List)
         {
@@ -23,24 +26,31 @@
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
 
     [Parameter]
-    public RequestSchemaList? Request { get; set; }
-    private RequestSchemaList RequestCurrent => Request ?? new();
+    public RequestSchemaList? InitialRequest { get; set; }
+    private RequestSchemaList InitialRequestCurrent => InitialRequest ?? new();
 
     [Parameter]
     public string? Scope { get; set; }
     private string ScopeCurrent => Scope ?? GetComponentName();
 
-    private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.List, out bool value) && value;
-    private IReadOnlyList<EntitySchema> List => State.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchema>? list) ? list : [];
+    private bool IsLoading => StateSchema.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.List, out bool value) && value;
+    private IReadOnlyList<EntitySchema> List => StateSchema.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchema>? list) ? list : [];
+    private RequestSchemaList Request => StateSchema.Value.TryGetRequest(ScopeCurrent, out RequestSchemaList? request) ? request : InitialRequestCurrent;
+    private int Count => StateSchema.Value.TryGetCount(ScopeCurrent, out int count) ? count : 0;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        if (List.Count == 0 && !IsLoading)
+        if (!IsLoading)
         {
-            Dispatcher.Dispatch(new FeatureSchemaReducers.ListAction(ScopeCurrent, RequestCurrent));
+            Dispatcher.Dispatch(new FeatureSchemaReducers.ListAction(ScopeCurrent, InitialRequestCurrent));
         }
+    }
+
+    private void Callback()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaReducers.ListAction(ScopeCurrent, Request));
     }
 
 }

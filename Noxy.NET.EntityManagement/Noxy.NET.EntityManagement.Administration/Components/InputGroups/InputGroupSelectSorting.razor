@@ -1,0 +1,50 @@
+@inject TextService TextService
+@inherits BaseInputGroup<(string Column, ListSortDirection Direction)?>
+
+<InputGroupSelect OptionList="_cacheSet" Name="@Name" DisplayName="@DisplayName" Description="@Description" InputAttributes="InputAttributes" @bind-Value:get="GetSortValue()" @bind-Value:set="SetSortValue">
+    @if (context != null)
+    {
+        @($"{TextService.Get(context.Label)} {(context.Direction == ListSortDirection.Ascending ? "⇡" : "⇣")}")
+    }
+    else
+    {
+        @string.Empty
+    }
+</InputGroupSelect>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Dictionary<string, string> OptionSet { get; set; } = new();
+
+    private Dictionary<string, string> _cacheDict = new();
+    private HashSet<SortOption?> _cacheSet = [];
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (OptionSet.Count == _cacheDict.Count && _cacheDict.DictionaryEqual(OptionSet)) return;
+        _cacheDict = OptionSet;
+        _cacheSet = [null];
+        foreach (KeyValuePair<string, string> item in OptionSet)
+        {
+            _cacheSet.Add(new(item.Key, ListSortDirection.Ascending, item.Value));
+            _cacheSet.Add(new(item.Key, ListSortDirection.Descending, item.Value));
+        }
+    }
+
+    private SortOption? GetSortValue()
+    {
+        if (!Value.HasValue) return null;
+
+        (string column, ListSortDirection direction) = Value.Value;
+        return !string.IsNullOrWhiteSpace(column) ? _cacheSet.First(x => x != null && x.Column == column && x.Direction == direction) : null;
+    }
+
+    private void SetSortValue(SortOption? value)
+    {
+        ValueChanged.InvokeAsync(value != null ? (value.Column, value.Direction) : null);
+    }
+
+}

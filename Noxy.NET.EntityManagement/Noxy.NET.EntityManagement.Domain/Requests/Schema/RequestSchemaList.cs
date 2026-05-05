@@ -1,33 +1,11 @@
-using System.ComponentModel;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
-using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests.Schema;
 
-public class RequestSchemaList : BaseRequestGet<ResponseSchemaList>
+public class RequestSchemaList : BaseRequestGetList<ResponseSchemaList>
 {
     public override string APIEndpoint => "Schema";
-
-    [DisplayName(TextConstants.LabelFormSearch)]
-    [Description(TextConstants.HelpFormSearch)]
-    public string? Search { get; set; }
-
-    [DisplayName(TextConstants.LabelFormPageSize)]
-    [Description(TextConstants.HelpFormPageSize)]
-    public int? PageSize { get; set; }
-
-    [DisplayName(TextConstants.LabelFormPageNumber)]
-    [Description(TextConstants.HelpFormPageNumber)]
-    public int? PageNumber { get; set; }
-
-    [DisplayName(TextConstants.LabelFormSortColumn)]
-    [Description(TextConstants.HelpFormSortColumn)]
-    public string? SortColumn { get; set; }
-
-    [DisplayName(TextConstants.LabelFormSortDirection)]
-    [Description(TextConstants.HelpFormSortDirection)]
-    public ListSortDirection? SortDirection { get; set; }
 
     public override Dictionary<string, object?> ToQueryParameters()
     {

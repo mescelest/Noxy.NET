@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using Noxy.NET.EntityManagement.Domain.Interfaces;
 using Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
@@ -7,6 +8,8 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
 [Table(nameof(TableSchema))]
+[Index(nameof(Name))]
+[Index(nameof(TimeActivated))]
 public class TableSchema : BaseTable, ISchemaMetadata
 {
     [Required]

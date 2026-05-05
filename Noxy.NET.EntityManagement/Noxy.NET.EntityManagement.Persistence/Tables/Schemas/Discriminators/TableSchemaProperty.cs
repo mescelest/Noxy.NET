@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Interfaces;
 using Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
@@ -6,6 +7,8 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
 
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
+[Index(nameof(Name))]
+[Index(nameof(Weight))]
 public abstract class TableSchemaProperty : BaseTableSchemaPresentation, ISchemaMetadata, ISchemaOrdering, ISchemaPresentation
 {
     [Required]

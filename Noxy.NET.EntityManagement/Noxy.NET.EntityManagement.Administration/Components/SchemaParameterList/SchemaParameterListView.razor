@@ -3,12 +3,15 @@
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="header">
         <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">List of schema parameters</DynamicHTMLTag>
+        <InputElementPagination PageSize="@(Request.PageSize ?? 10)" Count="Count" @bind-Value="Request.PageNumber" @bind-Value:after="Callback"/>
+    </div>
 
-        @foreach (EntitySchemaParameter.Discriminator entitySchemaParameter in List)
-        {
-                @ChildContent(entitySchemaParameter.GetValue())
-        }
+    @foreach (EntitySchemaParameter.Discriminator entitySchemaParameter in List)
+    {
+        @ChildContent(entitySchemaParameter.GetValue())
+    }
 </div>
 
 @code {
@@ -24,20 +27,28 @@
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H1;
 
     [Parameter]
-    public RequestSchemaParameterList? Request { get; set; }
-    private RequestSchemaParameterList RequestCurrent => Request ?? new() { SchemaID = SchemaID };
+    public RequestSchemaParameterList? InitialRequest { get; set; }
+    private RequestSchemaParameterList InitialRequestCurrent => InitialRequest ?? new() { SchemaID = SchemaID };
 
     [Parameter]
     public string? Scope { get; set; }
     private string ScopeCurrent => Scope ?? GetComponentName();
 
     private IReadOnlyList<EntitySchemaParameter.Discriminator> List => StateSchemaParameter.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) ? list : [];
+    private RequestSchemaParameterList Request => StateSchemaParameter.Value.TryGetRequest(ScopeCurrent, out RequestSchemaParameterList? request) ? request : InitialRequestCurrent;
+    private int Count => StateSchemaParameter.Value.TryGetCount(ScopeCurrent, out int count) ? count : 0;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, RequestCurrent));
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, InitialRequestCurrent));
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.CountAction(ScopeCurrent, new()));
+    }
+
+    private void Callback()
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, Request));
     }
 
 }

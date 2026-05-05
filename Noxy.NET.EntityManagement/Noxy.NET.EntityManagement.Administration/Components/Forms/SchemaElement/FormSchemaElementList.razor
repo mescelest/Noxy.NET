@@ -4,6 +4,9 @@
     <WebForm T="RequestSchemaElementList" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Search))" Description="@GetDescription(nameof(Model.Search))"
                         @bind-Value="Model.Search"/>
+
+        <InputGroupSelectSorting OptionSet="_sortOptionSet" Name="@nameof(Model.Sorting)" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>
+
         @ChildContent
     </WebForm>
 </div>
@@ -12,6 +15,14 @@
 
     [Parameter]
     public Guid? SchemaID { get; set; }
+
+    private readonly Dictionary<string, string> _sortOptionSet = new()
+    {
+        { nameof(EntitySchemaElement.ID), TextConstants.LabelID },
+        { nameof(EntitySchemaElement.Name), TextConstants.LabelName },
+        { nameof(EntitySchemaElement.Weight), TextConstants.LabelWeight },
+        { nameof(EntitySchemaElement.TimeCreated), TextConstants.LabelTimeCreated },
+    };
 
     protected override WebFormContext<RequestSchemaElementList> CreateContext()
     {

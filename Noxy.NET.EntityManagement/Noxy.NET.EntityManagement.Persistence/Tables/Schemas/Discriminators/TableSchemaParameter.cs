@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Interfaces;
 using Noxy.NET.EntityManagement.Persistence.Abstractions.Tables;
 
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
+[Index(nameof(Name))]
 public abstract class TableSchemaParameter : BaseTableSchema, ISchemaMetadata
 {
     [Required]
