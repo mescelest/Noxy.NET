@@ -12,6 +12,8 @@
 
         <InputGroupSelectSorting OptionSet="_sortOptionSet" Name="@nameof(Model.Sorting)" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>
 
+        <InputGroupSelectPageSize DisplayName="@GetDisplayName(nameof(Model.PageSize))" Description="@GetDescription(nameof(Model.PageSize))" @bind-Value="Model.PageSize"/>
+
         @ChildContent
     </WebForm>
 </div>
@@ -43,7 +45,7 @@
 
     protected override WebFormContext<RequestSchemaPropertyList> CreateContext()
     {
-        return new(new() { SchemaID = SchemaID });
+        return new(new() { SchemaID = SchemaID, SortColumn = nameof(EntitySchemaProperty.Name), SortDirection = ListSortDirection.Descending });
     }
 
     private HashSet<string> GetPropertyType()

@@ -83,6 +83,7 @@ public static class TextConstants
     public const string LabelFormDateTimeType = "Label:Form:DateTimeType";
     public const string LabelFormIsSystemDefined = "Label:Form:IsSystemDefined";
     public const string LabelFormIsApprovalRequired = "Label:Form:IsApprovalRequired";
+    public const string LabelFormIsActivated = "Label:Form:IsActivated";
     public const string LabelFormParameterType = "Label:Form:ParameterType";
     public const string LabelFormPropertyType = "Label:Form:PropertyType";
     public const string LabelFormDateEffective = "Label:Form:DateEffective";
@@ -117,6 +118,7 @@ public static class TextConstants
     public const string HelpFormDateTimeType = "Help:Form:DateTimeType";
     public const string HelpFormIsSystemDefined = "Help:Form:IsSystemDefined";
     public const string HelpFormIsApprovalRequired = "Help:Form:IsApprovalRequired";
+    public const string HelpFormIsActivated = "Help:Form:IsActivated";
     public const string HelpFormParameterType = "Help:Form:ParameterType";
     public const string HelpFormPropertyType = "Help:Form:PropertyType";
     public const string HelpFormDateEffective = "Help:Form:DateEffective";
@@ -149,6 +151,9 @@ public static class TextConstants
     public const string ValueIsSystemDefinedNeutral = "Value:IsSystemDefined:Neutral";
     public const string ValueIsSystemDefinedYes = "Value:IsSystemDefined:Yes";
     public const string ValueIsSystemDefinedNo = "Value:IsSystemDefined:No";
+    public const string ValueIsActivatedNeutral = "Value:IsActivated:Neutral";
+    public const string ValueIsActivatedYes = "Value:IsActivated:Yes";
+    public const string ValueIsActivatedNo = "Value:IsActivated:No";
     public const string ValueIsApprovalRequiredNeutral = "Value:IsApprovalRequired:Neutral";
     public const string ValueIsApprovalRequiredYes = "Value:IsApprovalRequired:Yes";
     public const string ValueIsApprovalRequiredNo = "Value:IsApprovalRequired:No";

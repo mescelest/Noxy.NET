@@ -9,6 +9,10 @@ public abstract class BaseRequestGetList<TResponse> : BaseRequestGet<TResponse>
     [JsonIgnore]
     public const int DefaultPageSize = 10;
 
+    [DisplayName(TextConstants.LabelFormIsActivated)]
+    [Description(TextConstants.HelpFormIsActivated)]
+    public bool? IsActivated { get; set; }
+
     [DisplayName(TextConstants.LabelFormSearch)]
     [Description(TextConstants.HelpFormSearch)]
     public string? Search { get; set; }

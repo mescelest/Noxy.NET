@@ -5,22 +5,24 @@
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Search))" Description="@GetDescription(nameof(Model.Search))"
                         @bind-Value="Model.Search"/>
 
-        <InputGroupSelect OptionList="ListIsSystemDefinedKey" DisplayName="@GetDisplayName(nameof(Model.IsSystemDefined))" Description="@GetDescription(nameof(Model.IsSystemDefined))"
-                          Name="@nameof(Model.IsSystemDefined)" @bind-Value:get="GetIsSystemDefined()" @bind-Value:set="SetIsSystemDefined">
-            <span>@TextService.Get(_collectionIsSystemDefined[context])</span>
+        <InputGroupSelect OptionList="IsSystemDefinedKeys" DisplayName="@GetDisplayName(nameof(Model.IsSystemDefined))" Description="@GetDescription(nameof(Model.IsSystemDefined))"
+                          Name="@nameof(Model.IsSystemDefined)" @bind-Value:get="ToTriState(Model.IsSystemDefined)" @bind-Value:set="SetIsSystemDefined">
+            <span>@TextService.Get(CollectionIsSystemDefined[context])</span>
         </InputGroupSelect>
 
-        <InputGroupSelect OptionList="ListIsApprovalRequiredKey" DisplayName="@GetDisplayName(nameof(Model.IsApprovalRequired))" Description="@GetDescription(nameof(Model.IsApprovalRequired))"
-                          Name="@nameof(Model.IsApprovalRequired)" @bind-Value:get="GetIsApprovalRequired()" @bind-Value:set="SetIsApprovalRequired">
-            <span>@TextService.Get(_collectionIsApprovalRequired[context])</span>
+        <InputGroupSelect OptionList="IsApprovalRequiredKeys" DisplayName="@GetDisplayName(nameof(Model.IsApprovalRequired))" Description="@GetDescription(nameof(Model.IsApprovalRequired))"
+                          Name="@nameof(Model.IsApprovalRequired)" @bind-Value:get="ToTriState(Model.IsApprovalRequired)" @bind-Value:set="SetIsApprovalRequired">
+            <span>@TextService.Get(CollectionIsApprovalRequired[context])</span>
         </InputGroupSelect>
 
-        <InputGroupCheckboxSet OptionList="ListTypeKey" DisplayName="@GetDisplayName(nameof(Model.ParameterType))" Description="@GetDescription(nameof(Model.ParameterType))"
-                               @bind-Value:get="GetParameterType()" @bind-Value:set="SetParameterType">
-            <span>@TextService.Get(_collectionType[context.Option])</span>
+        <InputGroupCheckboxSet OptionList="ParameterTypeKeys" DisplayName="@GetDisplayName(nameof(Model.ParameterType))" Description="@GetDescription(nameof(Model.ParameterType))"
+                               @bind-Value:get="Model.ParameterType" @bind-Value:set="SetParameterType">
+            <span>@TextService.Get(CollectionType[context.Option])</span>
         </InputGroupCheckboxSet>
 
-        <InputGroupSelectSorting OptionSet="_sortOptionSet" Name="@nameof(Model.Sorting)" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>
+        <InputGroupSelectSorting OptionSet="SortOptionSet" Name="@nameof(Model.Sorting)" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>
+
+        <InputGroupSelectPageSize DisplayName="@GetDisplayName(nameof(Model.PageSize))" Description="@GetDescription(nameof(Model.PageSize))" @bind-Value="Model.PageSize"/>
 
         @ChildContent
     </WebForm>
@@ -31,82 +33,61 @@
     [Parameter]
     public Guid? SchemaID { get; set; }
 
-    private readonly Dictionary<int, string> _collectionIsSystemDefined = new()
+    private static readonly Dictionary<string, string> SortOptionSet = new()
+    {
+        { nameof(EntitySchemaElement.ID), TextConstants.LabelID },
+        { nameof(EntitySchemaElement.Name), TextConstants.LabelName },
+        { nameof(EntitySchemaElement.Weight), TextConstants.LabelWeight },
+        { nameof(EntitySchemaElement.TimeCreated), TextConstants.LabelTimeCreated },
+    };
+
+    private static readonly Dictionary<int, string> CollectionIsSystemDefined = new()
     {
         { -1, TextConstants.ValueIsSystemDefinedNeutral },
         { 0, TextConstants.ValueIsSystemDefinedYes },
         { 1, TextConstants.ValueIsSystemDefinedNo }
     };
 
-    private readonly Dictionary<int, string> _collectionIsApprovalRequired = new()
+    private static readonly Dictionary<int, string> CollectionIsApprovalRequired = new()
     {
         { -1, TextConstants.ValueIsApprovalRequiredNeutral },
         { 0, TextConstants.ValueIsApprovalRequiredYes },
         { 1, TextConstants.ValueIsApprovalRequiredNo }
     };
 
-    private readonly Dictionary<string, string> _collectionType = new()
+    private static readonly Dictionary<string, string> CollectionType = new()
     {
         { nameof(EntitySchemaParameterStyle), TextConstants.LabelParameterStyle },
         { nameof(EntitySchemaParameterSystem), TextConstants.LabelParameterSystem },
         { nameof(EntitySchemaParameterText), TextConstants.LabelParameterText }
     };
 
-    private readonly Dictionary<string, string> _sortOptionSet = new()
-    {
-            { nameof(EntitySchemaElement.ID), TextConstants.LabelID },
-            { nameof(EntitySchemaElement.Name), TextConstants.LabelName },
-            { nameof(EntitySchemaElement.Weight), TextConstants.LabelWeight },
-            { nameof(EntitySchemaElement.TimeCreated), TextConstants.LabelTimeCreated },
-    };
-
-    private HashSet<int> ListIsSystemDefinedKey => _collectionIsSystemDefined.Select(x => x.Key).ToHashSet();
-    private HashSet<int> ListIsApprovalRequiredKey => _collectionIsApprovalRequired.Select(x => x.Key).ToHashSet();
-    private HashSet<string> ListTypeKey => _collectionType.Select(x => x.Key).ToHashSet();
+    private static readonly HashSet<int> IsSystemDefinedKeys = [..CollectionIsSystemDefined.Keys];
+    private static readonly HashSet<int> IsApprovalRequiredKeys = [..CollectionIsApprovalRequired.Keys];
+    private static readonly HashSet<string> ParameterTypeKeys = [..CollectionType.Keys];
 
     protected override WebFormContext<RequestSchemaParameterList> CreateContext()
     {
-        return new(new() { SchemaID = SchemaID });
+        return new(new() { SchemaID = SchemaID, SortColumn = nameof(EntitySchemaParameter.Name), SortDirection = ListSortDirection.Descending });
     }
 
-    private int GetIsSystemDefined()
+    private static int ToTriState(bool? value) => value switch
     {
-        return Model.IsSystemDefined switch
-        {
-            true => 1,
-            false => 0,
-            _ => -1
-        };
-    }
+        true => 1,
+        false => 0,
+        _ => -1
+    };
 
-    private void SetIsSystemDefined(int value)
+    private static bool? FromTriState(int value) => value switch
     {
-        Model.IsSystemDefined = value == -1 ? null : value == 1;
-    }
+        1 => true,
+        0 => false,
+        _ => null
+    };
 
-    private int GetIsApprovalRequired()
-    {
-        return Model.IsApprovalRequired switch
-        {
-            true => 1,
-            false => 0,
-            _ => -1
-        };
-    }
+    private void SetParameterType(HashSet<string>? value) => Model.ParameterType = value;
+    private void SetIsSystemDefined(int value) => Model.IsSystemDefined = FromTriState(value);
+    private void SetIsApprovalRequired(int value) => Model.IsApprovalRequired = FromTriState(value);
 
-    private void SetIsApprovalRequired(int value)
-    {
-        Model.IsApprovalRequired = value == -1 ? null : value == 1;
-    }
-
-    private HashSet<string> GetParameterType()
-    {
-        return Model.ParameterType ?? [];
-    }
-
-    private void SetParameterType(HashSet<string>? value)
-    {
-        Model.ParameterType = value;
-    }
 
 }

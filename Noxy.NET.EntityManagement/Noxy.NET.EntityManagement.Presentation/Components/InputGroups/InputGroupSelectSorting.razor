@@ -17,6 +17,10 @@
     [Parameter, EditorRequired]
     public Dictionary<string, string> OptionSet { get; set; } = new();
 
+    [Parameter]
+    public bool? HasNullOption { get; set; }
+    private bool HasNullOptionCurrent => HasNullOption ?? false;
+
     private Dictionary<string, string> _cacheDict = new();
     private HashSet<SortOption?> _cacheSet = [];
 
@@ -26,7 +30,7 @@
 
         if (OptionSet.Count == _cacheDict.Count && _cacheDict.DictionaryEqual(OptionSet)) return;
         _cacheDict = OptionSet;
-        _cacheSet = [null];
+        _cacheSet = HasNullOptionCurrent ? [null] : [];
         foreach (KeyValuePair<string, string> item in OptionSet)
         {
             _cacheSet.Add(new(item.Key, ListSortDirection.Ascending, item.Value));

@@ -1,0 +1,25 @@
+@inherits BaseInputGroup<int?>
+
+<InputGroupSelect OptionList="_cacheSet" Name="@Name" DisplayName="@DisplayName" Description="@Description" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+    @context
+</InputGroupSelect>
+
+@code {
+
+    [Parameter]
+    public HashSet<int?>? OptionSet { get; set; }
+    private HashSet<int?> OptionSetCurrent => OptionSet ?? SortPageSizeSet;
+
+    private static readonly HashSet<int?> SortPageSizeSet = [10, 25, 50, 100];
+
+    private HashSet<int?> _cacheSet = [];
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (OptionSetCurrent.Count == _cacheSet.Count && _cacheSet.SequenceEqual(OptionSetCurrent)) return;
+        _cacheSet = [..OptionSetCurrent];
+    }
+
+}

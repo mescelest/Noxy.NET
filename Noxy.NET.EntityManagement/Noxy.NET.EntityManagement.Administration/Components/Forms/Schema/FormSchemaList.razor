@@ -5,16 +5,14 @@
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Search))" Description="@GetDescription(nameof(Model.Search))"
                         @bind-Value="Model.Search"/>
 
-        <InputGroupSelectSorting OptionSet="_sortOptionSet" Name="@nameof(Model.Sorting)" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>
-
-        <InputGroupSelect OptionList="_sortPageSize" Name="@nameof(Model.PageSize)" DisplayName="@GetDisplayName(nameof(Model.PageSize))" Description="@GetDescription(nameof(Model.PageSize))"
-                          @bind-Value="Model.PageSize">
-            @context
+        <InputGroupSelect OptionList="IsSystemDefinedKeys" DisplayName="@GetDisplayName(nameof(Model.IsActivated))" Description="@GetDescription(nameof(Model.IsActivated))"
+                          Name="@nameof(Model.IsActivated)" @bind-Value:get="Model.IsActivated.ToTriState()" @bind-Value:set="SetIsActivated">
+            <span>@TextService.Get(CollectionIsSystemDefined[context])</span>
         </InputGroupSelect>
 
-        @* <Pagination > *@
-        @* *@
-        @* </Pagination> *@
+        <InputGroupSelectSorting OptionSet="SortOptionSet" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>
+
+        <InputGroupSelectPageSize DisplayName="@GetDisplayName(nameof(Model.PageSize))" Description="@GetDescription(nameof(Model.PageSize))" @bind-Value="Model.PageSize"/>
 
         @ChildContent
     </WebForm>
@@ -22,7 +20,7 @@
 
 @code {
 
-    private readonly Dictionary<string, string> _sortOptionSet = new()
+    private static readonly Dictionary<string, string> SortOptionSet = new()
     {
         { nameof(EntitySchema.ID), TextConstants.LabelID },
         { nameof(EntitySchema.Name), TextConstants.LabelName },
@@ -30,17 +28,20 @@
         { nameof(EntitySchema.TimeActivated), TextConstants.LabelTimeActivated },
     };
 
-    private readonly HashSet<int?> _sortPageSize =
-    [
-        10,
-        25,
-        50,
-        100
-    ];
+    private static readonly Dictionary<int, string> CollectionIsSystemDefined = new()
+    {
+        { -1, TextConstants.ValueIsActivatedNeutral },
+        { 0, TextConstants.ValueIsActivatedYes },
+        { 1, TextConstants.ValueIsActivatedNo }
+    };
+
+    private static readonly HashSet<int> IsSystemDefinedKeys = [..CollectionIsSystemDefined.Keys];
 
     protected override WebFormContext<RequestSchemaList> CreateContext()
     {
-        return new(new());
+        return new(new() { SortColumn = nameof(EntitySchema.TimeCreated), SortDirection = ListSortDirection.Descending });
     }
+
+    private void SetIsActivated(int value) => Model.IsActivated = value.FromTriState();
 
 }

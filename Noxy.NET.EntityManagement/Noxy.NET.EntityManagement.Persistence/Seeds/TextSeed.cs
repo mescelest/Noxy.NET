@@ -151,6 +151,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.LabelFormDateTimeType, "DateTime type");
         RegisterText(TextConstants.LabelFormIsSystemDefined, "Is system defined?");
         RegisterText(TextConstants.LabelFormIsApprovalRequired, "Is approval required?");
+        RegisterText(TextConstants.LabelFormIsActivated, "Is activated?");
         RegisterText(TextConstants.LabelFormParameterType, "Parameter type");
         RegisterText(TextConstants.LabelFormPropertyType, "Property type");
         RegisterText(TextConstants.LabelFormDateEffective, "Effective date");
@@ -187,6 +188,7 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.HelpFormDateTimeType, "The type of DateTime property.");
         RegisterText(TextConstants.HelpFormIsSystemDefined, "Determines if the entity is system defined and therefore cannot be changed.");
         RegisterText(TextConstants.HelpFormIsApprovalRequired, "Determines if another user must approve a text parameter value before it becomes active.");
+        RegisterText(TextConstants.HelpFormIsActivated, "Determines if the entity is active or has been previously activated.");
         RegisterText(TextConstants.HelpFormParameterType, "The specific type of parameter to be used.");
         RegisterText(TextConstants.HelpFormPropertyType, "The type of property.");
         RegisterText(TextConstants.HelpFormDateEffective, "The date from which this entity should become active.");
@@ -221,6 +223,9 @@ public class TextSeed(ModelBuilder builder, TableSchema refSchema) : BaseSeed(bu
         RegisterText(TextConstants.ValueIsSystemDefinedNeutral, "Either");
         RegisterText(TextConstants.ValueIsSystemDefinedYes, "System defined");
         RegisterText(TextConstants.ValueIsSystemDefinedNo, "User defined");
+        RegisterText(TextConstants.ValueIsActivatedNeutral, "Either");
+        RegisterText(TextConstants.ValueIsActivatedYes, "Has been activated");
+        RegisterText(TextConstants.ValueIsActivatedNo, "Never activated");
         RegisterText(TextConstants.ValueIsApprovalRequiredNeutral, "Either");
         RegisterText(TextConstants.ValueIsApprovalRequiredYes, "With approval required");
         RegisterText(TextConstants.ValueIsApprovalRequiredNo, "Without approval required");
