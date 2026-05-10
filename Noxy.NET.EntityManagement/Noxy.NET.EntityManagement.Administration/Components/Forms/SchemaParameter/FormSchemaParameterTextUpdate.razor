@@ -14,11 +14,11 @@
         </InputGroupSelect>
 
         <InputGroupCheckbox Option="true" @bind-Value="Model.IsApprovalRequired" DisplayName="@GetDisplayName(nameof(Model.IsApprovalRequired))" Description="@GetDescription(nameof(Model.IsApprovalRequired))">
-            @TextService.Get(TextConstants.ValueYes)
+            @TextService.Get(ParameterTextConstants.ValueYes)
         </InputGroupCheckbox>
 
         <InputGroupCheckbox Option="true" @bind-Value="Model.IsSystemDefined" DisplayName="@GetDisplayName(nameof(Model.IsSystemDefined))" Description="@GetDescription(nameof(Model.IsSystemDefined))">
-            @TextService.Get(TextConstants.ValueYes)
+            @TextService.Get(ParameterTextConstants.ValueYes)
         </InputGroupCheckbox>
 
         @ChildContent
@@ -32,9 +32,9 @@
 
     private readonly Dictionary<ParameterTextTypeEnum, string> _collectionType = new()
     {
-        { ParameterTextTypeEnum.Line, TextConstants.ValueParameterTextTypeLine },
-        { ParameterTextTypeEnum.Text, TextConstants.ValueParameterTextTypeText },
-        { ParameterTextTypeEnum.RichText, TextConstants.ValueParameterTextTypeRichText },
+            { ParameterTextTypeEnum.Line, ParameterTextConstants.ValueParameterTextTypeLine },
+            { ParameterTextTypeEnum.Text, ParameterTextConstants.ValueParameterTextTypeText },
+            { ParameterTextTypeEnum.RichText, ParameterTextConstants.ValueParameterTextTypeRichText },
     };
 
     private HashSet<ParameterTextTypeEnum> ListType => _collectionType.Select(x => x.Key).ToHashSet();

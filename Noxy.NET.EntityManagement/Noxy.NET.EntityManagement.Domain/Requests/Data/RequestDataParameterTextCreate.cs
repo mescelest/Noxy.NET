@@ -11,21 +11,21 @@ public class RequestDataParameterTextCreate : BaseRequestPost<ResponseDataParame
     public override string APIEndpoint => "/Data/Parameter/Text";
 
     [Required]
-    [DisplayName(TextConstants.LabelFormSchemaIdentifier)]
-    [Description(TextConstants.HelpFormSchemaIdentifier)]
+    [DisplayName(ParameterTextConstants.LabelFormSchemaIdentifier)]
+    [Description(ParameterTextConstants.HelpFormSchemaIdentifier)]
     public required string SchemaIdentifier { get; set; }
 
     [Required]
-    [DisplayName(TextConstants.LabelFormCulture)]
-    [Description(TextConstants.HelpFormCulture)]
+    [DisplayName(ParameterTextConstants.LabelFormCulture)]
+    [Description(ParameterTextConstants.HelpFormCulture)]
     public required string Culture { get; set; }
 
     [Required]
-    [DisplayName(TextConstants.LabelFormValue)]
-    [Description(TextConstants.HelpFormValue)]
+    [DisplayName(ParameterTextConstants.LabelFormValue)]
+    [Description(ParameterTextConstants.HelpFormValue)]
     public string Value { get; set; } = string.Empty;
 
-    [DisplayName(TextConstants.LabelFormDateEffective)]
-    [Description(TextConstants.HelpFormDateEffective)]
+    [DisplayName(ParameterTextConstants.LabelFormDateEffective)]
+    [Description(ParameterTextConstants.HelpFormDateEffective)]
     public DateTime? TimeEffective { get; set; }
 }

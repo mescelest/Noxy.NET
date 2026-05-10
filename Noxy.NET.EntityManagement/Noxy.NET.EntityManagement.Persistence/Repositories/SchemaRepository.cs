@@ -40,6 +40,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         IQueryable<TableSchema> query = Context.Schema.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Name, $"%{filter.Search}%"));
+        if (filter.IsActivated.HasValue) query = filter.IsActivated.Value ? query.Where(x => x.TimeActivated != null) : query.Where(x => x.TimeActivated == null);
 
         List<TableSchema> result = await query
             .OrderByDynamic(filter.SortColumn, filter.SortDirection == ListSortDirection.Descending)

@@ -35,31 +35,31 @@
 
     private static readonly Dictionary<string, string> SortOptionSet = new()
     {
-        { nameof(EntitySchemaElement.ID), TextConstants.LabelID },
-        { nameof(EntitySchemaElement.Name), TextConstants.LabelName },
-        { nameof(EntitySchemaElement.Weight), TextConstants.LabelWeight },
-        { nameof(EntitySchemaElement.TimeCreated), TextConstants.LabelTimeCreated },
+            { nameof(EntitySchemaElement.ID), ParameterTextConstants.LabelID },
+            { nameof(EntitySchemaElement.Name), ParameterTextConstants.LabelName },
+            { nameof(EntitySchemaElement.Weight), ParameterTextConstants.LabelWeight },
+            { nameof(EntitySchemaElement.TimeCreated), ParameterTextConstants.LabelTimeCreated },
     };
 
     private static readonly Dictionary<int, string> CollectionIsSystemDefined = new()
     {
-        { -1, TextConstants.ValueIsSystemDefinedNeutral },
-        { 0, TextConstants.ValueIsSystemDefinedYes },
-        { 1, TextConstants.ValueIsSystemDefinedNo }
+            { -1, ParameterTextConstants.ValueIsSystemDefinedNeutral },
+            { 0, ParameterTextConstants.ValueIsSystemDefinedYes },
+            { 1, ParameterTextConstants.ValueIsSystemDefinedNo }
     };
 
     private static readonly Dictionary<int, string> CollectionIsApprovalRequired = new()
     {
-        { -1, TextConstants.ValueIsApprovalRequiredNeutral },
-        { 0, TextConstants.ValueIsApprovalRequiredYes },
-        { 1, TextConstants.ValueIsApprovalRequiredNo }
+            { -1, ParameterTextConstants.ValueIsApprovalRequiredNeutral },
+            { 0, ParameterTextConstants.ValueIsApprovalRequiredYes },
+            { 1, ParameterTextConstants.ValueIsApprovalRequiredNo }
     };
 
     private static readonly Dictionary<string, string> CollectionType = new()
     {
-        { nameof(EntitySchemaParameterStyle), TextConstants.LabelParameterStyle },
-        { nameof(EntitySchemaParameterSystem), TextConstants.LabelParameterSystem },
-        { nameof(EntitySchemaParameterText), TextConstants.LabelParameterText }
+            { nameof(EntitySchemaParameterStyle), ParameterTextConstants.LabelParameterStyle },
+            { nameof(EntitySchemaParameterSystem), ParameterTextConstants.LabelParameterSystem },
+            { nameof(EntitySchemaParameterText), ParameterTextConstants.LabelParameterText }
     };
 
     private static readonly HashSet<int> IsSystemDefinedKeys = [..CollectionIsSystemDefined.Keys];

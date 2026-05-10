@@ -9,33 +9,29 @@ public abstract class BaseRequestGetList<TResponse> : BaseRequestGet<TResponse>
     [JsonIgnore]
     public const int DefaultPageSize = 10;
 
-    [DisplayName(TextConstants.LabelFormIsActivated)]
-    [Description(TextConstants.HelpFormIsActivated)]
-    public bool? IsActivated { get; set; }
-
-    [DisplayName(TextConstants.LabelFormSearch)]
-    [Description(TextConstants.HelpFormSearch)]
+    [DisplayName(ParameterTextConstants.LabelFormSearch)]
+    [Description(ParameterTextConstants.HelpFormSearch)]
     public string? Search { get; set; }
 
-    [DisplayName(TextConstants.LabelFormPageSize)]
-    [Description(TextConstants.HelpFormPageSize)]
+    [DisplayName(ParameterTextConstants.LabelFormPageSize)]
+    [Description(ParameterTextConstants.HelpFormPageSize)]
     public int? PageSize { get; set; }
 
-    [DisplayName(TextConstants.LabelFormPageNumber)]
-    [Description(TextConstants.HelpFormPageNumber)]
+    [DisplayName(ParameterTextConstants.LabelFormPageNumber)]
+    [Description(ParameterTextConstants.HelpFormPageNumber)]
     public int? PageNumber { get; set; }
 
-    [DisplayName(TextConstants.LabelFormSortColumn)]
-    [Description(TextConstants.HelpFormSortColumn)]
+    [DisplayName(ParameterTextConstants.LabelFormSortColumn)]
+    [Description(ParameterTextConstants.HelpFormSortColumn)]
     public string? SortColumn { get; set; }
 
-    [DisplayName(TextConstants.LabelFormSortDirection)]
-    [Description(TextConstants.HelpFormSortDirection)]
+    [DisplayName(ParameterTextConstants.LabelFormSortDirection)]
+    [Description(ParameterTextConstants.HelpFormSortDirection)]
     public ListSortDirection? SortDirection { get; set; }
 
     [JsonIgnore]
-    [DisplayName(TextConstants.LabelFormSortColumn)]
-    [Description(TextConstants.HelpFormSortColumn)]
+    [DisplayName(ParameterTextConstants.LabelFormSortColumn)]
+    [Description(ParameterTextConstants.HelpFormSortColumn)]
     public (string Column, ListSortDirection Direction)? Sorting
     {
         get => string.IsNullOrWhiteSpace(SortColumn) || !SortDirection.HasValue ? null : (SortColumn, SortDirection.Value);

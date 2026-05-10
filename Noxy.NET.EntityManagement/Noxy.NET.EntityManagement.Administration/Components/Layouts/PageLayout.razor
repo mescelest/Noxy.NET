@@ -7,22 +7,22 @@
     <div class="header">
         <div class="left">
             <NavLink href="/">
-                @TextService.Get(TextConstants.Title)
+                @TextService.Get(ParameterTextConstants.Title)
             </NavLink>
         </div>
 
         <div class="center">
             <NavLink href="/schema">
-                @TextService.Get(TextConstants.LinkNavigationSchema)
+                @TextService.Get(ParameterTextConstants.LinkNavigationSchema)
             </NavLink>
             <NavLink href="/parameter">
-                @TextService.Get(TextConstants.LinkNavigationParameter)
+                @TextService.Get(ParameterTextConstants.LinkNavigationParameter)
             </NavLink>
         </div>
 
         <div class="right">
             <Button @onclick="SignOut">
-                @TextService.Get(TextConstants.ButtonSignOut)
+                @TextService.Get(ParameterTextConstants.ButtonSignOut)
             </Button>
         </div>
     </div>

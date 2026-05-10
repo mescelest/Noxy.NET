@@ -56,11 +56,11 @@
         <FormSchemaUpdate Schema="Schema" OnSubmit="FormEditSubmitHandler">
             <div class="action-list">
                 <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                    @TextService.Get(TextConstants.ButtonUpdate)
+                    @TextService.Get(ParameterTextConstants.ButtonUpdate)
                 </Button>
 
                 <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
-                    @TextService.Get(TextConstants.ButtonCancel)
+                    @TextService.Get(ParameterTextConstants.ButtonCancel)
                 </Button>
             </div>
         </FormSchemaUpdate>

@@ -1,6 +1,6 @@
 namespace Noxy.NET.EntityManagement.Domain.Constants;
 
-public static class TextConstants
+public static class ParameterTextConstants
 {
     public const string Title = "Title";
 
@@ -92,6 +92,7 @@ public static class TextConstants
     public const string LabelFormSortColumn = "Label:Form:SortColumn";
     public const string LabelFormSortDirection = "Label:Form:SortDirection";
     public const string LabelFormParameterTextType = "Label:Form:ParameterTextType";
+    public const string LabelFormParameterSystemType = "Label:Form:ParameterSystemType";
     public const string LabelFormIsUnsigned = "Label:Form:IsUnsigned";
     public const string LabelFormAllowedExtensions = "Label:Form:AllowedExtensions";
     public const string LabelFormString = "Label:Form:String";
@@ -127,6 +128,7 @@ public static class TextConstants
     public const string HelpFormSortColumn = "Help:Form:Column";
     public const string HelpFormSortDirection = "Help:Form:Direction";
     public const string HelpFormParameterTextType = "Help:Form:ParameterTextType";
+    public const string HelpFormParameterSystemType = "Help:Form:ParameterSystemType";
     public const string HelpFormIsUnsigned = "Help:Form:IsUnsigned";
     public const string HelpFormAllowedExtensions = "Help:Form:AllowedExtensions";
     public const string HelpFormString = "Help:Form:String";

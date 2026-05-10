@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
 using Noxy.NET.EntityManagement.Domain.Attributes;
 using Noxy.NET.EntityManagement.Domain.Constants;
+using Noxy.NET.EntityManagement.Domain.Enums;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 
 namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
@@ -16,26 +17,30 @@ public class RequestSchemaParameterSystemUpdate : BaseRequestPost<ResponseSchema
 
     [Required]
     [IdentifierValidation]
-    [DisplayName(TextConstants.LabelFormSchemaIdentifier)]
-    [Description(TextConstants.HelpFormSchemaIdentifier)]
+    [DisplayName(ParameterTextConstants.LabelFormSchemaIdentifier)]
+    [Description(ParameterTextConstants.HelpFormSchemaIdentifier)]
     public string SchemaIdentifier { get; set; } = string.Empty;
 
     [Required]
-    [DisplayName(TextConstants.LabelFormName)]
-    [Description(TextConstants.HelpFormName)]
+    [DisplayName(ParameterTextConstants.LabelFormName)]
+    [Description(ParameterTextConstants.HelpFormName)]
     public string Name { get; set; } = string.Empty;
 
-    [DisplayName(TextConstants.LabelFormNote)]
-    [Description(TextConstants.HelpFormNote)]
+    [DisplayName(ParameterTextConstants.LabelFormNote)]
+    [Description(ParameterTextConstants.HelpFormNote)]
     public string Note { get; set; } = string.Empty;
 
+    [DisplayName(ParameterTextConstants.LabelFormParameterSystemType)]
+    [Description(ParameterTextConstants.HelpFormParameterSystemType)]
+    public ParameterSystemTypeEnum Type { get; set; } = ParameterSystemTypeEnum.String;
+
     [Required]
-    [DisplayName(TextConstants.LabelFormIsSystemDefined)]
-    [Description(TextConstants.HelpFormIsSystemDefined)]
+    [DisplayName(ParameterTextConstants.LabelFormIsSystemDefined)]
+    [Description(ParameterTextConstants.HelpFormIsSystemDefined)]
     public bool IsSystemDefined { get; set; }
 
     [Required]
-    [DisplayName(TextConstants.LabelFormIsApprovalRequired)]
-    [Description(TextConstants.HelpFormIsApprovalRequired)]
+    [DisplayName(ParameterTextConstants.LabelFormIsApprovalRequired)]
+    [Description(ParameterTextConstants.HelpFormIsApprovalRequired)]
     public bool IsApprovalRequired { get; set; }
 }

@@ -11,12 +11,12 @@ public class RequestSchemaPropertyCount : BaseRequestGet<ResponseSchemaPropertyC
 
     public Guid? SchemaID { get; set; }
 
-    [DisplayName(TextConstants.LabelFormSearch)]
-    [Description(TextConstants.HelpFormSearch)]
+    [DisplayName(ParameterTextConstants.LabelFormSearch)]
+    [Description(ParameterTextConstants.HelpFormSearch)]
     public string? Search { get; set; }
 
-    [DisplayName(TextConstants.LabelFormPropertyType)]
-    [Description(TextConstants.HelpFormPropertyType)]
+    [DisplayName(ParameterTextConstants.LabelFormPropertyType)]
+    [Description(ParameterTextConstants.HelpFormPropertyType)]
     public HashSet<string>? PropertyType { get; set; }
 
     public override Dictionary<string, object?> ToQueryParameters()

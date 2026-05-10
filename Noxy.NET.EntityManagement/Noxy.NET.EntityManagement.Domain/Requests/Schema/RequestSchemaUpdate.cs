@@ -14,11 +14,11 @@ public class RequestSchemaUpdate : BaseRequestPost<ResponseSchemaUpdate>
     public required Guid ID { get; init; }
 
     [Required]
-    [DisplayName(TextConstants.LabelFormName)]
-    [Description(TextConstants.HelpFormName)]
+    [DisplayName(ParameterTextConstants.LabelFormName)]
+    [Description(ParameterTextConstants.HelpFormName)]
     public string Name { get; set; } = string.Empty;
 
-    [DisplayName(TextConstants.LabelFormDescription)]
-    [Description(TextConstants.HelpFormDescription)]
+    [DisplayName(ParameterTextConstants.LabelFormDescription)]
+    [Description(ParameterTextConstants.HelpFormDescription)]
     public string Note { get; set; } = string.Empty;
 }

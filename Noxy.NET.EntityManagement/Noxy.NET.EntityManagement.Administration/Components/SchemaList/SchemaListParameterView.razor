@@ -16,19 +16,19 @@
         <Content>
             <Table class="grid" List="List">
                 <TableHeader>
-                    <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier)</strong>
-                    <strong>@TextService.Get(TextConstants.LabelName)</strong>
-                    <strong>@TextService.Get(TextConstants.LabelNote)</strong>
-                    <strong>@TextService.Get(TextConstants.LabelTitle)</strong>
-                    <strong>@TextService.Get(TextConstants.LabelDescription)</strong>
-                    <strong>@TextService.Get(TextConstants.LabelTimeCreated)</strong>
+                    <strong>@TextService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong>
+                    <strong>@TextService.Get(ParameterTextConstants.LabelName)</strong>
+                    <strong>@TextService.Get(ParameterTextConstants.LabelNote)</strong>
+                    <strong>@TextService.Get(ParameterTextConstants.LabelTitle)</strong>
+                    <strong>@TextService.Get(ParameterTextConstants.LabelDescription)</strong>
+                    <strong>@TextService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
                 </TableHeader>
                 <TableRow>
                     <span>@context.SchemaIdentifier</span>
                     <span>@context.Name</span>
                     <span>@context.Note</span>
-                    <span>@(context.IsApprovalRequired ? TextService.Get(TextConstants.ValueYes) : TextService.Get(TextConstants.ValueNo))</span>
-                    <span>@(context.IsSystemDefined ? TextService.Get(TextConstants.ValueYes) : TextService.Get(TextConstants.ValueNo))</span>
+                    <span>@(context.IsApprovalRequired ? TextService.Get(ParameterTextConstants.ValueYes) : TextService.Get(ParameterTextConstants.ValueNo))</span>
+                    <span>@(context.IsSystemDefined ? TextService.Get(ParameterTextConstants.ValueYes) : TextService.Get(ParameterTextConstants.ValueNo))</span>
                     <span>@context.TimeCreated</span>
                 </TableRow>
             </Table>

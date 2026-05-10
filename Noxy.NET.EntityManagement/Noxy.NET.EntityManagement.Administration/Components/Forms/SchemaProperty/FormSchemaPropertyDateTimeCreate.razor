@@ -35,9 +35,9 @@
 
     private readonly Dictionary<DateTimeTypeEnum, string> _collectionType = new()
     {
-            { DateTimeTypeEnum.Time, TextConstants.ValuePropertyDateTimeTypeTime },
-            { DateTimeTypeEnum.Date, TextConstants.ValuePropertyDateTimeTypeDate },
-            { DateTimeTypeEnum.DateAndTime, TextConstants.ValuePropertyDateTimeTypeDateTime },
+            { DateTimeTypeEnum.Time, ParameterTextConstants.ValuePropertyDateTimeTypeTime },
+            { DateTimeTypeEnum.Date, ParameterTextConstants.ValuePropertyDateTimeTypeDate },
+            { DateTimeTypeEnum.DateAndTime, ParameterTextConstants.ValuePropertyDateTimeTypeDateTime },
     };
 
     private HashSet<DateTimeTypeEnum> ListType => _collectionType.Select(x => x.Key).ToHashSet();

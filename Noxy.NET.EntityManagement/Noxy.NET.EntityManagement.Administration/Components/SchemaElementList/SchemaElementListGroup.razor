@@ -26,31 +26,31 @@
     @if (!_isEditMode)
     {
         <div>
-            <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
             @SchemaElement.SchemaIdentifier
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelName, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelName, GetComponentName()):</strong>
             @SchemaElement.Name
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelNote, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelNote, GetComponentName()):</strong>
             @SchemaElement.Note
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelWeight, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelWeight, GetComponentName()):</strong>
             @SchemaElement.Weight
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelTitle, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelTitle, GetComponentName()):</strong>
             @SchemaElement.TitleTextParameter?.Name
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelDescription, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelDescription, GetComponentName()):</strong>
             @SchemaElement.DescriptionTextParameter?.Name
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName()):</strong>
             @SchemaElement.TimeCreated
         </div>
     }
@@ -59,11 +59,11 @@
         <FormSchemaElementUpdate SchemaElement="SchemaElement" OnSubmit="FormEditSubmitHandler">
             <div class="action-list">
                 <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                    @TextService.Get(TextConstants.ButtonUpdate)
+                    @TextService.Get(ParameterTextConstants.ButtonUpdate)
                 </Button>
 
                 <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
-                    @TextService.Get(TextConstants.ButtonCancel)
+                    @TextService.Get(ParameterTextConstants.ButtonCancel)
                 </Button>
             </div>
         </FormSchemaElementUpdate>

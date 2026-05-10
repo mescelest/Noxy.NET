@@ -16,25 +16,25 @@ public class RequestSchemaContextUpdate : BaseRequestPost<ResponseSchemaContextU
 
     [Required]
     [IdentifierValidation]
-    [DisplayName(TextConstants.LabelFormSchemaIdentifier)]
-    [Description(TextConstants.HelpFormSchemaIdentifier)]
+    [DisplayName(ParameterTextConstants.LabelFormSchemaIdentifier)]
+    [Description(ParameterTextConstants.HelpFormSchemaIdentifier)]
     public string SchemaIdentifier { get; set; } = string.Empty;
 
     [Required]
-    [DisplayName(TextConstants.LabelFormName)]
-    [Description(TextConstants.HelpFormName)]
+    [DisplayName(ParameterTextConstants.LabelFormName)]
+    [Description(ParameterTextConstants.HelpFormName)]
     public string Name { get; set; } = string.Empty;
 
-    [DisplayName(TextConstants.LabelFormNote)]
-    [Description(TextConstants.HelpFormNote)]
+    [DisplayName(ParameterTextConstants.LabelFormNote)]
+    [Description(ParameterTextConstants.HelpFormNote)]
     public string Note { get; set; } = string.Empty;
 
     [NotEmptyGuid]
-    [DisplayName(TextConstants.LabelFormTitle)]
-    [Description(TextConstants.HelpFormTitle)]
+    [DisplayName(ParameterTextConstants.LabelFormTitle)]
+    [Description(ParameterTextConstants.HelpFormTitle)]
     public Guid TitleParameterTextID { get; set; }
 
-    [DisplayName(TextConstants.LabelFormDescription)]
-    [Description(TextConstants.HelpFormDescription)]
+    [DisplayName(ParameterTextConstants.LabelFormDescription)]
+    [Description(ParameterTextConstants.HelpFormDescription)]
     public Guid? DescriptionParameterTextID { get; set; }
 }

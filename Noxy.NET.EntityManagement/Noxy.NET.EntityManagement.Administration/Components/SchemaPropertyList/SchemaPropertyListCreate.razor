@@ -6,39 +6,39 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new property</DynamicHTMLTag>
 
-    <InputGroupSelect OptionList="_setType" DisplayName="@TextService.Get(TextConstants.LabelFormPropertyType)" Description="@TextService.Get(TextConstants.HelpFormPropertyType)"
+    <InputGroupSelect OptionList="_setType" DisplayName="@TextService.Get(ParameterTextConstants.LabelFormPropertyType)" Description="@TextService.Get(ParameterTextConstants.HelpFormPropertyType)"
                       Name="@nameof(_valueType)" @bind-Value="_valueType">
         <span>@TextService.Get(context)</span>
     </InputGroupSelect>
 
     @switch (_valueType)
     {
-        case TextConstants.LabelPropertyBoolean:
+        case ParameterTextConstants.LabelPropertyBoolean:
             <FormSchemaPropertyBooleanCreate SchemaID="SchemaID" OnSubmit="SubmitBoolean">
                 @SubmitAction()
             </FormSchemaPropertyBooleanCreate>
             break;
-        case TextConstants.LabelPropertyDateTime:
+        case ParameterTextConstants.LabelPropertyDateTime:
             <FormSchemaPropertyDateTimeCreate SchemaID="SchemaID" OnSubmit="SubmitDateTime">
                 @SubmitAction()
             </FormSchemaPropertyDateTimeCreate>
             break;
-        case TextConstants.LabelPropertyDecimal:
+        case ParameterTextConstants.LabelPropertyDecimal:
             <FormSchemaPropertyDecimalCreate SchemaID="SchemaID" OnSubmit="SubmitDecimal">
                 @SubmitAction()
             </FormSchemaPropertyDecimalCreate>
             break;
-        case TextConstants.LabelPropertyImage:
+        case ParameterTextConstants.LabelPropertyImage:
             <FormSchemaPropertyImageCreate SchemaID="SchemaID" OnSubmit="SubmitImage">
                 @SubmitAction()
             </FormSchemaPropertyImageCreate>
             break;
-        case TextConstants.LabelPropertyInteger:
+        case ParameterTextConstants.LabelPropertyInteger:
             <FormSchemaPropertyIntegerCreate SchemaID="SchemaID" OnSubmit="SubmitInteger">
                 @SubmitAction()
             </FormSchemaPropertyIntegerCreate>
             break;
-        case TextConstants.LabelPropertyString:
+        case ParameterTextConstants.LabelPropertyString:
             <FormSchemaPropertyStringCreate SchemaID="SchemaID" OnSubmit="SubmitString">
                 @SubmitAction()
             </FormSchemaPropertyStringCreate>
@@ -59,16 +59,16 @@
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
     private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H2;
 
-    private string _valueType = TextConstants.LabelPropertyBoolean;
+    private string _valueType = ParameterTextConstants.LabelPropertyBoolean;
 
     private readonly HashSet<string> _setType =
     [
-            TextConstants.LabelPropertyBoolean,
-            TextConstants.LabelPropertyDateTime,
-            TextConstants.LabelPropertyDecimal,
-            TextConstants.LabelPropertyImage,
-            TextConstants.LabelPropertyInteger,
-            TextConstants.LabelPropertyString,
+            ParameterTextConstants.LabelPropertyBoolean,
+            ParameterTextConstants.LabelPropertyDateTime,
+            ParameterTextConstants.LabelPropertyDecimal,
+            ParameterTextConstants.LabelPropertyImage,
+            ParameterTextConstants.LabelPropertyInteger,
+            ParameterTextConstants.LabelPropertyString,
     ];
 
     private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
@@ -108,7 +108,7 @@
         return
                 @<div class="action-list">
                     <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
-                        @TextService.Get(TextConstants.ButtonCreate)
+                        @TextService.Get(ParameterTextConstants.ButtonCreate)
                     </Button>
                 </div>;
     }

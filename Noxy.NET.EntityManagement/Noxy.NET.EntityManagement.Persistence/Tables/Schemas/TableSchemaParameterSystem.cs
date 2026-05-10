@@ -1,9 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+using Noxy.NET.EntityManagement.Domain.Enums;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
 public class TableSchemaParameterSystem : TableSchemaParameter
 {
+    [Required]
+    public required ParameterSystemTypeEnum Type { get; set; }
+
+
     public override TableSchemaParameterSystem Clone(Guid? schemaID = null)
     {
         return new()
@@ -12,6 +18,7 @@ public class TableSchemaParameterSystem : TableSchemaParameter
             SchemaIdentifier = SchemaIdentifier,
             Name = Name,
             Note = Note,
+            Type = Type,
             IsApprovalRequired = IsApprovalRequired,
             IsSystemDefined = IsSystemDefined,
         };

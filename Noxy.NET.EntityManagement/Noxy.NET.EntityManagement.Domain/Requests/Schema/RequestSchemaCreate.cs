@@ -11,11 +11,11 @@ public class RequestSchemaCreate : BaseRequestPost<ResponseSchemaCreate>
     public override string APIEndpoint => "Schema";
 
     [Required]
-    [DisplayName(TextConstants.LabelFormName)]
-    [Description(TextConstants.HelpFormName)]
+    [DisplayName(ParameterTextConstants.LabelFormName)]
+    [Description(ParameterTextConstants.HelpFormName)]
     public string Name { get; set; } = string.Empty;
 
-    [DisplayName(TextConstants.LabelFormNote)]
-    [Description(TextConstants.HelpFormNote)]
+    [DisplayName(ParameterTextConstants.LabelFormNote)]
+    [Description(ParameterTextConstants.HelpFormNote)]
     public string Note { get; set; } = string.Empty;
 }

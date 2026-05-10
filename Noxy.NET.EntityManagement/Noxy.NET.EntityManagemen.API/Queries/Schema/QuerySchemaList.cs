@@ -7,6 +7,7 @@ namespace Noxy.NET.EntityManagement.API.Queries.Schema;
 
 public class QuerySchemaList(RequestSchemaList request) : IRequest<ResponseSchemaList>
 {
+    public bool? IsActivated { get; } = request.IsActivated;
     public string? Search { get; } = request.Search;
     public int? PageNumber { get; } = request.PageNumber;
     public int? PageSize { get; } = request.PageSize;

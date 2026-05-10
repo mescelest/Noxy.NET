@@ -8,13 +8,13 @@
         <div class="logo">
             <NavLink href="/">
                 <h1>
-                    @TextService.Get(TextConstants.Title)
+                    @TextService.Get(ParameterTextConstants.Title)
                 </h1>
             </NavLink>
         </div>
         <div class="navigation">
             <NavLink href="/Schema">
-                @TextService.Get(TextConstants.LinkNavigationSchema)
+                @TextService.Get(ParameterTextConstants.LinkNavigationSchema)
             </NavLink>
 
             @foreach (ViewModelSchemaContext item in _listContext)
@@ -26,7 +26,7 @@
             @if (AuthProvider.Identity != null)
             {
                 <Button @onclick="SignOut">
-                    @TextService.Get(TextConstants.ButtonSignOut)
+                    @TextService.Get(ParameterTextConstants.ButtonSignOut)
                 </Button>
             }
         </div>

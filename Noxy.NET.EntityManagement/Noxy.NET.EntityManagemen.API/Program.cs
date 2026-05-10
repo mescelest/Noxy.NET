@@ -52,7 +52,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-await app.UseBaseWithPersistence();
 await app.UseApplication();
 
 await app.RunAsync();

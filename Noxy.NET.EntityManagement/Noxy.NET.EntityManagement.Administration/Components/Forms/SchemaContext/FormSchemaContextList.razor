@@ -20,9 +20,9 @@
 
     private readonly Dictionary<string, string> _sortOptionSet = new()
     {
-        { nameof(EntitySchemaContext.ID), TextConstants.LabelID },
-        { nameof(EntitySchemaContext.Name), TextConstants.LabelName },
-        { nameof(EntitySchemaContext.TimeCreated), TextConstants.LabelTimeCreated },
+            { nameof(EntitySchemaContext.ID), ParameterTextConstants.LabelID },
+            { nameof(EntitySchemaContext.Name), ParameterTextConstants.LabelName },
+            { nameof(EntitySchemaContext.TimeCreated), ParameterTextConstants.LabelTimeCreated },
     };
 
     protected override WebFormContext<RequestSchemaContextList> CreateContext()

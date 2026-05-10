@@ -11,8 +11,8 @@ public class RequestSchemaPropertyList : BaseRequestGetList<ResponseSchemaProper
 
     public Guid? SchemaID { get; set; }
 
-    [DisplayName(TextConstants.LabelFormPropertyType)]
-    [Description(TextConstants.HelpFormPropertyType)]
+    [DisplayName(ParameterTextConstants.LabelFormPropertyType)]
+    [Description(ParameterTextConstants.HelpFormPropertyType)]
     public HashSet<string>? PropertyType { get; set; }
 
     public override Dictionary<string, object?> ToQueryParameters()

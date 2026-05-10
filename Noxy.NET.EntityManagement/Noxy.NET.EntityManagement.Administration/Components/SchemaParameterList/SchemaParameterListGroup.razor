@@ -26,36 +26,36 @@
     @if (!_isEditMode)
     {
         <div>
-            <strong>@TextService.Get(TextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
             @SchemaParameter.SchemaIdentifier
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelName, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelName, GetComponentName()):</strong>
             @SchemaParameter.Name
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelNote, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelNote, GetComponentName()):</strong>
             @SchemaParameter.Note
         </div>
 
         @if (SchemaParameter is EntitySchemaParameterText parameterText)
         {
             <div>
-                <strong>@TextService.Get(TextConstants.LabelParameterTextType, GetComponentName()):</strong>
+                <strong>@TextService.Get(ParameterTextConstants.LabelParameterTextType, GetComponentName()):</strong>
                 @parameterText.Type
             </div>
         }
 
         <div>
-            <strong>@TextService.Get(TextConstants.LabelIsApprovalRequired, GetComponentName())</strong>
-            @(SchemaParameter.IsApprovalRequired ? TextService.Get(TextConstants.ValueYes) : TextService.Get(TextConstants.ValueNo))
+            <strong>@TextService.Get(ParameterTextConstants.LabelIsApprovalRequired, GetComponentName())</strong>
+            @(SchemaParameter.IsApprovalRequired ? TextService.Get(ParameterTextConstants.ValueYes) : TextService.Get(ParameterTextConstants.ValueNo))
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelIsSystemDefined, GetComponentName())</strong>
-            @(SchemaParameter.IsSystemDefined ? TextService.Get(TextConstants.ValueYes) : TextService.Get(TextConstants.ValueNo))
+            <strong>@TextService.Get(ParameterTextConstants.LabelIsSystemDefined, GetComponentName())</strong>
+            @(SchemaParameter.IsSystemDefined ? TextService.Get(ParameterTextConstants.ValueYes) : TextService.Get(ParameterTextConstants.ValueNo))
         </div>
         <div>
-            <strong>@TextService.Get(TextConstants.LabelTimeCreated, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName()):</strong>
             @SchemaParameter.TimeCreated
         </div>
     }
@@ -147,11 +147,11 @@
         return
             @<div class="action-list">
                 <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                    @TextService.Get(TextConstants.ButtonUpdate, GetComponentName())
+                    @TextService.Get(ParameterTextConstants.ButtonUpdate, GetComponentName())
                 </Button>
 
                 <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
-                    @TextService.Get(TextConstants.ButtonCancel, GetComponentName())
+                    @TextService.Get(ParameterTextConstants.ButtonCancel, GetComponentName())
                 </Button>
             </div>;
     }

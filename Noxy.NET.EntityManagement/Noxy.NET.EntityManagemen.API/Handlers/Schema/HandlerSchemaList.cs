@@ -16,6 +16,7 @@ public class HandlerSchemaList(IUnitOfWorkFactory serviceUoWFactory) : IRequestH
 
         List<EntitySchema> result = await uow.Schema.GetSchemaList(new()
         {
+            IsActivated = request.IsActivated,
             Search = request.Search?.ToEscapedSqlLike(),
             PageSize = request.PageSize ?? 10,
             PageNumber = request.PageNumber ?? 0,

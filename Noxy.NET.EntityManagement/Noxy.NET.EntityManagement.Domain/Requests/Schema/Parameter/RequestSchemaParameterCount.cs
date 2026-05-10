@@ -11,20 +11,20 @@ public class RequestSchemaParameterCount : BaseRequestGet<ResponseSchemaParamete
 
     public Guid? SchemaID { get; set; }
 
-    [DisplayName(TextConstants.LabelFormSearch)]
-    [Description(TextConstants.HelpFormSearch)]
+    [DisplayName(ParameterTextConstants.LabelFormSearch)]
+    [Description(ParameterTextConstants.HelpFormSearch)]
     public string? Search { get; set; }
 
-    [DisplayName(TextConstants.LabelFormIsSystemDefined)]
-    [Description(TextConstants.HelpFormIsSystemDefined)]
+    [DisplayName(ParameterTextConstants.LabelFormIsSystemDefined)]
+    [Description(ParameterTextConstants.HelpFormIsSystemDefined)]
     public bool? IsSystemDefined { get; set; }
 
-    [DisplayName(TextConstants.LabelFormIsApprovalRequired)]
-    [Description(TextConstants.HelpFormIsApprovalRequired)]
+    [DisplayName(ParameterTextConstants.LabelFormIsApprovalRequired)]
+    [Description(ParameterTextConstants.HelpFormIsApprovalRequired)]
     public bool? IsApprovalRequired { get; set; }
 
-    [DisplayName(TextConstants.LabelFormParameterType)]
-    [Description(TextConstants.HelpFormParameterType)]
+    [DisplayName(ParameterTextConstants.LabelFormParameterType)]
+    [Description(ParameterTextConstants.HelpFormParameterType)]
     public HashSet<string>? ParameterType { get; set; }
 
     public override Dictionary<string, object?> ToQueryParameters()

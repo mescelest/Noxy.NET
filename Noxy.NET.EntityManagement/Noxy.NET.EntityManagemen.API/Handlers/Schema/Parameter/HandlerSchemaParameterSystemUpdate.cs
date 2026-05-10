@@ -19,6 +19,7 @@ public class HandlerSchemaParameterSystemUpdate(IUnitOfWorkFactory serviceUoWFac
             SchemaIdentifier = request.SchemaIdentifier,
             Name = request.Name,
             Note = request.Note,
+            Type = request.Type,
             IsApprovalRequired = request.IsApprovalRequired,
             IsSystemDefined = request.IsSystemDefined,
         });

@@ -11,16 +11,16 @@ public class RequestSchemaParameterList : BaseRequestGetList<ResponseSchemaParam
 
     public Guid? SchemaID { get; set; }
 
-    [DisplayName(TextConstants.LabelFormIsSystemDefined)]
-    [Description(TextConstants.HelpFormIsSystemDefined)]
+    [DisplayName(ParameterTextConstants.LabelFormIsSystemDefined)]
+    [Description(ParameterTextConstants.HelpFormIsSystemDefined)]
     public bool? IsSystemDefined { get; set; }
 
-    [DisplayName(TextConstants.LabelFormIsApprovalRequired)]
-    [Description(TextConstants.HelpFormIsApprovalRequired)]
+    [DisplayName(ParameterTextConstants.LabelFormIsApprovalRequired)]
+    [Description(ParameterTextConstants.HelpFormIsApprovalRequired)]
     public bool? IsApprovalRequired { get; set; }
 
-    [DisplayName(TextConstants.LabelFormParameterType)]
-    [Description(TextConstants.HelpFormParameterType)]
+    [DisplayName(ParameterTextConstants.LabelFormParameterType)]
+    [Description(ParameterTextConstants.HelpFormParameterType)]
     public HashSet<string>? ParameterType { get; set; }
 
     public override Dictionary<string, object?> ToQueryParameters()

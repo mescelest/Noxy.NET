@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Noxy.NET.EntityManagement.Persistence.Seeds;
 using Noxy.NET.EntityManagement.Persistence.Tables.Authentication;
 using Noxy.NET.EntityManagement.Persistence.Tables.Data;
 using Noxy.NET.EntityManagement.Persistence.Tables.Data.Discriminators;
@@ -10,8 +11,6 @@ namespace Noxy.NET.EntityManagement.Persistence;
 
 public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
 {
-    private static List<Func<ModelBuilder, TableSchema?, TableSchema?>> MigrationSeedList { get; } = [];
-
     public DbSet<TableAuthentication> Authentication { get; set; } = null!;
     public DbSet<TableIdentity> Identity { get; set; } = null!;
     public DbSet<TableUser> User { get; set; } = null!;
@@ -50,62 +49,62 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableSchemaContextHasElement> SchemaContextHasElement { get; set; } = null!;
     public DbSet<TableSchemaElementHasProperty> SchemaElementHasProperty { get; set; } = null!;
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(builder);
 
-        modelBuilder.Entity<TableDataProperty>().UseTpcMappingStrategy();
-        modelBuilder.Entity<TableDataProperty>().Property(e => e.ID).ValueGeneratedNever();
-        modelBuilder.Entity<TableDataPropertyBoolean>().ToTable("TableDataPropertyBoolean").HasBaseType<TableDataProperty>();
-        modelBuilder.Entity<TableDataPropertyDateTime>().ToTable("TableDataPropertyDateTime").HasBaseType<TableDataProperty>();
-        modelBuilder.Entity<TableDataPropertyString>().ToTable("TableDataPropertyString").HasBaseType<TableDataProperty>();
+        builder.Entity<TableDataProperty>().UseTpcMappingStrategy();
+        builder.Entity<TableDataProperty>().Property(e => e.ID).ValueGeneratedNever();
+        builder.Entity<TableDataPropertyBoolean>().ToTable("TableDataPropertyBoolean").HasBaseType<TableDataProperty>();
+        builder.Entity<TableDataPropertyDateTime>().ToTable("TableDataPropertyDateTime").HasBaseType<TableDataProperty>();
+        builder.Entity<TableDataPropertyString>().ToTable("TableDataPropertyString").HasBaseType<TableDataProperty>();
 
-        modelBuilder.Entity<TableDataParameter>().UseTpcMappingStrategy();
-        modelBuilder.Entity<TableDataParameter>().Property(e => e.ID).ValueGeneratedNever();
-        modelBuilder.Entity<TableDataParameterStyle>().ToTable("TableDataParameterStyle").HasBaseType<TableDataParameter>();
-        modelBuilder.Entity<TableDataParameterSystem>().ToTable("TableDataParameterSystem").HasBaseType<TableDataParameter>();
-        modelBuilder.Entity<TableDataParameterText>().ToTable("TableDataParameterText").HasBaseType<TableDataParameter>();
+        builder.Entity<TableDataParameter>().UseTpcMappingStrategy();
+        builder.Entity<TableDataParameter>().Property(e => e.ID).ValueGeneratedNever();
+        builder.Entity<TableDataParameterStyle>().ToTable("TableDataParameterStyle").HasBaseType<TableDataParameter>();
+        builder.Entity<TableDataParameterSystem>().ToTable("TableDataParameterSystem").HasBaseType<TableDataParameter>();
+        builder.Entity<TableDataParameterText>().ToTable("TableDataParameterText").HasBaseType<TableDataParameter>();
 
-        modelBuilder.Entity<TableSchemaProperty>().UseTpcMappingStrategy();
-        modelBuilder.Entity<TableSchemaProperty>().Property(e => e.ID).ValueGeneratedNever();
-        modelBuilder.Entity<TableSchemaPropertyBoolean>().ToTable("TableSchemaPropertyBoolean").HasBaseType<TableSchemaProperty>();
-        modelBuilder.Entity<TableSchemaPropertyCollection>().ToTable("TableSchemaPropertyCollection").HasBaseType<TableSchemaProperty>();
-        modelBuilder.Entity<TableSchemaPropertyDateTime>().ToTable("TableSchemaPropertyDateTime").HasBaseType<TableSchemaProperty>();
-        modelBuilder.Entity<TableSchemaPropertyDecimal>().ToTable("TableSchemaPropertyDecimal").HasBaseType<TableSchemaProperty>();
-        modelBuilder.Entity<TableSchemaPropertyImage>().ToTable("TableSchemaPropertyImage").HasBaseType<TableSchemaProperty>();
-        modelBuilder.Entity<TableSchemaPropertyInteger>().ToTable("TableSchemaPropertyInteger").HasBaseType<TableSchemaProperty>();
-        modelBuilder.Entity<TableSchemaPropertyString>().ToTable("TableSchemaPropertyString").HasBaseType<TableSchemaProperty>();
-        modelBuilder.Entity<TableSchemaPropertyTable>().ToTable("TableSchemaPropertyTable").HasBaseType<TableSchemaProperty>();
+        builder.Entity<TableSchemaProperty>().UseTpcMappingStrategy();
+        builder.Entity<TableSchemaProperty>().Property(e => e.ID).ValueGeneratedNever();
+        builder.Entity<TableSchemaPropertyBoolean>().ToTable("TableSchemaPropertyBoolean").HasBaseType<TableSchemaProperty>();
+        builder.Entity<TableSchemaPropertyCollection>().ToTable("TableSchemaPropertyCollection").HasBaseType<TableSchemaProperty>();
+        builder.Entity<TableSchemaPropertyDateTime>().ToTable("TableSchemaPropertyDateTime").HasBaseType<TableSchemaProperty>();
+        builder.Entity<TableSchemaPropertyDecimal>().ToTable("TableSchemaPropertyDecimal").HasBaseType<TableSchemaProperty>();
+        builder.Entity<TableSchemaPropertyImage>().ToTable("TableSchemaPropertyImage").HasBaseType<TableSchemaProperty>();
+        builder.Entity<TableSchemaPropertyInteger>().ToTable("TableSchemaPropertyInteger").HasBaseType<TableSchemaProperty>();
+        builder.Entity<TableSchemaPropertyString>().ToTable("TableSchemaPropertyString").HasBaseType<TableSchemaProperty>();
+        builder.Entity<TableSchemaPropertyTable>().ToTable("TableSchemaPropertyTable").HasBaseType<TableSchemaProperty>();
 
-        modelBuilder.Entity<TableSchemaParameter>().UseTpcMappingStrategy();
-        modelBuilder.Entity<TableSchemaParameter>().Property(e => e.ID).ValueGeneratedNever();
-        modelBuilder.Entity<TableSchemaParameterStyle>().ToTable("TableSchemaParameterStyle").HasBaseType<TableSchemaParameter>();
-        modelBuilder.Entity<TableSchemaParameterSystem>().ToTable("TableSchemaParameterSystem").HasBaseType<TableSchemaParameter>();
-        modelBuilder.Entity<TableSchemaParameterText>().ToTable("TableSchemaParameterText").HasBaseType<TableSchemaParameter>();
+        builder.Entity<TableSchemaParameter>().UseTpcMappingStrategy();
+        builder.Entity<TableSchemaParameter>().Property(e => e.ID).ValueGeneratedNever();
+        builder.Entity<TableSchemaParameterStyle>().ToTable("TableSchemaParameterStyle").HasBaseType<TableSchemaParameter>();
+        builder.Entity<TableSchemaParameterSystem>().ToTable("TableSchemaParameterSystem").HasBaseType<TableSchemaParameter>();
+        builder.Entity<TableSchemaParameterText>().ToTable("TableSchemaParameterText").HasBaseType<TableSchemaParameter>();
 
-        modelBuilder.Entity<TableUser>()
+        builder.Entity<TableUser>()
             .HasOne(e => e.Authentication)
             .WithOne(e => e.User)
             .HasForeignKey<TableUser>(x => x.AuthenticationID);
 
         #region -- Schema --
 
-        modelBuilder.Entity<TableSchema>()
+        builder.Entity<TableSchema>()
             .HasMany(e => e.ContextList)
             .WithOne(e => e.Schema)
             .HasForeignKey(x => x.SchemaID);
 
-        modelBuilder.Entity<TableSchema>()
+        builder.Entity<TableSchema>()
             .HasMany(e => e.ElementList)
             .WithOne(e => e.Schema)
             .HasForeignKey(x => x.SchemaID);
 
-        modelBuilder.Entity<TableSchema>()
+        builder.Entity<TableSchema>()
             .HasMany(e => e.ParameterList)
             .WithOne(e => e.Schema)
             .HasForeignKey(x => x.SchemaID);
 
-        modelBuilder.Entity<TableSchema>()
+        builder.Entity<TableSchema>()
             .HasMany(e => e.PropertyList)
             .WithOne(e => e.Schema)
             .HasForeignKey(x => x.SchemaID);
@@ -114,37 +113,40 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         #region -- Junctions --
 
-        modelBuilder.Entity<TableSchemaPropertyCollectionHasProperty>()
+        builder.Entity<TableSchemaPropertyCollectionHasProperty>()
             .HasOne(e => e.Entity)
             .WithMany(e => e.PropertyList)
             .HasForeignKey(x => x.EntityID);
 
-        modelBuilder.Entity<TableSchemaPropertyCollectionHasProperty>()
+        builder.Entity<TableSchemaPropertyCollectionHasProperty>()
             .HasOne(e => e.Relation)
             .WithMany(e => e.RelationPropertyCollectionList)
             .HasForeignKey(x => x.RelationID);
 
-        modelBuilder.Entity<TableSchemaPropertyTableHasProperty>()
+        builder.Entity<TableSchemaPropertyTableHasProperty>()
             .HasOne(e => e.Entity)
             .WithMany(e => e.PropertyList)
             .HasForeignKey(x => x.EntityID);
 
-        modelBuilder.Entity<TableSchemaPropertyTableHasProperty>()
+        builder.Entity<TableSchemaPropertyTableHasProperty>()
             .HasOne(e => e.Relation)
             .WithMany(e => e.RelationPropertyTableList)
             .HasForeignKey(x => x.RelationID);
 
         #endregion -- Junctions --
 
-        TableSchema? tableSchema = null;
-        foreach (TableSchema result in MigrationSeedList.Select(action => action(modelBuilder, tableSchema)).OfType<TableSchema>())
+        TableSchema schema = new TableSchema
         {
-            tableSchema = result;
-        }
-    }
+            ID = Guid.Parse("12345678-1234-1234-1234-1234567890ab"),
+            Name = "Base schema",
+            Note = "This is a base schema intended to be cloned and extended.",
+            IsActive = true,
+            TimeCreated = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            TimeActivated = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+        };
+        builder.Entity<TableSchema>().HasData(schema);
 
-    public static void AddMigrationSeed(Func<ModelBuilder, TableSchema?, TableSchema?> action)
-    {
-        MigrationSeedList.Add(action);
+        new SchemaParameterTextSeed(builder, schema).Apply();
+        new SchemaParameterSystemSeed(builder, schema).Apply();
     }
 }

@@ -6,21 +6,21 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="content">
         <div class="column">
-            <h2>@TextService.Get(TextConstants.HeaderFormSignUp)</h2>
+            <h2>@TextService.Get(ParameterTextConstants.HeaderFormSignUp)</h2>
 
             <FormAuthenticationSignUp OnSubmit="SignUpFormSubmit">
                 <Button Status="StatusEnum.Info" type="submit">
-                    @TextService.Get(TextConstants.ButtonSignUp, GetComponentName())
+                    @TextService.Get(ParameterTextConstants.ButtonSignUp, GetComponentName())
                 </Button>
             </FormAuthenticationSignUp>
         </div>
 
         <div class="column">
-            <h2>@TextService.Get(TextConstants.HeaderFormSignIn)</h2>
+            <h2>@TextService.Get(ParameterTextConstants.HeaderFormSignIn)</h2>
 
             <FormAuthenticationSignIn OnSubmit="SignInFormSubmit">
                 <Button Status="StatusEnum.Success" type="submit">
-                    @TextService.Get(TextConstants.ButtonSignIn, GetComponentName())
+                    @TextService.Get(ParameterTextConstants.ButtonSignIn, GetComponentName())
                 </Button>
             </FormAuthenticationSignIn>
         </div>

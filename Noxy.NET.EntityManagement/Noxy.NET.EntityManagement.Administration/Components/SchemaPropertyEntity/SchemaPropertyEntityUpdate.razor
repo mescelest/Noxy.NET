@@ -4,7 +4,7 @@
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@TextService.Get(TextConstants.HeaderFormUpdateSchemaPropertyBoolean)</DynamicHTMLTag>
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@TextService.Get(ParameterTextConstants.HeaderFormUpdateSchemaPropertyBoolean)</DynamicHTMLTag>
 
     @switch (SchemaProperty)
     {
@@ -94,7 +94,7 @@
         return
             @<ButtonList Alignment="ButtonListAlignmentEnum.Right">
                 <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
-                    @TextService.Get(TextConstants.ButtonCreate)
+                    @TextService.Get(ParameterTextConstants.ButtonCreate)
                 </Button>
             </ButtonList>;
     }

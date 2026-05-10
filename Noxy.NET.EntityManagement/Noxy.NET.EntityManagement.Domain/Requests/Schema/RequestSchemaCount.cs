@@ -9,7 +9,7 @@ public class RequestSchemaCount : BaseRequestGet<ResponseSchemaCount>
 {
     public override string APIEndpoint => "Schema";
 
-    [DisplayName(TextConstants.LabelFormSearch)]
-    [Description(TextConstants.HelpFormSearch)]
+    [DisplayName(ParameterTextConstants.LabelFormSearch)]
+    [Description(ParameterTextConstants.HelpFormSearch)]
     public string? Search { get; set; }
 }

@@ -436,6 +436,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             SchemaIdentifier = table.SchemaIdentifier,
             Name = table.Name,
             Note = table.Note,
+            Type = table.Type,
             IsSystemDefined = table.IsSystemDefined,
             IsApprovalRequired = table.IsApprovalRequired,
             TimeCreated = table.TimeCreated,

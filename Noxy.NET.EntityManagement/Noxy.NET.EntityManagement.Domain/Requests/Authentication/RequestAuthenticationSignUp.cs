@@ -13,19 +13,19 @@ public class RequestAuthenticationSignUp : BaseRequestPost<ResponseAuthenticatio
 
     [Required]
     [EmailAddress]
-    [DisplayName(TextConstants.LabelFormEmail)]
-    [Description(TextConstants.HelpFormEmail)]
+    [DisplayName(ParameterTextConstants.LabelFormEmail)]
+    [Description(ParameterTextConstants.HelpFormEmail)]
     public string Email { get; set; } = string.Empty;
 
     [Required]
     [MinLength(12), MaxLength(512)]
-    [DisplayName(TextConstants.LabelFormPassword)]
-    [Description(TextConstants.HelpFormPassword)]
+    [DisplayName(ParameterTextConstants.LabelFormPassword)]
+    [Description(ParameterTextConstants.HelpFormPassword)]
     public string Password { get; set; } = string.Empty;
 
     [Required]
     [PropertyMatchValidation(nameof(Password))]
-    [DisplayName(TextConstants.LabelFormConfirmPassword)]
-    [Description(TextConstants.HelpFormConfirmPassword)]
+    [DisplayName(ParameterTextConstants.LabelFormConfirmPassword)]
+    [Description(ParameterTextConstants.HelpFormConfirmPassword)]
     public string ConfirmPassword { get; set; } = string.Empty;
 }
