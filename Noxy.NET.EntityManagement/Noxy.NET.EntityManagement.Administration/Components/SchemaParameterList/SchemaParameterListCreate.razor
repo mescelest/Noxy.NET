@@ -6,7 +6,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new parameter</DynamicHTMLTag>
 
-    <InputGroupSelect OptionList="_setType" DisplayName="@TextService.Get(ParameterTextConstants.LabelFormParameterType)" Description="@TextService.Get(ParameterTextConstants.HelpFormParameterType)" 
+    <InputGroupSelect OptionList="_setType" DisplayName="@TextService.Get(ParameterTextConstants.LabelFormParameterType)" Description="@TextService.Get(ParameterTextConstants.HelpFormParameterType)"
                       Name="@nameof(_valueType)" @bind-Value="_valueType">
         <span>@TextService.Get(context)</span>
     </InputGroupSelect>
@@ -48,23 +48,26 @@
 
     private readonly HashSet<string> _setType =
     [
-            ParameterTextConstants.LabelParameterStyle,
-            ParameterTextConstants.LabelParameterSystem,
-            ParameterTextConstants.LabelParameterText
+        ParameterTextConstants.LabelParameterStyle,
+        ParameterTextConstants.LabelParameterSystem,
+        ParameterTextConstants.LabelParameterText
     ];
 
     private bool IsLoading => State.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Add, out bool value) && value;
 
     private void SubmitStyle(IWebFormContext<RequestSchemaParameterStyleCreate> value)
-  Dispatcher.Dispatch(new FeatureSchemaParameterReducers.AddStyleAction(ScopeCurrent, value.Model value.Model));
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.AddStyleAction(ScopeCurrent, value.Model));
     }
 
     private void SubmitSystem(IWebFormContext<RequestSchemaParameterSystemCreate> value)
-  Dispatcher.Dispatch(new FeatureSchemaParameterReducers.AddSystemAction(ScopeCurrent, value.Model value.Model));
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.AddSystemAction(ScopeCurrent, value.Model));
     }
 
     private void SubmitText(IWebFormContext<RequestSchemaParameterTextCreate> value)
-  Dispatcher.Dispatch(new FeatureSchemaParameterReducers.AddTextAction(ScopeCurrent, value.Model value.Model));
+    {
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.AddTextAction(ScopeCurrent, value.Model));
     }
 
     private RenderFragment SubmitAction()
