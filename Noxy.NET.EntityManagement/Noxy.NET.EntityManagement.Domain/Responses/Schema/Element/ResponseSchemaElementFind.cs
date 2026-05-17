@@ -2,7 +2,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
 
-public class ResponseSchemaElementFind
+public class ResponseSchemaElementFind(EntitySchemaElement value)
 {
-    public required EntitySchemaElement Value { get; set; }
+    public EntitySchemaElement Value { get; } = value;
 }

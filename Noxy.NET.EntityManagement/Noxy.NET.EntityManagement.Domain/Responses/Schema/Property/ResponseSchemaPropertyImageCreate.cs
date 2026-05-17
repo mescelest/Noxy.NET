@@ -1,9 +1,8 @@
 using Noxy.NET.EntityManagement.Domain.Abstractions;
-using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
-public class ResponseSchemaPropertyImageCreate : BaseResponse
+public class ResponseSchemaPropertyImageCreate(Guid value) : BaseResponse
 {
-    public required EntitySchemaPropertyImage Value { get; set; }
+    public Guid Value { get; } = value;
 }

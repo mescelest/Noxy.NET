@@ -15,6 +15,6 @@ public class HandlerSchemaFind(IUnitOfWorkFactory serviceUoWFactory) : IQueryHan
         Guid id = request.ID != Guid.Empty ? request.ID : await uow.Schema.GetCurrentSchemaID();
         EntitySchema result = await uow.Schema.GetSchemaByID(id);
 
-        return new() { Value = result };
+        return new(result);
     }
 }

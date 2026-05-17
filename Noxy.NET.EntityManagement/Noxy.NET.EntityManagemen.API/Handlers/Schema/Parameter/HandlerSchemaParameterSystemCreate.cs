@@ -25,6 +25,6 @@ public class HandlerSchemaParameterSystemCreate(IUnitOfWorkFactory serviceUoWFac
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

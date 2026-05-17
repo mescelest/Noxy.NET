@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Mediator;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
 
 namespace Noxy.NET.EntityManagement.Presentation.Services;
@@ -45,9 +44,7 @@ public class APIHttpClient(HttpClient client)
         HttpResponseMessage response = await client.PostAsJsonAsync(request.APIEndpoint, request.ToBody(), WriteSerializerOptions, cancellationToken);
         await EnsureSuccess(response);
 
-        return typeof(TResponse) != typeof(Unit)
-            ? await DeserializeOrThrow<TResponse>(response, cancellationToken)
-            : (TResponse)(object)Unit.Value;
+        return await DeserializeOrThrow<TResponse>(response, cancellationToken);
     }
 
     private static async Task EnsureSuccess(HttpResponseMessage response)

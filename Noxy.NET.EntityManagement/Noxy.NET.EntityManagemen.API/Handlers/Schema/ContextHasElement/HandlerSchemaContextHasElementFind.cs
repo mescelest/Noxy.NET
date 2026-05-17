@@ -14,6 +14,6 @@ public class HandlerSchemaContextHasElementFind(IUnitOfWorkFactory serviceUoWFac
 
         EntitySchemaContextHasElement result = await uow.Schema.GetSchemaContextHasElementByID(request.ID);
 
-        return new() { Value = result };
+        return new(result);
     }
 }

@@ -20,6 +20,6 @@ public class HandlerSchemaContextHasElementCreate(IUnitOfWorkFactory serviceUoWF
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

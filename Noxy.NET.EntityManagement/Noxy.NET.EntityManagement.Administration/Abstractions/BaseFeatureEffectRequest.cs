@@ -9,23 +9,13 @@ public abstract class BaseFeatureEffectRequest<TState, TKind> where TState : Bas
     protected async Task Execute<TResult>(ExecuteConfiguration config, IDispatcher dispatcher, Func<Task<TResult>> operation)
     {
         (bool success, TResult? result) = await TryExecute(config, dispatcher, operation);
+        if (!success) return;
 
-        if (success)
-        {
-            if (!config.Discard)
-            {
-                dispatcher.Dispatch(new BaseFeatureReducerRequest<TState, TKind>.SuccessAction<TResult>(config.Scope, config.Kind, result!));
-            }
-            else
-            {
-                dispatcher.Dispatch(new BaseFeatureReducerRequest<TState, TKind>.SuccessAction(config.Scope, config.Kind));
-            }
-
-            if (config.Refresh)
-            {
-                RefreshList(config.Scope, dispatcher);
-            }
-        }
+        dispatcher.Dispatch(!config.Discard
+            ? new BaseFeatureReducerRequest<TState, TKind>.SuccessAction<TResult>(config.Scope, config.Kind, result!)
+            : new BaseFeatureReducerRequest<TState, TKind>.SuccessAction(config.Scope, config.Kind)
+        );
+        if (config.Refresh) RefreshList(config.Scope, dispatcher);
     }
 
     private static async Task<(bool Success, TResult? Result)> TryExecute<TResult>(ExecuteConfiguration config, IDispatcher dispatcher, Func<Task<TResult>> operation)

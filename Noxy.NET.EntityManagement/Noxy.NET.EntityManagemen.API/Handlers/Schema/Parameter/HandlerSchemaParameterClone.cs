@@ -16,6 +16,6 @@ public class HandlerSchemaParameterClone(IUnitOfWorkFactory serviceUoWFactory) :
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

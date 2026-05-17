@@ -3,7 +3,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 
-public class ResponseSchemaParameterFind : BaseResponse
+public class ResponseSchemaParameterFind(EntitySchemaParameter.Discriminator value) : BaseResponse
 {
-    public required EntitySchemaParameter.Discriminator Value { get; set; }
+    public EntitySchemaParameter.Discriminator Value { get; } = value;
 }

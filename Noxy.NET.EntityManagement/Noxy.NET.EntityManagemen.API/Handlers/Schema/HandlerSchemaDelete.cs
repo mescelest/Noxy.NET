@@ -15,6 +15,6 @@ public class HandlerSchemaDelete(IUnitOfWorkFactory serviceUoWFactory) : IComman
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result);
     }
 }

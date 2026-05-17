@@ -23,6 +23,6 @@ public class HandlerSchemaUpdate(IUnitOfWorkFactory serviceUoWFactory) : IComman
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

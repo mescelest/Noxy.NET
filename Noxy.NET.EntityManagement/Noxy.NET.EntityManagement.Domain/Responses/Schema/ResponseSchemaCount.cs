@@ -1,6 +1,8 @@
+using Noxy.NET.EntityManagement.Domain.Abstractions;
+
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
-public class ResponseSchemaCount
+public class ResponseSchemaCount(int value) : BaseResponse
 {
-    public required int Value { get; set; }
+    public int Value { get; } = value;
 }

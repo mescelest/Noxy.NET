@@ -18,6 +18,6 @@ public class HandlerSchemaElementCount(IUnitOfWorkFactory serviceUoWFactory) : I
             Search = request.Search?.ToEscapedSqlLike(),
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

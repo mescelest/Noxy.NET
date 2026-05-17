@@ -27,6 +27,6 @@ public class HandlerSchemaPropertyImageCreate(IUnitOfWorkFactory serviceUoWFacto
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

@@ -19,6 +19,6 @@ public class HandlerSchemaPropertyCount(IUnitOfWorkFactory serviceUoWFactory) : 
             PropertyType = request.PropertyType,
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

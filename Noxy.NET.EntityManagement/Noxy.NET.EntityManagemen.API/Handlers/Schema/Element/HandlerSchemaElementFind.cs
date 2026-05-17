@@ -14,6 +14,6 @@ public class HandlerSchemaElementFind(IUnitOfWorkFactory serviceUoWFactory) : IQ
 
         EntitySchemaElement result = await uow.Schema.GetSchemaElementByID(request.ID);
 
-        return new() { Value = result };
+        return new(result);
     }
 }

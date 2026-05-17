@@ -17,6 +17,6 @@ public class HandlerSchemaCount(IUnitOfWorkFactory serviceUoWFactory) : IQueryHa
             Search = request.Search?.ToEscapedSqlLike(),
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

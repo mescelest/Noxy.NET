@@ -14,6 +14,6 @@ public class HandlerSchemaPropertyFind(IUnitOfWorkFactory serviceUoWFactory) : I
 
         EntitySchemaProperty.Discriminator result = await uow.Schema.GetSchemaPropertyByID(request.ID);
 
-        return new() { Value = result };
+        return new(result);
     }
 }

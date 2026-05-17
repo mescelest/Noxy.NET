@@ -24,6 +24,6 @@ public class HandlerSchemaParameterList(IUnitOfWorkFactory serviceUoWFactory) : 
             PageNumber = request.PageNumber ?? 0,
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

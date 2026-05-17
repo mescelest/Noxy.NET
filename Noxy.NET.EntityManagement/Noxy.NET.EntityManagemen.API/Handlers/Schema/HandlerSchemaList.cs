@@ -24,6 +24,6 @@ public class HandlerSchemaList(IUnitOfWorkFactory serviceUoWFactory) : IQueryHan
             SortDirection = request.SortDirection ?? ListSortDirection.Descending,
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

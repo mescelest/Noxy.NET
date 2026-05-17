@@ -1,8 +1,9 @@
+using Noxy.NET.EntityManagement.Domain.Abstractions;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
-public class ResponseSchemaList
+public class ResponseSchemaList(List<EntitySchema> value) : BaseResponse
 {
-    public required List<EntitySchema> Value { get; set; }
+    public List<EntitySchema> Value { get; } = value;
 }

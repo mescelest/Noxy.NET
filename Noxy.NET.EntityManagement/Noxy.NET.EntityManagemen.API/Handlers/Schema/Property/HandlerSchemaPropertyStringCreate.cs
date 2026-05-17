@@ -26,6 +26,6 @@ public class HandlerSchemaPropertyStringCreate(IUnitOfWorkFactory serviceUoWFact
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

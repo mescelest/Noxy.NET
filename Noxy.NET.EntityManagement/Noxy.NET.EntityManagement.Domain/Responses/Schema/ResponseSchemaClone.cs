@@ -1,9 +1,8 @@
 using Noxy.NET.EntityManagement.Domain.Abstractions;
-using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
-public class ResponseSchemaClone : BaseResponse
+public class ResponseSchemaClone(Guid value) : BaseResponse
 {
-    public required EntitySchema Value { get; set; }
+    public Guid Value { get; } = value;
 }

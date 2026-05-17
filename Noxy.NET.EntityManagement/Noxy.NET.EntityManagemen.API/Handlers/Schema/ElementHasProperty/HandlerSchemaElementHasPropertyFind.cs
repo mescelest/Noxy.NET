@@ -14,6 +14,6 @@ public class HandlerSchemaElementHasPropertyFind(IUnitOfWorkFactory serviceUoWFa
 
         EntitySchemaElementHasProperty result = await uow.Schema.GetSchemaElementHasPropertyByID(request.ID);
 
-        return new() { Value = result };
+        return new(result);
     }
 }

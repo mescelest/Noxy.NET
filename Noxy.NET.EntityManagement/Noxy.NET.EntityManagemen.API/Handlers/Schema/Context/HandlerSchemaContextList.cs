@@ -21,6 +21,6 @@ public class HandlerSchemaContextList(IUnitOfWorkFactory serviceUoWFactory) : IQ
             PageNumber = request.PageNumber ?? 0,
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

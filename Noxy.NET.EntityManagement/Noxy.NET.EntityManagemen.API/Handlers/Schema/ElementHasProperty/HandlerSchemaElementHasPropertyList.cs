@@ -18,6 +18,6 @@ public class HandlerSchemaElementHasPropertyList(IUnitOfWorkFactory serviceUoWFa
             SchemaElementID = request.SchemaElementID,
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

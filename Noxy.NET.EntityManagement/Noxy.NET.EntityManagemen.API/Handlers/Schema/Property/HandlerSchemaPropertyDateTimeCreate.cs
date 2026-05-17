@@ -27,6 +27,6 @@ public class HandlerSchemaPropertyDateTimeCreate(IUnitOfWorkFactory serviceUoWFa
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

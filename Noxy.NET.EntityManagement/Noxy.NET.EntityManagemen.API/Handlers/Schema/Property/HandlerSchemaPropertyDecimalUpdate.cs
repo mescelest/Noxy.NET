@@ -27,6 +27,6 @@ public class HandlerSchemaPropertyDecimalUpdate(IUnitOfWorkFactory serviceUoWFac
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

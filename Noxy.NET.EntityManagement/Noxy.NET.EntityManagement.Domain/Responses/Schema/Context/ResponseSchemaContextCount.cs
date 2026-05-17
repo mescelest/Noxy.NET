@@ -1,6 +1,6 @@
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 
-public class ResponseSchemaContextCount
+public class ResponseSchemaContextCount(int value)
 {
-    public required int Value { get; set; }
+    public int Value { get; } = value;
 }

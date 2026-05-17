@@ -15,6 +15,6 @@ public class HandlerSchemaContextHasElementDelete(IUnitOfWorkFactory serviceUoWF
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result);
     }
 }

@@ -16,6 +16,6 @@ public class HandlerSchemaElementClone(IUnitOfWorkFactory serviceUoWFactory) : I
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

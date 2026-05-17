@@ -2,7 +2,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 
-public class ResponseSchemaContextList
+public class ResponseSchemaContextList(List<EntitySchemaContext> value)
 {
-    public required List<EntitySchemaContext> Value { get; set; }
+    public List<EntitySchemaContext> Value { get; } = value;
 }

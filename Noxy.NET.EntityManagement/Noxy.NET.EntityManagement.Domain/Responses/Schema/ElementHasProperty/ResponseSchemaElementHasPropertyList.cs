@@ -2,7 +2,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema.ElementHasProperty;
 
-public class ResponseSchemaElementHasPropertyList
+public class ResponseSchemaElementHasPropertyList(List<EntitySchemaElementHasProperty> value)
 {
-    public required List<EntitySchemaElementHasProperty> Value { get; set; }
+    public List<EntitySchemaElementHasProperty> Value { get; } = value;
 }

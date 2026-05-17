@@ -16,6 +16,6 @@ public sealed class HandlerSchemaClone(IUnitOfWorkFactory serviceUoWFactory) : I
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result.ID);
     }
 }

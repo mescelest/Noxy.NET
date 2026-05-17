@@ -22,6 +22,6 @@ public class HandlerSchemaPropertyList(IUnitOfWorkFactory serviceUoWFactory) : I
             PageNumber = request.PageNumber ?? 0,
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

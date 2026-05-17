@@ -15,6 +15,6 @@ public class HandlerSchemaElementHasPropertyDelete(IUnitOfWorkFactory serviceUoW
 
         await uow.Commit();
 
-        return new() { Value = result };
+        return new(result);
     }
 }

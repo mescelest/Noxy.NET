@@ -18,6 +18,6 @@ public class HandlerSchemaContextHasElementList(IUnitOfWorkFactory serviceUoWFac
             SchemaElementID = request.SchemaElementID,
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

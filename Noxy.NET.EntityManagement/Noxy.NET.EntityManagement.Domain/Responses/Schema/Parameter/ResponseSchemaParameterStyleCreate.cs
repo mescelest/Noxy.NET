@@ -1,9 +1,8 @@
 using Noxy.NET.EntityManagement.Domain.Abstractions;
-using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 
-public class ResponseSchemaParameterStyleCreate : BaseResponse
+public class ResponseSchemaParameterStyleCreate(Guid value) : BaseResponse
 {
-    public required EntitySchemaParameterStyle Value { get; set; }
+    public Guid Value { get; } = value;
 }

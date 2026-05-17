@@ -18,6 +18,6 @@ public class HandlerSchemaContextCount(IUnitOfWorkFactory serviceUoWFactory) : I
             Search = request.Search?.ToEscapedSqlLike(),
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }

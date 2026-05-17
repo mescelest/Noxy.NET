@@ -59,7 +59,7 @@ public class SchemaController(IMediator mediator) : ControllerBase
         return await mediator.Send(new QuerySchemaContextList(request));
     }
 
-    [HttpGet("Context/List")]
+    [HttpGet("Context/Count")]
     public async Task<ActionResult<ResponseSchemaContextCount>> GetSchemaContextCount([FromQuery] RequestSchemaContextCount request)
     {
         return await mediator.Send(new QuerySchemaContextCount(request));
@@ -150,254 +150,218 @@ public class SchemaController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("")]
-    public async Task<IActionResult> CreateSchema(RequestSchemaCreate request)
+    public async Task<ActionResult<ResponseSchemaCreate>> CreateSchema(RequestSchemaCreate request)
     {
-        await mediator.Send(new CommandSchemaCreate(request));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaCreate(request));
     }
 
     [HttpPost("{id:guid}")]
-    public async Task<IActionResult> UpdateSchema(Guid id, RequestSchemaUpdate request)
+    public async Task<ActionResult<ResponseSchemaUpdate>> UpdateSchema(Guid id, RequestSchemaUpdate request)
     {
-        await mediator.Send(new CommandSchemaUpdate(id, request));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaUpdate(id, request));
     }
 
     [HttpPost("{id:guid}/Clone")]
-    public async Task<IActionResult> CloneSchema(Guid id)
+    public async Task<ActionResult<ResponseSchemaClone>> CloneSchema(Guid id)
     {
-        await mediator.Send(new CommandSchemaClone(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaClone(id));
     }
 
     [HttpPost("{id:guid}/Activate")]
-    public async Task<ActionResult> ActivateSchema(Guid id)
+    public async Task<ActionResult<ResponseSchemaActivate>> ActivateSchema(Guid id)
     {
-        await mediator.Send(new CommandSchemaActivate(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaActivate(id));
     }
 
     [HttpPost("{id:guid}/Delete")]
-    public async Task<IActionResult> DeleteSchema(Guid id)
+    public async Task<ActionResult<ResponseSchemaDelete>> DeleteSchema(Guid id)
     {
-        await mediator.Send(new CommandSchemaDelete(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaDelete(id));
     }
 
     [HttpPost("Context")]
-    public async Task<IActionResult> CreateSchemaContext(RequestSchemaContextCreate request)
+    public async Task<ActionResult<ResponseSchemaContextCreate>> CreateSchemaContext(RequestSchemaContextCreate request)
     {
-        await mediator.Send(new CommandSchemaContextCreate(request));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaContextCreate(request));
     }
 
     [HttpPost("Context/{id:guid}")]
-    public async Task<IActionResult> UpdateSchemaContext(Guid id, RequestSchemaContextUpdate request)
+    public async Task<ActionResult<ResponseSchemaContextUpdate>> UpdateSchemaContext(Guid id, RequestSchemaContextUpdate request)
     {
-        await mediator.Send(new CommandSchemaContextUpdate(id, request));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaContextUpdate(id, request));
     }
 
     [HttpPost("Context/{id:guid}/Clone")]
-    public async Task<IActionResult> CloneSchemaContext(Guid id)
+    public async Task<ActionResult<ResponseSchemaContextClone>> CloneSchemaContext(Guid id)
     {
-        await mediator.Send(new CommandSchemaContextClone(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaContextClone(id));
     }
 
     [HttpPost("Context/{id:guid}/Delete")]
-    public async Task<IActionResult> DeleteSchemaContext(Guid id)
+    public async Task<ActionResult<ResponseSchemaContextDelete>> DeleteSchemaContext(Guid id)
     {
-        await mediator.Send(new CommandSchemaContextDelete(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaContextDelete(id));
     }
 
     [HttpPost("Context/Element")]
-    public async Task<IActionResult> CreateSchemaContextHasElement(RequestSchemaContextHasElementCreate request)
+    public async Task<ActionResult<ResponseSchemaContextHasElementCreate>> CreateSchemaContextHasElement(RequestSchemaContextHasElementCreate request)
     {
-        await mediator.Send(new CommandSchemaContextHasElementCreate(request));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaContextHasElementCreate(request));
     }
 
     [HttpPost("Context/Element/{id:guid}/Delete")]
-    public async Task<IActionResult> CreateSchemaContextHasElement(Guid id)
+    public async Task<ActionResult<ResponseSchemaContextHasElementDelete>> CreateSchemaContextHasElement(Guid id)
     {
-        await mediator.Send(new CommandSchemaContextHasElementDelete(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaContextHasElementDelete(id));
     }
 
     [HttpPost("Element")]
-    public async Task<IActionResult> CreateSchemaElement(RequestSchemaElementCreate request)
+    public async Task<ActionResult<ResponseSchemaElementCreate>> CreateSchemaElement(RequestSchemaElementCreate request)
     {
-        await mediator.Send(new CommandSchemaElementCreate(request));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaElementCreate(request));
     }
 
     [HttpPost("Element/{id:guid}")]
-    public async Task<IActionResult> UpdateSchemaElement(Guid id, RequestSchemaElementUpdate request)
+    public async Task<ActionResult<ResponseSchemaElementUpdate>> UpdateSchemaElement(Guid id, RequestSchemaElementUpdate request)
     {
-        await mediator.Send(new CommandSchemaElementUpdate(id, request));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaElementUpdate(id, request));
     }
 
     [HttpPost("Element/{id:guid}/Clone")]
-    public async Task<IActionResult> CloneSchemaElement(Guid id)
+    public async Task<ActionResult<ResponseSchemaElementClone>> CloneSchemaElement(Guid id)
     {
-        await mediator.Send(new CommandSchemaElementClone(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaElementClone(id));
     }
 
     [HttpPost("Element/{id:guid}/Delete")]
-    public async Task<IActionResult> DeleteSchemaElement(Guid id)
+    public async Task<ActionResult<ResponseSchemaElementDelete>> DeleteSchemaElement(Guid id)
     {
-        await mediator.Send(new CommandSchemaElementDelete(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaElementDelete(id));
     }
 
     [HttpPost("Element/Property")]
-    public async Task<IActionResult> CreateSchemaElementHasProperty(RequestSchemaElementHasPropertyCreate request)
+    public async Task<ActionResult<ResponseSchemaElementHasPropertyCreate>> CreateSchemaElementHasProperty(RequestSchemaElementHasPropertyCreate request)
     {
-        await mediator.Send(new CommandSchemaElementHasPropertyCreate(request));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaElementHasPropertyCreate(request));
     }
 
     [HttpPost("Element/Property/{id:guid}/Delete")]
-    public async Task<IActionResult> CreateSchemaElementHasProperty(Guid id)
+    public async Task<ActionResult<ResponseSchemaElementHasPropertyDelete>> CreateSchemaElementHasProperty(Guid id)
     {
-        await mediator.Send(new CommandSchemaElementHasPropertyDelete(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaElementHasPropertyDelete(id));
     }
 
     [HttpPost("Parameter/Style")]
-    public async Task<IActionResult> Create(RequestSchemaParameterStyleCreate model)
+    public async Task<ActionResult<ResponseSchemaParameterStyleCreate>> Create(RequestSchemaParameterStyleCreate model)
     {
-        await mediator.Send(new CommandSchemaParameterStyleCreate(model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaParameterStyleCreate(model));
     }
 
     [HttpPost("Parameter/System")]
-    public async Task<IActionResult> Create(RequestSchemaParameterSystemCreate model)
+    public async Task<ActionResult<ResponseSchemaParameterSystemCreate>> Create(RequestSchemaParameterSystemCreate model)
     {
-        await mediator.Send(new CommandSchemaParameterSystemCreate(model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaParameterSystemCreate(model));
     }
 
     [HttpPost("Parameter/Text")]
-    public async Task<IActionResult> Create(RequestSchemaParameterTextCreate model)
+    public async Task<ActionResult<ResponseSchemaParameterTextCreate>> Create(RequestSchemaParameterTextCreate model)
     {
-        await mediator.Send(new CommandSchemaParameterTextCreate(model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaParameterTextCreate(model));
     }
 
     [HttpPost("Parameter/Style/{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, RequestSchemaParameterStyleUpdate model)
+    public async Task<ActionResult<ResponseSchemaParameterStyleUpdate>> Update(Guid id, RequestSchemaParameterStyleUpdate model)
     {
-        await mediator.Send(new CommandSchemaParameterStyleUpdate(id, model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaParameterStyleUpdate(id, model));
     }
 
     [HttpPost("Parameter/System/{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, RequestSchemaParameterSystemUpdate model)
+    public async Task<ActionResult<ResponseSchemaParameterSystemUpdate>> Update(Guid id, RequestSchemaParameterSystemUpdate model)
     {
-        await mediator.Send(new CommandSchemaParameterSystemUpdate(id, model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaParameterSystemUpdate(id, model));
     }
 
     [HttpPost("Parameter/Text/{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, RequestSchemaParameterTextUpdate model)
+    public async Task<ActionResult<ResponseSchemaParameterTextUpdate>> Update(Guid id, RequestSchemaParameterTextUpdate model)
     {
-        await mediator.Send(new CommandSchemaParameterTextUpdate(id, model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaParameterTextUpdate(id, model));
     }
 
     [HttpPost("Parameter/{id:guid}/Clone")]
-    public async Task<IActionResult> CloneSchemaParameter(Guid id)
+    public async Task<ActionResult<ResponseSchemaParameterClone>> CloneSchemaParameter(Guid id)
     {
-        await mediator.Send(new CommandSchemaParameterClone(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaParameterClone(id));
     }
 
     [HttpPost("Parameter/{id:guid}/Delete")]
-    public async Task<IActionResult> DeleteSchemaParameter(Guid id)
+    public async Task<ActionResult<ResponseSchemaParameterDelete>> DeleteSchemaParameter(Guid id)
     {
-        await mediator.Send(new CommandSchemaParameterDelete(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaParameterDelete(id));
     }
 
     [HttpPost("Property/Boolean")]
-    public async Task<IActionResult> Create(RequestSchemaPropertyBooleanCreate model)
+    public async Task<ActionResult<ResponseSchemaPropertyBooleanCreate>> Create(RequestSchemaPropertyBooleanCreate model)
     {
-        await mediator.Send(new CommandSchemaPropertyBooleanCreate(model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyBooleanCreate(model));
     }
 
     [HttpPost("Property/DateTime")]
-    public async Task<IActionResult> Create(RequestSchemaPropertyDateTimeCreate model)
+    public async Task<ActionResult<ResponseSchemaPropertyDateTimeCreate>> Create(RequestSchemaPropertyDateTimeCreate model)
     {
-        await mediator.Send(new CommandSchemaPropertyDateTimeCreate(model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyDateTimeCreate(model));
     }
 
     [HttpPost("Property/Decimal")]
-    public async Task<IActionResult> Create(RequestSchemaPropertyDecimalCreate model)
+    public async Task<ActionResult<ResponseSchemaPropertyDecimalCreate>> Create(RequestSchemaPropertyDecimalCreate model)
     {
-        await mediator.Send(new CommandSchemaPropertyDecimalCreate(model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyDecimalCreate(model));
     }
 
     [HttpPost("Property/Boolean/{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, RequestSchemaPropertyBooleanUpdate model)
+    public async Task<ActionResult<ResponseSchemaPropertyBooleanUpdate>> Update(Guid id, RequestSchemaPropertyBooleanUpdate model)
     {
-        await mediator.Send(new CommandSchemaPropertyBooleanUpdate(id, model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyBooleanUpdate(id, model));
     }
 
     [HttpPost("Property/DateTime/{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, RequestSchemaPropertyDateTimeUpdate model)
+    public async Task<ActionResult<ResponseSchemaPropertyDateTimeUpdate>> Update(Guid id, RequestSchemaPropertyDateTimeUpdate model)
     {
-        await mediator.Send(new CommandSchemaPropertyDateTimeUpdate(id, model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyDateTimeUpdate(id, model));
     }
 
     [HttpPost("Property/Decimal/{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, RequestSchemaPropertyDecimalUpdate model)
+    public async Task<ActionResult<ResponseSchemaPropertyDecimalUpdate>> Update(Guid id, RequestSchemaPropertyDecimalUpdate model)
     {
-        await mediator.Send(new CommandSchemaPropertyDecimalUpdate(id, model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyDecimalUpdate(id, model));
     }
 
     [HttpPost("Property/Image/{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, RequestSchemaPropertyImageUpdate model)
+    public async Task<ActionResult<ResponseSchemaPropertyImageUpdate>> Update(Guid id, RequestSchemaPropertyImageUpdate model)
     {
-        await mediator.Send(new CommandSchemaPropertyImageUpdate(id, model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyImageUpdate(id, model));
     }
 
     [HttpPost("Property/Integer/{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, RequestSchemaPropertyIntegerUpdate model)
+    public async Task<ActionResult<ResponseSchemaPropertyIntegerUpdate>> Update(Guid id, RequestSchemaPropertyIntegerUpdate model)
     {
-        await mediator.Send(new CommandSchemaPropertyIntegerUpdate(id, model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyIntegerUpdate(id, model));
     }
 
     [HttpPost("Property/String/{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, RequestSchemaPropertyStringUpdate model)
+    public async Task<ActionResult<ResponseSchemaPropertyStringUpdate>> Update(Guid id, RequestSchemaPropertyStringUpdate model)
     {
-        await mediator.Send(new CommandSchemaPropertyStringUpdate(id, model));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyStringUpdate(id, model));
     }
 
     [HttpPost("Property/{id:guid}/Clone")]
-    public async Task<IActionResult> CloneSchemaProperty(Guid id)
+    public async Task<ActionResult<ResponseSchemaPropertyClone>> CloneSchemaProperty(Guid id)
     {
-        await mediator.Send(new CommandSchemaPropertyClone(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyClone(id));
     }
 
     [HttpPost("Property/{id:guid}/Delete")]
-    public async Task<IActionResult> DeleteSchemaProperty(Guid id)
+    public async Task<ActionResult<ResponseSchemaPropertyDelete>> DeleteSchemaProperty(Guid id)
     {
-        await mediator.Send(new CommandSchemaPropertyDelete(id));
-        return NoContent();
+        return await mediator.Send(new CommandSchemaPropertyDelete(id));
     }
 }

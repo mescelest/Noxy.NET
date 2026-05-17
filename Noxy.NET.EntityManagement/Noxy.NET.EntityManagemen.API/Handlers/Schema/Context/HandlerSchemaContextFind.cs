@@ -14,6 +14,6 @@ public class HandlerSchemaContextFind(IUnitOfWorkFactory serviceUoWFactory) : IQ
 
         EntitySchemaContext result = await uow.Schema.GetSchemaContextByID(request.ID);
 
-        return new() { Value = result };
+        return new(result);
     }
 }

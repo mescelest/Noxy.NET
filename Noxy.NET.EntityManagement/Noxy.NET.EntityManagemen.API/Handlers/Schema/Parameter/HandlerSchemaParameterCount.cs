@@ -21,6 +21,6 @@ public class HandlerSchemaParameterCount(IUnitOfWorkFactory serviceUoWFactory) :
             ParameterType = request.ParameterType,
         });
 
-        return new() { Value = result };
+        return new(result);
     }
 }
