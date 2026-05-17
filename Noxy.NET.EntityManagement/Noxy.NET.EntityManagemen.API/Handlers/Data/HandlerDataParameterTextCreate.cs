@@ -13,7 +13,7 @@ public class HandlerDataParameterTextCreate(IUnitOfWorkFactory serviceUoWFactory
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         Guid id = await uow.Schema.GetCurrentSchemaID();
-        EntityDataParameterText result = await uow.Data.CreateTextParameter(id, request.SchemaIdentifier, request.Culture, request.Value, request.DateEffective);
+        EntityDataParameterText result = await uow.Data.CreateParameterText(id, request.SchemaIdentifier, request.Culture, request.Value, request.DateEffective);
 
         await uow.Commit();
 

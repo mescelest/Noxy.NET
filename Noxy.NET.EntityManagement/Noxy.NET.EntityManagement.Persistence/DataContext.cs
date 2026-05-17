@@ -23,9 +23,9 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableDataPropertyString> DataPropertyString { get; set; } = null!;
 
     public DbSet<TableDataParameter> DataParameter { get; set; } = null!;
-    public DbSet<TableDataParameterStyle> DataStyleParameter { get; set; } = null!;
-    public DbSet<TableDataParameterSystem> DataSystemParameter { get; set; } = null!;
-    public DbSet<TableDataParameterText> DataTextParameter { get; set; } = null!;
+    public DbSet<TableDataParameterStyle> DataParameterStyle { get; set; } = null!;
+    public DbSet<TableDataParameterSystem> DataParameterSystem { get; set; } = null!;
+    public DbSet<TableDataParameterText> DataParameterText { get; set; } = null!;
 
     public DbSet<TableSchema> Schema { get; set; } = null!;
     public DbSet<TableSchemaContext> SchemaContext { get; set; } = null!;

@@ -13,10 +13,10 @@ namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
 public class DataRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), IDataRepository
 {
-    public async Task<EntityDataParameterStyle> CreateStyleParameter(Guid schemaID, string identifier, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterStyle> CreateParameterStyle(Guid schemaID, string identifier, string value, DateTime? timeEffective = null)
     {
         TableSchemaParameterStyle schema = await Context.SchemaParameterStyle.SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
-        EntityEntry<TableDataParameterStyle> entry = await Context.DataStyleParameter.AddAsync(new()
+        EntityEntry<TableDataParameterStyle> entry = await Context.DataParameterStyle.AddAsync(new()
         {
             SchemaIdentifier = identifier,
             Value = value,
@@ -27,10 +27,10 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         return MapperT2E.Map(entry.Entity);
     }
 
-    public async Task<EntityDataParameterSystem> CreateSystemParameter(Guid schemaID, string identifier, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterSystem> CreateParameterSystem(Guid schemaID, string identifier, string value, DateTime? timeEffective = null)
     {
         TableSchemaParameterSystem schema = await Context.SchemaParameterSystem.SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
-        EntityEntry<TableDataParameterSystem> entry = await Context.DataSystemParameter.AddAsync(new()
+        EntityEntry<TableDataParameterSystem> entry = await Context.DataParameterSystem.AddAsync(new()
         {
             SchemaIdentifier = identifier,
             Value = value,
@@ -41,10 +41,10 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         return MapperT2E.Map(entry.Entity);
     }
 
-    public async Task<EntityDataParameterText> CreateTextParameter(Guid schemaID, string identifier, string culture, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterText> CreateParameterText(Guid schemaID, string identifier, string culture, string value, DateTime? timeEffective = null)
     {
         TableSchemaParameterText schema = await Context.SchemaParameterText.SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
-        EntityEntry<TableDataParameterText> entry = await Context.DataTextParameter.AddAsync(new()
+        EntityEntry<TableDataParameterText> entry = await Context.DataParameterText.AddAsync(new()
         {
             SchemaIdentifier = identifier,
             Culture = culture,
@@ -65,6 +65,20 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         return entity.ID;
     }
 
+    public async Task<Dictionary<string, EntityDataParameter.Discriminator>> GetCurrentParameterByIdentifierList(IEnumerable<string> identifiers)
+    {
+        List<TableDataParameter> result = await Context.DataParameter
+            .Where(x =>
+                identifiers.Contains(x.SchemaIdentifier) &&
+                x.TimeApproved != null &&
+                x.TimeEffective < DateTime.UtcNow)
+            .GroupBy(x => x.SchemaIdentifier)
+            .Select(g => g.OrderByDescending(x => x.TimeCreated).First())
+            .ToListAsync();
+
+        return result.ToDictionary(x => x.SchemaIdentifier, x => MapperT2E.Map(x));
+    }
+
     public async Task<List<EntityDataParameter.Discriminator>> GetParameterListWithIdentifier(string identifier)
     {
         List<TableDataParameter> result = await Context.DataParameter
@@ -77,7 +91,7 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
 
     public async Task<EntityDataParameterText?> GetCurrentTextParameterByIdentifier(string identifier)
     {
-        TableDataParameterText? result = await Context.DataTextParameter
+        TableDataParameterText? result = await Context.DataParameterText
             .OrderBy(x => x.TimeCreated)
             .FirstOrDefaultAsync(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective < DateTime.UtcNow);
 
@@ -86,7 +100,7 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
 
     public async Task<Dictionary<string, EntityDataParameterText?>> GetCurrentTextParameterByIdentifierList(IEnumerable<string> identifiers)
     {
-        List<TableDataParameterText?> newestRows = await Context.DataTextParameter
+        List<TableDataParameterText?> newestRows = await Context.DataParameterText
             .Where(x =>
                 identifiers.Contains(x.SchemaIdentifier) &&
                 x.TimeApproved != null &&

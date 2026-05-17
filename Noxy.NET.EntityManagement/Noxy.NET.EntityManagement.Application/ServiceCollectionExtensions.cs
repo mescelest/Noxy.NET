@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Hosting;
+using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Services;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -14,6 +16,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISchemaBuilderService, SchemaBuilderService>();
         services.AddScoped<ITaskBundlingService, TaskBundlingService>();
 
+        services.AddSingleton<IParameterService, ParameterService>();
+
         return services;
     }
 
@@ -21,9 +25,17 @@ public static class ServiceCollectionExtensions
     {
         try
         {
-            // using IServiceScope scope = app.Services.CreateScope();
-            // ISchemaBuilderService serviceSchemaBuilderService = scope.ServiceProvider.GetRequiredService<ISchemaBuilderService>();
-            // EntitySchema schema = await serviceSchemaBuilderService.ConstructSchema();
+            using IServiceScope scope = app.Services.CreateScope();
+
+            ISchemaBuilderService serviceSchemaBuilder = scope.ServiceProvider.GetRequiredService<ISchemaBuilderService>();
+            EntitySchema schema = await serviceSchemaBuilder.ConstructSchema();
+            IEnumerable<string> list = schema.ParameterList?.Select(x => x.SchemaIdentifier) ?? [];
+
+            IUnitOfWorkFactory serviceUoWFactory = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>();
+            await using IUnitOfWork uow = await serviceUoWFactory.Create();
+
+            IParameterService serviceParameter = scope.ServiceProvider.GetRequiredService<IParameterService>();
+            // serviceParameter.SetParameterCollection(await uow.Data.GetCurrentParameterByIdentifierList(list));
         }
         catch
         {

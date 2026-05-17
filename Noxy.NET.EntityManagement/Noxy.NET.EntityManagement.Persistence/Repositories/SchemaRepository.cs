@@ -16,7 +16,7 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
 
 namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
-public class SchemaRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), ISchemaRepository
+public class SchemaRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection, IParameterService serviceParameter) : BaseRepository(context, serviceDependencyInjection), ISchemaRepository
 {
     public async Task<Guid> GetCurrentSchemaID()
     {
@@ -69,6 +69,11 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchema> UpdateSchema(EntitySchema entity)
     {
         TableSchema result = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
+        // if (result.TimeActivated == null && serviceParameter.TryGetParameterSystem(ParameterSystemConstants.SchemaInactiveEditEntity, out EntityDataParameterSystem? system))
+        // {
+        //     
+        //     system.Value
+        // }
 
         result.Name = entity.Name;
         result.Note = entity.Note;
