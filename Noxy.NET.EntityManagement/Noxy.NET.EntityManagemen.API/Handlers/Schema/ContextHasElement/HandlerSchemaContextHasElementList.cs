@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Queries.Schema.ContextHasElement;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
@@ -6,9 +6,9 @@ using Noxy.NET.EntityManagement.Domain.Responses.Schema.ContextHasElement;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.ContextHasElement;
 
-public class HandlerSchemaContextHasElementList(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<QuerySchemaContextHasElementList, ResponseSchemaContextHasElementList>
+public class HandlerSchemaContextHasElementList(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaContextHasElementList, ResponseSchemaContextHasElementList>
 {
-    public async Task<ResponseSchemaContextHasElementList> Handle(QuerySchemaContextHasElementList request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaContextHasElementList> Handle(QuerySchemaContextHasElementList request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

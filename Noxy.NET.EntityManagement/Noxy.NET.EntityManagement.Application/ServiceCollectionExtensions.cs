@@ -2,7 +2,9 @@
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Services;
+using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -35,7 +37,16 @@ public static class ServiceCollectionExtensions
             await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
             IParameterService serviceParameter = scope.ServiceProvider.GetRequiredService<IParameterService>();
-            // serviceParameter.SetParameterCollection(await uow.Data.GetCurrentParameterByIdentifierList(list));
+            Dictionary<string, EntityDataParameter.Discriminator> collection = await uow.Data.GetCurrentParameterByIdentifierList(list);
+
+            Dictionary<EntitySchemaParameter.Discriminator, EntityDataParameter.Discriminator> mapped = [];
+            foreach (EntitySchemaParameter.Discriminator item in schema.ParameterList ?? [])
+            {
+                if (!collection.TryGetValue(item.SchemaIdentifier, out EntityDataParameter.Discriminator? value)) continue;
+                mapped[item] = value;
+            }
+
+            serviceParameter.SetParameterCollection(mapped);
         }
         catch
         {

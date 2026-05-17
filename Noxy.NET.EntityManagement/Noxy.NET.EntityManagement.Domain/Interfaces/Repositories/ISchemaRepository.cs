@@ -1,9 +1,9 @@
-using Noxy.NET.EntityManagement.Application.Models;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
+using Noxy.NET.EntityManagement.Domain.Models.Filters;
 
-namespace Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
+namespace Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 
 public interface ISchemaRepository
 {

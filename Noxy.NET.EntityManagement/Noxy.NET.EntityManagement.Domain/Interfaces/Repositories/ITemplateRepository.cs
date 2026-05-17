@@ -1,6 +1,6 @@
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 
-namespace Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
+namespace Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 
 public interface ITemplateRepository
 {

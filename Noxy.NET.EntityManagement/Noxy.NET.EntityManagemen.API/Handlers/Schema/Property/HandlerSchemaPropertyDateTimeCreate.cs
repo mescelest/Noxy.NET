@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
@@ -7,9 +7,9 @@ using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Property;
 
-public class HandlerSchemaPropertyDateTimeCreate(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandSchemaPropertyDateTimeCreate, ResponseSchemaPropertyDateTimeCreate>
+public class HandlerSchemaPropertyDateTimeCreate(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaPropertyDateTimeCreate, ResponseSchemaPropertyDateTimeCreate>
 {
-    public async Task<ResponseSchemaPropertyDateTimeCreate> Handle(CommandSchemaPropertyDateTimeCreate request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaPropertyDateTimeCreate> Handle(CommandSchemaPropertyDateTimeCreate request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
@@ -7,9 +7,9 @@ using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Property;
 
-public class HandlerSchemaPropertyStringUpdate(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandSchemaPropertyStringUpdate, ResponseSchemaPropertyStringUpdate>
+public class HandlerSchemaPropertyStringUpdate(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaPropertyStringUpdate, ResponseSchemaPropertyStringUpdate>
 {
-    public async Task<ResponseSchemaPropertyStringUpdate> Handle(CommandSchemaPropertyStringUpdate request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaPropertyStringUpdate> Handle(CommandSchemaPropertyStringUpdate request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

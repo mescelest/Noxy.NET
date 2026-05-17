@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
@@ -8,9 +8,9 @@ using Noxy.NET.Extensions;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema;
 
-public class HandlerSchemaList(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<QuerySchemaList, ResponseSchemaList>
+public class HandlerSchemaList(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaList, ResponseSchemaList>
 {
-    public async Task<ResponseSchemaList> Handle(QuerySchemaList request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaList> Handle(QuerySchemaList request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

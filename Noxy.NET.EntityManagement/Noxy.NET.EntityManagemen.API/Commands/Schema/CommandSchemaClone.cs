@@ -1,9 +1,9 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.API.Commands.Schema;
 
-public class CommandSchemaClone(Guid id) : IRequest<ResponseSchemaClone>
+public sealed class CommandSchemaClone(Guid id) : ICommand<ResponseSchemaClone>
 {
     public Guid ID { get; } = id;
 }

@@ -2,9 +2,9 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Authentication;
+using Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Authentication;
 

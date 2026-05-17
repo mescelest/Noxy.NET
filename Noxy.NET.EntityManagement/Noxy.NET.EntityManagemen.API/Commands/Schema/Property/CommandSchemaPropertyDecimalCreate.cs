@@ -1,10 +1,10 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 
-public class CommandSchemaPropertyDecimalCreate(RequestSchemaPropertyDecimalCreate request) : IRequest<ResponseSchemaPropertyDecimalCreate>
+public class CommandSchemaPropertyDecimalCreate(RequestSchemaPropertyDecimalCreate request) : ICommand<ResponseSchemaPropertyDecimalCreate>
 {
     public Guid? SchemaID { get; } = request.SchemaID;
     public string SchemaIdentifier { get; } = request.SchemaIdentifier;

@@ -2,12 +2,13 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
-using Noxy.NET.EntityManagement.Application.Models;
+using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
+using Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
+using Noxy.NET.EntityManagement.Domain.Models.Filters;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Extensions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
@@ -16,7 +17,7 @@ using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
 
 namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
-public class SchemaRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection, IParameterService serviceParameter) : BaseRepository(context, serviceDependencyInjection), ISchemaRepository
+public class SchemaRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), ISchemaRepository
 {
     public async Task<Guid> GetCurrentSchemaID()
     {
@@ -69,11 +70,17 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
     public async Task<EntitySchema> UpdateSchema(EntitySchema entity)
     {
         TableSchema result = await Context.Schema.AsNoTracking().FirstAsync(x => x.ID == entity.ID);
-        // if (result.TimeActivated == null && serviceParameter.TryGetParameterSystem(ParameterSystemConstants.SchemaInactiveEditEntity, out EntityDataParameterSystem? system))
-        // {
-        //     
-        //     system.Value
-        // }
+        IParameterService serviceParameter = DI.GetService<IParameterService>();
+
+        if (result.TimeActivated == null && serviceParameter.TryGetParameterSystemValue(ParameterSystemConstants.SchemaInactiveEditEntity, out bool valueInactive) && !valueInactive)
+        {
+            throw new InvalidOperationException("Schema cannot be edited.");
+        }
+
+        if (result.TimeActivated != null && serviceParameter.TryGetParameterSystemValue(ParameterSystemConstants.SchemaDeactivatedEditEntity, out bool valueDeactivated) && !valueDeactivated)
+        {
+            throw new InvalidOperationException("Schema cannot be edited after it has been activated.");
+        }
 
         result.Name = entity.Name;
         result.Note = entity.Note;

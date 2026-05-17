@@ -1,10 +1,10 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 
-public class CommandSchemaPropertyImageUpdate(Guid id, RequestSchemaPropertyImageUpdate request) : IRequest<ResponseSchemaPropertyImageUpdate>
+public class CommandSchemaPropertyImageUpdate(Guid id, RequestSchemaPropertyImageUpdate request) : ICommand<ResponseSchemaPropertyImageUpdate>
 {
     public Guid ID { get; } = id;
     public string SchemaIdentifier { get; } = request.SchemaIdentifier;

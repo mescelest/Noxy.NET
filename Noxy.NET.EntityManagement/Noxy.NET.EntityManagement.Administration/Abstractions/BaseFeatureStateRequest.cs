@@ -1,4 +1,4 @@
-using Noxy.NET.EntityManagement.Domain.Model;
+using Noxy.NET.EntityManagement.Domain.Models;
 
 namespace Noxy.NET.EntityManagement.Administration.Abstractions;
 

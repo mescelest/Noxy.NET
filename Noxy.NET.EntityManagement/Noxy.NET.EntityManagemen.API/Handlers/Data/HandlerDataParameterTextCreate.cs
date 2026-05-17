@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Data;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
@@ -6,9 +6,9 @@ using Noxy.NET.EntityManagement.Domain.Responses.Data;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Data;
 
-public class HandlerDataParameterTextCreate(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandDataParameterTextCreate, ResponseDataParameterTextCreate>
+public class HandlerDataParameterTextCreate(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandDataParameterTextCreate, ResponseDataParameterTextCreate>
 {
-    public async Task<ResponseDataParameterTextCreate> Handle(CommandDataParameterTextCreate request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseDataParameterTextCreate> Handle(CommandDataParameterTextCreate request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Noxy.NET.EntityManagement.API.Commands.Authentication;
 using Noxy.NET.EntityManagement.API.Commands.Data;

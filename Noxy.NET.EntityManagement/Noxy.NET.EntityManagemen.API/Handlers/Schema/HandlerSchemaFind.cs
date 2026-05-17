@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Queries.Schema;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
@@ -6,9 +6,9 @@ using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema;
 
-public class HandlerSchemaFind(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<QuerySchemaFind, ResponseSchemaFind>
+public class HandlerSchemaFind(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaFind, ResponseSchemaFind>
 {
-    public async Task<ResponseSchemaFind> Handle(QuerySchemaFind request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaFind> Handle(QuerySchemaFind request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

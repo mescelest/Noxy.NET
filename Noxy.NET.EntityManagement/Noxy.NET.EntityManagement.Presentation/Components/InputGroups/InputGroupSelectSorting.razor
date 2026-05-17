@@ -1,4 +1,5 @@
 @inject TextService TextService
+@using Noxy.NET.EntityManagement.Domain.Models
 @inherits BaseInputGroup<(string Column, ListSortDirection Direction)?>
 
 <InputGroupSelect OptionList="_cacheSet" Name="@Name" DisplayName="@DisplayName" Description="@Description" InputAttributes="InputAttributes" @bind-Value:get="GetSortValue()" @bind-Value:set="SetSortValue">

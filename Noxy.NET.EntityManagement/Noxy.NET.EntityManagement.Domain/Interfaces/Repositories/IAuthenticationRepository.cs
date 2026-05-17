@@ -1,6 +1,6 @@
 using Noxy.NET.EntityManagement.Domain.Entities.Authentication;
 
-namespace Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
+namespace Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 
 public interface IAuthenticationRepository
 {

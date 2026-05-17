@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Context;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
@@ -6,9 +6,9 @@ using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Context;
 
-public class HandlerSchemaContextUpdate(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandSchemaContextUpdate, ResponseSchemaContextUpdate>
+public class HandlerSchemaContextUpdate(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaContextUpdate, ResponseSchemaContextUpdate>
 {
-    public async Task<ResponseSchemaContextUpdate> Handle(CommandSchemaContextUpdate request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaContextUpdate> Handle(CommandSchemaContextUpdate request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

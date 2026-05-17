@@ -1,11 +1,11 @@
 using System.ComponentModel;
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.API.Queries.Schema;
 
-public class QuerySchemaList(RequestSchemaList request) : IRequest<ResponseSchemaList>
+public class QuerySchemaList(RequestSchemaList request) : IQuery<ResponseSchemaList>
 {
     public bool? IsActivated { get; } = request.IsActivated;
     public string? Search { get; } = request.Search;

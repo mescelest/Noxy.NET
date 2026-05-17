@@ -1,6 +1,6 @@
 using Noxy.NET.EntityManagement.Application.Interfaces;
-using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
+using Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Persistence.Repositories;
 
 namespace Noxy.NET.EntityManagement.Persistence.Services;

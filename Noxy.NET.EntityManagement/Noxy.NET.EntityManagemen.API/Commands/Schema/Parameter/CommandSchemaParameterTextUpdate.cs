@@ -1,11 +1,11 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.Domain.Enums;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Parameter;
 
 namespace Noxy.NET.EntityManagement.API.Commands.Schema.Parameter;
 
-public class CommandSchemaParameterTextUpdate(Guid id, RequestSchemaParameterTextUpdate request) : IRequest<ResponseSchemaParameterTextUpdate>
+public class CommandSchemaParameterTextUpdate(Guid id, RequestSchemaParameterTextUpdate request) : ICommand<ResponseSchemaParameterTextUpdate>
 {
     public Guid ID { get; } = id;
     public string SchemaIdentifier { get; } = request.SchemaIdentifier;

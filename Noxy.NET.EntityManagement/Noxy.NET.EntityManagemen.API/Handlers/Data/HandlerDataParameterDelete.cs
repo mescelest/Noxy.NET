@@ -1,13 +1,13 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Authentication;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Responses.Data;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Data;
 
-public class HandlerDataParameterDelete(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandDataParameterDelete, ResponseDataParameterDelete>
+public class HandlerDataParameterDelete(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandDataParameterDelete, ResponseDataParameterDelete>
 {
-    public async Task<ResponseDataParameterDelete> Handle(CommandDataParameterDelete request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseDataParameterDelete> Handle(CommandDataParameterDelete request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

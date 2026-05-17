@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
@@ -6,13 +6,13 @@ using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema;
 
-public class HandlerSchemaClone(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandSchemaClone, ResponseSchemaClone>
+public sealed class HandlerSchemaClone(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaClone, ResponseSchemaClone>
 {
-    public async Task<ResponseSchemaClone> Handle(CommandSchemaClone request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaClone> Handle(CommandSchemaClone command, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchema result = await uow.Schema.CloneSchema(request.ID);
+        EntitySchema result = await uow.Schema.CloneSchema(command.ID);
 
         await uow.Commit();
 

@@ -1,12 +1,10 @@
-namespace Noxy.NET.EntityManagement.Application.Models;
+namespace Noxy.NET.EntityManagement.Domain.Models.Filters;
 
-public class FilterSchemaParameterList
+public class FilterSchemaParameterCount
 {
     public Guid SchemaID { get; init; }
     public string? Search { get; init; }
     public bool? IsSystemDefined { get; init; }
     public bool? IsApprovalRequired { get; init; }
     public IReadOnlySet<string>? ParameterType { get; init; }
-    public required int PageNumber { get; init; }
-    public required int PageSize { get; init; }
 }

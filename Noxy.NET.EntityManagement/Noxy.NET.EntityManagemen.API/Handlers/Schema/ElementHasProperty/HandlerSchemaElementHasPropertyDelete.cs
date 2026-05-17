@@ -1,13 +1,13 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.ElementHasProperty;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.ElementHasProperty;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.ElementHasProperty;
 
-public class HandlerSchemaElementHasPropertyDelete(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandSchemaElementHasPropertyDelete, ResponseSchemaElementHasPropertyDelete>
+public class HandlerSchemaElementHasPropertyDelete(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaElementHasPropertyDelete, ResponseSchemaElementHasPropertyDelete>
 {
-    public async Task<ResponseSchemaElementHasPropertyDelete> Handle(CommandSchemaElementHasPropertyDelete request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaElementHasPropertyDelete> Handle(CommandSchemaElementHasPropertyDelete request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

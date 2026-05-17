@@ -1,11 +1,11 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.Domain.Enums;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 
-public class CommandSchemaPropertyDateTimeUpdate(Guid id, RequestSchemaPropertyDateTimeUpdate request) : IRequest<ResponseSchemaPropertyDateTimeUpdate>
+public class CommandSchemaPropertyDateTimeUpdate(Guid id, RequestSchemaPropertyDateTimeUpdate request) : ICommand<ResponseSchemaPropertyDateTimeUpdate>
 {
     public Guid ID { get; } = id;
     public string SchemaIdentifier { get; } = request.SchemaIdentifier;

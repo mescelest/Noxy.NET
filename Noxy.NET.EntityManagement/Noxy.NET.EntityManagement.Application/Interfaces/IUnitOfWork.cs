@@ -1,4 +1,4 @@
-using Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
+using Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 
 namespace Noxy.NET.EntityManagement.Application.Interfaces;
 

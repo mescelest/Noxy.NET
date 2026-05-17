@@ -16,7 +16,9 @@ builder.Services.AddCors(options => options.AddPolicy(corsPolicyName, policy => 
 builder.Services.AddApplication();
 builder.Services.AddPersistence(x => x.UseSqlite($@"Data Source=..\..\Data\Noxy.NET.EntityManagement.sqlite"));
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+builder.Services.AddMediator(options => { options.ServiceLifetime = ServiceLifetime.Scoped; });
+
+// builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 builder.Services.AddControllers(options => { options.Filters.Add<GlobalExceptionFilter>(); });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

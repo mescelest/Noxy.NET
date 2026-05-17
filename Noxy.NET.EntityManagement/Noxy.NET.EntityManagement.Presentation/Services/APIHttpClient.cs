@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
 
 namespace Noxy.NET.EntityManagement.Presentation.Services;

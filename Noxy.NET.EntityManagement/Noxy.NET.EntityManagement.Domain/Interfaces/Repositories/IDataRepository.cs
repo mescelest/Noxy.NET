@@ -1,7 +1,7 @@
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 
-namespace Noxy.NET.EntityManagement.Application.Interfaces.Repositories;
+namespace Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 
 public interface IDataRepository
 {

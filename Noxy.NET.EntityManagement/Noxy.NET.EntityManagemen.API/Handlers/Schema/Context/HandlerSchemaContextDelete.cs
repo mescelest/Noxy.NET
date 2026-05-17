@@ -1,13 +1,13 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Context;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Context;
 
-public class HandlerSchemaContextDelete(IUnitOfWorkFactory serviceUoWFactory) : IRequestHandler<CommandSchemaContextDelete, ResponseSchemaContextDelete>
+public class HandlerSchemaContextDelete(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaContextDelete, ResponseSchemaContextDelete>
 {
-    public async Task<ResponseSchemaContextDelete> Handle(CommandSchemaContextDelete request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaContextDelete> Handle(CommandSchemaContextDelete request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 

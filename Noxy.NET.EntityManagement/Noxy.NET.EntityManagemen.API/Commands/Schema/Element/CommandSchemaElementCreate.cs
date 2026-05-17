@@ -1,10 +1,10 @@
-using MediatR;
+using Mediator;
 using Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Element;
 
 namespace Noxy.NET.EntityManagement.API.Commands.Schema.Element;
 
-public class CommandSchemaElementCreate(RequestSchemaElementCreate request) : IRequest<ResponseSchemaElementCreate>
+public class CommandSchemaElementCreate(RequestSchemaElementCreate request) : ICommand<ResponseSchemaElementCreate>
 {
     public Guid? SchemaID { get; } = request.SchemaID;
     public string SchemaIdentifier { get; } = request.SchemaIdentifier;
