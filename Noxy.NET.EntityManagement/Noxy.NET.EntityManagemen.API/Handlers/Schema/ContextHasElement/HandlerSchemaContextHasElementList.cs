@@ -8,14 +8,14 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema.ContextHasElement;
 
 public class HandlerSchemaContextHasElementList(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaContextHasElementList, ResponseSchemaContextHasElementList>
 {
-    public async ValueTask<ResponseSchemaContextHasElementList> Handle(QuerySchemaContextHasElementList request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaContextHasElementList> Handle(QuerySchemaContextHasElementList query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         List<EntitySchemaContextHasElement> result = await uow.Schema.GetSchemaContextHasElementList(new()
         {
-            SchemaContextID = request.SchemaContextID,
-            SchemaElementID = request.SchemaElementID,
+            SchemaContextID = query.SchemaContextID,
+            SchemaElementID = query.SchemaElementID,
         });
 
         return new(result);

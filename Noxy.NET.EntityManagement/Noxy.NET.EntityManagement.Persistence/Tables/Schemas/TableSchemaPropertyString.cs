@@ -13,8 +13,8 @@ public class TableSchemaPropertyString : TableSchemaProperty
             Name = Name,
             Note = Note,
             Weight = Weight,
-            TitleTextParameterID = TitleTextParameterID,
-            DescriptionTextParameterID = DescriptionTextParameterID,
+            TitleParameterTextID = TitleParameterTextID,
+            DescriptionParameterTextID = DescriptionParameterTextID,
         };
     }
 }

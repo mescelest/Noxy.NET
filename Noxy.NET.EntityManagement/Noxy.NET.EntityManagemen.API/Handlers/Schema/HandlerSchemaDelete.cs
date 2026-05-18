@@ -1,20 +1,25 @@
 using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema;
 using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Application.Interfaces.Services;
+using Noxy.NET.EntityManagement.Domain.Constants;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema;
 
-public class HandlerSchemaDelete(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaDelete, ResponseSchemaDelete>
+public class HandlerSchemaDelete(IUnitOfWorkFactory serviceUoWFactory, ISchemaValidatorService serviceSchemaValidator) : ICommandHandler<CommandSchemaDelete, ResponseSchemaDelete>
 {
-    public async ValueTask<ResponseSchemaDelete> Handle(CommandSchemaDelete request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaDelete> Handle(CommandSchemaDelete command, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        Guid result = await uow.Schema.DeleteSchema(request.ID);
+        EntitySchema entity = await uow.Schema.GetSchemaByID(command.ID);
+        serviceSchemaValidator.ValidateSchemaChange(entity, ParameterSystemConstants.SchemaInactiveDeleteEntity, ParameterSystemConstants.SchemaDeactivatedDeleteEntity);
 
+        uow.Schema.DeleteSchema(entity);
         await uow.Commit();
 
-        return new(result);
+        return new(entity.ID);
     }
 }

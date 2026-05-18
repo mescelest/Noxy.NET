@@ -13,4 +13,9 @@ public class EntityUser : BaseEntity
     public required EntityAuthentication? Authentication { get; set; }
 
     public required List<EntityIdentity>? IdentityList { get; set; }
+
+    public void RenewAuthentication()
+    {
+        TimeSignIn = DateTime.UtcNow;
+    }
 }

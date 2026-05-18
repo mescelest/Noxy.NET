@@ -8,14 +8,14 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema.ElementHasProperty;
 
 public class HandlerSchemaElementHasPropertyList(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaElementHasPropertyList, ResponseSchemaElementHasPropertyList>
 {
-    public async ValueTask<ResponseSchemaElementHasPropertyList> Handle(QuerySchemaElementHasPropertyList request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaElementHasPropertyList> Handle(QuerySchemaElementHasPropertyList query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         List<EntitySchemaElementHasProperty> result = await uow.Schema.GetSchemaElementHasPropertyList(new()
         {
-            SchemaPropertyID = request.SchemaPropertyID,
-            SchemaElementID = request.SchemaElementID,
+            SchemaElementID = query.SchemaElementID,
+            SchemaPropertyID = query.SchemaPropertyID,
         });
 
         return new(result);

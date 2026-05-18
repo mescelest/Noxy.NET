@@ -8,17 +8,17 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Parameter;
 
 public class HandlerSchemaParameterCount(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaParameterCount, ResponseSchemaParameterCount>
 {
-    public async ValueTask<ResponseSchemaParameterCount> Handle(QuerySchemaParameterCount request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaParameterCount> Handle(QuerySchemaParameterCount query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         int result = await uow.Schema.GetSchemaParameterCount(new()
         {
-            SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
-            Search = request.Search?.ToEscapedSqlLike(),
-            IsSystemDefined = request.IsSystemDefined,
-            IsApprovalRequired = request.IsApprovalRequired,
-            ParameterType = request.ParameterType,
+            SchemaID = query.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
+            Search = query.Search?.ToEscapedSqlLike(),
+            IsSystemDefined = query.IsSystemDefined,
+            IsApprovalRequired = query.IsApprovalRequired,
+            ParameterType = query.ParameterType,
         });
 
         return new(result);

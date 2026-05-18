@@ -1,6 +1,5 @@
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
-using Noxy.NET.EntityManagement.API.Commands.Authentication;
 using Noxy.NET.EntityManagement.API.Commands.Data;
 using Noxy.NET.EntityManagement.API.Queries.Data;
 using Noxy.NET.EntityManagement.Domain.Requests.Data;

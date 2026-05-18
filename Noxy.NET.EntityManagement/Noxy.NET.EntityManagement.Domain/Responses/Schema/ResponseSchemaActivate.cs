@@ -2,7 +2,7 @@ using Noxy.NET.EntityManagement.Domain.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Schema;
 
-public class ResponseSchemaActivate(Guid value) : BaseResponse
+public class ResponseSchemaActivate(DateTime value) : BaseResponse
 {
-    public Guid Value { get; } = value;
+    public DateTime Value { get; } = value;
 }

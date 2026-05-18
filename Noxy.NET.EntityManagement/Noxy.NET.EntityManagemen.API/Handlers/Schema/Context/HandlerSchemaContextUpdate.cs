@@ -1,30 +1,32 @@
 using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Context;
 using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Application.Interfaces.Services;
+using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Context;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Context;
 
-public class HandlerSchemaContextUpdate(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaContextUpdate, ResponseSchemaContextUpdate>
+public class HandlerSchemaContextUpdate(IUnitOfWorkFactory serviceUoWFactory, ISchemaValidatorService serviceSchemaValidator) : ICommandHandler<CommandSchemaContextUpdate, ResponseSchemaContextUpdate>
 {
-    public async ValueTask<ResponseSchemaContextUpdate> Handle(CommandSchemaContextUpdate request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaContextUpdate> Handle(CommandSchemaContextUpdate command, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaContext result = await uow.Schema.UpdateSchemaContext(new()
-        {
-            ID = request.ID,
-            SchemaID = Guid.Empty,
-            SchemaIdentifier = request.SchemaIdentifier,
-            Name = request.Name,
-            Note = request.Note,
-            TitleTextParameterID = request.TitleParameterTextID,
-            DescriptionTextParameterID = request.DescriptionParameterTextID,
-        });
+        EntitySchemaContext entity = await uow.Schema.GetSchemaContextByID(command.ID);
+        EntitySchema schema = await uow.Schema.GetSchemaByID(entity.SchemaID);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditContext, ParameterSystemConstants.SchemaDeactivatedEditContext);
+
+        entity.SchemaIdentifier = command.SchemaIdentifier;
+        entity.Name = command.Name;
+        entity.Note = command.Note;
+        entity.TitleTextParameterID = command.TitleParameterTextID;
+        entity.DescriptionTextParameterID = command.DescriptionParameterTextID;
+        uow.Schema.UpdateSchemaContext(entity);
 
         await uow.Commit();
 
-        return new(result.ID);
+        return new(entity.ID);
     }
 }

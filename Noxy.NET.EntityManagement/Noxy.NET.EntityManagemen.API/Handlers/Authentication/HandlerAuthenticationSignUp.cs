@@ -12,8 +12,10 @@ public class HandlerAuthenticationSignUp(IUnitOfWorkFactory serviceUoWFactory, I
     public async ValueTask<ResponseAuthenticationSignUp> Handle(CommandAuthenticationSignUp request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
+
         EntityUser entityUser = await uow.Authentication.CreateUser(request.Email, request.Password);
         await uow.Commit();
+
         return new() { JWT = serviceJWT.Create(entityUser) };
     }
 }

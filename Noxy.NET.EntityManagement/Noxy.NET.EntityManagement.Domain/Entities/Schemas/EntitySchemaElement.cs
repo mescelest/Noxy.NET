@@ -12,10 +12,10 @@ public class EntitySchemaElement : BaseEntitySchema, ISchemaMetadata, ISchemaPre
     public int Weight { get; set; } = DefaultWeight;
 
     public EntitySchemaParameterText? TitleTextParameter { get; set; }
-    public Guid TitleTextParameterID { get; set; }
+    public Guid TitleParameterTextID { get; set; }
 
     public EntitySchemaParameterText? DescriptionTextParameter { get; set; }
-    public Guid? DescriptionTextParameterID { get; set; }
+    public Guid? DescriptionParameterTextID { get; set; }
 
     public List<EntitySchemaElementHasProperty>? PropertyList { get; set; }
 

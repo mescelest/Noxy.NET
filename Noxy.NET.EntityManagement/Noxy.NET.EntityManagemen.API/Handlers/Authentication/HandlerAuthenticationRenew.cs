@@ -14,7 +14,7 @@ public class HandlerAuthenticationRenew(IUnitOfWorkFactory serviceUoWFactory, IJ
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         EntityUser entityUser = await uow.Authentication.GetUserWithEmail(request.Email);
-        entityUser.TimeSignIn = DateTime.UtcNow;
+        entityUser.RenewAuthentication();
 
         uow.Authentication.UpdateUser(entityUser);
         await uow.Commit();

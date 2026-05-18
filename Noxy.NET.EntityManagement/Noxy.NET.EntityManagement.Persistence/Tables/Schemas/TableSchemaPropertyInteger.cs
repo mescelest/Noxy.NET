@@ -16,8 +16,8 @@ public class TableSchemaPropertyInteger : TableSchemaProperty
             Note = Note,
             Weight = Weight,
             IsUnsigned = IsUnsigned,
-            TitleTextParameterID = TitleTextParameterID,
-            DescriptionTextParameterID = DescriptionTextParameterID,
+            TitleParameterTextID = TitleParameterTextID,
+            DescriptionParameterTextID = DescriptionParameterTextID,
         };
     }
 }

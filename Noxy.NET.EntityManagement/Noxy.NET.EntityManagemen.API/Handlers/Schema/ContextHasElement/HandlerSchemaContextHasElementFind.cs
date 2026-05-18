@@ -8,11 +8,11 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema.ContextHasElement;
 
 public class HandlerSchemaContextHasElementFind(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaContextHasElementFind, ResponseSchemaContextHasElementFind>
 {
-    public async ValueTask<ResponseSchemaContextHasElementFind> Handle(QuerySchemaContextHasElementFind request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaContextHasElementFind> Handle(QuerySchemaContextHasElementFind query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaContextHasElement result = await uow.Schema.GetSchemaContextHasElementByID(request.ID);
+        EntitySchemaContextHasElement result = await uow.Schema.GetSchemaContextHasElementByID(query.ID);
 
         return new(result);
     }

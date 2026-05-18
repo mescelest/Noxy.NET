@@ -1,5 +1,5 @@
 using Mediator;
-using Noxy.NET.EntityManagement.API.Commands.Authentication;
+using Noxy.NET.EntityManagement.API.Commands.Data;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Responses.Data;
 

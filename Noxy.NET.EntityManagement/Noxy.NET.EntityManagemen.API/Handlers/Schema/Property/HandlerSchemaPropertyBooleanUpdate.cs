@@ -1,32 +1,36 @@
 using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
+using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Property;
 
-public class HandlerSchemaPropertyBooleanUpdate(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaPropertyBooleanUpdate, ResponseSchemaPropertyBooleanUpdate>
+public class HandlerSchemaPropertyBooleanUpdate(IUnitOfWorkFactory serviceUoWFactory, ISchemaValidatorService serviceSchemaValidator) : ICommandHandler<CommandSchemaPropertyBooleanUpdate, ResponseSchemaPropertyBooleanUpdate>
 {
-    public async ValueTask<ResponseSchemaPropertyBooleanUpdate> Handle(CommandSchemaPropertyBooleanUpdate request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaPropertyBooleanUpdate> Handle(CommandSchemaPropertyBooleanUpdate command, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaPropertyBoolean result = await uow.Schema.UpdateSchemaPropertyBoolean(new()
-        {
-            ID = request.ID,
-            SchemaID = Guid.Empty,
-            SchemaIdentifier = request.SchemaIdentifier,
-            Name = request.Name,
-            Note = request.Note,
-            Weight = request.Weight ?? BaseEntity.DefaultWeight,
-            TitleTextParameterID = request.TitleParameterTextID,
-            DescriptionTextParameterID = request.DescriptionParameterTextID,
-        });
+        EntitySchemaProperty.Discriminator discriminator = await uow.Schema.GetSchemaPropertyByID(command.ID);
+        EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditParameter, ParameterSystemConstants.SchemaDeactivatedEditParameter);
+        if (discriminator.GetValue() is not EntitySchemaPropertyBoolean entity) throw new InvalidOperationException("Property is not of type Boolean");
+
+        entity.SchemaIdentifier = command.SchemaIdentifier;
+        entity.Name = command.Name;
+        entity.Note = command.Note;
+        entity.Weight = command.Weight ?? BaseEntity.DefaultWeight;
+        entity.TitleParameterTextID = command.TitleParameterTextID;
+        entity.DescriptionParameterTextID = command.DescriptionParameterTextID;
+        uow.Schema.UpdateSchemaPropertyBoolean(entity);
 
         await uow.Commit();
 
-        return new(result.ID);
+        return new(entity.ID);
     }
 }

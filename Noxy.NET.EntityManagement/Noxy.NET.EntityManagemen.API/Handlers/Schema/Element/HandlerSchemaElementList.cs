@@ -9,16 +9,16 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Element;
 
 public class HandlerSchemaElementList(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaElementList, ResponseSchemaElementList>
 {
-    public async ValueTask<ResponseSchemaElementList> Handle(QuerySchemaElementList request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaElementList> Handle(QuerySchemaElementList query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         List<EntitySchemaElement> result = await uow.Schema.GetSchemaElementList(new()
         {
-            SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
-            Search = request.Search?.ToEscapedSqlLike(),
-            PageSize = request.PageSize ?? 10,
-            PageNumber = request.PageNumber ?? 0,
+            SchemaID = query.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
+            Search = query.Search?.ToEscapedSqlLike(),
+            PageSize = query.PageSize ?? 10,
+            PageNumber = query.PageNumber ?? 0,
         });
 
         return new(result);

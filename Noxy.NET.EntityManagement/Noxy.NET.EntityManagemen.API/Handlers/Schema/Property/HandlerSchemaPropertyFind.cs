@@ -8,11 +8,11 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Property;
 
 public class HandlerSchemaPropertyFind(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaPropertyFind, ResponseSchemaPropertyFind>
 {
-    public async ValueTask<ResponseSchemaPropertyFind> Handle(QuerySchemaPropertyFind request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaPropertyFind> Handle(QuerySchemaPropertyFind query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaProperty.Discriminator result = await uow.Schema.GetSchemaPropertyByID(request.ID);
+        EntitySchemaProperty.Discriminator result = await uow.Schema.GetSchemaPropertyByID(query.ID);
 
         return new(result);
     }

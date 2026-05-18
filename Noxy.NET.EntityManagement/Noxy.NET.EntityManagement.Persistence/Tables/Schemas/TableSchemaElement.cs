@@ -10,7 +10,7 @@ namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 [Table(nameof(TableSchemaElement))]
 [Index(nameof(Name))]
 [Index(nameof(Weight))]
-public class TableSchemaElement : BaseTableSchemaPresentation, ISchemaMetadata, ISchemaOrdering, ISchemaPresentation
+public class TableSchemaElement : BaseTableSchemaPresentation, ISchemaMetadata, ISchemaOrdering
 {
     [Required]
     [MaxLength(DefaultNameLength)]
@@ -36,8 +36,8 @@ public class TableSchemaElement : BaseTableSchemaPresentation, ISchemaMetadata, 
             Name = Name,
             Weight = Weight,
             Note = Note,
-            TitleTextParameterID = TitleTextParameterID,
-            DescriptionTextParameterID = DescriptionTextParameterID,
+            TitleParameterTextID = TitleParameterTextID,
+            DescriptionParameterTextID = DescriptionParameterTextID,
         };
     }
 }

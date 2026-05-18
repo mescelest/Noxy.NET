@@ -391,14 +391,14 @@ public class TableToEntityMapper : ITableToEntityMapper
             Note = table.Note,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleTextParameterID = table.TitleParameterTextID,
+            DescriptionTextParameterID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
-        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listVisitedRelation);
-        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listVisitedRelation);
+        mapped.TitleTextParameter = MapInternal(table.TitleParameterText, listVisitedRelation);
+        mapped.DescriptionTextParameter = MapInternal(table.DescriptionParameterText, listVisitedRelation);
         mapped.ElementList = table.ElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
 
         return mapped;
@@ -498,14 +498,14 @@ public class TableToEntityMapper : ITableToEntityMapper
             Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleParameterTextID = table.TitleParameterTextID,
+            DescriptionParameterTextID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
-        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listVisitedRelation);
-        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listVisitedRelation);
+        mapped.TitleTextParameter = MapInternal(table.TitleParameterText, listVisitedRelation);
+        mapped.DescriptionTextParameter = MapInternal(table.DescriptionParameterText, listVisitedRelation);
         mapped.PropertyList = table.PropertyList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
 
         return mapped;
@@ -539,8 +539,8 @@ public class TableToEntityMapper : ITableToEntityMapper
             Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleParameterTextID = table.TitleParameterTextID,
+            DescriptionParameterTextID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
@@ -566,15 +566,15 @@ public class TableToEntityMapper : ITableToEntityMapper
             Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleParameterTextID = table.TitleParameterTextID,
+            DescriptionParameterTextID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
 
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
-        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listExtendedRelation);
-        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listExtendedRelation);
+        mapped.TitleParameterText = MapInternal(table.TitleParameterText, listExtendedRelation);
+        mapped.DescriptionParameterText = MapInternal(table.DescriptionParameterText, listExtendedRelation);
 
         mapped.RelationElementList = table.RelationElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
         mapped.PropertyList = table.PropertyList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
@@ -597,15 +597,15 @@ public class TableToEntityMapper : ITableToEntityMapper
             Type = table.Type,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleParameterTextID = table.TitleParameterTextID,
+            DescriptionParameterTextID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
 
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
-        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listExtendedRelation);
-        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listExtendedRelation);
+        mapped.TitleParameterText = MapInternal(table.TitleParameterText, listExtendedRelation);
+        mapped.DescriptionParameterText = MapInternal(table.DescriptionParameterText, listExtendedRelation);
 
         mapped.RelationElementList = table.RelationElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
         mapped.RelationPropertyCollectionList = table.RelationPropertyCollectionList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
@@ -626,15 +626,15 @@ public class TableToEntityMapper : ITableToEntityMapper
             Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleParameterTextID = table.TitleParameterTextID,
+            DescriptionParameterTextID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
 
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
-        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listExtendedRelation);
-        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listExtendedRelation);
+        mapped.TitleParameterText = MapInternal(table.TitleParameterText, listExtendedRelation);
+        mapped.DescriptionParameterText = MapInternal(table.DescriptionParameterText, listExtendedRelation);
 
         mapped.RelationElementList = table.RelationElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
         mapped.RelationPropertyCollectionList = table.RelationPropertyCollectionList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
@@ -656,15 +656,15 @@ public class TableToEntityMapper : ITableToEntityMapper
             AllowedExtensions = table.AllowedExtensions,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleParameterTextID = table.TitleParameterTextID,
+            DescriptionParameterTextID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
 
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
-        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listExtendedRelation);
-        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listExtendedRelation);
+        mapped.TitleParameterText = MapInternal(table.TitleParameterText, listExtendedRelation);
+        mapped.DescriptionParameterText = MapInternal(table.DescriptionParameterText, listExtendedRelation);
 
         mapped.RelationElementList = table.RelationElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
         mapped.RelationPropertyCollectionList = table.RelationPropertyCollectionList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
@@ -686,15 +686,15 @@ public class TableToEntityMapper : ITableToEntityMapper
             IsUnsigned = table.IsUnsigned,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleParameterTextID = table.TitleParameterTextID,
+            DescriptionParameterTextID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
 
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
-        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listExtendedRelation);
-        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listExtendedRelation);
+        mapped.TitleParameterText = MapInternal(table.TitleParameterText, listExtendedRelation);
+        mapped.DescriptionParameterText = MapInternal(table.DescriptionParameterText, listExtendedRelation);
 
         mapped.RelationElementList = table.RelationElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
         mapped.RelationPropertyCollectionList = table.RelationPropertyCollectionList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
@@ -715,15 +715,15 @@ public class TableToEntityMapper : ITableToEntityMapper
             Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleParameterTextID = table.TitleParameterTextID,
+            DescriptionParameterTextID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
 
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
-        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listExtendedRelation);
-        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listExtendedRelation);
+        mapped.TitleParameterText = MapInternal(table.TitleParameterText, listExtendedRelation);
+        mapped.DescriptionParameterText = MapInternal(table.DescriptionParameterText, listExtendedRelation);
 
         mapped.RelationElementList = table.RelationElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
         mapped.RelationPropertyCollectionList = table.RelationPropertyCollectionList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
@@ -744,15 +744,15 @@ public class TableToEntityMapper : ITableToEntityMapper
             Weight = table.Weight,
             TimeCreated = table.TimeCreated,
             SchemaID = table.SchemaID,
-            TitleTextParameterID = table.TitleTextParameterID,
-            DescriptionTextParameterID = table.DescriptionTextParameterID,
+            TitleParameterTextID = table.TitleParameterTextID,
+            DescriptionParameterTextID = table.DescriptionParameterTextID,
         };
 
         if (!TryExtendRelation(table.ID, listVisitedRelation, out Guid[] listExtendedRelation)) return mapped;
 
         mapped.Schema = MapInternal(table.Schema, listExtendedRelation);
-        mapped.TitleTextParameter = MapInternal(table.TitleTextParameter, listExtendedRelation);
-        mapped.DescriptionTextParameter = MapInternal(table.DescriptionTextParameter, listExtendedRelation);
+        mapped.TitleParameterText = MapInternal(table.TitleParameterText, listExtendedRelation);
+        mapped.DescriptionParameterText = MapInternal(table.DescriptionParameterText, listExtendedRelation);
 
         mapped.RelationElementList = table.RelationElementList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();
         mapped.PropertyList = table.PropertyList?.Select(x => MapInternal(x, listExtendedRelation)!).ToList();

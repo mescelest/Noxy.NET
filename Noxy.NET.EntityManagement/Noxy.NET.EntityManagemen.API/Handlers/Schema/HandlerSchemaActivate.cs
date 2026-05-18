@@ -12,10 +12,16 @@ public sealed class HandlerSchemaActivate(IUnitOfWorkFactory serviceUoWFactory) 
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchema result = await uow.Schema.ActivateSchema(command.ID);
+        EntitySchema entity = await uow.Schema.GetSchemaByID(command.ID);
+        if (entity.IsActive && entity.TimeActivated.HasValue) return new(entity.TimeActivated.Value);
 
+        entity.IsActive = true;
+        entity.TimeActivated = DateTime.UtcNow;
+        uow.Schema.UpdateSchema(entity);
+
+        await uow.Schema.DeactivateSchemaExcept(entity.ID);
         await uow.Commit();
 
-        return new(result.ID);
+        return new(entity.TimeActivated.Value);
     }
 }

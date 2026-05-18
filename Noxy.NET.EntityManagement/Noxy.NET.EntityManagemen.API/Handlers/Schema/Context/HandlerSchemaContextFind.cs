@@ -8,11 +8,11 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Context;
 
 public class HandlerSchemaContextFind(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaContextFind, ResponseSchemaContextFind>
 {
-    public async ValueTask<ResponseSchemaContextFind> Handle(QuerySchemaContextFind request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaContextFind> Handle(QuerySchemaContextFind query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaContext result = await uow.Schema.GetSchemaContextByID(request.ID);
+        EntitySchemaContext result = await uow.Schema.GetSchemaContextByID(query.ID);
 
         return new(result);
     }

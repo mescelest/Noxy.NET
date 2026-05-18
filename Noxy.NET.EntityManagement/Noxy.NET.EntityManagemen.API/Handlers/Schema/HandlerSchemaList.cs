@@ -10,18 +10,18 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema;
 
 public class HandlerSchemaList(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaList, ResponseSchemaList>
 {
-    public async ValueTask<ResponseSchemaList> Handle(QuerySchemaList request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaList> Handle(QuerySchemaList query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         List<EntitySchema> result = await uow.Schema.GetSchemaList(new()
         {
-            IsActivated = request.IsActivated,
-            Search = request.Search?.ToEscapedSqlLike(),
-            PageSize = request.PageSize ?? 10,
-            PageNumber = request.PageNumber ?? 0,
-            SortColumn = request.SortColumn ?? nameof(EntitySchema.TimeCreated),
-            SortDirection = request.SortDirection ?? ListSortDirection.Descending,
+            IsActivated = query.IsActivated,
+            Search = query.Search?.ToEscapedSqlLike(),
+            PageSize = query.PageSize ?? 10,
+            PageNumber = query.PageNumber ?? 0,
+            SortColumn = query.SortColumn ?? nameof(EntitySchema.TimeCreated),
+            SortDirection = query.SortDirection ?? ListSortDirection.Descending,
         });
 
         return new(result);

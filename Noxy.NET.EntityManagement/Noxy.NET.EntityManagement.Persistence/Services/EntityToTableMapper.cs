@@ -104,8 +104,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             SchemaIdentifier = entity.SchemaIdentifier,
             Name = entity.Name,
             Note = entity.Note,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID,
+            TitleParameterTextID = entity.TitleTextParameterID,
+            DescriptionParameterTextID = entity.DescriptionTextParameterID,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
         };
@@ -180,8 +180,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Weight = entity.Weight,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID,
+            TitleParameterTextID = entity.TitleParameterTextID,
+            DescriptionParameterTextID = entity.DescriptionParameterTextID,
         };
     }
 
@@ -209,8 +209,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Weight = entity.Weight,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID
+            TitleParameterTextID = entity.TitleParameterTextID,
+            DescriptionParameterTextID = entity.DescriptionParameterTextID
         };
     }
 
@@ -225,8 +225,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Weight = entity.Weight,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID,
+            TitleParameterTextID = entity.TitleParameterTextID,
+            DescriptionParameterTextID = entity.DescriptionParameterTextID,
         };
     }
 
@@ -242,8 +242,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Type = entity.Type,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID,
+            TitleParameterTextID = entity.TitleParameterTextID,
+            DescriptionParameterTextID = entity.DescriptionParameterTextID,
         };
     }
 
@@ -258,8 +258,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Weight = entity.Weight,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID,
+            TitleParameterTextID = entity.TitleParameterTextID,
+            DescriptionParameterTextID = entity.DescriptionParameterTextID,
         };
     }
 
@@ -275,8 +275,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             AllowedExtensions = entity.AllowedExtensions,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID,
+            TitleParameterTextID = entity.TitleParameterTextID,
+            DescriptionParameterTextID = entity.DescriptionParameterTextID,
         };
     }
 
@@ -291,8 +291,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Weight = entity.Weight,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID,
+            TitleParameterTextID = entity.TitleParameterTextID,
+            DescriptionParameterTextID = entity.DescriptionParameterTextID,
         };
     }
 
@@ -307,8 +307,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Weight = entity.Weight,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID,
+            TitleParameterTextID = entity.TitleParameterTextID,
+            DescriptionParameterTextID = entity.DescriptionParameterTextID,
         };
     }
 
@@ -323,8 +323,8 @@ public class EntityToTableMapper : IEntityToTableMapper
             Weight = entity.Weight,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             SchemaID = entity.SchemaID,
-            TitleTextParameterID = entity.TitleTextParameterID,
-            DescriptionTextParameterID = entity.DescriptionTextParameterID,
+            TitleParameterTextID = entity.TitleParameterTextID,
+            DescriptionParameterTextID = entity.DescriptionParameterTextID,
         };
     }
 

@@ -12,11 +12,11 @@ public abstract class EntitySchemaProperty : BaseEntitySchema, ISchemaMetadata, 
     public int Weight { get; set; } = DefaultWeight;
 
 
-    public EntitySchemaParameterText? TitleTextParameter { get; set; }
-    public Guid TitleTextParameterID { get; set; }
+    public EntitySchemaParameterText? TitleParameterText { get; set; }
+    public Guid TitleParameterTextID { get; set; }
 
-    public EntitySchemaParameterText? DescriptionTextParameter { get; set; }
-    public Guid? DescriptionTextParameterID { get; set; }
+    public EntitySchemaParameterText? DescriptionParameterText { get; set; }
+    public Guid? DescriptionParameterTextID { get; set; }
 
     [JsonIgnore]
     public ICollection<EntitySchemaElementHasProperty>? RelationElementList { get; set; }

@@ -1,33 +1,37 @@
 using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
+using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Property;
 
-public class HandlerSchemaPropertyIntegerUpdate(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaPropertyIntegerUpdate, ResponseSchemaPropertyIntegerUpdate>
+public class HandlerSchemaPropertyIntegerUpdate(IUnitOfWorkFactory serviceUoWFactory, ISchemaValidatorService serviceSchemaValidator) : ICommandHandler<CommandSchemaPropertyIntegerUpdate, ResponseSchemaPropertyIntegerUpdate>
 {
-    public async ValueTask<ResponseSchemaPropertyIntegerUpdate> Handle(CommandSchemaPropertyIntegerUpdate request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaPropertyIntegerUpdate> Handle(CommandSchemaPropertyIntegerUpdate command, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaPropertyInteger result = await uow.Schema.UpdateSchemaPropertyInteger(new()
-        {
-            ID = request.ID,
-            SchemaID = Guid.Empty,
-            SchemaIdentifier = request.SchemaIdentifier,
-            Name = request.Name,
-            Note = request.Note,
-            Weight = request.Weight ?? BaseEntity.DefaultWeight,
-            IsUnsigned = request.IsUnsigned,
-            TitleTextParameterID = request.TitleParameterTextID,
-            DescriptionTextParameterID = request.DescriptionParameterTextID,
-        });
+        EntitySchemaProperty.Discriminator discriminator = await uow.Schema.GetSchemaPropertyByID(command.ID);
+        EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditParameter, ParameterSystemConstants.SchemaDeactivatedEditParameter);
+        if (discriminator.GetValue() is not EntitySchemaPropertyInteger entity) throw new InvalidOperationException("Property is not of type Integer");
+
+        entity.SchemaIdentifier = command.SchemaIdentifier;
+        entity.Name = command.Name;
+        entity.Note = command.Note;
+        entity.Weight = command.Weight ?? BaseEntity.DefaultWeight;
+        entity.IsUnsigned = command.IsUnsigned;
+        entity.TitleParameterTextID = command.TitleParameterTextID;
+        entity.DescriptionParameterTextID = command.DescriptionParameterTextID;
+        uow.Schema.UpdateSchemaPropertyInteger(entity);
 
         await uow.Commit();
 
-        return new(result.ID);
+        return new(entity.ID);
     }
 }

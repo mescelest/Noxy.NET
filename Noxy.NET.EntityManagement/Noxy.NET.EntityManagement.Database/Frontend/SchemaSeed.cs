@@ -32,8 +32,8 @@ public class SchemaSeed(DataContext context, TableSchema schema)
                 Name = constant,
                 Note = note,
                 TimeCreated = DateTime.UtcNow,
-                TitleTextParameterID = idTitle,
-                DescriptionTextParameterID = idDescription,
+                TitleParameterTextID = idTitle,
+                DescriptionParameterTextID = idDescription,
                 SchemaID = schema.ID
             };
             context.SchemaContext.Add(entity);

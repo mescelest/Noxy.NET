@@ -8,14 +8,14 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Element;
 
 public class HandlerSchemaElementCount(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaElementCount, ResponseSchemaElementCount>
 {
-    public async ValueTask<ResponseSchemaElementCount> Handle(QuerySchemaElementCount request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaElementCount> Handle(QuerySchemaElementCount query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         int result = await uow.Schema.GetSchemaElementCount(new()
         {
-            SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
-            Search = request.Search?.ToEscapedSqlLike(),
+            SchemaID = query.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
+            Search = query.Search?.ToEscapedSqlLike(),
         });
 
         return new(result);

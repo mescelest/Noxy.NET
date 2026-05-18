@@ -1,33 +1,37 @@
 using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
+using Noxy.NET.EntityManagement.Domain.Constants;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Property;
 
-public class HandlerSchemaPropertyDateTimeUpdate(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaPropertyDateTimeUpdate, ResponseSchemaPropertyDateTimeUpdate>
+public class HandlerSchemaPropertyDateTimeUpdate(IUnitOfWorkFactory serviceUoWFactory, ISchemaValidatorService serviceSchemaValidator) : ICommandHandler<CommandSchemaPropertyDateTimeUpdate, ResponseSchemaPropertyDateTimeUpdate>
 {
-    public async ValueTask<ResponseSchemaPropertyDateTimeUpdate> Handle(CommandSchemaPropertyDateTimeUpdate request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaPropertyDateTimeUpdate> Handle(CommandSchemaPropertyDateTimeUpdate command, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaPropertyDateTime result = await uow.Schema.UpdateSchemaPropertyDateTime(new()
-        {
-            ID = request.ID,
-            SchemaID = Guid.Empty,
-            SchemaIdentifier = request.SchemaIdentifier,
-            Name = request.Name,
-            Note = request.Note,
-            Type = request.Type,
-            Weight = request.Weight ?? BaseEntity.DefaultWeight,
-            TitleTextParameterID = request.TitleParameterTextID,
-            DescriptionTextParameterID = request.DescriptionParameterTextID,
-        });
+        EntitySchemaProperty.Discriminator discriminator = await uow.Schema.GetSchemaPropertyByID(command.ID);
+        EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditParameter, ParameterSystemConstants.SchemaDeactivatedEditParameter);
+        if (discriminator.GetValue() is not EntitySchemaPropertyDateTime entity) throw new InvalidOperationException("Property is not of type DateTime");
+
+        entity.SchemaIdentifier = command.SchemaIdentifier;
+        entity.Name = command.Name;
+        entity.Note = command.Note;
+        entity.Weight = command.Weight ?? BaseEntity.DefaultWeight;
+        entity.TitleParameterTextID = command.TitleParameterTextID;
+        entity.DescriptionParameterTextID = command.DescriptionParameterTextID;
+        entity.Type = command.Type;
+        uow.Schema.UpdateSchemaPropertyDateTime(entity);
 
         await uow.Commit();
 
-        return new(result.ID);
+        return new(entity.ID);
     }
 }

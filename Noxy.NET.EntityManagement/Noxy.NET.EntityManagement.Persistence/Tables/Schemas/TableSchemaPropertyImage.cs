@@ -18,8 +18,8 @@ public class TableSchemaPropertyImage : TableSchemaProperty
             Note = Note,
             Weight = Weight,
             AllowedExtensions = AllowedExtensions,
-            TitleTextParameterID = TitleTextParameterID,
-            DescriptionTextParameterID = DescriptionTextParameterID,
+            TitleParameterTextID = TitleParameterTextID,
+            DescriptionParameterTextID = DescriptionParameterTextID,
         };
     }
 }

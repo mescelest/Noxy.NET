@@ -8,14 +8,14 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema;
 
 public class HandlerSchemaCreate(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaCreate, ResponseSchemaCreate>
 {
-    public async ValueTask<ResponseSchemaCreate> Handle(CommandSchemaCreate request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaCreate> Handle(CommandSchemaCreate command, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         EntitySchema result = await uow.Schema.CreateSchema(new()
         {
-            Name = request.Name,
-            Note = request.Note,
+            Name = command.Name,
+            Note = command.Note,
             IsActive = false,
             TimeActivated = null,
         });

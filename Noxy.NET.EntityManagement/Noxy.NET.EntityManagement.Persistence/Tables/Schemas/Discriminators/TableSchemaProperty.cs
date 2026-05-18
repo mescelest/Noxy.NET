@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 
 [Index(nameof(Name))]
 [Index(nameof(Weight))]
-public abstract class TableSchemaProperty : BaseTableSchemaPresentation, ISchemaMetadata, ISchemaOrdering, ISchemaPresentation
+public abstract class TableSchemaProperty : BaseTableSchemaPresentation, ISchemaMetadata, ISchemaOrdering
 {
     [Required]
     [MaxLength(DefaultNameLength)]

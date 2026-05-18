@@ -1,20 +1,28 @@
 using Mediator;
 using Noxy.NET.EntityManagement.API.Commands.Schema.Property;
 using Noxy.NET.EntityManagement.Application.Interfaces;
+using Noxy.NET.EntityManagement.Application.Interfaces.Services;
+using Noxy.NET.EntityManagement.Domain.Constants;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Responses.Schema.Property;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Property;
 
-public class HandlerSchemaPropertyDelete(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandSchemaPropertyDelete, ResponseSchemaPropertyDelete>
+public class HandlerSchemaPropertyDelete(IUnitOfWorkFactory serviceUoWFactory, ISchemaValidatorService serviceSchemaValidator) : ICommandHandler<CommandSchemaPropertyDelete, ResponseSchemaPropertyDelete>
 {
-    public async ValueTask<ResponseSchemaPropertyDelete> Handle(CommandSchemaPropertyDelete request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaPropertyDelete> Handle(CommandSchemaPropertyDelete command, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        Guid result = await uow.Schema.DeleteSchemaProperty(request.ID);
+        EntitySchemaProperty.Discriminator entity = await uow.Schema.GetSchemaPropertyByID(command.ID);
+        EntitySchema schema = await uow.Schema.GetSchemaByID(entity.SchemaID);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveDeleteProperty, ParameterSystemConstants.SchemaDeactivatedDeleteProperty);
+
+        uow.Schema.DeleteSchemaProperty(entity.GetValue());
 
         await uow.Commit();
 
-        return new(result);
+        return new(entity.ID);
     }
 }

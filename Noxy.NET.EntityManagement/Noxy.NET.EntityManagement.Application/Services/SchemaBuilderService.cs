@@ -57,15 +57,15 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
         foreach (EntitySchemaElement entity in schema.ElementList)
         {
             entity.Schema = schema;
-            entity.TitleTextParameter = collectionParameter.TryGetValue(entity.TitleTextParameterID, out EntitySchemaParameter.Discriminator? titleParam)
+            entity.TitleTextParameter = collectionParameter.TryGetValue(entity.TitleParameterTextID, out EntitySchemaParameter.Discriminator? titleParam)
                 ? titleParam.TextParameter
-                : throw new KeyNotFoundException($"Title parameter {entity.TitleTextParameterID} not found for {nameof(EntitySchemaElement)} {entity.ID}");
+                : throw new KeyNotFoundException($"Title parameter {entity.TitleParameterTextID} not found for {nameof(EntitySchemaElement)} {entity.ID}");
 
-            if (entity.DescriptionTextParameterID.HasValue)
+            if (entity.DescriptionParameterTextID.HasValue)
             {
-                entity.DescriptionTextParameter = collectionParameter.TryGetValue(entity.DescriptionTextParameterID.Value, out EntitySchemaParameter.Discriminator? descParam)
+                entity.DescriptionTextParameter = collectionParameter.TryGetValue(entity.DescriptionParameterTextID.Value, out EntitySchemaParameter.Discriminator? descParam)
                     ? descParam.TextParameter
-                    : throw new KeyNotFoundException($"Description parameter {entity.DescriptionTextParameterID} not found for {nameof(EntitySchemaElement)} {entity.ID}");
+                    : throw new KeyNotFoundException($"Description parameter {entity.DescriptionParameterTextID} not found for {nameof(EntitySchemaElement)} {entity.ID}");
             }
         }
 
@@ -79,15 +79,15 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
         foreach (EntitySchemaProperty entity in listProperty)
         {
             entity.Schema = schema;
-            entity.TitleTextParameter = collectionParameter.TryGetValue(entity.TitleTextParameterID, out EntitySchemaParameter.Discriminator? titleParam)
+            entity.TitleParameterText = collectionParameter.TryGetValue(entity.TitleParameterTextID, out EntitySchemaParameter.Discriminator? titleParam)
                 ? titleParam.TextParameter
-                : throw new KeyNotFoundException($"Title parameter {entity.TitleTextParameterID} not found for {nameof(EntitySchemaProperty)} {entity.ID}");
+                : throw new KeyNotFoundException($"Title parameter {entity.TitleParameterTextID} not found for {nameof(EntitySchemaProperty)} {entity.ID}");
 
-            if (entity.DescriptionTextParameterID.HasValue)
+            if (entity.DescriptionParameterTextID.HasValue)
             {
-                entity.DescriptionTextParameter = collectionParameter.TryGetValue(entity.DescriptionTextParameterID.Value, out EntitySchemaParameter.Discriminator? descParam)
+                entity.DescriptionParameterText = collectionParameter.TryGetValue(entity.DescriptionParameterTextID.Value, out EntitySchemaParameter.Discriminator? descParam)
                     ? descParam.TextParameter
-                    : throw new KeyNotFoundException($"Description parameter {entity.DescriptionTextParameterID} not found for {nameof(EntitySchemaProperty)} {entity.ID}");
+                    : throw new KeyNotFoundException($"Description parameter {entity.DescriptionParameterTextID} not found for {nameof(EntitySchemaProperty)} {entity.ID}");
             }
         }
 

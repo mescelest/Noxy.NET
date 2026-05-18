@@ -9,19 +9,19 @@ namespace Noxy.NET.EntityManagement.API.Handlers.Schema.Parameter;
 
 public class HandlerSchemaParameterList(IUnitOfWorkFactory serviceUoWFactory) : IQueryHandler<QuerySchemaParameterList, ResponseSchemaParameterList>
 {
-    public async ValueTask<ResponseSchemaParameterList> Handle(QuerySchemaParameterList request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseSchemaParameterList> Handle(QuerySchemaParameterList query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         List<EntitySchemaParameter.Discriminator> result = await uow.Schema.GetSchemaParameterList(new()
         {
-            SchemaID = request.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
-            Search = request.Search?.ToEscapedSqlLike(),
-            IsSystemDefined = request.IsSystemDefined,
-            IsApprovalRequired = request.IsApprovalRequired,
-            ParameterType = request.ParameterType,
-            PageSize = request.PageSize ?? 10,
-            PageNumber = request.PageNumber ?? 0,
+            SchemaID = query.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
+            Search = query.Search?.ToEscapedSqlLike(),
+            IsSystemDefined = query.IsSystemDefined,
+            IsApprovalRequired = query.IsApprovalRequired,
+            ParameterType = query.ParameterType,
+            PageSize = query.PageSize ?? 10,
+            PageNumber = query.PageNumber ?? 0,
         });
 
         return new(result);

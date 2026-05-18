@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
 [Table(nameof(TableSchemaContext))]
 [Index(nameof(Name))]
-public class TableSchemaContext : BaseTableSchemaPresentation, ISchemaMetadata, ISchemaPresentation
+public class TableSchemaContext : BaseTableSchemaPresentation, ISchemaMetadata
 {
     [Required]
     [MaxLength(DefaultNameLength)]
@@ -29,8 +29,8 @@ public class TableSchemaContext : BaseTableSchemaPresentation, ISchemaMetadata, 
             SchemaIdentifier = SchemaIdentifier,
             Name = Name,
             Note = Note,
-            TitleTextParameterID = TitleTextParameterID,
-            DescriptionTextParameterID = DescriptionTextParameterID,
+            TitleParameterTextID = TitleParameterTextID,
+            DescriptionParameterTextID = DescriptionParameterTextID,
         };
     }
 }

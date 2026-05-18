@@ -12,7 +12,8 @@ public sealed class HandlerSchemaClone(IUnitOfWorkFactory serviceUoWFactory) : I
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchema result = await uow.Schema.CloneSchema(command.ID);
+        EntitySchema entity = await uow.Schema.GetSchemaByID(command.ID);
+        EntitySchema result = await uow.Schema.CloneSchema(entity);
 
         await uow.Commit();
 
