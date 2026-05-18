@@ -20,6 +20,7 @@ public class RequestSchemaContextCount : BaseRequestGet<ResponseSchemaContextCou
         return new()
         {
             [nameof(SchemaID)] = SchemaID,
+            [nameof(Search)] = Search,
         };
     }
 }

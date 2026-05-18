@@ -44,10 +44,10 @@ public class SchemaParameterSystemSeed(ModelBuilder builder, TableSchema refSche
         Register(ParameterSystemConstants.SchemaInactiveAddParameter, true.ToString(), ParameterSystemTypeEnum.Boolean, "Can you add new Property entities to a Schema that has not been activated yet?", true);
         Register(ParameterSystemConstants.SchemaInactiveAddProperty, true.ToString(), ParameterSystemTypeEnum.Boolean, "Can you add new Parameter entities to a Schema that has not been activated yet?", true);
 
-        Register(ParameterSystemConstants.SchemaDeactivatedCloneContext, false.ToString(), ParameterSystemTypeEnum.Boolean, "Can you clone a Context entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedCloneElement, false.ToString(), ParameterSystemTypeEnum.Boolean, "Can you clone an Element entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedCloneParameter, false.ToString(), ParameterSystemTypeEnum.Boolean, "Can you clone a Parameter entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedCloneProperty, false.ToString(), ParameterSystemTypeEnum.Boolean, "Can you clone a Property entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveCloneContext, false.ToString(), ParameterSystemTypeEnum.Boolean, "Can you clone a Context entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveCloneElement, false.ToString(), ParameterSystemTypeEnum.Boolean, "Can you clone an Element entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveCloneParameter, false.ToString(), ParameterSystemTypeEnum.Boolean, "Can you clone a Parameter entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveCloneProperty, false.ToString(), ParameterSystemTypeEnum.Boolean, "Can you clone a Property entity from a Schema that has not been activated yet?", true);
 
         Register(ParameterSystemConstants.SchemaInactiveEditEntity, true.ToString(), ParameterSystemTypeEnum.Boolean, "Can you edit a Schema entity that has not been activated yet?", true);
         Register(ParameterSystemConstants.SchemaInactiveEditContext, true.ToString(), ParameterSystemTypeEnum.Boolean, "Can you edit a Context entity from a Schema that has not been activated yet?", true);

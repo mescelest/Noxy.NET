@@ -24,6 +24,8 @@ public class RequestSchemaPropertyCount : BaseRequestGet<ResponseSchemaPropertyC
         return new()
         {
             [nameof(SchemaID)] = SchemaID,
+            [nameof(PropertyType)] = PropertyType,
+            [nameof(Search)] = Search,
         };
     }
 }

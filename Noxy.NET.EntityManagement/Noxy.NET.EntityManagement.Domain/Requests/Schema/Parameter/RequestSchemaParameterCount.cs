@@ -32,6 +32,10 @@ public class RequestSchemaParameterCount : BaseRequestGet<ResponseSchemaParamete
         return new()
         {
             [nameof(SchemaID)] = SchemaID,
+            [nameof(IsSystemDefined)] = IsSystemDefined,
+            [nameof(IsApprovalRequired)] = IsApprovalRequired,
+            [nameof(ParameterType)] = ParameterType,
+            [nameof(Search)] = Search,
         };
     }
 }

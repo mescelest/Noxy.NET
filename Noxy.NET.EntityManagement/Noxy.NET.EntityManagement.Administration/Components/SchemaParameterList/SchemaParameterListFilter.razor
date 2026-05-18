@@ -32,6 +32,14 @@
     private void Submit(IWebFormContext<RequestSchemaParameterList> value)
     {
         Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(ScopeCurrent, value.Model));
+        Dispatcher.Dispatch(new FeatureSchemaParameterReducers.CountAction(ScopeCurrent, new()
+        {
+            Search = value.Model.Search,
+            IsApprovalRequired = value.Model.IsApprovalRequired,
+            IsSystemDefined = value.Model.IsSystemDefined,
+            ParameterType = value.Model.ParameterType,
+            SchemaID = SchemaID
+        }));
     }
 
 }

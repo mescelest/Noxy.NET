@@ -20,6 +20,7 @@ public class RequestSchemaElementCount : BaseRequestGet<ResponseSchemaElementCou
         return new()
         {
             [nameof(SchemaID)] = SchemaID,
+            [nameof(Search)] = Search,
         };
     }
 }

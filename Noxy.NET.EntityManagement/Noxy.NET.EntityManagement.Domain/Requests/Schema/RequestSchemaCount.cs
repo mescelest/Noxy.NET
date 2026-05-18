@@ -12,4 +12,17 @@ public class RequestSchemaCount : BaseRequestGet<ResponseSchemaCount>
     [DisplayName(ParameterTextConstants.LabelFormSearch)]
     [Description(ParameterTextConstants.HelpFormSearch)]
     public string? Search { get; set; }
+
+    [DisplayName(ParameterTextConstants.LabelFormIsActivated)]
+    [Description(ParameterTextConstants.HelpFormIsActivated)]
+    public bool? IsActivated { get; set; }
+
+    public override Dictionary<string, object?> ToQueryParameters()
+    {
+        return new()
+        {
+            [nameof(Search)] = Search,
+            [nameof(IsActivated)] = IsActivated,
+        };
+    }
 }

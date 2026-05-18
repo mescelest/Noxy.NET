@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IJWTService, JWTService>();
         services.AddScoped<ISchemaBuilderService, SchemaBuilderService>();
+        services.AddScoped<ISchemaValidatorService, SchemaValidatorService>();
         services.AddScoped<ITaskBundlingService, TaskBundlingService>();
 
         services.AddSingleton<IParameterService, ParameterService>();
