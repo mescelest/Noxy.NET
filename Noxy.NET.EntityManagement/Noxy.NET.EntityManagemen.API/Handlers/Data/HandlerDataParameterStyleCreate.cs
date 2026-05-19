@@ -12,6 +12,8 @@ public class HandlerDataParameterStyleCreate(IUnitOfWorkFactory serviceUoWFactor
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
+        // TODO: move logic from repo to handler and also update the parameter service 
+
         Guid id = await uow.Schema.GetCurrentSchemaID();
         EntityDataParameterStyle result = await uow.Data.CreateParameterStyle(id, request.SchemaIdentifier, request.Value, request.DateEffective);
 
