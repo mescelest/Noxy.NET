@@ -26,22 +26,22 @@
     @if (!_isEditMode)
     {
         <div>
-            <strong>@Presentation.Services.TextService.Get(ParameterTextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
             @SchemaParameter.SchemaIdentifier
         </div>
         <div>
-            <strong>@Presentation.Services.TextService.Get(ParameterTextConstants.LabelName, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelName, GetComponentName()):</strong>
             @SchemaParameter.Name
         </div>
         <div>
-            <strong>@Presentation.Services.TextService.Get(ParameterTextConstants.LabelNote, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelNote, GetComponentName()):</strong>
             @SchemaParameter.Note
         </div>
 
         @if (SchemaParameter is EntitySchemaParameterText parameterText)
         {
             <div>
-                <strong>@Presentation.Services.TextService.Get(ParameterTextConstants.LabelParameterTextType, GetComponentName()):</strong>
+                <strong>@TextService.Get(ParameterTextConstants.LabelParameterTextType, GetComponentName()):</strong>
                 @parameterText.Type
             </div>
         }
@@ -49,25 +49,25 @@
         @if (SchemaParameter is EntitySchemaParameterSystem parameterSystem)
         {
             <div>
-                <strong>@Presentation.Services.TextService.Get(ParameterTextConstants.LabelParameterSystemType, GetComponentName()):</strong>
+                <strong>@TextService.Get(ParameterTextConstants.LabelParameterSystemType, GetComponentName()):</strong>
                 @parameterSystem.Type
             </div>
             <div>
-                <strong>@Presentation.Services.TextService.Get(ParameterTextConstants.LabelIsPublic, GetComponentName()):</strong>
+                <strong>@TextService.Get(ParameterTextConstants.LabelIsPublic, GetComponentName()):</strong>
                 @parameterSystem.IsPublic
             </div>
         }
 
         <div>
-            <strong>@Presentation.Services.TextService.Get(ParameterTextConstants.LabelIsApprovalRequired, GetComponentName())</strong>
-            @(SchemaParameter.IsApprovalRequired ? Presentation.Services.TextService.Get(ParameterTextConstants.ValueYes) : Presentation.Services.TextService.Get(ParameterTextConstants.ValueNo))
+            <strong>@TextService.Get(ParameterTextConstants.LabelIsApprovalRequired, GetComponentName())</strong>
+            @(SchemaParameter.IsApprovalRequired ? TextService.Get(ParameterTextConstants.ValueYes) : TextService.Get(ParameterTextConstants.ValueNo))
         </div>
         <div>
-            <strong>@Presentation.Services.TextService.Get(ParameterTextConstants.LabelIsSystemDefined, GetComponentName())</strong>
-            @(SchemaParameter.IsSystemDefined ? Presentation.Services.TextService.Get(ParameterTextConstants.ValueYes) : Presentation.Services.TextService.Get(ParameterTextConstants.ValueNo))
+            <strong>@TextService.Get(ParameterTextConstants.LabelIsSystemDefined, GetComponentName())</strong>
+            @(SchemaParameter.IsSystemDefined ? TextService.Get(ParameterTextConstants.ValueYes) : TextService.Get(ParameterTextConstants.ValueNo))
         </div>
         <div>
-            <strong>@Presentation.Services.TextService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName()):</strong>
+            <strong>@TextService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName()):</strong>
             @SchemaParameter.TimeCreated
         </div>
     }
@@ -159,11 +159,11 @@
         return
             @<div class="action-list">
                 <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                    @Presentation.Services.TextService.Get(ParameterTextConstants.ButtonUpdate, GetComponentName())
+                    @TextService.Get(ParameterTextConstants.ButtonUpdate, GetComponentName())
                 </Button>
 
                 <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
-                    @Presentation.Services.TextService.Get(ParameterTextConstants.ButtonCancel, GetComponentName())
+                    @TextService.Get(ParameterTextConstants.ButtonCancel, GetComponentName())
                 </Button>
             </div>;
     }

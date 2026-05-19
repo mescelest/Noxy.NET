@@ -9,7 +9,7 @@ public sealed class DebouncerService : IDebouncerService
     private readonly Dictionary<string, TaskCompletionSource<bool>> _map = new();
     private readonly Dictionary<string, bool> _running = new();
 
-    public void Debounce(Func<Task> callback, string? key = null, int delayMs = 100)
+    public void Debounce(Func<Task> callback, string? key = null, int delayMs = 500)
     {
         key ??= GetKey(callback);
 
