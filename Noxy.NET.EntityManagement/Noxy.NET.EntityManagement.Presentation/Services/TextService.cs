@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Fluxor;
 using Noxy.NET.EntityManagement.Presentation.Abstractions.Features;
 using Noxy.NET.EntityManagement.Presentation.Features;
@@ -26,7 +27,7 @@ public class TextService : IState<FeatureTextState>
         if (key == null) return "[KEY MISSING]";
 
         if (Value.Collection.TryGetValue(key, out string? value)) return value ?? "[VALUE MISSING]";
-        if (!Value.Pending.TryGetValue(scope, out HashSet<string>? set) || !set.Contains(key))
+        if (!Value.Pending.TryGetValue(scope, out ImmutableHashSet<string>? set) || !set.Contains(key))
         {
             _dispatcher.Dispatch(new ParameterReducersBase<FeatureTextState>.LoadKey(key, scope));
         }

@@ -98,19 +98,19 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         foreach (TableSchemaElement item in listElementClone)
         {
             item.TitleParameterTextID = GetClonedParameterID(mapParameter, item.TitleParameterTextID);
-            if (item.DescriptionParameterTextID is not null) item.DescriptionParameterTextID = mapParameter.TryGetValue(item.DescriptionParameterTextID.Value, out var value) ? value : null;
+            if (item.DescriptionParameterTextID is not null) item.DescriptionParameterTextID = mapParameter.TryGetValue(item.DescriptionParameterTextID.Value, out Guid value) ? value : null;
         }
 
         foreach (TableSchemaContext item in listContextClone)
         {
             item.TitleParameterTextID = GetClonedParameterID(mapParameter, item.TitleParameterTextID);
-            if (item.DescriptionParameterTextID is not null) item.DescriptionParameterTextID = mapParameter.TryGetValue(item.DescriptionParameterTextID.Value, out var value) ? value : null;
+            if (item.DescriptionParameterTextID is not null) item.DescriptionParameterTextID = mapParameter.TryGetValue(item.DescriptionParameterTextID.Value, out Guid value) ? value : null;
         }
 
         foreach (TableSchemaProperty item in listPropertyClone)
         {
             item.TitleParameterTextID = GetClonedParameterID(mapParameter, item.TitleParameterTextID);
-            if (item.DescriptionParameterTextID is not null) item.DescriptionParameterTextID = mapParameter.TryGetValue(item.DescriptionParameterTextID.Value, out var value) ? value : null;
+            if (item.DescriptionParameterTextID is not null) item.DescriptionParameterTextID = mapParameter.TryGetValue(item.DescriptionParameterTextID.Value, out Guid value) ? value : null;
         }
 
         List<TableSchemaElementHasProperty> listJunctionElement = await Context.SchemaElementHasProperty.AsNoTracking().Where(x => mapElement.Keys.Contains(x.EntityID)).ToListAsync();
