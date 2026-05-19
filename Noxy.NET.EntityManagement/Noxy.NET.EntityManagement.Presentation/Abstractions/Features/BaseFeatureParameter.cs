@@ -7,9 +7,7 @@ namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Features;
 public abstract record BaseFeatureParameterState
 {
     public ImmutableDictionary<string, string?> Collection { get; init; } = ImmutableDictionary<string, string?>.Empty;
-
     public ImmutableDictionary<string, ImmutableHashSet<string>> Pending { get; init; } = ImmutableDictionary<string, ImmutableHashSet<string>>.Empty;
-
     public ImmutableHashSet<string> Resolved { get; init; } = ImmutableHashSet<string>.Empty;
 
     public bool IsScopeLoading(string scope) => Pending.TryGetValue(scope, out ImmutableHashSet<string>? set) && set.Count > 0;
@@ -27,7 +25,6 @@ public abstract class ParameterReducersBase<TState> where TState : BaseFeaturePa
 
         return state with { Pending = pending };
     }
-
 
     [ReducerMethod]
     public static TState ReduceResolvePending(TState state, ResolvePending action)
