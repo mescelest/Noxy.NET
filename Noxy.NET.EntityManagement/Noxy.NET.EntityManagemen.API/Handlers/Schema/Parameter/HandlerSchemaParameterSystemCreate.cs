@@ -24,6 +24,7 @@ public class HandlerSchemaParameterSystemCreate(IUnitOfWorkFactory serviceUoWFac
             Name = command.Name,
             Note = command.Note,
             Type = command.Type,
+            IsPublic = command.IsPublic,
             IsApprovalRequired = command.IsApprovalRequired,
             IsSystemDefined = command.IsSystemDefined,
         });

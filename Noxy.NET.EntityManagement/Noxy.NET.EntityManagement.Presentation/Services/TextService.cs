@@ -1,32 +1,36 @@
+using System.Collections.Immutable;
 using Fluxor;
+using Noxy.NET.EntityManagement.Presentation.Abstractions.Features;
 using Noxy.NET.EntityManagement.Presentation.Features;
 
 namespace Noxy.NET.EntityManagement.Presentation.Services;
 
 public class TextService : IState<FeatureTextState>
 {
-    private readonly IState<FeatureTextState> _inner;
+    private readonly IState<FeatureTextState> _state;
     private readonly IDispatcher _dispatcher;
-    public FeatureTextState Value => _inner.Value;
+
+    public FeatureTextState Value => _state.Value;
+
     public event EventHandler? StateChanged;
 
-    public TextService(IState<FeatureTextState> inner, IDispatcher dispatcher)
+    public TextService(IState<FeatureTextState> state, IDispatcher dispatcher)
     {
-        _inner = inner;
+        _state = state;
         _dispatcher = dispatcher;
 
-        _inner.StateChanged += (_, _) => StateChanged?.Invoke(this, EventArgs.Empty);
+        _state.StateChanged += (_, _) => StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public string Get(string? key, string scope = "")
     {
         if (key == null) return "[KEY MISSING]";
 
-        FeatureTextState state = Value;
-        if (state.TextCollection.TryGetValue(key, out string? value)) return value;
-
-        if (!state.Pending.TryGetValue(scope, out var set) || !set.Contains(key))
-            _dispatcher.Dispatch(new FeatureTextReducers.LoadKeyAction(key, scope));
+        if (Value.Collection.TryGetValue(key, out string? value)) return value ?? "[VALUE MISSING]";
+        if (!Value.Pending.TryGetValue(scope, out ImmutableHashSet<string>? set) || !set.Contains(key))
+        {
+            _dispatcher.Dispatch(new ParameterReducersBase<FeatureTextState>.LoadKey(key, scope));
+        }
 
         return "Loading…";
     }

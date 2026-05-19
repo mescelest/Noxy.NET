@@ -4,7 +4,7 @@ using Noxy.NET.EntityManagement.Domain.Responses.Data;
 
 namespace Noxy.NET.EntityManagement.API.Queries.Data;
 
-public class QueryDataParameterTextResolveList(RequestDataParameterTextResolveList request) : IQuery<ResponseDataParameterResolveList>
+public class QueryDataParameterTextResolveList(RequestDataParameterTextResolveList request) : IQuery<ResponseDataParameterTextResolveList>
 {
     public IEnumerable<string> SchemaIdentifierList { get; } = request.SchemaIdentifierList;
 }

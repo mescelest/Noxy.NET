@@ -7,10 +7,10 @@
     <FormSchemaElementList SchemaID="SchemaID" OnSubmit="Submit">
         <ButtonList Alignment="ButtonListAlignmentEnum.Right">
             <Button Status="StatusEnum.Warning" type="button">
-                @TextService.Get(ParameterTextConstants.ButtonReset)
+                @Presentation.Services.TextService.Get(ParameterTextConstants.ButtonReset)
             </Button>
             <Button Status="StatusEnum.Info" type="submit">
-                @TextService.Get(ParameterTextConstants.ButtonFilter)
+                @Presentation.Services.TextService.Get(ParameterTextConstants.ButtonFilter)
             </Button>
         </ButtonList>
     </FormSchemaElementList>
@@ -32,6 +32,11 @@
     private void Submit(IWebFormContext<RequestSchemaElementList> value)
     {
         Dispatcher.Dispatch(new FeatureSchemaElementReducers.ListAction(ScopeCurrent, value.Model));
+        Dispatcher.Dispatch(new FeatureSchemaElementReducers.CountAction(ScopeCurrent, new()
+        {
+                SchemaID = SchemaID,
+                Search = value.Model.Search,
+        }));
     }
 
 }

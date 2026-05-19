@@ -42,7 +42,7 @@ public class DataController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("Parameter/Text/Resolve")]
-    public async Task<ActionResult<ResponseDataParameterResolveList>> ParameterTextResolve([FromBody] RequestDataParameterTextResolveList request)
+    public async Task<ActionResult<ResponseDataParameterTextResolveList>> ParameterTextResolve([FromBody] RequestDataParameterTextResolveList request)
     {
         return await mediator.Send(new QueryDataParameterTextResolveList(request));
     }

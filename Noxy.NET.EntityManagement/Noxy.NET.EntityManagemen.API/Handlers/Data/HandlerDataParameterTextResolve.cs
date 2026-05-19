@@ -12,7 +12,7 @@ public class HandlerDataParameterTextResolve(IParameterService serviceParameter)
     {
         return ValueTask.FromResult(new ResponseDataParameterTextResolve
         {
-            Value = serviceParameter.TryGetParameterText(request.Identifier, out EntityDataParameterText? parameter) ? parameter.Value : "[MISSING]"
+            Value = serviceParameter.TryGetParameterText(request.Identifier, out EntityDataParameterText? parameter) ? parameter.Value : null
         });
     }
 }

@@ -32,6 +32,11 @@
     private void Submit(IWebFormContext<RequestSchemaPropertyList> value)
     {
         Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.ListAction(ScopeCurrent, value.Model));
+        Dispatcher.Dispatch(new FeatureSchemaPropertyReducers.CountAction(ScopeCurrent, new()
+        {
+                Search = value.Model.Search,
+                SchemaID = SchemaID
+        }));
     }
 
 }

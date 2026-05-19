@@ -110,6 +110,7 @@ public class SchemaParameterTextSeed(ModelBuilder builder, TableSchema refSchema
         Register(ParameterTextConstants.LabelValue, "Value");
         Register(ParameterTextConstants.LabelParameterStyle, "Style parameter");
         Register(ParameterTextConstants.LabelParameterSystem, "System parameter");
+        Register(ParameterTextConstants.LabelParameterSystemType, "System parameter type");
         Register(ParameterTextConstants.LabelParameterText, "Text parameter");
         Register(ParameterTextConstants.LabelParameterTextType, "Text parameter type");
         Register(ParameterTextConstants.LabelPropertyBoolean, "Boolean property");
@@ -126,6 +127,7 @@ public class SchemaParameterTextSeed(ModelBuilder builder, TableSchema refSchema
         Register(ParameterTextConstants.LabelWeight, "Weight");
         Register(ParameterTextConstants.LabelTitle, "Title");
         Register(ParameterTextConstants.LabelDescription, "Description");
+        Register(ParameterTextConstants.LabelIsPublic, "Is public?");
         Register(ParameterTextConstants.LabelIsApprovalRequired, "Is approval required?");
         Register(ParameterTextConstants.LabelIsSystemDefined, "Is system defined?");
         Register(ParameterTextConstants.LabelTimeApproved, "Approved at");
@@ -152,6 +154,7 @@ public class SchemaParameterTextSeed(ModelBuilder builder, TableSchema refSchema
         Register(ParameterTextConstants.LabelFormDescription, "Description");
         Register(ParameterTextConstants.LabelFormWeight, "Weight");
         Register(ParameterTextConstants.LabelFormDateTimeType, "DateTime type");
+        Register(ParameterTextConstants.LabelFormIsPublic, "Is public?");
         Register(ParameterTextConstants.LabelFormIsSystemDefined, "Is system defined?");
         Register(ParameterTextConstants.LabelFormIsApprovalRequired, "Is approval required?");
         Register(ParameterTextConstants.LabelFormIsActivated, "Is activated?");
@@ -190,6 +193,7 @@ public class SchemaParameterTextSeed(ModelBuilder builder, TableSchema refSchema
         Register(ParameterTextConstants.HelpFormDescription, "The description used when displaying an entity of this type.");
         Register(ParameterTextConstants.HelpFormWeight, "The sorting weight of this entity type when it is being ordered.");
         Register(ParameterTextConstants.HelpFormDateTimeType, "The type of DateTime property.");
+        Register(ParameterTextConstants.HelpFormIsPublic, "Determines if the entity is public and can be accessed in the frontend.");
         Register(ParameterTextConstants.HelpFormIsSystemDefined, "Determines if the entity is system defined and therefore cannot be changed.");
         Register(ParameterTextConstants.HelpFormIsApprovalRequired, "Determines if another user must approve a text parameter value before it becomes active.");
         Register(ParameterTextConstants.HelpFormIsActivated, "Determines if the entity is active or has been previously activated.");
@@ -238,7 +242,7 @@ public class SchemaParameterTextSeed(ModelBuilder builder, TableSchema refSchema
         #endregion
     }
 
-    protected void Register(string constant, string value, string culture = "en", ParameterTextTypeEnum type = ParameterTextTypeEnum.Line, string note = "", bool isApprovalRequired = false)
+    private void Register(string constant, string value, string culture = "en", ParameterTextTypeEnum type = ParameterTextTypeEnum.Line, string note = "", bool isApprovalRequired = false)
     {
         TableSchemaParameterText tableParameterText = new()
         {

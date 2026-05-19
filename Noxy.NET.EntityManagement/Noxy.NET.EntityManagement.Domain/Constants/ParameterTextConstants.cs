@@ -45,6 +45,7 @@ public static class ParameterTextConstants
     public const string LabelParameterSystem = "Label:ParameterSystem";
     public const string LabelParameterText = "Label:ParameterText";
     public const string LabelParameterTextType = "Label:ParameterTextType";
+    public const string LabelParameterSystemType = "Label:ParameterSystemType";
     public const string LabelPropertyBoolean = "Label:PropertyBoolean";
     public const string LabelPropertyDateTime = "Label:PropertyDateTime";
     public const string LabelPropertyDecimal = "Label:PropertyDecimal";
@@ -59,6 +60,7 @@ public static class ParameterTextConstants
     public const string LabelWeight = "Label:Weight";
     public const string LabelTitle = "Label:Title";
     public const string LabelDescription = "Label:Description";
+    public const string LabelIsPublic = "Label:IsPublic";
     public const string LabelIsApprovalRequired = "Label:IsApprovalRequired";
     public const string LabelIsSystemDefined = "Label:IsSystemDefined";
     public const string LabelTimeApproved = "Label:TimeApproved";
@@ -81,6 +83,7 @@ public static class ParameterTextConstants
     public const string LabelFormDescription = "Label:Form:Description";
     public const string LabelFormWeight = "Label:Form:Weight";
     public const string LabelFormDateTimeType = "Label:Form:DateTimeType";
+    public const string LabelFormIsPublic = "Label:Form:IsPublic";
     public const string LabelFormIsSystemDefined = "Label:Form:IsSystemDefined";
     public const string LabelFormIsApprovalRequired = "Label:Form:IsApprovalRequired";
     public const string LabelFormIsActivated = "Label:Form:IsActivated";
@@ -117,6 +120,7 @@ public static class ParameterTextConstants
     public const string HelpFormDescription = "Help:Form:Description";
     public const string HelpFormWeight = "Help:Form:Weight";
     public const string HelpFormDateTimeType = "Help:Form:DateTimeType";
+    public const string HelpFormIsPublic = "Help:Form:IsPublic";
     public const string HelpFormIsSystemDefined = "Help:Form:IsSystemDefined";
     public const string HelpFormIsApprovalRequired = "Help:Form:IsApprovalRequired";
     public const string HelpFormIsActivated = "Help:Form:IsActivated";

@@ -34,6 +34,11 @@ public class RequestSchemaParameterSystemCreate : BaseRequestPost<ResponseSchema
     public ParameterSystemTypeEnum Type { get; set; } = ParameterSystemTypeEnum.String;
 
     [Required]
+    [DisplayName(ParameterTextConstants.LabelFormIsPublic)]
+    [Description(ParameterTextConstants.HelpFormIsPublic)]
+    public bool IsPublic { get; set; }
+
+    [Required]
     [DisplayName(ParameterTextConstants.LabelFormIsSystemDefined)]
     [Description(ParameterTextConstants.HelpFormIsSystemDefined)]
     public bool IsSystemDefined { get; set; }

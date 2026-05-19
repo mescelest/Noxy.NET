@@ -6,15 +6,13 @@ using Noxy.NET.EntityManagement.Domain.Responses.Data;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Data;
 
-public class HandlerDataParameterTextResolveList(IParameterService serviceParameter) : IQueryHandler<QueryDataParameterTextResolveList, ResponseDataParameterResolveList>
+public class HandlerDataParameterTextResolveList(IParameterService serviceParameter) : IQueryHandler<QueryDataParameterTextResolveList, ResponseDataParameterTextResolveList>
 {
-    public ValueTask<ResponseDataParameterResolveList> Handle(QueryDataParameterTextResolveList request, CancellationToken cancellationToken)
+    public ValueTask<ResponseDataParameterTextResolveList> Handle(QueryDataParameterTextResolveList request, CancellationToken cancellationToken)
     {
-        return ValueTask.FromResult(new ResponseDataParameterResolveList
+        return ValueTask.FromResult(new ResponseDataParameterTextResolveList
         {
-            Value = request.SchemaIdentifierList.ToDictionary(x => x, y => serviceParameter.TryGetParameterText(y, out EntityDataParameterText? parameter)
-                ? parameter.Value
-                : "[MISSING]")
+            Value = request.SchemaIdentifierList.ToDictionary(x => x, y => serviceParameter.TryGetParameterText(y, out EntityDataParameterText? parameter) ? parameter.Value : null)
         });
     }
 }

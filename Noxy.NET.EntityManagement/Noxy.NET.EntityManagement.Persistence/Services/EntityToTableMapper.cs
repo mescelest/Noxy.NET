@@ -146,6 +146,7 @@ public class EntityToTableMapper : IEntityToTableMapper
             Name = entity.Name,
             Note = entity.Note,
             Type = entity.Type,
+            IsPublic = entity.IsPublic,
             IsSystemDefined = entity.IsSystemDefined,
             IsApprovalRequired = entity.IsApprovalRequired,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,

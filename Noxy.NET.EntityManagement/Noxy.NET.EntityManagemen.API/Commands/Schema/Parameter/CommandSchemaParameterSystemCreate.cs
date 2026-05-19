@@ -12,6 +12,7 @@ public class CommandSchemaParameterSystemCreate(RequestSchemaParameterSystemCrea
     public string Name { get; } = request.Name;
     public string Note { get; } = request.Note;
     public ParameterSystemTypeEnum Type { get; } = request.Type;
+    public bool IsPublic { get; } = request.IsPublic;
     public bool IsSystemDefined { get; } = request.IsSystemDefined;
     public bool IsApprovalRequired { get; } = request.IsApprovalRequired;
 }
