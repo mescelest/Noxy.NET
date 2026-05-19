@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Presentation.Features;
 
 namespace Noxy.NET.EntityManagement.Presentation.Services;
 
-public class TextService : IState<FeatureTextState>
+public class TextParameterService : IState<FeatureTextState>
 {
     private readonly IState<FeatureTextState> _state;
     private readonly IDispatcher _dispatcher;
@@ -14,7 +14,7 @@ public class TextService : IState<FeatureTextState>
 
     public event EventHandler? StateChanged;
 
-    public TextService(IState<FeatureTextState> state, IDispatcher dispatcher)
+    public TextParameterService(IState<FeatureTextState> state, IDispatcher dispatcher)
     {
         _state = state;
         _dispatcher = dispatcher;

@@ -1,11 +1,11 @@
-@inject TextService TextService
+@inject TextParameterService TextParameterService
 @using Noxy.NET.EntityManagement.Domain.Models
 @inherits BaseInputGroup<(string Column, ListSortDirection Direction)?>
 
 <InputGroupSelect OptionList="_cacheSet" Name="@Name" DisplayName="@DisplayName" Description="@Description" InputAttributes="InputAttributes" @bind-Value:get="GetSortValue()" @bind-Value:set="SetSortValue">
     @if (context != null)
     {
-        @($"{TextService.Get(context.Label)} {(context.Direction == ListSortDirection.Ascending ? "⇡" : "⇣")}")
+        @($"{TextParameterService.Get(context.Label)} {(context.Direction == ListSortDirection.Ascending ? "⇡" : "⇣")}")
     }
     else
     {

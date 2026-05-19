@@ -1,6 +1,7 @@
 @inject IState<FeatureSchemaState> StateSchema
 @inject IDispatcher Dispatcher
-@inject TextService TextService
+@inject TextParameterService TextParameterService
+@inject SystemParameterService SystemParameterService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -15,12 +16,16 @@
             @if (!Schema.IsActive)
             {
                 <Button Status="StatusEnum.Success" @onclick="OnButtonActivateClick">Activate</Button>
-            }
 
-            @if (Schema.TimeActivated == null)
-            {
-                <Button Status="StatusEnum.Warning" @onclick="ButtonEditClickerHandler">Edit</Button>
-                <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveEditEntity, ParameterSystemConstants.SchemaDeactivatedEditEntity))
+                {
+                    <Button Status="StatusEnum.Warning" @onclick="ButtonEditClickerHandler">Edit</Button>
+                }
+
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveDeleteEntity, ParameterSystemConstants.SchemaDeactivatedDeleteEntity))
+                {
+                    <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
+                }
             }
 
             <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
@@ -56,11 +61,11 @@
         <FormSchemaUpdate Schema="Schema" OnSubmit="FormEditSubmitHandler">
             <div class="action-list">
                 <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                    @TextService.Get(ParameterTextConstants.ButtonUpdate)
+                    @TextParameterService.Get(ParameterTextConstants.ButtonUpdate)
                 </Button>
 
                 <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
-                    @TextService.Get(ParameterTextConstants.ButtonCancel)
+                    @TextParameterService.Get(ParameterTextConstants.ButtonCancel)
                 </Button>
             </div>
         </FormSchemaUpdate>

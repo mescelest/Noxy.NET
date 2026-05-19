@@ -1,5 +1,5 @@
 ﻿@inject UserAuthenticationStateProvider AuthProvider
-@inject TextService TextService
+@inject TextParameterService TextParameterService
 @layout AuthenticationLayout
 @inherits LayoutComponent
 
@@ -8,13 +8,13 @@
         <div class="logo">
             <NavLink href="/">
                 <h1>
-                    @TextService.Get(ParameterTextConstants.Title)
+                    @TextParameterService.Get(ParameterTextConstants.Title)
                 </h1>
             </NavLink>
         </div>
         <div class="navigation">
             <NavLink href="/Schema">
-                @TextService.Get(ParameterTextConstants.LinkNavigationSchema)
+                @TextParameterService.Get(ParameterTextConstants.LinkNavigationSchema)
             </NavLink>
 
             @foreach (ViewModelSchemaContext item in _listContext)
@@ -26,7 +26,7 @@
             @if (AuthProvider.Identity != null)
             {
                 <Button @onclick="SignOut">
-                    @TextService.Get(ParameterTextConstants.ButtonSignOut)
+                    @TextParameterService.Get(ParameterTextConstants.ButtonSignOut)
                 </Button>
             }
         </div>

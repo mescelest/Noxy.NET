@@ -1,6 +1,6 @@
 @inject IState<FeatureSchemaElementState> StateElement
 @inject IState<FeatureSchemaElementHasPropertyState> StateElementHasProperty
-@inject TextService TextService
+@inject TextParameterService TextParameterService
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
@@ -13,10 +13,10 @@
             <Table class="grid" List="List">
                 <TableHeader>
                     <strong></strong>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelName)</strong>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelNote)</strong>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelName)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
                 </TableHeader>
                 <TableRow>
                     <span>

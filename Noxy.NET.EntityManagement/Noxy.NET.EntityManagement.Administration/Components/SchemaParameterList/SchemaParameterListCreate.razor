@@ -1,14 +1,14 @@
 @inject IState<FeatureSchemaState> State
 @inject IDispatcher Dispatcher
-@inject TextService TextService
+@inject TextParameterService TextParameterService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Create new parameter</DynamicHTMLTag>
 
-    <InputGroupSelect OptionList="_setType" DisplayName="@TextService.Get(ParameterTextConstants.LabelFormParameterType)" Description="@TextService.Get(ParameterTextConstants.HelpFormParameterType)"
+    <InputGroupSelect OptionList="_setType" DisplayName="@TextParameterService.Get(ParameterTextConstants.LabelFormParameterType)" Description="@TextParameterService.Get(ParameterTextConstants.HelpFormParameterType)"
                       Name="@nameof(_valueType)" @bind-Value="_valueType">
-        <span>@TextService.Get(context)</span>
+        <span>@TextParameterService.Get(context)</span>
     </InputGroupSelect>
 
     @switch (_valueType)
@@ -75,7 +75,7 @@
         return
             @<ButtonList Alignment="ButtonListAlignmentEnum.Right">
                 <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
-                    @TextService.Get(ParameterTextConstants.ButtonCreate)
+                    @TextParameterService.Get(ParameterTextConstants.ButtonCreate)
                 </Button>
             </ButtonList>;
     }

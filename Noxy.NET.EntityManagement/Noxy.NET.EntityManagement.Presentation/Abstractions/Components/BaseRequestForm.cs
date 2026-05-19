@@ -5,12 +5,12 @@ using Noxy.NET.EntityManagement.Presentation.Features;
 using Noxy.NET.EntityManagement.Presentation.Services;
 using Noxy.NET.UI.Abstractions;
 
-namespace Noxy.NET.EntityManagement.Presentation.Abstractions;
+namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
 public abstract class BaseRequestForm<TRequest, TResponse> : BaseForm<TRequest>, IDisposable where TRequest : BaseRequest<TResponse>
 {
     [Inject]
-    protected TextService TextService { get; set; } = null!;
+    protected TextParameterService TextParameterService { get; set; } = null!;
 
     [Inject]
     protected IState<FeatureTextState> TextState { get; set; } = null!;
@@ -34,11 +34,11 @@ public abstract class BaseRequestForm<TRequest, TResponse> : BaseForm<TRequest>,
 
     protected string GetDisplayName(string property)
     {
-        return TextService.Get(Context.GetFieldDisplayName(property), GetComponentName());
+        return TextParameterService.Get(Context.GetFieldDisplayName(property), GetComponentName());
     }
 
     protected string GetDescription(string property)
     {
-        return TextService.Get(Context.GetFieldDescription(property), GetComponentName());
+        return TextParameterService.Get(Context.GetFieldDescription(property), GetComponentName());
     }
 }

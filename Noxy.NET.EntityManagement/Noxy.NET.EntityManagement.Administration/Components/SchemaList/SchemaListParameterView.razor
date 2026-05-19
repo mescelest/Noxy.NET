@@ -1,5 +1,5 @@
 @inject IState<FeatureSchemaParameterState> StateContext
-@inject TextService TextService
+@inject TextParameterService TextParameterService
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
@@ -16,19 +16,19 @@
         <Content>
             <Table class="grid" List="List">
                 <TableHeader>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelName)</strong>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelNote)</strong>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelTitle)</strong>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelDescription)</strong>
-                    <strong>@TextService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelName)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelTitle)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelDescription)</strong>
+                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
                 </TableHeader>
                 <TableRow>
                     <span>@context.SchemaIdentifier</span>
                     <span>@context.Name</span>
                     <span>@context.Note</span>
-                    <span>@(context.IsApprovalRequired ? TextService.Get(ParameterTextConstants.ValueYes) : TextService.Get(ParameterTextConstants.ValueNo))</span>
-                    <span>@(context.IsSystemDefined ? TextService.Get(ParameterTextConstants.ValueYes) : TextService.Get(ParameterTextConstants.ValueNo))</span>
+                    <span>@(context.IsApprovalRequired ? TextParameterService.Get(ParameterTextConstants.ValueYes) : TextParameterService.Get(ParameterTextConstants.ValueNo))</span>
+                    <span>@(context.IsSystemDefined ? TextParameterService.Get(ParameterTextConstants.ValueYes) : TextParameterService.Get(ParameterTextConstants.ValueNo))</span>
                     <span>@context.TimeCreated</span>
                 </TableRow>
             </Table>

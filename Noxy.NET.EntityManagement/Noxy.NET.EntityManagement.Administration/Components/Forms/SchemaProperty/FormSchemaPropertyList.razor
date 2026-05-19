@@ -7,7 +7,7 @@
 
         <InputGroupCheckboxSet OptionList="ListTypeKey" DisplayName="@GetDisplayName(nameof(Model.PropertyType))" Description="@GetDescription(nameof(Model.PropertyType))"
                                @bind-Value:get="GetPropertyType()" @bind-Value:set="SetPropertyType">
-            <span>@TextService.Get(_collectionType[context.Option])</span>
+            <span>@TextParameterService.Get(_collectionType[context.Option])</span>
         </InputGroupCheckboxSet>
 
         <InputGroupSelectSorting OptionSet="_sortOptionSet" Name="@nameof(Model.Sorting)" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>

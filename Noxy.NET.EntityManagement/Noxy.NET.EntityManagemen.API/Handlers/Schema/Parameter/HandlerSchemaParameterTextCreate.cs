@@ -15,7 +15,7 @@ public class HandlerSchemaParameterTextCreate(IUnitOfWorkFactory serviceUoWFacto
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         EntitySchema schema = await uow.Schema.GetSchemaByID(command.SchemaID ?? await uow.Schema.GetCurrentSchemaID());
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveAddElement, ParameterSystemConstants.SchemaDeactivatedAddElement);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveAddParameter, ParameterSystemConstants.SchemaDeactivatedAddParameter);
 
         EntitySchemaParameterText result = await uow.Schema.CreateSchemaParameterText(new()
         {

@@ -1,4 +1,4 @@
-@inherits BaseRequestForm<RequestAuthenticationSignIn, ResponseAuthenticationSignIn>
+@inherits Noxy.NET.EntityManagement.Presentation.Abstractions.Components.BaseRequestForm<RequestAuthenticationSignIn, ResponseAuthenticationSignIn>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestAuthenticationSignIn" Context="Context" OnSubmit="ForwardSubmit">

@@ -10,7 +10,7 @@
 
         <InputGroupSelect OptionList="ListType" DisplayName="@GetDisplayName(nameof(Model.Type))" Description="@GetDescription(nameof(Model.Type))"
                           Name="@nameof(Model.Type)" @bind-Value="Model.Type">
-            <span>@TextService.Get(_collectionType[context])</span>
+            <span>@TextParameterService.Get(_collectionType[context])</span>
         </InputGroupSelect>
 
         <InputGroupInteger DisplayName="@GetDisplayName(nameof(Model.Weight))" Description="@GetDescription(nameof(Model.Weight))" @bind-Value="Model.Weight"/>

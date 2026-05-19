@@ -2,7 +2,7 @@ using System.Reflection;
 using Fluxor;
 using Noxy.NET.UI.Abstractions;
 
-namespace Noxy.NET.EntityManagement.Presentation.Abstractions;
+namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
 public abstract class FluxorElementComponent : ElementComponent, IDisposable
 {

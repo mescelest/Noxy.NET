@@ -7,17 +7,17 @@
 
         <InputGroupSelect OptionList="IsSystemDefinedKeys" DisplayName="@GetDisplayName(nameof(Model.IsSystemDefined))" Description="@GetDescription(nameof(Model.IsSystemDefined))"
                           Name="@nameof(Model.IsSystemDefined)" @bind-Value:get="ToTriState(Model.IsSystemDefined)" @bind-Value:set="SetIsSystemDefined">
-            <span>@TextService.Get(CollectionIsSystemDefined[context])</span>
+            <span>@TextParameterService.Get(CollectionIsSystemDefined[context])</span>
         </InputGroupSelect>
 
         <InputGroupSelect OptionList="IsApprovalRequiredKeys" DisplayName="@GetDisplayName(nameof(Model.IsApprovalRequired))" Description="@GetDescription(nameof(Model.IsApprovalRequired))"
                           Name="@nameof(Model.IsApprovalRequired)" @bind-Value:get="ToTriState(Model.IsApprovalRequired)" @bind-Value:set="SetIsApprovalRequired">
-            <span>@TextService.Get(CollectionIsApprovalRequired[context])</span>
+            <span>@TextParameterService.Get(CollectionIsApprovalRequired[context])</span>
         </InputGroupSelect>
 
         <InputGroupCheckboxSet OptionList="ParameterTypeKeys" DisplayName="@GetDisplayName(nameof(Model.ParameterType))" Description="@GetDescription(nameof(Model.ParameterType))"
                                @bind-Value:get="Model.ParameterType" @bind-Value:set="SetParameterType">
-            <span>@TextService.Get(CollectionType[context.Option])</span>
+            <span>@TextParameterService.Get(CollectionType[context.Option])</span>
         </InputGroupCheckboxSet>
 
         <InputGroupSelectSorting OptionSet="SortOptionSet" Name="@nameof(Model.Sorting)" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>

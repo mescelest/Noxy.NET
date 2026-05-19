@@ -1,6 +1,7 @@
 @inject IState<FeatureSchemaPropertyState> StateSchemaProperty
 @inject IDispatcher Dispatcher
-@inject TextService TextService
+@inject TextParameterService TextParameterService
+@inject SystemParameterService SystemParameterService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -12,50 +13,59 @@
             </NavLink>
         </div>
 
-        <ButtonList Alignment="ButtonListAlignmentEnum.Right">
-            @if (Schema.TimeActivated == null)
-            {
-                <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
-                <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
-                <Button Status="StatusEnum.Warning" @onclick="ButtonEditClickerHandler">Edit</Button>
-            }
-        </ButtonList>
+        @if (!Schema.IsActive)
+        {
+            <ButtonList Alignment="ButtonListAlignmentEnum.Right">
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveDeleteProperty, ParameterSystemConstants.SchemaDeactivatedDeleteProperty))
+                {
+                    <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
+                }
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveCloneProperty, ParameterSystemConstants.SchemaDeactivatedCloneProperty))
+                {
+                    <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
+                }
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveEditProperty, ParameterSystemConstants.SchemaDeactivatedEditProperty))
+                {
+                    <Button Status="StatusEnum.Warning" @onclick="ButtonEditClickerHandler">Edit</Button>
+                }
+            </ButtonList>
+        }
 
     </div>
 
     @if (!_isEditMode)
     {
         <div>
-            <strong>@TextService.Get(ParameterTextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
             @SchemaProperty.SchemaIdentifier
         </div>
         <div>
-            <strong>@TextService.Get(ParameterTextConstants.LabelName, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelName, GetComponentName()):</strong>
             @SchemaProperty.Name
         </div>
         <div>
-            <strong>@TextService.Get(ParameterTextConstants.LabelNote, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote, GetComponentName()):</strong>
             @SchemaProperty.Note
         </div>
 
         @if (SchemaProperty is EntitySchemaPropertyDateTime propertyDateTime)
         {
             <div>
-                <strong>@TextService.Get(ParameterTextConstants.LabelPropertyDateTime, GetComponentName()):</strong>
+                <strong>@TextParameterService.Get(ParameterTextConstants.LabelPropertyDateTime, GetComponentName()):</strong>
                 @propertyDateTime.Type
             </div>
         }
 
         <div>
-            <strong>@TextService.Get(ParameterTextConstants.LabelTitle, GetComponentName())</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTitle, GetComponentName())</strong>
             @SchemaProperty.TitleParameterText?.Name
         </div>
         <div>
-            <strong>@TextService.Get(ParameterTextConstants.LabelDescription, GetComponentName())</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelDescription, GetComponentName())</strong>
             @SchemaProperty.DescriptionParameterText?.Name
         </div>
         <div>
-            <strong>@TextService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName()):</strong>
             @SchemaProperty.TimeCreated
         </div>
     }
@@ -180,11 +190,11 @@
         return
             @<div class="action-list">
                 <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                    @TextService.Get(ParameterTextConstants.ButtonUpdate, GetComponentName())
+                    @TextParameterService.Get(ParameterTextConstants.ButtonUpdate, GetComponentName())
                 </Button>
 
                 <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
-                    @TextService.Get(ParameterTextConstants.ButtonCancel, GetComponentName())
+                    @TextParameterService.Get(ParameterTextConstants.ButtonCancel, GetComponentName())
                 </Button>
             </div>;
     }

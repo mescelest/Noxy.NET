@@ -41,6 +41,18 @@ public class DataController(IMediator mediator) : ControllerBase
         return await mediator.Send(new CommandDataParameterDelete(id));
     }
 
+    [HttpPost("Parameter/Style/Resolve")]
+    public async Task<ActionResult<ResponseDataParameterStyleResolveList>> ParameterStyleResolve([FromBody] RequestDataParameterStyleResolveList request)
+    {
+        return await mediator.Send(new QueryDataParameterStyleResolveList(request));
+    }
+
+    [HttpPost("Parameter/System/Resolve")]
+    public async Task<ActionResult<ResponseDataParameterSystemResolveList>> ParameterSystemResolve([FromBody] RequestDataParameterSystemResolveList request)
+    {
+        return await mediator.Send(new QueryDataParameterSystemResolveList(request));
+    }
+
     [HttpPost("Parameter/Text/Resolve")]
     public async Task<ActionResult<ResponseDataParameterTextResolveList>> ParameterTextResolve([FromBody] RequestDataParameterTextResolveList request)
     {

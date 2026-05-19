@@ -30,9 +30,10 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient<APIHttpClient>(client => client.BaseAddress = new(url));
 
-        services.AddScoped<TextService>();
         services.AddScoped<PageLoadingService>();
         services.AddScoped<SystemConstantService>();
+        services.AddScoped<SystemParameterService>();
+        services.AddScoped<TextParameterService>();
         services.AddScoped<UserAuthenticationService>();
         services.AddScoped<UserAuthenticationStateProvider>();
         services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredService<UserAuthenticationStateProvider>());

@@ -18,7 +18,7 @@ public class HandlerSchemaPropertyStringUpdate(IUnitOfWorkFactory serviceUoWFact
 
         EntitySchemaProperty.Discriminator discriminator = await uow.Schema.GetSchemaPropertyByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditParameter, ParameterSystemConstants.SchemaDeactivatedEditParameter);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditProperty, ParameterSystemConstants.SchemaDeactivatedEditProperty);
         if (discriminator.GetValue() is not EntitySchemaPropertyString entity) throw new InvalidOperationException("Property is not of type String");
 
         entity.SchemaIdentifier = command.SchemaIdentifier;

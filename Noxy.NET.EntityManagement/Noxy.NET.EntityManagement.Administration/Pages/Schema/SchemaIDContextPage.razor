@@ -1,6 +1,7 @@
 ﻿@page "/Schema/{ID:guid}/Context"
 @inject IState<FeatureSchemaState> StateSchema
 @inject IDispatcher Dispatcher
+@inject SystemParameterService SystemParameterService
 @inherits FluxorPageComponent
 
 <PageTitle>Context | Administration</PageTitle>
@@ -19,7 +20,7 @@
                     </SchemaContextListView>
                 </Content>
                 <Right>
-                    @if (Schema.TimeActivated == null)
+                    @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveAddContext, ParameterSystemConstants.SchemaDeactivatedAddContext))
                     {
                         <SchemaContextListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     }

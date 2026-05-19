@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace Noxy.NET.EntityManagement.Presentation.Abstractions;
+namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
 public abstract class FluxorInputGroupComponent<TValue> : FluxorInputElementComponent<TValue>
 {

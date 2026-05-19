@@ -1,5 +1,5 @@
 ﻿@inject UserAuthenticationStateProvider AuthProvider
-@inject TextService TextService
+@inject TextParameterService TextParameterService
 @layout AuthenticationLayout
 @inherits LayoutComponent
 
@@ -7,22 +7,22 @@
     <div class="header">
         <div class="left">
             <NavLink href="/">
-                @TextService.Get(ParameterTextConstants.Title)
+                @TextParameterService.Get(ParameterTextConstants.Title)
             </NavLink>
         </div>
 
         <div class="center">
             <NavLink href="/schema">
-                @TextService.Get(ParameterTextConstants.LinkNavigationSchema)
+                @TextParameterService.Get(ParameterTextConstants.LinkNavigationSchema)
             </NavLink>
             <NavLink href="/parameter">
-                @TextService.Get(ParameterTextConstants.LinkNavigationParameter)
+                @TextParameterService.Get(ParameterTextConstants.LinkNavigationParameter)
             </NavLink>
         </div>
 
         <div class="right">
             <Button @onclick="SignOut">
-                @TextService.Get(ParameterTextConstants.ButtonSignOut)
+                @TextParameterService.Get(ParameterTextConstants.ButtonSignOut)
             </Button>
         </div>
     </div>

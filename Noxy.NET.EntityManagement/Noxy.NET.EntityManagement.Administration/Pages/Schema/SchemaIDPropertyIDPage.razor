@@ -2,6 +2,7 @@
 @inject IState<FeatureSchemaState> StateSchema
 @inject IState<FeatureSchemaPropertyState> StateSchemaProperty
 @inject IDispatcher Dispatcher
+@inject SystemParameterService SystemParameterService
 @inherits FluxorPageComponent
 
 <PageTitle>@(SchemaProperty?.Name ?? "Property") | Administration</PageTitle>
@@ -17,7 +18,7 @@
                     <SchemaPropertyEntityView Schema="Schema" SchemaProperty="SchemaProperty" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
                 </Content>
                 <Right>
-                    @if (Schema.TimeActivated == null)
+                    @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveEditProperty, ParameterSystemConstants.SchemaDeactivatedEditProperty))
                     {
                         <SchemaPropertyEntityUpdate SchemaProperty="SchemaProperty" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     }

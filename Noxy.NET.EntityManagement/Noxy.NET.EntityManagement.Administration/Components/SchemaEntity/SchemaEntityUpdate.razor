@@ -1,15 +1,15 @@
 @inject IState<FeatureSchemaState> State
 @inject IDispatcher Dispatcher
-@inject TextService TextService
+@inject TextParameterService TextParameterService
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@TextService.Get(ParameterTextConstants.HeaderFormUpdateSchema)</DynamicHTMLTag>
+    <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">@TextParameterService.Get(ParameterTextConstants.HeaderFormUpdateSchema)</DynamicHTMLTag>
 
     <FormSchemaUpdate Schema="Schema" OnSubmit="Submit">
         <ButtonList Alignment="ButtonListAlignmentEnum.Right">
             <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
-                @TextService.Get(ParameterTextConstants.ButtonUpdate)
+                @TextParameterService.Get(ParameterTextConstants.ButtonUpdate)
             </Button>
         </ButtonList>
     </FormSchemaUpdate>

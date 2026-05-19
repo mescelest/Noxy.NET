@@ -8,11 +8,11 @@ using Noxy.NET.EntityManagement.Presentation.Services;
 namespace Noxy.NET.EntityManagement.Presentation.Features;
 
 [FeatureState]
-public record FeatureSystemState : BaseFeatureParameterState;
+public record FeatureParameterSystemState : BaseFeatureParameterState;
 
-public class FeatureSystemReducers : ParameterReducersBase<FeatureSystemState>;
+public class FeatureParameterSystemReducers : ParameterReducersBase<FeatureParameterSystemState>;
 
-public class FeatureSystemEffects(IState<FeatureSystemState> state, APIHttpClient http, IDebouncerService debouncer) : ParameterEffectsBase<FeatureSystemState>(state, debouncer)
+public class FeatureParameterSystemEffects(IState<FeatureParameterSystemState> state, APIHttpClient http, IDebouncerService debouncer) : ParameterEffectsBase<FeatureParameterSystemState>(state, debouncer)
 {
     protected override async Task<Dictionary<string, string?>> Resolve(IReadOnlyCollection<string> keys)
     {

@@ -1,5 +1,5 @@
 @inject IState<FeatureSchemaParameterDataParameterListState> StateData
-@inject TextService TextService
+@inject TextParameterService TextParameterService
 @inject APIHttpClient APIHttpClient
 @inject SystemConstantService SystemConstantService
 @inject IDispatcher Dispatcher
@@ -17,10 +17,10 @@
     <div class="table">
         <div class="header row">
             <b></b>
-            <b class="column left">@TextService.Get(ParameterTextConstants.LabelValue, GetComponentName())</b>
-            <b class="column right">@TextService.Get(ParameterTextConstants.LabelTimeEffective, GetComponentName())</b>
-            <b class="column right">@TextService.Get(ParameterTextConstants.LabelTimeApproved, GetComponentName())</b>
-            <b class="column right">@TextService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName())</b>
+            <b class="column left">@TextParameterService.Get(ParameterTextConstants.LabelValue, GetComponentName())</b>
+            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeEffective, GetComponentName())</b>
+            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeApproved, GetComponentName())</b>
+            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName())</b>
         </div>
 
         <div class="body">

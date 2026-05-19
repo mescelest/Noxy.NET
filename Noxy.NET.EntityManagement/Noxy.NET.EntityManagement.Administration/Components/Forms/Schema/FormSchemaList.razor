@@ -7,7 +7,7 @@
 
         <InputGroupSelect OptionList="IsActivatedKeys" DisplayName="@GetDisplayName(nameof(Model.IsActivated))" Description="@GetDescription(nameof(Model.IsActivated))"
                           Name="@nameof(Model.IsActivated)" @bind-Value:get="Model.IsActivated.ToTriState()" @bind-Value:set="SetIsActivated">
-            <span>@TextService.Get(CollectionIsSystemDefined[context])</span>
+            <span>@TextParameterService.Get(CollectionIsSystemDefined[context])</span>
         </InputGroupSelect>
 
         <InputGroupSelectSorting OptionSet="SortOptionSet" DisplayName="@GetDisplayName(nameof(Model.Sorting))" Description="@GetDescription(nameof(Model.Sorting))" @bind-Value="@Model.Sorting"/>

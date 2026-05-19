@@ -1,4 +1,4 @@
-namespace Noxy.NET.EntityManagement.Presentation.Abstractions;
+namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
 public abstract class FluxorPageComponent : FluxorElementComponent
 {
