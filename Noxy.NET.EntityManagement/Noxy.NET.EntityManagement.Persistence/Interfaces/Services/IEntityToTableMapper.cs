@@ -26,11 +26,11 @@ public interface IEntityToTableMapper
     #region -- Data --
 
     TableDataElement Map(EntityDataElement entity);
-    TableDataParameter Map(EntityDataParameter.Discriminator entity);
+    TableDataParameter Map(EntityDataParameter entity);
     TableDataParameterStyle Map(EntityDataParameterStyle entity);
     TableDataParameterSystem Map(EntityDataParameterSystem entity);
     TableDataParameterText Map(EntityDataParameterText entity);
-    TableDataProperty Map(EntityDataProperty.Discriminator entity);
+    TableDataProperty Map(EntityDataProperty entity);
     TableDataPropertyBoolean Map(EntityDataPropertyBoolean entity);
     TableDataPropertyDateTime Map(EntityDataPropertyDateTime entity);
     TableDataPropertyString Map(EntityDataPropertyString entity);

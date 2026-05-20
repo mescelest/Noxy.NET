@@ -72,20 +72,9 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TableDataProperty Map(EntityDataProperty.Discriminator entity)
+    public TableDataParameter Map(EntityDataParameter entity)
     {
-        return entity.GetValue() switch
-        {
-            EntityDataPropertyBoolean value => Map(value),
-            EntityDataPropertyDateTime value => Map(value),
-            EntityDataPropertyString value => Map(value),
-            _ => throw new ArgumentOutOfRangeException(nameof(entity))
-        };
-    }
-
-    public TableDataParameter Map(EntityDataParameter.Discriminator entity)
-    {
-        return entity.GetValue() switch
+        return entity switch
         {
             EntityDataParameterStyle value => Map(value),
             EntityDataParameterSystem value => Map(value),
@@ -134,6 +123,17 @@ public class EntityToTableMapper : IEntityToTableMapper
             TimeEffective = entity.TimeEffective,
             TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
             TimeUpdated = entity.TimeUpdated,
+        };
+    }
+
+    public TableDataProperty Map(EntityDataProperty entity)
+    {
+        return entity switch
+        {
+            EntityDataPropertyBoolean value => Map(value),
+            EntityDataPropertyDateTime value => Map(value),
+            EntityDataPropertyString value => Map(value),
+            _ => throw new ArgumentOutOfRangeException(nameof(entity))
         };
     }
 

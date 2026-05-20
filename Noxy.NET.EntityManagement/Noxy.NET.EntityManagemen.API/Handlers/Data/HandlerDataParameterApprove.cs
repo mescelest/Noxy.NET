@@ -4,19 +4,21 @@ using Noxy.NET.EntityManagement.Domain.Responses.Data;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Data;
 
-public class HandlerDataParameterDelete(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandDataParameterDelete, ResponseDataParameterDelete>
+public class HandlerDataParameterApprove(IUnitOfWorkFactory serviceUoWFactory) : ICommandHandler<CommandDataParameterApprove, ResponseDataParameterApprove>
 {
-    public async ValueTask<ResponseDataParameterDelete> Handle(CommandDataParameterDelete request, CancellationToken cancellationToken)
+    public async ValueTask<ResponseDataParameterApprove> Handle(CommandDataParameterApprove request, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         EntityDataParameter.Discriminator discriminator = await uow.Data.GetParameterByID(request.ID);
         EntityDataParameter entity = discriminator.GetValue();
-        if (entity.TimeEffective <= DateTime.UtcNow) throw new InvalidOperationException("Cannot delete parameter that is already effective.");
+        if (entity.TimeApproved.HasValue) return new(entity.TimeApproved.Value);
 
-        uow.Data.RemoveParameter(entity);
+        entity.TimeApproved = DateTime.UtcNow;
+        uow.Data.UpdateParameter(entity);
+
         await uow.Commit();
 
-        return new() { ID = entity.ID };
+        return new(entity.TimeApproved.Value);
     }
 }
