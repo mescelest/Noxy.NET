@@ -16,10 +16,10 @@ public class HandlerSchemaPropertyDecimalUpdate(IUnitOfWorkFactory serviceUoWFac
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaProperty.Discriminator discriminator = await uow.Schema.GetSchemaPropertyByID(command.ID);
+        EntitySchemaProperty discriminator = await uow.Schema.GetSchemaPropertyByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
         serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditProperty, ParameterSystemConstants.SchemaDeactivatedEditProperty);
-        if (discriminator.GetValue() is not EntitySchemaPropertyDecimal entity) throw new InvalidOperationException("Property is not of type Decimal");
+        if (discriminator is not EntitySchemaPropertyDecimal entity) throw new InvalidOperationException("Property is not of type Decimal");
 
         entity.SchemaIdentifier = command.SchemaIdentifier;
         entity.Name = command.Name;

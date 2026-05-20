@@ -15,10 +15,10 @@ public class HandlerSchemaParameterSystemUpdate(IUnitOfWorkFactory serviceUoWFac
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaParameter.Discriminator discriminator = await uow.Schema.GetSchemaParameterByID(command.ID);
+        EntitySchemaParameter discriminator = await uow.Schema.GetSchemaParameterByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
         serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditParameter, ParameterSystemConstants.SchemaDeactivatedEditParameter);
-        if (discriminator.GetValue() is not EntitySchemaParameterSystem entity) throw new InvalidOperationException("Parameter is not of type System");
+        if (discriminator is not EntitySchemaParameterSystem entity) throw new InvalidOperationException("Parameter is not of type System");
 
         entity.SchemaIdentifier = command.SchemaIdentifier;
         entity.Name = command.Name;

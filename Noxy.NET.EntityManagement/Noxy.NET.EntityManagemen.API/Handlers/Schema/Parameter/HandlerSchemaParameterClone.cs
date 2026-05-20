@@ -16,16 +16,15 @@ public class HandlerSchemaParameterClone(IUnitOfWorkFactory serviceUoWFactory, I
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaParameter.Discriminator entity = await uow.Schema.GetSchemaParameterByID(command.ID);
+        EntitySchemaParameter entity = await uow.Schema.GetSchemaParameterByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(entity.SchemaID);
         serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveCloneParameter, ParameterSystemConstants.SchemaDeactivatedCloneParameter);
 
-        EntitySchemaParameter value = entity.GetValue();
-        value.ID = BaseEntity.CreateID();
-        value.SchemaIdentifier = BaseEntity.CreateTemporarySchemaIdentifier();
-        value.TimeCreated = DateTime.UtcNow;
+        entity.ID = BaseEntity.CreateID();
+        entity.SchemaIdentifier = BaseEntity.CreateTemporarySchemaIdentifier();
+        entity.TimeCreated = DateTime.UtcNow;
 
-        EntitySchemaParameter result = value switch
+        EntitySchemaParameter result = entity switch
         {
             EntitySchemaParameterStyle v => await uow.Schema.CreateSchemaParameterStyle(v),
             EntitySchemaParameterSystem v => await uow.Schema.CreateSchemaParameterSystem(v),

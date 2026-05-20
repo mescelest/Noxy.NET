@@ -322,7 +322,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     #region -- SchemaParameter --
 
-    public async Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id)
+    public async Task<EntitySchemaParameter> GetSchemaParameterByID(Guid id)
     {
         TableSchemaParameter result = await Context.SchemaParameter
             .AsNoTracking()
@@ -330,7 +330,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return MapperT2E.Map(result);
     }
 
-    public async Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByIdentifier(Guid schemaID, string identifier)
+    public async Task<EntitySchemaParameter> GetSchemaParameterByIdentifier(Guid schemaID, string identifier)
     {
         TableSchemaParameter result = await Context.SchemaParameter
             .AsNoTracking()
@@ -338,7 +338,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return MapperT2E.Map(result);
     }
 
-    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
+    public async Task<List<EntitySchemaParameter>> GetSchemaParameterList(FilterSchemaParameterList filter)
     {
         IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
 
@@ -428,7 +428,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
 
     #region -- SchemaProperty --
 
-    public async Task<EntitySchemaProperty.Discriminator> GetSchemaPropertyByID(Guid id)
+    public async Task<EntitySchemaProperty> GetSchemaPropertyByID(Guid id)
     {
         TableSchemaProperty result = await Context.SchemaProperty
             .AsNoTracking()
@@ -438,7 +438,7 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return MapperT2E.Map(result);
     }
 
-    public async Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyList(FilterSchemaPropertyList filter)
+    public async Task<List<EntitySchemaProperty>> GetSchemaPropertyList(FilterSchemaPropertyList filter)
     {
         IQueryable<TableSchemaProperty> query = Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);
 
@@ -574,13 +574,13 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return [.. result.Select(MapperT2E.Map)];
     }
 
-    public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id)
+    public async Task<List<EntitySchemaParameter>> GetSchemaParameterListBySchemaID(Guid id)
     {
         List<TableSchemaParameter> result = await Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         return [.. result.Select(MapperT2E.Map)];
     }
 
-    public async Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id)
+    public async Task<List<EntitySchemaProperty>> GetSchemaPropertyListBySchemaID(Guid id)
     {
         List<TableSchemaProperty> result = await Context.SchemaProperty.AsNoTracking().Where(x => x.SchemaID == id).ToListAsync();
         return [.. result.Select(MapperT2E.Map)];

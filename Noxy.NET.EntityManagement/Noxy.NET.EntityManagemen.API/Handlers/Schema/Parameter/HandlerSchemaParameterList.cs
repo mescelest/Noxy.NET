@@ -13,7 +13,7 @@ public class HandlerSchemaParameterList(IUnitOfWorkFactory serviceUoWFactory) : 
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        List<EntitySchemaParameter.Discriminator> result = await uow.Schema.GetSchemaParameterList(new()
+        List<EntitySchemaParameter> result = await uow.Schema.GetSchemaParameterList(new()
         {
             SchemaID = query.SchemaID ?? await uow.Schema.GetCurrentSchemaID(),
             Search = query.Search?.ToEscapedSqlLike(),
@@ -24,6 +24,6 @@ public class HandlerSchemaParameterList(IUnitOfWorkFactory serviceUoWFactory) : 
             PageNumber = query.PageNumber ?? 0,
         });
 
-        return new(result);
+        return new(result.Select(x => new EntitySchemaParameter.Discriminator(x)).ToList());
     }
 }

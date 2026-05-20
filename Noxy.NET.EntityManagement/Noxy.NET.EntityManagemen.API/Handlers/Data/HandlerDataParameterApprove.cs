@@ -1,3 +1,5 @@
+using Mediator;
+using Noxy.NET.EntityManagement.API.Commands.Data;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Responses.Data;
@@ -10,8 +12,7 @@ public class HandlerDataParameterApprove(IUnitOfWorkFactory serviceUoWFactory) :
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntityDataParameter.Discriminator discriminator = await uow.Data.GetParameterByID(request.ID);
-        EntityDataParameter entity = discriminator.GetValue();
+        EntityDataParameter entity = await uow.Data.GetParameterByID(request.ID);
         if (entity.TimeApproved.HasValue) return new(entity.TimeApproved.Value);
 
         entity.TimeApproved = DateTime.UtcNow;

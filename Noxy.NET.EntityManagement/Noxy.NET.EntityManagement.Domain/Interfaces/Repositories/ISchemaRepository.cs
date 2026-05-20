@@ -65,9 +65,9 @@ public interface ISchemaRepository
 
     #region -- SchemaParameter --
 
-    Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id);
-    Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByIdentifier(Guid schemaID, string identifier);
-    Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter);
+    Task<EntitySchemaParameter> GetSchemaParameterByID(Guid id);
+    Task<EntitySchemaParameter> GetSchemaParameterByIdentifier(Guid schemaID, string identifier);
+    Task<List<EntitySchemaParameter>> GetSchemaParameterList(FilterSchemaParameterList filter);
     Task<int> GetSchemaParameterCount(FilterSchemaParameterCount filter);
     Task<EntitySchemaParameterStyle> CreateSchemaParameterStyle(EntitySchemaParameterStyle entity);
     Task<EntitySchemaParameterSystem> CreateSchemaParameterSystem(EntitySchemaParameterSystem entity);
@@ -81,8 +81,8 @@ public interface ISchemaRepository
 
     #region -- SchemaProperty --
 
-    Task<EntitySchemaProperty.Discriminator> GetSchemaPropertyByID(Guid id);
-    Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyList(FilterSchemaPropertyList filter);
+    Task<EntitySchemaProperty> GetSchemaPropertyByID(Guid id);
+    Task<List<EntitySchemaProperty>> GetSchemaPropertyList(FilterSchemaPropertyList filter);
     Task<int> GetSchemaPropertyCount(FilterSchemaPropertyCount filter);
     Task<EntitySchemaPropertyBoolean> CreateSchemaPropertyBoolean(EntitySchemaPropertyBoolean entity);
     Task<EntitySchemaPropertyDateTime> CreateSchemaPropertyDateTime(EntitySchemaPropertyDateTime entity);
@@ -102,8 +102,8 @@ public interface ISchemaRepository
 
     Task<List<EntitySchemaContext>> GetSchemaContextListBySchemaID(Guid id);
     Task<List<EntitySchemaElement>> GetSchemaElementListBySchemaID(Guid id);
-    Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterListBySchemaID(Guid id);
-    Task<List<EntitySchemaProperty.Discriminator>> GetSchemaPropertyListBySchemaID(Guid id);
+    Task<List<EntitySchemaParameter>> GetSchemaParameterListBySchemaID(Guid id);
+    Task<List<EntitySchemaProperty>> GetSchemaPropertyListBySchemaID(Guid id);
 
     Task<List<EntitySchemaContextHasElement>> GetSchemaContextHasElementListBySchemaID(Guid id);
     Task<List<EntitySchemaElementHasProperty>> GetSchemaElementHasPropertyListBySchemaID(Guid id);

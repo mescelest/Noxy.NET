@@ -16,10 +16,10 @@ public class HandlerSchemaPropertyBooleanUpdate(IUnitOfWorkFactory serviceUoWFac
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaProperty.Discriminator discriminator = await uow.Schema.GetSchemaPropertyByID(command.ID);
+        EntitySchemaProperty discriminator = await uow.Schema.GetSchemaPropertyByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
         serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditProperty, ParameterSystemConstants.SchemaDeactivatedEditProperty);
-        if (discriminator.GetValue() is not EntitySchemaPropertyBoolean entity) throw new InvalidOperationException("Property is not of type Boolean");
+        if (discriminator is not EntitySchemaPropertyBoolean entity) throw new InvalidOperationException("Property is not of type Boolean");
 
         entity.SchemaIdentifier = command.SchemaIdentifier;
         entity.Name = command.Name;

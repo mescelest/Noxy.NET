@@ -15,11 +15,11 @@ public class HandlerSchemaPropertyDelete(IUnitOfWorkFactory serviceUoWFactory, I
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaProperty.Discriminator entity = await uow.Schema.GetSchemaPropertyByID(command.ID);
+        EntitySchemaProperty entity = await uow.Schema.GetSchemaPropertyByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(entity.SchemaID);
         serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveDeleteProperty, ParameterSystemConstants.SchemaDeactivatedDeleteProperty);
 
-        uow.Schema.DeleteSchemaProperty(entity.GetValue());
+        uow.Schema.DeleteSchemaProperty(entity);
 
         await uow.Commit();
 

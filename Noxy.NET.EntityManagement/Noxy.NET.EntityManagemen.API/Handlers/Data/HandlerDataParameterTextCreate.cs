@@ -16,8 +16,8 @@ public class HandlerDataParameterTextCreate(IUnitOfWorkFactory serviceUoWFactory
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         Guid id = await uow.Schema.GetCurrentSchemaID();
-        EntitySchemaParameter.Discriminator discriminator = await uow.Schema.GetSchemaParameterByIdentifier(id, request.SchemaIdentifier);
-        if (discriminator.GetValue() is not EntitySchemaParameterText schema) throw new InvalidOperationException("SchemaParameter is not of type Text");
+        EntitySchemaParameter discriminator = await uow.Schema.GetSchemaParameterByIdentifier(id, request.SchemaIdentifier);
+        if (discriminator is not EntitySchemaParameterText schema) throw new InvalidOperationException("SchemaParameter is not of type Text");
 
         EntityDataParameterText entity = new()
         {
@@ -30,7 +30,7 @@ public class HandlerDataParameterTextCreate(IUnitOfWorkFactory serviceUoWFactory
 
         await uow.Commit();
 
-        serviceParameter.SetParameter(discriminator, new(result));
+        serviceParameter.AddToCache(result);
 
         return new(result);
     }

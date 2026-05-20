@@ -1,118 +1,190 @@
 using System.Diagnostics.CodeAnalysis;
+using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
-using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
-using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Enums;
 
 namespace Noxy.NET.EntityManagement.Application.Services;
 
-public class ParameterService : IParameterService
+public sealed class ParameterService(IUnitOfWorkFactory uowFactory) : IParameterService
 {
-    private readonly Dictionary<string, ParameterPair> _parameters = new();
+    private readonly record struct ParameterKey(Type Type, string Identifier);
 
-    public void SetParameterCollection(Dictionary<EntitySchemaParameter.Discriminator, EntityDataParameter.Discriminator> collection)
+    private readonly Lock _lock = new();
+    private readonly Dictionary<ParameterKey, List<EntityDataParameter>> _cache = new();
+
+    public async Task Initialize()
     {
-        _parameters.Clear();
-        foreach ((EntitySchemaParameter.Discriminator schema, EntityDataParameter.Discriminator data) in collection)
+        IUnitOfWork uow = await uowFactory.Create();
+        List<EntityDataParameter> list = await uow.Data.GetParameterList();
+
+        lock (_lock)
         {
-            _parameters[schema.SchemaIdentifier] = new(schema, data);
+            _cache.Clear();
+
+            foreach (EntityDataParameter p in list)
+            {
+                ParameterKey key = p switch
+                {
+                    EntityDataParameterStyle => new(typeof(EntityDataParameterStyle), p.SchemaIdentifier),
+                    EntityDataParameterSystem => new(typeof(EntityDataParameterSystem), p.SchemaIdentifier),
+                    EntityDataParameterText => new(typeof(EntityDataParameterText), p.SchemaIdentifier),
+                    _ => throw new InvalidOperationException()
+                };
+
+                if (!_cache.TryGetValue(key, out List<EntityDataParameter>? bucket))
+                {
+                    _cache[key] = bucket = [];
+                }
+
+                bucket.Add(p);
+            }
+
+            foreach (ParameterKey key in _cache.Keys.ToList())
+            {
+                _cache[key] = _cache[key]
+                    .OrderByDescending(x => x.TimeEffective)
+                    .ThenByDescending(x => x.TimeCreated)
+                    .ToList();
+            }
         }
     }
 
-    public void SetParameter(EntitySchemaParameter.Discriminator parameterSchema, EntityDataParameter.Discriminator parameterData)
+    public void AddToCache(EntityDataParameter parameter)
     {
-        _parameters[parameterSchema.SchemaIdentifier] = new(parameterSchema, parameterData);
+        lock (_lock)
+        {
+            ParameterKey key = parameter switch
+            {
+                EntityDataParameterStyle => new(typeof(EntityDataParameterStyle), parameter.SchemaIdentifier),
+                EntityDataParameterSystem => new(typeof(EntityDataParameterSystem), parameter.SchemaIdentifier),
+                EntityDataParameterText => new(typeof(EntityDataParameterText), parameter.SchemaIdentifier),
+                _ => throw new InvalidOperationException()
+            };
+
+            if (!_cache.TryGetValue(key, out List<EntityDataParameter>? list))
+            {
+                _cache[key] = list = [];
+            }
+
+            list.Add(parameter);
+            list.Sort((a, b) =>
+            {
+                int comparison = b.TimeEffective.CompareTo(a.TimeEffective);
+                return comparison != 0 ? comparison : b.TimeCreated.CompareTo(a.TimeCreated);
+            });
+        }
     }
 
-    public bool TryGetParameter(string identifier, [NotNullWhen(true)] out EntityDataParameter.Discriminator? parameter)
+    public void RemoveFromCache(EntityDataParameter parameter)
     {
-        parameter = null;
-        if (!TryResolve(identifier, out _, out EntityDataParameter.Discriminator? data)) return false;
-        parameter = data;
-        return true;
+        lock (_lock)
+        {
+            ParameterKey key = parameter switch
+            {
+                EntityDataParameterStyle => new(typeof(EntityDataParameterStyle), parameter.SchemaIdentifier),
+                EntityDataParameterSystem => new(typeof(EntityDataParameterSystem), parameter.SchemaIdentifier),
+                EntityDataParameterText => new(typeof(EntityDataParameterText), parameter.SchemaIdentifier),
+                _ => throw new InvalidOperationException()
+            };
+            if (!_cache.TryGetValue(key, out List<EntityDataParameter>? list)) return;
+
+            list.Remove(parameter);
+            if (list.Count == 0) _cache.Remove(key);
+        }
     }
 
-    public bool TryGetParameterStyle(string identifier, [NotNullWhen(true)] out EntityDataParameterStyle? parameter) => TryGetTyped(identifier, out parameter);
-    public bool TryGetParameterSystem(string identifier, [NotNullWhen(true)] out EntityDataParameterSystem? parameter) => TryGetTyped(identifier, out parameter);
-    public bool TryGetParameterText(string identifier, [NotNullWhen(true)] out EntityDataParameterText? parameter) => TryGetTyped(identifier, out parameter);
 
-    public bool TryGetParameterStyleValue(string identifier, [NotNullWhen(true)] out string? value)
+    private T? GetEffective<T>(string identifier) where T : EntityDataParameter
+    {
+        ParameterKey key = new(typeof(T), identifier);
+        if (!_cache.TryGetValue(key, out List<EntityDataParameter>? list)) return null;
+
+        DateTime now = DateTime.UtcNow;
+        return list.FirstOrDefault(x => x.TimeApproved != null && x.TimeEffective <= now) as T;
+    }
+
+    public bool TryGetParameterStyle(string identifier, [NotNullWhen(true)] out EntityDataParameterStyle? parameter)
+    {
+        lock (_lock)
+        {
+            parameter = GetEffective<EntityDataParameterStyle>(identifier);
+            return parameter != null;
+        }
+    }
+
+    public bool TryGetParameterSystem(string identifier, [NotNullWhen(true)] out EntityDataParameterSystem? parameter)
+    {
+        lock (_lock)
+        {
+            parameter = GetEffective<EntityDataParameterSystem>(identifier);
+            return parameter != null;
+        }
+    }
+
+    public bool TryGetParameterText(string identifier, [NotNullWhen(true)] out EntityDataParameterText? parameter)
+    {
+        lock (_lock)
+        {
+            parameter = GetEffective<EntityDataParameterText>(identifier);
+            return parameter != null;
+        }
+    }
+
+    public bool TryGetParameterStyleValue(string identifier, [NotNullWhen(true)] out string? value) => TryGetParameterValue<EntityDataParameterStyle>(identifier, out value);
+
+    public bool TryGetParameterSystemValue(string identifier, [NotNullWhen(true)] out string? value) => TryGetParameterValue<EntityDataParameterSystem>(identifier, out value);
+
+    public bool TryGetParameterTextValue(string identifier, [NotNullWhen(true)] out string? value) => TryGetParameterValue<EntityDataParameterText>(identifier, out value);
+
+    public bool TryGetParameterSystemValueBoolean(string identifier, out bool value) => TryGetSystemValue(identifier, ParameterSystemTypeEnum.Boolean, out value);
+
+    public bool TryGetParameterSystemValueInt(string identifier, out int value) => TryGetSystemValue(identifier, ParameterSystemTypeEnum.Integer, out value);
+
+    public bool TryGetParameterSystemValueDecimal(string identifier, out decimal value) => TryGetSystemValue(identifier, ParameterSystemTypeEnum.Decimal, out value);
+
+    public bool TryGetParameterSystemValueGuid(string identifier, out Guid value) => TryGetSystemValue(identifier, ParameterSystemTypeEnum.Guid, out value);
+
+    public bool TryGetParameterSystemValueDateTime(string identifier, out DateTime value) => TryGetSystemValue(identifier, ParameterSystemTypeEnum.DateTime, out value);
+
+    public bool TryGetParameterSystemValueString(string identifier, out string? value) => TryGetSystemValue(identifier, ParameterSystemTypeEnum.String, out value);
+
+    private bool TryGetParameterValue<TParam>(string identifier, [NotNullWhen(true)] out string? value) where TParam : EntityDataParameter
     {
         value = null;
 
-        if (!TryGetParameterStyle(identifier, out EntityDataParameterStyle? style))
-            return false;
+        lock (_lock)
+        {
+            TParam? p = GetEffective<TParam>(identifier);
+            if (p == null) return false;
 
-        value = style.Value;
-        return true;
+            value = p.Value;
+            return true;
+        }
     }
 
-    public bool TryGetParameterSystemValue<T>(string identifier, [NotNullWhen(true)] out T? value)
+    private bool TryGetSystemValue<T>(string identifier, ParameterSystemTypeEnum type, out T? value)
     {
         value = default;
+        if (!TryGetParameterSystemValue(identifier, out string? result)) return false;
+        value = ParseSystemValue<T>(type, result);
+        return true;
+    }
 
-        if (!TryResolve(identifier, out EntitySchemaParameter.Discriminator? schemaDisc, out EntityDataParameter.Discriminator? dataDisc))
-            return false;
-
-        EntitySchemaParameter valueSchema = schemaDisc.GetValue();
-        if (valueSchema is not EntitySchemaParameterSystem schema) return false;
-
-        EntityDataParameter valueData = dataDisc.GetValue();
-        if (valueData is not EntityDataParameterSystem data) return false;
-
-        object? parsed = schema.Type switch
+    public static T? ParseSystemValue<T>(ParameterSystemTypeEnum type, string value)
+    {
+        object? parsed = type switch
         {
-            ParameterSystemTypeEnum.Boolean => bool.TryParse(data.Value, out bool x) ? x : null,
-            ParameterSystemTypeEnum.Integer => int.TryParse(data.Value, out int x) ? x : null,
-            ParameterSystemTypeEnum.Decimal => decimal.TryParse(data.Value, out decimal x) ? x : null,
-            ParameterSystemTypeEnum.Guid => Guid.TryParse(data.Value, out Guid x) ? x : null,
-            ParameterSystemTypeEnum.DateTime => DateTime.TryParse(data.Value, out DateTime x) ? x : null,
-            ParameterSystemTypeEnum.String => data.Value,
-            _ => null,
+            ParameterSystemTypeEnum.Boolean => bool.TryParse(value, out bool b) ? b : null,
+            ParameterSystemTypeEnum.Integer => int.TryParse(value, out int i) ? i : null,
+            ParameterSystemTypeEnum.Decimal => decimal.TryParse(value, out decimal d) ? d : null,
+            ParameterSystemTypeEnum.Guid => Guid.TryParse(value, out Guid g) ? g : null,
+            ParameterSystemTypeEnum.DateTime => DateTime.TryParse(value, out DateTime dt) ? dt : null,
+            ParameterSystemTypeEnum.String => value,
+            _ => null
         };
 
-        if (parsed is not T typed) return false;
-        value = typed;
-        return true;
+        return parsed is T casted ? casted : default;
     }
-
-    public bool TryGetParameterTextValue(string identifier, [NotNullWhen(true)] out string? value)
-    {
-        value = null;
-
-        if (!TryGetParameterText(identifier, out EntityDataParameterText? text))
-            return false;
-
-        value = text.Value;
-        return true;
-    }
-
-    private bool TryGetTyped<T>(string identifier, out T? typed) where T : EntityDataParameter
-    {
-        typed = null;
-
-        if (!TryResolve(identifier, out _, out EntityDataParameter.Discriminator? data))
-            return false;
-
-        EntityDataParameter value = data.GetValue();
-        if (value is not T t) return false;
-
-        typed = t;
-        return true;
-    }
-
-    private bool TryResolve(string identifier, [NotNullWhen(true)] out EntitySchemaParameter.Discriminator? schema, [NotNullWhen(true)] out EntityDataParameter.Discriminator? data)
-    {
-        schema = null;
-        data = null;
-        if (!_parameters.TryGetValue(identifier, out ParameterPair? pair)) return false;
-
-        schema = pair.Schema;
-        data = pair.Data;
-        return true;
-    }
-
-    private sealed record ParameterPair(EntitySchemaParameter.Discriminator Schema, EntityDataParameter.Discriminator Data);
 }

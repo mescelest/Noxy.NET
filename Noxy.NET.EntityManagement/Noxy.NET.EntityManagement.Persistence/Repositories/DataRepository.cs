@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
@@ -10,7 +12,7 @@ namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
 public class DataRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), IDataRepository
 {
-    public async Task<EntityDataParameter.Discriminator> GetParameterByID(Guid id)
+    public async Task<EntityDataParameter> GetParameterByID(Guid id)
     {
         TableDataParameter result = await Context.DataParameter.SingleAsync(x => x.ID == id);
         return MapperT2E.Map(result);
@@ -77,65 +79,88 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
         Context.DataParameter.Remove(MapperE2T.Map(entity));
     }
 
-    public async Task<EntityDataParameter.Discriminator?> GetEffectiveParameterByIdentifier(string identifier)
+    public async Task<List<EntityDataParameter>> GetParameterList()
     {
-        var result = await Context.DataParameter
+        List<TableDataParameter> result = await Context.DataParameter.AsNoTracking().ToListAsync();
+        return result.Select(MapperT2E.Map).ToList();
+    }
+
+    public async Task<EntityDataParameter?> GetEffectiveParameterByIdentifier(string identifier)
+    {
+        DateTime now = DateTime.UtcNow;
+
+        TableDataParameter? result = await Context.DataParameter
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective < DateTime.UtcNow);
+            .Where(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective <= now)
+            .OrderByDescending(x => x.TimeEffective)
+            .ThenByDescending(x => x.TimeCreated)
+            .FirstOrDefaultAsync();
+
         return result != null ? MapperT2E.Map(result) : null;
     }
 
-    public async Task<Dictionary<string, EntityDataParameter.Discriminator>> GetCurrentParameterByIdentifierList(IEnumerable<string> identifiers)
+
+    public async Task<List<EntityDataParameter>> GetEffectiveParameterListByIdentifierList(IEnumerable<string> list)
     {
+        DateTime now = DateTime.UtcNow;
+
         List<TableDataParameter> result = await Context.DataParameter
-            .Where(x =>
-                identifiers.Contains(x.SchemaIdentifier) &&
-                x.TimeApproved != null &&
-                x.TimeEffective < DateTime.UtcNow)
+            .AsNoTracking()
+            .Where(x => list.Contains(x.SchemaIdentifier) && x.TimeApproved != null && x.TimeEffective <= now)
             .GroupBy(x => x.SchemaIdentifier)
-            .Select(g => g.OrderByDescending(x => x.TimeCreated).First())
+            .Select(g => g
+                .OrderByDescending(x => x.TimeEffective)
+                .ThenByDescending(x => x.TimeCreated)
+                .First())
             .ToListAsync();
 
-        return result.ToDictionary(x => x.SchemaIdentifier, x => MapperT2E.Map(x));
+        return result.Select(MapperT2E.Map).ToList();
     }
 
-    public async Task<List<EntityDataParameter.Discriminator>> GetParameterListWithIdentifier(string identifier)
+    public async Task<List<EntityDataParameter>> GetParameterListByIdentifier(string identifier)
     {
         List<TableDataParameter> result = await Context.DataParameter
             .AsNoTracking()
             .Where(x => x.SchemaIdentifier == identifier)
+            .OrderBy(x => x.TimeEffective)
+            .ThenBy(x => x.TimeCreated)
             .ToListAsync();
 
-        return [.. result.Select(MapperT2E.Map)];
+        return result.Select(MapperT2E.Map).ToList();
     }
 
-    public async Task<EntityDataParameterText?> GetCurrentTextParameterByIdentifier(string identifier)
+    public async Task<EntityDataParameterText?> GetEffectiveParameterTextByIdentifier(string identifier)
     {
+        DateTime now = DateTime.UtcNow;
+
         TableDataParameterText? result = await Context.DataParameterText
-            .OrderBy(x => x.TimeCreated)
-            .FirstOrDefaultAsync(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective < DateTime.UtcNow);
+            .AsNoTracking()
+            .Where(x => x.SchemaIdentifier == identifier && x.TimeApproved != null && x.TimeEffective <= now)
+            .OrderByDescending(x => x.TimeEffective)
+            .ThenByDescending(x => x.TimeCreated)
+            .FirstOrDefaultAsync();
 
         return result != null ? MapperT2E.Map(result) : null;
     }
 
-    public async Task<Dictionary<string, EntityDataParameterText?>> GetCurrentTextParameterByIdentifierList(IEnumerable<string> identifiers)
+    public async Task<List<EntityDataParameterText>> GetEffectiveParameterTextListByIdentifierList(
+        IEnumerable<string> identifiers)
     {
-        List<TableDataParameterText?> newestRows = await Context.DataParameterText
+        DateTime now = DateTime.UtcNow;
+
+        List<TableDataParameterText> rows = await Context.DataParameterText
+            .AsNoTracking()
             .Where(x =>
                 identifiers.Contains(x.SchemaIdentifier) &&
                 x.TimeApproved != null &&
-                x.TimeEffective < DateTime.UtcNow)
+                x.TimeEffective <= now)
             .GroupBy(x => x.SchemaIdentifier)
-            .Select(g => g.OrderByDescending(x => x.TimeCreated).FirstOrDefault())
+            .Select(g => g
+                .OrderByDescending(x => x.TimeEffective)
+                .ThenByDescending(x => x.TimeCreated)
+                .First())
             .ToListAsync();
 
-        Dictionary<string, TableDataParameterText> lookup = newestRows
-            .OfType<TableDataParameterText>()
-            .ToDictionary(x => x.SchemaIdentifier, x => x);
-
-        return identifiers.ToDictionary(
-            id => id,
-            id => lookup.TryGetValue(id, out TableDataParameterText? row) ? MapperT2E.Map(row) : null
-        );
+        return rows.Select(MapperT2E.Map).ToList();
     }
 }

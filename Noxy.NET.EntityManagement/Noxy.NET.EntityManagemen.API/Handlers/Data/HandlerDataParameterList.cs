@@ -12,8 +12,8 @@ public class HandlerDataParameterList(IUnitOfWorkFactory serviceUoWFactory) : IQ
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        List<EntityDataParameter.Discriminator> result = await uow.Data.GetParameterListWithIdentifier(request.SchemaIdentifier);
+        List<EntityDataParameter> result = await uow.Data.GetParameterListByIdentifier(request.SchemaIdentifier);
 
-        return new() { Value = result };
+        return new() { Value = result.Select(x => new EntityDataParameter.Discriminator(x)).ToList() };
     }
 }

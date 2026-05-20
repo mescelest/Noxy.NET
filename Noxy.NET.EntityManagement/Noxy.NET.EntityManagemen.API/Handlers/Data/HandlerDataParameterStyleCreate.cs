@@ -16,8 +16,8 @@ public class HandlerDataParameterStyleCreate(IUnitOfWorkFactory serviceUoWFactor
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         Guid id = await uow.Schema.GetCurrentSchemaID();
-        EntitySchemaParameter.Discriminator discriminator = await uow.Schema.GetSchemaParameterByIdentifier(id, request.SchemaIdentifier);
-        if (discriminator.GetValue() is not EntitySchemaParameterStyle schema) throw new InvalidOperationException("SchemaParameter is not of type Style");
+        EntitySchemaParameter parameter = await uow.Schema.GetSchemaParameterByIdentifier(id, request.SchemaIdentifier);
+        if (parameter is not EntitySchemaParameterStyle schema) throw new InvalidOperationException("SchemaParameter is not of type Style");
 
         EntityDataParameterStyle entity = new()
         {
@@ -30,7 +30,7 @@ public class HandlerDataParameterStyleCreate(IUnitOfWorkFactory serviceUoWFactor
 
         await uow.Commit();
 
-        serviceParameter.SetParameter(discriminator, new(result));
+        serviceParameter.AddToCache(result);
 
         return new(result);
     }

@@ -22,7 +22,7 @@ public class SchemaValidatorService(IParameterService serviceParameter) : ISchem
 
     public void ValidateInactiveSchemaSystemParameter(EntitySchema schema, string parameter)
     {
-        if (schema.TimeActivated == null && serviceParameter.TryGetParameterSystemValue(parameter, out bool valueInactive) && !valueInactive)
+        if (schema.TimeActivated == null && serviceParameter.TryGetParameterSystemValueBoolean(parameter, out bool valueInactive) && !valueInactive)
         {
             throw new InvalidOperationException($"System parameter '{parameter}' prevents this action from being completed.");
         }
@@ -30,7 +30,7 @@ public class SchemaValidatorService(IParameterService serviceParameter) : ISchem
 
     public void ValidateDeactivedSchemaSystemParameter(EntitySchema schema, string parameter)
     {
-        if (schema.TimeActivated != null && serviceParameter.TryGetParameterSystemValue(parameter, out bool valueDeactivated) && !valueDeactivated)
+        if (schema.TimeActivated != null && serviceParameter.TryGetParameterSystemValueBoolean(parameter, out bool valueDeactivated) && !valueDeactivated)
         {
             throw new InvalidOperationException($"System parameter '{parameter}' prevents this action from being completed.");
         }

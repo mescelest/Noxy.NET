@@ -26,11 +26,11 @@ public interface ITableToEntityMapper
     #region -- Data --
 
     EntityDataElement Map(TableDataElement table);
-    EntityDataParameter.Discriminator Map(TableDataParameter table);
+    EntityDataParameter Map(TableDataParameter table);
     EntityDataParameterStyle Map(TableDataParameterStyle table);
     EntityDataParameterSystem Map(TableDataParameterSystem table);
     EntityDataParameterText Map(TableDataParameterText table);
-    EntityDataProperty.Discriminator Map(TableDataProperty table);
+    EntityDataProperty Map(TableDataProperty table);
     EntityDataPropertyBoolean Map(TableDataPropertyBoolean table);
     EntityDataPropertyDateTime Map(TableDataPropertyDateTime table);
     EntityDataPropertyString Map(TableDataPropertyString table);
@@ -49,11 +49,11 @@ public interface ITableToEntityMapper
     EntitySchema Map(TableSchema table);
     EntitySchemaContext Map(TableSchemaContext table);
     EntitySchemaElement Map(TableSchemaElement table);
-    EntitySchemaParameter.Discriminator Map(TableSchemaParameter table);
+    EntitySchemaParameter Map(TableSchemaParameter table);
     EntitySchemaParameterStyle Map(TableSchemaParameterStyle table);
     EntitySchemaParameterSystem Map(TableSchemaParameterSystem table);
     EntitySchemaParameterText Map(TableSchemaParameterText table);
-    EntitySchemaProperty.Discriminator Map(TableSchemaProperty table);
+    EntitySchemaProperty Map(TableSchemaProperty table);
     EntitySchemaPropertyBoolean Map(TableSchemaPropertyBoolean table);
     EntitySchemaPropertyCollection Map(TableSchemaPropertyCollection table);
     EntitySchemaPropertyDateTime Map(TableSchemaPropertyDateTime table);

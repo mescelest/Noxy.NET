@@ -5,7 +5,7 @@ namespace Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 
 public interface IDataRepository
 {
-    Task<EntityDataParameter.Discriminator> GetParameterByID(Guid id);
+    Task<EntityDataParameter> GetParameterByID(Guid id);
     Task<EntityDataParameterStyle> GetParameterStyleByID(Guid id);
     Task<EntityDataParameterSystem> GetParameterSystemByID(Guid id);
     Task<EntityDataParameterText> GetParameterTextByID(Guid id);
@@ -18,9 +18,10 @@ public interface IDataRepository
     void UpdateParameterText(EntityDataParameterText entity);
     void RemoveParameter(EntityDataParameter entity);
 
-    Task<Dictionary<string, EntityDataParameter.Discriminator>> GetEffectiveParameterByIdentifier(string identifier);
-    Task<Dictionary<string, EntityDataParameter.Discriminator>> GetCurrentParameterByIdentifierList(IEnumerable<string> identifiers);
-    Task<List<EntityDataParameter.Discriminator>> GetParameterListWithIdentifier(string identifier);
-    Task<EntityDataParameterText?> GetCurrentTextParameterByIdentifier(string identifier);
-    Task<Dictionary<string, EntityDataParameterText?>> GetCurrentTextParameterByIdentifierList(IEnumerable<string> identifiers);
+    Task<List<EntityDataParameter>> GetParameterList();
+    Task<EntityDataParameter?> GetEffectiveParameterByIdentifier(string identifier);
+    Task<List<EntityDataParameter>> GetEffectiveParameterListByIdentifierList(IEnumerable<string> list);
+    Task<List<EntityDataParameter>> GetParameterListByIdentifier(string identifier);
+    Task<EntityDataParameterText?> GetEffectiveParameterTextByIdentifier(string identifier);
+    Task<List<EntityDataParameterText>> GetEffectiveParameterTextListByIdentifierList(IEnumerable<string> identifiers);
 }

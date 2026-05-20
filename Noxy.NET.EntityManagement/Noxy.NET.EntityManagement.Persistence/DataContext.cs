@@ -135,7 +135,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         #endregion -- Junctions --
 
-        TableSchema schema = new TableSchema
+        TableSchema schema = new()
         {
             ID = Guid.Parse("12345678-1234-1234-1234-1234567890ab"),
             Name = "Base schema",

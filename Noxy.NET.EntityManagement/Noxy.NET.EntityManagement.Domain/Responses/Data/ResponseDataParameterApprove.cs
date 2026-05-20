@@ -1,6 +1,6 @@
 namespace Noxy.NET.EntityManagement.Domain.Responses.Data;
 
-public class ResponseDataParameterApprove(DateTime Value)
+public class ResponseDataParameterApprove(DateTime value)
 {
-    public DateTime Value { get; } = Value;
+    public DateTime Value { get; } = value;
 }

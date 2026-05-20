@@ -12,8 +12,8 @@ public class HandlerSchemaParameterFind(IUnitOfWorkFactory serviceUoWFactory) : 
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaParameter.Discriminator result = await uow.Schema.GetSchemaParameterByID(query.ID);
+        EntitySchemaParameter result = await uow.Schema.GetSchemaParameterByID(query.ID);
 
-        return new(result);
+        return new(new(result));
     }
 }

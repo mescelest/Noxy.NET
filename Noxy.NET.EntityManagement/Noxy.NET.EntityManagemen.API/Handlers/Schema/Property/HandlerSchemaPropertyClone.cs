@@ -16,16 +16,15 @@ public class HandlerSchemaPropertyClone(IUnitOfWorkFactory serviceUoWFactory, IS
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaProperty.Discriminator entity = await uow.Schema.GetSchemaPropertyByID(command.ID);
+        EntitySchemaProperty entity = await uow.Schema.GetSchemaPropertyByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(entity.SchemaID);
         serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveCloneProperty, ParameterSystemConstants.SchemaDeactivatedCloneProperty);
 
-        EntitySchemaProperty value = entity.GetValue();
-        value.ID = BaseEntity.CreateID();
-        value.SchemaIdentifier = BaseEntity.CreateTemporarySchemaIdentifier();
-        value.TimeCreated = DateTime.UtcNow;
+        entity.ID = BaseEntity.CreateID();
+        entity.SchemaIdentifier = BaseEntity.CreateTemporarySchemaIdentifier();
+        entity.TimeCreated = DateTime.UtcNow;
 
-        EntitySchemaProperty result = value switch
+        EntitySchemaProperty result = entity switch
         {
             EntitySchemaPropertyBoolean v => await uow.Schema.CreateSchemaPropertyBoolean(v),
             EntitySchemaPropertyDateTime v => await uow.Schema.CreateSchemaPropertyDateTime(v),

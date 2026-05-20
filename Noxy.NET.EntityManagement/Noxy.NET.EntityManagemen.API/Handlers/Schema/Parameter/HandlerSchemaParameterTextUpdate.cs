@@ -15,10 +15,10 @@ public class HandlerSchemaParameterTextUpdate(IUnitOfWorkFactory serviceUoWFacto
     {
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
-        EntitySchemaParameter.Discriminator discriminator = await uow.Schema.GetSchemaParameterByID(command.ID);
+        EntitySchemaParameter discriminator = await uow.Schema.GetSchemaParameterByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
         serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditParameter, ParameterSystemConstants.SchemaDeactivatedEditParameter);
-        if (discriminator.GetValue() is not EntitySchemaParameterText entity) throw new InvalidOperationException("Parameter is not of type Text");
+        if (discriminator is not EntitySchemaParameterText entity) throw new InvalidOperationException("Parameter is not of type Text");
 
         entity.SchemaIdentifier = command.SchemaIdentifier;
         entity.Name = command.Name;

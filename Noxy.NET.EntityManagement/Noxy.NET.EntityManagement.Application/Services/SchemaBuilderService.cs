@@ -6,7 +6,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 
 namespace Noxy.NET.EntityManagement.Application.Services;
 
-public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBundlingService serviceTaskBundling) : ISchemaBuilderService
+public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory) : ISchemaBuilderService
 {
     public async Task<EntitySchema> ConstructSchema(Guid? id = null)
     {
@@ -23,12 +23,10 @@ public class SchemaBuilderService(IUnitOfWorkFactory serviceUoWFactory, ITaskBun
             schema = await uow.Schema.GetSchemaByID(id.Value);
         }
 
-        (schema.ContextList, schema.ParameterList, schema.ElementList, schema.PropertyList) = await serviceTaskBundling.WhenAll(
-            uow.Schema.GetSchemaContextListBySchemaID(id.Value),
-            uow.Schema.GetSchemaParameterListBySchemaID(id.Value),
-            uow.Schema.GetSchemaElementListBySchemaID(id.Value),
-            uow.Schema.GetSchemaPropertyListBySchemaID(id.Value)
-        );
+        schema.ContextList = await uow.Schema.GetSchemaContextListBySchemaID(id.Value);
+        schema.ElementList = await uow.Schema.GetSchemaElementListBySchemaID(id.Value);
+        schema.ParameterList = (await uow.Schema.GetSchemaParameterListBySchemaID(id.Value)).Select(x => new EntitySchemaParameter.Discriminator(x)).ToList();
+        schema.PropertyList = (await uow.Schema.GetSchemaPropertyListBySchemaID(id.Value)).Select(x => new EntitySchemaProperty.Discriminator(x)).ToList();
 
         Dictionary<Guid, List<EntitySchemaContextHasElement>> collectionContextHasElement = new(schema.ContextList.Count + schema.ElementList.Count);
         Dictionary<Guid, List<EntitySchemaElementHasProperty>> collectionElementHasProperty = new(schema.ElementList.Count + schema.PropertyList.Count);

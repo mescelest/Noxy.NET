@@ -3,7 +3,7 @@ namespace Noxy.NET.EntityManagement.Domain.Abstractions.Entities;
 public abstract class BaseEntity
 {
     public Guid ID { get; set; } = CreateID();
-    public DateTime? TimeCreated { get; set; } = DateTime.UtcNow;
+    public DateTime TimeCreated { get; set; } = DateTime.UtcNow;
     public DateTime? TimeUpdated { get; set; }
 
     public const int DefaultWeight = 0;

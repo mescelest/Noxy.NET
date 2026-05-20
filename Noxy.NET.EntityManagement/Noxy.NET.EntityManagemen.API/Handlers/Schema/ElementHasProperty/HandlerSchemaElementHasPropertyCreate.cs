@@ -17,7 +17,7 @@ public class HandlerSchemaElementHasPropertyCreate(IUnitOfWorkFactory serviceUoW
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         EntitySchemaElement entityElement = await uow.Schema.GetSchemaElementByID(command.SchemaElementID);
-        EntitySchemaProperty.Discriminator entityProperty = await uow.Schema.GetSchemaPropertyByID(command.SchemaPropertyID);
+        EntitySchemaProperty entityProperty = await uow.Schema.GetSchemaPropertyByID(command.SchemaPropertyID);
         if (entityElement.SchemaID != entityProperty.SchemaID) throw new InvalidOperationException("SchemaElement and SchemaProperty must be in same schema.");
 
         EntitySchema schema = await uow.Schema.GetSchemaByID(entityElement.SchemaID);
