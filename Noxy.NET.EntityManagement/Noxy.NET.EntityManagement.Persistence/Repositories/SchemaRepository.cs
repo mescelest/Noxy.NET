@@ -330,6 +330,14 @@ public class SchemaRepository(DataContext context, IDependencyInjectionService s
         return MapperT2E.Map(result);
     }
 
+    public async Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByIdentifier(Guid schemaID, string identifier)
+    {
+        TableSchemaParameter result = await Context.SchemaParameter
+            .AsNoTracking()
+            .SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
+        return MapperT2E.Map(result);
+    }
+
     public async Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter)
     {
         IQueryable<TableSchemaParameter> query = Context.SchemaParameter.AsNoTracking().Where(x => x.SchemaID == filter.SchemaID);

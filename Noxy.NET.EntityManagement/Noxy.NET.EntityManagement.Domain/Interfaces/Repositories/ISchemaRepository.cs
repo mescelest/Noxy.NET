@@ -66,6 +66,7 @@ public interface ISchemaRepository
     #region -- SchemaParameter --
 
     Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByID(Guid id);
+    Task<EntitySchemaParameter.Discriminator> GetSchemaParameterByIdentifier(Guid schemaID, string identifier);
     Task<List<EntitySchemaParameter.Discriminator>> GetSchemaParameterList(FilterSchemaParameterList filter);
     Task<int> GetSchemaParameterCount(FilterSchemaParameterCount filter);
     Task<EntitySchemaParameterStyle> CreateSchemaParameterStyle(EntitySchemaParameterStyle entity);

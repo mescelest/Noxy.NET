@@ -105,16 +105,16 @@ public class TableToEntityMapper : ITableToEntityMapper
     #region -- Data --
 
     public EntityDataElement Map(TableDataElement table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataProperty Map(TableDataProperty table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataPropertyBoolean Map(TableDataPropertyBoolean table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataPropertyDateTime Map(TableDataPropertyDateTime table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
-    public EntityDataPropertyString Map(TableDataPropertyString table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntityDataParameter.Discriminator Map(TableDataParameter table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntityDataParameterStyle Map(TableDataParameterStyle table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntityDataParameterSystem Map(TableDataParameterSystem table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
     public EntityDataParameterText Map(TableDataParameterText table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataProperty.Discriminator Map(TableDataProperty table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataPropertyBoolean Map(TableDataPropertyBoolean table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataPropertyDateTime Map(TableDataPropertyDateTime table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
+    public EntityDataPropertyString Map(TableDataPropertyString table) => MapInternal(table) ?? throw new ArgumentNullException(nameof(table));
 
-    private static EntityDataElement? MapInternal(TableDataElement? table)
+    private EntityDataElement? MapInternal(TableDataElement? table)
     {
         if (table == null) return null;
 
@@ -123,65 +123,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             ID = table.ID,
             SchemaIdentifier = table.SchemaIdentifier,
             TimeCreated = table.TimeCreated,
-            PropertyList = table.PropertyList?.Select(x => new EntityDataProperty.Discriminator(MapInternal(x))).ToList()
-        };
-
-        return mapped;
-    }
-
-    private static EntityDataProperty? MapInternal(TableDataProperty? table)
-    {
-        if (table == null) return null;
-
-        return table switch
-        {
-            TableDataPropertyBoolean property => MapInternal(property),
-            TableDataPropertyDateTime property => MapInternal(property),
-            TableDataPropertyString property => MapInternal(property),
-            _ => throw new ArgumentOutOfRangeException(nameof(table), table, null)
-        };
-    }
-
-    private static EntityDataPropertyBoolean? MapInternal(TableDataPropertyBoolean? table)
-    {
-        if (table == null) return null;
-
-        EntityDataPropertyBoolean mapped = new()
-        {
-            ID = table.ID,
-            SchemaIdentifier = table.SchemaIdentifier,
-            Value = table.Value,
-            TimeCreated = table.TimeCreated
-        };
-
-        return mapped;
-    }
-
-    private static EntityDataPropertyDateTime? MapInternal(TableDataPropertyDateTime? table)
-    {
-        if (table == null) return null;
-
-        EntityDataPropertyDateTime mapped = new()
-        {
-            ID = table.ID,
-            SchemaIdentifier = table.SchemaIdentifier,
-            Value = table.Value,
-            TimeCreated = table.TimeCreated
-        };
-
-        return mapped;
-    }
-
-    private static EntityDataPropertyString? MapInternal(TableDataPropertyString? table)
-    {
-        if (table == null) return null;
-
-        EntityDataPropertyString mapped = new()
-        {
-            ID = table.ID,
-            SchemaIdentifier = table.SchemaIdentifier,
-            Value = table.Value,
-            TimeCreated = table.TimeCreated
+            PropertyList = table.PropertyList?.Select(Map).ToList()
         };
 
         return mapped;
@@ -247,6 +189,67 @@ public class TableToEntityMapper : ITableToEntityMapper
             TimeEffective = table.TimeEffective,
             TimeCreated = table.TimeCreated,
             Culture = table.Culture
+        };
+
+        return mapped;
+    }
+
+    private static EntityDataProperty.Discriminator? MapInternal(TableDataProperty? table)
+    {
+        if (table == null) return null;
+
+        return new(table switch
+        {
+            TableDataPropertyBoolean property => MapInternal(property),
+            TableDataPropertyDateTime property => MapInternal(property),
+            TableDataPropertyString property => MapInternal(property),
+            _ => throw new ArgumentOutOfRangeException(nameof(table), table, null)
+        });
+    }
+
+    private static EntityDataPropertyBoolean? MapInternal(TableDataPropertyBoolean? table)
+    {
+        if (table == null) return null;
+
+        EntityDataPropertyBoolean mapped = new()
+        {
+            ID = table.ID,
+            SchemaIdentifier = table.SchemaIdentifier,
+            Value = table.Value,
+            ElementID = table.ElementID,
+            TimeCreated = table.TimeCreated
+        };
+
+        return mapped;
+    }
+
+    private static EntityDataPropertyDateTime? MapInternal(TableDataPropertyDateTime? table)
+    {
+        if (table == null) return null;
+
+        EntityDataPropertyDateTime mapped = new()
+        {
+            ID = table.ID,
+            SchemaIdentifier = table.SchemaIdentifier,
+            Value = table.Value,
+            ElementID = table.ElementID,
+            TimeCreated = table.TimeCreated
+        };
+
+        return mapped;
+    }
+
+    private static EntityDataPropertyString? MapInternal(TableDataPropertyString? table)
+    {
+        if (table == null) return null;
+
+        EntityDataPropertyString mapped = new()
+        {
+            ID = table.ID,
+            SchemaIdentifier = table.SchemaIdentifier,
+            Value = table.Value,
+            ElementID = table.ElementID,
+            TimeCreated = table.TimeCreated
         };
 
         return mapped;

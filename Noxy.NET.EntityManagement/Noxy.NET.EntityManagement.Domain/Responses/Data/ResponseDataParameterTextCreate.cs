@@ -3,7 +3,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Data;
 
 namespace Noxy.NET.EntityManagement.Domain.Responses.Data;
 
-public class ResponseDataParameterTextCreate : BaseResponse
+public class ResponseDataParameterTextCreate(EntityDataParameterText value) : BaseResponse
 {
-    public required EntityDataParameterText Value { get; set; }
+    public EntityDataParameterText Value { get; } = value;
 }

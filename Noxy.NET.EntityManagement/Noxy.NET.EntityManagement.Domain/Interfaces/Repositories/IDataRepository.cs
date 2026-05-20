@@ -5,9 +5,9 @@ namespace Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 
 public interface IDataRepository
 {
-    Task<EntityDataParameterStyle> CreateParameterStyle(Guid schemaID, string identifier, string value, DateTime? timeEffective = null);
-    Task<EntityDataParameterSystem> CreateParameterSystem(Guid schemaID, string identifier, string value, DateTime? timeEffective = null);
-    Task<EntityDataParameterText> CreateParameterText(Guid schemaID, string identifier, string culture, string value, DateTime? timeEffective = null);
+    Task<EntityDataParameterStyle> CreateParameterStyle(EntityDataParameterStyle entity);
+    Task<EntityDataParameterSystem> CreateParameterSystem(EntityDataParameterSystem entity);
+    Task<EntityDataParameterText> CreateParameterText(EntityDataParameterText entity);
     Task<Guid> RemoveParameterByID(Guid id);
 
     Task<Dictionary<string, EntityDataParameter.Discriminator>> GetCurrentParameterByIdentifierList(IEnumerable<string> identifiers);

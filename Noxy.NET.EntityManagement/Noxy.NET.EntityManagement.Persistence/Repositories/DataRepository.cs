@@ -7,53 +7,27 @@ using Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Data;
 using Noxy.NET.EntityManagement.Persistence.Tables.Data.Discriminators;
-using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 
 namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
 public class DataRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), IDataRepository
 {
-    public async Task<EntityDataParameterStyle> CreateParameterStyle(Guid schemaID, string identifier, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterStyle> CreateParameterStyle(EntityDataParameterStyle entity)
     {
-        TableSchemaParameterStyle schema = await Context.SchemaParameterStyle.SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
-        EntityEntry<TableDataParameterStyle> entry = await Context.DataParameterStyle.AddAsync(new()
-        {
-            SchemaIdentifier = identifier,
-            Value = value,
-            TimeApproved = schema.IsApprovalRequired ? null : DateTime.UtcNow,
-            TimeEffective = timeEffective ?? DateTime.UtcNow,
-        });
-
-        return MapperT2E.Map(entry.Entity);
+        EntityEntry<TableDataParameterStyle> result = await Context.DataParameterStyle.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
     }
 
-    public async Task<EntityDataParameterSystem> CreateParameterSystem(Guid schemaID, string identifier, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterSystem> CreateParameterSystem(EntityDataParameterSystem entity)
     {
-        TableSchemaParameterSystem schema = await Context.SchemaParameterSystem.SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
-        EntityEntry<TableDataParameterSystem> entry = await Context.DataParameterSystem.AddAsync(new()
-        {
-            SchemaIdentifier = identifier,
-            Value = value,
-            TimeApproved = schema.IsApprovalRequired ? null : DateTime.UtcNow,
-            TimeEffective = timeEffective ?? DateTime.UtcNow,
-        });
-
-        return MapperT2E.Map(entry.Entity);
+        EntityEntry<TableDataParameterSystem> result = await Context.DataParameterSystem.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
     }
 
-    public async Task<EntityDataParameterText> CreateParameterText(Guid schemaID, string identifier, string culture, string value, DateTime? timeEffective = null)
+    public async Task<EntityDataParameterText> CreateParameterText(EntityDataParameterText entity)
     {
-        TableSchemaParameterText schema = await Context.SchemaParameterText.SingleAsync(x => x.SchemaID == schemaID && x.SchemaIdentifier == identifier);
-        EntityEntry<TableDataParameterText> entry = await Context.DataParameterText.AddAsync(new()
-        {
-            SchemaIdentifier = identifier,
-            Culture = culture,
-            Value = value,
-            TimeApproved = schema.IsApprovalRequired ? null : DateTime.UtcNow,
-            TimeEffective = timeEffective ?? DateTime.UtcNow,
-        });
-
-        return MapperT2E.Map(entry.Entity);
+        EntityEntry<TableDataParameterText> result = await Context.DataParameterText.AddAsync(MapperE2T.Map(entity));
+        return MapperT2E.Map(result.Entity);
     }
 
     public async Task<Guid> RemoveParameterByID(Guid id)

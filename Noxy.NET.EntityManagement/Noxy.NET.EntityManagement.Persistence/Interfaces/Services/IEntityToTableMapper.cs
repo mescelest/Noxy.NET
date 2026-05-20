@@ -1,8 +1,12 @@
 using Noxy.NET.EntityManagement.Domain.Entities.Authentication;
+using Noxy.NET.EntityManagement.Domain.Entities.Data;
+using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Authentication;
+using Noxy.NET.EntityManagement.Persistence.Tables.Data;
+using Noxy.NET.EntityManagement.Persistence.Tables.Data.Discriminators;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
@@ -18,6 +22,20 @@ public interface IEntityToTableMapper
     TableUser Map(EntityUser entity);
 
     #endregion -- Authentication --
+
+    #region -- Data --
+
+    TableDataElement Map(EntityDataElement entity);
+    TableDataParameter Map(EntityDataParameter.Discriminator entity);
+    TableDataParameterStyle Map(EntityDataParameterStyle entity);
+    TableDataParameterSystem Map(EntityDataParameterSystem entity);
+    TableDataParameterText Map(EntityDataParameterText entity);
+    TableDataProperty Map(EntityDataProperty.Discriminator entity);
+    TableDataPropertyBoolean Map(EntityDataPropertyBoolean entity);
+    TableDataPropertyDateTime Map(EntityDataPropertyDateTime entity);
+    TableDataPropertyString Map(EntityDataPropertyString entity);
+
+    #endregion -- Data --
 
     #region -- Many-To-Many --
 

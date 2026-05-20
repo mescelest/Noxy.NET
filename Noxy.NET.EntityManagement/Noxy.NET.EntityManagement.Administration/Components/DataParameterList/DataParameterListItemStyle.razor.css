@@ -1,8 +1,32 @@
+.SchemaParameterListItemText {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
+}
+
+.create {
+    display: flex;
+    flex-flow: column;
+    padding-inline: var(--size-gap-xs);
+}
+
+.action-list {
+    display: flex;
+    flex-flow: row;
+    column-gap: var(--size-gap-md);
+    justify-content: flex-end;
+}
+
 .table {
     display: grid;
-    row-gap: var(--size-gap-md);
     column-gap: var(--size-gap-md);
-    grid-template-columns: 1fr max-content max-content max-content;
+    grid-template-columns: max-content 1fr max-content max-content max-content;
+    border-top: 1px solid black;
+}
+
+.header {
+    border-bottom: 1px solid black;
 }
 
 .body {
@@ -14,8 +38,13 @@
 .row {
     grid-column: 1 / -1;
     display: grid;
-    row-gap: var(--size-gap-xs);
     grid-template-columns: subgrid;
+    padding: var(--size-gap-xs);
+}
+
+.row[current] {
+    font-weight: 600;
+    background-color: #dfdfdf;
 }
 
 .column {
@@ -32,29 +61,3 @@
     justify-self: flex-end;
 }
 
-.create {
-    display: flex;
-    flex-flow: column;
-    row-gap: var(--size-gap-md);
-}
-
-.action {
-    display: flex;
-    flex-flow: column;
-    row-gap: var(--size-gap-md);
-}
-
-.action-list {
-    display: flex;
-    flex-flow: row;
-    column-gap: var(--size-gap-md);
-    justify-content: flex-end;
-}
-
-hr {
-    width: 100%;
-    height: 1px;
-    margin: 0;
-    border: none;
-    background: var(--color-disabled);
-}

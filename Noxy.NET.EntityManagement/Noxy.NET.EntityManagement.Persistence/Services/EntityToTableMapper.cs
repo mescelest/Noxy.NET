@@ -1,9 +1,13 @@
 using Noxy.NET.EntityManagement.Domain.Entities.Authentication;
+using Noxy.NET.EntityManagement.Domain.Entities.Data;
+using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 using Noxy.NET.EntityManagement.Persistence.Interfaces.Services;
 using Noxy.NET.EntityManagement.Persistence.Tables.Authentication;
+using Noxy.NET.EntityManagement.Persistence.Tables.Data;
+using Noxy.NET.EntityManagement.Persistence.Tables.Data.Discriminators;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas.Junctions;
@@ -54,6 +58,125 @@ public class EntityToTableMapper : IEntityToTableMapper
     }
 
     #endregion -- Authentication --
+
+    #region -- Data --
+
+    public TableDataElement Map(EntityDataElement entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            SchemaIdentifier = entity.SchemaIdentifier,
+            TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
+            TimeUpdated = entity.TimeUpdated,
+        };
+    }
+
+    public TableDataProperty Map(EntityDataProperty.Discriminator entity)
+    {
+        return entity.GetValue() switch
+        {
+            EntityDataPropertyBoolean value => Map(value),
+            EntityDataPropertyDateTime value => Map(value),
+            EntityDataPropertyString value => Map(value),
+            _ => throw new ArgumentOutOfRangeException(nameof(entity))
+        };
+    }
+
+    public TableDataParameter Map(EntityDataParameter.Discriminator entity)
+    {
+        return entity.GetValue() switch
+        {
+            EntityDataParameterStyle value => Map(value),
+            EntityDataParameterSystem value => Map(value),
+            EntityDataParameterText value => Map(value),
+            _ => throw new ArgumentOutOfRangeException(nameof(entity))
+        };
+    }
+
+    public TableDataParameterStyle Map(EntityDataParameterStyle entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            SchemaIdentifier = entity.SchemaIdentifier,
+            Value = entity.Value,
+            TimeApproved = entity.TimeApproved,
+            TimeEffective = entity.TimeEffective,
+            TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
+            TimeUpdated = entity.TimeUpdated,
+        };
+    }
+
+    public TableDataParameterSystem Map(EntityDataParameterSystem entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            SchemaIdentifier = entity.SchemaIdentifier,
+            Value = entity.Value,
+            TimeApproved = entity.TimeApproved,
+            TimeEffective = entity.TimeEffective,
+            TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
+            TimeUpdated = entity.TimeUpdated,
+        };
+    }
+
+    public TableDataParameterText Map(EntityDataParameterText entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            SchemaIdentifier = entity.SchemaIdentifier,
+            Culture = entity.Culture,
+            Value = entity.Value,
+            TimeApproved = entity.TimeApproved,
+            TimeEffective = entity.TimeEffective,
+            TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
+            TimeUpdated = entity.TimeUpdated,
+        };
+    }
+
+    public TableDataPropertyBoolean Map(EntityDataPropertyBoolean entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            SchemaIdentifier = entity.SchemaIdentifier,
+            Value = entity.Value,
+            ElementID = entity.ElementID,
+            TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
+            TimeUpdated = entity.TimeUpdated,
+        };
+    }
+
+    public TableDataPropertyDateTime Map(EntityDataPropertyDateTime entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            SchemaIdentifier = entity.SchemaIdentifier,
+            Value = entity.Value,
+            ElementID = entity.ElementID,
+            TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
+            TimeUpdated = entity.TimeUpdated,
+        };
+    }
+
+    public TableDataPropertyString Map(EntityDataPropertyString entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            SchemaIdentifier = entity.SchemaIdentifier,
+            Value = entity.Value,
+            ElementID = entity.ElementID,
+            TimeCreated = entity.TimeCreated ?? DateTime.UtcNow,
+            TimeUpdated = entity.TimeUpdated,
+        };
+    }
+
+    #endregion -- Data --
 
     #region -- Many-To-Many --
 

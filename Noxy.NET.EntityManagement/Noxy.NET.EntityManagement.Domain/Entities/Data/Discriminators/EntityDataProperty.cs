@@ -5,6 +5,9 @@ namespace Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 
 public abstract class EntityDataProperty : BaseEntityData
 {
+    public EntityDataElement? Element { get; set; }
+    public required Guid ElementID { get; set; }
+
     public class Discriminator : BaseEntity
     {
         [JsonConstructor]
