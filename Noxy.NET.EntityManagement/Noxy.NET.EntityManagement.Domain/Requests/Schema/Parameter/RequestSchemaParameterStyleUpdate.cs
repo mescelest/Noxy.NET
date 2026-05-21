@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 
 public class RequestSchemaParameterStyleUpdate : BaseRequestPost<ResponseSchemaParameterStyleUpdate>
 {
-    public override string APIEndpoint => $"Schema/Parameter/Style/{ID}";
+    public override string APIEndpoint => $"schema/parameter/style/{ID}";
 
     [Required]
     public required Guid ID { get; init; }

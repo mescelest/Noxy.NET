@@ -5,7 +5,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
 
 public class RequestSchemaContextFind : BaseRequestGet<ResponseSchemaContextFind>
 {
-    public override string APIEndpoint => $"Schema/Context/{ID}";
+    public override string APIEndpoint => $"schema/context/{ID}";
 
     public required Guid ID { get; set; }
 }

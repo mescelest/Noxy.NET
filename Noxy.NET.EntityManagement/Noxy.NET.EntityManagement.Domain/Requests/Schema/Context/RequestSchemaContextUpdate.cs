@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Context;
 
 public class RequestSchemaContextUpdate : BaseRequestPost<ResponseSchemaContextUpdate>
 {
-    public override string APIEndpoint => $"Schema/Context/{ID}";
+    public override string APIEndpoint => $"schema/context/{ID}";
 
     [Required]
     public required Guid ID { get; init; }

@@ -15,7 +15,7 @@ public class HandlerSchemaContextCreate(IUnitOfWorkFactory serviceUoWFactory, IS
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         EntitySchema schema = await uow.Schema.GetSchemaByID(command.SchemaID ?? await uow.Schema.GetCurrentSchemaID());
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveAddContext, ParameterSystemConstants.SchemaDeactivatedAddContext);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveContextAdd, ParameterSystemConstants.SchemaDeactivatedContextAdd);
 
         EntitySchemaContext result = await uow.Schema.CreateSchemaContext(new()
         {

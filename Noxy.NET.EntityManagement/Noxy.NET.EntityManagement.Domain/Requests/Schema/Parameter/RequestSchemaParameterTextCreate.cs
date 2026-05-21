@@ -10,7 +10,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 
 public class RequestSchemaParameterTextCreate : BaseRequestPost<ResponseSchemaParameterTextCreate>
 {
-    public override string APIEndpoint => "Schema/Parameter/Text";
+    public override string APIEndpoint => "schema/parameter/text";
 
     public Guid? SchemaID { get; set; }
 

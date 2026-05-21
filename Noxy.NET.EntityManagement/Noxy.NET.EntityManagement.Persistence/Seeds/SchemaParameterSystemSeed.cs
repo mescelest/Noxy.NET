@@ -12,54 +12,54 @@ public class SchemaParameterSystemSeed(ModelBuilder builder, TableSchema refSche
 {
     public void Apply()
     {
-        Register(ParameterSystemConstants.SchemaDeactivatedAddContext, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new Context entities to a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedAddContextHasElement, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new ContextHasElement entities to a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedAddElement, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new Element entities to a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedAddElementHasProperty, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new ElementHasProperty entities to a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedAddParameter, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new Parameter entities to a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedAddProperty, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new Property entities to a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedContextAdd, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new Context entities to a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedContextHasElementAdd, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new ContextHasElement entities to a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedElementAdd, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new Element entities to a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedElementHasPropertyAdd, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new ElementHasProperty entities to a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedParameterAdd, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new Parameter entities to a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedPropertyAdd, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you add new Property entities to a Schema that used to be active?", true);
 
-        Register(ParameterSystemConstants.SchemaDeactivatedCloneContext, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you clone a Context entity from a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedCloneElement, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you clone an Element entity from a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedCloneParameter, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you clone a Parameter entity from a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedCloneProperty, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you clone a Property entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedContextClone, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you clone a Context entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedElementClone, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you clone an Element entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedParameterClone, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you clone a Parameter entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedPropertyClone, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you clone a Property entity from a Schema that used to be active?", true);
 
-        Register(ParameterSystemConstants.SchemaDeactivatedEditEntity, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit a Schema entity that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedEditContext, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit a Context entity from a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedEditElement, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit an Element entity from a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedEditParameter, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit a Parameter entity from a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedEditProperty, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit a Property entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedEntityEdit, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit a Schema entity that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedContextEdit, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit a Context entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedElementEdit, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit an Element entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedParameterEdit, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit a Parameter entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedPropertyEdit, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you edit a Property entity from a Schema that used to be active?", true);
 
-        Register(ParameterSystemConstants.SchemaDeactivatedDeleteEntity, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove a Schema entity that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedDeleteContext, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove a Context entity from a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedDeleteElement, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove an Element entity from a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedDeleteParameter, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove a Parameter entity from a Schema that used to be active?", true);
-        Register(ParameterSystemConstants.SchemaDeactivatedDeleteProperty, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove a Property entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedEntityDelete, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove a Schema entity that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedContextDelete, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove a Context entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedElementDelete, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove an Element entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedParameterDelete, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove a Parameter entity from a Schema that used to be active?", true);
+        Register(ParameterSystemConstants.SchemaDeactivatedPropertyDelete, bool.FalseString, ParameterSystemTypeEnum.Boolean, "Can you remove a Property entity from a Schema that used to be active?", true);
 
 
-        Register(ParameterSystemConstants.SchemaInactiveAddContext, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new Context entities to a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveAddContextHasElement, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new ContextHasElement entities to a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveAddElement, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new Element entities to a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveAddElementHasProperty, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new ElementHasProperty entities to a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveAddParameter, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new Property entities to a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveAddProperty, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new Parameter entities to a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveContextAdd, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new Context entities to a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveContextHasElementAdd, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new ContextHasElement entities to a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveElementAdd, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new Element entities to a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveElementHasPropertyAdd, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new ElementHasProperty entities to a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveParameterAdd, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new Property entities to a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactivePropertyAdd, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you add new Parameter entities to a Schema that has not been activated yet?", true);
 
-        Register(ParameterSystemConstants.SchemaInactiveCloneContext, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you clone a Context entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveCloneElement, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you clone an Element entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveCloneParameter, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you clone a Parameter entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveCloneProperty, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you clone a Property entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveContextClone, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you clone a Context entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveElementClone, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you clone an Element entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveParameterClone, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you clone a Parameter entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactivePropertyClone, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you clone a Property entity from a Schema that has not been activated yet?", true);
 
-        Register(ParameterSystemConstants.SchemaInactiveEditEntity, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Schema entity that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveEditContext, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Context entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveEditElement, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Element entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveEditParameter, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Property entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveEditProperty, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Parameter entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveEntityEdit, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Schema entity that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveContextEdit, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Context entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveElementEdit, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Element entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveParameterEdit, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Property entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactivePropertyEdit, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you edit a Parameter entity from a Schema that has not been activated yet?", true);
 
-        Register(ParameterSystemConstants.SchemaInactiveDeleteEntity, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove a Schema entity that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveDeleteContext, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove a Context entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveDeleteElement, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove an Element entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveDeleteParameter, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove a Property entity from a Schema that has not been activated yet?", true);
-        Register(ParameterSystemConstants.SchemaInactiveDeleteProperty, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove a Parameter entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveEntityDelete, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove a Schema entity that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveContextDelete, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove a Context entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveElementDelete, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove an Element entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactiveParameterDelete, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove a Property entity from a Schema that has not been activated yet?", true);
+        Register(ParameterSystemConstants.SchemaInactivePropertyDelete, bool.TrueString, ParameterSystemTypeEnum.Boolean, "Can you remove a Parameter entity from a Schema that has not been activated yet?", true);
     }
 
     protected void Register(string constant, string value, ParameterSystemTypeEnum type = ParameterSystemTypeEnum.String, string note = "", bool isPublic = false, bool isApprovalRequired = true)
@@ -81,7 +81,7 @@ public class SchemaParameterSystemSeed(ModelBuilder builder, TableSchema refSche
 
         TableDataParameterSystem entityValue = new()
         {
-            ID = $"{constant}:Value".ToDeterministicGuid(),
+            ID = $"{constant}-Value".ToDeterministicGuid(),
             SchemaIdentifier = constant,
             Value = value,
             TimeApproved = Now,

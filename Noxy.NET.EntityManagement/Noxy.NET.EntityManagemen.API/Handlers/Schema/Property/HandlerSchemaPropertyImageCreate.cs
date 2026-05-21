@@ -16,7 +16,7 @@ public class HandlerSchemaPropertyImageCreate(IUnitOfWorkFactory serviceUoWFacto
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         EntitySchema schema = await uow.Schema.GetSchemaByID(command.SchemaID ?? await uow.Schema.GetCurrentSchemaID());
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveAddProperty, ParameterSystemConstants.SchemaDeactivatedAddProperty);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactivePropertyAdd, ParameterSystemConstants.SchemaDeactivatedPropertyAdd);
 
         EntitySchemaPropertyImage result = await uow.Schema.CreateSchemaPropertyImage(new()
         {

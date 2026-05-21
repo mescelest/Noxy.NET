@@ -5,7 +5,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
 
 public class RequestSchemaElementList : BaseRequestGetList<ResponseSchemaElementList>
 {
-    public override string APIEndpoint => "/Schema/Element";
+    public override string APIEndpoint => "/schema/element";
 
     public Guid? SchemaID { get; init; }
 

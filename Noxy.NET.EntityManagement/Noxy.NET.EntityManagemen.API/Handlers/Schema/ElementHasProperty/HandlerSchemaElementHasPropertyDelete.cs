@@ -17,7 +17,7 @@ public class HandlerSchemaElementHasPropertyDelete(IUnitOfWorkFactory serviceUoW
 
         EntitySchemaElementHasProperty entity = await uow.Schema.GetSchemaElementHasPropertyByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(entity.Entity!.SchemaID);
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveDeleteElementHasProperty, ParameterSystemConstants.SchemaDeactivatedDeleteElementHasProperty);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveElementHasPropertyDelete, ParameterSystemConstants.SchemaDeactivatedElementHasPropertyDelete);
 
         uow.Schema.DeleteSchemaElementHasProperty(entity);
 

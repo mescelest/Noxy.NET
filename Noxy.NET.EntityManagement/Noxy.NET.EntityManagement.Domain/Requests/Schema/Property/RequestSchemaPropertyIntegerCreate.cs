@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 
 public class RequestSchemaPropertyIntegerCreate : BaseRequestPost<ResponseSchemaPropertyIntegerCreate>
 {
-    public override string APIEndpoint => "Schema/Property/Integer";
+    public override string APIEndpoint => "schema/property/integer";
 
     public Guid? SchemaID { get; set; }
 

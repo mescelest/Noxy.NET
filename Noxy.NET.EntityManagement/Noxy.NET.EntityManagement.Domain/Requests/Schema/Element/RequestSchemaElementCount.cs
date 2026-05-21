@@ -7,7 +7,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Element;
 
 public class RequestSchemaElementCount : BaseRequestGet<ResponseSchemaElementCount>
 {
-    public override string APIEndpoint => "Schema/Element/Count";
+    public override string APIEndpoint => "schema/element/count";
 
     public Guid? SchemaID { get; set; }
 

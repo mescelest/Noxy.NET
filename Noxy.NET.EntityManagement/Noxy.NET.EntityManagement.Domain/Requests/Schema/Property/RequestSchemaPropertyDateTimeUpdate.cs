@@ -10,7 +10,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 
 public class RequestSchemaPropertyDateTimeUpdate : BaseRequestPost<ResponseSchemaPropertyDateTimeUpdate>
 {
-    public override string APIEndpoint => $"Schema/Property/DateTime/{ID}";
+    public override string APIEndpoint => $"schema/property/datetime/{ID}";
 
     [Required]
     public required Guid ID { get; init; }

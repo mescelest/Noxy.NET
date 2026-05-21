@@ -3,7 +3,7 @@ using Noxy.NET.EntityManagement.API.Commands.Data;
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
-using Noxy.NET.EntityManagement.Domain.Responses.Data;
+using Noxy.NET.EntityManagement.Domain.Responses.Data.Parameter;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Data;
 
@@ -19,8 +19,8 @@ public class HandlerDataParameterDelete(IUnitOfWorkFactory serviceUoWFactory, IP
         uow.Data.RemoveParameter(entity);
         await uow.Commit();
 
-        serviceParameter.AddToCache(entity);
+        serviceParameter.RemoveFromCache(entity);
 
-        return new() { ID = entity.ID };
+        return new(entity.ID);
     }
 }

@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 
 public class RequestSchemaPropertyBooleanCreate : BaseRequestPost<ResponseSchemaPropertyBooleanCreate>
 {
-    public override string APIEndpoint => "Schema/Property/Boolean";
+    public override string APIEndpoint => "schema/property/boolean";
 
     public Guid? SchemaID { get; set; }
 

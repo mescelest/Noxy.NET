@@ -18,7 +18,7 @@ public class HandlerSchemaPropertyDateTimeUpdate(IUnitOfWorkFactory serviceUoWFa
 
         EntitySchemaProperty discriminator = await uow.Schema.GetSchemaPropertyByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditProperty, ParameterSystemConstants.SchemaDeactivatedEditProperty);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactivePropertyEdit, ParameterSystemConstants.SchemaDeactivatedPropertyEdit);
         if (discriminator is not EntitySchemaPropertyDateTime entity) throw new InvalidOperationException("Property is not of type DateTime");
 
         entity.SchemaIdentifier = command.SchemaIdentifier;

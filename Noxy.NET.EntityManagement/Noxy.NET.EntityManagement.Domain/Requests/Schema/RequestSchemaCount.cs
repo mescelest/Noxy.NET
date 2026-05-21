@@ -7,7 +7,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema;
 
 public class RequestSchemaCount : BaseRequestGet<ResponseSchemaCount>
 {
-    public override string APIEndpoint => "Schema/Count";
+    public override string APIEndpoint => "schema/count";
 
     [DisplayName(ParameterTextConstants.LabelFormSearch)]
     [Description(ParameterTextConstants.HelpFormSearch)]

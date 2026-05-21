@@ -6,7 +6,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.ContextHasElement;
 
 public class RequestSchemaContextHasElementFind : BaseRequestGet<ResponseSchemaContextHasElementFind>
 {
-    public override string APIEndpoint => $"Schema/Context/Element/{ID}";
+    public override string APIEndpoint => $"schema/context/element/{ID}";
 
     [NotEmptyGuid]
     public required Guid ID { get; init; }

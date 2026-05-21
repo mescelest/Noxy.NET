@@ -15,7 +15,7 @@ public class HandlerSchemaDelete(IUnitOfWorkFactory serviceUoWFactory, ISchemaVa
         await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
         EntitySchema entity = await uow.Schema.GetSchemaByID(command.ID);
-        serviceSchemaValidator.ValidateSchemaChange(entity, ParameterSystemConstants.SchemaInactiveDeleteEntity, ParameterSystemConstants.SchemaDeactivatedDeleteEntity);
+        serviceSchemaValidator.ValidateSchemaChange(entity, ParameterSystemConstants.SchemaInactiveEntityDelete, ParameterSystemConstants.SchemaDeactivatedEntityDelete);
 
         uow.Schema.DeleteSchema(entity);
         await uow.Commit();

@@ -6,7 +6,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema;
 
 public class RequestSchemaActivate : BaseRequestPost<ResponseSchemaActivate>
 {
-    public override string APIEndpoint => $"Schema/{ID}/Activate";
+    public override string APIEndpoint => $"schema/{ID}/activate";
 
     [Required]
     public required Guid ID { get; init; }

@@ -16,7 +16,7 @@ public class HandlerSchemaElementUpdate(IUnitOfWorkFactory serviceUoWFactory, IS
 
         EntitySchemaElement entity = await uow.Schema.GetSchemaElementByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(entity.SchemaID);
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditElement, ParameterSystemConstants.SchemaDeactivatedEditElement);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveElementEdit, ParameterSystemConstants.SchemaDeactivatedElementEdit);
 
         entity.SchemaIdentifier = command.SchemaIdentifier;
         entity.Name = command.Name;

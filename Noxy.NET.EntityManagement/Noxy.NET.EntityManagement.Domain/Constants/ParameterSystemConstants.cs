@@ -2,55 +2,61 @@ namespace Noxy.NET.EntityManagement.Domain.Constants;
 
 public static class ParameterSystemConstants
 {
-    public const string SchemaDeactivatedAddContext = "Schema:Deactivated:Add:Context";
-    public const string SchemaDeactivatedAddContextHasElement = "Schema:Deactivated:Add:ContextHasElement";
-    public const string SchemaDeactivatedAddElement = "Schema:Deactivated:Add:Element";
-    public const string SchemaDeactivatedAddElementHasProperty = "Schema:Deactivated:Add:ElementHasProperty";
-    public const string SchemaDeactivatedAddParameter = "Schema:Deactivated:Add:Parameter";
-    public const string SchemaDeactivatedAddProperty = "Schema:Deactivated:Add:Property";
+    public const string SchemaDeactivatedEntityEdit = "Schema-Deactivated-Entity-Edit";
+    public const string SchemaDeactivatedEntityDelete = "Schema-Deactivated-Entity-Delete";
 
-    public const string SchemaDeactivatedCloneContext = "Schema:Deactivated:Clone:Context";
-    public const string SchemaDeactivatedCloneElement = "Schema:Deactivated:Clone:Element";
-    public const string SchemaDeactivatedCloneParameter = "Schema:Deactivated:Clone:Parameter";
-    public const string SchemaDeactivatedCloneProperty = "Schema:Deactivated:Clone:Property";
+    public const string SchemaDeactivatedContextAdd = "Schema-Deactivated-Context-Add";
+    public const string SchemaDeactivatedContextClone = "Schema-Deactivated-Context-Clone";
+    public const string SchemaDeactivatedContextEdit = "Schema-Deactivated-Context-Edit";
+    public const string SchemaDeactivatedContextDelete = "Schema-Deactivated-Context-Delete";
 
-    public const string SchemaDeactivatedEditEntity = "Schema:Deactivated:Edit:Entity";
-    public const string SchemaDeactivatedEditContext = "Schema:Deactivated:Edit:Context";
-    public const string SchemaDeactivatedEditElement = "Schema:Deactivated:Edit:Element";
-    public const string SchemaDeactivatedEditParameter = "Schema:Deactivated:Edit:Parameter";
-    public const string SchemaDeactivatedEditProperty = "Schema:Deactivated:Edit:Property";
+    public const string SchemaDeactivatedContextHasElementAdd = "Schema-Deactivated-ContextHasElement-Add";
+    public const string SchemaDeactivatedContextHasElementDelete = "Schema-Deactivated-ContextHasElement-Delete";
 
-    public const string SchemaDeactivatedDeleteEntity = "Schema:Deactivated:Delete:Entity";
-    public const string SchemaDeactivatedDeleteContext = "Schema:Deactivated:Delete:Context";
-    public const string SchemaDeactivatedDeleteContextHasElement = "Schema:Deactivated:Delete:ContextHasElement";
-    public const string SchemaDeactivatedDeleteElement = "Schema:Deactivated:Delete:Element";
-    public const string SchemaDeactivatedDeleteElementHasProperty = "Schema:Deactivated:Delete:ElementHasProperty";
-    public const string SchemaDeactivatedDeleteParameter = "Schema:Deactivated:Delete:Parameter";
-    public const string SchemaDeactivatedDeleteProperty = "Schema:Deactivated:Delete:Property";
+    public const string SchemaDeactivatedElementAdd = "Schema-Deactivated-Element-Add";
+    public const string SchemaDeactivatedElementClone = "Schema-Deactivated-Element-Clone";
+    public const string SchemaDeactivatedElementEdit = "Schema-Deactivated-Element-Edit";
+    public const string SchemaDeactivatedElementDelete = "Schema-Deactivated-Element-Delete";
 
-    public const string SchemaInactiveAddContext = "Schema:Inactive:Add:Context";
-    public const string SchemaInactiveAddContextHasElement = "Schema:Inactive:Add:ContextHasElement";
-    public const string SchemaInactiveAddElement = "Schema:Inactive:Add:Element";
-    public const string SchemaInactiveAddElementHasProperty = "Schema:Inactive:Add:ElementHasProperty";
-    public const string SchemaInactiveAddParameter = "Schema:Inactive:Add:Parameter";
-    public const string SchemaInactiveAddProperty = "Schema:Inactive:Add:Property";
+    public const string SchemaDeactivatedElementHasPropertyAdd = "Schema-Deactivated-ElementHasProperty-Add";
+    public const string SchemaDeactivatedElementHasPropertyDelete = "Schema-Deactivated-ElementHasProperty-Delete";
 
-    public const string SchemaInactiveCloneContext = "Schema:Inactive:Clone:Context";
-    public const string SchemaInactiveCloneElement = "Schema:Inactive:Clone:Element";
-    public const string SchemaInactiveCloneParameter = "Schema:Inactive:Clone:Parameter";
-    public const string SchemaInactiveCloneProperty = "Schema:Inactive:Clone:Property";
+    public const string SchemaDeactivatedParameterAdd = "Schema-Deactivated-Parameter-Add";
+    public const string SchemaDeactivatedParameterClone = "Schema-Deactivated-Parameter-Clone";
+    public const string SchemaDeactivatedParameterEdit = "Schema-Deactivated-Parameter-Edit";
+    public const string SchemaDeactivatedParameterDelete = "Schema-Deactivated-Parameter-Delete";
 
-    public const string SchemaInactiveEditEntity = "Schema:Inactive:Edit:Entity";
-    public const string SchemaInactiveEditContext = "Schema:Inactive:Edit:Context";
-    public const string SchemaInactiveEditElement = "Schema:Inactive:Edit:Element";
-    public const string SchemaInactiveEditParameter = "Schema:Inactive:Edit:Parameter";
-    public const string SchemaInactiveEditProperty = "Schema:Inactive:Edit:Property";
+    public const string SchemaDeactivatedPropertyAdd = "Schema-Deactivated-Property-Add";
+    public const string SchemaDeactivatedPropertyClone = "Schema-Deactivated-Property-Clone";
+    public const string SchemaDeactivatedPropertyEdit = "Schema-Deactivated-Property-Edit";
+    public const string SchemaDeactivatedPropertyDelete = "Schema-Deactivated-Property-Delete";
 
-    public const string SchemaInactiveDeleteEntity = "Schema:Inactive:Delete:Entity";
-    public const string SchemaInactiveDeleteContext = "Schema:Inactive:Delete:Context";
-    public const string SchemaInactiveDeleteContextHasElement = "Schema:Inactive:Delete:ContextHasElement";
-    public const string SchemaInactiveDeleteElement = "Schema:Inactive:Delete:Element";
-    public const string SchemaInactiveDeleteElementHasProperty = "Schema:Inactive:Delete:ElementHasProperty";
-    public const string SchemaInactiveDeleteParameter = "Schema:Inactive:Delete:Parameter";
-    public const string SchemaInactiveDeleteProperty = "Schema:Inactive:Delete:Property";
+    public const string SchemaInactiveEntityEdit = "Schema-Inactive-Entity-Edit";
+    public const string SchemaInactiveEntityDelete = "Schema-Inactive-Entity-Delete";
+
+    public const string SchemaInactiveContextAdd = "Schema-Inactive-Context-Add";
+    public const string SchemaInactiveContextClone = "Schema-Inactive-Context-Clone";
+    public const string SchemaInactiveContextEdit = "Schema-Inactive-Context-Edit";
+    public const string SchemaInactiveContextDelete = "Schema-Inactive-Context-Delete";
+
+    public const string SchemaInactiveContextHasElementAdd = "Schema-Inactive-ContextHasElement-Add";
+    public const string SchemaInactiveContextHasElementDelete = "Schema-Inactive-ContextHasElement-Delete";
+
+    public const string SchemaInactiveElementAdd = "Schema-Inactive-Element-Add";
+    public const string SchemaInactiveElementClone = "Schema-Inactive-Element-Clone";
+    public const string SchemaInactiveElementEdit = "Schema-Inactive-Element-Edit";
+    public const string SchemaInactiveElementDelete = "Schema-Inactive-Element-Delete";
+
+    public const string SchemaInactiveElementHasPropertyAdd = "Schema-Inactive-ElementHasProperty-Add";
+    public const string SchemaInactiveElementHasPropertyDelete = "Schema-Inactive-ElementHasProperty-Delete";
+
+    public const string SchemaInactiveParameterAdd = "Schema-Inactive-Parameter-Add";
+    public const string SchemaInactiveParameterClone = "Schema-Inactive-Parameter-Clone";
+    public const string SchemaInactiveParameterEdit = "Schema-Inactive-Parameter-Edit";
+    public const string SchemaInactiveParameterDelete = "Schema-Inactive-Parameter-Delete";
+
+    public const string SchemaInactivePropertyAdd = "Schema-Inactive-Property-Add";
+    public const string SchemaInactivePropertyClone = "Schema-Inactive-Property-Clone";
+    public const string SchemaInactivePropertyEdit = "Schema-Inactive-Property-Edit";
+    public const string SchemaInactivePropertyDelete = "Schema-Inactive-Property-Delete";
 }

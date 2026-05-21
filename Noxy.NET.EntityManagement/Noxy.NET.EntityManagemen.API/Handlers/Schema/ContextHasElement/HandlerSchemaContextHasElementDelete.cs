@@ -17,7 +17,7 @@ public class HandlerSchemaContextHasElementDelete(IUnitOfWorkFactory serviceUoWF
 
         EntitySchemaContextHasElement entity = await uow.Schema.GetSchemaContextHasElementByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(entity.Entity!.SchemaID);
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveDeleteContextHasElement, ParameterSystemConstants.SchemaDeactivatedDeleteContextHasElement);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveContextHasElementDelete, ParameterSystemConstants.SchemaDeactivatedContextHasElementDelete);
 
         uow.Schema.DeleteSchemaContextHasElement(entity);
 

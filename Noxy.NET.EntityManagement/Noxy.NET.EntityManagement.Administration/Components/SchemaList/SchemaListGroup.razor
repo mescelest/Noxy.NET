@@ -17,12 +17,12 @@
             {
                 <Button Status="StatusEnum.Success" @onclick="OnButtonActivateClick">Activate</Button>
 
-                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveEditEntity, ParameterSystemConstants.SchemaDeactivatedEditEntity))
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveEntityEdit, ParameterSystemConstants.SchemaDeactivatedEntityEdit))
                 {
                     <Button Status="StatusEnum.Warning" @onclick="ButtonEditClickerHandler">Edit</Button>
                 }
 
-                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveDeleteEntity, ParameterSystemConstants.SchemaDeactivatedDeleteEntity))
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveEntityDelete, ParameterSystemConstants.SchemaDeactivatedEntityDelete))
                 {
                     <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
                 }

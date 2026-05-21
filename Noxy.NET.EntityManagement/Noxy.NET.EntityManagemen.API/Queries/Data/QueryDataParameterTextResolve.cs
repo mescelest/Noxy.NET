@@ -1,9 +1,9 @@
 using Mediator;
-using Noxy.NET.EntityManagement.Domain.Responses.Data;
+using Noxy.NET.EntityManagement.Domain.Responses.Data.Parameter;
 
 namespace Noxy.NET.EntityManagement.API.Queries.Data;
 
-public class QueryDataParameterTextResolve(string identifier) : IQuery<ResponseDataParameterTextResolve>
+public class QueryDataParameterTextResolve(string schemaIdentifier) : IQuery<ResponseDataParameterTextResolve>
 {
-    public string Identifier { get; } = identifier;
+    public string SchemaIdentifier { get; } = schemaIdentifier;
 }

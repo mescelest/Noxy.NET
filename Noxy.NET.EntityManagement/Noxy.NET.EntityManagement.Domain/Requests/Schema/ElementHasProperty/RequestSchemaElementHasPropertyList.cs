@@ -6,7 +6,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.ElementHasProperty;
 
 public class RequestSchemaElementHasPropertyList : BaseRequestGet<ResponseSchemaElementHasPropertyList>
 {
-    public override string APIEndpoint => "Schema/Element/Property";
+    public override string APIEndpoint => "schema/element/property";
 
     [RequiredIfNot(nameof(SchemaPropertyID))]
     public Guid? SchemaElementID { get; set; }

@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 
 public class RequestSchemaPropertyBooleanUpdate : BaseRequestPost<ResponseSchemaPropertyBooleanUpdate>
 {
-    public override string APIEndpoint => $"Schema/Property/Boolean/{ID}";
+    public override string APIEndpoint => $"schema/property/boolean/{ID}";
 
     [Required]
     public required Guid ID { get; init; }

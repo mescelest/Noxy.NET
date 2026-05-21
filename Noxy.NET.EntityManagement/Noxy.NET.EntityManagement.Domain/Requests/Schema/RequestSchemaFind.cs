@@ -5,7 +5,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema;
 
 public class RequestSchemaFind : BaseRequestGet<ResponseSchemaFind>
 {
-    public override string APIEndpoint => $"Schema/{ID}";
+    public override string APIEndpoint => $"schema/{ID}";
 
     public required Guid ID { get; set; }
 }

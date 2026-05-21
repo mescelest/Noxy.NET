@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Authentication;
 
 public class RequestAuthenticationSignUp : BaseRequestPost<ResponseAuthenticationSignUp>
 {
-    public override string APIEndpoint => "Authentication";
+    public override string APIEndpoint => "authentication";
 
     [Required]
     [EmailAddress]

@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 
 public class RequestSchemaPropertyImageUpdate : BaseRequestPost<ResponseSchemaPropertyImageUpdate>
 {
-    public override string APIEndpoint => $"Schema/Property/Image/{ID}";
+    public override string APIEndpoint => $"schema/property/image/{ID}";
 
     [Required]
     public required Guid ID { get; init; }

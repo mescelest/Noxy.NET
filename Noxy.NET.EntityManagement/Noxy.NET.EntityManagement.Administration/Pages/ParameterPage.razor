@@ -11,7 +11,7 @@
         </Left>
         <Content>
             <SchemaParameterListView Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H1">
-                <DataParameterListGroup SchemaParameter="context"/>
+                <DataParameterListGroup Scope="@GetGroupScope(context)" SchemaParameter="context"/>
             </SchemaParameterListView>
         </Content>
     </MagazineFrame>
@@ -20,5 +20,7 @@
 @code {
 
     private string Scope => GetComponentName();
+
+    private string GetGroupScope(EntitySchemaParameter parameter) => $"{Scope}:{parameter.SchemaIdentifier}";
 
 }

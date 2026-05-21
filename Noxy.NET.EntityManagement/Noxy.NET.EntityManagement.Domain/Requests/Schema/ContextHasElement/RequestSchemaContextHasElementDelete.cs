@@ -6,7 +6,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.ContextHasElement;
 
 public class RequestSchemaContextHasElementDelete : BaseRequestPost<ResponseSchemaContextHasElementDelete>
 {
-    public override string APIEndpoint => $"Schema/Context/Element/{ID}/Delete";
+    public override string APIEndpoint => $"schema/context/element/{ID}/delete";
 
     [NotEmptyGuid]
     public required Guid ID { get; init; }

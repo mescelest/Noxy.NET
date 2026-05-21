@@ -8,7 +8,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema;
 
 public class RequestSchemaCreate : BaseRequestPost<ResponseSchemaCreate>
 {
-    public override string APIEndpoint => "Schema";
+    public override string APIEndpoint => "schema";
 
     [Required]
     [DisplayName(ParameterTextConstants.LabelFormName)]

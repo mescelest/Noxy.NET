@@ -18,7 +18,7 @@ public class HandlerSchemaPropertyClone(IUnitOfWorkFactory serviceUoWFactory, IS
 
         EntitySchemaProperty entity = await uow.Schema.GetSchemaPropertyByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(entity.SchemaID);
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveCloneProperty, ParameterSystemConstants.SchemaDeactivatedCloneProperty);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactivePropertyClone, ParameterSystemConstants.SchemaDeactivatedPropertyClone);
 
         entity.ID = BaseEntity.CreateID();
         entity.SchemaIdentifier = BaseEntity.CreateTemporarySchemaIdentifier();

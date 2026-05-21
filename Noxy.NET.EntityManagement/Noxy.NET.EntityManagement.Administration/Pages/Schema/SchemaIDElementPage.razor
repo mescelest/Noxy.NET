@@ -20,7 +20,7 @@
                     </SchemaElementListView>
                 </Content>
                 <Right>
-                    @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveAddElement, ParameterSystemConstants.SchemaDeactivatedAddElement))
+                    @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveElementAdd, ParameterSystemConstants.SchemaDeactivatedElementAdd))
                     {
                         <SchemaElementListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     }

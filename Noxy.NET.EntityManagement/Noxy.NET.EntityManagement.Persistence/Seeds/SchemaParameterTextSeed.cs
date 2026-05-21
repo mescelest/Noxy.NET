@@ -260,7 +260,7 @@ public class SchemaParameterTextSeed(ModelBuilder builder, TableSchema refSchema
 
         TableDataParameterText tableParameterValue = new()
         {
-            ID = $"{constant}:Value".ToDeterministicGuid(),
+            ID = $"{constant}-Value".ToDeterministicGuid(),
             SchemaIdentifier = constant,
             Culture = culture,
             Value = value,

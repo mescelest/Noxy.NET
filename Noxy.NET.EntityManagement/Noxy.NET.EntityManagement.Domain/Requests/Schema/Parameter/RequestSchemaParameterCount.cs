@@ -7,7 +7,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 
 public class RequestSchemaParameterCount : BaseRequestGet<ResponseSchemaParameterCount>
 {
-    public override string APIEndpoint => "Schema/Parameter/Count";
+    public override string APIEndpoint => "schema/parameter/count";
 
     public Guid? SchemaID { get; set; }
 

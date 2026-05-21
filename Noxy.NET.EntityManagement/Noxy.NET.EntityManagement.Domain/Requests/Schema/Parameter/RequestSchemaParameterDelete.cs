@@ -6,7 +6,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Parameter;
 
 public class RequestSchemaParameterDelete : BaseRequestPost<ResponseSchemaParameterDelete>
 {
-    public override string APIEndpoint => $"Schema/Parameter/{ID}/Delete";
+    public override string APIEndpoint => $"schema/parameter/{ID}/delete";
 
     [Required]
     public required Guid ID { get; init; }

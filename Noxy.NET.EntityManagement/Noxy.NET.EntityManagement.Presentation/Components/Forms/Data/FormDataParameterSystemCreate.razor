@@ -1,4 +1,5 @@
-@inherits BaseRequestForm<RequestDataParameterSystemCreate, ResponseDataParameterSystemCreate>
+@using Noxy.NET.EntityManagement.Domain.Requests.Data.Parameter
+@inherits BaseRequestForm<Noxy.NET.EntityManagement.Domain.Requests.Data.Parameter.RequestDataParameterSystemCreate, Noxy.NET.EntityManagement.Domain.Responses.Data.Parameter.ResponseDataParameterSystemCreate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestDataParameterSystemCreate" Context="Context" OnSubmit="ForwardSubmit">

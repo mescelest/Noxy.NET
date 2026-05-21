@@ -16,15 +16,15 @@
         @if (!Schema.IsActive)
         {
             <ButtonList Alignment="ButtonListAlignmentEnum.Right">
-                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveDeleteParameter, ParameterSystemConstants.SchemaDeactivatedDeleteParameter))
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveParameterDelete, ParameterSystemConstants.SchemaDeactivatedParameterDelete))
                 {
                     <Button Status="StatusEnum.Error" @onclick="OnButtonDeleteClick">Delete</Button>
                 }
-                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveCloneParameter, ParameterSystemConstants.SchemaDeactivatedCloneParameter))
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveParameterClone, ParameterSystemConstants.SchemaDeactivatedParameterClone))
                 {
                     <Button Status="StatusEnum.Info" @onclick="OnButtonCloneClick">Clone</Button>
                 }
-                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveEditParameter, ParameterSystemConstants.SchemaDeactivatedEditParameter))
+                @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveParameterEdit, ParameterSystemConstants.SchemaDeactivatedParameterEdit))
                 {
                     <Button Status="StatusEnum.Warning" @onclick="ButtonEditClickerHandler">Edit</Button>
                 }

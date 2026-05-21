@@ -18,7 +18,7 @@
                     <SchemaElementEntityView Schema="Schema" SchemaElement="SchemaElement" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H1"/>
                 </Content>
                 <Right>
-                    @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveEditElement, ParameterSystemConstants.SchemaDeactivatedEditElement))
+                    @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveElementEdit, ParameterSystemConstants.SchemaDeactivatedElementEdit))
                     {
                         <SchemaElementEntityUpdate SchemaElement="SchemaElement" Scope="@Scope" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     }

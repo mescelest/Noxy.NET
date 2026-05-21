@@ -9,7 +9,7 @@ namespace Noxy.NET.EntityManagement.Domain.Requests.Schema.Property;
 
 public class RequestSchemaPropertyDecimalUpdate : BaseRequestPost<ResponseSchemaPropertyDecimalUpdate>
 {
-    public override string APIEndpoint => $"Schema/Property/Decimal/{ID}";
+    public override string APIEndpoint => $"schema/property/decimal/{ID}";
 
     [Required]
     public required Guid ID { get; init; }

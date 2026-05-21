@@ -20,7 +20,7 @@ public class HandlerSchemaContextHasElementCreate(IUnitOfWorkFactory serviceUoWF
         if (entityContext.SchemaID != entityElement.SchemaID) throw new InvalidOperationException("SchemaContext and SchemaElement must be in same schema.");
 
         EntitySchema schema = await uow.Schema.GetSchemaByID(entityContext.SchemaID);
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveAddContextHasElement, ParameterSystemConstants.SchemaDeactivatedAddContextHasElement);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveContextHasElementAdd, ParameterSystemConstants.SchemaDeactivatedContextHasElementAdd);
 
         EntitySchemaContextHasElement result = await uow.Schema.CreateSchemaContextHasElement(new()
         {

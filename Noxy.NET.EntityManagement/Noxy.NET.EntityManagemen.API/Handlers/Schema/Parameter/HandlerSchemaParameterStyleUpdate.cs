@@ -17,7 +17,7 @@ public class HandlerSchemaParameterStyleUpdate(IUnitOfWorkFactory serviceUoWFact
 
         EntitySchemaParameter discriminator = await uow.Schema.GetSchemaParameterByID(command.ID);
         EntitySchema schema = await uow.Schema.GetSchemaByID(discriminator.SchemaID);
-        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveEditParameter, ParameterSystemConstants.SchemaDeactivatedEditParameter);
+        serviceSchemaValidator.ValidateSchemaChange(schema, ParameterSystemConstants.SchemaInactiveParameterEdit, ParameterSystemConstants.SchemaDeactivatedParameterEdit);
         if (discriminator is not EntitySchemaParameterStyle entity) throw new InvalidOperationException("Parameter is not of type Style");
 
         entity.SchemaIdentifier = command.SchemaIdentifier;

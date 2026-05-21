@@ -1,0 +1,6 @@
+namespace Noxy.NET.EntityManagement.Domain.Responses.Data.Parameter;
+
+public class ResponseDataParameterStyleResolve(string? value)
+{
+    public string? Value { get; } = value;
+}

@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
-using Noxy.NET.EntityManagement.Domain.Responses.Data;
+using Noxy.NET.EntityManagement.Domain.Responses.Data.Parameter;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Data;
 
@@ -32,6 +32,6 @@ public class HandlerDataParameterTextCreate(IUnitOfWorkFactory serviceUoWFactory
 
         serviceParameter.AddToCache(result);
 
-        return new(result);
+        return new(result.ID);
     }
 }

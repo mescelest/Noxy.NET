@@ -9,7 +9,9 @@ public interface IParameterService
 {
     void Initialize(List<EntitySchemaParameter> listSchemaParameter, List<EntityDataParameter> listDataParameter);
     void AddToCache(EntityDataParameter parameter);
+    void ReplaceInCache(EntityDataParameter parameter);
     void RemoveFromCache(EntityDataParameter parameter);
+    void UpdateValidSchemaIdentifierList(IEnumerable<EntitySchemaParameter> list);
 
     bool TryGetParameterStyle(string identifier, [NotNullWhen(true)] out EntityDataParameterStyle? parameter);
     bool TryGetParameterSystem(string identifier, [NotNullWhen(true)] out EntityDataParameterSystem? parameter);

@@ -64,6 +64,23 @@ public sealed class ParameterService : IParameterService
         }
     }
 
+    public void ReplaceInCache(EntityDataParameter parameter)
+    {
+        lock (_lock)
+        {
+            ParameterKey key = CreateKey(parameter);
+            if (!_cache.TryGetValue(key, out List<EntityDataParameter>? list))
+            {
+                _cache[key] = [parameter];
+                return;
+            }
+
+            list.RemoveAll(x => x.ID == parameter.ID);
+            list.Add(parameter);
+            list.Sort(SortByEffectiveThenCreated);
+        }
+    }
+
     public void RemoveFromCache(EntityDataParameter parameter)
     {
         lock (_lock)

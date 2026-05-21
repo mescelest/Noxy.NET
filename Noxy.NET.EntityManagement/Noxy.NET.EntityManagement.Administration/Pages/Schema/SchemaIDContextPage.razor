@@ -20,7 +20,7 @@
                     </SchemaContextListView>
                 </Content>
                 <Right>
-                    @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveAddContext, ParameterSystemConstants.SchemaDeactivatedAddContext))
+                    @if (SystemParameterService.CanPerformSchemaAction(Schema, ParameterSystemConstants.SchemaInactiveContextAdd, ParameterSystemConstants.SchemaDeactivatedContextAdd))
                     {
                         <SchemaContextListCreate Scope="@Scope" SchemaID="ID" HeaderLevel="HTMLHeaderLevelEnum.H2"/>
                     }

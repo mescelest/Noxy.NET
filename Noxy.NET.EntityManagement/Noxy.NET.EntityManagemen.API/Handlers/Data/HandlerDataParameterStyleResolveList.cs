@@ -2,7 +2,7 @@ using Mediator;
 using Noxy.NET.EntityManagement.API.Queries.Data;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
-using Noxy.NET.EntityManagement.Domain.Responses.Data;
+using Noxy.NET.EntityManagement.Domain.Responses.Data.Parameter;
 
 namespace Noxy.NET.EntityManagement.API.Handlers.Data;
 
@@ -10,9 +10,7 @@ public class HandlerDataParameterStyleResolveList(IParameterService serviceParam
 {
     public ValueTask<ResponseDataParameterStyleResolveList> Handle(QueryDataParameterStyleResolveList request, CancellationToken cancellationToken)
     {
-        return ValueTask.FromResult(new ResponseDataParameterStyleResolveList
-        {
-            Value = request.SchemaIdentifierList.ToDictionary(x => x, y => serviceParameter.TryGetParameterStyle(y, out EntityDataParameterStyle? parameter) ? parameter.Value : null)
-        });
+        Dictionary<string, string?> result = request.SchemaIdentifierList.ToDictionary(x => x, y => serviceParameter.TryGetParameterStyle(y, out EntityDataParameterStyle? parameter) ? parameter.Value : null);
+        return ValueTask.FromResult(new ResponseDataParameterStyleResolveList(result));
     }
 }
