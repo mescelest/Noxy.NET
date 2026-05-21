@@ -1,52 +1,50 @@
 using System.Diagnostics.CodeAnalysis;
-using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Enums;
 
 namespace Noxy.NET.EntityManagement.Application.Services;
 
-public sealed class ParameterService(IUnitOfWorkFactory uowFactory) : IParameterService
+public sealed class ParameterService : IParameterService
 {
-    private readonly record struct ParameterKey(Type Type, string Identifier);
+    private readonly record struct ParameterKey(int Type, string Identifier);
 
     private readonly Lock _lock = new();
     private readonly Dictionary<ParameterKey, List<EntityDataParameter>> _cache = new();
+    private readonly HashSet<string> _listValidSchemaIdentifier = [];
 
-    public async Task Initialize()
+    private const int TypeCodeStyle = 1;
+    private const int TypeCodeSystem = 2;
+    private const int TypeCodeText = 3;
+
+    public void Initialize(List<EntitySchemaParameter> listSchemaParameter, List<EntityDataParameter> listDataParameter)
     {
-        IUnitOfWork uow = await uowFactory.Create();
-        List<EntityDataParameter> list = await uow.Data.GetParameterList();
-
         lock (_lock)
         {
             _cache.Clear();
+            _listValidSchemaIdentifier.Clear();
 
-            foreach (EntityDataParameter p in list)
+            foreach (EntitySchemaParameter schema in listSchemaParameter)
             {
-                ParameterKey key = p switch
-                {
-                    EntityDataParameterStyle => new(typeof(EntityDataParameterStyle), p.SchemaIdentifier),
-                    EntityDataParameterSystem => new(typeof(EntityDataParameterSystem), p.SchemaIdentifier),
-                    EntityDataParameterText => new(typeof(EntityDataParameterText), p.SchemaIdentifier),
-                    _ => throw new InvalidOperationException()
-                };
+                _listValidSchemaIdentifier.Add(schema.SchemaIdentifier);
+            }
 
-                if (!_cache.TryGetValue(key, out List<EntityDataParameter>? bucket))
+            foreach (EntityDataParameter parameter in listDataParameter)
+            {
+                ParameterKey key = CreateKey(parameter);
+                if (!_cache.TryGetValue(key, out List<EntityDataParameter>? list))
                 {
-                    _cache[key] = bucket = [];
+                    _cache[key] = list = [];
                 }
 
-                bucket.Add(p);
+                list.Add(parameter);
             }
 
             foreach (ParameterKey key in _cache.Keys.ToList())
             {
-                _cache[key] = _cache[key]
-                    .OrderByDescending(x => x.TimeEffective)
-                    .ThenByDescending(x => x.TimeCreated)
-                    .ToList();
+                _cache[key].Sort(SortByEffectiveThenCreated);
             }
         }
     }
@@ -55,25 +53,14 @@ public sealed class ParameterService(IUnitOfWorkFactory uowFactory) : IParameter
     {
         lock (_lock)
         {
-            ParameterKey key = parameter switch
-            {
-                EntityDataParameterStyle => new(typeof(EntityDataParameterStyle), parameter.SchemaIdentifier),
-                EntityDataParameterSystem => new(typeof(EntityDataParameterSystem), parameter.SchemaIdentifier),
-                EntityDataParameterText => new(typeof(EntityDataParameterText), parameter.SchemaIdentifier),
-                _ => throw new InvalidOperationException()
-            };
-
+            ParameterKey key = CreateKey(parameter);
             if (!_cache.TryGetValue(key, out List<EntityDataParameter>? list))
             {
                 _cache[key] = list = [];
             }
 
             list.Add(parameter);
-            list.Sort((a, b) =>
-            {
-                int comparison = b.TimeEffective.CompareTo(a.TimeEffective);
-                return comparison != 0 ? comparison : b.TimeCreated.CompareTo(a.TimeCreated);
-            });
+            list.Sort(SortByEffectiveThenCreated);
         }
     }
 
@@ -81,13 +68,7 @@ public sealed class ParameterService(IUnitOfWorkFactory uowFactory) : IParameter
     {
         lock (_lock)
         {
-            ParameterKey key = parameter switch
-            {
-                EntityDataParameterStyle => new(typeof(EntityDataParameterStyle), parameter.SchemaIdentifier),
-                EntityDataParameterSystem => new(typeof(EntityDataParameterSystem), parameter.SchemaIdentifier),
-                EntityDataParameterText => new(typeof(EntityDataParameterText), parameter.SchemaIdentifier),
-                _ => throw new InvalidOperationException()
-            };
+            ParameterKey key = CreateKey(parameter);
             if (!_cache.TryGetValue(key, out List<EntityDataParameter>? list)) return;
 
             list.Remove(parameter);
@@ -95,41 +76,34 @@ public sealed class ParameterService(IUnitOfWorkFactory uowFactory) : IParameter
         }
     }
 
-
-    private T? GetEffective<T>(string identifier) where T : EntityDataParameter
+    public void UpdateValidSchemaIdentifierList(IEnumerable<EntitySchemaParameter> list)
     {
-        ParameterKey key = new(typeof(T), identifier);
-        if (!_cache.TryGetValue(key, out List<EntityDataParameter>? list)) return null;
-
-        DateTime now = DateTime.UtcNow;
-        return list.FirstOrDefault(x => x.TimeApproved != null && x.TimeEffective <= now) as T;
+        lock (_lock)
+        {
+            _listValidSchemaIdentifier.Clear();
+            foreach (EntitySchemaParameter schema in list)
+            {
+                _listValidSchemaIdentifier.Add(schema.SchemaIdentifier);
+            }
+        }
     }
 
     public bool TryGetParameterStyle(string identifier, [NotNullWhen(true)] out EntityDataParameterStyle? parameter)
     {
-        lock (_lock)
-        {
-            parameter = GetEffective<EntityDataParameterStyle>(identifier);
-            return parameter != null;
-        }
+        parameter = GetEffective<EntityDataParameterStyle>(identifier);
+        return parameter != null;
     }
 
     public bool TryGetParameterSystem(string identifier, [NotNullWhen(true)] out EntityDataParameterSystem? parameter)
     {
-        lock (_lock)
-        {
-            parameter = GetEffective<EntityDataParameterSystem>(identifier);
-            return parameter != null;
-        }
+        parameter = GetEffective<EntityDataParameterSystem>(identifier);
+        return parameter != null;
     }
 
     public bool TryGetParameterText(string identifier, [NotNullWhen(true)] out EntityDataParameterText? parameter)
     {
-        lock (_lock)
-        {
-            parameter = GetEffective<EntityDataParameterText>(identifier);
-            return parameter != null;
-        }
+        parameter = GetEffective<EntityDataParameterText>(identifier);
+        return parameter != null;
     }
 
     public bool TryGetParameterStyleValue(string identifier, [NotNullWhen(true)] out string? value) => TryGetParameterValue<EntityDataParameterStyle>(identifier, out value);
@@ -150,18 +124,28 @@ public sealed class ParameterService(IUnitOfWorkFactory uowFactory) : IParameter
 
     public bool TryGetParameterSystemValueString(string identifier, out string? value) => TryGetSystemValue(identifier, ParameterSystemTypeEnum.String, out value);
 
+    private T? GetEffective<T>(string identifier) where T : EntityDataParameter
+    {
+        lock (_lock)
+        {
+            if (!_listValidSchemaIdentifier.Contains(identifier)) return null;
+
+            ParameterKey key = CreateKey<T>(identifier);
+            if (!_cache.TryGetValue(key, out List<EntityDataParameter>? list)) return null;
+
+            DateTime now = DateTime.UtcNow;
+            return list.FirstOrDefault(x => x.TimeApproved != null && x.TimeEffective <= now) as T;
+        }
+    }
+
     private bool TryGetParameterValue<TParam>(string identifier, [NotNullWhen(true)] out string? value) where TParam : EntityDataParameter
     {
         value = null;
+        TParam? p = GetEffective<TParam>(identifier);
+        if (p == null) return false;
 
-        lock (_lock)
-        {
-            TParam? p = GetEffective<TParam>(identifier);
-            if (p == null) return false;
-
-            value = p.Value;
-            return true;
-        }
+        value = p.Value;
+        return true;
     }
 
     private bool TryGetSystemValue<T>(string identifier, ParameterSystemTypeEnum type, out T? value)
@@ -172,7 +156,7 @@ public sealed class ParameterService(IUnitOfWorkFactory uowFactory) : IParameter
         return true;
     }
 
-    public static T? ParseSystemValue<T>(ParameterSystemTypeEnum type, string value)
+    private static T? ParseSystemValue<T>(ParameterSystemTypeEnum type, string value)
     {
         object? parsed = type switch
         {
@@ -187,4 +171,33 @@ public sealed class ParameterService(IUnitOfWorkFactory uowFactory) : IParameter
 
         return parsed is T casted ? casted : default;
     }
+
+    private static ParameterKey CreateKey(EntityDataParameter p)
+    {
+        return p switch
+        {
+            EntityDataParameterStyle => new(TypeCodeStyle, p.SchemaIdentifier),
+            EntityDataParameterSystem => new(TypeCodeSystem, p.SchemaIdentifier),
+            EntityDataParameterText => new(TypeCodeText, p.SchemaIdentifier),
+            _ => throw new InvalidOperationException()
+        };
+    }
+
+    private static ParameterKey CreateKey<T>(string identifier) where T : EntityDataParameter
+    {
+        return typeof(T) switch
+        {
+            { } t when t == typeof(EntityDataParameterStyle) => new(TypeCodeStyle, identifier),
+            { } t when t == typeof(EntityDataParameterSystem) => new(TypeCodeSystem, identifier),
+            { } t when t == typeof(EntityDataParameterText) => new(TypeCodeText, identifier),
+            _ => throw new InvalidOperationException()
+        };
+    }
+
+    private static readonly Comparison<EntityDataParameter> SortByEffectiveThenCreated =
+        (a, b) =>
+        {
+            int comparison = b.TimeEffective.CompareTo(a.TimeEffective);
+            return comparison != 0 ? comparison : b.TimeCreated.CompareTo(a.TimeCreated);
+        };
 }

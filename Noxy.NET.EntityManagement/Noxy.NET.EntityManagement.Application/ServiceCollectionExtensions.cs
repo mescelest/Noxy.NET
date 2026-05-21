@@ -2,7 +2,9 @@
 using Noxy.NET.EntityManagement.Application.Interfaces;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Services;
+using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -30,13 +32,14 @@ public static class ServiceCollectionExtensions
 
             ISchemaBuilderService serviceSchemaBuilder = scope.ServiceProvider.GetRequiredService<ISchemaBuilderService>();
             EntitySchema schema = await serviceSchemaBuilder.ConstructSchema();
-            IEnumerable<string> list = schema.ParameterList?.Select(x => x.SchemaIdentifier) ?? [];
+            List<EntitySchemaParameter> listSchemaParameter = schema.ParameterList?.Select(x => x.GetValue()).ToList() ?? [];
 
             IUnitOfWorkFactory serviceUoWFactory = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>();
             await using IUnitOfWork uow = await serviceUoWFactory.Create();
 
+            List<EntityDataParameter> listDataParameter = await uow.Data.GetParameterList();
             IParameterService serviceParameter = scope.ServiceProvider.GetRequiredService<IParameterService>();
-            await serviceParameter.Initialize();
+            serviceParameter.Initialize(listSchemaParameter, listDataParameter);
         }
         catch
         {

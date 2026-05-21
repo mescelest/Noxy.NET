@@ -1,12 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
+using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 
 namespace Noxy.NET.EntityManagement.Application.Interfaces.Services;
 
 public interface IParameterService
 {
-    Task Initialize();
+    void Initialize(List<EntitySchemaParameter> listSchemaParameter, List<EntityDataParameter> listDataParameter);
     void AddToCache(EntityDataParameter parameter);
     void RemoveFromCache(EntityDataParameter parameter);
 
