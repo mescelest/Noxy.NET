@@ -1,14 +1,38 @@
-@using Noxy.NET.EntityManagement.Domain.Requests.Data.Parameter
-@inherits BaseRequestForm<Noxy.NET.EntityManagement.Domain.Requests.Data.Parameter.RequestDataParameterSystemCreate, Noxy.NET.EntityManagement.Domain.Responses.Data.Parameter.ResponseDataParameterSystemCreate>
+@inherits BaseRequestForm<RequestDataParameterSystemCreate, ResponseDataParameterSystemCreate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestDataParameterSystemCreate" Context="Context" OnSubmit="ForwardSubmit">
-        <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
-                        @bind-Value="Model.Value"/>
+        @switch (SchemaParameter.Type)
+        {
+            case ParameterSystemTypeEnum.Boolean:
+                <InputGroupCheckbox Option="true" Name="@nameof(Model.Value)" DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
+                                    @bind-Value:get="GetBooleanValue()" @bind-Value:set="SetBooleanValue">
+                    <span>Enabled</span>
+                </InputGroupCheckbox>
+                break;
+            case ParameterSystemTypeEnum.String:
+            case ParameterSystemTypeEnum.Guid:
+                <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))" @bind-Value="Model.Value"/>
+                break;
+            case ParameterSystemTypeEnum.Integer:
+                <InputGroupInteger DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
+                                   @bind-Value:get="GetIntegerValue()" @bind-Value:set="SetIntegerValue"/>
+                break;
+            case ParameterSystemTypeEnum.Decimal:
+                <InputGroupDecimal DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
+                                   @bind-Value:get="GetDecimalValue()" @bind-Value:set="SetDecimalValue"/>
+                break;
+            case ParameterSystemTypeEnum.DateTime:
+                <InputGroupDate DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
+                                @bind-Value:get="GetDateTimeValue()" @bind-Value:set="SetDateTimeValue"/>
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
 
-        <InputGroupRadioSet OptionList="OptionSet" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
-                            @bind-Value="Model.TimeEffective">
-            @if (context.Option == null)
+        <InputGroupRadioSet OptionList="IsScheduledOptions" Name="@nameof(Model.TimeEffective)" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
+                            @bind-Value:get="GetIsScheduled()" @bind-Value:set="SetIsScheduled">
+            @if (!context.Option)
             {
                 <span>Immediately</span>
             }
@@ -18,9 +42,9 @@
             }
         </InputGroupRadioSet>
 
-        @if (Model.TimeEffective != null)
+        @if (Model.TimeEffective.HasValue)
         {
-            <InputGroupDate DisplayName="Pick effective date" @bind-Value:get="_optionList[1]" @bind-Value:set="SetEffectiveDatePicked"/>
+            <InputGroupDate DisplayName="Pick effective date" @bind-Value="Model.TimeEffective"/>
         }
 
         @ChildContent
@@ -33,17 +57,71 @@
     [Parameter, EditorRequired]
     public EntitySchemaParameterSystem SchemaParameter { get; set; }
 
-    private readonly List<DateTime?> _optionList = [null, DateTime.Now.AddDays(1)];
-    private HashSet<DateTime?> OptionSet => _optionList.ToHashSet();
+    private static readonly HashSet<bool> IsScheduledOptions = [false, true];
+
+    private bool GetIsScheduled()
+    {
+        return Model.TimeEffective.HasValue;
+    }
+
+    private void SetIsScheduled(bool value)
+    {
+        if (value)
+        {
+            Model.TimeEffective ??= DateTime.Now.AddDays(1);
+        }
+        else
+        {
+            Model.TimeEffective = null;
+        }
+    }
+
+    private bool GetBooleanValue()
+    {
+        if (Model.Value == string.Empty) Model.Value = bool.FalseString;
+        return bool.TryParse(Model.Value, out bool value) && value;
+    }
+
+    private void SetBooleanValue(bool value)
+    {
+        Model.Value = value.ToString();
+    }
+
+    private DateTime? GetDateTimeValue()
+    {
+        if (Model.Value == string.Empty) Model.Value = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);
+        return DateTime.TryParse(Model.Value, out DateTime value) ? value : null;
+    }
+
+    private void SetDateTimeValue(DateTime? value)
+    {
+        Model.Value = value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : "";
+    }
+
+    private int? GetIntegerValue()
+    {
+        return int.TryParse(Model.Value, out int value) ? value : null;
+    }
+
+    private void SetIntegerValue(int? value)
+    {
+        Model.Value = value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : "";
+    }
+
+    private decimal? GetDecimalValue()
+    {
+        return decimal.TryParse(Model.Value, out decimal value) ? value : null;
+    }
+
+    private void SetDecimalValue(decimal? value)
+    {
+        Model.Value = value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : "";
+    }
 
     protected override WebFormContext<RequestDataParameterSystemCreate> CreateContext()
     {
         return new(new() { SchemaIdentifier = SchemaParameter.SchemaIdentifier });
     }
 
-    private void SetEffectiveDatePicked(DateTime? value)
-    {
-        Model.TimeEffective = _optionList[1] = value;
-    }
 }
 

@@ -1,14 +1,13 @@
-@using Noxy.NET.EntityManagement.Domain.Requests.Data.Parameter
-@inherits BaseRequestForm<Noxy.NET.EntityManagement.Domain.Requests.Data.Parameter.RequestDataParameterStyleCreate, Noxy.NET.EntityManagement.Domain.Responses.Data.Parameter.ResponseDataParameterStyleCreate>
+@inherits BaseRequestForm<RequestDataParameterStyleCreate, ResponseDataParameterStyleCreate>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="RequestDataParameterStyleCreate" Context="Context" OnSubmit="ForwardSubmit">
         <InputGroupText DisplayName="@GetDisplayName(nameof(Model.Value))" Description="@GetDescription(nameof(Model.Value))"
                         @bind-Value="Model.Value"/>
 
-        <InputGroupRadioSet OptionList="OptionSet" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
-                            @bind-Value="Model.TimeEffective">
-            @if (context.Option == null)
+        <InputGroupRadioSet OptionList="IsScheduledOptions" Name="@nameof(Model.TimeEffective)" DisplayName="@GetDisplayName(nameof(Model.TimeEffective))" Description="@GetDescription(nameof(Model.TimeEffective))"
+                            @bind-Value:get="GetIsScheduled()" @bind-Value:set="SetIsScheduled">
+            @if (!context.Option)
             {
                 <span>Immediately</span>
             }
@@ -18,32 +17,42 @@
             }
         </InputGroupRadioSet>
 
-        @if (Model.TimeEffective != null)
+        @if (Model.TimeEffective.HasValue)
         {
-            <InputGroupDate DisplayName="Pick effective date" @bind-Value:get="_optionList[1]" @bind-Value:set="SetEffectiveDatePicked"/>
+            <InputGroupDate DisplayName="Pick effective date" @bind-Value="Model.TimeEffective"/>
         }
 
         @ChildContent
     </WebForm>
 </div>
 
-
 @code {
 
     [Parameter, EditorRequired]
     public EntitySchemaParameterStyle SchemaParameter { get; set; }
 
-    private readonly List<DateTime?> _optionList = [null, DateTime.Now.AddDays(1)];
-    private HashSet<DateTime?> OptionSet => _optionList.ToHashSet();
+    private static readonly HashSet<bool> IsScheduledOptions = [false, true];
+
+    private bool GetIsScheduled()
+    {
+        return Model.TimeEffective.HasValue;
+    }
+
+    private void SetIsScheduled(bool value)
+    {
+        if (value)
+        {
+            Model.TimeEffective ??= DateTime.Now.AddDays(1);
+        }
+        else
+        {
+            Model.TimeEffective = null;
+        }
+    }
 
     protected override WebFormContext<RequestDataParameterStyleCreate> CreateContext()
     {
         return new(new() { SchemaIdentifier = SchemaParameter.SchemaIdentifier });
-    }
-
-    private void SetEffectiveDatePicked(DateTime? value)
-    {
-        Model.TimeEffective = _optionList[1] = value;
     }
 
 }

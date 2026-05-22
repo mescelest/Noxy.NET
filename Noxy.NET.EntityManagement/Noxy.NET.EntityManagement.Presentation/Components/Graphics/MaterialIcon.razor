@@ -1,11 +1,10 @@
 @inherits ElementComponent
 
-<i class="@CssClass" style="@GetStyle()">
+<i @attributes="AdditionalAttributes" class="@CssClass" style="@GetStyle()">
     @IconCurrent
 </i>
 
 @code {
-
     [Parameter, EditorRequired]
     public string? Icon { get; set; }
     private string IconCurrent => Icon ?? "crop_square";
@@ -19,17 +18,32 @@
     private string ColorCurrent => Color ?? "inherit";
 
     [Parameter]
-    public MaterialIconVariantEnum? Variant { get; set; }
-    private MaterialIconVariantEnum VariantCurrent => Variant ?? MaterialIconVariantEnum.Filled;
+    public MaterialSymbolVariantEnum? Variant { get; set; }
+    private MaterialSymbolVariantEnum VariantCurrent => Variant ?? MaterialSymbolVariantEnum.Outlined;
 
-    protected override string CssClass => CombineCssClass(base.CssClass, GetComponentClass(), VariantCurrent.ToText());
+    [Parameter]
+    public int? Weight { get; set; }
+    private int WeightCurrent => Weight ?? 400;
+
+    [Parameter]
+    public int? Grade { get; set; }
+    private int GradeCurrent => Grade ?? 0;
+
+    [Parameter]
+    public int? OpticalSize { get; set; }
+    private int OpticalSizeCurrent => OpticalSize ?? 0;
+
+    protected override string CssClass => CombineCssClass(GetComponentClass(), VariantCurrent.ToText());
 
     private string GetStyle()
     {
+        int fillValue = VariantCurrent is MaterialSymbolVariantEnum.Filled or MaterialSymbolVariantEnum.RoundedFilled or MaterialSymbolVariantEnum.SharpFilled ? 1 : 0;
+
         Dictionary<string, object> style = new()
         {
             ["font-size"] = SizeCurrent,
-            ["color"] = ColorCurrent
+            ["color"] = ColorCurrent,
+            ["font-variation-settings"] = $"'FILL' {fillValue}, 'wght' {WeightCurrent}, 'GRAD' {GradeCurrent}, 'opsz' {OpticalSizeCurrent}"
         };
 
         return string.Join(";", style.Select(kvp => $"{kvp.Key}:{kvp.Value}"));

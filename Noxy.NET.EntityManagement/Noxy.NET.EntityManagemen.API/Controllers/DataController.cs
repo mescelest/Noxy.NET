@@ -23,7 +23,7 @@ public class DataController(IMediator mediator) : ControllerBase
         return await mediator.Send(new QueryDataParameterList(identifier, request));
     }
 
-    [HttpGet("parameter/{identifier}/count")]
+    [HttpGet("parameter/by-identifier/{identifier}/count")]
     public async Task<ActionResult<ResponseDataParameterCount>> ParameterCountWithIdentifier(string identifier, [FromQuery] RequestDataParameterCount request)
     {
         return await mediator.Send(new QueryDataParameterCount(identifier, request));

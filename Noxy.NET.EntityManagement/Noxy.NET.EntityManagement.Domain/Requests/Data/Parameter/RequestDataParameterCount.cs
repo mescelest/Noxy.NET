@@ -9,7 +9,7 @@ public class RequestDataParameterCount : BaseRequestGet<ResponseDataParameterCou
 {
     public override string APIEndpoint => $"/data/parameter/by-identifier/{SchemaIdentifier}/count";
 
-    public required string SchemaIdentifier { get; init; }
+    public required string? SchemaIdentifier { get; init; }
 
     [DisplayName(ParameterTextConstants.LabelFormSearch)]
     [Description(ParameterTextConstants.HelpFormSearch)]

@@ -1,6 +1,3 @@
-@inject IState<FeatureDataParameterState> StateDataParameter
-@inject TextParameterService TextParameterService
-@inject SystemConstantService SystemConstantService
 @inject IDispatcher Dispatcher
 @inherits FluxorElementComponent
 
@@ -13,52 +10,7 @@
         </FormDataParameterSystemCreate>
     </div>
 
-    <div class="table">
-        <div class="header row">
-            <b></b>
-            <b class="column left">@Presentation.Services.TextParameterService.Get(ParameterTextConstants.LabelValue, GetComponentName())</b>
-            <b class="column right">@Presentation.Services.TextParameterService.Get(ParameterTextConstants.LabelTimeEffective, GetComponentName())</b>
-            <b class="column right">@Presentation.Services.TextParameterService.Get(ParameterTextConstants.LabelTimeApproved, GetComponentName())</b>
-            <b class="column right">@Presentation.Services.TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName())</b>
-        </div>
-
-        <div class="body">
-            @{
-                EntityDataParameterSystem[] list = GetParameterList();
-                Guid current = GetCurrent(list);
-
-                foreach (EntityDataParameterSystem item in list)
-                {
-                    bool isCurrent = current == item.ID;
-
-                    <div class="row" current="@isCurrent">
-                        <span>
-                            @if (isCurrent)
-                            {
-                                <MaterialIcon Icon="chevron_right" Size="24"/>
-                            }
-                            else if (item.TimeApproved == null)
-                            {
-                                <MaterialIcon Icon="how_to_reg" Size="24" @onclick="() => ApproveParameter(item)"/>
-                            }
-                            else if (item.TimeEffective > DateTime.UtcNow)
-                            {
-                                <MaterialIcon Icon="delete" Size="24" @onclick="() => DeleteParameter(item)"/>
-                            }
-                            else
-                            {
-                                <MaterialIcon Icon="reset_settings" Size="24" @onclick="() => UpdateForm(item)"/>
-                            }
-                        </span>
-                        <span class="column left">@item.Value</span>
-                        <span class="column right">@Presentation.Services.SystemConstantService.AsDate(item.TimeEffective)</span>
-                        <span class="column right">@Presentation.Services.SystemConstantService.AsDate(item.TimeApproved)</span>
-                        <span class="column right">@Presentation.Services.SystemConstantService.AsDate(item.TimeCreated)</span>
-                    </div>
-                }
-            }
-        </div>
-    </div>
+    <DataParameterListTable T="EntityDataParameterSystem" class="table" Scope="@ScopeCurrent" SchemaParameter="SchemaParameter" OnClone="UpdateForm"/>
 </div>
 
 @code {
@@ -72,19 +24,6 @@
 
     private FormDataParameterSystemCreate? _ref;
 
-    private EntityDataParameterSystem[] GetParameterList()
-    {
-        IReadOnlyList<EntityDataParameter> list = StateDataParameter.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntityDataParameter>? value) ? value : [];
-        return list.OfType<EntityDataParameterSystem>().OrderByDescending(x => x.TimeEffective).ToArray();
-    }
-
-    private static Guid GetCurrent(EntityDataParameterSystem[] list)
-    {
-        return list.Length != 0
-                ? list.FirstOrDefault(x => x.TimeEffective < DateTime.UtcNow && x.TimeApproved != null)?.ID ?? Guid.Empty
-                : Guid.Empty;
-    }
-
     private void UpdateForm(EntityDataParameterSystem entity)
     {
         if (_ref == null) return;
@@ -93,23 +32,13 @@
         _ref.Model.TimeEffective = entity.TimeEffective;
     }
 
-    private void ApproveParameter(EntityDataParameter entity)
-    {
-        Dispatcher.Dispatch(new FeatureDataParameterReducers.ApproveAction(ScopeCurrent, new() { ID = entity.ID }));
-    }
-
-    private void DeleteParameter(EntityDataParameter entity)
-    {
-        Dispatcher.Dispatch(new FeatureDataParameterReducers.DeleteAction(ScopeCurrent, new() { ID = entity.ID }));
-    }
-
     private void Submit(WebFormContext<RequestDataParameterSystemCreate> context)
     {
         Dispatcher.Dispatch(new FeatureDataParameterReducers.AddSystemAction(ScopeCurrent, new()
         {
-                SchemaIdentifier = SchemaParameter.SchemaIdentifier,
-                Value = context.Model.Value,
-                TimeEffective = context.Model.TimeEffective
+            SchemaIdentifier = SchemaParameter.SchemaIdentifier,
+            Value = context.Model.Value,
+            TimeEffective = context.Model.TimeEffective
         }));
     }
 

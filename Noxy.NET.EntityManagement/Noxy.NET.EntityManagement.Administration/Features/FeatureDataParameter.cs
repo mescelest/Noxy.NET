@@ -31,10 +31,24 @@ public record FeatureDataParameterState : BaseFeatureStateRequest<FeatureDataPar
     public bool TryGetLoading(string scope, FeatureDataParameterActionKind kind, out bool value) => Loading.TryGetValue(new(scope, kind), out value);
     public bool TryGetError(string scope, FeatureDataParameterActionKind kind, out string? error) => Error.TryGetValue(new(scope, kind), out error);
 
+    public bool TryHasListKey(string scope, out bool value) => value = List.ContainsKey(scope);
+
     public bool TryGetCount(string scope, out int value) => Count.TryGetValue(scope, out value);
     public bool TryGetFind(string scope, [NotNullWhen(true)] out EntityDataParameter? value) => Find.TryGetValue(scope, out value);
     public bool TryGetList(string scope, [NotNullWhen(true)] out IReadOnlyList<EntityDataParameter>? list) => List.TryGetValue(scope, out list);
     public bool TryGetRequest(string scope, [NotNullWhen(true)] out RequestDataParameterList? request) => Request.TryGetValue(scope, out request);
+
+    public bool TryGetSortedList<T>(string scope, [NotNullWhen(true)] out IReadOnlyList<T>? sortedList) where T : EntityDataParameter
+    {
+        if (List.TryGetValue(scope, out IReadOnlyList<EntityDataParameter>? list))
+        {
+            sortedList = list.OfType<T>().OrderByDescending(t => t.TimeEffective).ThenByDescending(t => t.TimeCreated).ToList();
+            return true;
+        }
+
+        sortedList = null;
+        return false;
+    }
 }
 
 public class FeatureDataParameterReducers : BaseFeatureReducerRequest<FeatureDataParameterState, FeatureDataParameterActionKind>

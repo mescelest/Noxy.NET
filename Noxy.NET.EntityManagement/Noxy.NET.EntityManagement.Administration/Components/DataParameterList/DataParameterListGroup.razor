@@ -3,24 +3,26 @@
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Collapsible Loading="IsLoadingList" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
+    <Collapsible @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
         <Header>
             <h3>@SchemaParameter.Name</h3>
         </Header>
 
         <Content>
-            @switch (SchemaParameter)
-            {
-                case EntitySchemaParameterStyle parameterStyle:
-                    <DataParameterListItemStyle SchemaParameter="@parameterStyle"/>
-                    break;
-                case EntitySchemaParameterSystem parameterSystem:
-                    <DataParameterListItemSystem SchemaParameter="@parameterSystem"/>
-                    break;
-                case EntitySchemaParameterText parameterText:
-                    <DataParameterListItemText SchemaParameter="@parameterText"/>
-                    break;
-            }
+            <CascadingValue Value="!_isCollapsed" Name="CanLoad">
+                @switch (SchemaParameter)
+                {
+                    case EntitySchemaParameterStyle parameterStyle:
+                        <DataParameterListItemStyle Scope="@ScopeCurrent" SchemaParameter="@parameterStyle"/>
+                        break;
+                    case EntitySchemaParameterSystem parameterSystem:
+                        <DataParameterListItemSystem Scope="@ScopeCurrent" SchemaParameter="@parameterSystem"/>
+                        break;
+                    case EntitySchemaParameterText parameterText:
+                        <DataParameterListItemText Scope="@ScopeCurrent" SchemaParameter="@parameterText"/>
+                        break;
+                }
+            </CascadingValue>
         </Content>
     </Collapsible>
 </div>
@@ -36,14 +38,9 @@
 
     private bool _isCollapsed = true;
 
-    private bool IsLoadingList => StateDataParameter.Value.TryGetLoading(ScopeCurrent, FeatureDataParameterActionKind.List, out bool isLoading) && isLoading;
-
     private void SetCollapsed(bool value)
     {
         _isCollapsed = value;
-        if (_isCollapsed || IsLoadingList) return;
-
-        Dispatcher.Dispatch(new FeatureDataParameterReducers.ListAction(ScopeCurrent, new() { SchemaIdentifier = SchemaParameter.SchemaIdentifier }));
     }
 
 }

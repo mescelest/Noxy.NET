@@ -1,4 +1,4 @@
-.SchemaParameterListItemText {
+.DataParameterListItemSystem {
     display: flex;
     flex: 1 1 auto;
     flex-flow: column;
@@ -8,7 +8,7 @@
 .create {
     display: flex;
     flex-flow: column;
-    padding-inline: var(--size-gap-xs);
+    padding: var(--size-gap-xs);
 }
 
 .action-list {
@@ -18,46 +18,45 @@
     justify-content: flex-end;
 }
 
-.table {
+.DataParameterListItemSystem ::deep > .table {
     display: grid;
-    column-gap: var(--size-gap-md);
     grid-template-columns: max-content 1fr max-content max-content max-content;
-    border-top: 1px solid black;
 }
 
-.header {
-    border-bottom: 1px solid black;
-}
+/*.header {*/
+/*    border-bottom: 1px solid black;*/
+/*}*/
 
-.body {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
-}
+/*.body {*/
+/*    grid-column: 1 / -1;*/
+/*    display: grid;*/
+/*    grid-template-columns: subgrid;*/
+/*}*/
 
-.row {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
-    padding: var(--size-gap-xs);
-}
+/*.row {*/
+/*    grid-column: 1 / -1;*/
+/*    display: grid;*/
+/*    grid-template-columns: subgrid;*/
+/*    padding: var(--size-gap-xs);*/
+/*    align-items: center;*/
+/*}*/
 
-.row[current] {
-    font-weight: 600;
-    background-color: #dfdfdf;
-}
+/*.row[current] {*/
+/*    font-weight: 600;*/
+/*    background-color: #dfdfdf;*/
+/*}*/
 
-.column {
-    display: flex;
-    flex: 0 0 auto;
-    flex-flow: row;
-}
+/*.column {*/
+/*    display: flex;*/
+/*    flex: 0 0 auto;*/
+/*    flex-flow: row;*/
+/*}*/
 
-.column.left {
-    justify-self: flex-start;
-}
+/*.column.left {*/
+/*    justify-self: flex-start;*/
+/*}*/
 
-.column.right {
-    justify-self: flex-end;
-}
+/*.column.right {*/
+/*    justify-self: flex-end;*/
+/*}*/
 

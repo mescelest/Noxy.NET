@@ -11,7 +11,9 @@
 
         @foreach (EntitySchema item in List)
         {
-            @ChildContent(item)
+            <div class="item">
+                @ChildContent(item)
+            </div>
         }
     </Loader>
 </div>

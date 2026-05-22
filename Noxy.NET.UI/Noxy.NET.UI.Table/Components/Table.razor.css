@@ -1,35 +1,36 @@
 .Table {
     display: grid;
-    grid-auto-rows: max-content;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    column-gap: var(--size-gap-xs);
-    row-gap: var(--size-gap-xs);
-    padding: var(--size-gap-xxs);
+    column-gap: var(--size-gap-sm);
     overflow: auto;
 }
 
+.header, .row {
+    padding: var(--size-gap-xs) var(--size-gap-sm);
+}
+
 .header {
+    grid-column: 1 / -1;
+
     display: grid;
-    grid-column: 1 / max;
     grid-template-columns: subgrid;
-    padding: var(--size-gap-xxs);
-    margin: calc(-1 * var(--size-gap-xxs));
-    margin-bottom: calc(-1 * var(--size-border-width-md));
-    position: sticky;
-    top: calc(-1 * var(--size-gap-xxs));
-    left: 0;
     border-bottom: var(--size-border-width-md) solid var(--color-offset-primary-lg);
     background-color: var(--color-offset-primary-sm);
 }
 
 .row {
+    grid-column: 1 / -1;
+
     display: grid;
-    grid-column: 1 / max;
     grid-template-columns: subgrid;
-    padding: var(--size-gap-xxs);
-    margin: calc(-1 * var(--size-gap-xxs));
 }
 
 .row:nth-of-type(2n+1) {
     background-color: var(--color-offset-primary-sm);
+}
+
+.Table ::deep > .loading {
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: center;
 }

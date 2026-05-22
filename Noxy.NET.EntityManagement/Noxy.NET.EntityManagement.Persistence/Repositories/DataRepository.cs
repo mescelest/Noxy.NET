@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
@@ -6,6 +7,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 using Noxy.NET.EntityManagement.Domain.Models;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
+using Noxy.NET.EntityManagement.Persistence.Extensions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Data;
 using Noxy.NET.EntityManagement.Persistence.Tables.Data.Discriminators;
 
@@ -21,47 +23,48 @@ public class DataRepository(DataContext context, IDependencyInjectionService ser
 
     public async Task<EntityDataParameter> GetParameterByID(Guid id)
     {
-        TableDataParameter result = await Context.DataParameter.SingleAsync(x => x.ID == id);
+        TableDataParameter result = await Context.DataParameter.AsNoTracking().SingleAsync(x => x.ID == id);
         return MapperT2E.Map(result);
     }
 
     public async Task<List<EntityDataParameter>> GetParameterListByIdentifier(string identifier, FilterDataParameterList filter)
     {
-        List<TableDataParameter> result = await Context.DataParameter
-            .AsNoTracking()
+        IQueryable<TableDataParameter> query = Context.DataParameter.AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Value, $"%{filter.Search}%"));
+
+        List<TableDataParameter> result = await query
             .Where(x => x.SchemaIdentifier == identifier)
-            .OrderBy(x => x.TimeEffective)
-            .ThenBy(x => x.TimeCreated)
+            .OrderByDynamic(filter.SortColumn, filter.SortDirection == ListSortDirection.Descending)
+            .Skip(filter.PageNumber * filter.PageSize)
+            .Take(filter.PageSize)
             .ToListAsync();
 
-        return result.Select(MapperT2E.Map).ToList();
+        return [.. result.Select(MapperT2E.Map)];
     }
 
     public async Task<int> GetParameterCountByIdentifier(string identifier, FilterDataParameterCount filter)
     {
-        int result = await Context.DataParameter
-            .AsNoTracking()
-            .Where(x => x.SchemaIdentifier == identifier)
-            .CountAsync();
+        IQueryable<TableDataParameter> query = Context.DataParameter.AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Value, $"%{filter.Search}%"));
 
-        return result;
+        return await query.Where(x => x.SchemaIdentifier == identifier).CountAsync();
     }
 
     public async Task<EntityDataParameterStyle> GetParameterStyleByID(Guid id)
     {
-        TableDataParameterStyle result = await Context.DataParameterStyle.SingleAsync(x => x.ID == id);
+        TableDataParameterStyle result = await Context.DataParameterStyle.AsNoTracking().SingleAsync(x => x.ID == id);
         return MapperT2E.Map(result);
     }
 
     public async Task<EntityDataParameterSystem> GetParameterSystemByID(Guid id)
     {
-        TableDataParameterSystem result = await Context.DataParameterSystem.SingleAsync(x => x.ID == id);
+        TableDataParameterSystem result = await Context.DataParameterSystem.AsNoTracking().SingleAsync(x => x.ID == id);
         return MapperT2E.Map(result);
     }
 
     public async Task<EntityDataParameterText> GetParameterTextByID(Guid id)
     {
-        TableDataParameterText result = await Context.DataParameterText.SingleAsync(x => x.ID == id);
+        TableDataParameterText result = await Context.DataParameterText.AsNoTracking().SingleAsync(x => x.ID == id);
         return MapperT2E.Map(result);
     }
 

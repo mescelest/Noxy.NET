@@ -6,19 +6,21 @@
         @TableHeader
     </div>
 
-    @if (List.Any())
-    {
-        @foreach (T element in List)
+    <Loader class="loading" Loading="Loading">
+        @if (List.Any())
         {
-            <div class="row">
-                @TableRow(element)
-            </div>
+            @foreach (T element in List)
+            {
+                <div class="row" @key="element">
+                    @TableRow(element)
+                </div>
+            }
         }
-    }
-    else if (Placeholder != null)
-    {
-        <div class="placeholder">No rows present</div>
-    }
+        else if (Placeholder != null)
+        {
+            <div class="placeholder">No rows present</div>
+        }
+    </Loader>
 </div>
 
 @code {
@@ -34,5 +36,8 @@
 
     [Parameter]
     public RenderFragment? Placeholder { get; set; }
+
+    [Parameter]
+    public bool Loading { get; set; }
 
 }
