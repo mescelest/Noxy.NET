@@ -1,0 +1,31 @@
+@inherits ElementComponent
+
+@code {
+    [CascadingParameter]
+    private TabSet? Parent { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; }
+
+    [Parameter]
+    public string? Link { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? LinkContent { get; set; }
+
+    public string ID => UUIDCode;
+
+    protected override void OnInitialized()
+    {
+        if (Parent == null)
+        {
+            throw new InvalidOperationException("TabPage must be used inside a TabSet component.");
+        }
+
+        Parent.AddPage(this);
+    }
+
+}

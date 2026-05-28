@@ -1,0 +1,120 @@
+@implements IDisposable
+
+<CascadingValue Value="this" IsFixed="true">
+    @ChildContent
+</CascadingValue>
+
+<div class="tab-container">
+    <div role="tablist" aria-label="Entity Details" class="tab-list" @onkeydown="HandleKeyDown">
+        @foreach (TabPage item in _pages)
+        {
+            bool isSelected = item == _activePage;
+            string isSelectedAria = isSelected ? "true" : "false";
+            string? isSelectedClass = isSelected ? "active" : null;
+            string tabId = $"tab-{item.ID}";
+            string panelId = $"panel-{item.ID}";
+            int tabIndex = isSelected ? 0 : -1;
+
+            <div class="tab">
+                <button @ref="_tabReferences[item]" type="button" class="tab-button" id="@tabId" tabindex="@tabIndex" data-selected="@isSelectedClass"
+                        role="tab" aria-selected="@isSelectedAria" aria-controls="@panelId" @onclick="() => ActivatePage(item)">
+                    @item.Title
+                </button>
+                @if (!string.IsNullOrWhiteSpace(item.Link))
+                {
+                    <a href="@item.Link" target="_blank" class="tab-link">
+                        @if (item.LinkContent != null)
+                        {
+                            @item.LinkContent
+                        }
+                        else
+                        {
+                            <span>⇾</span>
+                        }
+                    </a>
+                }
+            </div>
+        }
+    </div>
+
+    @foreach (TabPage item in _pages)
+    {
+        bool isSelected = item == _activePage;
+        string tabId = $"tab-{item.ID}";
+        string panelId = $"panel-{item.ID}";
+
+        <div class="tab-panel" id="@panelId" role="tabpanel" hidden="@(!isSelected)" aria-labelledby="@tabId">
+            @if (isSelected)
+            {
+                @item.ChildContent
+            }
+        </div>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment<bool>? Arrow { get; set; }
+
+    private readonly List<TabPage> _pages = [];
+    private TabPage? _activePage;
+
+    private readonly Dictionary<TabPage, ElementReference> _tabReferences = new();
+
+    public void AddPage(TabPage page)
+    {
+        _pages.Add(page);
+        if (_pages.Count == 1)
+        {
+            _activePage = page;
+        }
+
+        StateHasChanged();
+    }
+
+    private void ActivatePage(TabPage page)
+    {
+        _activePage = page;
+        StateHasChanged();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (_activePage == null || _pages.Count <= 1) return;
+
+        int currentIndex = _pages.IndexOf(_activePage);
+        int nextIndex;
+
+        switch (e.Key)
+        {
+            case "ArrowRight":
+                nextIndex = (currentIndex + 1) % _pages.Count;
+                break;
+            case "ArrowLeft":
+                nextIndex = (currentIndex - 1 + _pages.Count) % _pages.Count;
+                break;
+            default:
+                return;
+        }
+
+        TabPage nextPages = _pages[nextIndex];
+        ActivatePage(nextPages);
+
+        // WCAG Focus Management: Shift physical keyboard focus to the new tab
+        if (_tabReferences.TryGetValue(nextPages, out ElementReference elementRef))
+        {
+            await elementRef.FocusAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        _pages.Clear();
+        _tabReferences.Clear();
+    }
+
+}

@@ -52,12 +52,16 @@ public class SchemaParameterTextSeed(ModelBuilder builder, TableSchema refSchema
 
         Register(ParameterTextConstants.HeaderSchema, "Schemas");
         Register(ParameterTextConstants.HeaderContext, "Contexts");
+        Register(ParameterTextConstants.HeaderContextList, "Context list");
         Register(ParameterTextConstants.HeaderElement, "Elements");
+        Register(ParameterTextConstants.HeaderElementList, "Element list");
         Register(ParameterTextConstants.HeaderParameter, "Parameters");
+        Register(ParameterTextConstants.HeaderParameterList, "Parameters list");
         Register(ParameterTextConstants.HeaderParameterStyle, "Style Parameters");
         Register(ParameterTextConstants.HeaderParameterSystem, "System Parameters");
         Register(ParameterTextConstants.HeaderParameterText, "Text Parameters");
         Register(ParameterTextConstants.HeaderProperty, "Properties");
+        Register(ParameterTextConstants.HeaderPropertyList, "Property list");
         Register(ParameterTextConstants.HeaderPropertyBoolean, "Boolean Properties");
         Register(ParameterTextConstants.HeaderPropertyCollection, "Collection Properties");
         Register(ParameterTextConstants.HeaderPropertyDateTime, "DateTime Properties");

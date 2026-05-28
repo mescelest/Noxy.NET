@@ -24,12 +24,16 @@ public static class ParameterTextConstants
 
     public const string HeaderSchema = "Header-Schema";
     public const string HeaderContext = "Header-Context";
+    public const string HeaderContextList = "Header-Context-List";
     public const string HeaderElement = "Header-Element";
+    public const string HeaderElementList = "Header-Element-List";
     public const string HeaderParameter = "Header-Parameter";
+    public const string HeaderParameterList = "Header-Parameter-List";
     public const string HeaderParameterStyle = "Header-Parameter-Style";
     public const string HeaderParameterSystem = "Header-Parameter-System";
     public const string HeaderParameterText = "Header-Parameter-Text";
     public const string HeaderProperty = "Header-Property";
+    public const string HeaderPropertyList = "Header-Property-List";
     public const string HeaderPropertyBoolean = "Header-Property-Boolean";
     public const string HeaderPropertyCollection = "Header-Property-Collection";
     public const string HeaderPropertyDateTime = "Header-Property-DateTime";

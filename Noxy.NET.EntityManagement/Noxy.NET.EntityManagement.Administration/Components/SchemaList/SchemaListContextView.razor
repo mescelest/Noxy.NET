@@ -4,36 +4,41 @@
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed">
-        <Header>
-            <div class="title">
-                <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Context list</DynamicHTMLTag>
-                <NavLink href="@Link">
-                    <MaterialIcon Icon="arrow_right_alt" Size="@Size"/>
-                </NavLink>
-            </div>
-        </Header>
-        <Content>
-            <Table class="grid" List="List">
-                <TableHeader>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelName)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelTitle)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelDescription)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
-                </TableHeader>
-                <TableRow>
-                    <span>@context.SchemaIdentifier</span>
-                    <span>@context.Name</span>
-                    <span>@context.Note</span>
-                    <span>@context.TitleTextParameter?.Name</span>
-                    <span>@context.DescriptionTextParameter?.Name</span>
-                    <span>@context.TimeCreated</span>
-                </TableRow>
-            </Table>
-        </Content>
-    </Collapsible>
+    <Table class="grid" List="List">
+        <TableHeader>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelName)</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote)</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTitle)</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelDescription)</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
+        </TableHeader>
+        <TableRow>
+            <span>@context.SchemaIdentifier</span>
+            <span>@context.Name</span>
+            <span>@context.Note</span>
+            <span>@context.TitleTextParameter?.Name</span>
+            <span>@context.DescriptionTextParameter?.Name</span>
+            <span>@context.TimeCreated</span>
+        </TableRow>
+        <Placeholder>
+            No items here
+        </Placeholder>
+    </Table>
+
+    @* <Collapsible Loading="IsLoading" @bind-Collapsed:get="_isCollapsed" @bind-Collapsed:set="SetCollapsed"> *@
+    @*     <Header> *@
+    @*         <div class="title"> *@
+    @*             <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Context list</DynamicHTMLTag> *@
+    @*             <NavLink href="@Link"> *@
+    @*                 <MaterialIcon Icon="arrow_right_alt" Size="@Size"/> *@
+    @*             </NavLink> *@
+    @*         </div> *@
+    @*     </Header> *@
+    @*     <Content> *@
+    @* *@
+    @*     </Content> *@
+    @* </Collapsible> *@
 </div>
 
 @code {

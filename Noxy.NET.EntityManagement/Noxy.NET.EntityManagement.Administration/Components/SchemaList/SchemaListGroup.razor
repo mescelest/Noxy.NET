@@ -35,14 +35,10 @@
 
     @if (!_isEditMode)
     {
-        <div>
-            <strong>Name:</strong>
-            @Schema.Name
-        </div>
-        <div>
-            <strong>Note:</strong>
+        <span class="note">
             @Schema.Note
-        </div>
+        </span>
+
         <div>
             <strong>Created at:</strong>
             @Schema.TimeCreated
@@ -71,13 +67,28 @@
         </FormSchemaUpdate>
     }
 
-    <SchemaListContextView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+    <TabSet>
+        <TabPage Title="@TextParameterService.Get(ParameterTextConstants.HeaderContextList)" Link="@LinkContext">
+            <ChildContent>
+                <SchemaListContextView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+            </ChildContent>
+            <LinkContent>
+                <MaterialIcon Icon="arrow_right"/>
+            </LinkContent>
+        </TabPage>
 
-    <SchemaListElementView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+        <TabPage Title="@TextParameterService.Get(ParameterTextConstants.HeaderElementList)">
+            <SchemaListElementView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+        </TabPage>
 
-    <SchemaListParameterView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+        <TabPage Title="@TextParameterService.Get(ParameterTextConstants.HeaderParameterList)">
+            <SchemaListParameterView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+        </TabPage>
 
-    <SchemaListPropertyView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+        <TabPage Title="@TextParameterService.Get(ParameterTextConstants.HeaderPropertyList)">
+            <SchemaListPropertyView SchemaID="@Schema.ID" Scope="@Schema.ID.ToString()" HeaderLevel="HeaderLevelCurrent.GetNext()"/>
+        </TabPage>
+    </TabSet>
 
 </div>
 
@@ -99,6 +110,8 @@
     private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
     private string Link => $"/schema/{Schema.ID}";
     private bool IsLoadingUpdate => StateSchema.Value.TryGetLoading(ScopeCurrent, FeatureSchemaActionKind.Update, out bool value) && value;
+
+    private string LinkContext => $"/schema/{Schema.ID}/context";
 
     private void ButtonEditClickerHandler()
     {
