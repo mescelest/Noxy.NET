@@ -1,0 +1,142 @@
+﻿@inject IDispatcher Dispatcher
+
+<div class="block-base-type-selector">
+
+    <div class="header">
+        <FormField Label="Base type group" For="base-type-group">
+            <Select TOption="string" ID="base-type-group" List="BaseTypeConstants.BaseTypes.Keys.ToHashSet()" Value="_inputGroup" ValueChanged="OnGroupCategoryChange">
+                <option value="@context">@context</option>
+            </Select>
+        </FormField>
+
+        <FormField Label="Filter by name" For="filter-by-name">
+            <input class="filter-by-name" id="filter-by-name" type="text" aria-label="Filter by name" value="@_inputSearch" @oninput="OnSearchInput"/>
+        </FormField>
+
+        @if (!string.IsNullOrEmpty(_inputGroup))
+        {
+            <div class="action-list">
+                <Checkbox Label="Select Entire Group" Value="@IsWholeGroupChecked()" ValueChanged="OnToggleWholeGroup"/>
+
+                <button type="button" @onclick="OnResetBaseTypes" disabled="@(!Block.BaseTypeList.Any())" class="btn btn-secondary reset-button">
+                    Reset Selections
+                </button>
+            </div>
+        }
+    </div>
+
+    <div class="content" role="group" aria-label="Available base types">
+        @if (!string.IsNullOrEmpty(_inputGroup))
+        {
+            string[] filteredBases = GetFilteredBaseTypes();
+            if (!filteredBases.Any())
+            {
+                <p class="no-results">No base types match your search.</p>
+            }
+            else
+            {
+                @foreach (string baseType in filteredBases)
+                {
+                    bool isChecked = Block.BaseTypeList.Contains(baseType);
+
+                    <Checkbox Label="@baseType" Value="@isChecked" ValueChanged="@(e => OnBaseTypeToggle(baseType, e))"/>
+                }
+            }
+        }
+    </div>
+</div>
+
+@code {
+
+    private string _inputGroup = string.Empty;
+    private string _inputSearch = string.Empty;
+
+    [Parameter, EditorRequired]
+    public FilterGroup Group { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public FilterBlock Block { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        _inputGroup = BaseTypeConstants.BaseTypes.FirstOrDefault().Key;
+    }
+
+    private string[] GetFilteredBaseTypes()
+    {
+        if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? list)) return [];
+        if (!string.IsNullOrWhiteSpace(_inputSearch)) list = list.Where(b => b.Contains(_inputSearch, StringComparison.OrdinalIgnoreCase)).ToList();
+        return list.ToArray();
+    }
+
+    // Checks the master dictionary list entirely, ignoring the search text filter
+    private bool IsWholeGroupChecked()
+    {
+        if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? masterList)) return false;
+        return masterList.All(b => Block.BaseTypeList.Contains(b));
+    }
+
+    private void OnGroupCategoryChange(string value)
+    {
+        _inputGroup = value;
+        _inputSearch = string.Empty;
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        _inputSearch = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private void OnBaseTypeToggle(string baseType, bool value)
+    {
+        FilterBlock block = Block.Clone();
+        HashSet<string> updatedBases = [..Block.BaseTypeList];
+
+        if (value) updatedBases.Add(baseType);
+        else updatedBases.Remove(baseType);
+
+        block.BaseTypeList = updatedBases;
+        DispatchUpdate(block);
+    }
+
+    // Handles mass adding/removing the master list ignoring search states
+    private void OnToggleWholeGroup(bool value)
+    {
+        if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? masterList)) return;
+
+        FilterBlock block = Block.Clone();
+        HashSet<string> updatedBases = [..Block.BaseTypeList];
+
+        if (value)
+        {
+            foreach (string baseType in masterList)
+            {
+                updatedBases.Add(baseType);
+            }
+        }
+        else
+        {
+            foreach (string baseType in masterList)
+            {
+                updatedBases.Remove(baseType);
+            }
+        }
+
+        block.BaseTypeList = updatedBases;
+        DispatchUpdate(block);
+    }
+
+    private void OnResetBaseTypes()
+    {
+        _inputSearch = string.Empty;
+        FilterBlock block = Block.Clone();
+        block.BaseTypeList = [];
+        DispatchUpdate(block);
+    }
+
+    private void DispatchUpdate(FilterBlock block)
+    {
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(Group.ID, block));
+    }
+
+}

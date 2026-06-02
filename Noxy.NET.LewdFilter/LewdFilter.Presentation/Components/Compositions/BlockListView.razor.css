@@ -1,0 +1,28 @@
+﻿.block-list-view {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
+}
+
+.block {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    gap: var(--size-gap-sm);
+    padding: var(--size-gap-sm);
+    border-radius: var(--size-border-radius-md);
+    background-color: var(--color-offset-primary-sm);
+}
+
+.header {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+}
+
+.content {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+}

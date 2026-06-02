@@ -1,0 +1,13 @@
+﻿.form-group {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    margin: 0;
+    padding: var(--size-gap-xs);
+}
+
+.legend {
+    padding-right: var(--size-gap-xxxs);
+    padding-left: var(--size-gap-xxxs);
+    margin-left: calc(-1 * var(--size-gap-xxxs));
+}

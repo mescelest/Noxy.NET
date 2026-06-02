@@ -1,0 +1,80 @@
+﻿<div class="filter-rarity-condition">
+    @if (_operator == ComparatorTypeEnum.Between)
+    {
+        <Select TOption="RarityTypeEnum?" ID="@ID" Name="left" List="_rarityOptionsWithNull" Value="_left" ValueChanged="OnLeftChanged">
+            @context?.ToString()
+        </Select>
+    }
+
+    <Select TOption="ComparatorTypeEnum" Name="operator" List="_operators" Value="_operator" ValueChanged="OnOperatorChanged">
+        @context.ToFilterSymbol()
+    </Select>
+
+    <Select TOption="RarityTypeEnum?" Name="right" List="_rarityOptionsWithNull" Value="_right" ValueChanged="OnRightChanged">
+        @context?.ToString()
+    </Select>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? ID { get; set; }
+
+    [Parameter]
+    public FilterComparatorRarity? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<FilterComparatorRarity?> ValueChanged { get; set; }
+
+    private readonly HashSet<ComparatorTypeEnum> _operators = Enum.GetValues<ComparatorTypeEnum>().ToHashSet();
+    private HashSet<RarityTypeEnum?> _rarityOptionsWithNull = [];
+
+    private RarityTypeEnum? _left;
+    private RarityTypeEnum? _right;
+    private ComparatorTypeEnum _operator = ComparatorTypeEnum.Equal;
+
+    protected override void OnInitialized()
+    {
+        _rarityOptionsWithNull = [null, .. Enum.GetValues<RarityTypeEnum>().Cast<RarityTypeEnum?>()];
+    }
+
+    protected override void OnParametersSet()
+    {
+        _left = Value?.Left;
+        _right = Value?.Right;
+        _operator = Value?.ComparatorType ?? ComparatorTypeEnum.Equal;
+    }
+
+    private Task OnLeftChanged(RarityTypeEnum? rarity)
+    {
+        _left = rarity;
+        return PushUpdate();
+    }
+
+    private Task OnRightChanged(RarityTypeEnum? rarity)
+    {
+        _right = rarity;
+        return PushUpdate();
+    }
+
+    private Task OnOperatorChanged(ComparatorTypeEnum op)
+    {
+        _operator = op;
+        if (_operator != ComparatorTypeEnum.Between) _right = null;
+
+        return PushUpdate();
+    }
+
+    private async Task PushUpdate()
+    {
+        if (_left is null && _right is null)
+        {
+            await ValueChanged.InvokeAsync(null);
+        }
+        else
+        {
+            await ValueChanged.InvokeAsync(new() { Left = _left, Right = _right, ComparatorType = _operator });
+        }
+    }
+
+}

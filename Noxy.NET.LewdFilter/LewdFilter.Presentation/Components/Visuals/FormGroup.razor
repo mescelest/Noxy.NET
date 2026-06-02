@@ -1,0 +1,18 @@
+﻿<fieldset class="form-group">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <legend class="legend">@Label</legend>
+    }
+
+    @ChildContent
+</fieldset>
+
+
+@code {
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

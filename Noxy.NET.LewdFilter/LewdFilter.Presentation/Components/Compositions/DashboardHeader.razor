@@ -1,0 +1,49 @@
+﻿@inherits FluxorComponent
+@inject IDispatcher Dispatcher
+@inject IState<FilterFeatureState> State
+
+<header class="dashboard-header" role="banner">
+    <div class="header-brand">
+        <span class="brand-icon">⚙️</span>
+        <h1>@State.Value.Filter.Name</h1>
+    </div>
+
+    <div class="header-actions">
+        <button type="button" class="btn-header btn-secondary" disabled="@State.Value.IsLoading" @onclick="TriggerExport">
+            Export JSON
+        </button>
+
+        <label class="btn-header btn-secondary @(State.Value.IsLoading ? "is-disabled" : "")">
+            Import JSON
+            <InputFile OnChange="HandleImportFile" disabled="@State.Value.IsLoading" style="display: none;"/>
+        </label>
+
+        <button type="button" class="btn-header btn-primary" disabled="@State.Value.IsLoading" @onclick="TriggerSave">
+            Compile & Download
+        </button>
+    </div>
+</header>
+
+@code {
+
+    private void TriggerExport() => Dispatcher.Dispatch(new FilterFeatureReducers.ExportFilterAction());
+
+    private void TriggerSave() => Dispatcher.Dispatch(new FilterFeatureReducers.SaveFilterAction());
+
+    private async Task HandleImportFile(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            await using Stream stream = e.File.OpenReadStream(maxAllowedSize: 2048000);
+            using StreamReader reader = new(stream);
+            string fileContent = await reader.ReadToEndAsync();
+
+            Dispatcher.Dispatch(new FilterFeatureReducers.ImportFilterAction(fileContent));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"UI File Reader failed to read uploaded asset: {ex.Message}");
+        }
+    }
+
+}

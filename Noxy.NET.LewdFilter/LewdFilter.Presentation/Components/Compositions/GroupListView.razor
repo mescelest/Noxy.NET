@@ -1,0 +1,24 @@
+﻿@inherits FluxorComponent
+@inject IDispatcher Dispatcher
+@inject IState<FilterFeatureState> State
+
+<div class="group-list-view">
+    @foreach (FilterGroup group in GroupList)
+    {
+        <div class="group">
+            <div class="header">
+                <h3>@group.Name</h3>
+            </div>
+            <div class="content">
+                <BlockListView Group="group" BlockList="group.BlockList"/>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+
+    private List<FilterGroup> GroupList => State.Value.Filter.GroupList;
+
+}
+ 

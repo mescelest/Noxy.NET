@@ -1,0 +1,67 @@
+﻿@inject IDispatcher Dispatcher
+@inject IState<FilterFeatureState> State
+@inherits FluxorComponent
+
+<div class="block-editor" role="form" aria-label="Edit Filter Block">
+    <div class="header">
+        <input type="text" class="name" value="@Block.Name" @onchange="OnInputNameChange"/>
+
+        <div class="preview">
+            <div class="preview-item" style="@GetInlinePreviewStyles()">
+                Preview item
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <FormGroup Label="Styling">
+            <BlockStyleSelector Group="@Group" Block="@Block"/>
+        </FormGroup>
+
+        <FormGroup Label="@BaseTypeLabel">
+            <BlockBaseTypeSelector Group="@Group" Block="@Block"/>
+        </FormGroup>
+
+        <FormGroup Label="Comparison">
+            <BlockConditionSelector Group="@Group" Block="@Block"/>
+        </FormGroup>
+    </div>
+
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public FilterGroup Group { get; set; }
+
+    [Parameter, EditorRequired]
+    public FilterBlock Block { get; set; }
+
+    private Filter Filter => State.Value.Filter;
+
+    private string BaseTypeLabel => $"Base Type ({BaseTypeCount})";
+    private int BaseTypeCount => Filter.TryGetBlock(Group.ID, Block.ID, out _, out FilterBlock? block) ? block.BaseTypeList.Count : 0;
+
+    private string GetInlinePreviewStyles()
+    {
+        string textHex = Block.TextColor is not null ? Block.TextColor.ToHex() : FilterColor.DefaultText.ToHex();
+        string bgHex = Block.BackgroundColor is not null ? Block.BackgroundColor.ToHex() : FilterColor.DefaultBackground.ToHex();
+        string borderStyle = Block.BorderColor is not null ? Block.BorderColor.ToHex() : FilterColor.DefaultBorder.ToHex();
+        string fontSize = $"{(Block.FontSize ?? 32) / 32.0:0.00}rem";
+
+        return $"color: {textHex}; background-color: {bgHex}; border: 1px solid {borderStyle}; font-size: {fontSize};";
+    }
+
+    private void OnInputNameChange(ChangeEventArgs e)
+    {
+        FilterBlock block = Block.Clone();
+        block.Name = e.Value?.ToString() ?? string.Empty;
+        DispatchUpdate(block);
+    }
+
+    private void DispatchUpdate(FilterBlock updatedBlock)
+    {
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(Group.ID, updatedBlock));
+    }
+
+}

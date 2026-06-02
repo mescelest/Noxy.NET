@@ -1,0 +1,39 @@
+﻿.select {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    position: relative;
+}
+
+.control {
+    width: 100%;
+    padding: 0 36px 0 12px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.control:focus {
+    border-color: var(--color-highlight);
+    outline: none;
+}
+
+.control:disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+}
+
+.select ::deep i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.control:disabled ~ :not(select) {
+    color: #d1d5db;
+}

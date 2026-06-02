@@ -1,0 +1,22 @@
+﻿@inherits FluxorComponent
+@inject IDispatcher Dispatcher
+@inject IState<FilterFeatureState> State
+
+<div class="block-list-view">
+    @foreach (FilterBlock block in BlockList)
+    {
+        <div class="block">
+            <BlockEditor Group="Group" Block="block"/>
+        </div>
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public FilterGroup Group { get; set; }
+
+    [Parameter, EditorRequired]
+    public List<FilterBlock> BlockList { get; set; }
+
+}

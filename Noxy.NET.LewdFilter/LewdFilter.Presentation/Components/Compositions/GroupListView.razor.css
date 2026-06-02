@@ -1,0 +1,30 @@
+﻿.group-list-view {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
+}
+
+.group {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    gap: var(--size-gap-md);
+    padding: var(--size-gap-md);
+    border-radius: var(--size-border-radius-lg);
+    background-color: var(--color-offset-primary-sm);
+}
+
+.header {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    padding-bottom: var(--size-gap-xxxs);
+    border-bottom: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+}
+
+.content {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+}

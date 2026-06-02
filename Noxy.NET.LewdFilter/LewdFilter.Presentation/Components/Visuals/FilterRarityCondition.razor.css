@@ -1,0 +1,7 @@
+﻿.filter-rarity-condition {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: row;
+    column-gap: 10px;
+    width: 310px;
+}

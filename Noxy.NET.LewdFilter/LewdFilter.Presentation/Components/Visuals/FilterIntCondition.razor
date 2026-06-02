@@ -1,0 +1,69 @@
+﻿<div class="filter-int-condition">
+    @if (_operator == ComparatorTypeEnum.Between)
+    {
+        <input class="left" name="left" type="tel" size="5" value="@_left" @onchange="OnLeftChanged"/>
+    }
+
+    <Select TOption="ComparatorTypeEnum" Name="operator" List="_operators" Value="_operator" ValueChanged="OnOperatorChanged">
+        @context.ToFilterSymbol()
+    </Select>
+
+    <input class="right" name="right" type="tel" size="5" value="@_right" @onchange="OnRightChanged"/>
+</div>
+
+@code {
+    [Parameter]
+    public string? ID { get; set; }
+
+    [Parameter]
+    public FilterComparatorInt? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<FilterComparatorInt?> ValueChanged { get; set; }
+
+    private readonly HashSet<ComparatorTypeEnum> _operators = Enum.GetValues<ComparatorTypeEnum>().ToHashSet();
+
+    private int? _left;
+    private int? _right;
+    private ComparatorTypeEnum _operator = ComparatorTypeEnum.Equal;
+
+    protected override void OnParametersSet()
+    {
+        _left = Value?.Left;
+        _right = Value?.Right;
+        _operator = Value?.ComparatorType ?? ComparatorTypeEnum.Equal;
+    }
+
+    private Task OnLeftChanged(ChangeEventArgs e)
+    {
+        _left = int.TryParse(e.Value?.ToString(), out int n) ? n : null;
+        return PushUpdate();
+    }
+
+    private Task OnRightChanged(ChangeEventArgs e)
+    {
+        _right = int.TryParse(e.Value?.ToString(), out int n) ? n : null;
+        return PushUpdate();
+    }
+
+    private Task OnOperatorChanged(ComparatorTypeEnum op)
+    {
+        _operator = op;
+        if (_operator != ComparatorTypeEnum.Between) _right = null;
+
+        return PushUpdate();
+    }
+
+    private async Task PushUpdate()
+    {
+        if (_left is null && _right is null)
+        {
+            await ValueChanged.InvokeAsync(null);
+        }
+        else
+        {
+            await ValueChanged.InvokeAsync(new() { Left = _left, Right = _right, ComparatorType = _operator });
+        }
+    }
+
+}

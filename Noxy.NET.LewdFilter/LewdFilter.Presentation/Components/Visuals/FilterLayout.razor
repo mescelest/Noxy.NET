@@ -1,0 +1,30 @@
+﻿@layout MainLayout
+@inherits LayoutComponentBase
+@inject IState<FilterFeatureState> State
+
+<div class="filter-layout">
+    <header>
+        <DashboardHeader/>
+    </header>
+
+    <aside class="left" role="complementary" aria-label="Group Navigation">
+        <div class="header">
+            <h2>Overview</h2>
+        </div>
+        <GroupEditor/>
+    </aside>
+
+    <main role="main">
+        <div class="header">
+            <h2>Filter</h2>
+        </div>
+        @Body
+    </main>
+
+    <aside class="right" role="complementary" aria-label="Color Utilities">
+        <div class="header">
+            <h2>Colors</h2>
+        </div>
+        <ColorEditor/>
+    </aside>
+</div>

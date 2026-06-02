@@ -1,0 +1,65 @@
+﻿@inherits FluxorComponent
+@inject IDispatcher Dispatcher
+@inject IState<FilterFeatureState> State
+
+<nav class="overview-sidebar">
+    <div class="table" role="table">
+        <div class="table-header" role="rowheader">
+            <strong>Name</strong>
+            <div></div>
+            <div></div>
+        </div>
+
+        @for (int i = 0; i < GroupList.Count; i++)
+        {
+            FilterGroup group = GroupList[i];
+            bool isFirstRow = i == 0;
+
+            <div class="table-row" role="row" @key="group.ID">
+                <div class="table-cell" role="cell">
+                    <input type="text" class="name" value="@group.Name" @onchange="e => OnInputGroupEditNameChange(e, group)"/>
+                </div>
+                <div class="table-cell" role="cell">
+                    @if (isFirstRow)
+                    {
+                        <button type="button" class="add" @onclick="AddNewRowAtBottom">
+                            <MaterialIcon Icon="add" Size="20px"/>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="delete" @onclick="() => DeleteGroup(group.ID)">
+                            <MaterialIcon Icon="remove" Size="20px"/>
+                        </button>
+                    }
+                </div>
+                <div class="table-cell" role="cell">
+                    <a href="#group-@group.ID" class="navigate" title="Scroll to group">
+                        <button type="button" class="focus">
+                            <MaterialIcon Icon="jump_to_element" Size="20px"/>
+                        </button>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</nav>
+
+@code {
+    private List<FilterGroup> GroupList => State.Value.Filter.GroupList;
+
+    private void OnInputGroupEditNameChange(ChangeEventArgs obj, FilterGroup group)
+    {
+        group.Name = obj.Value?.ToString() ?? "";
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditGroupAction(group.Clone()));
+    }
+
+    private void AddNewRowAtBottom()
+    {
+        FilterGroup group = FilterGroup.Default;
+        Dispatcher.Dispatch(new FilterFeatureReducers.AddGroupAction(group));
+    }
+
+    private void DeleteGroup(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveGroupAction(id));
+
+}

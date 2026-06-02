@@ -1,0 +1,43 @@
+﻿@inject IState<FilterFeatureState> State
+@inject IDispatcher Dispatcher
+
+<div class="block-condition-selector">
+
+    <FormField Label="Rarity" For="rarity-condition">
+        <FilterRarityCondition id="rarity-condition" Value="Block.Rarity" ValueChanged="OnRarityChange"/>
+    </FormField>
+
+    <FormField Label="Stack Size" For="stack-size-condition">
+        <FilterIntCondition id="stack-size-condition" Value="Block.StackSize" ValueChanged="OnStackSizeChange"/>
+    </FormField>
+
+    <FormField Label="Quality" For="quality-condition">
+        <FilterIntCondition id="quality-condition" Value="Block.Quality" ValueChanged="OnQualityChange"/>
+    </FormField>
+
+    <FormField Label="Unidentified Item Tier" For="unidentified-tier-condition">
+        <FilterIntCondition id="unidentified-tier-condition" Value="Block.UnidentifiedItemTier" ValueChanged="OnUnidentifiedTierChange"/>
+    </FormField>
+
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public FilterGroup Group { get; set; }
+
+    [Parameter, EditorRequired]
+    public FilterBlock Block { get; set; }
+
+    private void OnRarityChange(FilterComparatorRarity? condition) => UpdateBlockCondition(block => block.Rarity = condition);
+    private void OnStackSizeChange(FilterComparatorInt? condition) => UpdateBlockCondition(block => block.StackSize = condition);
+    private void OnQualityChange(FilterComparatorInt? condition) => UpdateBlockCondition(block => block.Quality = condition);
+    private void OnUnidentifiedTierChange(FilterComparatorInt? condition) => UpdateBlockCondition(block => block.UnidentifiedItemTier = condition);
+
+    private void UpdateBlockCondition(Action<FilterBlock> cbAssignProperty)
+    {
+        FilterBlock block = Block.Clone();
+        cbAssignProperty(block);
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(Group.ID, block));
+    }
+
+}

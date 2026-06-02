@@ -1,0 +1,40 @@
+﻿.filter-layout {
+    display: grid;
+    grid-template: "header header header" max-content "left-sidebar main right-sidebar" 1fr / max-content 1fr max-content;
+    height: 100vh;
+    grid-column-gap: var(--size-gap-md);
+}
+
+header {
+    grid-area: header;
+}
+
+main {
+    grid-area: main;
+}
+
+aside, main {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-md);
+    padding-block: var(--size-gap-md);
+}
+
+aside.left {
+    grid-area: left-sidebar;
+    padding-left: var(--size-gap-md);
+}
+
+aside.right {
+    grid-area: right-sidebar;
+    padding-right: var(--size-gap-md);
+}
+
+.header {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    padding-bottom: var(--size-gap-xxxs);
+    border-bottom: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+}

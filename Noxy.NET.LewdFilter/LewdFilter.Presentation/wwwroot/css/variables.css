@@ -1,0 +1,94 @@
+:root {
+    --blazor-load-percentage: 0;
+    --blazor-load-percentage-text: "0%";
+}
+
+:root {
+    --size-text-label: 1.3rem;
+    --size-text-message: 1.4rem;
+    --size-text-body: 1.6rem;
+    --size-text-h1: 3.2rem;
+    --size-text-h2: 2.8rem;
+    --size-text-h3: 2.4rem;
+    --size-text-h4: 2.2rem;
+    --size-text-h5: 2.0rem;
+    --size-text-h6: 1.8rem;
+    --size-gap-tiny: 2px;
+    --size-gap-xxxs: 4px;
+    --size-gap-xxs: 8px;
+    --size-gap-xs: 12px;
+    --size-gap-sm: 16px;
+    --size-gap-md: 20px;
+    --size-gap-lg: 24px;
+    --size-gap-xl: 28px;
+    --size-gap-xxl: 32px;
+    --size-gap-xxxl: 36px;
+    --size-gap-huge: 40px;
+    --size-border-width-sm: 1px;
+    --size-border-width-md: 2px;
+    --size-border-width-lg: 3px;
+    --size-border-radius-sm: 2px;
+    --size-border-radius-md: 4px;
+    --size-border-radius-lg: 8px;
+    --size-box-shadow: 2px;
+    --size-control-xxxs: 20px;
+    --size-control-xxs: 24px;
+    --size-control-xs: 30px;
+    --size-control-sm: 36px;
+    --size-control-md: 42px;
+    --size-control-lg: 48px;
+    --size-control-xl: 64px;
+    --size-control-xxl: 92px;
+    --size-icon-xxs: 16px;
+    --size-icon-xs: 20px;
+    --size-icon-sm: 24px;
+    --size-icon-md: 28px;
+    --size-icon-lg: 32px;
+    --size-icon-xl: 36px;
+    --size-icon-xxl: 40px;
+    --size-page-xs: 320px;
+    --size-page-sm: 360px;
+    --size-page-md: 720px;
+    --size-page-lg: 1280px;
+    --size-page-xl: 1920px;
+    --size-column: 320px;
+    --size-layout-sidebar: clamp(var(--size-column), 15%, 400px);
+}
+
+:root {
+    --animation-length-short: 150ms;
+    --animation-length-medium: 250ms;
+    --animation-length-long: 500ms;
+}
+
+:root {
+    --font-family-primary: "Roboto", sans-serif;
+    --font-label: normal normal 300 normal var(--size-text-label, 13px) var(--font-family-primary, sans-serif);
+    --font-body: normal normal 400 normal var(--size-text-body, 16px) var(--font-family-primary, sans-serif);
+    --font-button: normal normal 500 normal var(--size-text-body, 16px) var(--font-family-primary, sans-serif);
+}
+
+:root {
+    --color-light: #FFFFFF;
+    --color-dark: #000000;
+    --color-none: #4D4AD3;
+    --color-muted: #767676;
+    --color-highlight: #0073EC;
+    --color-info: #289ED9;
+    --color-success: #23883D;
+    --color-warning: #D97F00;
+    --color-notice: #A948DD;
+    --color-error: #E42B21;
+    --color-disabled: #4D4D4D;
+}
+
+:root {
+    --color-primary: var(--color-light);
+    --color-complementary: var(--color-dark);
+    --color-offset-primary-sm: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
+    --color-offset-primary-md: color-mix(in srgb, transparent 90%, var(--color-complementary, #000000));
+    --color-offset-primary-lg: color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
+    --color-offset-complementary-sm: color-mix(in srgb, transparent 90%, var(--color-primary, #FFFFFF));
+    --color-offset-complementary-md: color-mix(in srgb, transparent 80%, var(--color-primary, #FFFFFF));
+    --color-offset-complementary-lg: color-mix(in srgb, transparent 50%, var(--color-primary, #FFFFFF));
+}

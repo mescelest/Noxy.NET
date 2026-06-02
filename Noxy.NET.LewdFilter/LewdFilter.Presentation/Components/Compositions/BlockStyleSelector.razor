@@ -1,0 +1,80 @@
+﻿@inject IState<FilterFeatureState> State
+@inject IDispatcher Dispatcher
+
+<div class="block-style-selector">
+
+    <FormField Label="Text Color" For="text-color-select">
+        <select id="text-color-select" value="@TextColor?.ID" @onchange="OnTextColorChange" class="form-select">
+            <option value="">-- Default --</option>
+            @foreach (FilterColor color in Filter.GetColorList(ColorTypeEnum.Text))
+            {
+                <option value="@color.ID">@color.Name</option>
+            }
+        </select>
+    </FormField>
+
+    <FormField Label="Background Color" For="bg-color-select">
+        <select id="bg-color-select" value="@BackgroundColor?.ID" @onchange="OnBackgroundColorChange" class="form-select">
+            <option value="">-- Default --</option>
+            @foreach (FilterColor color in Filter.GetColorList(ColorTypeEnum.Background))
+            {
+                <option value="@color.ID">@color.Name</option>
+            }
+        </select>
+    </FormField>
+
+    <FormField Label="Border Color" For="border-color-select">
+        <select id="border-color-select" value="@BorderColor?.ID" @onchange="OnBorderColorChange" class="form-select">
+            <option value="">-- Default --</option>
+            @foreach (FilterColor color in Filter.GetColorList(ColorTypeEnum.Border))
+            {
+                <option value="@color.ID">@color.Name</option>
+            }
+        </select>
+    </FormField>
+
+    <FormField Label="@($"Font Size ({FontSize})")" For="font-size-slider">
+        <input id="font-size-slider" type="range" min="18" max="45" value="@FontSize" @oninput="OnFontSizeChange" class="poe-range-slider"/>
+    </FormField>
+
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public FilterGroup Group { get; set; }
+
+    [Parameter, EditorRequired]
+    public FilterBlock Block { get; set; }
+
+    private Filter Filter => State.Value.Filter;
+
+    private int FontSize => Block.FontSize ?? 32;
+    private FilterColor? TextColor => Block.TextColor;
+    private FilterColor? BackgroundColor => Block.BackgroundColor;
+    private FilterColor? BorderColor => Block.BorderColor;
+
+    private void OnTextColorChange(ChangeEventArgs e) => UpdateBlockColor(ColorTypeEnum.Text, e.Value?.ToString(), (block, color) => block.TextColor = color);
+    private void OnBackgroundColorChange(ChangeEventArgs e) => UpdateBlockColor(ColorTypeEnum.Background, e.Value?.ToString(), (block, color) => block.BackgroundColor = color);
+    private void OnBorderColorChange(ChangeEventArgs e) => UpdateBlockColor(ColorTypeEnum.Border, e.Value?.ToString(), (block, color) => block.BorderColor = color);
+
+    private void UpdateBlockColor(ColorTypeEnum type, string? idString, Action<FilterBlock, FilterColor?> cbAssignProperty)
+    {
+        FilterBlock block = Block.Clone();
+        cbAssignProperty(block, Filter.TryGetColor(type, idString, out FilterColor? color) ? color : null);
+        DispatchUpdate(block);
+    }
+
+    private void OnFontSizeChange(ChangeEventArgs e)
+    {
+        FilterBlock block = Block.Clone();
+        block.FontSize = int.TryParse(e.Value?.ToString(), out int size) ? size : 32;
+        DispatchUpdate(block);
+    }
+
+    private void DispatchUpdate(FilterBlock updatedBlock)
+    {
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(Group.ID, updatedBlock));
+    }
+
+}

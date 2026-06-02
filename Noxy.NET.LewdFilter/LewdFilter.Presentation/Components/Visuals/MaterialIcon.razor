@@ -1,0 +1,50 @@
+<i class="@CssClass" style="@GetStyle()">
+    @IconCurrent
+</i>
+
+@code {
+    [Parameter, EditorRequired]
+    public string? Icon { get; set; }
+    private string IconCurrent => Icon ?? "crop_square";
+
+    [Parameter]
+    public string? Size { get; set; }
+    private string SizeCurrent => Size ?? "var(--size-text-body, 16px)";
+
+    [Parameter]
+    public string? Color { get; set; }
+    private string ColorCurrent => Color ?? "inherit";
+
+    [Parameter]
+    public MaterialSymbolVariantEnum? Variant { get; set; }
+    private MaterialSymbolVariantEnum VariantCurrent => Variant ?? MaterialSymbolVariantEnum.Outlined;
+
+    [Parameter]
+    public int? Weight { get; set; }
+    private int WeightCurrent => Weight ?? 400;
+
+    [Parameter]
+    public int? Grade { get; set; }
+    private int GradeCurrent => Grade ?? 0;
+
+    [Parameter]
+    public int? OpticalSize { get; set; }
+    private int OpticalSizeCurrent => OpticalSize ?? 0;
+
+    private string CssClass => $"material-icon {VariantCurrent.ToText()}";
+
+    private string GetStyle()
+    {
+        int fillValue = VariantCurrent is MaterialSymbolVariantEnum.Filled or MaterialSymbolVariantEnum.RoundedFilled or MaterialSymbolVariantEnum.SharpFilled ? 1 : 0;
+
+        Dictionary<string, object> style = new()
+        {
+                ["font-size"] = SizeCurrent,
+                ["color"] = ColorCurrent,
+                ["font-variation-settings"] = $"'FILL' {fillValue}, 'wght' {WeightCurrent}, 'GRAD' {GradeCurrent}, 'opsz' {OpticalSizeCurrent}"
+        };
+
+        return string.Join(";", style.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
+    }
+
+}

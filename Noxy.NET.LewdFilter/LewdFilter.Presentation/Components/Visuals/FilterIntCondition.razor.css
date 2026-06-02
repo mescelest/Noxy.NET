@@ -1,0 +1,6 @@
+﻿.filter-int-condition {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: row;
+    column-gap: 10px;
+}

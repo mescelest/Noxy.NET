@@ -1,0 +1,92 @@
+﻿@inject IDispatcher Dispatcher
+@inject IState<FilterFeatureState> State
+@inherits FluxorComponent
+
+<div class="color-sidebar">
+    <div class="tab-list" role="tablist">
+        @foreach (ColorTypeEnum type in Enum.GetValues<ColorTypeEnum>())
+        {
+            bool isSelected = _tab == type;
+            string isSelectedAria = isSelected ? "true" : "false";
+            string? isSelectedAttribute = isSelected ? "selected" : null;
+
+            <button type="button" class="tab" role="tab" aria-selected="@isSelectedAria" selected="@isSelectedAttribute" @onclick="() => SetActiveTab(type)">
+                <strong>
+                    @type.ToText()
+                </strong>
+            </button>
+        }
+    </div>
+
+    <div class="tab-panel" role="tabpanel">
+        <div class="table" role="table">
+            <div class="table-header" role="rowheader">
+                <strong>Name</strong>
+                <strong>Color</strong>
+                <div></div>
+            </div>
+
+            @for (int i = 0; i < ColorList.Count; i++)
+            {
+                FilterColor color = ColorList[i];
+                bool isFirstRow = i == 0;
+
+                <div class="table-row" role="row" @key="color.ID">
+                    <div class="table-cell" role="cell">
+                        <input type="text" class="name" value="@color.Name" @onchange="e => OnInputColorEditNameChange(e, color)"/>
+                    </div>
+                    <div class="table-cell" role="cell">
+                        <input type="color" class="color" alpha value="@color.ToHex()" @onchange="e => OnInputColorEditValueChange(e, color)"/>
+                        <input type="text" size="7" class="color" value="@color.ToHex()" @onchange="e => OnInputColorEditValueChange(e, color)"/>
+                    </div>
+                    <div class="table-cell" role="cell">
+                        @if (isFirstRow)
+                        {
+                            <button type="button" class="add" @onclick="AddNewRowAtBottom">
+                                <MaterialIcon Icon="add" Size="20px"/>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="delete" @onclick="() => DeleteColor(color.ID)">
+                                <MaterialIcon Icon="remove" Size="20px"/>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private ColorTypeEnum _tab = ColorTypeEnum.Background;
+
+    private List<FilterColor> ColorList => State.Value.Filter.CustomColorCollection.GetValueOrDefault(_tab, []);
+
+    private void SetActiveTab(ColorTypeEnum tab) => _tab = tab;
+
+    private void OnInputColorEditNameChange(ChangeEventArgs obj, FilterColor color)
+    {
+        color.Name = obj.Value?.ToString() ?? "";
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
+    }
+
+    private void OnInputColorEditValueChange(ChangeEventArgs obj, FilterColor color)
+    {
+        if (color.TryUpdateFrom(obj.Value?.ToString()))
+        {
+            Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
+        }
+    }
+
+    private void AddNewRowAtBottom()
+    {
+        FilterColor freshColor = new() { Name = "", R = 255, G = 255, B = 255, A = 255 };
+        Dispatcher.Dispatch(new FilterFeatureReducers.AddColorAction(_tab, freshColor));
+    }
+
+    private void DeleteColor(Guid colorID) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveColorAction(_tab, colorID));
+
+}
