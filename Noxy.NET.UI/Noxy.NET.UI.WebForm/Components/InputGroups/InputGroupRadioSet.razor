@@ -14,7 +14,7 @@
                 }
                 else
                 {
-                    <InputControlRadio Checked="IsChecked(context.Option)"/>
+                    <InputVisualRadio Checked="IsChecked(context.Option)"/>
                     <InputElementRadio ID="@context.ID" Name="@context.Name" Option="@context.Option" OnChange="x => context.OnChange(x, context.Option)"/>
                 }
             </Control>

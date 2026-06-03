@@ -4,14 +4,15 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <TemplateInputGroup For="@IDCurrent" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
         @{
-            InputElementCheckboxScope<TOption> context = new(IDCurrent, GetName(), EqualityComparer<TOption>.Default.Equals(Value, Option), Option, Value, ValueChanged, ValueExpression);
+            bool isChecked = EqualityComparer<TOption>.Default.Equals(Value, Option);
+            InputElementCheckboxScope<TOption> context = new(IDCurrent, GetName(), isChecked, Option, Value, ValueChanged, ValueExpression);
             if (Control != null)
             {
                 @Control(context)
             }
             else
             {
-                <InputControlCheckbox Checked="@context.Checked"/>
+                <InputVisualCheckbox Checked="@context.Checked"/>
                 <InputElementCheckbox TOption="TOption" @attributes="InputAttributes" ID="@context.ID" Name="@context.Name" Option="@context.Option"
                                       Value="@context.Value" ValueChanged="@context.ValueChanged" ValueExpression="@context.ValueExpression"/>
             }

@@ -15,7 +15,7 @@
                 }
                 else
                 {
-                    <InputControlCheckbox Checked="IsChecked(context.Option)"/>
+                    <InputVisualCheckbox Checked="IsChecked(context.Option)"/>
                     <InputElementCheckbox ID="@context.ID" Name="@context.Name" Option="@context.Option" OnChange="x => context.OnChange(x, context.Option)"/>
                 }
             </Control>
