@@ -1,0 +1,18 @@
+@inherits BaseInput<TOption>
+@typeparam TOption
+
+<TemplateInputControlSelect>
+    <InputElementSelect @attributes="AdditionalAttributes" class="@CssClass" TOption="TOption" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" ChildContent="ChildContent"
+                        Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
+    </InputElementSelect>
+</TemplateInputControlSelect>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public RenderFragment<TOption?> ChildContent { get; set; }
+
+    [Parameter, EditorRequired]
+    public HashSet<TOption> OptionList { get; set; }
+
+}

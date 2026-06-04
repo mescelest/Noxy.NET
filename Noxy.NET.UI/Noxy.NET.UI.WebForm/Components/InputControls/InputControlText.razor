@@ -1,9 +1,9 @@
-﻿@inherits BaseInputControl<string>
+﻿@inherits BaseInput<string>
 @implements IBaseInputTextual
 
-<div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputElementText @attributes="InputAttributes" class="input" ID="@IDCurrent" Name="@GetName()" Size="Size" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
-</div>
+<TemplateInputControlTextual>
+    <InputElementText @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Size="Size" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+</TemplateInputControlTextual>
 
 @code {
 

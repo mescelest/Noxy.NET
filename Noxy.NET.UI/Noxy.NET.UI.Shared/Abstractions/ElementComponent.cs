@@ -26,7 +26,7 @@ public abstract class ElementComponent : BlazorComponent
 
     protected virtual string GetComponentClass()
     {
-        List<string> result = ["Component"];
+        List<string> result = [];
         if (TryExtractAttribute("class", out string? @class) && !string.IsNullOrWhiteSpace(@class))
         {
             result.AddRange(@class.Split(' '));

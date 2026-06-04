@@ -1,0 +1,12 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+
+}  

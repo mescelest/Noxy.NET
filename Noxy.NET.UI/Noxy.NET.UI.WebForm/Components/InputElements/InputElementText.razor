@@ -8,5 +8,9 @@
     public WebFormInputTextTypeEnum? Type { get; set; }
     private string TypeCurrent => (Type ?? WebFormInputTextTypeEnum.Text).ToText();
 
+    protected override string? GetParsedValue(string value)
+    {
+        return value;
+    }
 }
 

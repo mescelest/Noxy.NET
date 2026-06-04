@@ -4,9 +4,7 @@
 }
 
 :root {
-    --size-text-label: 1.3rem;
-    --size-text-message: 1.4rem;
-    --size-text-body: 1.6rem;
+    --size-text-body: 1rem;
     --size-text-h1: 3.2rem;
     --size-text-h2: 2.8rem;
     --size-text-h3: 2.4rem;
@@ -74,7 +72,7 @@
     --color-warning: #D97F00;
     --color-notice: #A948DD;
     --color-error: #E42B21;
-    --color-disabled: #4D4D4D;
+    --color-disabled: #7f7f7f;
 }
 
 :root {

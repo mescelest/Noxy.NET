@@ -77,13 +77,13 @@ public abstract class ParameterEffectsBase<TState>(IState<TState> state, IDeboun
     {
         if (!state.Value.Pending.TryGetValue(action.Scope, out ImmutableHashSet<string>? set)) return Task.CompletedTask;
 
-        int currentCount = set.Count;
-        if (!_lastPendingCount.TryGetValue(action.Scope, out int lastCount)) _lastPendingCount[action.Scope] = 0;
-        if (currentCount == lastCount) return Task.CompletedTask;
+        int countCurrent = set.Count;
+        if (!_lastPendingCount.TryGetValue(action.Scope, out int countLast)) _lastPendingCount[action.Scope] = 0;
+        if (countCurrent == countLast) return Task.CompletedTask;
 
-        _lastPendingCount[action.Scope] = currentCount;
-        string debounceKey = $"{typeof(TState).Name}:{action.Scope}";
-        debouncer.Debounce(() => ResolveInternal(action.Scope, dispatcher), debounceKey, 10);
+        _lastPendingCount[action.Scope] = countCurrent;
+        string key = $"{typeof(TState).Name}:{action.Scope}";
+        debouncer.Debounce(() => ResolveInternal(action.Scope, dispatcher), new() { Key = key, Delay = 10 });
 
         return Task.CompletedTask;
     }

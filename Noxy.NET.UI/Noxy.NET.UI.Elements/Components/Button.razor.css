@@ -4,14 +4,14 @@
     align-items: center;
     justify-content: center;
     min-width: var(--size-control-input, 36px);
-    min-height: var(--size-control-input, 36px);
+    min-height: var(--size-control-input, 36px); 
     position: relative;
     padding: 0 var(--size-gap-xxs, 8px);
-    background-color: var(--color-muted, #767676);
-    border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-muted, #767676) 35%, var(--color-primary, FFFFFF));
+    background-color: var(--color-button, #4D4AD3);
+    border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-button, #4D4AD3) 35%, var(--color-primary, #FFFFFF));
     border-radius: var(--size-border-radius-md, 4px);
     box-shadow: 0 0 0 var(--size-border-width-sm, 1px) transparent inset;
-    font: var(--font-button, Serif);
+    font: var(--font-button), Serif;
     color: var(--color-primary, #FFFFFF);
     box-sizing: border-box;
     cursor: pointer;
@@ -23,7 +23,7 @@
 }
 
 .Button:focus {
-    box-shadow: 0 0 0 var(--size-border-width-sm, 1px) var(--color-focus-button, #000000) inset;
+    box-shadow: 0 0 0 var(--size-border-width-sm, 1px) var(--color-complementary, #000000) inset;
     outline: none;
 }
 
@@ -37,8 +37,8 @@
 
 .Button:disabled:not(.loading) {
     border-color: transparent;
-    background-color: var(--color-disabled, #4D4D4D);
-    color: color-mix(in srgb, var(--color-disabled, #4D4D4D) 60%, var(--color-primary, FFFFFF));
+    background-color: var(--color-disabled, #565656);
+    color: color-mix(in srgb, var(--color-disabled, #7F7F7F) 20%, var(--color-primary, #FFFFFF));
     cursor: not-allowed;
 }
 

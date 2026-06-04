@@ -1,8 +1,8 @@
-﻿@inherits BaseInputControl<DateTime?>
+﻿@inherits BaseInput<DateTime?>
 
-<div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputElementDate @attributes="InputAttributes" class="input" ID="@IDCurrent" Name="@GetName()" UseTime="@UseTime" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
-</div>
+<TemplateInputControlTextual>
+    <InputElementDate @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" UseTime="@UseTime" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+</TemplateInputControlTextual>
 
 @code {
 

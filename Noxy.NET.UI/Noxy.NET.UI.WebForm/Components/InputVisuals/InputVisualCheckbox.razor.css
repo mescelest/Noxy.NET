@@ -1,19 +1,21 @@
-.InputControlCheckbox {
+.InputVisualCheckbox {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--size-control-xxs);
-    height: var(--size-control-xxs);
+    width: var(--size-control-choice);
+    height: var(--size-control-choice);
     border: var(--size-border-width-sm) solid var(--color-complementary);
     border-radius: var(--size-border-radius-md);
     color: var(--color-primary);
+    font-size: 12px;
+    box-sizing: border-box;
     user-select: none;
 }
 
-.InputControlCheckbox[checked] {
+.InputVisualCheckbox[checked] {
     background-color: var(--color-complementary);
 }
 
-.InputControlCheckbox ::deep + input[type="checkbox"] {
+.InputVisualCheckbox ::deep + input[type="checkbox"] {
     display: none;
 }

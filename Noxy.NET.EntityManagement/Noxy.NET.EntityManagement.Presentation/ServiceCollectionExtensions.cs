@@ -29,7 +29,6 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient<APIHttpClient>(client => client.BaseAddress = new(url));
 
-        services.AddScoped<PageLoadingService>();
         services.AddScoped<SystemConstantService>();
         services.AddScoped<SystemParameterService>();
         services.AddScoped<TextParameterService>();

@@ -1,0 +1,64 @@
+.TemplateInputControlCheckbox {
+    display: flex;
+    column-gap: var(--size-gap-xxs);
+    align-items: center;
+    cursor: pointer;
+}
+
+.TemplateInputControlCheckbox[disabled] {
+    color: var(--color-disabled);
+}
+
+.TemplateInputControlCheckbox[disabled] .checkbox {
+    background-color: var(--color-offset-primary-lg);
+    border-color: var(--color-disabled);
+    cursor: not-allowed;
+}
+
+.TemplateInputControlCheckbox:not([disabled]):hover .checkbox {
+    border-color: var(--color-highlight);
+    box-shadow: 0 0 10px 0 var(--color-offset-primary-lg) inset;
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-control-choice);
+    height: var(--size-control-choice);
+    font-size: 12px;
+    color: var(--color-muted);
+    border: var(--size-border-width-md) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-sm);
+    background-color: var(--color-primary);
+    box-sizing: border-box;
+}
+
+.tick {
+    transform: rotate(5deg);
+}
+
+.TemplateInputControlCheckbox:not([disabled]) .checkbox[checked] {
+    border-color: var(--color-highlight);
+    background-color: var(--color-highlight);
+    color: var(--color-primary);
+}
+
+.TemplateInputControlCheckbox:not([disabled]):focus-within .checkbox {
+    outline: var(--size-border-width-md) solid var(--color-highlight);
+    outline-offset: var(--size-gap-tiny);
+}
+
+.input:disabled ~ .label {
+    color: var(--color-disabled);
+    cursor: not-allowed;
+}
+
+.TemplateInputControlCheckbox ::deep > .InputElementCheckbox {
+    position: fixed;
+    top: -100%;
+    left: -100%;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}

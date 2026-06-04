@@ -1,0 +1,28 @@
+@inherits ElementComponent
+
+<label @attributes="AdditionalAttributes" class="@CssClass" for="@For" disabled="@Disabled">
+    <div class="checkbox" checked="@Checked">
+        <span class="tick">✔</span>
+    </div>
+
+    @ChildContent
+</label>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment<bool>? Visual { get; set; }
+
+    [Parameter, EditorRequired]
+    public bool? Checked { get; set; }
+
+    [Parameter, EditorRequired]
+    public bool? Disabled { get; set; }
+
+    [Parameter, EditorRequired]
+    public string For { get; set; }
+
+}   

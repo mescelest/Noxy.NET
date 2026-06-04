@@ -1,27 +1,35 @@
-﻿@inject IDispatcher Dispatcher
+﻿@using Noxy.NET.UI.Components
+@using Noxy.NET.UI.Enums
+@inject IDispatcher Dispatcher
 
 <div class="block-base-type-selector">
 
     <div class="header">
         <FormField Label="Base type group" For="base-type-group">
-            <Select TOption="string" ID="base-type-group" List="BaseTypeConstants.BaseTypes.Keys.ToHashSet()" Value="_inputGroup" ValueChanged="OnGroupCategoryChange">
-                <option value="@context">@context</option>
-            </Select>
+            <InputControlSelect TOption="string" class="base-type-group" ID="base-type-group" OptionList="BaseTypeConstants.BaseTypes.Keys.ToHashSet()" @bind-Value="_inputGroup" @bind-Value:after="() => _inputSearch = string.Empty">
+                @context
+            </InputControlSelect>
+
+            @* <Select TOption="string" ID="base-type-group" Value="_inputGroup" ValueChanged="OnGroupCategoryChange"> *@
+            @*     <option value="@context"></option> *@
+            @* </Select> *@
         </FormField>
 
         <FormField Label="Filter by name" For="filter-by-name">
-            <input class="filter-by-name" id="filter-by-name" type="text" aria-label="Filter by name" value="@_inputSearch" @oninput="OnSearchInput"/>
+            <InputControlText class="filter-by-name" ID="filter-by-name" aria-label="Filter by name" OnInputDelay="200" @bind-Value="@_inputSearch"/>
         </FormField>
 
         @if (!string.IsNullOrEmpty(_inputGroup))
         {
             <div class="action-list">
-                
-            <Checkbox Label="Select Entire Group" Value="@IsWholeGroupChecked()" ValueChanged="OnToggleWholeGroup"/>
 
-                <button type="button" @onclick="OnResetBaseTypes" disabled="@(!Block.BaseTypeList.Any())" class="btn btn-secondary reset-button">
+                <InputControlCheckbox ID="select-all" Option="true" @bind-Value:get="@GetSelectAll()" @bind-Value:set="@SetSelectAll">
+                    Select All
+                </InputControlCheckbox>
+
+                <Button type="button" Status="StatusEnum.Error" @onclick="OnResetBaseTypes" disabled="@(!Block.BaseTypeList.Any())" class="btn btn-secondary reset-button">
                     Reset Selections
-                </button>
+                </Button>
             </div>
         }
     </div>
@@ -70,22 +78,41 @@
         return list.ToArray();
     }
 
-    // Checks the master dictionary list entirely, ignoring the search text filter
-    private bool IsWholeGroupChecked()
+    private bool? GetSelectAll()
     {
         if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? masterList)) return false;
         return masterList.All(b => Block.BaseTypeList.Contains(b));
+    }
+
+    private void SetSelectAll(bool? value)
+    {
+        if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? list)) return;
+
+        HashSet<string> set = [..Block.BaseTypeList];
+        if (value ?? false)
+        {
+            foreach (string item in list)
+            {
+                set.Add(item);
+            }
+        }
+        else
+        {
+            foreach (string item in list)
+            {
+                set.Remove(item);
+            }
+        }
+
+        FilterBlock block = Block.Clone();
+        block.BaseTypeList = set;
+        DispatchUpdate(block);
     }
 
     private void OnGroupCategoryChange(string value)
     {
         _inputGroup = value;
         _inputSearch = string.Empty;
-    }
-
-    private void OnSearchInput(ChangeEventArgs e)
-    {
-        _inputSearch = e.Value?.ToString() ?? string.Empty;
     }
 
     private void OnBaseTypeToggle(string baseType, bool value)
@@ -95,33 +122,6 @@
 
         if (value) updatedBases.Add(baseType);
         else updatedBases.Remove(baseType);
-
-        block.BaseTypeList = updatedBases;
-        DispatchUpdate(block);
-    }
-
-    // Handles mass adding/removing the master list ignoring search states
-    private void OnToggleWholeGroup(bool value)
-    {
-        if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? masterList)) return;
-
-        FilterBlock block = Block.Clone();
-        HashSet<string> updatedBases = [..Block.BaseTypeList];
-
-        if (value)
-        {
-            foreach (string baseType in masterList)
-            {
-                updatedBases.Add(baseType);
-            }
-        }
-        else
-        {
-            foreach (string baseType in masterList)
-            {
-                updatedBases.Remove(baseType);
-            }
-        }
 
         block.BaseTypeList = updatedBases;
         DispatchUpdate(block);

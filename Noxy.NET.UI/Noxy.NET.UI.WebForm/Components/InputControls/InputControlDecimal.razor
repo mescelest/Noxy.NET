@@ -1,9 +1,10 @@
-﻿@inherits BaseInputControl<decimal?>
+﻿@inherits BaseInput<decimal?>
 @implements IBaseInputTextual
 
-<div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputElementDecimal @attributes="InputAttributes" class="input" ID="@IDCurrent" Name="@GetName()" Size="Size" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
-</div>
+<TemplateInputControlTextual>
+    <InputElementDecimal @attributes="@AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Size="Size" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+</TemplateInputControlTextual>
+
 
 @code {
 

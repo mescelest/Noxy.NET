@@ -38,9 +38,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Update="Components\InputControls\InputControlCheckbox.razor.css">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
         <Content Update="Components\InputGroups\InputGroupCheckbox.razor.css">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>

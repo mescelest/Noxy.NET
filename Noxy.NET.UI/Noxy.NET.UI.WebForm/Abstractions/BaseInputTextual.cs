@@ -1,6 +1,4 @@
 ﻿using System.Globalization;
-using System.Linq.Expressions;
-using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using Noxy.NET.Interfaces;
 using Noxy.NET.UI.Interfaces;
@@ -20,8 +18,6 @@ public abstract class BaseInputTextual<TValue> : BaseInput<TValue>, IBaseInputTe
     public int? OnInputDelay { get; set; }
 
     protected string ValueInternal { get; set; } = string.Empty;
-
-    private static readonly Func<string, TValue?> _parser = BuildParser();
 
     protected override void OnParametersSet()
     {
@@ -65,36 +61,13 @@ public abstract class BaseInputTextual<TValue> : BaseInput<TValue>, IBaseInputTe
     protected virtual void HandleChange(string value)
     {
         ValueInternal = value;
-        var parsed = GetParsedValue(value);
         NotifyChange(GetParsedValue(value));
     }
 
-    protected virtual TValue? GetParsedValue(string value)
-    {
-        return !string.IsNullOrWhiteSpace(value) ? _parser(value) : default;
-    }
-
+    protected abstract TValue? GetParsedValue(string value);
 
     private static string GetChangeEventArgsValue(ChangeEventArgs args)
     {
         return args.Value?.ToString() ?? string.Empty;
-    }
-
-    private static Func<string, TValue?> BuildParser()
-    {
-        Type type = Nullable.GetUnderlyingType(typeof(TValue)) ?? typeof(TValue);
-        MethodInfo? tryParse = type.GetMethod("TryParse", BindingFlags.Public | BindingFlags.Static, null, [typeof(string), typeof(IFormatProvider), type.MakeByRefType()], null);
-        if (tryParse is null) return _ => default;
-
-        ParameterExpression value = Expression.Parameter(typeof(string), "value");
-        ParameterExpression result = Expression.Variable(type, "result");
-        ConstantExpression @null = Expression.Constant(null, typeof(TValue?));
-        LabelTarget label = Expression.Label(typeof(TValue?));
-
-        MethodCallExpression call = Expression.Call(tryParse, value, Expression.Constant(CultureInfo.InvariantCulture), result);
-        ConditionalExpression ternary = Expression.IfThenElse(call, Expression.Return(label, Expression.Convert(result, typeof(TValue?))), Expression.Return(label, @null));
-        BlockExpression block = Expression.Block([result], ternary, Expression.Label(label, @null));
-
-        return Expression.Lambda<Func<string, TValue?>>(block, value).Compile();
     }
 }
