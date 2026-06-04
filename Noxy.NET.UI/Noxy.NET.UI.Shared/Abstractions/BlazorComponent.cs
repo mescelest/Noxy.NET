@@ -1,13 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Noxy.NET.UI.Services;
 
 namespace Noxy.NET.UI.Abstractions;
 
 public abstract class BlazorComponent : ComponentBase
 {
-    [Inject]
-    protected PageLoadingService PageLoadingService { get; set; } = null!;
-
     protected bool IsRendered { get; set; }
 
     protected Guid UUID { get; } = Guid.NewGuid();

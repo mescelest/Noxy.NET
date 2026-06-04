@@ -5,7 +5,7 @@ using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
-using Noxy.NET.EntityManagement.Domain.Models;
+using Noxy.NET.EntityManagement.Domain.Models.Filters.Data;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Extensions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Data;

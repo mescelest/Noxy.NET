@@ -1,9 +1,9 @@
 using Fluxor;
-using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Domain.Requests.Data.Parameter;
 using Noxy.NET.EntityManagement.Domain.Responses.Data.Parameter;
 using Noxy.NET.EntityManagement.Presentation.Abstractions.Features;
 using Noxy.NET.EntityManagement.Presentation.Services;
+using Noxy.NET.Interfaces;
 
 namespace Noxy.NET.EntityManagement.Presentation.Features;
 

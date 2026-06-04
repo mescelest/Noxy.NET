@@ -1,8 +1,6 @@
-﻿using Noxy.NET.Interfaces;
+﻿namespace Noxy.NET.Models;
 
-namespace Noxy.NET.Models;
-
-public class TableList<TData> : List<TData>, ITableList<TData>
+public class TableList<TData> : List<TData>
 {
     public TableList(int width) : base(width)
     {

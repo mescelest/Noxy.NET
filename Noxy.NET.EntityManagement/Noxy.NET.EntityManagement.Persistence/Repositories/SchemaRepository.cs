@@ -7,7 +7,7 @@ using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
 using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Junctions;
 using Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
-using Noxy.NET.EntityManagement.Domain.Models.Filters;
+using Noxy.NET.EntityManagement.Domain.Models.Filters.Schema;
 using Noxy.NET.EntityManagement.Persistence.Abstractions;
 using Noxy.NET.EntityManagement.Persistence.Extensions;
 using Noxy.NET.EntityManagement.Persistence.Tables.Schemas;

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using Fluxor;
-using Noxy.NET.EntityManagement.Application.Interfaces.Services;
+using Noxy.NET.Interfaces;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Features;
 

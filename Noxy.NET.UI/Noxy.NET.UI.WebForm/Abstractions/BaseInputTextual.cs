@@ -1,64 +1,100 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
+﻿using System.Globalization;
+using System.Linq.Expressions;
+using System.Reflection;
+using Microsoft.AspNetCore.Components;
+using Noxy.NET.Interfaces;
+using Noxy.NET.UI.Interfaces;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseInputTextual<TValue> : BaseInput<TValue>, IDisposable, IAsyncDisposable
+public abstract class BaseInputTextual<TValue> : BaseInput<TValue>, IBaseInputTextual
 {
     [Inject]
-    protected IJSRuntime JS { get; set; } = null!;
-
-    [Parameter]
-    public bool? HasChangeEventOnInput { get; set; }
-    protected bool HasChangeEventOnInputCurrent => HasChangeEventOnInput ?? false;
+    protected IDebouncerService DebouncerService { get; set; } = null!;
 
     [Parameter]
     public int? Size { get; set; }
     protected int SizeCurrent => Size ?? 40;
 
     [Parameter]
-    public int? InputDelay { get; set; }
-    protected int InputDelayCurrent => InputDelay ?? 200;
+    public int? OnInputDelay { get; set; }
 
-    protected ElementReference InputRef { get; set; }
-    protected IJSObjectReference? InteropModule { get; set; }
-    protected DotNetObjectReference<BaseInputTextual<TValue>>? DotNetReference { get; set; }
+    protected string ValueInternal { get; set; } = string.Empty;
 
-    protected override async Task OnAfterFirstRenderAsync()
+    private static readonly Func<string, TValue?> _parser = BuildParser();
+
+    protected override void OnParametersSet()
     {
-        await base.OnAfterFirstRenderAsync();
+        base.OnParametersSet();
 
-        if (HasChangeEventOnInputCurrent)
+        ValueInternal = GetCurrentValue();
+    }
+
+    protected virtual string GetCurrentValue()
+    {
+        return Value switch
         {
-            await LoadInterop(JS);
+            null => string.Empty,
+            IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+            _ => Value.ToString() ?? string.Empty
+        };
+    }
 
-            DotNetReference ??= DotNetObjectReference.Create(this);
-            await InteropModule!.InvokeVoidAsync("RegisterOnInput", InputRef, InputDelayCurrent, DotNetReference, nameof(OnValueInput));
+    protected virtual void OnValueInput(ChangeEventArgs args)
+    {
+        if (!OnInputDelay.HasValue) return;
+
+        Console.WriteLine(args.Value);
+        string value = GetChangeEventArgsValue(args);
+        if (OnInputDelay.Value > 0)
+        {
+            DebouncerService.Debounce(() => HandleChange(value), new(OnInputDelay.Value, true, UUIDString));
+        }
+        else
+        {
+            HandleChange(value);
         }
     }
 
-    protected async Task LoadInterop(IJSRuntime js)
+    protected virtual void OnValueChange(ChangeEventArgs args)
     {
-        InteropModule ??= await js.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUIWebForm}/Interop.js");
+        OnChange.InvokeAsync(args);
+        HandleChange(GetChangeEventArgsValue(args));
     }
 
-    [JSInvokable]
-    public abstract void OnValueInput(string value);
-
-    protected abstract void OnValueChange(ChangeEventArgs args);
-
-    public virtual void Dispose()
+    protected virtual void HandleChange(string value)
     {
-        GC.SuppressFinalize(this);
-        DotNetReference?.Dispose();
+        ValueInternal = value;
+        var parsed = GetParsedValue(value);
+        NotifyChange(GetParsedValue(value));
     }
 
-    public async virtual ValueTask DisposeAsync()
+    protected virtual TValue? GetParsedValue(string value)
     {
-        GC.SuppressFinalize(this);
-        if (InteropModule != null)
-        {
-            await InteropModule.DisposeAsync();
-        }
+        return !string.IsNullOrWhiteSpace(value) ? _parser(value) : default;
+    }
+
+
+    private static string GetChangeEventArgsValue(ChangeEventArgs args)
+    {
+        return args.Value?.ToString() ?? string.Empty;
+    }
+
+    private static Func<string, TValue?> BuildParser()
+    {
+        Type type = Nullable.GetUnderlyingType(typeof(TValue)) ?? typeof(TValue);
+        MethodInfo? tryParse = type.GetMethod("TryParse", BindingFlags.Public | BindingFlags.Static, null, [typeof(string), typeof(IFormatProvider), type.MakeByRefType()], null);
+        if (tryParse is null) return _ => default;
+
+        ParameterExpression value = Expression.Parameter(typeof(string), "value");
+        ParameterExpression result = Expression.Variable(type, "result");
+        ConstantExpression @null = Expression.Constant(null, typeof(TValue?));
+        LabelTarget label = Expression.Label(typeof(TValue?));
+
+        MethodCallExpression call = Expression.Call(tryParse, value, Expression.Constant(CultureInfo.InvariantCulture), result);
+        ConditionalExpression ternary = Expression.IfThenElse(call, Expression.Return(label, Expression.Convert(result, typeof(TValue?))), Expression.Return(label, @null));
+        BlockExpression block = Expression.Block([result], ternary, Expression.Label(label, @null));
+
+        return Expression.Lambda<Func<string, TValue?>>(block, value).Compile();
     }
 }

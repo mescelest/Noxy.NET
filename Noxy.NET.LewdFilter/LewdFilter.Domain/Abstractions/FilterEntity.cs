@@ -1,4 +1,4 @@
-﻿namespace LewdFilter.Domain;
+﻿namespace LewdFilter.Domain.Abstractions;
 
 public abstract class FilterEntity
 {

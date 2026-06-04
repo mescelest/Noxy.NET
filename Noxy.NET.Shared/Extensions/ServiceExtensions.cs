@@ -10,12 +10,17 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddNoxyNETCommonServices(this IServiceCollection services)
     {
         return services
-            .AddNoxyNETUIWeightManager();
+            .AddNoxyNETTaskBundlingService()
+            .AddNoxyNETDebouncerService();
     }
 
-    public static IServiceCollection AddNoxyNETUIWeightManager(this IServiceCollection services)
+    public static IServiceCollection AddNoxyNETTaskBundlingService(this IServiceCollection services)
     {
-        services.AddScoped(typeof(IWeightManager<>), typeof(WeightManager<>));
-        return services;
+        return services.AddScoped<ITaskBundlingService, TaskBundlingService>();
+    }
+
+    public static IServiceCollection AddNoxyNETDebouncerService(this IServiceCollection services)
+    {
+        return services.AddScoped<IDebouncerService, DebouncerService>();
     }
 }

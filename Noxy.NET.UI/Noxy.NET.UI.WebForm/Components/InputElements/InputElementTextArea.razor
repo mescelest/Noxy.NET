@@ -1,7 +1,7 @@
 ﻿@inherits BaseInputTextual<string>
 
-<textarea @attributes="AdditionalAttributes" @ref="InputRef" id="@IDCurrent" class="@CssClass" cols="@SizeCurrent" rows="@RowsCurrent" @onchange="OnValueChange">
-    @Value
+<textarea @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" cols="@SizeCurrent" rows="@RowsCurrent" @onchange="OnValueChange" @oninput="OnValueInput">
+    @ValueInternal
 </textarea>
 
 @code {
@@ -10,17 +10,4 @@
     public int? Rows { get; set; }
     private int RowsCurrent => Rows ?? 6;
 
-    [JSInvokable]
-    public override void OnValueInput(string value)
-    {
-        NotifyChange(value);
-    }
-
-    protected override void OnValueChange(ChangeEventArgs args)
-    {
-        OnChange.InvokeAsync(args);
-        NotifyChange(args.Value?.ToString() ?? string.Empty);
-    }
-
 }
-

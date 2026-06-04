@@ -9,15 +9,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddNoxyNETUICommonServices(this IServiceCollection services)
     {
-        return services
-            .AddNoxyNETCommonServices()
-            .AddNoxyNETUIThemeService();
-    }
-
-    public static IServiceCollection AddNoxyNetUILoadingService(this IServiceCollection services)
-    {
-        services.AddScoped<PageLoadingService>();
-        return services;
+        return services.AddNoxyNETUIThemeService();
     }
 
     public static IServiceCollection AddNoxyNETUIThemeService(this IServiceCollection services)

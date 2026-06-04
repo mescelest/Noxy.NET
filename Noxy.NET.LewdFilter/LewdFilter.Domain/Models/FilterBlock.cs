@@ -1,4 +1,6 @@
-﻿namespace LewdFilter.Domain.Models;
+﻿using LewdFilter.Domain.Abstractions;
+
+namespace LewdFilter.Domain.Models;
 
 public class FilterBlock : FilterEntity
 {

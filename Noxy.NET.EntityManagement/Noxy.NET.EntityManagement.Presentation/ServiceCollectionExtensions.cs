@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Services;
 using Noxy.NET.EntityManagement.Presentation.Services;
-using Noxy.NET.UI.Services;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace

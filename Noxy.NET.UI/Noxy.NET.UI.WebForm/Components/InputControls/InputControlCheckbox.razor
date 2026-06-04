@@ -1,5 +1,32 @@
-<h3>InputControlCheckbox</h3>
+@inherits BaseInputControl<TOption?>
+@typeparam TOption
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @if (Visual != null)
+    {
+        @Visual(Checked)
+    }
+    else
+    {
+        <InputVisualCheckbox Checked="Checked" class="visual"/>
+    }
+
+    <InputElementCheckbox TOption="TOption" @attributes="InputAttributes" class="input" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+
+    @ChildContent
+</div>
 
 @code {
-    
+
+    [Parameter, EditorRequired]
+    public TOption Option { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment<bool>? Visual { get; set; }
+
+    public bool Checked => EqualityComparer<TOption>.Default.Equals(Value, Option);
+
 }

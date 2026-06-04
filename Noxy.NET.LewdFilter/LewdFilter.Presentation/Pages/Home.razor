@@ -4,4 +4,14 @@
 
 <PageTitle>Dashboard - LewdFilter Canvas</PageTitle>
 
+<InputControlDecimal OnInputDelay="500" @bind-Value="Value"/>
+<InputControlText @bind-Value="TextValue"/>
+
 <GroupListView/>
+
+@code {
+
+    public decimal? Value { get; set; }
+    public string TextValue { get => Value?.ToString() ?? string.Empty; set => Value = decimal.TryParse(value, out var result) ? result : (decimal?)null; }
+
+}

@@ -1,36 +1,12 @@
 ﻿@inherits BaseInputTextual<int?>
 
-<input @attributes="AdditionalAttributes" @ref="InputRef" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="tel" size="@SizeCurrent" value="@Value" @onchange="OnValueChange"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="tel" size="@SizeCurrent" value="@ValueInternal" inputmode="numeric" @onchange="OnValueChange" @oninput="OnValueInput"/>
 
 @code {
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override int? GetParsedValue(string value)
     {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
-
-        await LoadInterop(JS);
-    }
-
-    [JSInvokable]
-    public override void OnValueInput(string value)
-    {
-        HandleChange(value);
-    }
-
-    protected override void OnValueChange(ChangeEventArgs args)
-    {
-        OnChange.InvokeAsync(args);
-        HandleChange(args.Value?.ToString() ?? string.Empty);
-    }
-
-    private void HandleChange(string value)
-    {
-        int? next = int.TryParse(value, out int parsed) ? parsed : null;
-
-        NotifyChange(next);
-        InteropModule?.InvokeVoidAsync("NoxyNETUIWebForm.SetInputValue", InputRef, next?.ToString());
+        return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) ? parsed : null;
     }
 
 }
-

@@ -1,35 +1,12 @@
 ﻿@inherits BaseInputTextual<decimal?>
 
-<input @attributes="AdditionalAttributes" @ref="InputRef" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="tel" size="@SizeCurrent" value="@Value" @onchange="OnValueChange"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="tel" size="@SizeCurrent" value="@ValueInternal" inputmode="numeric" @onchange="OnValueChange" @oninput="OnValueInput"/>
 
 @code {
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override decimal? GetParsedValue(string value)
     {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
-
-        await LoadInterop(JS);
-    }
-
-    [JSInvokable]
-    public override void OnValueInput(string value)
-    {
-        HandleChange(value);
-    }
-
-    protected override void OnValueChange(ChangeEventArgs args)
-    {
-        OnChange.InvokeAsync(args);
-        HandleChange(args.Value?.ToString() ?? string.Empty);
-    }
-
-    private void HandleChange(string value)
-    {
-        decimal? next = decimal.TryParse(value, out decimal parsed) ? parsed : null;
-
-        NotifyChange(next);
-        InteropModule?.InvokeVoidAsync("NoxyNETUIWebForm.SetInputValue", InputRef, next?.ToString());
+        return decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal parsed) ? parsed : null;
     }
 
 }

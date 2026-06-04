@@ -1,4 +1,5 @@
-﻿using LewdFilter.Domain.Enums;
+﻿using LewdFilter.Domain.Abstractions;
+using LewdFilter.Domain.Enums;
 
 namespace LewdFilter.Domain.Models;
 

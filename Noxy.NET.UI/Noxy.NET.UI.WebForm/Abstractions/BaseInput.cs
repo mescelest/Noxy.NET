@@ -4,7 +4,7 @@ using Noxy.NET.UI.Interfaces;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseInput : ElementComponent
+public abstract class BaseInput : ElementComponent, IBaseInput
 {
     [CascadingParameter]
     public IWebFormContext? Context { get; set; }
@@ -30,7 +30,7 @@ public abstract class BaseInput : ElementComponent
     }
 }
 
-public abstract class BaseInput<TValue> : BaseInput
+public abstract class BaseInput<TValue> : BaseInput, IBaseInput<TValue>
 {
     [Parameter]
     public TValue? Value { get; set; }

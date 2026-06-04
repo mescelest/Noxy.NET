@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using LewdFilter.Domain.Abstractions;
 
 namespace LewdFilter.Domain.Models;
 

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using LewdFilter.Domain.Abstractions;
 using LewdFilter.Domain.Enums;
 
 namespace LewdFilter.Domain.Models;

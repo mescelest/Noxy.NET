@@ -1,4 +1,4 @@
-namespace Noxy.NET.EntityManagement.Domain.Models.Filters;
+namespace Noxy.NET.EntityManagement.Domain.Models.Filters.Schema;
 
 public class FilterSchemaElementList
 {

@@ -31,14 +31,8 @@
     --size-border-radius-md: 4px;
     --size-border-radius-lg: 8px;
     --size-box-shadow: 2px;
-    --size-control-xxxs: 20px;
-    --size-control-xxs: 24px;
-    --size-control-xs: 30px;
-    --size-control-sm: 36px;
-    --size-control-md: 42px;
-    --size-control-lg: 48px;
-    --size-control-xl: 64px;
-    --size-control-xxl: 92px;
+    --size-control-choice: 20px;
+    --size-control-input: 32px;
     --size-icon-xxs: 16px;
     --size-icon-xs: 20px;
     --size-icon-sm: 24px;
@@ -46,11 +40,12 @@
     --size-icon-lg: 32px;
     --size-icon-xl: 36px;
     --size-icon-xxl: 40px;
-    --size-page-xs: 320px;
+    --size-page-min: 320px;
     --size-page-sm: 360px;
     --size-page-md: 720px;
     --size-page-lg: 1280px;
-    --size-page-xl: 1920px;
+    --size-page-xl: 1440px;
+    --size-page-xxl: 1920px;
     --size-column: 320px;
     --size-layout-sidebar: clamp(var(--size-column), 15%, 400px);
 }

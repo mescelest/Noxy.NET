@@ -1,0 +1,25 @@
+﻿.InputControlText {
+    display: flex;
+}
+
+.InputControlText ::deep .input {
+    height: var(--size-control-input, 36px);
+    padding-inline: var(--size-gap-xxs, 8px);
+    border: var(--size-border-width-sm, 1) solid var(--color-offset-primary-lg, #00000033);
+    border-radius: var(--size-border-radius-md, 2px);
+    font-size: inherit;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: box-shadow 100ms ease-in-out;
+}
+
+.InputControlText ::deep .input:hover {
+    box-shadow: 0 0 4px 0 var(--color-offset-primary-lg, #00000033) inset;
+}
+
+.InputControlText ::deep .input:focus {
+    padding-inline: calc(var(--size-gap-xxs, 8px) - 1px);
+    border-color: var(--color-highlight);
+    border-width: var(--size-border-width-md);
+    outline: none;
+}

@@ -1,6 +1,6 @@
 using Noxy.NET.EntityManagement.Domain.Entities.Data;
 using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
-using Noxy.NET.EntityManagement.Domain.Models;
+using Noxy.NET.EntityManagement.Domain.Models.Filters.Data;
 
 namespace Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
 

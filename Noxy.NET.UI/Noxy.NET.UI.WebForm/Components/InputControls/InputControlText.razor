@@ -1,0 +1,17 @@
+﻿@inherits BaseInputControl<string>
+@implements IBaseInputTextual
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <InputElementText @attributes="InputAttributes" class="input" ID="@IDCurrent" Name="@GetName()" Size="Size" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+</div>
+
+@code {
+
+    [Parameter]
+    public int? Size { get; set; }
+
+    [Parameter]
+    public int? OnInputDelay { get; set; }
+
+}
+

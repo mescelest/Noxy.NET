@@ -3,15 +3,15 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    min-width: var(--size-control-md, 46px);
-    height: var(--size-control-md, 46px);
+    min-width: var(--size-control-input, 36px);
+    min-height: var(--size-control-input, 36px);
     position: relative;
-    padding: 0 var(--size-gap-sm, 8px);
-    background-color: var(--color-button, #767676);
-    border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-button, #767676) 35%, var(--color-primary, #ffffff));
+    padding: 0 var(--size-gap-xxs, 8px);
+    background-color: var(--color-muted, #767676);
+    border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-muted, #767676) 35%, var(--color-primary, FFFFFF));
     border-radius: var(--size-border-radius-md, 4px);
     box-shadow: 0 0 0 var(--size-border-width-sm, 1px) transparent inset;
-    font: var(--font-button);
+    font: var(--font-button, Serif);
     color: var(--color-primary, #FFFFFF);
     box-sizing: border-box;
     cursor: pointer;
@@ -38,50 +38,8 @@
 .Button:disabled:not(.loading) {
     border-color: transparent;
     background-color: var(--color-disabled, #4D4D4D);
-    color: color-mix(in srgb, var(--color-disabled, #4D4D4D) 60%, var(--color-primary, #ffffff));
+    color: color-mix(in srgb, var(--color-disabled, #4D4D4D) 60%, var(--color-primary, FFFFFF));
     cursor: not-allowed;
-}
-
-.Button[size="xxs"] {
-    min-width: var(--size-control-xxs, 24px);
-    height: var(--size-control-xxs, 24px);
-    padding: 0 var(--size-gap-xxs, 2px);
-}
-
-.Button[size="xs"] {
-    min-width: var(--size-control-xs, 30px);
-    height: var(--size-control-xs, 30px);
-    padding: 0 var(--size-gap-xs, 4px);
-}
-
-.Button[size="sm"] {
-    min-width: var(--size-control-sm, 36px);
-    height: var(--size-control-sm, 36px);
-    padding: 0 var(--size-gap-xs, 4px);
-}
-
-.Button[size="md"] {
-    min-width: var(--size-control-md, 42px);
-    height: var(--size-control-md, 42px);
-    padding: 0 var(--size-gap-sm, 8px);
-}
-
-.Button[size="lg"] {
-    min-width: var(--size-control-lg, 48px);
-    height: var(--size-control-lg, 48px);
-    padding: 0 var(--size-gap-sm, 8px);
-}
-
-.Button[size="xl"] {
-    min-width: var(--size-control-xl, 64px);
-    height: var(--size-control-xl, 64px);
-    padding: 0 var(--size-gap-md, 12px);
-}
-
-.Button[size="xxl"] {
-    min-width: var(--size-control-xxl, 92px);
-    height: var(--size-control-xxl, 92px);
-    padding: 0 var(--size-gap-lg, 16px);
 }
 
 .Button[status="none"] {

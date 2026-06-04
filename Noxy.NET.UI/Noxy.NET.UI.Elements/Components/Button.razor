@@ -1,6 +1,6 @@
 ﻿@inherits ElementComponent
 
-<button @attributes="AdditionalAttributes" class="@CssClass" status="@StatusString" size="@SizeString" disabled="@Disabled">
+<button @attributes="AdditionalAttributes" class="@CssClass" status="@StatusString" disabled="@Disabled">
     <Loader Loading="LoadingCurrent">
         @ChildContent
     </Loader>
@@ -11,10 +11,6 @@
     [Parameter]
     public StatusEnum? Status { get; set; }
     private string StatusString => (Status ?? StatusEnum.None).ToText();
-
-    [Parameter]
-    public ButtonSizeEnum? Size { get; set; }
-    private string SizeString => (Size ?? ButtonSizeEnum.Medium).ToText();
 
     [Parameter]
     public bool? Loading { get; set; }
