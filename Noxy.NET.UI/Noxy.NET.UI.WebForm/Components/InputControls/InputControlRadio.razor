@@ -1,11 +1,11 @@
 @inherits BaseInput<TOption?>
 @typeparam TOption
 
-<TemplateInputControlCheckbox Visual="@Visual" For="@IDCurrent" Checked="@Checked" Disabled="@Disabled">
-    <InputElementCheckbox TOption="TOption" @attributes="@AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+<TemplateInputControlRadio Visual="@Visual" For="@IDCurrent" Checked="@Checked" Disabled="@Disabled">
+    <InputElementRadio TOption="TOption" @attributes="@AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
 
     @ChildContent
-</TemplateInputControlCheckbox>
+</TemplateInputControlRadio>
 
 @code {
 

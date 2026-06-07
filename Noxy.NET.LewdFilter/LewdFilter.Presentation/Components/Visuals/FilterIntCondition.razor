@@ -1,69 +1,49 @@
-﻿<div class="filter-int-condition">
+﻿@inherits BaseInput<FilterComparatorInt?>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
     @if (_operator == ComparatorTypeEnum.Between)
     {
-        <input class="left" name="left" type="tel" size="5" value="@_left" @onchange="OnLeftChanged"/>
+        <InputControlInteger class="left" Name="left" Size="5" @bind-Value="@_left" @bind-Value:after="PushUpdate"/>
     }
 
-    <Select TOption="ComparatorTypeEnum" Name="operator" List="_operators" Value="_operator" ValueChanged="OnOperatorChanged">
+    <InputControlSelect TOption="ComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
         @context.ToFilterSymbol()
-    </Select>
-
-    <input class="right" name="right" type="tel" size="5" value="@_right" @onchange="OnRightChanged"/>
+    </InputControlSelect>
+    
+    <InputControlInteger class="right" Name="right" Size="5" @bind-Value="@_right" @bind-Value:after="PushUpdate"/>
 </div>
 
 @code {
-    [Parameter]
-    public string? ID { get; set; }
-
-    [Parameter]
-    public FilterComparatorInt? Value { get; set; }
-
-    [Parameter]
-    public EventCallback<FilterComparatorInt?> ValueChanged { get; set; }
-
-    private readonly HashSet<ComparatorTypeEnum> _operators = Enum.GetValues<ComparatorTypeEnum>().ToHashSet();
-
+    
     private int? _left;
     private int? _right;
     private ComparatorTypeEnum _operator = ComparatorTypeEnum.Equal;
 
+    private readonly HashSet<ComparatorTypeEnum> _operators = Enum.GetValues<ComparatorTypeEnum>().ToHashSet();
+    
     protected override void OnParametersSet()
     {
         _left = Value?.Left;
         _right = Value?.Right;
         _operator = Value?.ComparatorType ?? ComparatorTypeEnum.Equal;
     }
-
-    private Task OnLeftChanged(ChangeEventArgs e)
-    {
-        _left = int.TryParse(e.Value?.ToString(), out int n) ? n : null;
-        return PushUpdate();
-    }
-
-    private Task OnRightChanged(ChangeEventArgs e)
-    {
-        _right = int.TryParse(e.Value?.ToString(), out int n) ? n : null;
-        return PushUpdate();
-    }
-
-    private Task OnOperatorChanged(ComparatorTypeEnum op)
+    
+    private void SetOperator(ComparatorTypeEnum op)
     {
         _operator = op;
         if (_operator != ComparatorTypeEnum.Between) _right = null;
-
-        return PushUpdate();
+        PushUpdate();
     }
 
-    private async Task PushUpdate()
+    private void PushUpdate()
     {
         if (_left is null && _right is null)
         {
-            await ValueChanged.InvokeAsync(null);
+            ValueChanged.InvokeAsync(null);
         }
         else
         {
-            await ValueChanged.InvokeAsync(new() { Left = _left, Right = _right, ComparatorType = _operator });
+            ValueChanged.InvokeAsync(new() { Left = _left, Right = _right, ComparatorType = _operator });
         }
     }
-
 }

@@ -1,36 +1,28 @@
 ﻿@inject IState<FilterFeatureState> State
 @inject IDispatcher Dispatcher
+@inherits ElementComponent
 
-<div class="block-style-selector">
+<div @attributes="AdditionalAttributes" class="@CssClass">
 
-    <FormField Label="Text Color" For="text-color-select">
-        <select id="text-color-select" value="@TextColor?.ID" @onchange="OnTextColorChange" class="form-select">
-            <option value="">-- Default --</option>
-            @foreach (FilterColor color in Filter.GetColorList(ColorTypeEnum.Text))
-            {
-                <option value="@color.ID">@color.Name</option>
-            }
-        </select>
+    <FormField Label="Text Color" For="text-color">
+        <InputControlSelect TOption="FilterColor?" ID="text-color" Name="text-color" OptionList="TextFilterColorSet" 
+                            @bind-Value:get="Block.TextColor" @bind-Value:set="SetTextColor">
+            @GetColorName(context)
+        </InputControlSelect>
     </FormField>
 
-    <FormField Label="Background Color" For="bg-color-select">
-        <select id="bg-color-select" value="@BackgroundColor?.ID" @onchange="OnBackgroundColorChange" class="form-select">
-            <option value="">-- Default --</option>
-            @foreach (FilterColor color in Filter.GetColorList(ColorTypeEnum.Background))
-            {
-                <option value="@color.ID">@color.Name</option>
-            }
-        </select>
+    <FormField Label="Background Color" For="background-color">
+        <InputControlSelect TOption="FilterColor?" ID="background-color" Name="background-color" OptionList="BackgroundFilterColorSet" 
+                            @bind-Value:get="Block.BackgroundColor" @bind-Value:set="SetBackgroundColor">
+            @GetColorName(context)
+        </InputControlSelect>
     </FormField>
 
-    <FormField Label="Border Color" For="border-color-select">
-        <select id="border-color-select" value="@BorderColor?.ID" @onchange="OnBorderColorChange" class="form-select">
-            <option value="">-- Default --</option>
-            @foreach (FilterColor color in Filter.GetColorList(ColorTypeEnum.Border))
-            {
-                <option value="@color.ID">@color.Name</option>
-            }
-        </select>
+    <FormField Label="Border Color" For="border-color">
+        <InputControlSelect TOption="FilterColor?" ID="border-color" Name="border-color" OptionList="BorderFilterColorSet" 
+                            @bind-Value:get="Block.BorderColor" @bind-Value:set="SetBorderColor">
+            @GetColorName(context)
+        </InputControlSelect>
     </FormField>
 
     <FormField Label="@($"Font Size ({FontSize})")" For="font-size-slider">
@@ -50,18 +42,33 @@
     private Filter Filter => State.Value.Filter;
 
     private int FontSize => Block.FontSize ?? 32;
-    private FilterColor? TextColor => Block.TextColor;
-    private FilterColor? BackgroundColor => Block.BackgroundColor;
-    private FilterColor? BorderColor => Block.BorderColor;
+    
+    private HashSet<FilterColor?> TextFilterColorSet => [null, ..Filter.GetColorList(ColorTypeEnum.Text)];
+    private HashSet<FilterColor?> BackgroundFilterColorSet => [null, ..Filter.GetColorList(ColorTypeEnum.Background)];
+    private HashSet<FilterColor?> BorderFilterColorSet => [null, ..Filter.GetColorList(ColorTypeEnum.Border)];
 
-    private void OnTextColorChange(ChangeEventArgs e) => UpdateBlockColor(ColorTypeEnum.Text, e.Value?.ToString(), (block, color) => block.TextColor = color);
-    private void OnBackgroundColorChange(ChangeEventArgs e) => UpdateBlockColor(ColorTypeEnum.Background, e.Value?.ToString(), (block, color) => block.BackgroundColor = color);
-    private void OnBorderColorChange(ChangeEventArgs e) => UpdateBlockColor(ColorTypeEnum.Border, e.Value?.ToString(), (block, color) => block.BorderColor = color);
-
-    private void UpdateBlockColor(ColorTypeEnum type, string? idString, Action<FilterBlock, FilterColor?> cbAssignProperty)
+    private void SetTextColor(FilterColor? value) => UpdateBlockColor(ColorTypeEnum.Text, value);
+    private void SetBackgroundColor(FilterColor? value) => UpdateBlockColor(ColorTypeEnum.Background, value);
+    private void SetBorderColor(FilterColor? value) => UpdateBlockColor(ColorTypeEnum.Border, value);
+    
+    private void UpdateBlockColor(ColorTypeEnum type, FilterColor? color)
     {
         FilterBlock block = Block.Clone();
-        cbAssignProperty(block, Filter.TryGetColor(type, idString, out FilterColor? color) ? color : null);
+        switch (type)
+        {
+            case ColorTypeEnum.Text:
+                block.TextColor = color;
+                break;
+            case ColorTypeEnum.Background:
+                block.BackgroundColor = color;
+                break;
+            case ColorTypeEnum.Border:
+                block.BorderColor = color;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+        
         DispatchUpdate(block);
     }
 
@@ -76,5 +83,7 @@
     {
         Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(Group.ID, updatedBlock));
     }
+
+    private static string GetColorName(FilterColor? color) => color?.Name ?? "-- Default --";
 
 }

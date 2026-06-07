@@ -1,18 +1,14 @@
-﻿@using Noxy.NET.UI.Components
-@using Noxy.NET.UI.Enums
+﻿
 @inject IDispatcher Dispatcher
 
 <div class="block-base-type-selector">
 
     <div class="header">
         <FormField Label="Base type group" For="base-type-group">
-            <InputControlSelect TOption="string" class="base-type-group" ID="base-type-group" OptionList="BaseTypeConstants.BaseTypes.Keys.ToHashSet()" @bind-Value="_inputGroup" @bind-Value:after="() => _inputSearch = string.Empty">
+            <InputControlSelect TOption="string" class="base-type-group" ID="base-type-group" OptionList="BaseTypeGroupSet" 
+                                @bind-Value:get="_inputGroup" @bind-Value:set="SetInputGroup">
                 @context
             </InputControlSelect>
-
-            @* <Select TOption="string" ID="base-type-group" Value="_inputGroup" ValueChanged="OnGroupCategoryChange"> *@
-            @*     <option value="@context"></option> *@
-            @* </Select> *@
         </FormField>
 
         <FormField Label="Filter by name" For="filter-by-name">
@@ -48,7 +44,10 @@
                 {
                     bool isChecked = Block.BaseTypeList.Contains(baseType);
 
-                    <Checkbox Label="@baseType" Value="@isChecked" ValueChanged="@(e => OnBaseTypeToggle(baseType, e))"/>
+                    <InputControlCheckbox ID="@baseType" Name="base-type" Option="true" 
+                                          @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(baseType, v)">
+                        @baseType
+                    </InputControlCheckbox>
                 }
             }
         }
@@ -56,16 +55,18 @@
 </div>
 
 @code {
-
-    private string _inputGroup = string.Empty;
-    private string _inputSearch = string.Empty;
-
+    
     [Parameter, EditorRequired]
     public FilterGroup Group { get; set; } = null!;
 
     [Parameter, EditorRequired]
     public FilterBlock Block { get; set; } = null!;
+    
+    private string _inputGroup = string.Empty;
+    private string _inputSearch = string.Empty;
 
+    private static HashSet<string> BaseTypeGroupSet => BaseTypeConstants.BaseTypes.Keys.ToHashSet();
+    
     protected override void OnInitialized()
     {
         _inputGroup = BaseTypeConstants.BaseTypes.FirstOrDefault().Key;
@@ -78,6 +79,12 @@
         return list.ToArray();
     }
 
+    private void SetInputGroup(string? value)
+    {
+        _inputGroup = value ?? string.Empty;
+        _inputSearch = string.Empty;
+    }
+    
     private bool? GetSelectAll()
     {
         if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? masterList)) return false;
@@ -109,19 +116,19 @@
         DispatchUpdate(block);
     }
 
-    private void OnGroupCategoryChange(string value)
-    {
-        _inputGroup = value;
-        _inputSearch = string.Empty;
-    }
-
     private void OnBaseTypeToggle(string baseType, bool value)
     {
         FilterBlock block = Block.Clone();
         HashSet<string> updatedBases = [..Block.BaseTypeList];
 
-        if (value) updatedBases.Add(baseType);
-        else updatedBases.Remove(baseType);
+        if (value)
+        {
+            updatedBases.Add(baseType);
+        }
+        else
+        {
+            updatedBases.Remove(baseType);
+        }
 
         block.BaseTypeList = updatedBases;
         DispatchUpdate(block);

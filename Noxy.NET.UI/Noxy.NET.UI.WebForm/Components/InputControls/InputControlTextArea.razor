@@ -1,0 +1,20 @@
+﻿@inherits BaseInput<string>
+@implements IBaseInputTextual
+
+<TemplateInputControlTextual>
+    <InputElementTextArea @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Size="Size" Rows="Rows" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+</TemplateInputControlTextual>
+
+@code {
+
+    [Parameter]
+    public int? Rows { get; set; }
+    
+    [Parameter]
+    public int? Size { get; set; }
+
+    [Parameter]
+    public int? OnInputDelay { get; set; }
+
+}
+
