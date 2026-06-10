@@ -1,4 +1,5 @@
-﻿using Noxy.NET.UI.Interfaces;
+﻿using Microsoft.AspNetCore.Components;
+using Noxy.NET.UI.Interfaces;
 using Noxy.NET.UI.Models;
 
 namespace Noxy.NET.UI.Abstractions;

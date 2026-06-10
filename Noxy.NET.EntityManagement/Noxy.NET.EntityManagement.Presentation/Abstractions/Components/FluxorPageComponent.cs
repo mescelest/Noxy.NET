@@ -1,3 +1,5 @@
+using Noxy.NET.UI.Models;
+
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
 public abstract class FluxorPageComponent : FluxorElementComponent

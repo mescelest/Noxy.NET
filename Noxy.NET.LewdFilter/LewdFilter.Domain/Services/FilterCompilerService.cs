@@ -8,7 +8,7 @@ public class FilterCompilerService
 {
     private static string Indent(int level) => new(' ', level * 4);
 
-    public static string Compile(Filter filter)
+    public string Compile(Filter filter)
     {
         StringBuilder sb = new();
 

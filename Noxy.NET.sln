@@ -55,6 +55,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LewdFilter.Domain", "Noxy.N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LewdFilter.Presentation", "Noxy.NET.LewdFilter\LewdFilter.Presentation\LewdFilter.Presentation.csproj", "{FBD7BB39-E600-40BD-B768-CC14524A0329}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Noxy.NET.UI.Shared.Fluxor", "Noxy.NET.UI\Noxy.NET.UI.Shared.Fluxor\Noxy.NET.UI.Shared.Fluxor.csproj", "{2AF716FA-6A14-4BA3-A5EB-A4949071FCCF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,6 +139,10 @@ Global
 		{FBD7BB39-E600-40BD-B768-CC14524A0329}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBD7BB39-E600-40BD-B768-CC14524A0329}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBD7BB39-E600-40BD-B768-CC14524A0329}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AF716FA-6A14-4BA3-A5EB-A4949071FCCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF716FA-6A14-4BA3-A5EB-A4949071FCCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AF716FA-6A14-4BA3-A5EB-A4949071FCCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AF716FA-6A14-4BA3-A5EB-A4949071FCCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -163,6 +169,7 @@ Global
 		{749FEB17-7842-894C-F2D2-D720BF60B1D1} = {B1A09F2B-8669-4759-BA19-B00E8B47F934}
 		{3FCF279F-43E7-4E83-851F-5C9147CF7830} = {5C3C6C52-E42D-4B58-83F5-C4B55F63C468}
 		{FBD7BB39-E600-40BD-B768-CC14524A0329} = {5C3C6C52-E42D-4B58-83F5-C4B55F63C468}
+		{2AF716FA-6A14-4BA3-A5EB-A4949071FCCF} = {7225C7C5-5628-446B-9AF5-97E7FE3356E3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B114B5EB-0D5D-43A3-8CA4-66193E2ED600}
