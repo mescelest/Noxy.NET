@@ -1,8 +1,6 @@
-﻿using Fluxor;
-using LewdFilter.Domain.Enums;
+﻿using LewdFilter.Domain.Enums;
 using LewdFilter.Domain.Models;
 using LewdFilter.Domain.Services;
-using Microsoft.JSInterop;
 
 namespace LewdFilter.Presentation.Features;
 
@@ -278,7 +276,7 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
         try
         {
             Filter payload = state.Value.Filter;
-            string compiledOutput = compiler.Compile(payload);
+            string compiledOutput = FilterCompilerService.Compile(payload);
             string fileName = $"{(string.IsNullOrWhiteSpace(payload.Name) ? DefaultFileName : payload.Name)}.filter";
             await js.InvokeVoidAsync("downloadFileFromStream", fileName, compiledOutput);
         }

@@ -28,7 +28,7 @@
 
     private DialogSizeEnum SizeCurrent => Context?.Options.Size ?? DialogSizeEnum.Auto;
 
-    protected override string CssClass => CombineCssClass(base.CssClass, OverlayString, GetSizeString());
+    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, OverlayString, GetSizeString());
 
     protected override void OnInitialized()
     {

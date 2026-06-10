@@ -1,4 +1,6 @@
-﻿<fieldset class="form-group">
+﻿@inherits ElementComponent
+
+<fieldset @attributes="AdditionalAttributes" class="@CssClass">
     @if (!string.IsNullOrWhiteSpace(Label))
     {
         <legend class="legend">@Label</legend>

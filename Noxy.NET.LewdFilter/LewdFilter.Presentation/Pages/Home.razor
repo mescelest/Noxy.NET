@@ -2,16 +2,14 @@
 
 @layout FilterLayout
 
-<PageTitle>Dashboard - LewdFilter Canvas</PageTitle>
+<PageTitle>Dashboard - LewdFilter</PageTitle>
 
-<InputControlDecimal OnInputDelay="500" @bind-Value="Value"/>
-<InputControlText @bind-Value="TextValue"/>
+<InputElementRange Min="0" Max="100" Step="5" @bind-Value="Value"/>
 
 <GroupListView/>
 
 @code {
 
-    public decimal? Value { get; set; }
-    public string TextValue { get => Value?.ToString() ?? string.Empty; set => Value = decimal.TryParse(value, out var result) ? result : (decimal?)null; }
+    public double? Value { get; set; }
 
 }

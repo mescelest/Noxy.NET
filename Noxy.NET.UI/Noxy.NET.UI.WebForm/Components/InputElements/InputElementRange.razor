@@ -1,0 +1,28 @@
+﻿@inherits BaseInput<double?>
+
+<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="range" min="@Min" max="@Max" step="@Step" value="@Value"
+       aria-valuemin="@Min" aria-valuemax="@Max" aria-valuenow="@Value" @onchange="OnInputChange"/>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public double Min { get; set; }
+
+    [Parameter, EditorRequired]
+    public double Max { get; set; }
+
+    [Parameter]
+    public double? Step { get; set; }
+
+    private void OnInputChange(ChangeEventArgs args)
+    {
+        OnChange.InvokeAsync(args);
+        NotifyChange(GetEventValue(args));
+    }
+
+    private static double? GetEventValue(ChangeEventArgs args)
+    {
+        return double.TryParse(args.Value?.ToString(), out double value) ? value : null;
+    }
+
+}

@@ -1,0 +1,21 @@
+﻿@inherits BaseInput<string?>
+
+<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="color" alpha="@Alpha" value="@Value" @onchange="OnInputChange"/>
+
+@code {
+
+    [Parameter]
+    public bool? Alpha { get; set; }
+
+    private void OnInputChange(ChangeEventArgs args)
+    {
+        OnChange.InvokeAsync(args);
+        NotifyChange(GetEventValue(args));
+    }
+
+    private static string GetEventValue(ChangeEventArgs args)
+    {
+        return args.Value?.ToString() ?? string.Empty;
+    }
+
+}

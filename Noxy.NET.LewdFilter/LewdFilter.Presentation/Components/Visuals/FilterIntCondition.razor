@@ -7,7 +7,7 @@
     }
 
     <InputControlSelect TOption="ComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
-        @context.ToFilterSymbol()
+        @context.ToTextSymbol()
     </InputControlSelect>
     
     <InputControlInteger class="right" Name="right" Size="5" @bind-Value="@_right" @bind-Value:after="PushUpdate"/>

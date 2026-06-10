@@ -2,5 +2,5 @@ namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
 public abstract class FluxorPageComponent : FluxorElementComponent
 {
-    protected override string CssClass => CombineCssClass(base.CssClass, "Page");
+    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, "Page");
 }

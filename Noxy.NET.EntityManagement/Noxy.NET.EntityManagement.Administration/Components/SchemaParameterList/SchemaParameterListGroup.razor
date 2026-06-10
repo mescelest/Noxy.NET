@@ -36,22 +36,22 @@
     @if (!_isEditMode)
     {
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier, ComponentName):</strong>
             @SchemaParameter.SchemaIdentifier
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelName, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelName, ComponentName):</strong>
             @SchemaParameter.Name
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote, ComponentName):</strong>
             @SchemaParameter.Note
         </div>
 
         @if (SchemaParameter is EntitySchemaParameterText parameterText)
         {
             <div>
-                <strong>@TextParameterService.Get(ParameterTextConstants.LabelParameterTextType, GetComponentName()):</strong>
+                <strong>@TextParameterService.Get(ParameterTextConstants.LabelParameterTextType, ComponentName):</strong>
                 @parameterText.Type
             </div>
         }
@@ -59,25 +59,25 @@
         @if (SchemaParameter is EntitySchemaParameterSystem parameterSystem)
         {
             <div>
-                <strong>@TextParameterService.Get(ParameterTextConstants.LabelParameterSystemType, GetComponentName()):</strong>
+                <strong>@TextParameterService.Get(ParameterTextConstants.LabelParameterSystemType, ComponentName):</strong>
                 @parameterSystem.Type
             </div>
             <div>
-                <strong>@TextParameterService.Get(ParameterTextConstants.LabelIsPublic, GetComponentName()):</strong>
+                <strong>@TextParameterService.Get(ParameterTextConstants.LabelIsPublic, ComponentName):</strong>
                 @parameterSystem.IsPublic
             </div>
         }
 
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelIsApprovalRequired, GetComponentName())</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelIsApprovalRequired, ComponentName)</strong>
             @(SchemaParameter.IsApprovalRequired ? TextParameterService.Get(ParameterTextConstants.ValueYes) : TextParameterService.Get(ParameterTextConstants.ValueNo))
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelIsSystemDefined, GetComponentName())</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelIsSystemDefined, ComponentName)</strong>
             @(SchemaParameter.IsSystemDefined ? TextParameterService.Get(ParameterTextConstants.ValueYes) : TextParameterService.Get(ParameterTextConstants.ValueNo))
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, ComponentName):</strong>
             @SchemaParameter.TimeCreated
         </div>
     }
@@ -114,7 +114,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? GetComponentName();
+    private string ScopeCurrent => Scope ?? ComponentName;
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
@@ -169,11 +169,11 @@
         return
             @<div class="action-list">
                 <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
-                    @TextParameterService.Get(ParameterTextConstants.ButtonUpdate, GetComponentName())
+                    @TextParameterService.Get(ParameterTextConstants.ButtonUpdate, ComponentName)
                 </Button>
 
                 <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
-                    @TextParameterService.Get(ParameterTextConstants.ButtonCancel, GetComponentName())
+                    @TextParameterService.Get(ParameterTextConstants.ButtonCancel, ComponentName)
                 </Button>
             </div>;
     }

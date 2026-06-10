@@ -53,7 +53,7 @@
     private string ActiveClassString => IsActive ? "active" : string.Empty;
     private string CompletedClassString => IsCompleted ? "completed" : string.Empty;
 
-    protected new string CssClass => CombineCssClass(base.CssClass, CurrentClassString, ActiveClassString, CompletedClassString);
+    protected new string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, CurrentClassString, ActiveClassString, CompletedClassString);
 
     protected override void OnInitialized()
     {

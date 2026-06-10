@@ -24,12 +24,12 @@
                     <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
                 </TableHeader>
                 <TableRow>
-                    <span>@context.SchemaIdentifier</span>
-                    <span>@context.Name</span>
-                    <span>@context.Note</span>
-                    <span>@context.TitleParameterText?.Name</span>
-                    <span>@context.DescriptionParameterText?.Name</span>
-                    <span>@context.TimeCreated</span>
+                    <span>@context.Row.SchemaIdentifier</span>
+                    <span>@context.Row.Name</span>
+                    <span>@context.Row.Note</span>
+                    <span>@context.Row.TitleParameterText?.Name</span>
+                    <span>@context.Row.DescriptionParameterText?.Name</span>
+                    <span>@context.Row.TimeCreated</span>
                 </TableRow>
             </Table>
         </Content>
@@ -47,7 +47,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{SchemaID}";
+    private string ScopeCurrent => Scope ?? $"{ComponentName}:{SchemaID}";
 
     private bool _isCollapsed = true;
 

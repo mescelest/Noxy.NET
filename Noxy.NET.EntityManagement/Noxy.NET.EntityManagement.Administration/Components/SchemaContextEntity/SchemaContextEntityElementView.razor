@@ -20,12 +20,12 @@
                 </TableHeader>
                 <TableRow>
                     <span>
-                        <InputElementCheckbox Option="true" @bind-Value:get="@IsChecked(context.ID)" @bind-Value:set="x => SetChecked(x, context.ID)"/>
+                        <InputElementCheckbox Option="true" @bind-Value:get="@IsChecked(context.Row.ID)" @bind-Value:set="x => SetChecked(x, context.Row.ID)"/>
                     </span>
-                    <span>@context.SchemaIdentifier</span>
-                    <span>@context.Name</span>
-                    <span>@context.Note</span>
-                    <span>@context.TimeCreated</span>
+                    <span>@context.Row.SchemaIdentifier</span>
+                    <span>@context.Row.Name</span>
+                    <span>@context.Row.Note</span>
+                    <span>@context.Row.TimeCreated</span>
                 </TableRow>
             </Table>
         </Content>
@@ -42,7 +42,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{Schema.ID}";
+    private string ScopeCurrent => Scope ?? $"{ComponentName}:{Schema.ID}";
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }

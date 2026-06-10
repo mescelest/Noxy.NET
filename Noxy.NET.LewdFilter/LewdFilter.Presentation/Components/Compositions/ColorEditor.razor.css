@@ -1,4 +1,4 @@
-﻿.color-sidebar {
+﻿.ColorEditor {
     display: flex;
     flex: 0 0 auto;
     flex-flow: column;
@@ -37,11 +37,10 @@
     flex-flow: column;
 }
 
-.table {
+.ColorEditor ::deep .table {
     display: grid;
     grid-template-columns: max-content max-content max-content;
     align-items: center;
-    row-gap: 10px;
     column-gap: 10px;
 }
 

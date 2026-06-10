@@ -11,7 +11,7 @@ public class FilterColor : FilterEntity
     public int B { get; set; } = 255;
     public int A { get; set; } = 255;
 
-    public override string ToString() => $"{R} {G} {B} {A}";
+    public override string ToString() => A < 255 ? $"{R} {G} {B} {A}" : $"{R} {G} {B}";
 
     public static FilterColor DefaultBorder => new() { Name = "Default border", R = 0, G = 0, B = 0, A = 0 };
     public static FilterColor DefaultText => new() { Name = "Default text", R = 200, G = 200, B = 200, A = 255 };

@@ -5,6 +5,7 @@
 }
 
 .TemplateInputControlSelect ::deep select {
+    width: 100%;
     height: var(--size-control-input, 36px);
     padding-left: var(--size-gap-xxs, 8px);
     padding-right: var(--size-gap-xxl, 32px);
@@ -20,7 +21,7 @@
 }
 
 .TemplateInputControlSelect ::deep select:hover {
-    box-shadow: 0 0 4px 0 var(--color-offset-primary-lg, #00000033) inset;
+    box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, #00000033) inset;
 }
 
 .TemplateInputControlSelect ::deep select:focus {

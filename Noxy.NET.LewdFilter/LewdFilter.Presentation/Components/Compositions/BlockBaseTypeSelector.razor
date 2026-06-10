@@ -1,11 +1,10 @@
-﻿
-@inject IDispatcher Dispatcher
+﻿@inject IDispatcher Dispatcher
+@inherits ElementComponent
 
-<div class="block-base-type-selector">
-
+<div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="header">
         <FormField Label="Base type group" For="base-type-group">
-            <InputControlSelect TOption="string" class="base-type-group" ID="base-type-group" OptionList="BaseTypeGroupSet" 
+            <InputControlSelect TOption="string" class="base-type-group" ID="base-type-group" OptionList="BaseTypeGroupSet"
                                 @bind-Value:get="_inputGroup" @bind-Value:set="SetInputGroup">
                 @context
             </InputControlSelect>
@@ -44,7 +43,7 @@
                 {
                     bool isChecked = Block.BaseTypeList.Contains(baseType);
 
-                    <InputControlCheckbox ID="@baseType" Name="base-type" Option="true" 
+                    <InputControlCheckbox ID="@baseType" Name="base-type" Option="true"
                                           @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(baseType, v)">
                         @baseType
                     </InputControlCheckbox>
@@ -95,7 +94,7 @@
     {
         if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? list)) return;
 
-        HashSet<string> set = [..Block.BaseTypeList];
+        HashSet<string> set = [.. Block.BaseTypeList];
         if (value ?? false)
         {
             foreach (string item in list)
@@ -119,7 +118,7 @@
     private void OnBaseTypeToggle(string baseType, bool value)
     {
         FilterBlock block = Block.Clone();
-        HashSet<string> updatedBases = [..Block.BaseTypeList];
+        HashSet<string> updatedBases = [.. Block.BaseTypeList];
 
         if (value)
         {

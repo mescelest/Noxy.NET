@@ -1,4 +1,4 @@
-﻿.filter-layout {
+﻿.FilterLayout {
     display: grid;
     grid-template: "header header header" max-content "left-sidebar main right-sidebar" 1fr / max-content 1fr max-content;
     height: 100vh;

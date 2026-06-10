@@ -4,12 +4,12 @@
     @if (_operator == ComparatorTypeEnum.Between)
     {
         <InputControlSelect TOption="RarityTypeEnum?" OptionList="_setRarityTypeEnum" Name="left" @bind-Value="_left" @bind-Value:after="PushUpdate">
-            @context.ToString()
+            @context?.ToFilterString()
         </InputControlSelect>
     }
 
     <InputControlSelect TOption="ComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
-        @context.ToFilterSymbol()
+        @context.ToTextSymbol()
     </InputControlSelect>
     
     <InputControlSelect TOption="RarityTypeEnum?" OptionList="_setRarityTypeEnum" Name="right" @bind-Value="_right" @bind-Value:after="PushUpdate">

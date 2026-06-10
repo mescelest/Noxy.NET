@@ -33,7 +33,7 @@
     public int? OpticalSize { get; set; }
     private int OpticalSizeCurrent => OpticalSize ?? 0;
 
-    protected override string CssClass => CombineCssClass(GetComponentClass(), VariantCurrent.ToText());
+    public override string CssClass => ComponentMetadata.CombineCssClass(GetComponentClass(), VariantCurrent.ToText());
 
     private string GetStyle()
     {

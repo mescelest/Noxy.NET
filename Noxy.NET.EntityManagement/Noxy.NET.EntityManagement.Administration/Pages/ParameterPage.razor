@@ -1,5 +1,4 @@
 ﻿@page "/Parameter"
-@using Noxy.NET.EntityManagement.Administration.Components.DataParameterList
 @inherits PageComponent
 
 <PageTitle>Administration | Parameter</PageTitle>
@@ -19,7 +18,7 @@
 
 @code {
 
-    private string Scope => GetComponentName();
+    private string Scope => ComponentName;
 
     private string GetGroupScope(EntitySchemaParameter parameter) => $"{Scope}:{parameter.SchemaIdentifier}";
 

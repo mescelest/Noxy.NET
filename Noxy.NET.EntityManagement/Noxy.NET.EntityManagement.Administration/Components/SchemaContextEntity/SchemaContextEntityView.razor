@@ -16,7 +16,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{Schema.ID}:{SchemaContext.ID}";
+    private string ScopeCurrent => Scope ?? $"{ComponentName}:{Schema.ID}:{SchemaContext.ID}";
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }

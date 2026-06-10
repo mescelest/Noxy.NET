@@ -14,10 +14,10 @@ public class FilterComparatorRarity : FilterEntity
         if (Left is null && Right is null) return string.Empty;
 
         string op = ComparatorType.ToFilterSymbol();
-        if (ComparatorType != ComparatorTypeEnum.Between) return Left is not null ? $"Rarity {op} {Left}" : $"Rarity {op} {Right}";
-        if (Left is not null && Right is null) return $"Rarity >= {Left}";
-        if (Left is null && Right is not null) return $"Rarity <= {Right}";
+        if (ComparatorType != ComparatorTypeEnum.Between) return Left is not null ? $"{op} {Left}" : $"{op} {Right}";
+        if (Left is not null && Right is null) return $">= {Left}";
+        if (Left is null && Right is not null) return $"<= {Right}";
 
-        return $"Rarity {op} {Left} {Right}";
+        return $"{op} {Left} {Right}";
     }
 }

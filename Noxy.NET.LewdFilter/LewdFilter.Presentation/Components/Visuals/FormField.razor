@@ -1,4 +1,6 @@
-﻿<div class="form-field">
+﻿@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
     @if (!string.IsNullOrWhiteSpace(Label))
     {
         <label for="@For" class="label">@Label</label>
@@ -18,4 +20,4 @@
     [Parameter, EditorRequired]
     public RenderFragment? ChildContent { get; set; }
 
-}  
+}

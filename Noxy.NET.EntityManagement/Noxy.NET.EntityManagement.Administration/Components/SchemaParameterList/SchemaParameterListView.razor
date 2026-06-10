@@ -32,7 +32,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? GetComponentName();
+    private string ScopeCurrent => Scope ?? ComponentName;
 
     private IReadOnlyList<EntitySchemaParameter.Discriminator> List => StateSchemaParameter.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaParameter.Discriminator>? list) ? list : [];
     private RequestSchemaParameterList Request => StateSchemaParameter.Value.TryGetRequest(ScopeCurrent, out RequestSchemaParameterList? request) ? request : InitialRequestCurrent;

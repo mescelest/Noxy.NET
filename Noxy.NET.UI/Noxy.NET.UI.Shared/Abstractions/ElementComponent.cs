@@ -1,54 +1,23 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Diagnostics.CodeAnalysis;
+using Noxy.NET.UI.Interfaces;
+using Noxy.NET.UI.Models;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class ElementComponent : BlazorComponent
+public abstract class ElementComponent : BlazorComponent, IElementComponent
 {
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; init; }
 
-    protected override string CssClass => CombineCssClass(base.CssClass, GetComponentClass());
+    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, GetComponentClass());
 
-    protected void InvokeEventCallback<TArgs>(string param, TArgs args) where TArgs : EventArgs
+    public virtual string GetComponentClass()
     {
-        if (!(AdditionalAttributes?.TryGetValue(param, out object? objFunction) ?? false)) return;
-
-        switch (objFunction)
-        {
-            case Action<TArgs> fnAction:
-                fnAction(args);
-                break;
-            case EventCallback<TArgs> fnCallback:
-                fnCallback.InvokeAsync(args);
-                break;
-        }
+        return ComponentMetadata.ExtractCssClass(AdditionalAttributes);
     }
 
-    protected virtual string GetComponentClass()
+    public bool TryExtractAttribute<T>(string attribute, [NotNullWhen(true)] out T? result)
     {
-        List<string> result = [];
-        if (TryExtractAttribute("class", out string? @class) && !string.IsNullOrWhiteSpace(@class))
-        {
-            result.AddRange(@class.Split(' '));
-        }
-
-        return CombineCssClass([..result]);
-    }
-
-    protected bool TryExtractAttribute<T>(string attribute, out T? result)
-    {
-        return TryExtractAttribute(AdditionalAttributes, attribute, out result);
-    }
-
-    protected static bool TryExtractAttribute<T>(IReadOnlyDictionary<string, object>? collection, string attribute, out T? result)
-    {
-        if (collection is not null && collection.TryGetValue(attribute, out object? value) && value.GetType() == typeof(T))
-        {
-            result = (T)value;
-            return true;
-        }
-
-        result = default;
-        return false;
+        return ComponentMetadata.TryExtractAttribute(AdditionalAttributes, attribute, out result);
     }
 }

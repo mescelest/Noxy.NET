@@ -1,13 +1,13 @@
 ﻿@inject IDispatcher Dispatcher
 @inject IState<FilterFeatureState> State
-@inherits FluxorComponent
+@inherits FluxorElementComponent
 
-<div class="color-sidebar">
+<div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="tab-list" role="tablist">
         @foreach (ColorTypeEnum type in Enum.GetValues<ColorTypeEnum>())
         {
             bool isSelected = _tab == type;
-            string isSelectedAria = isSelected ? "true" : "false";
+            string isSelectedAria = isSelected.ToString().ToLower();
             string? isSelectedAttribute = isSelected ? "selected" : null;
 
             <button type="button" class="tab" role="tab" aria-selected="@isSelectedAria" selected="@isSelectedAttribute" @onclick="() => SetActiveTab(type)">
@@ -19,43 +19,43 @@
     </div>
 
     <div class="tab-panel" role="tabpanel">
-        <div class="table" role="table">
-            <div class="table-header" role="rowheader">
-                <strong>Name</strong>
-                <strong>Color</strong>
-                <div></div>
-            </div>
-
-            @for (int i = 0; i < ColorList.Count; i++)
-            {
-                FilterColor color = ColorList[i];
-                bool isFirstRow = i == 0;
-
-                <div class="table-row" role="row" @key="color.ID">
-                    <div class="table-cell" role="cell">
-                        <input type="text" class="name" value="@color.Name" @onchange="e => OnInputColorEditNameChange(e, color)"/>
-                    </div>
-                    <div class="table-cell" role="cell">
-                        <input type="color" class="color" alpha value="@color.ToHex()" @onchange="e => OnInputColorEditValueChange(e, color)"/>
-                        <input type="text" size="7" class="color" value="@color.ToHex()" @onchange="e => OnInputColorEditValueChange(e, color)"/>
-                    </div>
-                    <div class="table-cell" role="cell">
-                        @if (isFirstRow)
-                        {
-                            <button type="button" class="add" @onclick="AddNewRowAtBottom">
-                                <MaterialIcon Icon="add" Size="20px"/>
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="button" class="delete" @onclick="() => DeleteColor(color.ID)">
-                                <MaterialIcon Icon="remove" Size="20px"/>
-                            </button>
-                        }
-                    </div>
+        <Table class="table" List="ColorList">
+            <TableHeader>
+                <div role="cell">
+                    <strong>Name</strong>
                 </div>
-            }
-        </div>
+                <div role="cell">
+                    <strong>Color</strong>
+                </div>
+                <div role="cell"></div>
+            </TableHeader>
+            <TableRow>
+                <div class="table-cell" role="cell">
+                    <InputControlText class="name" Size="20" @bind-Value:get="@context.Row.Name" @bind-Value:set="e => OnInputColorEditNameChange(e, context.Row)"/>
+                </div>
+
+                <div class="table-cell" role="cell">
+                    <input type="color" class="color" alpha value="@context.Row.ToHex()" @onchange="e => OnInputColorEditValueChange(e, context.Row)"/>
+                    <InputControlText class="color-value" Size="7" @bind-Value:get="@context.Row.ToHex()" @bind-Value:set="e => OnInputColorEditValueChange(e, context.Row)"/>
+                </div>
+
+                <div class="table-cell" role="cell">
+                    @if (context.Index == 0)
+                    {
+                        <Button type="button" Status="StatusEnum.Success" @onclick="AddNewRowAtBottom">
+                            <MaterialIcon Icon="add" Size="20px"/>
+                        </Button>
+                    }
+                    else
+                    {
+                        <Button type="button" Status="StatusEnum.Error" @onclick="() => DeleteColor(context.Row.ID)">
+                            <MaterialIcon Icon="remove" Size="20px"/>
+                        </Button>
+                    }
+                </div>
+
+            </TableRow>
+        </Table>
     </div>
 </div>
 
@@ -67,15 +67,23 @@
 
     private void SetActiveTab(ColorTypeEnum tab) => _tab = tab;
 
-    private void OnInputColorEditNameChange(ChangeEventArgs obj, FilterColor color)
+    private void OnInputColorEditNameChange(string value, FilterColor color)
     {
-        color.Name = obj.Value?.ToString() ?? "";
+        color.Name = value;
         Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
     }
 
-    private void OnInputColorEditValueChange(ChangeEventArgs obj, FilterColor color)
+    private void OnInputColorEditValueChange(string value, FilterColor color)
     {
-        if (color.TryUpdateFrom(obj.Value?.ToString()))
+        if (color.TryUpdateFrom(value))
+        {
+            Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
+        }
+    }
+
+    private void OnInputColorEditValueChange(ChangeEventArgs value, FilterColor color)
+    {
+        if (color.TryUpdateFrom(value.Value?.ToString()))
         {
             Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
         }

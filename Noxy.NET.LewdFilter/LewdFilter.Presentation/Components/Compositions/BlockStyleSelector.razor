@@ -5,21 +5,21 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
 
     <FormField Label="Text Color" For="text-color">
-        <InputControlSelect TOption="FilterColor?" ID="text-color" Name="text-color" OptionList="TextFilterColorSet" 
+        <InputControlSelect TOption="FilterColor" ID="text-color" Name="text-color" OptionList="TextFilterColorSet" 
                             @bind-Value:get="Block.TextColor" @bind-Value:set="SetTextColor">
             @GetColorName(context)
         </InputControlSelect>
     </FormField>
 
     <FormField Label="Background Color" For="background-color">
-        <InputControlSelect TOption="FilterColor?" ID="background-color" Name="background-color" OptionList="BackgroundFilterColorSet" 
+        <InputControlSelect TOption="FilterColor" ID="background-color" Name="background-color" OptionList="BackgroundFilterColorSet" 
                             @bind-Value:get="Block.BackgroundColor" @bind-Value:set="SetBackgroundColor">
             @GetColorName(context)
         </InputControlSelect>
     </FormField>
 
     <FormField Label="Border Color" For="border-color">
-        <InputControlSelect TOption="FilterColor?" ID="border-color" Name="border-color" OptionList="BorderFilterColorSet" 
+        <InputControlSelect TOption="FilterColor" ID="border-color" Name="border-color" OptionList="BorderFilterColorSet" 
                             @bind-Value:get="Block.BorderColor" @bind-Value:set="SetBorderColor">
             @GetColorName(context)
         </InputControlSelect>

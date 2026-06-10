@@ -36,31 +36,31 @@
     @if (!_isEditMode)
     {
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier, ComponentName):</strong>
             @SchemaElement.SchemaIdentifier
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelName, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelName, ComponentName):</strong>
             @SchemaElement.Name
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote, ComponentName):</strong>
             @SchemaElement.Note
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelWeight, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelWeight, ComponentName):</strong>
             @SchemaElement.Weight
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTitle, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTitle, ComponentName):</strong>
             @SchemaElement.TitleTextParameter?.Name
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelDescription, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelDescription, ComponentName):</strong>
             @SchemaElement.DescriptionTextParameter?.Name
         </div>
         <div>
-            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName()):</strong>
+            <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, ComponentName):</strong>
             @SchemaElement.TimeCreated
         </div>
     }
@@ -91,7 +91,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? GetComponentName();
+    private string ScopeCurrent => Scope ?? ComponentName;
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }

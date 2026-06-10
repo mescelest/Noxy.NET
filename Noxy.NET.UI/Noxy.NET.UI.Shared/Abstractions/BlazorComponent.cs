@@ -1,23 +1,33 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Noxy.NET.UI.Interfaces;
+using Noxy.NET.UI.Models;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BlazorComponent : ComponentBase
+public abstract class BlazorComponent : ComponentBase, IBlazorComponent
 {
-    protected bool IsRendered { get; set; }
+    public ComponentMetadata Metadata { get; }
 
-    protected Guid UUID { get; } = Guid.NewGuid();
-    protected string UUIDString => UUID.ToString();
-    protected string UUIDCode => UUID.ToString().Replace("-", "");
+    public Guid UUID => Metadata.UUID;
+    public string UUIDString => Metadata.UUIDString;
+    public string UUIDCode => Metadata.UUIDCode;
 
-    protected virtual string CssClass => GetComponentName();
+    public bool IsRendered => Metadata.IsRendered;
+
+    public string ComponentName => Metadata.Name;
+
+    public virtual string CssClass => ComponentName;
+
+    protected BlazorComponent()
+    {
+        Metadata = new(GetType());
+    }
 
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
         if (!firstRender) return;
 
-        IsRendered = true;
+        Metadata.MarkAsRendered();
         OnAfterFirstRender();
     }
 
@@ -36,15 +46,5 @@ public abstract class BlazorComponent : ComponentBase
     protected virtual Task OnAfterFirstRenderAsync()
     {
         return Task.CompletedTask;
-    }
-
-    protected string GetComponentName()
-    {
-        return GetType().Name.Split('`').First();
-    }
-
-    protected static string CombineCssClass(params string?[] @params)
-    {
-        return string.Join(' ', @params.Where(x => !string.IsNullOrWhiteSpace(x)).OfType<string>().Select(@class => @class.Trim()));
     }
 }

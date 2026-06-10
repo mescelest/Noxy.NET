@@ -1,5 +1,3 @@
-using Fluxor;
-using Microsoft.AspNetCore.Components;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
 using Noxy.NET.EntityManagement.Presentation.Features;
 using Noxy.NET.EntityManagement.Presentation.Services;
@@ -34,11 +32,11 @@ public abstract class BaseRequestForm<TRequest, TResponse> : BaseForm<TRequest>,
 
     protected string GetDisplayName(string property)
     {
-        return TextParameterService.Get(Context.GetFieldDisplayName(property), GetComponentName());
+        return TextParameterService.Get(Context.GetFieldDisplayName(property), ComponentName);
     }
 
     protected string GetDescription(string property)
     {
-        return TextParameterService.Get(Context.GetFieldDescription(property), GetComponentName());
+        return TextParameterService.Get(Context.GetFieldDescription(property), ComponentName);
     }
 }

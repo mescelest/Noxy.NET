@@ -40,7 +40,7 @@
     [Parameter]
     public Guid ElementID { get; set; }
 
-    private string Scope => $"{GetComponentName()}:{SchemaID}:{ElementID}";
+    private string Scope => $"{ComponentName}:{SchemaID}:{ElementID}";
 
     private bool IsLoadingSchema => StateSchema.Value.TryGetLoading(Scope, FeatureSchemaActionKind.Find, out bool value) && value;
     private EntitySchema? Schema => StateSchema.Value.TryGetFind(Scope, out EntitySchema? value) ? value : null;

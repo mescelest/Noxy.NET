@@ -1,8 +1,8 @@
 ﻿@inject IDispatcher Dispatcher
 @inject IState<FilterFeatureState> State
-@inherits FluxorComponent
+@inherits FluxorElementComponent
 
-<div class="block-editor" role="form" aria-label="Edit Filter Block">
+<div @attributes="AdditionalAttributes" class="@CssClass" role="form" aria-label="Edit filter block">
     <div class="header">
         <input type="text" class="name" value="@Block.Name" @onchange="OnInputNameChange"/>
 

@@ -1,24 +1,26 @@
 ﻿@typeparam T
 @inherits ElementComponent
 
-<div @attributes="AdditionalAttributes" class="@CssClass">
-    <div class="header">
+<div @attributes="AdditionalAttributes" class="@CssClass" role="table">
+    <div class="header" role="rowheader">
         @TableHeader
     </div>
 
     <Loader class="loading" Loading="Loading">
         @if (List.Any())
         {
-            @foreach (T element in List)
+            @for (var index = 0; index < List.Count(); index++)
             {
-                <div class="row" @key="element">
-                    @TableRow(element)
+                T element = List.ElementAt(index);
+
+                <div @key="element" class="row" role="row">
+                    @TableRow((element, index))
                 </div>
             }
         }
         else if (Placeholder != null)
         {
-            <div class="placeholder">No rows present</div>
+            <div class="placeholder" role="row">No rows present</div>
         }
     </Loader>
 </div>
@@ -29,7 +31,7 @@
     public IEnumerable<T> List { get; set; }
 
     [Parameter, EditorRequired]
-    public RenderFragment<T> TableRow { get; set; }
+    public RenderFragment<(T Row, int Index)> TableRow { get; set; }
 
     [Parameter, EditorRequired]
     public RenderFragment TableHeader { get; set; }

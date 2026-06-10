@@ -1,6 +1,9 @@
-﻿namespace Noxy.NET.UI.Abstractions;
+﻿using Noxy.NET.UI.Interfaces;
+using Noxy.NET.UI.Models;
 
-public abstract class PageComponent : BlazorComponent
+namespace Noxy.NET.UI.Abstractions;
+
+public abstract class PageComponent : BlazorComponent, IPageComponent
 {
-    protected override string CssClass => CombineCssClass(base.CssClass, "Page");
+    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, "Page");
 }

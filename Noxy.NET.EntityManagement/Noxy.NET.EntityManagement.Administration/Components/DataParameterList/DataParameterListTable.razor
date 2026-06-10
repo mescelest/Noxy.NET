@@ -9,42 +9,42 @@
     <Table class="table" List="List" Loading="IsLoading">
         <TableHeader>
             <b></b>
-            <b class="column left">@TextParameterService.Get(ParameterTextConstants.LabelValue, GetComponentName())</b>
+            <b class="column left">@TextParameterService.Get(ParameterTextConstants.LabelValue, ComponentName)</b>
             @if (_isTextParameter)
             {
-                <b class="column left">@TextParameterService.Get(ParameterTextConstants.LabelCulture, GetComponentName())</b>
+                <b class="column left">@TextParameterService.Get(ParameterTextConstants.LabelCulture, ComponentName)</b>
             }
-            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeEffective, GetComponentName())</b>
-            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeApproved, GetComponentName())</b>
-            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, GetComponentName())</b>
+            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeEffective, ComponentName)</b>
+            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeApproved, ComponentName)</b>
+            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, ComponentName)</b>
         </TableHeader>
         <TableRow>
-            @if (Current == context.ID)
+            @if (Current == context.Row.ID)
             {
                 <MaterialIcon Icon="chevron_right" Size="18px"/>
             }
-            else if (context.TimeApproved == null)
+            else if (context.Row.TimeApproved == null)
             {
-                <MaterialIcon Icon="how_to_reg" Size="18px" @onclick="() => ApproveParameter(context)"/>
+                <MaterialIcon Icon="how_to_reg" Size="18px" @onclick="() => ApproveParameter(context.Row)"/>
             }
-            else if (context.TimeEffective > DateTime.UtcNow)
+            else if (context.Row.TimeEffective > DateTime.UtcNow)
             {
-                <MaterialIcon Icon="delete" Size="18px" @onclick="() => DeleteParameter(context)"/>
+                <MaterialIcon Icon="delete" Size="18px" @onclick="() => DeleteParameter(context.Row)"/>
             }
             else
             {
-                <MaterialIcon Icon="reset_settings" Size="18px" @onclick="() => OnClone.InvokeAsync(context)"/>
+                <MaterialIcon Icon="reset_settings" Size="18px" @onclick="() => OnClone.InvokeAsync(context.Row)"/>
             }
-            <span class="column left">@context.Value</span>
+            <span class="column left">@context.Row.Value</span>
 
-            @if (_isTextParameter && context is EntityDataParameterText text)
+            @if (_isTextParameter && context.Row is EntityDataParameterText text)
             {
                 <span class="column left">@text.Culture</span>
             }
 
-            <span class="column right">@SystemConstantService.AsDateTime(context.TimeEffective)</span>
-            <span class="column right">@SystemConstantService.AsDateTime(context.TimeApproved)</span>
-            <span class="column right">@SystemConstantService.AsDateTime(context.TimeCreated)</span>
+            <span class="column right">@SystemConstantService.AsDateTime(context.Row.TimeEffective)</span>
+            <span class="column right">@SystemConstantService.AsDateTime(context.Row.TimeApproved)</span>
+            <span class="column right">@SystemConstantService.AsDateTime(context.Row.TimeCreated)</span>
         </TableRow>
     </Table>
 </div>
@@ -56,7 +56,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? $"{GetComponentName()}";
+    private string ScopeCurrent => Scope ?? $"{ComponentName}";
 
     [Parameter]
     public EventCallback<T> OnClone { get; set; }

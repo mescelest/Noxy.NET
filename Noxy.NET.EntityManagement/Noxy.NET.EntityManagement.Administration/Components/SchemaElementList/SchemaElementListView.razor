@@ -35,7 +35,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? $"{GetComponentName()}:{SchemaID}";
+    private string ScopeCurrent => Scope ?? $"{ComponentName}:{SchemaID}";
 
     private bool IsLoading => StateElement.Value.TryGetLoading(ScopeCurrent, FeatureSchemaElementActionKind.List, out bool value) && value;
     private IReadOnlyList<EntitySchemaElement> List => StateElement.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaElement>? list) ? list : [];

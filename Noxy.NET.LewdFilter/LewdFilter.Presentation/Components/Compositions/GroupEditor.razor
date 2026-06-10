@@ -1,56 +1,60 @@
-﻿@inherits FluxorComponent
-@inject IDispatcher Dispatcher
+﻿@inject IDispatcher Dispatcher
 @inject IState<FilterFeatureState> State
+@inherits FluxorElementComponent
 
-<nav class="overview-sidebar">
-    <div class="table" role="table">
-        <div class="table-header" role="rowheader">
-            <strong>Name</strong>
-            <div></div>
-            <div></div>
-        </div>
-
-        @for (int i = 0; i < GroupList.Count; i++)
-        {
-            FilterGroup group = GroupList[i];
-            bool isFirstRow = i == 0;
-
-            <div class="table-row" role="row" @key="group.ID">
-                <div class="table-cell" role="cell">
-                    <input type="text" class="name" value="@group.Name" @onchange="e => OnInputGroupEditNameChange(e, group)"/>
-                </div>
-                <div class="table-cell" role="cell">
-                    @if (isFirstRow)
-                    {
-                        <button type="button" class="add" @onclick="AddNewRowAtBottom">
-                            <MaterialIcon Icon="add" Size="20px"/>
-                        </button>
-                    }
-                    else
-                    {
-                        <button type="button" class="delete" @onclick="() => DeleteGroup(group.ID)">
-                            <MaterialIcon Icon="remove" Size="20px"/>
-                        </button>
-                    }
-                </div>
-                <div class="table-cell" role="cell">
-                    <a href="#group-@group.ID" class="navigate" title="Scroll to group">
-                        <button type="button" class="focus">
-                            <MaterialIcon Icon="jump_to_element" Size="20px"/>
-                        </button>
-                    </a>
-                </div>
+<nav class="GroupEditor">
+    <Table class="table" List="GroupList">
+        <TableHeader>
+            <div role="cell">
+                <strong>Name</strong>
             </div>
-        }
-    </div>
+            <div role="cell"></div>
+            <div role="cell"></div>
+        </TableHeader>
+        <TableRow>
+            <div class="table-cell" role="cell">
+                <InputControlText class="name" Size="20" @bind-Value:get="@context.Row.Name" @bind-Value:set="e => OnInputGroupEditNameChange(e, context.Row)"/>
+            </div>
+
+            <div class="table-cell" role="cell">
+                @if (context.Index == 0)
+                {
+                    <Button type="button" Status="StatusEnum.Success" @onclick="AddNewRowAtBottom">
+                        <MaterialIcon Icon="add" Size="20px"/>
+                    </Button>
+                }
+                else
+                {
+                    <Button type="button" Status="StatusEnum.Error" @onclick="() => DeleteGroup(context.Row.ID)">
+                        <MaterialIcon Icon="remove" Size="20px"/>
+                    </Button>
+                }
+            </div>
+
+            <div class="table-cell" role="cell">
+                <a href="@GetGroupLink(@context.Row)" class="navigate" title="Scroll to group">
+                    <Button type="button" Status="StatusEnum.Info">
+                        <MaterialIcon Icon="jump_to_element" Size="20px"/>
+                    </Button>
+                </a>
+            </div>
+
+        </TableRow>
+    </Table>
 </nav>
 
 @code {
+
     private List<FilterGroup> GroupList => State.Value.Filter.GroupList;
 
-    private void OnInputGroupEditNameChange(ChangeEventArgs obj, FilterGroup group)
+    private string GetGroupLink(FilterGroup group)
     {
-        group.Name = obj.Value?.ToString() ?? "";
+        return $"#group-{group.ID}";
+    }
+
+    private void OnInputGroupEditNameChange(string value, FilterGroup group)
+    {
+        group.Name = value;
         Dispatcher.Dispatch(new FilterFeatureReducers.EditGroupAction(group.Clone()));
     }
 

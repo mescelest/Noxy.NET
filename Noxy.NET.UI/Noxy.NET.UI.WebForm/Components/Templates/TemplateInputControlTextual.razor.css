@@ -14,7 +14,7 @@
 }
 
 .TemplateInputControlTextual ::deep input:hover {
-    box-shadow: 0 0 4px 0 var(--color-offset-primary-lg, #00000033) inset;
+    box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, #00000033) inset;
 }
 
 .TemplateInputControlTextual ::deep input:focus {

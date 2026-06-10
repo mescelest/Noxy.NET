@@ -10,7 +10,7 @@
 
             <FormAuthenticationSignUp OnSubmit="SignUpFormSubmit">
                 <Button Status="StatusEnum.Info" type="submit">
-                    @TextParameterService.Get(ParameterTextConstants.ButtonSignUp, GetComponentName())
+                    @TextParameterService.Get(ParameterTextConstants.ButtonSignUp, ComponentName)
                 </Button>
             </FormAuthenticationSignUp>
         </div>
@@ -20,7 +20,7 @@
 
             <FormAuthenticationSignIn OnSubmit="SignInFormSubmit">
                 <Button Status="StatusEnum.Success" type="submit">
-                    @TextParameterService.Get(ParameterTextConstants.ButtonSignIn, GetComponentName())
+                    @TextParameterService.Get(ParameterTextConstants.ButtonSignIn, ComponentName)
                 </Button>
             </FormAuthenticationSignIn>
         </div>

@@ -6,7 +6,7 @@
 }
 
 .header, .row {
-    padding: var(--size-gap-xs) var(--size-gap-sm);
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
 }
 
 .header {

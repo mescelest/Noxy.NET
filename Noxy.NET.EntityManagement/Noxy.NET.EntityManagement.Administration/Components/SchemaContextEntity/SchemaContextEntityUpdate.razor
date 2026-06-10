@@ -22,7 +22,7 @@
 
     [Parameter]
     public string? Scope { get; set; }
-    private string ScopeCurrent => Scope ?? GetComponentName();
+    private string ScopeCurrent => Scope ?? ComponentName;
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }

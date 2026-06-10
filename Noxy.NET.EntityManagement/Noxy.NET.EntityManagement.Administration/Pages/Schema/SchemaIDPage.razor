@@ -36,7 +36,7 @@
     [Parameter]
     public Guid ID { get; set; }
 
-    private string Scope => $"{GetComponentName()}:{ID}";
+    private string Scope => $"{ComponentName}:{ID}";
 
     private bool IsLoading => StateSchema.Value.TryGetLoading(Scope, FeatureSchemaActionKind.Find, out bool value) && value;
     private EntitySchema? Schema => StateSchema.Value.TryGetFind(Scope, out EntitySchema? value) ? value : null;

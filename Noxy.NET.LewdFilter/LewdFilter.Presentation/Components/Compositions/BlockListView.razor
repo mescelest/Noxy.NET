@@ -1,8 +1,8 @@
-﻿@inherits FluxorComponent
+﻿@inherits FluxorElementComponent
 @inject IDispatcher Dispatcher
 @inject IState<FilterFeatureState> State
 
-<div class="block-list-view">
+<div @attributes="AdditionalAttributes" class="@CssClass">
     @foreach (FilterBlock block in BlockList)
     {
         <div class="block">

@@ -1,6 +1,7 @@
 ﻿@inject IDispatcher Dispatcher
+@inherits ElementComponent
 
-<div class="block-condition-selector">
+<div @attributes="AdditionalAttributes" class="@CssClass">
 
     <FormField Label="Rarity" For="rarity-condition">
         <FilterRarityCondition id="rarity-condition" Value="Block.Rarity" ValueChanged="OnRarityChange"/>

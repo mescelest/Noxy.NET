@@ -1,22 +1,15 @@
-﻿.overview-sidebar {
+﻿.GroupEditor {
     display: flex;
     flex: 0 0 auto;
     flex-flow: column;
     row-gap: var(--size-gap-md);
 }
 
-.table {
+.GroupEditor ::deep .table {
     display: grid;
     grid-template-columns: 1fr max-content max-content;
     align-items: center;
-    row-gap: 10px;
     column-gap: 10px;
-}
-
-.table-header, .table-row {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
 }
 
 .table-cell {
@@ -39,15 +32,4 @@
     text-decoration: none;
 }
 
-button.focus {
-    background-color: var(--color-highlight);
-}
-
-button.add {
-    background-color: var(--color-success);
-}
-
-button.delete {
-    background-color: var(--color-error);
-}
 

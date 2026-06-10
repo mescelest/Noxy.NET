@@ -19,8 +19,9 @@
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
-    protected override string CssClass => CombineCssClass(base.CssClass, LoadingCurrent ? "loading" : null);
-
+    private string? LoadingClass => LoadingCurrent ? "loading" : null;
     private bool? Disabled => TryExtractAttribute("disabled", out bool result) ? result : Loading;
+
+    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, LoadingClass);
 
 } 

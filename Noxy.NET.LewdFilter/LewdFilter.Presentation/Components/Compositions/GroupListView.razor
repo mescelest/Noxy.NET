@@ -1,8 +1,8 @@
-﻿@inherits FluxorComponent
-@inject IDispatcher Dispatcher
+﻿@inject IDispatcher Dispatcher
 @inject IState<FilterFeatureState> State
+@inherits FluxorElementComponent
 
-<div class="group-list-view">
+<div @attributes="AdditionalAttributes" class="@CssClass">
     @foreach (FilterGroup group in GroupList)
     {
         <div class="group">
