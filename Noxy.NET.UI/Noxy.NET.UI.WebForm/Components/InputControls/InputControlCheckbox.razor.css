@@ -1,21 +1,21 @@
-.TemplateInputControlRadio {
+.InputControlCheckbox {
     display: flex;
     column-gap: var(--size-gap-xxs);
     align-items: center;
     cursor: pointer;
 }
 
-.TemplateInputControlRadio[disabled] {
+.InputControlCheckbox[disabled] {
     color: var(--color-disabled);
 }
 
-.TemplateInputControlRadio[disabled] .visual {
+.InputControlCheckbox[disabled] .visual {
     background-color: var(--color-offset-primary-lg);
     border-color: var(--color-disabled);
     cursor: not-allowed;
 }
 
-.TemplateInputControlRadio:not([disabled]):hover .visual {
+.InputControlCheckbox:not([disabled]):hover .visual {
     border-color: var(--color-highlight);
     box-shadow: 0 0 10px 0 var(--color-offset-primary-lg) inset;
 }
@@ -38,13 +38,13 @@
     transform: rotate(5deg);
 }
 
-.TemplateInputControlRadio:not([disabled]) .visual[checked] {
+.InputControlCheckbox:not([disabled]) .visual[checked] {
     border-color: var(--color-highlight);
     background-color: var(--color-highlight);
     color: var(--color-primary);
 }
 
-.TemplateInputControlRadio:not([disabled]):focus-within .visual {
+.InputControlCheckbox:not([disabled]):focus-within .visual {
     outline: var(--size-border-width-md) solid var(--color-highlight);
     outline-offset: var(--size-gap-tiny);
 }
@@ -54,7 +54,7 @@
     cursor: not-allowed;
 }
 
-.TemplateInputControlRadio ::deep > .InputElementRadio {
+.InputControlCheckbox ::deep > .InputElementCheckbox {
     position: fixed;
     top: -100%;
     left: -100%;

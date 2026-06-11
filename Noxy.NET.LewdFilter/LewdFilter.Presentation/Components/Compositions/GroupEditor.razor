@@ -32,7 +32,7 @@
             </div>
 
             <div class="table-cell" role="cell">
-                <a href="@GetGroupLink(@context.Row)" class="navigate" title="Scroll to group">
+                <a href="#@context.Row.ToGroupID()" class="navigate" title="Scroll to group">
                     <Button type="button" Status="StatusEnum.Info">
                         <MaterialIcon Icon="jump_to_element" Size="20px"/>
                     </Button>
@@ -46,11 +46,6 @@
 @code {
 
     private List<FilterGroup> GroupList => State.Value.Filter.GroupList;
-
-    private string GetGroupLink(FilterGroup group)
-    {
-        return $"#group-{group.ID}";
-    }
 
     private void OnInputGroupEditNameChange(string value, FilterGroup group)
     {

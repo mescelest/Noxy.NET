@@ -1,11 +1,13 @@
 @inherits BaseInput<TOption>
 @typeparam TOption
 
-<TemplateInputControlSelect>
-    <InputElementSelect @attributes="AdditionalAttributes" class="@CssClass" TOption="TOption" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" ChildContent="ChildContent"
+<div class="@ComponentName">
+    <InputElementSelect TOption="TOption" @attributes="AdditionalAttributes" class="@GetComponentClass()" ID="@IDCurrent" Name="@GetName()" OptionList="OptionList" ChildContent="ChildContent"
                         Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression">
     </InputElementSelect>
-</TemplateInputControlSelect>
+
+    <i class="arrow">❯</i>
+</div>
 
 @code {
 

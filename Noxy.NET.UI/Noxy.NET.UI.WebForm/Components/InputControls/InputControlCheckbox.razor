@@ -1,11 +1,23 @@
-@inherits BaseInput<TOption?>
 @typeparam TOption
+@inherits BaseInput<TOption?>
 
-<TemplateInputControlCheckbox Visual="@Visual" For="@IDCurrent" Checked="@Checked" Disabled="@Disabled">
-    <InputElementCheckbox TOption="TOption" @attributes="@AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+<label class="@ComponentName" for="@IDCurrent" disabled="@Disabled">
+    @if (Visual != null)
+    {
+        @Visual(Checked)
+        ;
+    }
+    else
+    {
+        <div class="visual" checked="@Checked">
+            <span class="tick">✔</span>
+        </div>
+    }
+
+    <InputElementCheckbox TOption="TOption" @attributes="@AdditionalAttributes" class="@GetComponentClass()" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
 
     @ChildContent
-</TemplateInputControlCheckbox>
+</label>
 
 @code {
 

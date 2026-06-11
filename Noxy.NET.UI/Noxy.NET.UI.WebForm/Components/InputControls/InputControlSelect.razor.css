@@ -1,0 +1,47 @@
+.InputControlSelect {
+    display: flex;
+    position: relative;
+    align-self: flex-start;
+}
+
+.InputControlSelect ::deep select {
+    width: 100%;
+    height: var(--size-control-input, 36px);
+    padding-left: var(--size-gap-xxs, 8px);
+    padding-right: var(--size-gap-xxl, 32px);
+    border: var(--size-border-width-sm, 1) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-md, 2px);
+    font-size: inherit;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: box-shadow 100ms ease-in-out;
+    appearance: none;
+    --moz-appearance: none;
+    --webkit-appearance: none;
+}
+
+.InputControlSelect ::deep select:hover {
+    box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, #00000033) inset;
+}
+
+.InputControlSelect ::deep select:focus {
+    padding-left: calc(var(--size-gap-xxs, 8px) - 1px);
+    padding-right: calc(var(--size-gap-xxl, 32px) - 1px);
+    border-color: var(--color-highlight);
+    border-width: var(--size-border-width-md);
+    outline: none;
+}
+
+.InputControlSelect > .arrow {
+    display: flex;
+    align-items: center;
+    width: auto;
+    height: auto;
+    position: absolute;
+    right: 12px;
+    top: calc(50% + 0px);
+    font-size: 14px;
+    font-style: normal;
+    transform: translateY(-50%) rotate(90deg);
+    pointer-events: none;
+}

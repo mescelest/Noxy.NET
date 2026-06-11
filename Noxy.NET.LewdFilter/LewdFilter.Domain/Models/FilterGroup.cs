@@ -10,6 +10,11 @@ public class FilterGroup : FilterEntity
 
     public static FilterGroup Default => new() { Name = "New group", BlockList = [FilterBlock.Default] };
 
+    public string ToGroupID()
+    {
+        return $"group-{ID}";
+    }
+
     public FilterGroup Clone(Guid? targetID = null) => new()
     {
         ID = targetID ?? ID,

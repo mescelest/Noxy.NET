@@ -1,0 +1,101 @@
+/* Layout wrapper */
+.TemplateInputControlColor {
+    display: inline-flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+/* Custom Text Box style */
+.color-text-field {
+    border: none;
+    padding: 8px 12px;
+    outline: none;
+    font-family: monospace;
+    width: 100px;
+}
+
+/* Custom visual replacement for the color button */
+.custom-color-preview-btn {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    border-left: 1px solid #ccc;
+    display: inline-block;
+    transition: transform 0.1s ease;
+}
+
+.custom-color-preview-btn:active {
+    transform: scale(0.95);
+}
+
+/* CRITICAL: Safely hide the native element child from layout flow */
+.hidden-native-input-container {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- CSS Anchor Positioning Engine --- */
+.custom-color-dropdown {
+    position: fixed;
+    position-area: block-end span-inline-end; /* Drop right below button alignment */
+    position-try-fallbacks: block-start span-inline-end, flip-inline;
+
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    min-width: 220px;
+
+    /* Clear default popover user-agent agent overrides */
+    margin: unset;
+    inset: unset;
+}
+
+.custom-dropdown-content h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #333;
+}
+
+.palette-grid {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.palette-grid button {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+/* Screen reader utility helper */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}

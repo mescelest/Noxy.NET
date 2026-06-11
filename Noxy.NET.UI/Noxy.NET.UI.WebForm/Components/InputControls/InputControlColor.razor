@@ -1,0 +1,77 @@
+﻿@inherits BaseInput<BaseColor>
+
+<label @attributes="AdditionalAttributes" class="@CssClass" for="@For" disabled="@Disabled" style="anchor-scope: @Anchor;">
+    <div class="input-group">
+        <input type="text" class="color-text-field" value="@CurrentTextValue" @oninput="HandleTextInput" placeholder="#000000"/>
+
+        <label for="@AssociatedInputId" popovertarget="@Popover" class="custom-color-preview-btn" style="anchor-name: @Anchor; background-color: @CurrentTextValue;">
+            <span class="sr-only">Choose Color</span>
+        </label>
+    </div>
+
+    <div id="@Popover" popover="auto" class="custom-color-dropdown" style="position-anchor: @Anchor;">
+
+        <div class="custom-dropdown-content">
+            <h4>Advanced Color Engine</h4>
+            <p>Active Hex: <code>@CurrentTextValue</code></p>
+
+            <div class="palette-grid">
+                <button type="button" @onclick='() => SetColor("#FF5733")' style="background:#FF5733"></button>
+                <button type="button" @onclick='() => SetColor("#33FF57")' style="background:#33FF57"></button>
+                <button type="button" @onclick='() => SetColor("#3357FF")' style="background:#3357FF"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="hidden-native-input-container">
+        @ChildContent
+    </div>
+</label>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment<bool?>? Visual { get; set; }
+
+    [Parameter, EditorRequired]
+    public bool? Checked { get; set; }
+
+    [Parameter, EditorRequired]
+    public bool? Disabled { get; set; }
+
+    [Parameter, EditorRequired]
+    public string For { get; set; }
+
+    [Parameter]
+    public string CurrentTextValue { get; set; } = "#000000";
+
+    [Parameter]
+    public EventCallback<string> CurrentTextValueChanged { get; set; }
+
+    [Parameter]
+    public string AssociatedInputId { get; set; } = "native-color-picker";
+
+    private string Anchor => $"--color-anchor-{UUIDCode}";
+    private string Popover => $"color-popover-{UUIDCode}";
+
+    protected async Task HandleTextInput(ChangeEventArgs e)
+    {
+        var input = e.Value?.ToString();
+        // Insert your custom color record parsing engine check here
+        if (!string.IsNullOrWhiteSpace(input) && input.StartsWith("#"))
+        {
+            CurrentTextValue = input;
+            await CurrentTextValueChanged.InvokeAsync(CurrentTextValue);
+        }
+    }
+
+    protected async Task SetColor(string hex)
+    {
+        CurrentTextValue = hex;
+        await CurrentTextValueChanged.InvokeAsync(CurrentTextValue);
+    }
+
+}

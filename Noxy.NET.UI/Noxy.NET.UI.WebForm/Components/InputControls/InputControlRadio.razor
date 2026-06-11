@@ -1,11 +1,23 @@
 @inherits BaseInput<TOption?>
 @typeparam TOption
 
-<TemplateInputControlRadio Visual="@Visual" For="@IDCurrent" Checked="@Checked" Disabled="@Disabled">
-    <InputElementRadio TOption="TOption" @attributes="@AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+<label class="@ComponentName" for="@IDCurrent" disabled="@Disabled">
+    @if (Visual != null)
+    {
+        @Visual(Checked)
+        ;
+    }
+    else
+    {
+        <div class="visual" checked="@Checked">
+            <span class="tick">✔</span>
+        </div>
+    }
+
+    <InputElementRadio TOption="TOption" @attributes="AdditionalAttributes" class="@GetComponentClass()" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
 
     @ChildContent
-</TemplateInputControlRadio>
+</label>
 
 @code {
 
@@ -22,5 +34,4 @@
     public bool? Disabled { get; set; }
 
     private bool Checked => EqualityComparer<TOption>.Default.Equals(Value, Option);
-
 }
