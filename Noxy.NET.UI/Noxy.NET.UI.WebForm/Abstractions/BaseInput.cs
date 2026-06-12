@@ -16,9 +16,6 @@ public abstract class BaseInput : ElementComponent, IBaseInput
     [Parameter]
     public string? Name { get; set; }
 
-    [Parameter]
-    public EventCallback<ChangeEventArgs> OnChange { get; set; }
-
     protected static string? GetFieldNameFromExpression<T>(Expression<Func<T>>? expression)
     {
         return expression?.Body switch

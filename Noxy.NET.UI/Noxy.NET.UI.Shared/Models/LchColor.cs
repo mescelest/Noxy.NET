@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.UI.Models;
@@ -36,4 +38,27 @@ public record LchColor : BaseColor
     public override LchColor ToLch() => this;
     public override OkLabColor ToOkLab() => ToRgb().ToOkLab();
     public override OkLchColor ToOkLch() => ToOkLab().ToOkLch();
+
+    public static bool TryParse(string input, [NotNullWhen(true)] out LchColor? color)
+    {
+        color = null;
+        ReadOnlySpan<char> span = input.AsSpan().Trim();
+        if (!span.StartsWith("lch", StringComparison.OrdinalIgnoreCase) || !TryPrepareFormat(span, 3, out ReadOnlySpan<char> content)) return false;
+
+        if (!TryReadCssColorComponent(content, out ReadOnlySpan<char> tokenLightness, out ReadOnlySpan<char> rem1)) return false;
+        if (tokenLightness.EndsWith("%")) tokenLightness = tokenLightness[..^1];
+        if (!double.TryParse(tokenLightness, CultureInfo.InvariantCulture, out double l)) return false;
+
+        if (!TryReadCssColorComponent(rem1, out ReadOnlySpan<char> tokenChroma, out ReadOnlySpan<char> rem2)) return false;
+        if (!double.TryParse(tokenChroma, CultureInfo.InvariantCulture, out double c)) return false;
+
+        if (!TryReadCssColorComponent(rem2, out ReadOnlySpan<char> tokenHue, out ReadOnlySpan<char> rem3)) return false;
+        if (!TryParseAngle(tokenHue, out double h)) return false;
+
+        if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> tokenAlpha, out _)) return false;
+        if (!TryParseAlpha(tokenAlpha, out double alpha)) return false;
+
+        color = new(l, c, h, alpha);
+        return true;
+    }
 }

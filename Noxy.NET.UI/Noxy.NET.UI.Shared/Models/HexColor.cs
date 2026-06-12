@@ -1,27 +1,27 @@
-using System.Text.RegularExpressions;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.UI.Models;
 
 public record HexColor : BaseColor
 {
-    private static readonly Regex HexRegex = new(@"^#?([0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$", RegexOptions.Compiled);
-
     public string Value { get; }
     public int R { get; }
     public int G { get; }
     public int B { get; }
     public double A { get; }
 
-    public HexColor(string hex)
+    public HexColor(int r, int g, int b, double a = 1.0)
     {
-        if (!HexRegex.IsMatch(hex)) throw new FormatException($"Invalid hex color: {hex}");
-
-        Value = hex;
-        (R, G, B, A) = ParseHex(hex);
+        R = Math.Clamp(r, 0, 255);
+        G = Math.Clamp(g, 0, 255);
+        B = Math.Clamp(b, 0, 255);
+        A = Math.Clamp(a, 0.0, 1.0);
+        Value = A >= 1.0 ? $"#{R:X2}{G:X2}{B:X2}" : $"#{R:X2}{G:X2}{B:X2}{Math.Round(A * 255):X2}";
     }
 
-    public override string ToCssString() => A >= 1.0 ? $"#{R:X2}{G:X2}{B:X2}" : $"#{R:X2}{G:X2}{B:X2}{Math.Round(A * 255):X2}";
+    public override string ToCssString() => Value;
 
     public override RgbColor ToRgb() => new(R, G, B, A);
     public override HexColor ToHex() => this;
@@ -33,28 +33,38 @@ public record HexColor : BaseColor
     public override OkLabColor ToOkLab() => ToRgb().ToOkLab();
     public override OkLchColor ToOkLch() => ToRgb().ToOkLch();
 
-    private static (int R, int G, int B, double A) ParseHex(string hex)
+    public static HexColor Parse(string hex)
     {
-        string clean = hex.TrimStart('#');
+        return !TryParse(hex, out HexColor? color) ? throw new FormatException($"Invalid hex color: {hex}") : color;
+    }
 
-        clean = clean.Length switch
-        {
-            3 => $"{clean[0]}{clean[0]}{clean[1]}{clean[1]}{clean[2]}{clean[2]}",
-            4 => $"{clean[0]}{clean[0]}{clean[1]}{clean[1]}{clean[2]}{clean[2]}{clean[3]}{clean[3]}",
-            _ => clean
-        };
+    public static bool TryParse(string hex, [NotNullWhen(true)] out HexColor? color)
+    {
+        color = null;
+        ReadOnlySpan<char> span = hex.AsSpan().Trim().TrimStart('#');
+        int len = span.Length;
 
-        int r = Convert.ToInt32(clean[..2], 16);
-        int g = Convert.ToInt32(clean[2..4], 16);
-        int b = Convert.ToInt32(clean[4..6], 16);
+        if (len is not (3 or 4 or 6 or 8) || !uint.TryParse(span, NumberStyles.HexNumber, null, out uint rawHex)) return false;
 
+        uint r, g, b;
         double a = 1.0;
-        if (clean.Length == 8)
+
+        if (len is 3 or 4)
         {
-            int alphaByte = Convert.ToInt32(clean[6..8], 16);
-            a = alphaByte / 255.0;
+            r = ((rawHex >> (len == 4 ? 12 : 8)) & 0xF) * 17;
+            g = ((rawHex >> (len == 4 ? 8 : 4)) & 0xF) * 17;
+            b = ((rawHex >> (len == 4 ? 4 : 0)) & 0xF) * 17;
+            if (len == 4) a = ((rawHex & 0xF) * 17) / 255.0;
+        }
+        else
+        {
+            r = (rawHex >> (len == 8 ? 24 : 16)) & 0xFF;
+            g = (rawHex >> (len == 8 ? 16 : 8)) & 0xFF;
+            b = (rawHex >> (len == 8 ? 8 : 0)) & 0xFF;
+            if (len == 8) a = (rawHex & 0xFF) / 255.0;
         }
 
-        return (r, g, b, a);
+        color = new((int)r, (int)g, (int)b, Math.Round(a, 2));
+        return true;
     }
 }

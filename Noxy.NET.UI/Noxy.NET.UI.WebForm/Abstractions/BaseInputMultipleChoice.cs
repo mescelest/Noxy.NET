@@ -1,14 +1,18 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Noxy.NET.UI.Interfaces;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseInputMultipleChoice<TOption, TValue> : BaseInput<TValue> where TValue : ISet<TOption>, new()
+public abstract class BaseInputMultipleChoice<TOption, TValue> : BaseInput<TValue>, INotifyInputChanged where TValue : ISet<TOption>, new()
 {
     [Parameter, EditorRequired]
     public required HashSet<TOption> OptionList { get; set; }
 
     [Parameter]
     public Func<TOption, IReadOnlyDictionary<string, object>?>? InputAttributes { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnChange { get; set; }
 
     protected void OnChoiceChange(ChangeEventArgs args, TOption option)
     {

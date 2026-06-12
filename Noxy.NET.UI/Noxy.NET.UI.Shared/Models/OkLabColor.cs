@@ -1,40 +1,42 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.UI.Models;
 
 public record OkLabColor : BaseColor
 {
-    public double L { get; }
-    public double A { get; }
-    public double B { get; }
+    public double Lightness { get; }
+    public double AxisA { get; }
+    public double AxisB { get; }
     public double Alpha { get; }
 
-    public OkLabColor(double l, double a, double b, double alpha = 1.0)
+    public OkLabColor(double lightness, double axisA, double axisB, double alpha = 1.0)
     {
-        L = Math.Clamp(l, 0.0, 1.0);
-        A = a;
-        B = b;
+        Lightness = Math.Clamp(lightness, 0.0, 1.0);
+        AxisA = axisA;
+        AxisB = axisB;
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"oklab({L} {A} {B})" : $"oklab({L} {A} {B} / {Alpha})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"oklab({Lightness} {AxisA} {AxisB})" : $"oklab({Lightness} {AxisA} {AxisB} / {Alpha})";
 
     public override OkLabColor ToOkLab() => this;
 
     public override OkLchColor ToOkLch()
     {
-        double c = Math.Sqrt(A * A + B * B);
-        double h = Math.Atan2(B, A) * (180.0 / Math.PI);
+        double c = Math.Sqrt(AxisA * AxisA + AxisB * AxisB);
+        double h = Math.Atan2(AxisB, AxisA) * (180.0 / Math.PI);
         if (h < 0) h += 360.0;
 
-        return new OkLchColor(L, c, h, Alpha);
+        return new(Lightness, c, h, Alpha);
     }
 
     public override XyzColor ToXyz()
     {
-        double lPrime = L + 0.3963377774 * A + 0.2158037573 * B;
-        double mPrime = L - 0.1055613458 * A - 0.0638541728 * B;
-        double sPrime = L - 0.0894841775 * A - 1.2914855480 * B;
+        double lPrime = Lightness + 0.3963377774 * AxisA + 0.2158037573 * AxisB;
+        double mPrime = Lightness - 0.1055613458 * AxisA - 0.0638541728 * AxisB;
+        double sPrime = Lightness - 0.0894841775 * AxisA - 1.2914855480 * AxisB;
 
         double l = lPrime * lPrime * lPrime;
         double m = mPrime * mPrime * mPrime;
@@ -44,7 +46,7 @@ public record OkLabColor : BaseColor
         double y = -0.0405801784 * l + 1.1122568696 * m - 0.0716766787 * s;
         double z = -0.0763812845 * l - 0.4214819784 * m + 1.5861632204 * s;
 
-        return new XyzColor(x, y, z, Alpha);
+        return new(x, y, z, Alpha);
     }
 
     public override LabColor ToLab() => ToXyz().ToLab();
@@ -53,4 +55,26 @@ public record OkLabColor : BaseColor
     public override HslColor ToHsl() => ToRgb().ToHsl();
     public override HsvColor ToHsv() => ToRgb().ToHsv();
     public override LchColor ToLch() => ToLab().ToLch();
+
+    public static bool TryParse(string input, [NotNullWhen(true)] out OkLabColor? color)
+    {
+        color = null;
+        ReadOnlySpan<char> span = input.AsSpan().Trim();
+        if (!span.StartsWith("oklab", StringComparison.OrdinalIgnoreCase) || !TryPrepareFormat(span, 5, out ReadOnlySpan<char> content)) return false;
+
+        if (!TryReadCssColorComponent(content, out ReadOnlySpan<char> tokenLightness, out ReadOnlySpan<char> rem1)) return false;
+        if (!TryParsePercentageOrRaw(tokenLightness, out double lightness, percentageScale: 100.0)) return false;
+
+        if (!TryReadCssColorComponent(rem1, out ReadOnlySpan<char> tokenAxisA, out ReadOnlySpan<char> rem2)) return false;
+        if (!double.TryParse(tokenAxisA, CultureInfo.InvariantCulture, out double axisA)) return false;
+
+        if (!TryReadCssColorComponent(rem2, out ReadOnlySpan<char> tokenAxisB, out ReadOnlySpan<char> rem3)) return false;
+        if (!double.TryParse(tokenAxisB, CultureInfo.InvariantCulture, out double axisB)) return false;
+
+        if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> alphaToken, out _)) return false;
+        if (!TryParseAlpha(alphaToken, out double alpha)) return false;
+
+        color = new(lightness, axisA, axisB, alpha);
+        return true;
+    }
 }

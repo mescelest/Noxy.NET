@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Noxy.NET.UI.Models;
 
 namespace Noxy.NET.UI.Abstractions;
@@ -19,192 +20,158 @@ public abstract record BaseColor
     public abstract OkLabColor ToOkLab();
     public abstract OkLchColor ToOkLch();
 
-    public static bool TryParseCssColor(string value, [NotNullWhen(true)] out BaseColor? color)
+    public static bool TryParseCssColor(string? value, [NotNullWhen(true)] out BaseColor? color)
     {
         color = null;
         if (string.IsNullOrWhiteSpace(value)) return false;
 
-        value = value.Trim().ToLowerInvariant();
+        ReadOnlySpan<char> span = value.AsSpan().Trim();
 
-        if (value.StartsWith("#"))
-            return TryParseHex(value, out color);
-
-        if (value.StartsWith("rgb"))
-            return TryParseRgb(value, out color);
-
-        if (value.StartsWith("hsl"))
-            return TryParseHsl(value, out color);
-
-        if (value.StartsWith("oklab"))
-            return TryParseOklab(value, out color);
-
-        if (value.StartsWith("oklch"))
-            return TryParseOklch(value, out color);
-
-        //return TryParseNamed(value, out color);
-        return false;
-    }
-
-    public static bool TryParseHex(string input, out HexColor? color)
-    {
-        color = null;
-        string hex = input.TrimStart('#');
-
-        try
+        if (span.StartsWith("#"))
         {
-            if (hex.Length == 3)
-            {
-                color = new RgbColor(
-                    Convert.ToInt32(new string(hex[0], 2), 16),
-                    Convert.ToInt32(new string(hex[1], 2), 16),
-                    Convert.ToInt32(new string(hex[2], 2), 16)
-                );
-                return true;
-            }
-
-            if (hex.Length == 4)
-            {
-                color = new RgbColor(
-                    Convert.ToInt32(new string(hex[0], 2), 16),
-                    Convert.ToInt32(new string(hex[1], 2), 16),
-                    Convert.ToInt32(new string(hex[2], 2), 16),
-                    Convert.ToInt32(new string(hex[3], 2), 16) / 255.0
-                );
-                return true;
-            }
-
-            if (hex.Length == 6)
-            {
-                color = new RgbColor(
-                    Convert.ToInt32(hex[..2], 16),
-                    Convert.ToInt32(hex[2..4], 16),
-                    Convert.ToInt32(hex[4..6], 16)
-                );
-                return true;
-            }
-
-            if (hex.Length == 8)
-            {
-                color = new RgbColor(
-                    Convert.ToInt32(hex[..2], 16),
-                    Convert.ToInt32(hex[2..4], 16),
-                    Convert.ToInt32(hex[4..6], 16),
-                    Convert.ToInt32(hex[6..8], 16) / 255.0
-                );
-                return true;
-            }
+            if (!HexColor.TryParse(value, out HexColor? hexColor)) return false;
+            color = hexColor;
+            return true;
         }
-        catch
+
+        if (span.StartsWith("rgb", StringComparison.OrdinalIgnoreCase))
         {
+            if (!RgbColor.TryParse(value, out RgbColor? rgbColor)) return false;
+            color = rgbColor;
+            return true;
+        }
+
+        if (span.StartsWith("hsl", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!HslColor.TryParse(value, out HslColor? hslColor)) return false;
+            color = hslColor;
+            return true;
+        }
+
+        if (span.StartsWith("lab", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!LabColor.TryParse(value, out LabColor? labColor)) return false;
+            color = labColor;
+            return true;
+        }
+
+        if (span.StartsWith("lch", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!LchColor.TryParse(value, out LchColor? lchColor)) return false;
+            color = lchColor;
+            return true;
+        }
+
+        if (span.StartsWith("oklab", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!OkLabColor.TryParse(value, out OkLabColor? okLabColor)) return false;
+            color = okLabColor;
+            return true;
+        }
+
+        if (span.StartsWith("oklch", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!OkLchColor.TryParse(value, out OkLchColor? okLchColor)) return false;
+            color = okLchColor;
+            return true;
         }
 
         return false;
     }
 
-    private static bool TryParseRgb(string input, out BaseColor? color)
+    protected static bool TryPrepareFormat(ReadOnlySpan<char> span, int prefixLen, out ReadOnlySpan<char> content)
     {
-        color = null;
+        content = default;
+        if (span.Length <= prefixLen || span[^1] != ')') return false;
 
-        try
-        {
-            string inner = input[input.IndexOf('(') + 1..input.LastIndexOf(')')];
-            inner = inner.Replace(",", " ");
-
-            string[] parts = inner.Split('/', StringSplitOptions.TrimEntries);
-            string[] rgb = parts[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            int r = int.Parse(rgb[0]);
-            int g = int.Parse(rgb[1]);
-            int b = int.Parse(rgb[2]);
-
-            double a = parts.Length == 2 ? double.Parse(parts[1]) : 1.0;
-
-            color = new RgbColor(r, g, b, a);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        content = span[prefixLen..^1].Trim();
+        return true;
     }
 
-    private static bool TryParseHsl(string input, out BaseColor? color)
+    protected static bool TryReadCssColorComponent(ReadOnlySpan<char> span, out ReadOnlySpan<char> token, out ReadOnlySpan<char> remainder)
     {
-        color = null;
+        token = default;
+        remainder = span;
+        if (span.IsEmpty) return false;
 
-        try
+        bool isLegacy = span.Contains(',');
+        char delim1 = isLegacy ? ',' : ' ';
+        char delim2 = isLegacy ? ',' : '/';
+
+        int idx1 = span.IndexOf(delim1);
+        int idx2 = span.IndexOf(delim2);
+
+        int idx = (idx1, idx2) switch
         {
-            string inner = input[input.IndexOf('(') + 1..input.LastIndexOf(')')];
-            inner = inner.Replace(",", " ");
+            (-1, -1) => -1,
+            (-1, var j) => j,
+            (var i, -1) => i,
+            var (i, j) => Math.Min(i, j)
+        };
 
-            string[] parts = inner.Split('/', StringSplitOptions.TrimEntries);
-            string[] hsl = parts[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            int h = int.Parse(hsl[0]);
-            int s = int.Parse(hsl[1].TrimEnd('%'));
-            int l = int.Parse(hsl[2].TrimEnd('%'));
-
-            double a = parts.Length == 2 ? double.Parse(parts[1]) : 1.0;
-
-            color = new HslColor(h, s, l, a);
-            return true;
-        }
-        catch
+        if (idx == -1)
         {
-            return false;
+            token = span.Trim();
+            remainder = ReadOnlySpan<char>.Empty;
+            return !token.IsEmpty;
         }
+
+        token = span[..idx].Trim();
+        char foundDelim = span[idx];
+        remainder = span[(idx + 1)..].TrimStart(foundDelim).TrimStart();
+        return true;
     }
 
-
-    private static bool TryParseOklab(string input, out BaseColor? color)
+    protected static bool TryParseAlpha(ReadOnlySpan<char> token, out double alpha)
     {
-        color = null;
+        alpha = 1.0;
+        if (token.IsEmpty) return true; // Missing alpha defaults to 1.0 safely
 
-        try
-        {
-            string inner = input[input.IndexOf('(') + 1..input.LastIndexOf(')')];
-            string[] parts = inner.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            double l = double.Parse(parts[0]);
-            double a = double.Parse(parts[1]);
-            double b = double.Parse(parts[2]);
-
-            double alpha = 1.0;
-            if (parts.Length == 5 && parts[3] == "/")
-                alpha = double.Parse(parts[4]);
-
-            color = new OkLabColor(l, a, b, alpha);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        if (!token.EndsWith("%")) return double.TryParse(token, CultureInfo.InvariantCulture, out alpha);
+        if (!double.TryParse(token[..^1], CultureInfo.InvariantCulture, out double pct)) return false;
+        alpha = pct / 100.0;
+        return true;
     }
 
-    private static bool TryParseOklch(string input, out BaseColor? color)
+    protected static bool TryParsePercentageOrRaw(ReadOnlySpan<char> token, out double value, double percentageScale = 100.0)
     {
-        color = null;
+        value = 0.0;
+        if (!token.EndsWith("%")) return double.TryParse(token, CultureInfo.InvariantCulture, out value);
+        if (!double.TryParse(token[..^1], CultureInfo.InvariantCulture, out double pct)) return false;
+        value = pct / percentageScale;
+        return true;
+    }
 
-        try
+    protected static bool TryParseAngle(ReadOnlySpan<char> token, out double degrees)
+    {
+        degrees = 0.0;
+        double factor = 1.0;
+        ReadOnlySpan<char> valueToken = token;
+
+        if (token.EndsWith("deg", StringComparison.OrdinalIgnoreCase))
         {
-            string inner = input[input.IndexOf('(') + 1..input.LastIndexOf(')')];
-            string[] parts = inner.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            double l = double.Parse(parts[0]);
-            double c = double.Parse(parts[1]);
-            double h = double.Parse(parts[2]);
-
-            double alpha = 1.0;
-            if (parts.Length == 5 && parts[3] == "/")
-                alpha = double.Parse(parts[4]);
-
-            color = new OkLchColor(l, c, h, alpha);
-            return true;
+            valueToken = token[..^3];
         }
-        catch
+        else if (token.EndsWith("rad", StringComparison.OrdinalIgnoreCase))
         {
-            return false;
+            valueToken = token[..^3];
+            factor = 180.0 / Math.PI;
         }
+        else if (token.EndsWith("grad", StringComparison.OrdinalIgnoreCase))
+        {
+            valueToken = token[..^4];
+            factor = 0.9;
+        }
+        else if (token.EndsWith("turn", StringComparison.OrdinalIgnoreCase))
+        {
+            valueToken = token[..^4];
+            factor = 360.0;
+        }
+
+        if (!double.TryParse(valueToken, CultureInfo.InvariantCulture, out double rawValue)) return false;
+
+        double deg = rawValue * factor;
+        degrees = (deg % 360.0 + 360.0) % 360.0;
+        return true;
     }
 }

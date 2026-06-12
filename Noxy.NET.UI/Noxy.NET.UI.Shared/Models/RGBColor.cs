@@ -1,42 +1,36 @@
+using System.Diagnostics.CodeAnalysis;
 using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.UI.Models;
 
 public record RgbColor : BaseColor
 {
-    public int R { get; }
-    public int G { get; }
-    public int B { get; }
+    public int Red { get; }
+    public int Green { get; }
+    public int Blue { get; }
     public double Alpha { get; }
 
-    public RgbColor(int r, int g, int b, double alpha = 1.0)
+    public RgbColor(int red, int green, int blue, double alpha = 1.0)
     {
-        R = Math.Clamp(r, 0, 255);
-        G = Math.Clamp(g, 0, 255);
-        B = Math.Clamp(b, 0, 255);
+        Red = Math.Clamp(red, 0, 255);
+        Green = Math.Clamp(green, 0, 255);
+        Blue = Math.Clamp(blue, 0, 255);
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
     public override string ToCssString()
     {
-        return Alpha >= 1.0 ? $"rgb({R} {G} {B})" : $"rgb({R} {G} {B} / {Alpha})";
+        return Alpha >= 1.0 ? $"rgb({Red} {Green} {Blue})" : $"rgb({Red} {Green} {Blue} / {Alpha})";
     }
 
     public override RgbColor ToRgb() => this;
-
-    public override HexColor ToHex()
-    {
-        int a = (int)Math.Round(Alpha * 255);
-        return a == 255
-            ? new($"#{R:X2}{G:X2}{B:X2}")
-            : new($"#{R:X2}{G:X2}{B:X2}{a:X2}");
-    }
+    public override HexColor ToHex() => new(Red, Green, Blue, Alpha);
 
     public override HslColor ToHsl()
     {
-        double r = R / 255.0;
-        double g = G / 255.0;
-        double b = B / 255.0;
+        double r = Red / 255.0;
+        double g = Green / 255.0;
+        double b = Blue / 255.0;
 
         double max = Math.Max(r, Math.Max(g, b));
         double min = Math.Min(r, Math.Min(g, b));
@@ -45,23 +39,31 @@ public record RgbColor : BaseColor
         double d = max - min;
         double s = d == 0 ? 0 : l > 0.5 ? d / (2.0 - max - min) : d / (max + min);
 
-        if (d != 0)
-        {
-            if (max == r) h = (g - b) / d + (g < b ? 6 : 0);
-            else if (max == g) h = (b - r) / d + 2;
-            else h = (r - g) / d + 4;
+        if (d == 0) return new((int)Math.Round(h * 360), (int)Math.Round(s * 100), (int)Math.Round(l * 100), Alpha);
 
-            h /= 6.0;
+        if (Math.Abs(max - r) < Tolerance)
+        {
+            h = (g - b) / d + (g < b ? 6 : 0);
         }
+        else if (Math.Abs(max - g) < Tolerance)
+        {
+            h = (b - r) / d + 2;
+        }
+        else
+        {
+            h = (r - g) / d + 4;
+        }
+
+        h /= 6.0;
 
         return new((int)Math.Round(h * 360), (int)Math.Round(s * 100), (int)Math.Round(l * 100), Alpha);
     }
 
     public override HsvColor ToHsv()
     {
-        double r = R / 255.0;
-        double g = G / 255.0;
-        double b = B / 255.0;
+        double r = Red / 255.0;
+        double g = Green / 255.0;
+        double b = Blue / 255.0;
 
         double max = Math.Max(r, Math.Max(g, b));
         double min = Math.Min(r, Math.Min(g, b));
@@ -69,29 +71,37 @@ public record RgbColor : BaseColor
         double h = 0;
         double s = max == 0 ? 0 : d / max;
 
-        if (d != 0)
-        {
-            if (max == r) h = (g - b) / d + (g < b ? 6 : 0);
-            else if (max == g) h = (b - r) / d + 2;
-            else h = (r - g) / d + 4;
+        if (d == 0) return new((int)Math.Round(h * 360), (int)Math.Round(s * 100), (int)Math.Round(max * 100), Alpha);
 
-            h /= 6.0;
+        if (Math.Abs(max - r) < Tolerance)
+        {
+            h = (g - b) / d + (g < b ? 6 : 0);
         }
+        else if (Math.Abs(max - g) < Tolerance)
+        {
+            h = (b - r) / d + 2;
+        }
+        else
+        {
+            h = (r - g) / d + 4;
+        }
+
+        h /= 6.0;
 
         return new((int)Math.Round(h * 360), (int)Math.Round(s * 100), (int)Math.Round(max * 100), Alpha);
     }
 
     public override XyzColor ToXyz()
     {
-        double r = InverseGamma(R);
-        double g = InverseGamma(G);
-        double b = InverseGamma(B);
+        double r = InverseGamma(Red);
+        double g = InverseGamma(Green);
+        double b = InverseGamma(Blue);
 
         double x = r * 0.4124564 + g * 0.3575761 + b * 0.1804375;
         double y = r * 0.2126729 + g * 0.7151522 + b * 0.0721750;
         double z = r * 0.0193339 + g * 0.1191920 + b * 0.9503041;
 
-        return new XyzColor(x, y, z, Alpha);
+        return new(x, y, z, Alpha);
     }
 
     public override LabColor ToLab()
@@ -110,12 +120,39 @@ public record RgbColor : BaseColor
         double aa = 500.0 * (fx - fy);
         double bb = 200.0 * (fy - fz);
 
-        return new LabColor(l, aa, bb, a);
+        return new(l, aa, bb, a);
     }
 
     public override LchColor ToLch() => ToLab().ToLch();
     public override OkLabColor ToOkLab() => ToXyz().ToOkLab();
     public override OkLchColor ToOkLch() => ToOkLab().ToOkLch();
+
+    public static bool TryParse(string input, [NotNullWhen(true)] out RgbColor? color)
+    {
+        color = null;
+        ReadOnlySpan<char> span = input.AsSpan().Trim();
+        if (!span.StartsWith("rgb", StringComparison.OrdinalIgnoreCase)) return false;
+        int prefixLen = span.Length > 3 && (span[3] is 'a' or 'A') ? 4 : 3;
+        if (!TryPrepareFormat(span, prefixLen, out ReadOnlySpan<char> content)) return false;
+
+        if (!TryReadCssColorComponent(content, out ReadOnlySpan<char> tokenRed, out ReadOnlySpan<char> rem1)) return false;
+        if (!TryParsePercentageOrRaw(tokenRed, out double rVal, percentageScale: 100.0)) return false;
+        int red = tokenRed.EndsWith("%") ? (int)Math.Round(rVal * 255.0) : (int)Math.Round(rVal);
+
+        if (!TryReadCssColorComponent(rem1, out ReadOnlySpan<char> tokenGreen, out ReadOnlySpan<char> rem2)) return false;
+        if (!TryParsePercentageOrRaw(tokenGreen, out double gVal, percentageScale: 100.0)) return false;
+        int green = tokenGreen.EndsWith("%") ? (int)Math.Round(gVal * 255.0) : (int)Math.Round(gVal);
+
+        if (!TryReadCssColorComponent(rem2, out ReadOnlySpan<char> tokenBlue, out ReadOnlySpan<char> rem3)) return false;
+        if (!TryParsePercentageOrRaw(tokenBlue, out double bVal, percentageScale: 100.0)) return false;
+        int blue = tokenBlue.EndsWith("%") ? (int)Math.Round(bVal * 255.0) : (int)Math.Round(bVal);
+
+        if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> tokenAlpha, out _)) return false;
+        if (!TryParseAlpha(tokenAlpha, out double alpha)) return false;
+
+        color = new(red, green, blue, alpha);
+        return true;
+    }
 
     private static double InverseGamma(int v)
     {
@@ -128,51 +165,5 @@ public record RgbColor : BaseColor
         const double d = 0.20689655172413793;
         const double t = d * d * d;
         return v > t ? Math.Cbrt(v) : v / (3.0 * d * d) + 4.0 / 29.0;
-    }
-
-    public static bool TryParse(string input, out RgbColor? color)
-    {
-        color = null;
-        if (string.IsNullOrWhiteSpace(input)) return false;
-
-        input = input.Trim();
-        if (!input.StartsWith("rgb", StringComparison.OrdinalIgnoreCase)) return false;
-
-        int open = input.IndexOf('(');
-        int close = input.LastIndexOf(')');
-        if (open < 0 || close < 0 || close <= open + 1) return false;
-
-        // Extract inside of parentheses
-        ReadOnlySpan<char> inner = input.AsSpan(open + 1, close - open - 1);
-
-        // Normalize commas → spaces
-        Span<char> buffer = stackalloc char[inner.Length];
-        for (int i = 0; i < inner.Length; i++)
-            buffer[i] = inner[i] == ',' ? ' ' : inner[i];
-
-        // Split on '/'
-        int slashIndex = buffer.IndexOf('/');
-        ReadOnlySpan<char> rgbPart = slashIndex >= 0
-            ? buffer[..slashIndex].Trim()
-            : buffer.Trim();
-
-        ReadOnlySpan<char> alphaPart = slashIndex >= 0
-            ? buffer[(slashIndex + 1)..].Trim()
-            : ReadOnlySpan<char>.Empty;
-
-        // Split RGB by spaces
-        var rgb = rgbPart.ToString().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (rgb.Length != 3) return false;
-
-        if (!int.TryParse(rgb[0], out int r)) return false;
-        if (!int.TryParse(rgb[1], out int g)) return false;
-        if (!int.TryParse(rgb[2], out int b)) return false;
-
-        double a = 1.0;
-        if (!alphaPart.IsEmpty && !double.TryParse(alphaPart, out a))
-            return false;
-
-        color = new RgbColor(r, g, b, a);
-        return true;
     }
 }

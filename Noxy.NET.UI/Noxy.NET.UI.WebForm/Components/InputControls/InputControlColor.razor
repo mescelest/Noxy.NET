@@ -42,8 +42,12 @@
         _popover = $"color-popover-{UUIDCode}";
     }
 
-    private void SetValue(string value)
+    private void SetValue(string? value)
     {
-        throw new NotImplementedException();
+        if (BaseColor.TryParseCssColor(value, out BaseColor? color))
+        {
+            NotifyChange(color);
+        }
     }
+
 }

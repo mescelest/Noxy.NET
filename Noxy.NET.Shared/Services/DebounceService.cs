@@ -67,14 +67,14 @@ public sealed class DebouncerService : IDebouncerService
 
             if (completed != delay)
             {
-                lock (_lock) _map[key] = new TaskCompletionSource();
+                lock (_lock) _map[key] = new();
                 continue;
             }
 
             lock (_lock)
             {
                 _running[key] = false;
-                _map[key] = new TaskCompletionSource();
+                _map[key] = new();
             }
 
             await callback();
@@ -118,7 +118,7 @@ public sealed class DebouncerService : IDebouncerService
 
             if (completed != delay)
             {
-                lock (_lock) _map[key] = new TaskCompletionSource();
+                lock (_lock) _map[key] = new();
                 continue;
             }
 
@@ -126,7 +126,7 @@ public sealed class DebouncerService : IDebouncerService
             lock (_lock)
             {
                 _running[key] = false;
-                _map[key] = new TaskCompletionSource();
+                _map[key] = new();
 
                 callback = _latestCallback[key];
                 _latestCallback.Remove(key);

@@ -1,4 +1,5 @@
 ﻿@inherits BaseInput<DateTime?>
+@implements INotifyInputChanged
 
 <input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="@UseTimeString" value="@ValueCurrent" @onchange="OnInputChange"/>
 
@@ -8,6 +9,9 @@
     public bool? UseTime { get; set; }
     private bool UseTimeCurrent => UseTime ?? false;
     private string UseTimeString => UseTimeCurrent ? "datetime" : "date";
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnChange { get; set; }
 
     private string? ValueCurrent => Value?.ToString("yyyy-MM-dd");
 

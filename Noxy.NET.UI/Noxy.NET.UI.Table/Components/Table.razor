@@ -9,7 +9,7 @@
     <Loader class="loading" Loading="Loading">
         @if (List.Any())
         {
-            @for (var index = 0; index < List.Count(); index++)
+            @for (int index = 0; index < List.Count(); index++)
             {
                 T element = List.ElementAt(index);
 

@@ -1,4 +1,5 @@
 ﻿@inherits BaseInput<TOption?>
+@implements INotifyInputChanged
 @typeparam TOption
 
 <input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="checkbox" checked="@CheckedCurrent" @onchange="OnInputChange"/>
@@ -11,6 +12,9 @@
     [Parameter]
     public bool? Checked { get; set; }
     private bool CheckedCurrent => Checked ?? EqualityComparer<TOption>.Default.Equals(Value, Option);
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnChange { get; set; }
 
     private void OnInputChange(ChangeEventArgs args)
     {

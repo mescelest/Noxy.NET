@@ -8,7 +8,6 @@ public interface IBaseInput
     IWebFormContext? Context { get; set; }
     string? ID { get; set; }
     string? Name { get; set; }
-    EventCallback<ChangeEventArgs> OnChange { get; set; }
 }
 
 public interface IBaseInput<TValue>

@@ -5,7 +5,7 @@ using Noxy.NET.UI.Interfaces;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class BaseInputTextual<TValue> : BaseInput<TValue>, IBaseInputTextual
+public abstract class BaseInputTextual<TValue> : BaseInput<TValue>, IBaseInputTextual, INotifyInputChanged
 {
     [Inject]
     protected IDebouncerService DebouncerService { get; set; } = null!;
@@ -16,6 +16,9 @@ public abstract class BaseInputTextual<TValue> : BaseInput<TValue>, IBaseInputTe
 
     [Parameter]
     public int? OnInputDelay { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnChange { get; set; }
 
     protected string ValueInternal { get; set; } = string.Empty;
 
@@ -40,7 +43,6 @@ public abstract class BaseInputTextual<TValue> : BaseInput<TValue>, IBaseInputTe
     {
         if (!OnInputDelay.HasValue) return;
 
-        Console.WriteLine(args.Value);
         string value = GetChangeEventArgsValue(args);
         if (OnInputDelay.Value > 0)
         {
