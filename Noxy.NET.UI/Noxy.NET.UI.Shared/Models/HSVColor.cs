@@ -2,41 +2,60 @@ using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.UI.Models;
 
-public record HsvColor(int H, int S, int V, double Alpha = 1.0) : BaseColor
+public record HsvColor : BaseColor
 {
-    public override string ToCssString() => $"hsv({H}, {S}%, {V}%)";
+    public int H { get; }
+    public int S { get; }
+    public int V { get; }
+    public double Alpha { get; }
+
+    public HsvColor(int h, int s, int v, double alpha = 1.0)
+    {
+        H = ((h % 360) + 360) % 360;
+        S = Math.Clamp(s, 0, 100);
+        V = Math.Clamp(v, 0, 100);
+        Alpha = Math.Clamp(alpha, 0.0, 1.0);
+    }
+
+    public override string ToCssString() => Alpha >= 1.0 ? $"hsl({H} {S}% {V}%)" : $"hsla({H} {S}% {V}% / {Alpha})";
 
     public override RgbColor ToRgb()
     {
-        double hf = H / 360.0, sf = S / 100.0, vf = V / 100.0;
-        if (S == 0)
+        double h = H / 360.0;
+        double s = S / 100.0;
+        double v = V / 100.0;
+        double a = Alpha;
+
+        if (s == 0)
         {
-            int gray = (int)Math.Round(vf * 255);
-            return new(gray, gray, gray, Alpha);
+            int gray = (int)Math.Round(v * 255);
+            return new(gray, gray, gray, a);
         }
 
-        double h6 = hf * 6.0;
-        if (Math.Abs(h6 - 6.0) < Tolerance)
-        {
-            h6 = 0.0;
-        }
+        double h6 = h * 6.0;
+        int sector = (int)Math.Floor(h6);
+        double fraction = h6 - sector;
 
-        int i = (int)Math.Floor(h6);
-        double v1 = vf * (1.0 - sf);
-        double v2 = vf * (1.0 - sf * (h6 - i));
-        double v3 = vf * (1.0 - sf * (1.0 - (h6 - i)));
+        double p = v * (1.0 - s);
+        double q = v * (1.0 - s * fraction);
+        double t = v * (1.0 - s * (1.0 - fraction));
 
-        (double rf, double gf, double bf) = i switch
+        (double rf, double gf, double bf) = sector switch
         {
-            0 => (vf, v3, v1),
-            1 => (v2, vf, v1),
-            2 => (v1, vf, v3),
-            3 => (v1, v2, vf),
-            4 => (v3, v1, vf),
-            _ => (vf, v1, v2)
+            0 => (v, t, p),
+            1 => (q, v, p),
+            2 => (p, v, t),
+            3 => (p, q, v),
+            4 => (t, p, v),
+            _ => (v, p, q)
         };
 
-        return new((int)Math.Round(rf * 255), (int)Math.Round(gf * 255), (int)Math.Round(bf * 255), Alpha);
+        return new(
+            (int)Math.Round(rf * 255),
+            (int)Math.Round(gf * 255),
+            (int)Math.Round(bf * 255),
+            a
+        );
     }
 
     public override HexColor ToHex() => ToRgb().ToHex();
@@ -44,7 +63,24 @@ public record HsvColor(int H, int S, int V, double Alpha = 1.0) : BaseColor
     public override HsvColor ToHsv() => this;
     public override XyzColor ToXyz() => ToRgb().ToXyz();
     public override LabColor ToLab() => ToRgb().ToLab();
-    public override LchColor ToLch() => throw new NotImplementedException();
-    public override OkLabColor ToOkLab() => throw new NotImplementedException();
+    public override LchColor ToLch() => ToRgb().ToLch();
+    public override OkLabColor ToOkLab() => ToRgb().ToOkLab();
     public override OkLchColor ToOkLch() => ToRgb().ToOkLch();
+
+    public static bool TryParse(string input, out HexColor? color)
+    {
+        color = null;
+        if (string.IsNullOrWhiteSpace(input)) return false;
+
+        input = input.Trim();
+        if (input[0] != '#' || input.Length is not 4 and not 5 and not 7 and not 9) return false;
+
+        for (int i = 1; i < input.Length; i++)
+        {
+            if (!Uri.IsHexDigit(input[i])) return false;
+        }
+
+        color = new HexColor(input);
+        return true;
+    }
 }
