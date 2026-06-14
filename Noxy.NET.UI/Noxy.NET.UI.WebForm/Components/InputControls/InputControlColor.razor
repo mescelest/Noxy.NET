@@ -44,9 +44,9 @@
     private RgbColor _localColor = new(0, 0, 0);
     private HsvColor? _activeDraftColor;
 
-    private string ValueString => _activeDraftColor is not null
-        ? _activeDraftColor.ToRgb().ToCssString()
-        : _localColor.ToCssString();
+    private RgbColor CurrentRgb => _activeDraftColor?.ToRgb() ?? _localColor;
+
+    private string ValueString => CurrentRgb.ToCssString();
 
     protected override void OnInitialized()
     {
@@ -80,10 +80,10 @@
     }
 
     private double GetHueDouble() => _activeDraftColor?.Hue ?? _hue ?? 0.0;
-    private string GetRedString() => (_activeDraftColor?.ToRgb() ?? _localColor).Red.ToString();
-    private string GetGreenString() => (_activeDraftColor?.ToRgb() ?? _localColor).Green.ToString();
-    private string GetBlueString() => (_activeDraftColor?.ToRgb() ?? _localColor).Blue.ToString();
-    private string GetAlphaString() => (_activeDraftColor?.ToRgb() ?? _localColor).Alpha.ToString("0.00", CultureInfo.InvariantCulture);
+    private string GetRedString() => CurrentRgb.Red.ToString();
+    private string GetGreenString() => CurrentRgb.Green.ToString();
+    private string GetBlueString() => CurrentRgb.Blue.ToString();
+    private string GetAlphaString() => CurrentRgb.Alpha.ToString("0.00", CultureInfo.InvariantCulture);
 
     private void SetHueFromDouble(double? value)
     {
@@ -96,7 +96,7 @@
         }
         else
         {
-            HsvColor hsv = _localColor.ToHsv();
+            var hsv = _localColor.ToHsv();
             _localColor = new HsvColor(integerHue, hsv.Saturation, hsv.Value, hsv.Alpha).ToRgb();
             NotifyChange(_localColor);
         }
@@ -104,20 +104,20 @@
 
     private void SetRedFromString(string? value)
     {
-        byte.TryParse(value, out byte r);
-        UpdateLocalColor(r, null, null, null);
+        int.TryParse(value, out int r);
+        UpdateLocalColor(Math.Clamp(r, 0, 255), null, null, null);
     }
 
     private void SetGreenFromString(string? value)
     {
-        byte.TryParse(value, out byte g);
-        UpdateLocalColor(null, g, null, null);
+        int.TryParse(value, out int g);
+        UpdateLocalColor(null, Math.Clamp(g, 0, 255), null, null);
     }
 
     private void SetBlueFromString(string? value)
     {
-        byte.TryParse(value, out byte b);
-        UpdateLocalColor(null, null, b, null);
+        int.TryParse(value, out int b);
+        UpdateLocalColor(null, null, Math.Clamp(b, 0, 255), null);
     }
 
     private void SetAlphaFromString(string? value)
@@ -128,13 +128,14 @@
         }
     }
 
-    private void UpdateLocalColor(byte? r, byte? g, byte? b, double? a)
+    private void UpdateLocalColor(int? r, int? g, int? b, double? a)
     {
-        int newR = r ?? (_activeDraftColor?.ToRgb() ?? _localColor).Red;
-        int newG = g ?? (_activeDraftColor?.ToRgb() ?? _localColor).Green;
-        int newB = b ?? (_activeDraftColor?.ToRgb() ?? _localColor).Blue;
-        double newA = a ?? (_activeDraftColor?.ToRgb() ?? _localColor).Alpha;
+        RgbColor current = CurrentRgb;
 
+        int newR = r ?? current.Red;
+        int newG = g ?? current.Green;
+        int newB = b ?? current.Blue;
+        double newA = a ?? current.Alpha;
         RgbColor updated = new(newR, newG, newB, newA);
 
         if (_activeDraftColor is not null)
@@ -155,9 +156,8 @@
         int saturation = (int)Math.Round(saturationPercentage);
         int value = (int)Math.Round(valuePercentage);
         int currentHueInteger = (int)Math.Round(_activeDraftColor?.Hue ?? _hue ?? 0.0);
-        double currentAlpha = _activeDraftColor?.ToRgb().Alpha ?? _localColor.Alpha;
 
-        _activeDraftColor = new HsvColor(currentHueInteger, saturation, value, currentAlpha);
+        _activeDraftColor = new(currentHueInteger, saturation, value, CurrentRgb.Alpha);
 
         await InvokeAsync(StateHasChanged);
     }
