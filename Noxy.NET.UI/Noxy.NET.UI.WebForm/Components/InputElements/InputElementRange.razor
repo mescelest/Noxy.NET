@@ -2,7 +2,7 @@
 @implements INotifyInputChanged
 
 <input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="range" min="@Min" max="@Max" step="@Step" value="@Value"
-       aria-valuemin="@Min" aria-valuemax="@Max" aria-valuenow="@Value" @onchange="OnInputChange"/>
+       aria-valuemin="@Min" aria-valuemax="@Max" aria-valuenow="@Value" @oninput="OnInputChange"/>
 
 @code {
 

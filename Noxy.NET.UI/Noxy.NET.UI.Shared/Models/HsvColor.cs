@@ -9,15 +9,15 @@ public record HsvColor : BaseColor
     public int Value { get; }
     public double Alpha { get; }
 
-    public HsvColor(int h, int s, int v, double alpha = 1.0)
+    public HsvColor(int hue, int saturation, int value, double alpha = 1.0)
     {
-        Hue = ((h % 360) + 360) % 360;
-        Saturation = Math.Clamp(s, 0, 100);
-        Value = Math.Clamp(v, 0, 100);
+        Hue = (hue % 360 + 360) % 360;
+        Saturation = Math.Clamp(saturation, 0, 100);
+        Value = Math.Clamp(value, 0, 100);
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"hsl({Hue} {Saturation}% {Value}%)" : $"hsla({Hue} {Saturation}% {Value}% / {Alpha})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"hsv({Hue} {Saturation}% {Value}%)" : $"hsva({Hue} {Saturation}% {Value}% / {Alpha})";
 
     public override RgbColor ToRgb()
     {
