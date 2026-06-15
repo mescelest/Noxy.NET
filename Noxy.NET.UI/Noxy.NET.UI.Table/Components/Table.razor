@@ -12,8 +12,9 @@
             @for (int index = 0; index < List.Count(); index++)
             {
                 T element = List.ElementAt(index);
+                object? rowKey = KeySelector != null ? KeySelector(element) : element;
 
-                <div @key="element" class="row" role="row">
+                <div @key="rowKey" class="row" role="row">
                     @TableRow((element, index))
                 </div>
             }
@@ -38,6 +39,9 @@
 
     [Parameter]
     public RenderFragment? Placeholder { get; set; }
+
+    [Parameter]
+    public Func<T, object>? KeySelector { get; set; }
 
     [Parameter]
     public bool Loading { get; set; }

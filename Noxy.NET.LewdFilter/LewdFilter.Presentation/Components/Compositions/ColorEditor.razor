@@ -1,5 +1,6 @@
 ﻿@inject IDispatcher Dispatcher
 @inject IState<FilterFeatureState> State
+@using Noxy.NET.UI.Models
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -19,14 +20,10 @@
     </div>
 
     <div class="tab-panel" role="tabpanel">
-        <Table class="table" List="ColorList">
+        <Table class="table" List="ColorList" T="FilterColor" KeySelector="row => row.ID">
             <TableHeader>
-                <div role="cell">
-                    <strong>Name</strong>
-                </div>
-                <div role="cell">
-                    <strong>Color</strong>
-                </div>
+                <div role="cell"><strong>Name</strong></div>
+                <div role="cell"><strong>Color</strong></div>
                 <div role="cell"></div>
             </TableHeader>
             <TableRow>
@@ -35,8 +32,7 @@
                 </div>
 
                 <div class="table-cell" role="cell">
-                    <input type="color" class="color" alpha value="@context.Row.ToHex()" @onchange="e => OnInputColorEditValueChange(e, context.Row)"/>
-                    <InputControlText class="color-value" Size="7" @bind-Value:get="@context.Row.ToHex()" @bind-Value:set="e => OnInputColorEditValueChange(e, context.Row)"/>
+                    <InputControlColor @bind-Value:get="@GetColor(context.Row)" @bind-Value:set="e => OnInputColorEditValueChange(e, context.Row)"/>
                 </div>
 
                 <div class="table-cell" role="cell">
@@ -53,7 +49,6 @@
                         </Button>
                     }
                 </div>
-
             </TableRow>
         </Table>
     </div>
@@ -67,26 +62,28 @@
 
     private void SetActiveTab(ColorTypeEnum tab) => _tab = tab;
 
-    private void OnInputColorEditNameChange(string value, FilterColor color)
+    private BaseColor GetColor(FilterColor color)
     {
-        color.Name = value;
+        return new RgbColor(color.R, color.G, color.B, color.A / 255.0);
+    }
+
+    private void OnInputColorEditNameChange(string? value, FilterColor color)
+    {
+        color.Name = value ?? string.Empty;
         Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
     }
 
-    private void OnInputColorEditValueChange(string value, FilterColor color)
+    private void OnInputColorEditValueChange(BaseColor? value, FilterColor color)
     {
-        if (color.TryUpdateFrom(value))
-        {
-            Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
-        }
-    }
+        if (value is null) return;
 
-    private void OnInputColorEditValueChange(ChangeEventArgs value, FilterColor color)
-    {
-        if (color.TryUpdateFrom(value.Value?.ToString()))
-        {
-            Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
-        }
+        RgbColor rgb = value.ToRgb();
+        color.R = rgb.Red;
+        color.G = rgb.Green;
+        color.B = rgb.Blue;
+        color.A = (int)Math.Round(rgb.Alpha * 255.0);
+
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
     }
 
     private void AddNewRowAtBottom()

@@ -2,35 +2,30 @@
 @inherits BaseInput<BaseColor>
 @implements IAsyncDisposable
 
-<div @attributes="AdditionalAttributes" class="@CssClass" disabled="@Disabled">
+<div @attributes="AdditionalAttributes" class="@CssClass" disabled="@Disabled" style="anchor-name: @_anchor; position: relative;">
     <div class="control">
-        <InputControlText @attributes="AdditionalAttributes" class="input" ID="@IDCurrent" Name="@GetName()" OnInputDelay="500" @bind-Value:get="ValueString" @bind-Value:set="SetValue"/>
-
+        <InputControlText @attributes="AdditionalAttributes" class="input" ID="@IDCurrent" Name="@GetName()" Size="16" OnInputDelay="500" @bind-Value:get="ValueString" @bind-Value:set="SetValue"/>
         <button class="preview" popovertarget="@_popover" style="background-color: @ValueString;"></button>
     </div>
 
-    <div id="@_popover" popover class="popover">
+    <div id="@_popover" popover class="popover" style="position-anchor: @_anchor;">
         <div class="content">
             <div @ref="_windowRef" class="color-window" style="@GetWindowStyle()"></div>
 
-            <InputElementRange class="color-scroll-hue" Min="0" Max="359" Step="1"
-                               @bind-Value:get="GetHueDouble()" @bind-Value:set="SetHueFromDouble"/>
+            <InputElementRange class="color-scroll-hue" Min="0" Max="359" Step="1" @bind-Value:get="GetHueDouble()" @bind-Value:set="SetHueFromDouble"/>
 
             <div class="color-input-list">
-                <InputControlText class="color-red" Size="4" @bind-Value:get="@GetRedString()" @bind-Value:set="SetRedFromString"/>
-                <InputControlText class="color-green" Size="4" @bind-Value:get="@GetGreenString()" @bind-Value:set="SetGreenFromString"/>
-                <InputControlText class="color-blue" Size="4" @bind-Value:get="@GetBlueString()" @bind-Value:set="SetBlueFromString"/>
-                <InputControlText class="color-alpha" Size="4" @bind-Value:get="GetAlphaString()" @bind-Value:set="SetAlphaFromString"/>
+                <InputControlText class="color-input color-red" maxlength="3" Size="3" @bind-Value:get="@GetRedString()" @bind-Value:set="SetRedFromString"/>
+                <InputControlText class="color-input color-green" maxlength="3" Size="3" @bind-Value:get="@GetGreenString()" @bind-Value:set="SetGreenFromString"/>
+                <InputControlText class="color-input color-blue" maxlength="3" Size="3" @bind-Value:get="@GetBlueString()" @bind-Value:set="SetBlueFromString"/>
+                <InputControlText class="color-input color-alpha" maxlength="4" Size="3" @bind-Value:get="GetAlphaString()" @bind-Value:set="SetAlphaFromString"/>
             </div>
-
-            <div class="color-switch"></div>
-            <div class="color-palette"></div>
         </div>
     </div>
 </div>
 
 @code {
-    [Parameter, EditorRequired]
+    [Parameter]
     public bool? Disabled { get; set; }
 
     private ElementReference _windowRef;
@@ -79,7 +74,7 @@
         }
     }
 
-    private double GetHueDouble() => _activeDraftColor?.Hue ?? _hue ?? 0.0;
+    private double? GetHueDouble() => _activeDraftColor?.Hue ?? _hue ?? 0.0;
     private string GetRedString() => CurrentRgb.Red.ToString();
     private string GetGreenString() => CurrentRgb.Green.ToString();
     private string GetBlueString() => CurrentRgb.Blue.ToString();
@@ -191,4 +186,5 @@
         {
         }
     }
+
 }
