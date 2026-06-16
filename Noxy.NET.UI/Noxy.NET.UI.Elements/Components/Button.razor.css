@@ -18,6 +18,10 @@
     transition: box-shadow var(--animation-length-short, 150ms) ease-in-out, border var(--animation-length-short, 150ms) ease-in-out;
 }
 
+.Button[data-is-icon] {
+    padding: 0;
+}
+
 .Button.loading > ::deep .Loader {
     stroke: var(--color-complementary, #000000);
 }
@@ -42,30 +46,30 @@
     cursor: not-allowed;
 }
 
-.Button[status="none"] {
+.Button[data-status="none"] {
     --color-button: var(--color-none, #4D4AD3);
 }
 
-.Button[status="success"] {
+.Button[data-status="success"] {
     --color-button: var(--color-success, #23883D);
 }
 
-.Button[status="info"] {
+.Button[data-status="info"] {
     --color-button: var(--color-info, #289ED9);
 }
 
-.Button[status="highlight"] {
+.Button[data-status="highlight"] {
     --color-button: var(--color-highlight, #0073EC);
 }
 
-.Button[status="warning"] {
+.Button[data-status="warning"] {
     --color-button: var(--color-warning, #D97F00);
 }
 
-.Button[status="notice"] {
+.Button[data-status="notice"] {
     --color-button: var(--color-notice, #A948DD);
 }
 
-.Button[status="error"] {
+.Button[data-status="error"] {
     --color-button: var(--color-error, #E42B21);
 }

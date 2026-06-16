@@ -1,4 +1,5 @@
-﻿using Fluxor;
+﻿using System.Text;
+using Fluxor;
 using LewdFilter.Domain.Enums;
 using LewdFilter.Domain.Models;
 using LewdFilter.Domain.Services;
@@ -60,115 +61,77 @@ public class FilterFeatureReducers
     public static FilterFeatureState ReduceAddColor(FilterFeatureState state, AddColorAction action)
     {
         List<FilterColor> listCurrent = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []);
+        Filter filterCloned = state.Filter.Clone();
+        filterCloned.CustomColorCollection = new(state.Filter.CustomColorCollection) { [action.Type] = [.. listCurrent, action.Color] };
 
-        return state with
-        {
-            Filter = new()
-            {
-                ID = state.Filter.ID,
-                Name = state.Filter.Name,
-                GroupList = state.Filter.GroupList,
-                CustomColorCollection = new(state.Filter.CustomColorCollection) { [action.Type] = [..listCurrent, action.Color] }
-            }
-        };
+        return state with { Filter = filterCloned };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceEditColor(FilterFeatureState state, EditColorAction action)
     {
         List<FilterColor> listCurrent = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []);
-
-        return state with
+        Filter filterCloned = state.Filter.Clone();
+        filterCloned.CustomColorCollection = new(state.Filter.CustomColorCollection)
         {
-            Filter = new()
-            {
-                ID = state.Filter.ID,
-                Name = state.Filter.Name,
-                GroupList = state.Filter.GroupList,
-                CustomColorCollection = new(state.Filter.CustomColorCollection)
-                {
-                    [action.Type] = listCurrent.Select(c => c.ID == action.Color.ID ? action.Color : c).ToList()
-                }
-            }
+            [action.Type] = listCurrent.Select(c => c.ID == action.Color.ID ? action.Color : c).ToList()
         };
+
+        return state with { Filter = filterCloned };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceRemoveColor(FilterFeatureState state, RemoveColorAction action)
     {
         List<FilterColor> listCurrent = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []);
-
-        return state with
+        Filter filterCloned = state.Filter.Clone();
+        filterCloned.CustomColorCollection = new(state.Filter.CustomColorCollection)
         {
-            Filter = new()
-            {
-                ID = state.Filter.ID,
-                Name = state.Filter.Name,
-                GroupList = state.Filter.GroupList,
-                CustomColorCollection = new(state.Filter.CustomColorCollection)
-                {
-                    [action.Type] = listCurrent.Where(c => c.ID != action.ColorID).ToList()
-                }
-            }
+            [action.Type] = listCurrent.Where(c => c.ID != action.ColorID).ToList()
         };
+
+        return state with { Filter = filterCloned };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceAddGroup(FilterFeatureState state, AddGroupAction action)
     {
-        return state with
-        {
-            Filter = new()
-            {
-                ID = state.Filter.ID,
-                Name = state.Filter.Name,
-                CustomColorCollection = state.Filter.CustomColorCollection,
-                GroupList = [..state.Filter.GroupList, action.Group]
-            }
-        };
+        Filter filterCloned = state.Filter.Clone();
+        filterCloned.GroupList = [.. state.Filter.GroupList, action.Group];
+
+        return state with { Filter = filterCloned };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceEditGroup(FilterFeatureState state, EditGroupAction action)
     {
-        return state with
-        {
-            Filter = new()
-            {
-                ID = state.Filter.ID,
-                Name = state.Filter.Name,
-                CustomColorCollection = state.Filter.CustomColorCollection,
-                GroupList = state.Filter.GroupList.Select(g => g.ID == action.Group.ID ? action.Group : g).ToList()
-            }
-        };
+        Filter filterCloned = state.Filter.Clone();
+        filterCloned.GroupList = state.Filter.GroupList.Select(g => g.ID == action.Group.ID ? action.Group : g).ToList();
+
+        return state with { Filter = filterCloned };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceRemoveGroup(FilterFeatureState state, RemoveGroupAction action)
     {
-        return state with
-        {
-            Filter = new()
-            {
-                ID = state.Filter.ID,
-                Name = state.Filter.Name,
-                CustomColorCollection = state.Filter.CustomColorCollection,
-                GroupList = state.Filter.GroupList.Where(g => g.ID != action.GroupID).ToList()
-            }
-        };
+        Filter filterCloned = state.Filter.Clone();
+        filterCloned.GroupList = state.Filter.GroupList.Where(g => g.ID != action.GroupID).ToList();
+
+        return state with { Filter = filterCloned };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceAddBlock(FilterFeatureState state, AddBlockAction action)
     {
-        if (!state.Filter.TryGetGroup(action.GroupID, out FilterGroup? group)) return state;
+        var targetGroup = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
+        if (targetGroup == null) return state;
 
-        List<FilterBlock> listBlockUpdated = group.AddBlock(action.Block);
-        FilterGroup groupUpdated = new() { ID = group.ID, Name = group.Name, BlockList = listBlockUpdated };
-        List<FilterGroup> listGroupUpdated = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupUpdated : g).ToList();
+        var updatedBlockList = targetGroup.AddBlock(action.Block);
+        var updatedGroup = new FilterGroup { ID = targetGroup.ID, Name = targetGroup.Name, BlockList = updatedBlockList };
+        var updatedGroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? updatedGroup : g).ToList();
 
         Filter filterCloned = state.Filter.Clone();
-        filterCloned.GroupList = listGroupUpdated;
+        filterCloned.GroupList = updatedGroupList;
 
         return state with { Filter = filterCloned };
     }
@@ -176,13 +139,18 @@ public class FilterFeatureReducers
     [ReducerMethod]
     public static FilterFeatureState ReduceEditBlock(FilterFeatureState state, EditBlockAction action)
     {
-        if (!state.Filter.TryGetGroup(action.GroupID, out FilterGroup? group) || !group.TryReplaceBlock(action.Block, out List<FilterBlock>? listBlockUpdated)) return state;
+        var targetGroup = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
+        if (targetGroup == null) return state;
 
-        FilterGroup groupUpdated = new() { ID = group.ID, Name = group.Name, BlockList = listBlockUpdated };
-        List<FilterGroup> listGroupUpdated = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupUpdated : g).ToList();
+        var updatedBlockList = targetGroup.BlockList
+            .Select(b => b.ID == action.Block.ID ? action.Block : b)
+            .ToList();
+
+        var updatedGroup = new FilterGroup { ID = targetGroup.ID, Name = targetGroup.Name, BlockList = updatedBlockList };
+        var updatedGroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? updatedGroup : g).ToList();
 
         Filter filterCloned = state.Filter.Clone();
-        filterCloned.GroupList = listGroupUpdated;
+        filterCloned.GroupList = updatedGroupList;
 
         return state with { Filter = filterCloned };
     }
@@ -190,14 +158,15 @@ public class FilterFeatureReducers
     [ReducerMethod]
     public static FilterFeatureState ReduceRemoveBlock(FilterFeatureState state, RemoveBlockAction action)
     {
-        if (!state.Filter.TryGetGroup(action.GroupID, out FilterGroup? group)) return state;
+        var targetGroup = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
+        if (targetGroup == null) return state;
 
-        List<FilterBlock> listBlockUpdated = group.RemoveBlock(action.BlockID);
-        FilterGroup groupUpdated = new() { ID = group.ID, Name = group.Name, BlockList = listBlockUpdated };
-        List<FilterGroup> listGroupUpdated = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupUpdated : g).ToList();
+        var updatedBlockList = targetGroup.RemoveBlock(action.BlockID);
+        var updatedGroup = new FilterGroup { ID = targetGroup.ID, Name = targetGroup.Name, BlockList = updatedBlockList };
+        var updatedGroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? updatedGroup : g).ToList();
 
         Filter filterCloned = state.Filter.Clone();
-        filterCloned.GroupList = listGroupUpdated;
+        filterCloned.GroupList = updatedGroupList;
 
         return state with { Filter = filterCloned };
     }
@@ -233,7 +202,12 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
             Filter filterData = state.Value.Filter;
             string jsonString = storageService.SaveFilterToJson(filterData);
             string fileName = $"{(string.IsNullOrWhiteSpace(filterData.Name) ? DefaultFileName : filterData.Name)}.json";
-            await js.InvokeVoidAsync("downloadFileFromStream", fileName, jsonString);
+
+            byte[] fileBytes = Encoding.UTF8.GetBytes(jsonString);
+            using MemoryStream stream = new(fileBytes);
+            using DotNetStreamReference streamRef = new(stream);
+
+            await js.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
         catch (Exception ex)
         {
@@ -280,7 +254,12 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
             Filter payload = state.Value.Filter;
             string compiledOutput = compiler.Compile(payload);
             string fileName = $"{(string.IsNullOrWhiteSpace(payload.Name) ? DefaultFileName : payload.Name)}.filter";
-            await js.InvokeVoidAsync("downloadFileFromStream", fileName, compiledOutput);
+
+            byte[] fileBytes = Encoding.UTF8.GetBytes(compiledOutput);
+            using MemoryStream stream = new(fileBytes);
+            using DotNetStreamReference streamRef = new(stream);
+
+            await js.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
         catch (Exception ex)
         {

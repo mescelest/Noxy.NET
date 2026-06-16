@@ -132,23 +132,23 @@ public record RgbColor : BaseColor
         color = null;
         ReadOnlySpan<char> span = input.AsSpan().Trim();
         if (!span.StartsWith("rgb", StringComparison.OrdinalIgnoreCase)) return false;
-        int prefixLen = span.Length > 3 && (span[3] is 'a' or 'A') ? 4 : 3;
+
+        int prefixLen = span.Length > 3 && (span[3] is 'a' or 'A') ? 5 : 4; // Crucial: skip the '('
         if (!TryPrepareFormat(span, prefixLen, out ReadOnlySpan<char> content)) return false;
 
         if (!TryReadCssColorComponent(content, out ReadOnlySpan<char> tokenRed, out ReadOnlySpan<char> rem1)) return false;
-        if (!TryParsePercentageOrRaw(tokenRed, out double rVal, percentageScale: 100.0)) return false;
-        int red = tokenRed.EndsWith("%") ? (int)Math.Round(rVal * 255.0) : (int)Math.Round(rVal);
+        if (!TryParsePercentageOrRaw(tokenRed, out double valueRed, percentageScale: 100.0)) return false;
+        int red = tokenRed.EndsWith("%") ? (int)Math.Round(valueRed * 255.0) : (int)Math.Round(valueRed);
 
         if (!TryReadCssColorComponent(rem1, out ReadOnlySpan<char> tokenGreen, out ReadOnlySpan<char> rem2)) return false;
-        if (!TryParsePercentageOrRaw(tokenGreen, out double gVal, percentageScale: 100.0)) return false;
-        int green = tokenGreen.EndsWith("%") ? (int)Math.Round(gVal * 255.0) : (int)Math.Round(gVal);
+        if (!TryParsePercentageOrRaw(tokenGreen, out double valueGreen, percentageScale: 100.0)) return false;
+        int green = tokenGreen.EndsWith("%") ? (int)Math.Round(valueGreen * 255.0) : (int)Math.Round(valueGreen);
 
         if (!TryReadCssColorComponent(rem2, out ReadOnlySpan<char> tokenBlue, out ReadOnlySpan<char> rem3)) return false;
-        if (!TryParsePercentageOrRaw(tokenBlue, out double bVal, percentageScale: 100.0)) return false;
-        int blue = tokenBlue.EndsWith("%") ? (int)Math.Round(bVal * 255.0) : (int)Math.Round(bVal);
+        if (!TryParsePercentageOrRaw(tokenBlue, out double valueBlue, percentageScale: 100.0)) return false;
+        int blue = tokenBlue.EndsWith("%") ? (int)Math.Round(valueBlue * 255.0) : (int)Math.Round(valueBlue);
 
-        if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> tokenAlpha, out _)) return false;
-        if (!TryParseAlpha(tokenAlpha, out double alpha)) return false;
+        if (!TryReadAndParseAlpha(rem3, out double alpha)) return false;
 
         color = new(red, green, blue, alpha);
         return true;

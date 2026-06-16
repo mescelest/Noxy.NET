@@ -3,6 +3,7 @@
     column-gap: var(--size-gap-xxs);
     align-items: center;
     cursor: pointer;
+    user-select: none;
 }
 
 .InputControlCheckbox[disabled] {
@@ -27,15 +28,12 @@
     width: var(--size-control-choice);
     height: var(--size-control-choice);
     font-size: 12px;
+    line-height: 100%;
     color: var(--color-muted);
     border: var(--size-border-width-md) solid var(--color-offset-primary-lg);
     border-radius: var(--size-border-radius-sm);
     background-color: var(--color-primary);
     box-sizing: border-box;
-}
-
-.tick {
-    transform: rotate(5deg);
 }
 
 .InputControlCheckbox:not([disabled]) .visual[checked] {

@@ -288,7 +288,7 @@ public static class ArmorBaseTypeConstants
         "Closed Helm",
         "Cabalist Helm",
         "Gladiatorial Helm",
-        "Gladiatoral Helm",
+        "Cassis Helm",
         "Warded Helm",
         "Cryptic Helm",
         "Champion Helm",

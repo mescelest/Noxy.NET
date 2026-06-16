@@ -1,11 +1,10 @@
 @typeparam TOption
 @inherits BaseInput<TOption?>
 
-<label class="@ComponentName" for="@IDCurrent" disabled="@Disabled">
+<label class="@CssClass" for="@IDCurrent" disabled="@Disabled">
     @if (Visual != null)
     {
         @Visual(Checked)
-        ;
     }
     else
     {
@@ -14,9 +13,9 @@
         </div>
     }
 
-    <InputElementCheckbox TOption="TOption" @attributes="@AdditionalAttributes" class="@GetComponentClass()" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+    <InputElementCheckbox TOption="TOption" @attributes="@AdditionalAttributes" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
 
-    @ChildContent
+    @ChildContent 
 </label>
 
 @code {
@@ -24,8 +23,8 @@
     [Parameter, EditorRequired]
     public TOption Option { get; set; }
 
-    [Parameter, EditorRequired]
-    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
 
     [Parameter]
     public RenderFragment<bool?>? Visual { get; set; }

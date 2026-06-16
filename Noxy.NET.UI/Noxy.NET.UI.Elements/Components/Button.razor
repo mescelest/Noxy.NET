@@ -1,6 +1,6 @@
 ﻿@inherits ElementComponent
 
-<button @attributes="AdditionalAttributes" class="@CssClass" status="@StatusString" disabled="@Disabled">
+<button @attributes="AdditionalAttributes" class="@CssClass" disabled="@Disabled" data-status="@StatusString" data-is-icon="@IsIcon">
     <Loader Loading="LoadingCurrent">
         @ChildContent
     </Loader>
@@ -18,6 +18,9 @@
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool? IsIcon { get; set; }
 
     private string? LoadingClass => LoadingCurrent ? "loading" : null;
     private bool? Disabled => TryExtractAttribute("disabled", out bool result) ? result : Loading;

@@ -44,6 +44,13 @@ public abstract record BaseColor
             return true;
         }
 
+        if (span.StartsWith("hsv", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!HsvColor.TryParse(value, out HsvColor? hsvColor)) return false;
+            color = hsvColor;
+            return true;
+        }
+
         if (span.StartsWith("hsl", StringComparison.OrdinalIgnoreCase))
         {
             if (!HslColor.TryParse(value, out HslColor? hslColor)) return false;
@@ -176,5 +183,11 @@ public abstract record BaseColor
         double deg = rawValue * factor;
         degrees = (deg % 360.0 + 360.0) % 360.0;
         return true;
+    }
+
+    protected static bool TryReadAndParseAlpha(ReadOnlySpan<char> remainder, out double alpha)
+    {
+        alpha = 1.0;
+        return remainder.IsEmpty || TryReadCssColorComponent(remainder, out ReadOnlySpan<char> tokenAlpha, out _) && TryParseAlpha(tokenAlpha, out alpha);
     }
 }

@@ -75,24 +75,20 @@ public record HslColor : BaseColor
         if (!TryPrepareFormat(span, prefixLen, out ReadOnlySpan<char> content)) return false;
 
         if (!TryReadCssColorComponent(content, out ReadOnlySpan<char> tokenHue, out ReadOnlySpan<char> rem1)) return false;
-        if (!TryParseAngle(tokenHue, out double deg)) return false;
-        int hue = (int)Math.Round(deg);
+        if (!TryParseAngle(tokenHue, out double valueHue)) return false;
+        int hue = (int)Math.Round(valueHue);
 
         if (!TryReadCssColorComponent(rem1, out ReadOnlySpan<char> tokenSaturation, out ReadOnlySpan<char> rem2)) return false;
         if (tokenSaturation.EndsWith("%")) tokenSaturation = tokenSaturation[..^1];
-        if (!double.TryParse(tokenSaturation, CultureInfo.InvariantCulture, out double satDouble)) return false;
-        int saturation = (int)Math.Round(satDouble);
+        if (!double.TryParse(tokenSaturation, CultureInfo.InvariantCulture, out double valueSaturation)) return false;
+        int saturation = (int)Math.Round(valueSaturation);
 
         if (!TryReadCssColorComponent(rem2, out ReadOnlySpan<char> tokenLightness, out ReadOnlySpan<char> rem3)) return false;
         if (tokenLightness.EndsWith("%")) tokenLightness = tokenLightness[..^1];
-        if (!double.TryParse(tokenLightness, CultureInfo.InvariantCulture, out double lightDouble)) return false;
-        int lightness = (int)Math.Round(lightDouble);
+        if (!double.TryParse(tokenLightness, CultureInfo.InvariantCulture, out double valueLightness)) return false;
+        int lightness = (int)Math.Round(valueLightness);
 
-        double alpha = 1.0;
-        if (!rem3.IsEmpty)
-        {
-            if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> tokenAlpha, out _) || !TryParseAlpha(tokenAlpha, out alpha)) return false;
-        }
+        if (!TryReadAndParseAlpha(rem3, out double alpha)) return false;
 
         color = new(hue, saturation, lightness, alpha);
         return true;

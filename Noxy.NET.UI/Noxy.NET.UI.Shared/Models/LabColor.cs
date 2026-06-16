@@ -56,11 +56,10 @@ public record LabColor : BaseColor
     {
         color = null;
         ReadOnlySpan<char> span = input.AsSpan().Trim();
-        if (!span.StartsWith("lab", StringComparison.OrdinalIgnoreCase) || !TryPrepareFormat(span, 3, out ReadOnlySpan<char> content)) return false;
+        if (!span.StartsWith("lab", StringComparison.OrdinalIgnoreCase) || !TryPrepareFormat(span, 4, out ReadOnlySpan<char> content)) return false;
 
         if (!TryReadCssColorComponent(content, out ReadOnlySpan<char> tokenLightness, out ReadOnlySpan<char> rem1)) return false;
-        if (tokenLightness.EndsWith("%")) tokenLightness = tokenLightness[..^1];
-        if (!double.TryParse(tokenLightness, CultureInfo.InvariantCulture, out double lightness)) return false;
+        if (!TryParsePercentageOrRaw(tokenLightness, out double lightness, percentageScale: 1.0)) return false;
 
         if (!TryReadCssColorComponent(rem1, out ReadOnlySpan<char> tokenAxisA, out ReadOnlySpan<char> rem2)) return false;
         if (!double.TryParse(tokenAxisA, CultureInfo.InvariantCulture, out double axisA)) return false;
@@ -68,8 +67,7 @@ public record LabColor : BaseColor
         if (!TryReadCssColorComponent(rem2, out ReadOnlySpan<char> tokenAxisB, out ReadOnlySpan<char> rem3)) return false;
         if (!double.TryParse(tokenAxisB, CultureInfo.InvariantCulture, out double axisB)) return false;
 
-        if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> tokenAlpha, out _)) return false;
-        if (!TryParseAlpha(tokenAlpha, out double alpha)) return false;
+        if (!TryReadAndParseAlpha(rem3, out double alpha)) return false;
 
         color = new(lightness, axisA, axisB, alpha);
         return true;

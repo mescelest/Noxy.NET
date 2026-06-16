@@ -5,22 +5,25 @@
     row-gap: var(--size-gap-md);
 }
 
-.group {
+.GroupListView ::deep .group {
     display: flex;
     flex: 0 0 auto;
     flex-flow: column;
-    gap: var(--size-gap-md);
-    padding: var(--size-gap-md);
+    padding: var(--size-gap-sm);
     border-radius: var(--size-border-radius-lg);
     background-color: var(--color-offset-primary-sm);
+}
+
+.GroupListView ::deep .group .content {
+    margin-top: var(--size-gap-xxs);
 }
 
 .header {
     display: flex;
     flex: 0 0 auto;
     flex-flow: row;
-    padding-bottom: var(--size-gap-xxxs);
-    border-bottom: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    align-items: center;
+    column-gap: var(--size-gap-xxs);
 }
 
 .content {

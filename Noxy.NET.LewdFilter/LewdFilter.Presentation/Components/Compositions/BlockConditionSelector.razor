@@ -1,32 +1,46 @@
 ﻿@inject IDispatcher Dispatcher
-@inherits ElementComponent
+@inject IStateSelection<FilterFeatureState, FilterBlock?> BlockSelection
+@inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
 
-    <FormField Label="Rarity" For="rarity-condition">
-        <FilterRarityCondition id="rarity-condition" Value="Block.Rarity" ValueChanged="OnRarityChange"/>
-    </FormField>
+    @if (Block != null)
+    {
+        <FormField Label="Rarity" For="rarity-condition">
+            <FilterRarityCondition id="rarity-condition" Value="Block.Rarity" ValueChanged="OnRarityChange"/>
+        </FormField>
 
-    <FormField Label="Stack Size" For="stack-size-condition">
-        <FilterIntCondition id="stack-size-condition" Value="Block.StackSize" ValueChanged="OnStackSizeChange"/>
-    </FormField>
+        <FormField Label="Stack Size" For="stack-size-condition">
+            <FilterIntCondition id="stack-size-condition" Value="Block.StackSize" ValueChanged="OnStackSizeChange"/>
+        </FormField>
 
-    <FormField Label="Quality" For="quality-condition">
-        <FilterIntCondition id="quality-condition" Value="Block.Quality" ValueChanged="OnQualityChange"/>
-    </FormField>
+        <FormField Label="Quality" For="quality-condition">
+            <FilterIntCondition id="quality-condition" Value="Block.Quality" ValueChanged="OnQualityChange"/>
+        </FormField>
 
-    <FormField Label="Unidentified Item Tier" For="unidentified-tier-condition">
-        <FilterIntCondition id="unidentified-tier-condition" Value="Block.UnidentifiedItemTier" ValueChanged="OnUnidentifiedTierChange"/>
-    </FormField>
+        <FormField Label="Unidentified Item Tier" For="unidentified-tier-condition">
+            <FilterIntCondition id="unidentified-tier-condition" Value="Block.UnidentifiedItemTier" ValueChanged="OnUnidentifiedTierChange"/>
+        </FormField>
+    }
 
 </div>
 
 @code {
     [Parameter, EditorRequired]
-    public FilterGroup Group { get; set; }
-
+    public Guid GroupId { get; set; }
     [Parameter, EditorRequired]
-    public FilterBlock Block { get; set; }
+    public Guid BlockId { get; set; }
+
+    private FilterBlock? Block => BlockSelection.Value;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        BlockSelection.Select(state => state.Filter.GroupList
+            .FirstOrDefault(g => g.ID == GroupId)?
+            .BlockList.FirstOrDefault(b => b.ID == BlockId));
+    }
 
     private void OnRarityChange(FilterComparatorRarity? condition) => UpdateBlockCondition(block => block.Rarity = condition);
     private void OnStackSizeChange(FilterComparatorInt? condition) => UpdateBlockCondition(block => block.StackSize = condition);
@@ -35,9 +49,11 @@
 
     private void UpdateBlockCondition(Action<FilterBlock> cbAssignProperty)
     {
-        FilterBlock block = Block.Clone();
-        cbAssignProperty(block);
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(Group.ID, block));
-    }
+        if (Block == null) return;
 
+        FilterBlock clonedBlock = Block.Clone();
+        cbAssignProperty(clonedBlock);
+
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, clonedBlock));
+    }
 }

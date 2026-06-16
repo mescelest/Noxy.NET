@@ -35,6 +35,7 @@ public class MiscellaneousBaseTypeConstants
         "Victorious Fate",
         "Ancient Crisis Fragment",
         "Shattered Triskelion",
+        "Call of the Shadows"
     ];
 
     public static readonly string[] Relics =
@@ -66,12 +67,155 @@ public class MiscellaneousBaseTypeConstants
 
     public static readonly string[] Tablet =
     [
-        "Abyss Precursor Tablet",
-        "Breach Precursor Tablet",
-        "Delirium Precursor Tablet",
-        "Expedition Precursor Tablet",
-        "Irridiated Precursor Tablet",
-        "Overseer Precursor Tablet",
-        "Temple Precursor Tablet",
+        "Abyss Tablet",
+        "Breach Tablet",
+        "Delirium Tablet",
+        "Expedition Tablet",
+        "Irradiated Tablet",
+        "Overseer Tablet",
+        "Ritual Tablet",
+        "Temple Tablet",
+    ];
+
+    public static readonly string[] LineageSupportGemBase =
+    [
+        "Ahn's Citadel",
+        "Arakaali's Lust",
+        "Arjun's Medal",
+        "Bhatair's Vengeance",
+        "Brutus' Brain",
+        "Cirel's Cultivation",
+        "Daresso's Passion",
+        "Dialla's Desire",
+        "Doedre's Undoing",
+        "Dominus' Grasp",
+        "Eonyr's Thunder",
+        "Helbrym's Hide",
+        "Kalisa's Crescendo",
+        "Morgana's Tempest",
+        "Oisín's Oath",
+        "Ratha's Assault",
+        "Romira's Requital",
+        "Sione's Temper",
+        "Tacati's Ire",
+        "Uruk's Smelting",
+        "Vilenta's Propulsion",
+    ];
+
+    public static readonly string[] LineageSupportGemBreach =
+    [
+        "Breachlord's Amalgam",
+        "Breachlord's Rift",
+        "Esh's Prowess",
+        "Esh's Radiance",
+        "Tul's Avalanche",
+        "Tul's Stillness",
+        "Uul-Netol's Embrace",
+        "Xoph's Pyre",
+        "Vruun's Aftermath",
+        "Vruun's Inevitability",
+    ];
+
+    public static readonly string[] LineageSupportGemAbyss =
+    [
+        "Amanamu's Tithe",
+        "Kulemak's Dominion",
+        "Kurgal's Leash",
+        "Tecrod's Revenge",
+    ];
+
+    public static readonly string[] LineageSupportGemAnomaly =
+    [
+        "Ailith's Chimes",
+        "Einhar's Beastrite",
+        "Rigwald's Ferocity",
+        "Kaom's Madness",
+        "Rakiata's Flow",
+        "Tasalio's Rhythm",
+        "Tawhoa's Tending",
+        "Garukhan's Resolve",
+        "Khatal's Rejuvenation",
+        "Varashta's Blessing",
+        "Zarokh's Refrain",
+        "Atalui's Bloodletting",
+        "Atziri's Allure",
+        "Paquate's Pact",
+        "Xibaqua's Rending",
+    ];
+
+    public static readonly string[] LineageSupportGemAldur =
+    [
+        "Medved's Felling",
+        "Olroth's Conviction",
+        "Olroth's Hubris",
+        "Uhtred's Augury",
+        "Uhtred's Constellation",
+        "Uhtred's Exodus",
+        "Uhtred's Omen",
+        "Uhtred's Rite",
+        "Vorana's Siege",
+        "Styrn's Ferocity",
+        "Styrn's Mountain",
+    ];
+
+    public static readonly string[] LineageSupportGemArbiter =
+    [
+        "Arbiter's Ignition",
+        "Arbiter's Reach",
+        "Seraph's Heart",
+        "Her Declaration",
+        "Prototype Seventeen",
+    ];
+
+    public static readonly string[] LineageSupportGemTemple =
+    [
+        "Atziri's Communion",
+        "Atziri's Impatience",
+        "Guatelitzi's Ablation",
+        "Hayoxi's Fulmination",
+        "Zerphi's Infamy",
+    ];
+
+    public static readonly string[] LineageSupportGemMisc =
+    [
+        "Catha's Brilliance",
+        "Ixchel's Torment",
+        "Tangmazu's Thurible",
+        "Trickster's Shard",
+    ];
+
+    public static readonly string[] FlaskLife =
+    [
+        "Lesser Life Flask",
+        "Medium Life Flask",
+        "Greater Life Flask",
+        "Grand Life Flask",
+        "Giant Life Flask",
+        "Colossal Life Flask",
+        "Gargantuan Life Flask",
+        "Transcendent Life Flask",
+        "Ultimate Life Flask",
+    ];
+
+    public static readonly string[] FlaskMana =
+    [
+        "Lesser Mana Flask",
+        "Medium Mana Flask",
+        "Greater Mana Flask",
+        "Grand Mana Flask",
+        "Giant Mana Flask",
+        "Colossal Mana Flask",
+        "Gargantuan Mana Flask",
+        "Transcendent Mana Flask",
+        "Ultimate Mana Flask"
+    ];
+
+    public static readonly string[] Wombgift =
+    [
+        "Banded Wombgift",
+        "Lavish Wombgift",
+        "Ornate Wombgift",
+        "Signet Wombgift",
+        "Revelatory Wombgift",
     ];
 }

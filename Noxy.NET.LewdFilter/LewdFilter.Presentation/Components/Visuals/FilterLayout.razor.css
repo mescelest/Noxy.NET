@@ -18,7 +18,8 @@ aside, main {
     flex: 0 0 auto;
     flex-flow: column;
     row-gap: var(--size-gap-md);
-    padding-block: var(--size-gap-md);
+    padding-top: var(--size-gap-md);
+    padding-bottom: calc(var(--size-gap-huge) * 5);
 }
 
 aside.left {

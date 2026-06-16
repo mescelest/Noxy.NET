@@ -1,5 +1,6 @@
 ﻿@inject IDispatcher Dispatcher
-@inherits ElementComponent
+@inject IStateSelection<FilterFeatureState, FilterBlock?> BlockSelection
+@inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="header">
@@ -11,25 +12,24 @@
         </FormField>
 
         <FormField Label="Filter by name" For="filter-by-name">
-            <InputControlText class="filter-by-name" ID="filter-by-name" aria-label="Filter by name" OnInputDelay="200" @bind-Value="@_inputSearch"/>
+            <InputControlText class="filter-by-name" ID="filter-by-name" OnInputDelay="200" @bind-Value="@_inputSearch"/>
         </FormField>
 
         @if (!string.IsNullOrEmpty(_inputGroup))
         {
             <div class="action-list">
-
-                <InputControlCheckbox ID="select-all" Option="true" @bind-Value:get="@GetSelectAll()" @bind-Value:set="@SetSelectAll">
+                <InputControlCheckbox ID="@GetBaseTypeID("select-all")" Option="true" @bind-Value:get="@GetSelectAll()" @bind-Value:set="@SetSelectAll">
                     Select All
                 </InputControlCheckbox>
 
-                <Button type="button" Status="StatusEnum.Error" @onclick="OnResetBaseTypes" disabled="@(!Block.BaseTypeList.Any())" class="btn btn-secondary reset-button">
+                <Button type="button" Status="StatusEnum.Error" @onclick="OnResetBaseTypes" disabled="@(!CurrentBaseTypeList.Any())" class="btn btn-secondary reset-button">
                     Reset Selections
                 </Button>
             </div>
         }
     </div>
 
-    <div class="content" role="group" aria-label="Available base types">
+    <div class="content">
         @if (!string.IsNullOrEmpty(_inputGroup))
         {
             string[] filteredBases = GetFilteredBaseTypes();
@@ -41,10 +41,9 @@
             {
                 @foreach (string baseType in filteredBases)
                 {
-                    bool isChecked = Block.BaseTypeList.Contains(baseType);
+                    bool isChecked = CurrentBaseTypeList.Contains(baseType);
 
-                    <InputControlCheckbox ID="@baseType" Name="base-type" Option="true"
-                                          @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(baseType, v)">
+                    <InputControlCheckbox @key="baseType" ID="@GetBaseTypeID(baseType)" Name="base-type" Option="true" @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(baseType, v)">
                         @baseType
                     </InputControlCheckbox>
                 }
@@ -54,22 +53,29 @@
 </div>
 
 @code {
-    
     [Parameter, EditorRequired]
-    public FilterGroup Group { get; set; } = null!;
-
+    public Guid GroupId { get; set; }
     [Parameter, EditorRequired]
-    public FilterBlock Block { get; set; } = null!;
+    public Guid BlockId { get; set; }
     
     private string _inputGroup = string.Empty;
     private string _inputSearch = string.Empty;
 
+    private FilterBlock? Block => BlockSelection.Value;
+    private HashSet<string> CurrentBaseTypeList => Block?.BaseTypeList ?? [];
     private static HashSet<string> BaseTypeGroupSet => BaseTypeConstants.BaseTypes.Keys.ToHashSet();
     
     protected override void OnInitialized()
     {
+        base.OnInitialized();
         _inputGroup = BaseTypeConstants.BaseTypes.FirstOrDefault().Key;
+
+        BlockSelection.Select(state => state.Filter.GroupList
+            .FirstOrDefault(g => g.ID == GroupId)?
+            .BlockList.FirstOrDefault(b => b.ID == BlockId));
     }
+
+    private string GetBaseTypeID(string baseType) => $"{UUIDCode}-{baseType}";
 
     private string[] GetFilteredBaseTypes()
     {
@@ -87,63 +93,49 @@
     private bool? GetSelectAll()
     {
         if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? masterList)) return false;
-        return masterList.All(b => Block.BaseTypeList.Contains(b));
+        return masterList.All(b => CurrentBaseTypeList.Contains(b));
     }
 
     private void SetSelectAll(bool? value)
     {
         if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? list)) return;
 
-        HashSet<string> set = [.. Block.BaseTypeList];
+        HashSet<string> set = [.. CurrentBaseTypeList];
         if (value ?? false)
         {
-            foreach (string item in list)
-            {
-                set.Add(item);
-            }
+            foreach (string item in list) set.Add(item);
         }
         else
         {
-            foreach (string item in list)
-            {
-                set.Remove(item);
-            }
+            foreach (string item in list) set.Remove(item);
         }
 
-        FilterBlock block = Block.Clone();
-        block.BaseTypeList = set;
-        DispatchUpdate(block);
+        DispatchUpdateWithNewBases(set);
     }
 
     private void OnBaseTypeToggle(string baseType, bool value)
     {
-        FilterBlock block = Block.Clone();
-        HashSet<string> updatedBases = [.. Block.BaseTypeList];
+        HashSet<string> updatedBases = [.. CurrentBaseTypeList];
 
-        if (value)
-        {
-            updatedBases.Add(baseType);
-        }
-        else
-        {
-            updatedBases.Remove(baseType);
-        }
+        if (value) updatedBases.Add(baseType);
+        else updatedBases.Remove(baseType);
 
-        block.BaseTypeList = updatedBases;
-        DispatchUpdate(block);
+        DispatchUpdateWithNewBases(updatedBases);
     }
 
     private void OnResetBaseTypes()
     {
         _inputSearch = string.Empty;
-        FilterBlock block = Block.Clone();
-        block.BaseTypeList = [];
-        DispatchUpdate(block);
+        DispatchUpdateWithNewBases([]);
     }
 
-    private void DispatchUpdate(FilterBlock block)
+    private void DispatchUpdateWithNewBases(HashSet<string> newBases)
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(Group.ID, block));
-    }
+        if (Block == null) return;
 
+        FilterBlock blockSnapshot = Block.Clone();
+        blockSnapshot.BaseTypeList = newBases;
+
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, blockSnapshot));
+    }
 }

@@ -98,6 +98,7 @@ public static class WeaponBaseTypeConstants
         "Bolting Quarterstaff",
         "Dreaming Quarterstaff",
         "Aegis Quarterstaff",
+        "Skullcrusher Quarterstaff",
     ];
 
     public static readonly string[] Quiver =

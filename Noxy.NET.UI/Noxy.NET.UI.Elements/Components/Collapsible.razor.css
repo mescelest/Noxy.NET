@@ -26,8 +26,6 @@
 .content-wrapper {
     display: grid;
     grid-template-rows: minmax(0, 1fr);
-    border-left: var(--size-border-width-md, 2px) solid color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
-    background: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
     overflow: hidden;
     transition: grid-template-rows var(--animation-length-medium) ease-in-out, margin var(--animation-length-medium) ease-in-out;
 }
@@ -53,4 +51,5 @@
     flex: 0 0 auto;
     flex-flow: column;
     row-gap: var(--size-gap-md);
+    border-left: var(--size-border-width-md, 2px) solid color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
 }

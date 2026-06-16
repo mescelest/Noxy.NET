@@ -1,0 +1,40 @@
+@inject IStateSelection<FilterFeatureState, string> GroupNameSelection
+@inject IDispatcher Dispatcher
+@inherits FluxorElementComponent
+
+<Collapsible class="group" id="@($"group-{GroupId}")" @bind-Collapsed="IsCollapsed">
+    <Header>
+        <div class="header">
+            <h3>@GroupName</h3>
+            <Button type="button" class="btn-create-block" Status="StatusEnum.Success" IsIcon="true" @onclick="OnCreateBlock">
+                <MaterialIcon Icon="add" Size="20px"/>
+            </Button>
+        </div>
+    </Header>
+    <Content>
+        <BlockListView GroupId="GroupId"/>
+    </Content>
+</Collapsible>
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid GroupId { get; set; }
+
+    private string GroupName => GroupNameSelection.Value ?? "Unnamed Group";
+    private bool IsCollapsed { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        GroupNameSelection.Select(state =>
+            state.Filter.GroupList.FirstOrDefault(g => g.ID == GroupId)?.Name ?? string.Empty
+        );
+    }
+
+    private void OnCreateBlock()
+    {
+        Dispatcher.Dispatch(new FilterFeatureReducers.AddBlockAction(GroupId, FilterBlock.Default));
+    }
+
+}

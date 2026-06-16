@@ -36,7 +36,7 @@
     private DotNetObjectReference<InputControlColor>? _refDotNet;
 
     private string? _cacheInput;
-    private HsvColor _currentColor = new(0, 100, 100);
+    private HsvColor _currentColor = new(0, 0, 0);
 
     private RgbColor CurrentRgb => _currentColor.ToRgb();
     private string ValueString => $"rgba({CurrentRgb.Red}, {CurrentRgb.Green}, {CurrentRgb.Blue}, {CurrentRgb.Alpha.ToString("0.00", CultureInfo.InvariantCulture)})";
@@ -57,7 +57,7 @@
 
         if (incomingHsv == _currentColor) return;
         _currentColor = incomingHsv;
-        _cacheInput = CurrentRgb.ToCssString(); // Uses RgbColor's ToCssString() override
+        _cacheInput = CurrentRgb.ToCssString();
     }
 
     protected override async Task OnAfterFirstRenderAsync()
@@ -67,6 +67,9 @@
         await using IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUIWebForm}/Components/InputControls/{ComponentName}.razor.js");
         _refDotNet = DotNetObjectReference.Create(this);
         _refJs = await module.InvokeAsync<IJSObjectReference>("init", _windowRef, _refDotNet);
+
+        _cacheInput = CurrentRgb.ToCssString();
+        await InvokeAsync(StateHasChanged);
     }
 
     private double? GetHueDouble() => (double)_currentColor.Hue;

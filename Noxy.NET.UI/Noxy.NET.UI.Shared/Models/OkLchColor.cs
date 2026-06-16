@@ -78,8 +78,7 @@ public record OkLchColor : BaseColor
         if (!TryReadCssColorComponent(rem2, out ReadOnlySpan<char> tokenHue, out ReadOnlySpan<char> rem3)) return false;
         if (!TryParseAngle(tokenHue, out double hue)) return false;
 
-        if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> tokenAlpha, out _)) return false;
-        if (!TryParseAlpha(tokenAlpha, out double alpha)) return false;
+        if (!TryReadAndParseAlpha(rem3, out double alpha)) return false;
 
         color = new(lightness, chroma, hue, alpha);
         return true;

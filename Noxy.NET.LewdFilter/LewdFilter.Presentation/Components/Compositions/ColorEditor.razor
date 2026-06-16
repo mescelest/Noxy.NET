@@ -1,6 +1,5 @@
 ﻿@inject IDispatcher Dispatcher
-@inject IState<FilterFeatureState> State
-@using Noxy.NET.UI.Models
+@inject IStateSelection<FilterFeatureState, ImmutableArray<FilterColor>> ColorListSelection
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -28,7 +27,7 @@
             </TableHeader>
             <TableRow>
                 <div class="table-cell" role="cell">
-                    <InputControlText class="name" Size="20" @bind-Value:get="@context.Row.Name" @bind-Value:set="e => OnInputColorEditNameChange(e, context.Row)"/>
+                    <InputControlText class="name" Size="12" @bind-Value:get="@context.Row.Name" @bind-Value:set="e => OnInputColorEditNameChange(e, context.Row)"/>
                 </div>
 
                 <div class="table-cell" role="cell">
@@ -38,13 +37,13 @@
                 <div class="table-cell" role="cell">
                     @if (context.Index == 0)
                     {
-                        <Button type="button" Status="StatusEnum.Success" @onclick="AddNewRowAtBottom">
+                        <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="AddNewRowAtBottom">
                             <MaterialIcon Icon="add" Size="20px"/>
                         </Button>
                     }
                     else
                     {
-                        <Button type="button" Status="StatusEnum.Error" @onclick="() => DeleteColor(context.Row.ID)">
+                        <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => DeleteColor(context.Row.ID)">
                             <MaterialIcon Icon="remove" Size="20px"/>
                         </Button>
                     }
@@ -55,12 +54,28 @@
 </div>
 
 @code {
-
     private ColorTypeEnum _tab = ColorTypeEnum.Background;
 
-    private List<FilterColor> ColorList => State.Value.Filter.CustomColorCollection.GetValueOrDefault(_tab, []);
+    private List<FilterColor> ColorList => [.. ColorListSelection.Value];
 
-    private void SetActiveTab(ColorTypeEnum tab) => _tab = tab;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        UpdateSelection();
+    }
+
+    private void SetActiveTab(ColorTypeEnum tab)
+    {
+        _tab = tab;
+        UpdateSelection();
+    }
+
+    private void UpdateSelection()
+    {
+        ColorListSelection.Select(state =>
+            [.. state.Filter.CustomColorCollection.GetValueOrDefault(_tab, [])]
+        );
+    }
 
     private BaseColor GetColor(FilterColor color)
     {
@@ -69,8 +84,9 @@
 
     private void OnInputColorEditNameChange(string? value, FilterColor color)
     {
-        color.Name = value ?? string.Empty;
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
+        FilterColor clonedColor = color.Clone();
+        clonedColor.Name = value ?? string.Empty;
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, clonedColor));
     }
 
     private void OnInputColorEditValueChange(BaseColor? value, FilterColor color)
@@ -78,12 +94,13 @@
         if (value is null) return;
 
         RgbColor rgb = value.ToRgb();
-        color.R = rgb.Red;
-        color.G = rgb.Green;
-        color.B = rgb.Blue;
-        color.A = (int)Math.Round(rgb.Alpha * 255.0);
+        FilterColor clonedColor = color.Clone();
+        clonedColor.R = rgb.Red;
+        clonedColor.G = rgb.Green;
+        clonedColor.B = rgb.Blue;
+        clonedColor.A = (int)Math.Round(rgb.Alpha * 255.0);
 
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color.Clone()));
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, clonedColor));
     }
 
     private void AddNewRowAtBottom()
@@ -93,5 +110,4 @@
     }
 
     private void DeleteColor(Guid colorID) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveColorAction(_tab, colorID));
-
 }

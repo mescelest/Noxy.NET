@@ -1,67 +1,108 @@
 ﻿@inject IDispatcher Dispatcher
-@inject IState<FilterFeatureState> State
+@inject IStateSelection<FilterFeatureState, FilterBlock?> BlockSelection
+@inject IStateSelection<FilterFeatureState, int> BaseTypeCountSelection
+@inject IStateSelection<FilterFeatureState, string> PreviewStylesSelection
 @inherits FluxorElementComponent
 
-<div @attributes="AdditionalAttributes" class="@CssClass" role="form" aria-label="Edit filter block">
-    <div class="header">
-        <input type="text" class="name" value="@Block.Name" @onchange="OnInputNameChange"/>
+@if (Block != null)
+{
+    <div @attributes="AdditionalAttributes" class="@CssClass" role="form" aria-label="Edit filter block">
+        <div class="header">
+            <div class="config">
+                <InputControlCheckbox ID="@($"show-{Block.ID}")" class="show" Option="true" @bind-Value:get="Block.IsShow" @bind-Value:set="OnShowToggle"/>
 
-        <div class="preview">
-            <div class="preview-item" style="@GetInlinePreviewStyles()">
-                Preview item
+                <InputControlText class="name" Size="16" @bind-Value:get="@Block.Name" @bind-Value:set="OnInputNameChange"/>
+
+                <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="DeleteBlock">
+                    <MaterialIcon Icon="remove" Size="20px"/>
+                </Button>
+            </div>
+
+            <div class="preview">
+                <div class="preview-item" style="@PreviewStyles">
+                    Preview item
+                </div>
             </div>
         </div>
+
+        <div class="content">
+            <FormGroup Label="Styling">
+                <BlockStyleSelector GroupId="GroupId" BlockId="BlockId"/>
+            </FormGroup>
+
+            <FormGroup Label="@BaseTypeLabel">
+                <BlockBaseTypeSelector GroupId="GroupId" BlockId="BlockId"/>
+            </FormGroup>
+
+            <FormGroup Label="Comparison">
+                <BlockConditionSelector GroupId="GroupId" BlockId="BlockId"/>
+            </FormGroup>
+        </div>
     </div>
-
-    <div class="content">
-        <FormGroup Label="Styling">
-            <BlockStyleSelector Group="@Group" Block="@Block"/>
-        </FormGroup>
-
-        <FormGroup Label="@BaseTypeLabel">
-            <BlockBaseTypeSelector Group="@Group" Block="@Block"/>
-        </FormGroup>
-
-        <FormGroup Label="Comparison">
-            <BlockConditionSelector Group="@Group" Block="@Block"/>
-        </FormGroup>
-    </div>
-
-</div>
+}
 
 @code {
-
     [Parameter, EditorRequired]
-    public FilterGroup Group { get; set; }
-
+    public Guid GroupId { get; set; }
     [Parameter, EditorRequired]
-    public FilterBlock Block { get; set; }
+    public Guid BlockId { get; set; }
 
-    private Filter Filter => State.Value.Filter;
-
+    private FilterBlock? Block => BlockSelection.Value;
+    private int BaseTypeCount => BaseTypeCountSelection.Value;
+    private string PreviewStyles => PreviewStylesSelection.Value;
     private string BaseTypeLabel => $"Base Type ({BaseTypeCount})";
-    private int BaseTypeCount => Filter.TryGetBlock(Group.ID, Block.ID, out _, out FilterBlock? block) ? block.BaseTypeList.Count : 0;
 
-    private string GetInlinePreviewStyles()
+    protected override void OnInitialized()
     {
-        string textHex = Block.TextColor is not null ? Block.TextColor.ToHex() : FilterColor.DefaultText.ToHex();
-        string bgHex = Block.BackgroundColor is not null ? Block.BackgroundColor.ToHex() : FilterColor.DefaultBackground.ToHex();
-        string borderStyle = Block.BorderColor is not null ? Block.BorderColor.ToHex() : FilterColor.DefaultBorder.ToHex();
-        string fontSize = $"{(Block.FontSize ?? 32) / 32.0:0.00}rem";
+        base.OnInitialized();
 
-        return $"color: {textHex}; background-color: {bgHex}; border: 1px solid {borderStyle}; font-size: {fontSize};";
+        BlockSelection.Select(state => state.Filter.GroupList
+            .FirstOrDefault(g => g.ID == GroupId)?
+            .BlockList.FirstOrDefault(b => b.ID == BlockId));
+
+        BaseTypeCountSelection.Select(state => state.Filter.GroupList
+            .FirstOrDefault(g => g.ID == GroupId)?
+            .BlockList.FirstOrDefault(b => b.ID == BlockId)?
+            .BaseTypeList.Count ?? 0);
+
+        PreviewStylesSelection.Select(state =>
+        {
+            var block = state.Filter.GroupList.FirstOrDefault(g => g.ID == GroupId)?.BlockList.FirstOrDefault(b => b.ID == BlockId);
+            if (block == null) return string.Empty;
+
+            string textHex = block.TextColor is not null ? block.TextColor.ToHex() : FilterColor.DefaultText.ToHex();
+            string bgHex = block.BackgroundColor is not null ? block.BackgroundColor.ToHex() : FilterColor.DefaultBackground.ToHex();
+            string borderStyle = block.BorderColor is not null ? block.BorderColor.ToHex() : FilterColor.DefaultBorder.ToHex();
+            string fontSize = $"{(block.FontSize ?? 32) / 32.0:0.00}rem";
+
+            return $"color: {textHex}; background-color: {bgHex}; border: 1px solid {borderStyle}; font-size: {fontSize};";
+        });
     }
 
-    private void OnInputNameChange(ChangeEventArgs e)
+    private void OnInputNameChange(string? value)
     {
-        FilterBlock block = Block.Clone();
-        block.Name = e.Value?.ToString() ?? string.Empty;
-        DispatchUpdate(block);
+        if (Block == null) return;
+
+        FilterBlock updatedBlock = Block.Clone();
+        updatedBlock.Name = value ?? string.Empty;
+        DispatchUpdate(updatedBlock);
+    }
+
+    private void OnShowToggle(bool value)
+    {
+        if (Block == null) return;
+        FilterBlock updatedBlock = Block.Clone();
+        updatedBlock.IsShow = value;
+        DispatchUpdate(updatedBlock);
+    }
+
+    private void DeleteBlock()
+    {
+        Dispatcher.Dispatch(new FilterFeatureReducers.RemoveBlockAction(GroupId, BlockId));
     }
 
     private void DispatchUpdate(FilterBlock updatedBlock)
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(Group.ID, updatedBlock));
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, updatedBlock));
     }
-
 }

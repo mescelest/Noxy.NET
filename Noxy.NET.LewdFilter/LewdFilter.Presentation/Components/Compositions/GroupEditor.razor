@@ -1,5 +1,5 @@
 ﻿@inject IDispatcher Dispatcher
-@inject IState<FilterFeatureState> State
+@inject IStateSelection<FilterFeatureState, ImmutableArray<FilterGroup>> GroupListSelection
 @inherits FluxorElementComponent
 
 <nav class="GroupEditor">
@@ -19,13 +19,13 @@
             <div class="table-cell" role="cell">
                 @if (context.Index == 0)
                 {
-                    <Button type="button" Status="StatusEnum.Success" @onclick="AddNewRowAtBottom">
+                    <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="AddNewRowAtBottom">
                         <MaterialIcon Icon="add" Size="20px"/>
                     </Button>
                 }
                 else
                 {
-                    <Button type="button" Status="StatusEnum.Error" @onclick="() => DeleteGroup(context.Row.ID)">
+                    <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => DeleteGroup(context.Row.ID)">
                         <MaterialIcon Icon="remove" Size="20px"/>
                     </Button>
                 }
@@ -33,32 +33,35 @@
 
             <div class="table-cell" role="cell">
                 <a href="#@context.Row.ToGroupID()" class="navigate" title="Scroll to group">
-                    <Button type="button" Status="StatusEnum.Info">
+                    <Button type="button" Status="StatusEnum.Info" IsIcon="true">
                         <MaterialIcon Icon="jump_to_element" Size="20px"/>
                     </Button>
                 </a>
             </div>
-
         </TableRow>
     </Table>
 </nav>
 
 @code {
+    private List<FilterGroup> GroupList => [.. GroupListSelection.Value];
 
-    private List<FilterGroup> GroupList => State.Value.Filter.GroupList;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        GroupListSelection.Select(state => [.. state.Filter.GroupList]);
+    }
 
     private void OnInputGroupEditNameChange(string value, FilterGroup group)
     {
-        group.Name = value;
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditGroupAction(group.Clone()));
+        FilterGroup clonedGroup = group.Clone();
+        clonedGroup.Name = value;
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditGroupAction(clonedGroup));
     }
 
     private void AddNewRowAtBottom()
     {
-        FilterGroup group = FilterGroup.Default;
-        Dispatcher.Dispatch(new FilterFeatureReducers.AddGroupAction(group));
+        Dispatcher.Dispatch(new FilterFeatureReducers.AddGroupAction(FilterGroup.Default));
     }
 
     private void DeleteGroup(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveGroupAction(id));
-
 }

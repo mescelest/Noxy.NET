@@ -7,11 +7,12 @@ public static class BaseTypeConstants
         { "Currency (Basic)", CurrencyBaseTypeConstants.CurrencyBase },
         { "Currency (Abyssal)", CurrencyBaseTypeConstants.CurrencyAbyssal },
         { "Currency (Aldur)", CurrencyBaseTypeConstants.CurrencyAldur },
+        { "Currency (Vaal)", CurrencyBaseTypeConstants.CurrencyVaal },
 
         { "Catalysts (Basic)", CurrencyBaseTypeConstants.Catalyst },
         { "Catalysts (Refined)", CurrencyBaseTypeConstants.CatalystRefined },
 
-        { "Liquid emotions", CurrencyBaseTypeConstants.LiquidEmotion },
+        { "Liquid Emotions", CurrencyBaseTypeConstants.LiquidEmotion },
 
         { "Alloys", CurrencyBaseTypeConstants.Alloys },
         { "Essences (Basic)", CurrencyBaseTypeConstants.Essence },
@@ -28,8 +29,21 @@ public static class BaseTypeConstants
         { "Omens (Abyssal)", CurrencyBaseTypeConstants.OmenAbyssal },
 
         { "Fragments", MiscellaneousBaseTypeConstants.Fragment },
-        { "Reliquary keys", MiscellaneousBaseTypeConstants.ReliquaryKey },
+        { "Reliquary Keys", MiscellaneousBaseTypeConstants.ReliquaryKey },
         { "Tablets", MiscellaneousBaseTypeConstants.Tablet },
+        { "Wombgifts", MiscellaneousBaseTypeConstants.Wombgift },
+        { "Relics", MiscellaneousBaseTypeConstants.Relics },
+        { "Flasks (Life)", MiscellaneousBaseTypeConstants.FlaskLife },
+        { "Flasks (Mana)", MiscellaneousBaseTypeConstants.FlaskMana },
+
+        { "Lineage Gems (Base)", MiscellaneousBaseTypeConstants.LineageSupportGemBase },
+        { "Lineage Gems (Abyss)", MiscellaneousBaseTypeConstants.LineageSupportGemAbyss },
+        { "Lineage Gems (Aldur)", MiscellaneousBaseTypeConstants.LineageSupportGemAldur },
+        { "Lineage Gems (Anomaly)", MiscellaneousBaseTypeConstants.LineageSupportGemAnomaly },
+        { "Lineage Gems (Arbiter)", MiscellaneousBaseTypeConstants.LineageSupportGemArbiter },
+        { "Lineage Gems (Breach)", MiscellaneousBaseTypeConstants.LineageSupportGemBreach },
+        { "Lineage Gems (Misc)", MiscellaneousBaseTypeConstants.LineageSupportGemMisc },
+        { "Lineage Gems (Temple)", MiscellaneousBaseTypeConstants.LineageSupportGemTemple },
 
         { "Weapons: One-Hand Maces", WeaponBaseTypeConstants.OneHandedMace },
         { "Weapons: Two-Hand Maces", WeaponBaseTypeConstants.TwoHandedMace },
@@ -46,7 +60,7 @@ public static class BaseTypeConstants
         { "Amulets (Basic)", JewelleryBaseTypeConstants.AmuletBase },
         { "Amulets (Restricted)", JewelleryBaseTypeConstants.AmuletRestricted },
         { "Rings (Basic)", JewelleryBaseTypeConstants.RingBase },
-        { "Rings (Restricted)", JewelleryBaseTypeConstants.AmuletRestricted },
+        { "Rings (Restricted)", JewelleryBaseTypeConstants.RingRestricted },
         { "Belts", JewelleryBaseTypeConstants.Belt },
         { "Charms", JewelleryBaseTypeConstants.Charm },
         { "Jewels", MiscellaneousBaseTypeConstants.Jewel },
@@ -85,7 +99,5 @@ public static class BaseTypeConstants
         { "Evasion/Energy Shield: Chests", ArmorBaseTypeConstants.EvasionEnergyShieldChest },
         { "Evasion/Energy Shield: Gloves", ArmorBaseTypeConstants.EvasionEnergyShieldGloves },
         { "Evasion/Energy Shield: Boots", ArmorBaseTypeConstants.EvasionEnergyShieldBoots },
-
-        { "Relics", MiscellaneousBaseTypeConstants.Relics },
     };
 }

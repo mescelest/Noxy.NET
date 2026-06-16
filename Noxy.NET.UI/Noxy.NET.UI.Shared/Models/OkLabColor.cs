@@ -71,8 +71,7 @@ public record OkLabColor : BaseColor
         if (!TryReadCssColorComponent(rem2, out ReadOnlySpan<char> tokenAxisB, out ReadOnlySpan<char> rem3)) return false;
         if (!double.TryParse(tokenAxisB, CultureInfo.InvariantCulture, out double axisB)) return false;
 
-        if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> alphaToken, out _)) return false;
-        if (!TryParseAlpha(alphaToken, out double alpha)) return false;
+        if (!TryReadAndParseAlpha(rem3, out double alpha)) return false;
 
         color = new(lightness, axisA, axisB, alpha);
         return true;

@@ -14,6 +14,19 @@
     justify-content: space-between;
 }
 
+.config {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    column-gap: var(--size-gap-xxs);
+}
+
+.config ::deep .show .visual {
+    width: var(--size-control-input);
+    height: var(--size-control-input);
+    font-size: 20px;
+}
+
 .content {
     grid-column: 1 / -1;
     display: grid;
