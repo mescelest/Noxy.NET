@@ -9,7 +9,7 @@ public record OkLchColor : BaseColor
     public double Lightness { get; }
     public double Chroma { get; }
     public double Hue { get; }
-    public double Alpha { get; }
+    public override double Alpha { get; }
 
     public OkLchColor(double lightness, double chroma, double hue, double alpha = 1.0)
     {
@@ -19,7 +19,7 @@ public record OkLchColor : BaseColor
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"oklch({Lightness * 100}% {Chroma} {Hue})" : $"oklch({Lightness * 100}% {Chroma} {Hue} / {Alpha})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"oklch({Lightness * 100}% {Chroma} {Hue})" : $"oklch({Lightness * 100}% {Chroma} {Hue} / {AlphaCssString})";
 
     public override RgbColor ToRgb()
     {

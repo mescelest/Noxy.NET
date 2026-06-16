@@ -8,7 +8,7 @@ public record RgbColor : BaseColor
     public int Red { get; }
     public int Green { get; }
     public int Blue { get; }
-    public double Alpha { get; }
+    public override double Alpha { get; }
 
     public RgbColor(int red, int green, int blue, double alpha = 1.0)
     {
@@ -20,7 +20,7 @@ public record RgbColor : BaseColor
 
     public override string ToCssString()
     {
-        return Alpha >= 1.0 ? $"rgb({Red} {Green} {Blue})" : $"rgb({Red} {Green} {Blue} / {Alpha})";
+        return Alpha >= 1.0 ? $"rgb({Red} {Green} {Blue})" : $"rgb({Red} {Green} {Blue} / {AlphaCssString})";
     }
 
     public override RgbColor ToRgb() => this;

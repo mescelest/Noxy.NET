@@ -7,7 +7,7 @@ public record HsvColor : BaseColor
     public int Hue { get; }
     public int Saturation { get; }
     public int Value { get; }
-    public double Alpha { get; }
+    public override double Alpha { get; }
 
     public HsvColor(int hue, int saturation, int value, double alpha = 1.0)
     {
@@ -17,7 +17,7 @@ public record HsvColor : BaseColor
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"hsv({Hue} {Saturation}% {Value}%)" : $"hsva({Hue} {Saturation}% {Value}% / {Alpha})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"hsv({Hue} {Saturation}% {Value}%)" : $"hsva({Hue} {Saturation}% {Value}% / {AlphaCssString})";
 
     public override RgbColor ToRgb()
     {

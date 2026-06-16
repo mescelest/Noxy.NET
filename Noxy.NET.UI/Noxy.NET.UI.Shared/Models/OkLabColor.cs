@@ -9,7 +9,7 @@ public record OkLabColor : BaseColor
     public double Lightness { get; }
     public double AxisA { get; }
     public double AxisB { get; }
-    public double Alpha { get; }
+    public override double Alpha { get; }
 
     public OkLabColor(double lightness, double axisA, double axisB, double alpha = 1.0)
     {
@@ -19,7 +19,7 @@ public record OkLabColor : BaseColor
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"oklab({Lightness} {AxisA} {AxisB})" : $"oklab({Lightness} {AxisA} {AxisB} / {Alpha})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"oklab({Lightness} {AxisA} {AxisB})" : $"oklab({Lightness} {AxisA} {AxisB} / {AlphaCssString})";
 
     public override OkLabColor ToOkLab() => this;
 

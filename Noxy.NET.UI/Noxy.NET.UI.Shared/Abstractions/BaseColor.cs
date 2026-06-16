@@ -6,6 +6,9 @@ namespace Noxy.NET.UI.Abstractions;
 
 public abstract record BaseColor
 {
+    public abstract double Alpha { get; }
+    public string AlphaCssString => Alpha.ToString("0.00", CultureInfo.InvariantCulture);
+
     protected const float Tolerance = 0.00001f;
 
     public abstract string ToCssString();

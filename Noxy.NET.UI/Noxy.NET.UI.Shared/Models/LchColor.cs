@@ -6,28 +6,28 @@ namespace Noxy.NET.UI.Models;
 
 public record LchColor : BaseColor
 {
-    public double L { get; }
-    public double C { get; }
-    public double H { get; }
-    public double Alpha { get; }
+    public double Lightness { get; }
+    public double Chroma { get; }
+    public double Hue { get; }
+    public override double Alpha { get; }
 
     public LchColor(double l, double c, double h, double alpha = 1.0)
     {
-        L = Math.Clamp(l, 0.0, 100.0);
-        C = Math.Max(c, 0.0);
-        H = ((h % 360) + 360) % 360;
+        Lightness = Math.Clamp(l, 0.0, 100.0);
+        Chroma = Math.Max(c, 0.0);
+        Hue = (h % 360 + 360) % 360;
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"lch({L}% {C} {H})" : $"lch({L}% {C} {H} / {Alpha})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"lch({Lightness}% {Chroma} {Hue})" : $"lch({Lightness}% {Chroma} {Hue} / {AlphaCssString})";
 
     public override LabColor ToLab()
     {
-        double hRad = H * (Math.PI / 180.0);
-        double a = C * Math.Cos(hRad);
-        double b = C * Math.Sin(hRad);
+        double hRad = Hue * (Math.PI / 180.0);
+        double a = Chroma * Math.Cos(hRad);
+        double b = Chroma * Math.Sin(hRad);
 
-        return new(L, a, b, Alpha);
+        return new(Lightness, a, b, Alpha);
     }
 
     public override RgbColor ToRgb() => ToLab().ToRgb();

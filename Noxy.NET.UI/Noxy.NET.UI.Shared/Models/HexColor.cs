@@ -4,26 +4,26 @@ using Noxy.NET.UI.Abstractions;
 
 namespace Noxy.NET.UI.Models;
 
-public record HexColor : BaseColor
+public sealed record HexColor : BaseColor
 {
     public string Value { get; }
-    public int R { get; }
-    public int G { get; }
-    public int B { get; }
-    public double A { get; }
+    public int Red { get; }
+    public int Green { get; }
+    public int Blue { get; }
+    public override double Alpha { get; }
 
     public HexColor(int r, int g, int b, double a = 1.0)
     {
-        R = Math.Clamp(r, 0, 255);
-        G = Math.Clamp(g, 0, 255);
-        B = Math.Clamp(b, 0, 255);
-        A = Math.Clamp(a, 0.0, 1.0);
-        Value = A >= 1.0 ? $"#{R:X2}{G:X2}{B:X2}" : $"#{R:X2}{G:X2}{B:X2}{Math.Round(A * 255):X2}";
+        Red = Math.Clamp(r, 0, 255);
+        Green = Math.Clamp(g, 0, 255);
+        Blue = Math.Clamp(b, 0, 255);
+        Alpha = Math.Clamp(a, 0.0, 1.0);
+        Value = Alpha >= 1.0 ? $"#{Red:X2}{Green:X2}{Blue:X2}" : $"#{Red:X2}{Green:X2}{Blue:X2}{Math.Round(Alpha * 255):X2}";
     }
 
     public override string ToCssString() => Value;
 
-    public override RgbColor ToRgb() => new(R, G, B, A);
+    public override RgbColor ToRgb() => new(Red, Green, Blue, Alpha);
     public override HexColor ToHex() => this;
     public override HslColor ToHsl() => ToRgb().ToHsl();
     public override HsvColor ToHsv() => ToRgb().ToHsv();

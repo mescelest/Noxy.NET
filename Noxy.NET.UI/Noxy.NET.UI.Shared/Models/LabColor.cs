@@ -9,7 +9,7 @@ public record LabColor : BaseColor
     public double Lightness { get; }
     public double AxisA { get; }
     public double AxisB { get; }
-    public double Alpha { get; }
+    public override double Alpha { get; }
 
     private const double Epsilon = 216.0 / 24389.0;
     private const double Kappa = 24389.0 / 27.0;
@@ -22,7 +22,7 @@ public record LabColor : BaseColor
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"lab({Lightness}% {AxisA} {AxisB})" : $"lab({Lightness}% {AxisA} {AxisB} / {Alpha})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"lab({Lightness}% {AxisA} {AxisB})" : $"lab({Lightness}% {AxisA} {AxisB} / {AlphaCssString})";
 
     public override RgbColor ToRgb() => ToXyz().ToRgb();
     public override HexColor ToHex() => ToRgb().ToHex();

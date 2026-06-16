@@ -4,7 +4,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass" disabled="@Disabled" style="anchor-name: @_anchor; position: relative;">
     <div class="control">
-        <InputControlText @attributes="AdditionalAttributes" class="input" ID="@IDCurrent" Name="@GetName()" Size="16" OnInputDelay="500" @bind-Value:get="ValueString" @bind-Value:set="SetValue"/>
+        <InputControlText @attributes="AdditionalAttributes" class="input" ID="@IDCurrent" Name="@GetName()" Size="17" OnInputDelay="500" @bind-Value:get="_cacheInput" @bind-Value:set="SetValue"/>
         <button class="preview" popovertarget="@_popover" style="background-color: @ValueString;"></button>
     </div>
 
@@ -15,9 +15,9 @@
             <InputElementRange class="color-scroll-hue" Min="0" Max="359" Step="1" @bind-Value:get="GetHueDouble()" @bind-Value:set="SetHueFromDouble"/>
 
             <div class="color-input-list">
-                <InputControlText class="color-input color-red" maxlength="3" Size="3" @bind-Value:get="@GetRedString()" @bind-Value:set="SetRedFromString"/>
-                <InputControlText class="color-input color-green" maxlength="3" Size="3" @bind-Value:get="@GetGreenString()" @bind-Value:set="SetGreenFromString"/>
-                <InputControlText class="color-input color-blue" maxlength="3" Size="3" @bind-Value:get="@GetBlueString()" @bind-Value:set="SetBlueFromString"/>
+                <InputControlText class="color-input color-red" maxlength="3" Size="3" @bind-Value:get="@CurrentRgb.Red.ToString()" @bind-Value:set="SetRedFromString"/>
+                <InputControlText class="color-input color-green" maxlength="3" Size="3" @bind-Value:get="@CurrentRgb.Green.ToString()" @bind-Value:set="SetGreenFromString"/>
+                <InputControlText class="color-input color-blue" maxlength="3" Size="3" @bind-Value:get="@CurrentRgb.Blue.ToString()" @bind-Value:set="SetBlueFromString"/>
                 <InputControlText class="color-input color-alpha" maxlength="4" Size="3" @bind-Value:get="GetAlphaString()" @bind-Value:set="SetAlphaFromString"/>
             </div>
         </div>
@@ -32,16 +32,14 @@
     private string _anchor = string.Empty;
     private string _popover = string.Empty;
 
-    private IJSObjectReference? _dragInstance;
-    private DotNetObjectReference<InputControlColor>? _dotNetHelper;
+    private IJSObjectReference? _refJs;
+    private DotNetObjectReference<InputControlColor>? _refDotNet;
 
-    private double? _hue;
-    private RgbColor _localColor = new(0, 0, 0);
-    private HsvColor? _activeDraftColor;
+    private string? _cacheInput;
+    private HsvColor _currentColor = new(0, 100, 100);
 
-    private RgbColor CurrentRgb => _activeDraftColor?.ToRgb() ?? _localColor;
-
-    private string ValueString => CurrentRgb.ToCssString();
+    private RgbColor CurrentRgb => _currentColor.ToRgb();
+    private string ValueString => $"rgba({CurrentRgb.Red}, {CurrentRgb.Green}, {CurrentRgb.Blue}, {CurrentRgb.Alpha.ToString("0.00", CultureInfo.InvariantCulture)})";
 
     protected override void OnInitialized()
     {
@@ -50,109 +48,71 @@
         _popover = $"popover-{UUIDCode}";
     }
 
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (Value is null) return;
+        HsvColor incomingHsv = Value.ToHsv();
+
+        if (incomingHsv == _currentColor) return;
+        _currentColor = incomingHsv;
+        _cacheInput = CurrentRgb.ToCssString(); // Uses RgbColor's ToCssString() override
+    }
+
     protected override async Task OnAfterFirstRenderAsync()
     {
         await base.OnAfterFirstRenderAsync();
 
         await using IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUIWebForm}/Components/InputControls/{ComponentName}.razor.js");
-
-        _dotNetHelper = DotNetObjectReference.Create(this);
-        _dragInstance = await module.InvokeAsync<IJSObjectReference>("init", _windowRef, _dotNetHelper);
+        _refDotNet = DotNetObjectReference.Create(this);
+        _refJs = await module.InvokeAsync<IJSObjectReference>("init", _windowRef, _refDotNet);
     }
 
-    private string GetWindowStyle()
-    {
-        double currentHue = _activeDraftColor?.Hue ?? _hue ?? 0.0;
-        return $"background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent); background-color: hsl({currentHue} 100% 50%);";
-    }
+    private double? GetHueDouble() => (double)_currentColor.Hue;
+    private string GetWindowStyle() => $"background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent); background-color: hsl({_currentColor.Hue} 100% 50%);";
+    private string GetAlphaString() => CurrentRgb.Alpha.ToString("0.00", CultureInfo.InvariantCulture);
+
+    private void SetRedFromString(string? value) => UpdateRgbField(r: int.TryParse(value, out int r) ? Math.Clamp(r, 0, 255) : null);
+    private void SetGreenFromString(string? value) => UpdateRgbField(g: int.TryParse(value, out int g) ? Math.Clamp(g, 0, 255) : null);
+    private void SetBlueFromString(string? value) => UpdateRgbField(b: int.TryParse(value, out int b) ? Math.Clamp(b, 0, 255) : null);
+    private void SetAlphaFromString(string? value) => UpdateRgbField(a: double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double a) ? Math.Clamp(a, 0.0, 1.0) : null);
 
     private void SetValue(string? value)
     {
-        if (BaseColor.TryParseCssColor(value, out BaseColor? color))
-        {
-            NotifyChange(color);
-        }
-    }
+        _cacheInput = value;
+        if (!BaseColor.TryParseCssColor(value, out BaseColor? color)) return;
 
-    private double? GetHueDouble() => _activeDraftColor?.Hue ?? _hue ?? 0.0;
-    private string GetRedString() => CurrentRgb.Red.ToString();
-    private string GetGreenString() => CurrentRgb.Green.ToString();
-    private string GetBlueString() => CurrentRgb.Blue.ToString();
-    private string GetAlphaString() => CurrentRgb.Alpha.ToString("0.00", CultureInfo.InvariantCulture);
+        _currentColor = color.ToHsv();
+        NotifyChange(color);
+        StateHasChanged();
+    }
 
     private void SetHueFromDouble(double? value)
     {
-        _hue = value;
-        int integerHue = (int)Math.Round(_hue ?? 0.0);
+        int integerHue = (int)Math.Round(value ?? 0.0);
+        _currentColor = new(integerHue, _currentColor.Saturation, _currentColor.Value, _currentColor.Alpha);
+        _cacheInput = CurrentRgb.ToCssString();
 
-        if (_activeDraftColor is not null)
-        {
-            _activeDraftColor = new(integerHue, _activeDraftColor.Saturation, _activeDraftColor.Value, _activeDraftColor.Alpha);
-        }
-        else
-        {
-            var hsv = _localColor.ToHsv();
-            _localColor = new HsvColor(integerHue, hsv.Saturation, hsv.Value, hsv.Alpha).ToRgb();
-            NotifyChange(_localColor);
-        }
+        NotifyChange(CurrentRgb);
     }
 
-    private void SetRedFromString(string? value)
+    private void UpdateRgbField(int? r = null, int? g = null, int? b = null, double? a = null)
     {
-        int.TryParse(value, out int r);
-        UpdateLocalColor(Math.Clamp(r, 0, 255), null, null, null);
-    }
+        RgbColor updatedRgb = new(r ?? CurrentRgb.Red, g ?? CurrentRgb.Green, b ?? CurrentRgb.Blue, a ?? CurrentRgb.Alpha);
+        _currentColor = updatedRgb.ToHsv();
+        _cacheInput = updatedRgb.ToCssString();
 
-    private void SetGreenFromString(string? value)
-    {
-        int.TryParse(value, out int g);
-        UpdateLocalColor(null, Math.Clamp(g, 0, 255), null, null);
-    }
-
-    private void SetBlueFromString(string? value)
-    {
-        int.TryParse(value, out int b);
-        UpdateLocalColor(null, null, Math.Clamp(b, 0, 255), null);
-    }
-
-    private void SetAlphaFromString(string? value)
-    {
-        if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double parsedAlpha))
-        {
-            UpdateLocalColor(null, null, null, Math.Clamp(parsedAlpha, 0.0, 1.0));
-        }
-    }
-
-    private void UpdateLocalColor(int? r, int? g, int? b, double? a)
-    {
-        RgbColor current = CurrentRgb;
-
-        int newR = r ?? current.Red;
-        int newG = g ?? current.Green;
-        int newB = b ?? current.Blue;
-        double newA = a ?? current.Alpha;
-        RgbColor updated = new(newR, newG, newB, newA);
-
-        if (_activeDraftColor is not null)
-        {
-            _activeDraftColor = updated.ToHsv();
-        }
-        else
-        {
-            _localColor = updated;
-            _hue = _localColor.ToHsv().Hue;
-            NotifyChange(_localColor);
-        }
+        NotifyChange(updatedRgb);
     }
 
     [JSInvokable]
     public async Task UpdateColorPreviewFromJs(double saturationPercentage, double valuePercentage)
     {
-        int saturation = (int)Math.Round(saturationPercentage);
-        int value = (int)Math.Round(valuePercentage);
-        int currentHueInteger = (int)Math.Round(_activeDraftColor?.Hue ?? _hue ?? 0.0);
-
-        _activeDraftColor = new(currentHueInteger, saturation, value, CurrentRgb.Alpha);
+        int integerSaturation = (int)Math.Round(saturationPercentage);
+        int integerValue = (int)Math.Round(valuePercentage);
+        _currentColor = new(_currentColor.Hue, integerSaturation, integerValue, _currentColor.Alpha);
+        _cacheInput = CurrentRgb.ToCssString();
 
         await InvokeAsync(StateHasChanged);
     }
@@ -160,13 +120,8 @@
     [JSInvokable]
     public void OnDragEnd()
     {
-        if (_activeDraftColor is null) return;
-
-        _localColor = _activeDraftColor.ToRgb();
-        _hue = _activeDraftColor.Hue;
-        NotifyChange(_localColor);
-
-        _activeDraftColor = null;
+        _cacheInput = CurrentRgb.ToCssString();
+        NotifyChange(CurrentRgb);
         InvokeAsync(StateHasChanged);
     }
 
@@ -174,13 +129,13 @@
     {
         try
         {
-            if (_dragInstance is not null)
+            if (_refJs is not null)
             {
-                await _dragInstance.InvokeVoidAsync("dispose");
-                await _dragInstance.DisposeAsync();
+                await _refJs.InvokeVoidAsync("dispose");
+                await _refJs.DisposeAsync();
             }
 
-            _dotNetHelper?.Dispose();
+            _refDotNet?.Dispose();
         }
         catch (JSDisconnectedException)
         {

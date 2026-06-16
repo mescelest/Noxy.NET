@@ -9,7 +9,7 @@ public record HslColor : BaseColor
     public int Hue { get; }
     public int Saturation { get; }
     public int Lightness { get; }
-    public double Alpha { get; }
+    public override double Alpha { get; }
 
     public HslColor(int h, int s, int l, double alpha = 1.0)
     {
@@ -19,7 +19,7 @@ public record HslColor : BaseColor
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"hsl({Hue} {Saturation}% {Lightness}%)" : $"hsla({Hue} {Saturation}% {Lightness}% / {Alpha})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"hsl({Hue} {Saturation}% {Lightness}%)" : $"hsla({Hue} {Saturation}% {Lightness}% / {AlphaCssString})";
 
     public override RgbColor ToRgb()
     {
@@ -80,14 +80,19 @@ public record HslColor : BaseColor
 
         if (!TryReadCssColorComponent(rem1, out ReadOnlySpan<char> tokenSaturation, out ReadOnlySpan<char> rem2)) return false;
         if (tokenSaturation.EndsWith("%")) tokenSaturation = tokenSaturation[..^1];
-        if (!int.TryParse(tokenSaturation, CultureInfo.InvariantCulture, out int saturation)) return false;
+        if (!double.TryParse(tokenSaturation, CultureInfo.InvariantCulture, out double satDouble)) return false;
+        int saturation = (int)Math.Round(satDouble);
 
         if (!TryReadCssColorComponent(rem2, out ReadOnlySpan<char> tokenLightness, out ReadOnlySpan<char> rem3)) return false;
         if (tokenLightness.EndsWith("%")) tokenLightness = tokenLightness[..^1];
-        if (!int.TryParse(tokenLightness, CultureInfo.InvariantCulture, out int lightness)) return false;
+        if (!double.TryParse(tokenLightness, CultureInfo.InvariantCulture, out double lightDouble)) return false;
+        int lightness = (int)Math.Round(lightDouble);
 
-        if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> tokenAlpha, out _)) return false;
-        if (!TryParseAlpha(tokenAlpha, out double alpha)) return false;
+        double alpha = 1.0;
+        if (!rem3.IsEmpty)
+        {
+            if (!TryReadCssColorComponent(rem3, out ReadOnlySpan<char> tokenAlpha, out _) || !TryParseAlpha(tokenAlpha, out alpha)) return false;
+        }
 
         color = new(hue, saturation, lightness, alpha);
         return true;

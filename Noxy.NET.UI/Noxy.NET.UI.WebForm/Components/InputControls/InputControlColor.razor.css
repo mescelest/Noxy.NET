@@ -16,7 +16,7 @@
 }
 
 .control ::deep .input:focus {
-    padding-right: calc(var(--size-gap-sm, 20px) - 1px);
+    padding-right: calc((var(--size-control-input) - var(--size-control-choice)) + var(--size-control-choice) - 1px);
 }
 
 .preview {
