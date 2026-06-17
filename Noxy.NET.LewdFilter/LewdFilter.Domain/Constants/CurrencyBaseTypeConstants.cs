@@ -163,7 +163,7 @@ public class CurrencyBaseTypeConstants
         "Omen of the Sovereign",
     ];
 
-    public static readonly string[] Essence =
+    public static readonly string[] EssencePerfect =
     [
         "Perfect Essence of Abrasion",
         "Perfect Essence of Battle",
@@ -213,6 +213,66 @@ public class CurrencyBaseTypeConstants
         "Essence of the Body",
         "Essence of the Infinite",
         "Essence of the Mind",
+        "Lesser Essence of Abrasion",
+        "Lesser Essence of Battle",
+        "Lesser Essence of Command",
+        "Lesser Essence of Electricity",
+        "Lesser Essence of Enhancement",
+        "Lesser Essence of Flames",
+        "Lesser Essence of Haste",
+        "Lesser Essence of Ice",
+        "Lesser Essence of Insulation",
+        "Lesser Essence of Ruin",
+        "Lesser Essence of Seeking",
+        "Lesser Essence of Sorcery",
+        "Lesser YEssence of Thawing",
+        "Lesser Essence of the Body",
+        "Lesser Essence of the Infinite",
+        "Lesser Essence of the Mind",
+    ];
+
+    public static readonly string[] EssenceGreater =
+    [
+        "Greater Essence of Abrasion",
+        "Greater Essence of Battle",
+        "Greater Essence of Command",
+        "Greater Essence of Electricity",
+        "Greater Essence of Enhancement",
+        "Greater Essence of Flames",
+        "Greater Essence of Haste",
+        "Greater Essence of Ice",
+        "Greater Essence of Insulation",
+        "Greater Essence of Ruin",
+        "Greater Essence of Seeking",
+        "Greater Essence of Sorcery",
+        "Greater Essence of Thawing",
+        "Greater Essence of the Body",
+        "Greater Essence of the Infinite",
+        "Greater Essence of the Mind",
+    ];
+
+    public static readonly string[] EssenceNormal =
+    [
+        "Essence of Abrasion",
+        "Essence of Battle",
+        "Essence of Command",
+        "Essence of Electricity",
+        "Essence of Enhancement",
+        "Essence of Flames",
+        "Essence of Haste",
+        "Essence of Ice",
+        "Essence of Insulation",
+        "Essence of Ruin",
+        "Essence of Seeking",
+        "Essence of Sorcery",
+        "Essence of Thawing",
+        "Essence of the Body",
+        "Essence of the Infinite",
+        "Essence of the Mind",
+    ];
+
+    public static readonly string[] EssenceLesser =
+    [
         "Lesser Essence of Abrasion",
         "Lesser Essence of Battle",
         "Lesser Essence of Command",

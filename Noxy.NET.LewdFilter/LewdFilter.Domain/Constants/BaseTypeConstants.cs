@@ -15,8 +15,12 @@ public static class BaseTypeConstants
         { "Liquid Emotions", CurrencyBaseTypeConstants.LiquidEmotion },
 
         { "Alloys", CurrencyBaseTypeConstants.Alloys },
-        { "Essences (Basic)", CurrencyBaseTypeConstants.Essence },
+
         { "Essences (Unique)", CurrencyBaseTypeConstants.EssenceUnique },
+        { "Essences (Perfect)", CurrencyBaseTypeConstants.EssencePerfect },
+        { "Essences (Greater)", CurrencyBaseTypeConstants.EssenceGreater },
+        { "Essences (Normal)", CurrencyBaseTypeConstants.EssenceNormal },
+        { "Essences (Lesser)", CurrencyBaseTypeConstants.EssenceLesser },
 
         { "Augments (Aldur)", AugmentBaseTypeConstants.AugmentAldur },
         { "Augments (Ancient)", AugmentBaseTypeConstants.AugmentAncient },
