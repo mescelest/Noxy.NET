@@ -23,6 +23,7 @@ public static class WeaponBaseTypeConstants
         "Warmonger Bow",
         "Gemini Bow",
         "Fanatic Bow",
+        "Obliterator Bow",
     ];
 
     public static readonly string[] Crossbow =
