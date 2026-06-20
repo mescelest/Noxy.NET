@@ -1,37 +1,101 @@
-﻿@inject IJSRuntime JS
+﻿@typeparam T
+@inject IJSRuntime JS
 @inherits ElementComponent
-@typeparam T
+@implements IAsyncDisposable
 
-<div @attributes="AdditionalAttributes" @ref="_contentRef" class="@CssClass">
-    @foreach (T item in List)
+<div @ref="_refElement" class="@CssClass">
+    @for (int i = 0; i < List.Count; i++)
     {
-        @ChildContent(item)
+        int index = i;
+        T item = List[index];
+
+        @ChildContent((item, index))
     }
 </div>
 
 @code {
 
     [Parameter, EditorRequired]
-    public required IEnumerable<T> List { get; set; }
+    public required List<T> List { get; set; }
 
     [Parameter, EditorRequired]
-    public required RenderFragment<T> ChildContent { get; set; }
+    public required RenderFragment<(T Item, int Index)> ChildContent { get; set; }
 
     [Parameter]
-    public EventCallback<ElementReference> OnLoad { get; set; }
+    public EventCallback<(int IndexOld, int IndexNew)> OnUpdate { get; set; }
 
-    private ElementReference _contentRef;
+    [Parameter]
+    public Func<T, int, object>? KeySelector { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    [Parameter]
+    public string? Handle { get; set; }
+    private string HandleCurrent => !string.IsNullOrWhiteSpace(Handle) ? Handle : "sortable-handle";
+
+    [Parameter]
+    public string? Draggable { get; set; }
+    private string DraggableCurrent => !string.IsNullOrWhiteSpace(Draggable) ? Draggable : "sortable-item";
+
+    [Parameter]
+    public string? GhostClass { get; set; } = "";
+    private string GhostClassCurrent => !string.IsNullOrWhiteSpace(GhostClass) ? GhostClass : "sortable-ghost";
+
+    private ElementReference _refElement;
+    private IJSObjectReference? _componentModule;
+    private IJSObjectReference? _refInstance;
+    private DotNetObjectReference<SortableList<T>>? _refDotNet;
+
+    private object GetRowKey(T item, int index)
     {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender)
-        {
-            return;
-        }
+        return KeySelector != null ? KeySelector(item, index) : item!;
+    }
 
-        await JS.LoadScriptResource($"./_content/{Constants.AssemblyNameUICommon}/Sortable.min.js");
-        await OnLoad.InvokeAsync(_contentRef);
+    protected override async Task OnAfterFirstRenderAsync()
+    {
+        await base.OnAfterFirstRenderAsync();
+
+        await JS.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUICommon}/Sortable.min.js");
+        _componentModule = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(SortableList<>)));
+
+        Dictionary<string, object?> options = new()
+        {
+                { "animation", 150 },
+                { "ghostClass", GhostClassCurrent },
+                { "draggable", $".{DraggableCurrent}" },
+                { "handle", $".{HandleCurrent}" }
+        };
+        _refDotNet = DotNetObjectReference.Create(this);
+        _refInstance = await _componentModule.InvokeAsync<IJSObjectReference>("initSortable", _refElement, _refDotNet, options);
+    }
+
+    [JSInvokable]
+    public async Task OnJSUpdate(int oldIndex, int newIndex)
+    {
+        if (oldIndex != newIndex && OnUpdate.HasDelegate)
+        {
+            await OnUpdate.InvokeAsync((oldIndex, newIndex));
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_refInstance is not null)
+            {
+                await _refInstance.InvokeVoidAsync("destroy");
+                await _refInstance.DisposeAsync();
+            }
+
+            if (_componentModule is not null)
+            {
+                await _componentModule.DisposeAsync();
+            }
+
+            _refDotNet?.Dispose();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
     }
 
 }

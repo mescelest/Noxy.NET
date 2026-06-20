@@ -35,6 +35,8 @@ public class FilterFeatureReducers
 
     public record AddGroupAction(FilterGroup Group);
 
+    public record MoveGroupToIndexAction(Guid GroupID, int Index);
+
     public record EditGroupAction(FilterGroup Group);
 
     public record RemoveGroupAction(Guid GroupID);
@@ -42,6 +44,8 @@ public class FilterFeatureReducers
     public record AddBlockAction(Guid GroupID, FilterBlock Block);
 
     public record EditBlockAction(Guid GroupID, FilterBlock Block);
+
+    public record MoveBlockToIndexAction(Guid GroupID, Guid BlockID, int Index);
 
     public record RemoveBlockAction(Guid GroupID, Guid BlockID);
 
@@ -61,114 +65,147 @@ public class FilterFeatureReducers
     public static FilterFeatureState ReduceAddColor(FilterFeatureState state, AddColorAction action)
     {
         List<FilterColor> listCurrent = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []);
-        Filter filterCloned = state.Filter.Clone();
-        filterCloned.CustomColorCollection = new(state.Filter.CustomColorCollection) { [action.Type] = [.. listCurrent, action.Color] };
+        Filter clone = state.Filter.Clone();
+        clone.CustomColorCollection = new(state.Filter.CustomColorCollection) { [action.Type] = [.. listCurrent, action.Color] };
 
-        return state with { Filter = filterCloned };
+        return state with { Filter = clone };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceEditColor(FilterFeatureState state, EditColorAction action)
     {
         List<FilterColor> listCurrent = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []);
-        Filter filterCloned = state.Filter.Clone();
-        filterCloned.CustomColorCollection = new(state.Filter.CustomColorCollection)
+        Filter clone = state.Filter.Clone();
+        clone.CustomColorCollection = new(state.Filter.CustomColorCollection)
         {
             [action.Type] = listCurrent.Select(c => c.ID == action.Color.ID ? action.Color : c).ToList()
         };
 
-        return state with { Filter = filterCloned };
+        return state with { Filter = clone };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceRemoveColor(FilterFeatureState state, RemoveColorAction action)
     {
         List<FilterColor> listCurrent = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []);
-        Filter filterCloned = state.Filter.Clone();
-        filterCloned.CustomColorCollection = new(state.Filter.CustomColorCollection)
+        Filter clone = state.Filter.Clone();
+        clone.CustomColorCollection = new(state.Filter.CustomColorCollection)
         {
             [action.Type] = listCurrent.Where(c => c.ID != action.ColorID).ToList()
         };
 
-        return state with { Filter = filterCloned };
+        return state with { Filter = clone };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceAddGroup(FilterFeatureState state, AddGroupAction action)
     {
-        Filter filterCloned = state.Filter.Clone();
-        filterCloned.GroupList = [.. state.Filter.GroupList, action.Group];
+        Filter clone = state.Filter.Clone();
+        clone.GroupList = [.. state.Filter.GroupList, action.Group];
 
-        return state with { Filter = filterCloned };
+        return state with { Filter = clone };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceEditGroup(FilterFeatureState state, EditGroupAction action)
     {
-        Filter filterCloned = state.Filter.Clone();
-        filterCloned.GroupList = state.Filter.GroupList.Select(g => g.ID == action.Group.ID ? action.Group : g).ToList();
+        Filter clone = state.Filter.Clone();
+        clone.GroupList = state.Filter.GroupList.Select(g => g.ID == action.Group.ID ? action.Group : g).ToList();
 
-        return state with { Filter = filterCloned };
+        return state with { Filter = clone };
+    }
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceMoveGroupToIndex(FilterFeatureState state, MoveGroupToIndexAction action)
+    {
+        List<FilterGroup> listGroup = state.Filter.GroupList.ToList();
+        int index = listGroup.FindIndex(g => g.ID == action.GroupID);
+        if (index == -1 || action.Index < 0 || action.Index >= listGroup.Count || index == action.Index) return state;
+
+        FilterGroup item = listGroup[index];
+        listGroup.RemoveAt(index);
+        listGroup.Insert(action.Index, item);
+
+        Filter clone = state.Filter.Clone();
+        clone.GroupList = listGroup;
+
+        return state with { Filter = clone };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceRemoveGroup(FilterFeatureState state, RemoveGroupAction action)
     {
-        Filter filterCloned = state.Filter.Clone();
-        filterCloned.GroupList = state.Filter.GroupList.Where(g => g.ID != action.GroupID).ToList();
+        Filter clone = state.Filter.Clone();
+        clone.GroupList = state.Filter.GroupList.Where(g => g.ID != action.GroupID).ToList();
 
-        return state with { Filter = filterCloned };
+        return state with { Filter = clone };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceAddBlock(FilterFeatureState state, AddBlockAction action)
     {
-        var targetGroup = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
-        if (targetGroup == null) return state;
+        FilterGroup? group = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
+        if (group == null) return state;
 
-        var updatedBlockList = targetGroup.AddBlock(action.Block);
-        var updatedGroup = new FilterGroup { ID = targetGroup.ID, Name = targetGroup.Name, BlockList = updatedBlockList };
-        var updatedGroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? updatedGroup : g).ToList();
+        List<FilterBlock> listBlock = group.AddBlock(action.Block);
+        FilterGroup groupCurrent = new() { ID = group.ID, Name = group.Name, BlockList = listBlock };
 
-        Filter filterCloned = state.Filter.Clone();
-        filterCloned.GroupList = updatedGroupList;
+        Filter clone = state.Filter.Clone();
+        clone.GroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupCurrent : g).ToList();
 
-        return state with { Filter = filterCloned };
+        return state with { Filter = clone };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceEditBlock(FilterFeatureState state, EditBlockAction action)
     {
-        var targetGroup = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
-        if (targetGroup == null) return state;
+        FilterGroup? group = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
+        if (group == null) return state;
 
-        var updatedBlockList = targetGroup.BlockList
-            .Select(b => b.ID == action.Block.ID ? action.Block : b)
-            .ToList();
+        List<FilterBlock> listBlock = group.BlockList.Select(b => b.ID == action.Block.ID ? action.Block : b).ToList();
 
-        var updatedGroup = new FilterGroup { ID = targetGroup.ID, Name = targetGroup.Name, BlockList = updatedBlockList };
-        var updatedGroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? updatedGroup : g).ToList();
+        FilterGroup groupCurrent = new() { ID = group.ID, Name = group.Name, BlockList = listBlock };
 
-        Filter filterCloned = state.Filter.Clone();
-        filterCloned.GroupList = updatedGroupList;
+        Filter clone = state.Filter.Clone();
+        clone.GroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupCurrent : g).ToList();
 
-        return state with { Filter = filterCloned };
+        return state with { Filter = clone };
+    }
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceMoveBlockToIndex(FilterFeatureState state, MoveBlockToIndexAction action)
+    {
+        FilterGroup? group = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
+        if (group == null) return state;
+
+        List<FilterBlock> listBlock = group.BlockList.ToList();
+        int index = listBlock.FindIndex(b => b.ID == action.BlockID);
+        if (index == -1 || action.Index < 0 || action.Index >= listBlock.Count || index == action.Index) return state;
+
+        FilterBlock item = listBlock[index];
+        listBlock.RemoveAt(index);
+        listBlock.Insert(action.Index, item);
+
+        Filter clone = state.Filter.Clone();
+        FilterGroup groupCurrent = new() { ID = group.ID, Name = group.Name, BlockList = listBlock };
+        clone.GroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupCurrent : g).ToList();
+
+        return state with { Filter = clone };
     }
 
     [ReducerMethod]
     public static FilterFeatureState ReduceRemoveBlock(FilterFeatureState state, RemoveBlockAction action)
     {
-        var targetGroup = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
-        if (targetGroup == null) return state;
+        FilterGroup? group = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
+        if (group == null) return state;
 
-        var updatedBlockList = targetGroup.RemoveBlock(action.BlockID);
-        var updatedGroup = new FilterGroup { ID = targetGroup.ID, Name = targetGroup.Name, BlockList = updatedBlockList };
-        var updatedGroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? updatedGroup : g).ToList();
+        List<FilterBlock> listBlock = group.RemoveBlock(action.BlockID);
+        FilterGroup groupCurrent = new() { ID = group.ID, Name = group.Name, BlockList = listBlock };
 
-        Filter filterCloned = state.Filter.Clone();
-        filterCloned.GroupList = updatedGroupList;
+        Filter clone = state.Filter.Clone();
+        clone.GroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupCurrent : g).ToList();
 
-        return state with { Filter = filterCloned };
+        return state with { Filter = clone };
     }
 
     [ReducerMethod]
@@ -209,9 +246,9 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
 
             await js.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Error exporting configuration JSON: {ex.Message}");
+            // ignored
         }
         finally
         {
@@ -227,19 +264,13 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
             if (string.IsNullOrWhiteSpace(action.FileContent)) return Task.CompletedTask;
             Filter? importedFilter = storageService.LoadFilterFromJson(action.FileContent);
 
-            if (importedFilter != null)
-            {
-                dispatcher.Dispatch(new FilterFeatureReducers.ImportFilterSuccessAction(importedFilter));
-            }
-            else
-            {
-                Console.WriteLine("Import failed: Deserialization returned a null object reference.");
-                dispatcher.Dispatch(new FilterFeatureReducers.ImportFilterSuccessAction(state.Value.Filter));
-            }
+            dispatcher.Dispatch(importedFilter != null
+                ? new FilterFeatureReducers.ImportFilterSuccessAction(importedFilter)
+                : new FilterFeatureReducers.ImportFilterSuccessAction(state.Value.Filter)
+            );
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Critical error parsing imported JSON profile: {ex.Message}");
             dispatcher.Dispatch(new FilterFeatureReducers.ImportFilterSuccessAction(state.Value.Filter));
         }
 
@@ -261,9 +292,9 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
 
             await js.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"FilterCompilerService processing failed: {ex.Message}");
+            // ignored
         }
         finally
         {

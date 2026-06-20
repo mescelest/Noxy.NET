@@ -9,7 +9,7 @@
     <Loader class="loading" Loading="Loading">
         @if (List.Any())
         {
-            @for (int index = 0; index < List.Count(); index++)
+            @for (int index = 0; index < List.Count; index++)
             {
                 T element = List.ElementAt(index);
                 object? rowKey = KeySelector != null ? KeySelector(element) : element;
@@ -29,7 +29,7 @@
 @code {
 
     [Parameter, EditorRequired]
-    public IEnumerable<T> List { get; set; }
+    public List<T> List { get; set; }
 
     [Parameter, EditorRequired]
     public RenderFragment<(T Row, int Index)> TableRow { get; set; }

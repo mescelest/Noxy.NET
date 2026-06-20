@@ -3,47 +3,54 @@
 @inject IStateSelection<FilterFeatureState, Dictionary<ColorTypeEnum, List<FilterColor>>> ColorCollectionSelection
 @inherits FluxorElementComponent
 
-
 <div @attributes="AdditionalAttributes" class="@CssClass">
 
     @if (Block != null)
     {
-        <FormField Label="Text Color" For="text-color">
-            <InputControlSelect TOption="FilterColor" ID="text-color" Name="text-color" OptionList="TextFilterColorSet"
+        <FormField Label="Text Color" For="@TextColorId">
+            <InputControlSelect TOption="FilterColor" ID="@TextColorId" Name="@TextColorId" OptionList="TextFilterColorSet"
                                 @bind-Value:get="Block.TextColor" @bind-Value:set="SetTextColor">
                 @GetColorName(context)
             </InputControlSelect>
         </FormField>
 
-        <FormField Label="Background Color" For="background-color">
-            <InputControlSelect TOption="FilterColor" ID="background-color" Name="background-color" OptionList="BackgroundFilterColorSet"
+        <FormField Label="Background Color" For="@BackgroundColorId">
+            <InputControlSelect TOption="FilterColor" ID="@BackgroundColorId" Name="@BackgroundColorId" OptionList="BackgroundFilterColorSet"
                                 @bind-Value:get="Block.BackgroundColor" @bind-Value:set="SetBackgroundColor">
                 @GetColorName(context)
             </InputControlSelect>
         </FormField>
 
-        <FormField Label="Border Color" For="border-color">
-            <InputControlSelect TOption="FilterColor" ID="border-color" Name="border-color" OptionList="BorderFilterColorSet"
+        <FormField Label="Border Color" For="@BorderId">
+            <InputControlSelect TOption="FilterColor" ID="@BorderId" Name="@BorderId" OptionList="BorderFilterColorSet"
                                 @bind-Value:get="Block.BorderColor" @bind-Value:set="SetBorderColor">
                 @GetColorName(context)
             </InputControlSelect>
         </FormField>
 
-        <FormField Label="@($"Font Size ({FontSize})")" For="font-size-slider">
-            <input id="font-size-slider" type="range" min="18" max="45" value="@FontSize" @oninput="OnFontSizeChange" class="poe-range-slider"/>
+        <FormField Label="@($"Font Size ({FontSize})")" For="@FontSizeId">
+            <InputElementRange class="poe-range-slider" ID="@FontSizeId" Min="18" Max="45" Value="@((double)FontSize)" OnChange="OnFontSizeChange"/>
         </FormField>
     }
 
 </div>
 
 @code {
+
     [Parameter, EditorRequired]
     public Guid GroupId { get; set; }
+
     [Parameter, EditorRequired]
     public Guid BlockId { get; set; }
 
     private FilterBlock? Block => BlockSelection.Value;
     private int FontSize => Block?.FontSize ?? 32;
+
+    // Unique IDs combined with GroupId and BlockId to ensure total context safety
+    private string TextColorId => $"text-color-{GroupId}-{BlockId}";
+    private string BackgroundColorId => $"background-color-{GroupId}-{BlockId}";
+    private string BorderId => $"border-color-{GroupId}-{BlockId}";
+    private string FontSizeId => $"font-size-slider-{GroupId}-{BlockId}";
 
     private HashSet<FilterColor?> TextFilterColorSet => GetColorsForType(ColorTypeEnum.Text);
     private HashSet<FilterColor?> BackgroundFilterColorSet => GetColorsForType(ColorTypeEnum.Background);
@@ -53,19 +60,14 @@
     {
         base.OnInitialized();
 
-        BlockSelection.Select(state => state.Filter.GroupList
-            .FirstOrDefault(g => g.ID == GroupId)?
-            .BlockList.FirstOrDefault(b => b.ID == BlockId));
-
-        // Track the structural collection directly. Fluxor will only re-render this 
-        // component if the underlying color dictionaries reference changes.
+        BlockSelection.Select(state => state.Filter.GroupList.FirstOrDefault(g => g.ID == GroupId)?.BlockList.FirstOrDefault(b => b.ID == BlockId));
         ColorCollectionSelection.Select(state => state.Filter.CustomColorCollection);
     }
 
     private HashSet<FilterColor?> GetColorsForType(ColorTypeEnum type)
     {
-        var collection = ColorCollectionSelection.Value;
-        if (collection == null || !collection.TryGetValue(type, out var list))
+        Dictionary<ColorTypeEnum, List<FilterColor>>? collection = ColorCollectionSelection.Value;
+        if (collection == null || !collection.TryGetValue(type, out List<FilterColor>? list))
         {
             return [null];
         }
@@ -76,7 +78,7 @@
     private void SetTextColor(FilterColor? value) => UpdateBlockColor(ColorTypeEnum.Text, value);
     private void SetBackgroundColor(FilterColor? value) => UpdateBlockColor(ColorTypeEnum.Background, value);
     private void SetBorderColor(FilterColor? value) => UpdateBlockColor(ColorTypeEnum.Border, value);
-    
+
     private void UpdateBlockColor(ColorTypeEnum type, FilterColor? color)
     {
         if (Block == null) return;
@@ -98,7 +100,7 @@
         if (Block == null) return;
 
         FilterBlock updatedBlock = Block.Clone();
-        updatedBlock.FontSize = int.TryParse(e.Value?.ToString(), out int size) ? size : 32;
+        updatedBlock.FontSize = double.TryParse(e.Value?.ToString(), out double size) ? (int)size : 32;
         DispatchUpdate(updatedBlock);
     }
 

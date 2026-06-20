@@ -4,15 +4,14 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="header">
-        <FormField Label="Base type group" For="base-type-group">
-            <InputControlSelect TOption="string" class="base-type-group" ID="base-type-group" OptionList="BaseTypeGroupSet"
-                                @bind-Value:get="_inputGroup" @bind-Value:set="SetInputGroup">
+        <FormField Label="Base type group" For="@BaseTypeGroupId">
+            <InputControlSelect TOption="string" class="base-type-group" ID="@BaseTypeGroupId" OptionList="BaseTypeGroupSet" @bind-Value:get="_inputGroup" @bind-Value:set="SetInputGroup">
                 @context
             </InputControlSelect>
         </FormField>
 
-        <FormField Label="Filter by name" For="filter-by-name">
-            <InputControlText class="filter-by-name" ID="filter-by-name" OnInputDelay="200" @bind-Value="@_inputSearch"/>
+        <FormField Label="Filter by name" For="@FilterByNameId">
+            <InputControlText class="filter-by-name" ID="@FilterByNameId" OnInputDelay="200" @bind-Value="@_inputSearch"/>
         </FormField>
 
         @if (!string.IsNullOrEmpty(_inputGroup))
@@ -53,8 +52,10 @@
 </div>
 
 @code {
+
     [Parameter, EditorRequired]
     public Guid GroupId { get; set; }
+
     [Parameter, EditorRequired]
     public Guid BlockId { get; set; }
     
@@ -64,6 +65,8 @@
     private FilterBlock? Block => BlockSelection.Value;
     private HashSet<string> CurrentBaseTypeList => Block?.BaseTypeList ?? [];
     private static HashSet<string> BaseTypeGroupSet => BaseTypeConstants.BaseTypes.Keys.ToHashSet();
+    private string BaseTypeGroupId => $"base-type-group-{GroupId}";
+    private string FilterByNameId => $"filter-by-name-{GroupId}";
     
     protected override void OnInitialized()
     {
@@ -136,6 +139,5 @@
         FilterBlock blockSnapshot = Block.Clone();
         blockSnapshot.BaseTypeList = newBases;
 
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, blockSnapshot));
-    }
+        DispatchDispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, blockSnapshot}
 }

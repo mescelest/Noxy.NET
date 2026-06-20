@@ -67,7 +67,7 @@
 
         PreviewStylesSelection.Select(state =>
         {
-            var block = state.Filter.GroupList.FirstOrDefault(g => g.ID == GroupId)?.BlockList.FirstOrDefault(b => b.ID == BlockId);
+            FilterBlock? block = state.Filter.GroupList.FirstOrDefault(g => g.ID == GroupId)?.BlockList.FirstOrDefault(b => b.ID == BlockId);
             if (block == null) return string.Empty;
 
             string textHex = block.TextColor is not null ? block.TextColor.ToHex() : FilterColor.DefaultText.ToHex();

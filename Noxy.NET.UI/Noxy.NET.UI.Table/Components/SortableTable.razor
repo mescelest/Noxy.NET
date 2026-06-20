@@ -1,0 +1,59 @@
+﻿@typeparam T
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" role="table">
+    <div class="header" role="rowheader">
+        @TableHeader
+    </div>
+
+    <Loader class="loading" Loading="Loading">
+        @if (List.Any())
+        {
+            <SortableList List="List" OnUpdate="OnUpdate" KeySelector="KeySelector" Handle="@Handle" Draggable="sortable-row" GhostClass="@GhostClass" ItemAttributes="RowAttributes">
+                <div @key="@GetRowKey(context.Item, context.Index)" class="sortable-row" role="row">
+                    @TableRow((context.Item, context.Index))
+                </div>
+            </SortableList>
+        }
+        else if (Placeholder != null)
+        {
+            @Placeholder
+        }
+    </Loader>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required List<T> List { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<(T Row, int Index)> TableRow { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment TableHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment? Placeholder { get; set; }
+
+    [Parameter]
+    public Func<T, int, object>? KeySelector { get; set; }
+
+    [Parameter]
+    public EventCallback<(int IndexOld, int IndexNew)> OnUpdate { get; set; }
+
+    [Parameter]
+    public string? Handle { get; set; }
+
+    [Parameter]
+    public string? GhostClass { get; set; }
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+    private object GetRowKey(T item, int index)
+    {
+        return KeySelector != null ? KeySelector(item, index) : item!;
+    }
+
+}

@@ -1,0 +1,36 @@
+.SortableTable {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    column-gap: var(--size-gap-sm);
+    overflow: auto;
+}
+
+.header, .row {
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+}
+
+.header {
+    grid-column: 1 / -1;
+
+    display: grid;
+    grid-template-columns: subgrid;
+    border-bottom: var(--size-border-width-md) solid var(--color-offset-primary-lg);
+    background-color: var(--color-offset-primary-sm);
+}
+
+.row {
+    grid-column: 1 / -1;
+
+    display: grid;
+    grid-template-columns: subgrid;
+}
+
+.row:nth-of-type(2n+1) {
+    background-color: var(--color-offset-primary-sm);
+}
+
+.Table ::deep > .loading {
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: center;
+}

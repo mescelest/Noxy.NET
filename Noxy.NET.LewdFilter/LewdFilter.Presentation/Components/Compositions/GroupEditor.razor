@@ -3,8 +3,9 @@
 @inherits FluxorElementComponent
 
 <nav class="GroupEditor">
-    <Table class="table" List="GroupList">
+    <SortableTable class="table" List="GroupList" OnUpdate="OnSortableTableUpdate" KeySelector="(g, _) => g.ID" Handle="sortable-handle">
         <TableHeader>
+            <div role="cell"></div>
             <div role="cell">
                 <strong>Name</strong>
             </div>
@@ -12,20 +13,24 @@
             <div role="cell"></div>
         </TableHeader>
         <TableRow>
+            <div class="table-cell sortable-handle" role="cell" style="cursor: grab;">
+                <MaterialIcon Icon="drag_handle" Size="20px"/>
+            </div>
+
             <div class="table-cell" role="cell">
                 <InputControlText class="name" Size="20" @bind-Value:get="@context.Row.Name" @bind-Value:set="e => OnInputGroupEditNameChange(e, context.Row)"/>
             </div>
 
-            <div class="table-cell" role="cell">
+            <div class="table-cell" role="cell" style="min-width: 40px; display: inline-flex; justify-content: center;">
                 @if (context.Index == 0)
                 {
-                    <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="AddNewRowAtBottom">
+                    <Button @key='"add-btn"' type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="AddNewRowAtBottom">
                         <MaterialIcon Icon="add" Size="20px"/>
                     </Button>
                 }
                 else
                 {
-                    <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => DeleteGroup(context.Row.ID)">
+                    <Button @key='"remove-btn"' type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => DeleteGroup(context.Row.ID)">
                         <MaterialIcon Icon="remove" Size="20px"/>
                     </Button>
                 }
@@ -34,21 +39,28 @@
             <div class="table-cell" role="cell">
                 <a href="#@context.Row.ToGroupID()" class="navigate" title="Scroll to group">
                     <Button type="button" Status="StatusEnum.Info" IsIcon="true">
-                        <MaterialIcon Icon="jump_to_element" Size="20px"/>
+                    <MaterialIcon Icon="jump_to_element" Size="20px"/>
                     </Button>
                 </a>
             </div>
         </TableRow>
-    </Table>
+    </SortableTable>
 </nav>
 
 @code {
+
     private List<FilterGroup> GroupList => [.. GroupListSelection.Value];
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         GroupListSelection.Select(state => [.. state.Filter.GroupList]);
+    }
+
+    private void OnSortableTableUpdate((int IndexOld, int IndexNew) indices)
+    {
+        FilterGroup targetGroup = GroupList[indices.IndexOld];
+        Dispatcher.Dispatch(new FilterFeatureReducers.MoveGroupToIndexAction(targetGroup.ID, indices.IndexNew));
     }
 
     private void OnInputGroupEditNameChange(string value, FilterGroup group)
@@ -64,4 +76,5 @@
     }
 
     private void DeleteGroup(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveGroupAction(id));
+
 }

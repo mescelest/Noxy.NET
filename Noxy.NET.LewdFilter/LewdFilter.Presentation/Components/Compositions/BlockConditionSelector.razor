@@ -6,32 +6,38 @@
 
     @if (Block != null)
     {
-        <FormField Label="Rarity" For="rarity-condition">
-            <FilterRarityCondition id="rarity-condition" Value="Block.Rarity" ValueChanged="OnRarityChange"/>
+        <FormField Label="Rarity" For="@RarityId">
+            <FilterRarityCondition id="@RarityId" Value="Block.Rarity" ValueChanged="OnRarityChange"/>
         </FormField>
 
-        <FormField Label="Stack Size" For="stack-size-condition">
-            <FilterIntCondition id="stack-size-condition" Value="Block.StackSize" ValueChanged="OnStackSizeChange"/>
+        <FormField Label="Stack Size" For="@StackSizeId">
+            <FilterIntCondition id="@StackSizeId" Value="Block.StackSize" ValueChanged="OnStackSizeChange"/>
         </FormField>
 
-        <FormField Label="Quality" For="quality-condition">
-            <FilterIntCondition id="quality-condition" Value="Block.Quality" ValueChanged="OnQualityChange"/>
+        <FormField Label="Quality" For="@QualityId">
+            <FilterIntCondition id="@QualityId" Value="Block.Quality" ValueChanged="OnQualityChange"/>
         </FormField>
 
-        <FormField Label="Unidentified Item Tier" For="unidentified-tier-condition">
-            <FilterIntCondition id="unidentified-tier-condition" Value="Block.UnidentifiedItemTier" ValueChanged="OnUnidentifiedTierChange"/>
+        <FormField Label="Unidentified Item Tier" For="@UnidentifiedTierId">
+            <FilterIntCondition id="@UnidentifiedTierId" Value="Block.UnidentifiedItemTier" ValueChanged="OnUnidentifiedTierChange"/>
         </FormField>
     }
 
 </div>
 
 @code {
+
     [Parameter, EditorRequired]
     public Guid GroupId { get; set; }
+
     [Parameter, EditorRequired]
     public Guid BlockId { get; set; }
 
     private FilterBlock? Block => BlockSelection.Value;
+    private string RarityId => $"rarity-condition-{GroupId}";
+    private string StackSizeId => $"stack-size-condition-{GroupId}";
+    private string QualityId => $"quality-condition-{GroupId}";
+    private string UnidentifiedTierId => $"unidentified-tier-condition-{GroupId}";
 
     protected override void OnInitialized()
     {
@@ -56,4 +62,5 @@
 
         Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, clonedBlock));
     }
+
 }

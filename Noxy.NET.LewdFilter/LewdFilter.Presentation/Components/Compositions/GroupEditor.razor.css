@@ -7,9 +7,24 @@
 
 .GroupEditor ::deep .table {
     display: grid;
-    grid-template-columns: 1fr max-content max-content;
+    grid-template-columns: max-content 1fr max-content max-content;
     align-items: center;
-    column-gap: 10px;
+    row-gap: var(--size-gap-xs);
+}
+
+.GroupEditor ::deep .SortableList {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: var(--size-gap-xs);
+}
+
+.GroupEditor ::deep .sortable-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: center;
+    column-gap: var(--size-gap-xs);
 }
 
 .table-cell {
