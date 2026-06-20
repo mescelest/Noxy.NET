@@ -4,7 +4,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="tab-list" role="tablist">
-        @foreach (ColorTypeEnum type in Enum.GetValues<ColorTypeEnum>())
+        @foreach (FilterColorTypeEnum type in Enum.GetValues<FilterColorTypeEnum>())
         {
             bool isSelected = _tab == type;
             string isSelectedAria = isSelected.ToString().ToLower();
@@ -54,7 +54,7 @@
 </div>
 
 @code {
-    private ColorTypeEnum _tab = ColorTypeEnum.Background;
+    private FilterColorTypeEnum _tab = FilterColorTypeEnum.Background;
 
     private List<FilterColor> ColorList => [.. ColorListSelection.Value];
 
@@ -64,7 +64,7 @@
         UpdateSelection();
     }
 
-    private void SetActiveTab(ColorTypeEnum tab)
+    private void SetActiveTab(FilterColorTypeEnum tab)
     {
         _tab = tab;
         UpdateSelection();
@@ -84,9 +84,7 @@
 
     private void OnInputColorEditNameChange(string? value, FilterColor color)
     {
-        FilterColor clonedColor = color.Clone();
-        clonedColor.Name = value ?? string.Empty;
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, clonedColor));
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color with { Name = value ?? string.Empty }));
     }
 
     private void OnInputColorEditValueChange(BaseColor? value, FilterColor color)
@@ -94,13 +92,16 @@
         if (value is null) return;
 
         RgbColor rgb = value.ToRgb();
-        FilterColor clonedColor = color.Clone();
-        clonedColor.R = rgb.Red;
-        clonedColor.G = rgb.Green;
-        clonedColor.B = rgb.Blue;
-        clonedColor.A = (int)Math.Round(rgb.Alpha * 255.0);
 
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, clonedColor));
+        FilterColor updatedColor = color with
+        {
+            R = rgb.Red,
+            G = rgb.Green,
+            B = rgb.Blue,
+            A = (int)Math.Round(rgb.Alpha * 255.0)
+        };
+
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, updatedColor));
     }
 
     private void AddNewRowAtBottom()

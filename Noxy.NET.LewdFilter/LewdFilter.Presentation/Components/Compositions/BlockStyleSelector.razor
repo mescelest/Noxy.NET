@@ -1,6 +1,6 @@
 ﻿@inject IDispatcher Dispatcher
 @inject IStateSelection<FilterFeatureState, FilterBlock?> BlockSelection
-@inject IStateSelection<FilterFeatureState, Dictionary<ColorTypeEnum, List<FilterColor>>> ColorCollectionSelection
+@inject IStateSelection<FilterFeatureState, Dictionary<FilterColorTypeEnum, List<FilterColor>>> ColorCollectionSelection
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -46,15 +46,14 @@
     private FilterBlock? Block => BlockSelection.Value;
     private int FontSize => Block?.FontSize ?? 32;
 
-    // Unique IDs combined with GroupId and BlockId to ensure total context safety
     private string TextColorId => $"text-color-{GroupId}-{BlockId}";
     private string BackgroundColorId => $"background-color-{GroupId}-{BlockId}";
     private string BorderId => $"border-color-{GroupId}-{BlockId}";
     private string FontSizeId => $"font-size-slider-{GroupId}-{BlockId}";
 
-    private HashSet<FilterColor?> TextFilterColorSet => GetColorsForType(ColorTypeEnum.Text);
-    private HashSet<FilterColor?> BackgroundFilterColorSet => GetColorsForType(ColorTypeEnum.Background);
-    private HashSet<FilterColor?> BorderFilterColorSet => GetColorsForType(ColorTypeEnum.Border);
+    private HashSet<FilterColor?> TextFilterColorSet => GetColorsForType(FilterColorTypeEnum.Text);
+    private HashSet<FilterColor?> BackgroundFilterColorSet => GetColorsForType(FilterColorTypeEnum.Background);
+    private HashSet<FilterColor?> BorderFilterColorSet => GetColorsForType(FilterColorTypeEnum.Border);
 
     protected override void OnInitialized()
     {
@@ -64,9 +63,9 @@
         ColorCollectionSelection.Select(state => state.Filter.CustomColorCollection);
     }
 
-    private HashSet<FilterColor?> GetColorsForType(ColorTypeEnum type)
+    private HashSet<FilterColor?> GetColorsForType(FilterColorTypeEnum type)
     {
-        Dictionary<ColorTypeEnum, List<FilterColor>>? collection = ColorCollectionSelection.Value;
+        Dictionary<FilterColorTypeEnum, List<FilterColor>>? collection = ColorCollectionSelection.Value;
         if (collection == null || !collection.TryGetValue(type, out List<FilterColor>? list))
         {
             return [null];
@@ -75,22 +74,21 @@
         return [null, .. list];
     }
 
-    private void SetTextColor(FilterColor? value) => UpdateBlockColor(ColorTypeEnum.Text, value);
-    private void SetBackgroundColor(FilterColor? value) => UpdateBlockColor(ColorTypeEnum.Background, value);
-    private void SetBorderColor(FilterColor? value) => UpdateBlockColor(ColorTypeEnum.Border, value);
+    private void SetTextColor(FilterColor? value) => UpdateBlockColor(FilterColorTypeEnum.Text, value);
+    private void SetBackgroundColor(FilterColor? value) => UpdateBlockColor(FilterColorTypeEnum.Background, value);
+    private void SetBorderColor(FilterColor? value) => UpdateBlockColor(FilterColorTypeEnum.Border, value);
 
-    private void UpdateBlockColor(ColorTypeEnum type, FilterColor? color)
+    private void UpdateBlockColor(FilterColorTypeEnum type, FilterColor? color)
     {
         if (Block == null) return;
 
-        FilterBlock updatedBlock = Block.Clone();
-        switch (type)
+        FilterBlock updatedBlock = type switch
         {
-            case ColorTypeEnum.Text: updatedBlock.TextColor = color; break;
-            case ColorTypeEnum.Background: updatedBlock.BackgroundColor = color; break;
-            case ColorTypeEnum.Border: updatedBlock.BorderColor = color; break;
-            default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
+            FilterColorTypeEnum.Text => Block with { TextColor = color },
+            FilterColorTypeEnum.Background => Block with { BackgroundColor = color },
+            FilterColorTypeEnum.Border => Block with { BorderColor = color },
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
 
         DispatchUpdate(updatedBlock);
     }
@@ -99,9 +97,8 @@
     {
         if (Block == null) return;
 
-        FilterBlock updatedBlock = Block.Clone();
-        updatedBlock.FontSize = double.TryParse(e.Value?.ToString(), out double size) ? (int)size : 32;
-        DispatchUpdate(updatedBlock);
+        int size = double.TryParse(e.Value?.ToString(), out double parsedSize) ? (int)parsedSize : 32;
+        DispatchUpdate(Block with { FontSize = size });
     }
 
     private void DispatchUpdate(FilterBlock updatedBlock)

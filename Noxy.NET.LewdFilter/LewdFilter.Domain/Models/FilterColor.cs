@@ -3,7 +3,7 @@ using LewdFilter.Domain.Abstractions;
 
 namespace LewdFilter.Domain.Models;
 
-public class FilterColor : FilterEntity
+public record FilterColor : FilterEntity
 {
     public string Name { get; set; } = string.Empty;
     public int R { get; set; } = 255;
@@ -46,14 +46,4 @@ public class FilterColor : FilterEntity
             return false;
         }
     }
-
-    public FilterColor Clone(Guid? targetID = null) => new()
-    {
-        ID = targetID ?? ID,
-        Name = Name,
-        R = R,
-        G = G,
-        B = B,
-        A = A
-    };
 }

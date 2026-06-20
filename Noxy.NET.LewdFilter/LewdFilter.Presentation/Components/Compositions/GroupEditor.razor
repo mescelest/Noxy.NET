@@ -39,7 +39,7 @@
             <div class="table-cell" role="cell">
                 <a href="#@context.Row.ToGroupID()" class="navigate" title="Scroll to group">
                     <Button type="button" Status="StatusEnum.Info" IsIcon="true">
-                    <MaterialIcon Icon="jump_to_element" Size="20px"/>
+                        <MaterialIcon Icon="jump_to_element" Size="20px"/>
                     </Button>
                 </a>
             </div>
@@ -65,9 +65,7 @@
 
     private void OnInputGroupEditNameChange(string value, FilterGroup group)
     {
-        FilterGroup clonedGroup = group.Clone();
-        clonedGroup.Name = value;
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditGroupAction(clonedGroup));
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditGroupAction(group with { Name = value }));
     }
 
     private void AddNewRowAtBottom()

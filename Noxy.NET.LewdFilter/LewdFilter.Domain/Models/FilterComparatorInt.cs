@@ -3,15 +3,15 @@ using LewdFilter.Domain.Enums;
 
 namespace LewdFilter.Domain.Models;
 
-public class FilterComparatorInt : FilterEntity
+public record FilterComparatorInt : FilterEntity
 {
     public int? Left { get; set; }
     public int? Right { get; set; }
-    public ComparatorTypeEnum ComparatorType { get; set; }
+    public FilterComparatorTypeEnum FilterComparatorType { get; set; }
 
     public override string ToString()
     {
-        string op = ComparatorType.ToFilterSymbol();
+        string op = FilterComparatorType.ToFilterSymbol();
         return (Left, Right) switch
         {
             ({ } l, { } r) => $"{l} {op} {r}",

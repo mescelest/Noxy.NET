@@ -1,12 +1,12 @@
 ﻿@inherits BaseInput<FilterComparatorInt?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @if (_operator == ComparatorTypeEnum.Between)
+    @if (_operator == FilterComparatorTypeEnum.Between)
     {
         <InputControlInteger class="left" Name="left" Size="5" @bind-Value="@_left" @bind-Value:after="PushUpdate"/>
     }
 
-    <InputControlSelect TOption="ComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
+    <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
         @context.ToTextSymbol()
     </InputControlSelect>
     
@@ -17,21 +17,21 @@
 
     private int? _left;
     private int? _right;
-    private ComparatorTypeEnum _operator = ComparatorTypeEnum.Equal;
+    private FilterComparatorTypeEnum _operator = FilterComparatorTypeEnum.Equal;
 
-    private readonly HashSet<ComparatorTypeEnum> _operators = Enum.GetValues<ComparatorTypeEnum>().ToHashSet();
+    private readonly HashSet<FilterComparatorTypeEnum> _operators = Enum.GetValues<FilterComparatorTypeEnum>().ToHashSet();
     
     protected override void OnParametersSet()
     {
         _left = Value?.Left;
         _right = Value?.Right;
-        _operator = Value?.ComparatorType ?? ComparatorTypeEnum.Equal;
+        _operator = Value?.FilterComparatorType ?? FilterComparatorTypeEnum.Equal;
     }
-    
-    private void SetOperator(ComparatorTypeEnum op)
+
+    private void SetOperator(FilterComparatorTypeEnum op)
     {
         _operator = op;
-        if (_operator != ComparatorTypeEnum.Between) _right = null;
+        if (_operator != FilterComparatorTypeEnum.Between) _right = null;
         PushUpdate();
     }
 
@@ -43,7 +43,7 @@
         }
         else
         {
-            ValueChanged.InvokeAsync(new() { Left = _left, Right = _right, ComparatorType = _operator });
+            ValueChanged.InvokeAsync(new() { Left = _left, Right = _right, FilterComparatorType = _operator });
         }
     }
 }

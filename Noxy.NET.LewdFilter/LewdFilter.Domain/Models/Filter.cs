@@ -4,34 +4,30 @@ using LewdFilter.Domain.Enums;
 
 namespace LewdFilter.Domain.Models;
 
-public class Filter : FilterEntity
+public record Filter : FilterEntity
 {
     public string Name { get; set; } = string.Empty;
     public List<FilterGroup> GroupList { get; set; } = [];
-    public Dictionary<ColorTypeEnum, List<FilterColor>> CustomColorCollection { get; set; } = new()
+    public Dictionary<FilterColorTypeEnum, List<FilterColor>> CustomColorCollection { get; set; } = new()
     {
-        { ColorTypeEnum.Text, [] },
-        { ColorTypeEnum.Border, [] },
-        { ColorTypeEnum.Background, [] }
+        { FilterColorTypeEnum.Text, [] },
+        { FilterColorTypeEnum.Border, [] },
+        { FilterColorTypeEnum.Background, [] }
     };
 
-    public Filter Clone(Guid? newID = null)
+    protected Filter(Filter other) : base(other)
     {
-        return new()
-        {
-            ID = newID ?? ID,
-            Name = Name,
-            CustomColorCollection = CustomColorCollection,
-            GroupList = GroupList
-        };
+        Name = other.Name;
+        GroupList = other.GroupList.Select(g => g with { }).ToList();
+        CustomColorCollection = other.CustomColorCollection.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Select(c => c with { }).ToList());
     }
 
-    public List<FilterColor> GetColorList(ColorTypeEnum type)
+    public List<FilterColor> GetColorList(FilterColorTypeEnum type)
     {
         return CustomColorCollection.GetValueOrDefault(type, []);
     }
 
-    public bool TryGetColor(ColorTypeEnum type, string? idString, [NotNullWhen(true)] out FilterColor? color)
+    public bool TryGetColor(FilterColorTypeEnum type, string? idString, [NotNullWhen(true)] out FilterColor? color)
     {
         color = Guid.TryParse(idString, out Guid targetId) ? GetColorList(type).FirstOrDefault(c => c.ID == targetId) : null;
         return color != null;

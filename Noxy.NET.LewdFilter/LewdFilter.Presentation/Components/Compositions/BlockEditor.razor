@@ -83,17 +83,14 @@
     {
         if (Block == null) return;
 
-        FilterBlock updatedBlock = Block.Clone();
-        updatedBlock.Name = value ?? string.Empty;
-        DispatchUpdate(updatedBlock);
+        DispatchUpdate(Block with { Name = value ?? string.Empty });
     }
 
     private void OnShowToggle(bool value)
     {
         if (Block == null) return;
-        FilterBlock updatedBlock = Block.Clone();
-        updatedBlock.IsShow = value;
-        DispatchUpdate(updatedBlock);
+
+        DispatchUpdate(Block with { IsShow = value });
     }
 
     private void DeleteBlock()

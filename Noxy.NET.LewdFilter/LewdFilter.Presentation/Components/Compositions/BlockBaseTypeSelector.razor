@@ -136,10 +136,7 @@
     {
         if (Block == null) return;
 
-        FilterBlock clone = Block.Clone();
-        clone.BaseTypeList = list;
-
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, clone));
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, Block with { BaseTypeList = list }));
     }
 
 }

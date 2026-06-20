@@ -43,24 +43,21 @@
     {
         base.OnInitialized();
 
-        BlockSelection.Select(state => state.Filter.GroupList
-            .FirstOrDefault(g => g.ID == GroupId)?
-            .BlockList.FirstOrDefault(b => b.ID == BlockId));
+        BlockSelection.Select(state => state.Filter.GroupList.FirstOrDefault(g => g.ID == GroupId)?.BlockList.FirstOrDefault(b => b.ID == BlockId));
     }
 
-    private void OnRarityChange(FilterComparatorRarity? condition) => UpdateBlockCondition(block => block.Rarity = condition);
-    private void OnStackSizeChange(FilterComparatorInt? condition) => UpdateBlockCondition(block => block.StackSize = condition);
-    private void OnQualityChange(FilterComparatorInt? condition) => UpdateBlockCondition(block => block.Quality = condition);
-    private void OnUnidentifiedTierChange(FilterComparatorInt? condition) => UpdateBlockCondition(block => block.UnidentifiedItemTier = condition);
+    private void OnRarityChange(FilterComparatorRarity? condition) => UpdateBlockCondition(b => b with { Rarity = condition });
+    private void OnStackSizeChange(FilterComparatorInt? condition) => UpdateBlockCondition(b => b with { StackSize = condition });
+    private void OnQualityChange(FilterComparatorInt? condition) => UpdateBlockCondition(b => b with { Quality = condition });
+    private void OnUnidentifiedTierChange(FilterComparatorInt? condition) => UpdateBlockCondition(b => b with { UnidentifiedItemTier = condition });
 
-    private void UpdateBlockCondition(Action<FilterBlock> cbAssignProperty)
+    private void UpdateBlockCondition(Func<FilterBlock, FilterBlock> mutateBlock)
     {
         if (Block == null) return;
 
-        FilterBlock clonedBlock = Block.Clone();
-        cbAssignProperty(clonedBlock);
+        FilterBlock updatedBlock = mutateBlock(Block);
 
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, clonedBlock));
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, updatedBlock));
     }
 
 }
