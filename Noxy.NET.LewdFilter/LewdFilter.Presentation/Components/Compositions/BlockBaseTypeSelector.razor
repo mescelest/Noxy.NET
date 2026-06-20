@@ -31,19 +31,19 @@
     <div class="content">
         @if (!string.IsNullOrEmpty(_inputGroup))
         {
-            string[] filteredBases = GetFilteredBaseTypes();
-            if (!filteredBases.Any())
+            string[] filtered = GetFilteredBaseTypes();
+            if (!filtered.Any())
             {
                 <p class="no-results">No base types match your search.</p>
             }
             else
             {
-                @foreach (string baseType in filteredBases)
+                @foreach (string type in filtered)
                 {
-                    bool isChecked = CurrentBaseTypeList.Contains(baseType);
+                    bool isChecked = CurrentBaseTypeList.Contains(type);
 
-                    <InputControlCheckbox @key="baseType" ID="@GetBaseTypeID(baseType)" Name="base-type" Option="true" @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(baseType, v)">
-                        @baseType
+                    <InputControlCheckbox @key="type" ID="@GetBaseTypeID(type)" Name="base-type" Option="true" @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(type, v)">
+                        @type
                     </InputControlCheckbox>
                 }
             }
@@ -58,7 +58,7 @@
 
     [Parameter, EditorRequired]
     public Guid BlockId { get; set; }
-    
+
     private string _inputGroup = string.Empty;
     private string _inputSearch = string.Empty;
 
@@ -67,7 +67,7 @@
     private static HashSet<string> BaseTypeGroupSet => BaseTypeConstants.BaseTypes.Keys.ToHashSet();
     private string BaseTypeGroupId => $"base-type-group-{GroupId}";
     private string FilterByNameId => $"filter-by-name-{GroupId}";
-    
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -78,7 +78,7 @@
             .BlockList.FirstOrDefault(b => b.ID == BlockId));
     }
 
-    private string GetBaseTypeID(string baseType) => $"{UUIDCode}-{baseType}";
+    private string GetBaseTypeID(string type) => $"{UUIDCode}-{type}";
 
     private string[] GetFilteredBaseTypes()
     {
@@ -92,7 +92,7 @@
         _inputGroup = value ?? string.Empty;
         _inputSearch = string.Empty;
     }
-    
+
     private bool? GetSelectAll()
     {
         if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? masterList)) return false;
@@ -113,31 +113,33 @@
             foreach (string item in list) set.Remove(item);
         }
 
-        DispatchUpdateWithNewBases(set);
+        DispatchUpdateWithNewBaseList(set);
     }
 
-    private void OnBaseTypeToggle(string baseType, bool value)
+    private void OnBaseTypeToggle(string type, bool value)
     {
-        HashSet<string> updatedBases = [.. CurrentBaseTypeList];
+        HashSet<string> list = [.. CurrentBaseTypeList];
 
-        if (value) updatedBases.Add(baseType);
-        else updatedBases.Remove(baseType);
+        if (value) list.Add(type);
+        else list.Remove(type);
 
-        DispatchUpdateWithNewBases(updatedBases);
+        DispatchUpdateWithNewBaseList(list);
     }
 
     private void OnResetBaseTypes()
     {
         _inputSearch = string.Empty;
-        DispatchUpdateWithNewBases([]);
+        DispatchUpdateWithNewBaseList([]);
     }
 
-    private void DispatchUpdateWithNewBases(HashSet<string> newBases)
+    private void DispatchUpdateWithNewBaseList(HashSet<string> list)
     {
         if (Block == null) return;
 
-        FilterBlock blockSnapshot = Block.Clone();
-        blockSnapshot.BaseTypeList = newBases;
+        FilterBlock clone = Block.Clone();
+        clone.BaseTypeList = list;
 
-        DispatchDispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, blockSnapshot}
+        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, clone));
+    }
+
 }
