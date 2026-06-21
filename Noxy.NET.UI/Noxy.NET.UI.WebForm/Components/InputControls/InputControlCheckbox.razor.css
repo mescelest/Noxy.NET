@@ -8,12 +8,12 @@
 
 .InputControlCheckbox[disabled] {
     color: var(--color-disabled);
+    cursor: not-allowed;
 }
 
 .InputControlCheckbox[disabled] .visual {
     background-color: var(--color-offset-primary-lg);
     border-color: var(--color-disabled);
-    cursor: not-allowed;
 }
 
 .InputControlCheckbox:not([disabled]):hover .visual {

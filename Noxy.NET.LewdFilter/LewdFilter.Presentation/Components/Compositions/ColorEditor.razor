@@ -72,19 +72,12 @@
 
     private void UpdateSelection()
     {
-        ColorListSelection.Select(state =>
-            [.. state.Filter.CustomColorCollection.GetValueOrDefault(_tab, [])]
-        );
-    }
-
-    private BaseColor GetColor(FilterColor color)
-    {
-        return new RgbColor(color.R, color.G, color.B, color.A / 255.0);
+        ColorListSelection.Select(FilterFeatureState.SelectColorListByTab(_tab));
     }
 
     private void OnInputColorEditNameChange(string? value, FilterColor color)
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, color with { Name = value ?? string.Empty }));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetColorAction(_tab, color with { Name = value ?? string.Empty }));
     }
 
     private void OnInputColorEditValueChange(BaseColor? value, FilterColor color)
@@ -101,14 +94,20 @@
             A = (int)Math.Round(rgb.Alpha * 255.0)
         };
 
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditColorAction(_tab, updatedColor));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetColorAction(_tab, updatedColor));
     }
 
     private void AddNewRowAtBottom()
     {
         FilterColor freshColor = new() { Name = "", R = 255, G = 255, B = 255, A = 255 };
-        Dispatcher.Dispatch(new FilterFeatureReducers.AddColorAction(_tab, freshColor));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetColorAction(_tab, freshColor));
     }
 
     private void DeleteColor(Guid colorID) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveColorAction(_tab, colorID));
+
+    private static BaseColor GetColor(FilterColor color)
+    {
+        return new RgbColor(color.R, color.G, color.B, color.A / 255.0);
+    }
+
 }

@@ -56,27 +56,9 @@
     {
         base.OnInitialized();
 
-        BlockSelection.Select(state => state.Filter.GroupList
-            .FirstOrDefault(g => g.ID == GroupId)?
-            .BlockList.FirstOrDefault(b => b.ID == BlockId));
-
-        BaseTypeCountSelection.Select(state => state.Filter.GroupList
-            .FirstOrDefault(g => g.ID == GroupId)?
-            .BlockList.FirstOrDefault(b => b.ID == BlockId)?
-            .BaseTypeList.Count ?? 0);
-
-        PreviewStylesSelection.Select(state =>
-        {
-            FilterBlock? block = state.Filter.GroupList.FirstOrDefault(g => g.ID == GroupId)?.BlockList.FirstOrDefault(b => b.ID == BlockId);
-            if (block == null) return string.Empty;
-
-            string textHex = block.TextColor is not null ? block.TextColor.ToHex() : FilterColor.DefaultText.ToHex();
-            string bgHex = block.BackgroundColor is not null ? block.BackgroundColor.ToHex() : FilterColor.DefaultBackground.ToHex();
-            string borderStyle = block.BorderColor is not null ? block.BorderColor.ToHex() : FilterColor.DefaultBorder.ToHex();
-            string fontSize = $"{(block.FontSize ?? 32) / 32.0:0.00}rem";
-
-            return $"color: {textHex}; background-color: {bgHex}; border: 1px solid {borderStyle}; font-size: {fontSize};";
-        });
+        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
+        BaseTypeCountSelection.Select(FilterFeatureState.SelectBlockBaseTypeCount(GroupId, BlockId));
+        PreviewStylesSelection.Select(FilterFeatureState.SelectPreviewStyle(GroupId, BlockId));
     }
 
     private void OnInputNameChange(string? value)
@@ -100,6 +82,6 @@
 
     private void DispatchUpdate(FilterBlock updatedBlock)
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, updatedBlock));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, updatedBlock));
     }
 }

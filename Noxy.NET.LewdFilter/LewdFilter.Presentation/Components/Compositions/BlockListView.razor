@@ -1,8 +1,8 @@
-﻿@inject IStateSelection<FilterFeatureState, ImmutableArray<Guid>> BlockIdsSelection
+﻿@inject IStateSelection<FilterFeatureState, ImmutableArray<Guid>> BlockIdList
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @foreach (Guid blockId in BlockIdsSelection.Value)
+    @foreach (Guid blockId in BlockIdList.Value)
     {
         <div class="block" @key="blockId">
             <BlockEditor GroupId="GroupId" BlockId="blockId"/>
@@ -19,7 +19,7 @@
     {
         base.OnInitialized();
 
-        BlockIdsSelection.Select(state => [.. state.Filter.GroupList.FirstOrDefault(g => g.ID == GroupId)?.BlockList.Select(b => b.ID) ?? []]);
+        BlockIdList.Select(FilterFeatureState.SelectBlockIDList(GroupId));
     }
 
 }

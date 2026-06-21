@@ -73,9 +73,7 @@
         base.OnInitialized();
         _inputGroup = BaseTypeConstants.BaseTypes.FirstOrDefault().Key;
 
-        BlockSelection.Select(state => state.Filter.GroupList
-            .FirstOrDefault(g => g.ID == GroupId)?
-            .BlockList.FirstOrDefault(b => b.ID == BlockId));
+        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
     }
 
     private string GetBaseTypeID(string type) => $"{UUIDCode}-{type}";
@@ -136,7 +134,7 @@
     {
         if (Block == null) return;
 
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, Block with { BaseTypeList = list }));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, Block with { BaseTypeList = list }));
     }
 
 }

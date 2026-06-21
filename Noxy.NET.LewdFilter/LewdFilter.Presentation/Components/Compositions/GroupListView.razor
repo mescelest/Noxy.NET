@@ -13,7 +13,8 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        GroupIdsSelection.Select(state => [..state.Filter.GroupList.Select(g => g.ID)]);
+
+        GroupIdsSelection.Select(FilterFeatureState.SelectGroupIDList());
     }
 
 }

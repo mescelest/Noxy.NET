@@ -1,0 +1,59 @@
+@inherits BaseInput<FilterMinimapIcon?>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <InputControlSelect TOption="FilterIconShapeEnum?" OptionList="_shapeOptions" ID="@ID" Name="@Name" @bind-Value:get="_shape" @bind-Value:set="OnShapeChange">
+        @(context?.ToString() ?? "-- Disabled --")
+    </InputControlSelect>
+
+    <InputControlSelect TOption="FilterColorNameEnum" OptionList="_colorOptions" Disabled="@(Value is null)" @bind-Value:get="_color" @bind-Value:set="OnColorChange">
+        @context.ToString()
+    </InputControlSelect>
+
+    <InputControlSelect TOption="FilterIconSizeEnum" OptionList="_sizeOptions" Disabled="@(Value is null)" @bind-Value:get="_size" @bind-Value:set="OnSizeChange">
+        @context.ToString()
+    </InputControlSelect>
+</div>
+
+@code {
+
+    private readonly HashSet<FilterIconShapeEnum?> _shapeOptions = [null, .. Enum.GetValues<FilterIconShapeEnum>().Cast<FilterIconShapeEnum?>()];
+    private readonly HashSet<FilterColorNameEnum> _colorOptions = Enum.GetValues<FilterColorNameEnum>().ToHashSet();
+    private readonly HashSet<FilterIconSizeEnum> _sizeOptions = Enum.GetValues<FilterIconSizeEnum>().ToHashSet();
+
+    private FilterIconShapeEnum? _shape;
+    private FilterColorNameEnum _color = FilterColorNameEnum.White;
+    private FilterIconSizeEnum _size = Enum.GetValues<FilterIconSizeEnum>().FirstOrDefault();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        _shape = Value?.Shape;
+        _color = Value?.Color ?? FilterColorNameEnum.White;
+        _size = Value?.Size ?? Enum.GetValues<FilterIconSizeEnum>().FirstOrDefault();
+    }
+
+    private void OnShapeChange(FilterIconShapeEnum? shape)
+    {
+        _shape = shape;
+        PushUpdate();
+    }
+
+    private void OnColorChange(FilterColorNameEnum color)
+    {
+        _color = color;
+        PushUpdate();
+    }
+
+    private void OnSizeChange(FilterIconSizeEnum size)
+    {
+        _size = size;
+        PushUpdate();
+    }
+
+    private void PushUpdate()
+    {
+        NotifyChange(_shape is not null ? new FilterMinimapIcon(_color, _size, _shape.Value) : null);
+    }
+
+}

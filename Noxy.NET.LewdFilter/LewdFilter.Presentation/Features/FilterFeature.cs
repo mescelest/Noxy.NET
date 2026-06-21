@@ -1,9 +1,11 @@
-﻿using System.Text;
+﻿using System.Collections.Immutable;
+using System.Text;
 using Fluxor;
 using LewdFilter.Domain.Enums;
 using LewdFilter.Domain.Models;
 using LewdFilter.Domain.Services;
 using Microsoft.JSInterop;
+using Noxy.NET.Extensions;
 
 namespace LewdFilter.Presentation.Features;
 
@@ -23,74 +25,74 @@ public record FilterFeatureState
     };
 
     public bool IsLoading { get; init; }
+
+    public static Func<FilterFeatureState, FilterGroup> SelectGroup(Guid groupId) => state => state.Filter.GroupList.FirstOrDefault(g => g.ID == groupId) ?? FilterGroup.Default;
+
+    public static Func<FilterFeatureState, string> SelectGroupName(Guid groupId) => state => SelectGroup(groupId)(state).Name;
+
+    public static Func<FilterFeatureState, ImmutableArray<FilterGroup>> SelectGroupList() => state => [.. state.Filter.GroupList];
+
+    public static Func<FilterFeatureState, ImmutableArray<Guid>> SelectGroupIDList() => state => [.. SelectGroupList()(state).Select(g => g.ID)];
+
+    public static Func<FilterFeatureState, FilterBlock> SelectBlock(Guid groupId, Guid blockId) => state => SelectGroup(groupId)(state).BlockList.FirstOrDefault(b => b.ID == blockId) ?? FilterBlock.Default;
+
+    public static Func<FilterFeatureState, ImmutableArray<Guid>> SelectBlockIDList(Guid groupId) => state => [.. SelectGroup(groupId)(state).BlockList.Select(b => b.ID)];
+
+    public static Func<FilterFeatureState, int> SelectBlockBaseTypeCount(Guid groupId, Guid blockId) => state => SelectBlock(groupId, blockId)(state).BaseTypeList.Count;
+
+    public static Func<FilterFeatureState, Dictionary<FilterColorTypeEnum, List<FilterColor>>> SelectCustomColorList() => state => state.Filter.CustomColorCollection;
+
+    public static Func<FilterFeatureState, ImmutableArray<FilterColor>> SelectColorListByTab(FilterColorTypeEnum tab) => state => state.Filter.CustomColorCollection.TryGetValue(tab, out List<FilterColor>? colors) ? [.. colors] : [];
+
+    public static Func<FilterFeatureState, string> SelectPreviewStyle(Guid groupId, Guid blockId) => state =>
+    {
+        FilterBlock block = SelectBlock(groupId, blockId)(state);
+
+        string textHex = (block.TextColor ?? FilterColor.DefaultText).ToHex();
+        string bgHex = (block.BackgroundColor ?? FilterColor.DefaultBackground).ToHex();
+        string borderStyle = (block.BorderColor ?? FilterColor.DefaultBorder).ToHex();
+        string fontSize = $"{(block.FontSize ?? 32) / 32.0:0.00}rem";
+
+        return $"color: {textHex}; background-color: {bgHex}; border: 1px solid {borderStyle}; font-size: {fontSize};";
+    };
 }
 
 public class FilterFeatureReducers
 {
-    public record AddColorAction(FilterColorTypeEnum Type, FilterColor Color);
-
-    public record EditColorAction(FilterColorTypeEnum Type, FilterColor Color);
-
+    public record SetColorAction(FilterColorTypeEnum Type, FilterColor Color);
     public record RemoveColorAction(FilterColorTypeEnum Type, Guid ColorID);
 
-    public record AddGroupAction(FilterGroup Group);
-
+    public record SetGroupAction(FilterGroup Group);
     public record MoveGroupToIndexAction(Guid GroupID, int Index);
-
-    public record EditGroupAction(FilterGroup Group);
-
     public record RemoveGroupAction(Guid GroupID);
 
-    public record AddBlockAction(Guid GroupID, FilterBlock Block);
-
-    public record EditBlockAction(Guid GroupID, FilterBlock Block);
-
-    public record MoveBlockToIndexAction(Guid GroupID, Guid BlockID, int Index);
-
+    public record SetBlockAction(Guid GroupID, FilterBlock Block);
+    public record MoveBlockAction(Guid GroupID, Guid BlockID, int Index);
     public record RemoveBlockAction(Guid GroupID, Guid BlockID);
 
     public record ExportFilterAction;
-
     public record ExportFilterSuccessAction;
-
     public record ImportFilterAction(string FileContent);
-
     public record ImportFilterSuccessAction(Filter RootFilter);
-
+    public record ExportGroupAction(Guid GroupID);
+    public record ExportGroupSuccessAction;
+    public record ImportGroupAction(string FileContent);
+    public record ImportGroupSuccessAction;
     public record SaveFilterAction;
-
     public record SaveFilterSuccessAction;
+    public record MergeGroupAndColorsAction(FilterGroup Group, List<FilterColorExport> AssociatedColors);
 
     [ReducerMethod]
-    public static FilterFeatureState ReduceAddColor(FilterFeatureState state, AddColorAction action)
+    public static FilterFeatureState ReduceSetColor(FilterFeatureState state, SetColorAction action)
     {
-        List<FilterColor> listCurrent = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []);
+        List<FilterColor> updatedList = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []).ToList();
+        updatedList.SetItemByKey(action.Color, c => c.ID);
 
         return state with
         {
             Filter = state.Filter with
             {
-                CustomColorCollection = new(state.Filter.CustomColorCollection)
-                {
-                    [action.Type] = [.. listCurrent, action.Color]
-                }
-            }
-        };
-    }
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceEditColor(FilterFeatureState state, EditColorAction action)
-    {
-        List<FilterColor> listCurrent = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []);
-
-        return state with
-        {
-            Filter = state.Filter with
-            {
-                CustomColorCollection = new(state.Filter.CustomColorCollection)
-                {
-                    [action.Type] = listCurrent.Select(c => c.ID == action.Color.ID ? action.Color : c).ToList()
-                }
+                CustomColorCollection = new(state.Filter.CustomColorCollection) { [action.Type] = updatedList }
             }
         };
     }
@@ -99,38 +101,22 @@ public class FilterFeatureReducers
     public static FilterFeatureState ReduceRemoveColor(FilterFeatureState state, RemoveColorAction action)
     {
         List<FilterColor> listCurrent = state.Filter.CustomColorCollection.GetValueOrDefault(action.Type, []);
-
         return state with
         {
             Filter = state.Filter with
             {
-                CustomColorCollection = new(state.Filter.CustomColorCollection)
-                {
-                    [action.Type] = listCurrent.Where(c => c.ID != action.ColorID).ToList()
-                }
+                CustomColorCollection = new(state.Filter.CustomColorCollection) { [action.Type] = listCurrent.Where(c => c.ID != action.ColorID).ToList() }
             }
         };
     }
 
     [ReducerMethod]
-    public static FilterFeatureState ReduceAddGroup(FilterFeatureState state, AddGroupAction action)
+    public static FilterFeatureState ReduceSetGroup(FilterFeatureState state, SetGroupAction action)
     {
-        return state with
-        {
-            Filter = state.Filter with { GroupList = [.. state.Filter.GroupList, action.Group] }
-        };
-    }
+        List<FilterGroup> currentGroups = state.Filter.GroupList.ToList();
+        currentGroups.SetItemByKey(action.Group, g => g.ID);
 
-    [ReducerMethod]
-    public static FilterFeatureState ReduceEditGroup(FilterFeatureState state, EditGroupAction action)
-    {
-        return state with
-        {
-            Filter = state.Filter with
-            {
-                GroupList = state.Filter.GroupList.Select(g => g.ID == action.Group.ID ? action.Group : g).ToList()
-            }
-        };
+        return state with { Filter = state.Filter with { GroupList = currentGroups } };
     }
 
     [ReducerMethod]
@@ -144,194 +130,256 @@ public class FilterFeatureReducers
         listGroup.RemoveAt(index);
         listGroup.Insert(action.Index, item);
 
-        return state with
-        {
-            Filter = state.Filter with { GroupList = listGroup }
-        };
+        return state with { Filter = state.Filter with { GroupList = listGroup } };
     }
 
     [ReducerMethod]
-    public static FilterFeatureState ReduceRemoveGroup(FilterFeatureState state, RemoveGroupAction action)
+    public static FilterFeatureState ReduceRemoveGroup(FilterFeatureState state, RemoveGroupAction action) => state with
     {
+        Filter = state.Filter with { GroupList = state.Filter.GroupList.Where(g => g.ID != action.GroupID).ToList() }
+    };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceSetBlock(FilterFeatureState state, SetBlockAction action) =>
+        UpdateGroupInState(state, action.GroupID, group =>
+        {
+            List<FilterBlock> currentBlocks = group.BlockList.ToList();
+            currentBlocks.SetItemByKey(action.Block, b => b.ID);
+
+            return group with { BlockList = currentBlocks };
+        });
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceMoveBlock(FilterFeatureState state, MoveBlockAction action) =>
+        UpdateGroupInState(state, action.GroupID, g =>
+        {
+            List<FilterBlock> listBlock = g.BlockList.ToList();
+            int index = listBlock.FindIndex(b => b.ID == action.BlockID);
+            if (index == -1 || action.Index < 0 || action.Index >= listBlock.Count || index == action.Index) return g;
+
+            FilterBlock item = listBlock[index];
+            listBlock.RemoveAt(index);
+            listBlock.Insert(action.Index, item);
+            return g with { BlockList = listBlock };
+        });
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceRemoveBlock(FilterFeatureState state, RemoveBlockAction action) =>
+        UpdateGroupInState(state, action.GroupID, g => g with { BlockList = g.RemoveBlock(action.BlockID) });
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceExportFilter(FilterFeatureState state, ExportFilterAction action) => state with { IsLoading = true };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceExportFilterSuccess(FilterFeatureState state, ExportFilterSuccessAction action) => state with { IsLoading = false };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceImportFilter(FilterFeatureState state, ImportFilterAction action) => state with { IsLoading = true };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceImportFilterSuccess(FilterFeatureState state, ImportFilterSuccessAction action) => state with { IsLoading = false, Filter = action.RootFilter };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceImportGroup(FilterFeatureState state, ImportGroupAction action) => state with { IsLoading = true };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceImportGroupSuccess(FilterFeatureState state, ImportGroupSuccessAction action) => state with { IsLoading = false };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceExportGroup(FilterFeatureState state, ExportGroupAction action) => state with { IsLoading = true };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceExportGroupSuccess(FilterFeatureState state, ExportGroupSuccessAction action) => state with { IsLoading = false };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceSaveFilter(FilterFeatureState state, SaveFilterAction action) => state with { IsLoading = true };
+
+    [ReducerMethod]
+    public static FilterFeatureState ReduceSaveFilterSuccess(FilterFeatureState state, SaveFilterSuccessAction action) => state with { IsLoading = false };
+
+    [ReducerMethod]
+    public static FilterFeatureState OnMergeGroupAndColors(FilterFeatureState state, MergeGroupAndColorsAction action)
+    {
+        Dictionary<FilterColorTypeEnum, List<FilterColor>> updatedColors = new(state.Filter.CustomColorCollection.ToDictionary(kvp => kvp.Key, kvp => new List<FilterColor>(kvp.Value)));
+
+        Dictionary<Guid, FilterColor> colorIdRemap = [];
+
+        foreach (FilterColorExport incoming in action.AssociatedColors)
+        {
+            if (!updatedColors.TryGetValue(incoming.Type, out List<FilterColor>? existingList))
+            {
+                existingList = [];
+                updatedColors[incoming.Type] = existingList;
+            }
+
+            FilterColor? structuralMatch = existingList.FirstOrDefault(c =>
+                c.R == incoming.Color.R &&
+                c.G == incoming.Color.G &&
+                c.B == incoming.Color.B &&
+                c.A == incoming.Color.A);
+
+            if (structuralMatch is not null)
+            {
+                colorIdRemap[incoming.Color.ID] = structuralMatch;
+            }
+            else
+            {
+                existingList.Add(incoming.Color);
+                colorIdRemap[incoming.Color.ID] = incoming.Color;
+            }
+        }
+
+        List<FilterBlock> updatedBlocks = [];
+        foreach (FilterBlock block in action.Group.BlockList)
+        {
+            FilterBlock adjustedBlock = block with
+            {
+                TextColor = block.TextColor is not null && colorIdRemap.TryGetValue(block.TextColor.ID, out FilterColor? newText) ? newText : block.TextColor,
+                BackgroundColor = block.BackgroundColor is not null && colorIdRemap.TryGetValue(block.BackgroundColor.ID, out FilterColor? newBg) ? newBg : block.BackgroundColor,
+                BorderColor = block.BorderColor is not null && colorIdRemap.TryGetValue(block.BorderColor.ID, out FilterColor? newBorder) ? newBorder : block.BorderColor
+            };
+            updatedBlocks.Add(adjustedBlock);
+        }
+
+        FilterGroup finalizedGroup = action.Group with { BlockList = updatedBlocks };
+
         return state with
         {
             Filter = state.Filter with
             {
-                GroupList = state.Filter.GroupList.Where(g => g.ID != action.GroupID).ToList()
+                GroupList = [.. state.Filter.GroupList, finalizedGroup],
+                CustomColorCollection = updatedColors
             }
         };
     }
 
-    [ReducerMethod]
-    public static FilterFeatureState ReduceAddBlock(FilterFeatureState state, AddBlockAction action)
+    // --- Private Helper Methods ---
+
+    private static FilterFeatureState UpdateGroupInState(FilterFeatureState state, Guid groupId, Func<FilterGroup, FilterGroup> updateLogic)
     {
-        FilterGroup? group = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
-        if (group == null) return state;
+        int index = state.Filter.GroupList.FindIndex(g => g.ID == groupId);
+        if (index == -1) return state;
 
-        List<FilterBlock> listBlock = group.AddBlock(action.Block);
-        FilterGroup groupCurrent = group with { BlockList = listBlock };
+        List<FilterGroup> updatedGroups = state.Filter.GroupList.ToList();
+        updatedGroups[index] = updateLogic(updatedGroups[index]);
 
-        return state with
-        {
-            Filter = state.Filter with
-            {
-                GroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupCurrent : g).ToList()
-            }
-        };
+        return state with { Filter = state.Filter with { GroupList = updatedGroups } };
     }
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceEditBlock(FilterFeatureState state, EditBlockAction action)
-    {
-        FilterGroup? group = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
-        if (group == null) return state;
-
-        List<FilterBlock> listBlock = group.BlockList.Select(b => b.ID == action.Block.ID ? action.Block : b).ToList();
-        FilterGroup groupCurrent = group with { BlockList = listBlock };
-
-        return state with
-        {
-            Filter = state.Filter with
-            {
-                GroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupCurrent : g).ToList()
-            }
-        };
-    }
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceMoveBlockToIndex(FilterFeatureState state, MoveBlockToIndexAction action)
-    {
-        FilterGroup? group = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
-        if (group == null) return state;
-
-        List<FilterBlock> listBlock = group.BlockList.ToList();
-        int index = listBlock.FindIndex(b => b.ID == action.BlockID);
-        if (index == -1 || action.Index < 0 || action.Index >= listBlock.Count || index == action.Index) return state;
-
-        FilterBlock item = listBlock[index];
-        listBlock.RemoveAt(index);
-        listBlock.Insert(action.Index, item);
-
-        FilterGroup groupCurrent = group with { BlockList = listBlock };
-
-        return state with
-        {
-            Filter = state.Filter with
-            {
-                GroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupCurrent : g).ToList()
-            }
-        };
-    }
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceRemoveBlock(FilterFeatureState state, RemoveBlockAction action)
-    {
-        FilterGroup? group = state.Filter.GroupList.FirstOrDefault(g => g.ID == action.GroupID);
-        if (group == null) return state;
-
-        List<FilterBlock> listBlock = group.RemoveBlock(action.BlockID);
-        FilterGroup groupCurrent = group with { BlockList = listBlock };
-
-        return state with
-        {
-            Filter = state.Filter with
-            {
-                GroupList = state.Filter.GroupList.Select(g => g.ID == action.GroupID ? groupCurrent : g).ToList()
-            }
-        };
-    }
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceExport(FilterFeatureState state, ExportFilterAction action) => state with { IsLoading = true };
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceImport(FilterFeatureState state, ImportFilterAction action) => state with { IsLoading = true };
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceSave(FilterFeatureState state, SaveFilterAction action) => state with { IsLoading = true };
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceExportSuccess(FilterFeatureState state, ExportFilterSuccessAction action) => state with { IsLoading = false };
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceImportSuccess(FilterFeatureState state, ImportFilterSuccessAction action) => state with { IsLoading = false, Filter = action.RootFilter };
-
-    [ReducerMethod]
-    public static FilterFeatureState ReduceSaveSuccess(FilterFeatureState state, SaveFilterSuccessAction action) => state with { IsLoading = false };
 }
 
-public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageService storageService, IState<FilterFeatureState> state, IJSRuntime js)
+public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageService storage, IState<FilterFeatureState> state, IDispatcher dispatcher, IJSRuntime js)
 {
-    private const string DefaultFileName = "filter";
+    private const string DefaultName = "filter";
+
+    private const string DownloadModulePath = "./js/download.js";
+    private const string DownloadIdentifier = "download";
+    private const string JsonExtension = "json";
+    private const string FilterExtension = "filter";
 
     [EffectMethod]
-    public async Task HandleExportFilterAction(FilterFeatureReducers.ExportFilterAction action, IDispatcher dispatcher)
+    public Task HandleExportGroupAction(FilterFeatureReducers.ExportGroupAction action, IDispatcher _)
     {
+        return RunSafeAsync(async () =>
+        {
+            FilterGroup group = FilterFeatureState.SelectGroup(action.GroupID)(state.Value);
+            if (group == FilterGroup.Default) return new FilterFeatureReducers.ExportGroupSuccessAction();
+
+            HashSet<Guid> listColorID = [];
+            foreach (FilterBlock block in group.BlockList)
+            {
+                if (block.TextColor is not null) listColorID.Add(block.TextColor.ID);
+                if (block.BackgroundColor is not null) listColorID.Add(block.BackgroundColor.ID);
+                if (block.BorderColor is not null) listColorID.Add(block.BorderColor.ID);
+            }
+
+            List<FilterColorExport> listColor = [.. from kvp in state.Value.Filter.CustomColorCollection from color in kvp.Value where listColorID.Contains(color.ID) select new FilterColorExport(kvp.Key, color)];
+
+            FilterGroupExport package = new(group, listColor);
+            string json = storage.SerializeGroupExport(package);
+
+            await DownloadAsync($"{GetGroupName(group)}_export.{JsonExtension}", json);
+            return new FilterFeatureReducers.ExportGroupSuccessAction();
+        });
+    }
+
+    [EffectMethod]
+    public Task HandleImportGroupAction(FilterFeatureReducers.ImportGroupAction action, IDispatcher _)
+    {
+        return RunSafeAsync(() =>
+        {
+            if (string.IsNullOrWhiteSpace(action.FileContent)) return Task.FromResult<object>(new FilterFeatureReducers.ImportGroupSuccessAction());
+
+            FilterGroupExport? package = storage.DeserializeGroupImport(action.FileContent);
+            if (package?.Group is null) return Task.FromResult<object>(new FilterFeatureReducers.ImportGroupSuccessAction());
+
+            dispatcher.Dispatch(new FilterFeatureReducers.MergeGroupAndColorsAction(package.Group, package.ColorList));
+            return Task.FromResult<object>(new FilterFeatureReducers.ImportGroupSuccessAction());
+        });
+    }
+
+    [EffectMethod]
+    public Task HandleExportFilterAction(FilterFeatureReducers.ExportFilterAction action, IDispatcher _)
+    {
+        return RunSafeAsync(async () =>
+        {
+            await DownloadAsync($"{GetFilterName()}.{JsonExtension}", storage.SaveFilterToJson(state.Value.Filter));
+            return new FilterFeatureReducers.ExportFilterSuccessAction();
+        });
+    }
+
+    [EffectMethod]
+    public Task HandleImportFilterAction(FilterFeatureReducers.ImportFilterAction action, IDispatcher _)
+    {
+        return RunSafeAsync(() =>
+        {
+            Filter? imported = string.IsNullOrWhiteSpace(action.FileContent) ? null : storage.LoadFilterFromJson(action.FileContent);
+            return Task.FromResult<object>(new FilterFeatureReducers.ImportFilterSuccessAction(imported ?? state.Value.Filter));
+        });
+    }
+
+    [EffectMethod]
+    public Task HandleSaveFilterAction(FilterFeatureReducers.SaveFilterAction action, IDispatcher _)
+    {
+        return RunSafeAsync(async () =>
+        {
+            await DownloadAsync($"{GetFilterName()}.{FilterExtension}", compiler.Compile(state.Value.Filter));
+            return new FilterFeatureReducers.SaveFilterSuccessAction();
+        });
+    }
+
+    private string GetFilterName()
+    {
+        return !string.IsNullOrWhiteSpace(state.Value.Filter.Name) ? state.Value.Filter.Name : DefaultName;
+    }
+
+    private static string GetGroupName(FilterGroup group)
+    {
+        return !string.IsNullOrWhiteSpace(group.Name) ? group.Name : DefaultName;
+    }
+
+    private async Task DownloadAsync(string fileName, string content)
+    {
+        using MemoryStream stream = new(Encoding.UTF8.GetBytes(content));
+        using DotNetStreamReference streamRef = new(stream);
+
+        await using IJSObjectReference module = await js.InvokeAsync<IJSObjectReference>("import", DownloadModulePath);
+        await module.InvokeVoidAsync(DownloadIdentifier, fileName, streamRef);
+    }
+
+    private async Task RunSafeAsync(Func<Task<object>> process)
+    {
+        object? successAction = null;
         try
         {
-            Filter filterData = state.Value.Filter;
-            string jsonString = storageService.SaveFilterToJson(filterData);
-            string fileName = $"{(string.IsNullOrWhiteSpace(filterData.Name) ? DefaultFileName : filterData.Name)}.json";
-
-            byte[] fileBytes = Encoding.UTF8.GetBytes(jsonString);
-            using MemoryStream stream = new(fileBytes);
-            using DotNetStreamReference streamRef = new(stream);
-
-            await js.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            successAction = await process();
         }
-        catch (Exception)
+        catch
         {
             // ignored
         }
         finally
         {
-            dispatcher.Dispatch(new FilterFeatureReducers.ExportFilterSuccessAction());
-        }
-    }
-
-    [EffectMethod]
-    public Task HandleImportFilterAction(FilterFeatureReducers.ImportFilterAction action, IDispatcher dispatcher)
-    {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(action.FileContent)) return Task.CompletedTask;
-            Filter? importedFilter = storageService.LoadFilterFromJson(action.FileContent);
-
-            dispatcher.Dispatch(importedFilter != null
-                ? new FilterFeatureReducers.ImportFilterSuccessAction(importedFilter)
-                : new FilterFeatureReducers.ImportFilterSuccessAction(state.Value.Filter)
-            );
-        }
-        catch (Exception)
-        {
-            dispatcher.Dispatch(new FilterFeatureReducers.ImportFilterSuccessAction(state.Value.Filter));
-        }
-
-        return Task.CompletedTask;
-    }
-
-    [EffectMethod]
-    public async Task HandleSaveFilterAction(FilterFeatureReducers.SaveFilterAction action, IDispatcher dispatcher)
-    {
-        try
-        {
-            Filter payload = state.Value.Filter;
-            string compiledOutput = compiler.Compile(payload);
-            string fileName = $"{(string.IsNullOrWhiteSpace(payload.Name) ? DefaultFileName : payload.Name)}.filter";
-
-            byte[] fileBytes = Encoding.UTF8.GetBytes(compiledOutput);
-            using MemoryStream stream = new(fileBytes);
-            using DotNetStreamReference streamRef = new(stream);
-
-            await js.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
-        }
-        catch (Exception)
-        {
-            // ignored
-        }
-        finally
-        {
-            dispatcher.Dispatch(new FilterFeatureReducers.SaveFilterSuccessAction());
+            if (successAction is not null) dispatcher.Dispatch(successAction);
         }
     }
 }

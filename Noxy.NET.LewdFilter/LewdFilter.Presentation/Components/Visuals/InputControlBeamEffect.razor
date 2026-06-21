@@ -1,0 +1,45 @@
+@inherits BaseInput<FilterBeamEffect?>
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <InputControlSelect TOption="FilterColorNameEnum?" OptionList="_colorOptions" ID="@ID" Name="@Name" @bind-Value:get="_color" @bind-Value:set="OnColorChange">
+        @(context?.ToString() ?? "-- Disabled --")
+    </InputControlSelect>
+
+    <InputControlCheckbox Option="true" Disabled="@(Value is null)" @bind-Value:get="_isTemporary" @bind-Value:set="OnTempChange">
+        Is Temporary
+    </InputControlCheckbox>
+</div>
+
+@code {
+
+    private readonly HashSet<FilterColorNameEnum?> _colorOptions = [null, .. Enum.GetValues<FilterColorNameEnum>().Cast<FilterColorNameEnum?>()];
+
+    private FilterColorNameEnum? _color;
+    private bool _isTemporary;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        _color = Value?.Color;
+        _isTemporary = Value?.IsTemporary ?? false;
+    }
+
+    private void OnColorChange(FilterColorNameEnum? color)
+    {
+        _color = color;
+        PushUpdate();
+    }
+
+    private void OnTempChange(bool isTemporary)
+    {
+        _isTemporary = isTemporary;
+        PushUpdate();
+    }
+
+    private void PushUpdate()
+    {
+        NotifyChange(_color is not null ? new FilterBeamEffect(_color.Value, _isTemporary) : null);
+    }
+
+}

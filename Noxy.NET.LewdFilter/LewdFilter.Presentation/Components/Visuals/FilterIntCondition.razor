@@ -1,16 +1,13 @@
 ﻿@inherits BaseInput<FilterComparatorInt?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @if (_operator == FilterComparatorTypeEnum.Between)
-    {
-        <InputControlInteger class="left" Name="left" Size="5" @bind-Value="@_left" @bind-Value:after="PushUpdate"/>
-    }
+    <InputControlInteger class="left" ID="@ID" Name="left" Size="5" @bind-Value="@_left" @bind-Value:after="PushUpdate"/>
 
-    <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
+    <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" ID="@ID" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
         @context.ToTextSymbol()
     </InputControlSelect>
-    
-    <InputControlInteger class="right" Name="right" Size="5" @bind-Value="@_right" @bind-Value:after="PushUpdate"/>
+
+    <InputControlInteger class="right" ID="@ID" Name="right" Size="5" Disabled="@(_operator != FilterComparatorTypeEnum.Between)" @bind-Value="@_right" @bind-Value:after="PushUpdate"/>
 </div>
 
 @code {
@@ -23,6 +20,8 @@
     
     protected override void OnParametersSet()
     {
+        base.OnParametersSet();
+
         _left = Value?.Left;
         _right = Value?.Right;
         _operator = Value?.FilterComparatorType ?? FilterComparatorTypeEnum.Equal;
@@ -31,19 +30,19 @@
     private void SetOperator(FilterComparatorTypeEnum op)
     {
         _operator = op;
-        if (_operator != FilterComparatorTypeEnum.Between) _right = null;
         PushUpdate();
     }
 
     private void PushUpdate()
     {
-        if (_left is null && _right is null)
+        FilterComparatorInt? result = _operator switch
         {
-            ValueChanged.InvokeAsync(null);
-        }
-        else
-        {
-            ValueChanged.InvokeAsync(new() { Left = _left, Right = _right, FilterComparatorType = _operator });
-        }
+            FilterComparatorTypeEnum.Between when _left is not null && _right is not null => new() { Left = _left, Right = _right, FilterComparatorType = _operator },
+            FilterComparatorTypeEnum.Between => null,
+            _ => _left is not null ? new() { Left = _left, Right = null, FilterComparatorType = _operator } : null
+        };
+
+        NotifyChange(result);
     }
+
 }

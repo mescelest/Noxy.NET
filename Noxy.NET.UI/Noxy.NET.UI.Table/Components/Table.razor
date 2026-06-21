@@ -29,7 +29,7 @@
 @code {
 
     [Parameter, EditorRequired]
-    public List<T> List { get; set; }
+    public IReadOnlyList<T> List { get; set; }
 
     [Parameter, EditorRequired]
     public RenderFragment<(T Row, int Index)> TableRow { get; set; }

@@ -9,12 +9,9 @@ public class FilterStorageService
     private readonly JsonSerializerOptions _options = new()
     {
         WriteIndented = true,
-        // Automatically maps and preserves shared color references in memory
         ReferenceHandler = ReferenceHandler.Preserve,
         Converters = { new JsonStringEnumConverter() }
     };
-
-    // Automatically maps and preserves shared color references in memory
 
     public string SaveFilterToJson(Filter filter)
     {
@@ -24,5 +21,15 @@ public class FilterStorageService
     public Filter? LoadFilterFromJson(string jsonContent)
     {
         return JsonSerializer.Deserialize<Filter>(jsonContent, _options);
+    }
+
+    public string SerializeGroupExport(FilterGroupExport package)
+    {
+        return JsonSerializer.Serialize(package, _options);
+    }
+
+    public FilterGroupExport? DeserializeGroupImport(string jsonContent)
+    {
+        return JsonSerializer.Deserialize<FilterGroupExport>(jsonContent, _options);
     }
 }

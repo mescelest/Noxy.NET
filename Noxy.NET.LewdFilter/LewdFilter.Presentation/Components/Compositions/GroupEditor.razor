@@ -11,9 +11,10 @@
             </div>
             <div role="cell"></div>
             <div role="cell"></div>
+            <div role="cell"></div>
         </TableHeader>
         <TableRow>
-            <div class="table-cell sortable-handle" role="cell" style="cursor: grab;">
+            <div class="table-cell sortable-handle" role="cell">
                 <MaterialIcon Icon="drag_handle" Size="20px"/>
             </div>
 
@@ -21,7 +22,7 @@
                 <InputControlText class="name" Size="20" @bind-Value:get="@context.Row.Name" @bind-Value:set="e => OnInputGroupEditNameChange(e, context.Row)"/>
             </div>
 
-            <div class="table-cell" role="cell" style="min-width: 40px; display: inline-flex; justify-content: center;">
+            <div class="table-cell" role="cell">
                 @if (context.Index == 0)
                 {
                     <Button @key='"add-btn"' type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="AddNewRowAtBottom">
@@ -34,6 +35,12 @@
                         <MaterialIcon Icon="remove" Size="20px"/>
                     </Button>
                 }
+            </div>
+
+            <div class="table-cell" role="cell">
+                <Button type="button" Status="StatusEnum.None" IsIcon="true" @onclick="() => ExportGroup(context.Row.ID)" title="Export group JSON">
+                    <MaterialIcon Icon="download" Size="20px"/>
+                </Button>
             </div>
 
             <div class="table-cell" role="cell">
@@ -54,7 +61,8 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        GroupListSelection.Select(state => [.. state.Filter.GroupList]);
+
+        GroupListSelection.Select(FilterFeatureState.SelectGroupList());
     }
 
     private void OnSortableTableUpdate((int IndexOld, int IndexNew) indices)
@@ -63,16 +71,18 @@
         Dispatcher.Dispatch(new FilterFeatureReducers.MoveGroupToIndexAction(targetGroup.ID, indices.IndexNew));
     }
 
-    private void OnInputGroupEditNameChange(string value, FilterGroup group)
+    private void OnInputGroupEditNameChange(string? value, FilterGroup group)
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditGroupAction(group with { Name = value }));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetGroupAction(group with { Name = value ?? string.Empty }));
     }
 
     private void AddNewRowAtBottom()
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.AddGroupAction(FilterGroup.Default));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetGroupAction(FilterGroup.Default));
     }
 
     private void DeleteGroup(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveGroupAction(id));
+
+    private void ExportGroup(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.ExportGroupAction(id));
 
 }

@@ -1,37 +1,39 @@
 ﻿@inject IDispatcher Dispatcher
-@inject IStateSelection<FilterFeatureState, FilterBlock?> BlockSelection
+@inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
 @inject IStateSelection<FilterFeatureState, Dictionary<FilterColorTypeEnum, List<FilterColor>>> ColorCollectionSelection
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
 
-    @if (Block != null)
-    {
-        <FormField Label="Text Color" For="@TextColorId">
-            <InputControlSelect TOption="FilterColor" ID="@TextColorId" Name="@TextColorId" OptionList="TextFilterColorSet"
-                                @bind-Value:get="Block.TextColor" @bind-Value:set="SetTextColor">
-                @GetColorName(context)
-            </InputControlSelect>
-        </FormField>
+    <FormField Label="Text Color" For="@TextColorId">
+        <InputControlSelect TOption="FilterColor" ID="@TextColorId" Name="@TextColorId" OptionList="TextFilterColorSet" @bind-Value:get="Block.TextColor" @bind-Value:set="SetTextColor">
+            @GetColorName(context)
+        </InputControlSelect>
+    </FormField>
 
-        <FormField Label="Background Color" For="@BackgroundColorId">
-            <InputControlSelect TOption="FilterColor" ID="@BackgroundColorId" Name="@BackgroundColorId" OptionList="BackgroundFilterColorSet"
-                                @bind-Value:get="Block.BackgroundColor" @bind-Value:set="SetBackgroundColor">
-                @GetColorName(context)
-            </InputControlSelect>
-        </FormField>
+    <FormField Label="Background Color" For="@BackgroundColorId">
+        <InputControlSelect TOption="FilterColor" ID="@BackgroundColorId" Name="@BackgroundColorId" OptionList="BackgroundFilterColorSet" @bind-Value:get="Block.BackgroundColor" @bind-Value:set="SetBackgroundColor">
+            @GetColorName(context)
+        </InputControlSelect>
+    </FormField>
 
-        <FormField Label="Border Color" For="@BorderId">
-            <InputControlSelect TOption="FilterColor" ID="@BorderId" Name="@BorderId" OptionList="BorderFilterColorSet"
-                                @bind-Value:get="Block.BorderColor" @bind-Value:set="SetBorderColor">
-                @GetColorName(context)
-            </InputControlSelect>
-        </FormField>
+    <FormField Label="Border Color" For="@BorderId">
+        <InputControlSelect TOption="FilterColor" ID="@BorderId" Name="@BorderId" OptionList="BorderFilterColorSet" @bind-Value:get="Block.BorderColor" @bind-Value:set="SetBorderColor">
+            @GetColorName(context)
+        </InputControlSelect>
+    </FormField>
 
-        <FormField Label="@($"Font Size ({FontSize})")" For="@FontSizeId">
-            <InputElementRange class="poe-range-slider" ID="@FontSizeId" Min="18" Max="45" Value="@((double)FontSize)" OnChange="OnFontSizeChange"/>
-        </FormField>
-    }
+    <FormField Label="@($"Font Size ({FontSize})")" For="@FontSizeId">
+        <InputElementRange ID="@FontSizeId" Min="18" Max="45" @bind-Value:get="FontSize" @bind-Value:set="SetFontSize"/>
+    </FormField>
+
+    <FormField Label="Alert Beam" For="@PlayEffectId">
+        <InputControlBeamEffect ID="@PlayEffectId" Name="@PlayEffectId" @bind-Value:get="Block.PlayEffect" @bind-Value:set="SetPlayEffect"/>
+    </FormField>
+
+    <FormField Label="Minimap Icon" For="@MinimapIconId">
+        <InputControlMinimapIcon ID="@MinimapIconId" Name="@MinimapIconId" @bind-Value:get="Block.MinimapIcon" @bind-Value:set="SetMinimapIcon"/>
+    </FormField>
 
 </div>
 
@@ -43,13 +45,15 @@
     [Parameter, EditorRequired]
     public Guid BlockId { get; set; }
 
-    private FilterBlock? Block => BlockSelection.Value;
-    private int FontSize => Block?.FontSize ?? 32;
+    private FilterBlock Block => BlockSelection.Value;
+    private double? FontSize => Block.FontSize.HasValue ? (double)Block.FontSize.Value : 32;
 
     private string TextColorId => $"text-color-{GroupId}-{BlockId}";
     private string BackgroundColorId => $"background-color-{GroupId}-{BlockId}";
     private string BorderId => $"border-color-{GroupId}-{BlockId}";
     private string FontSizeId => $"font-size-slider-{GroupId}-{BlockId}";
+    private string PlayEffectId => $"play-effect-{GroupId}-{BlockId}";
+    private string MinimapIconId => $"minimap-icon-{GroupId}-{BlockId}";
 
     private HashSet<FilterColor?> TextFilterColorSet => GetColorsForType(FilterColorTypeEnum.Text);
     private HashSet<FilterColor?> BackgroundFilterColorSet => GetColorsForType(FilterColorTypeEnum.Background);
@@ -59,8 +63,8 @@
     {
         base.OnInitialized();
 
-        BlockSelection.Select(state => state.Filter.GroupList.FirstOrDefault(g => g.ID == GroupId)?.BlockList.FirstOrDefault(b => b.ID == BlockId));
-        ColorCollectionSelection.Select(state => state.Filter.CustomColorCollection);
+        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
+        ColorCollectionSelection.Select(FilterFeatureState.SelectCustomColorList());
     }
 
     private HashSet<FilterColor?> GetColorsForType(FilterColorTypeEnum type)
@@ -80,8 +84,6 @@
 
     private void UpdateBlockColor(FilterColorTypeEnum type, FilterColor? color)
     {
-        if (Block == null) return;
-
         FilterBlock updatedBlock = type switch
         {
             FilterColorTypeEnum.Text => Block with { TextColor = color },
@@ -93,18 +95,11 @@
         DispatchUpdate(updatedBlock);
     }
 
-    private void OnFontSizeChange(ChangeEventArgs e)
-    {
-        if (Block == null) return;
+    private void SetFontSize(double? value) => DispatchUpdate(Block with { FontSize = value.HasValue ? (int)value.Value : 32 });
+    private void SetPlayEffect(FilterBeamEffect? value) => DispatchUpdate(Block with { PlayEffect = value });
+    private void SetMinimapIcon(FilterMinimapIcon? value) => DispatchUpdate(Block with { MinimapIcon = value });
 
-        int size = double.TryParse(e.Value?.ToString(), out double parsedSize) ? (int)parsedSize : 32;
-        DispatchUpdate(Block with { FontSize = size });
-    }
-
-    private void DispatchUpdate(FilterBlock updatedBlock)
-    {
-        Dispatcher.Dispatch(new FilterFeatureReducers.EditBlockAction(GroupId, updatedBlock));
-    }
+    private void DispatchUpdate(FilterBlock block) => Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, block));
 
     private static string GetColorName(FilterColor? color) => color?.Name ?? "-- Default --";
 }
