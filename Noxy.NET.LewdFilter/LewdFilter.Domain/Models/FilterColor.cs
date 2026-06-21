@@ -1,49 +1,28 @@
-﻿using System.Globalization;
-using LewdFilter.Domain.Abstractions;
+﻿using LewdFilter.Domain.Abstractions;
 
 namespace LewdFilter.Domain.Models;
 
 public record FilterColor : FilterEntity
 {
     public string Name { get; set; } = string.Empty;
-    public int R { get; set; } = 255;
-    public int G { get; set; } = 255;
-    public int B { get; set; } = 255;
-    public int A { get; set; } = 255;
+    public int Red { get; set; } = 255;
+    public int Green { get; set; } = 255;
+    public int Blue { get; set; } = 255;
+    public int Alpha { get; set; } = 255;
 
-    public override string ToString() => A < 255 ? $"{R} {G} {B} {A}" : $"{R} {G} {B}";
+    public override string ToString() => Alpha < 255 ? $"{Red} {Green} {Blue} {Alpha}" : $"{Red} {Green} {Blue}";
 
-    public static FilterColor DefaultBorder => new() { Name = "Default border", R = 0, G = 0, B = 0, A = 0 };
-    public static FilterColor DefaultText => new() { Name = "Default text", R = 200, G = 200, B = 200, A = 255 };
-    public static FilterColor DefaultBackground => new() { Name = "Default background", R = 11, G = 11, B = 11, A = 230 };
+    public static FilterColor DefaultBorder => new() { Name = "Default border", Red = 0, Green = 0, Blue = 0, Alpha = 0 };
+    public static FilterColor DefaultText => new() { Name = "Default text", Red = 200, Green = 200, Blue = 200, Alpha = 255 };
+    public static FilterColor DefaultBackground => new() { Name = "Default background", Red = 11, Green = 11, Blue = 11, Alpha = 230 };
 
     public string ToHex()
     {
-        return $"#{R:X2}{G:X2}{B:X2}{A:X2}";
+        return $"#{Red:X2}{Green:X2}{Blue:X2}{Alpha:X2}";
     }
 
-    public bool TryUpdateFrom(string? hexInput)
+    public bool ValueEquals(FilterColor? other)
     {
-        if (string.IsNullOrEmpty(hexInput)) return false;
-
-        ReadOnlySpan<char> hex = hexInput.AsSpan().TrimStart('#');
-        if (hex.Length is not (6 or 8)) return false;
-
-        try
-        {
-            (R, G, B, A) =
-            (
-                int.Parse(hex[..2], NumberStyles.HexNumber),
-                int.Parse(hex[2..4], NumberStyles.HexNumber),
-                int.Parse(hex[4..6], NumberStyles.HexNumber),
-                hex.Length == 8 ? int.Parse(hex[6..], NumberStyles.HexNumber) : 255
-            );
-
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return other is not null && (ReferenceEquals(this, other) || Red == other.Red && Green == other.Green && Blue == other.Blue && Alpha == other.Alpha);
     }
 }

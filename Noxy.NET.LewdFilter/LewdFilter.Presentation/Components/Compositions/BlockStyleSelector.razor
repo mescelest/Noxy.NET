@@ -1,6 +1,6 @@
 ﻿@inject IDispatcher Dispatcher
 @inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
-@inject IStateSelection<FilterFeatureState, Dictionary<FilterColorTypeEnum, List<FilterColor>>> ColorCollectionSelection
+@inject IStateSelection<FilterFeatureState, ImmutableDictionary<FilterColorTypeEnum, List<FilterColor>>> ColorCollectionSelection
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -69,7 +69,7 @@
 
     private HashSet<FilterColor?> GetColorsForType(FilterColorTypeEnum type)
     {
-        Dictionary<FilterColorTypeEnum, List<FilterColor>>? collection = ColorCollectionSelection.Value;
+        ImmutableDictionary<FilterColorTypeEnum, List<FilterColor>>? collection = ColorCollectionSelection.Value;
         if (collection == null || !collection.TryGetValue(type, out List<FilterColor>? list))
         {
             return [null];

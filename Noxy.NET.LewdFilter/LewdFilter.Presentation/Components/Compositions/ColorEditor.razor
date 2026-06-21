@@ -1,5 +1,5 @@
 ﻿@inject IDispatcher Dispatcher
-@inject IStateSelection<FilterFeatureState, ImmutableArray<FilterColor>> ColorListSelection
+@inject IState<FilterFeatureState> FilterState
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -54,25 +54,14 @@
 </div>
 
 @code {
+
     private FilterColorTypeEnum _tab = FilterColorTypeEnum.Background;
 
-    private List<FilterColor> ColorList => [.. ColorListSelection.Value];
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        UpdateSelection();
-    }
+    private List<FilterColor> ColorList => [.. FilterFeatureState.SelectColorListByTab(_tab)(FilterState.Value)];
 
     private void SetActiveTab(FilterColorTypeEnum tab)
     {
         _tab = tab;
-        UpdateSelection();
-    }
-
-    private void UpdateSelection()
-    {
-        ColorListSelection.Select(FilterFeatureState.SelectColorListByTab(_tab));
     }
 
     private void OnInputColorEditNameChange(string? value, FilterColor color)
@@ -88,10 +77,10 @@
 
         FilterColor updatedColor = color with
         {
-            R = rgb.Red,
-            G = rgb.Green,
-            B = rgb.Blue,
-            A = (int)Math.Round(rgb.Alpha * 255.0)
+            Red = rgb.Red,
+            Green = rgb.Green,
+            Blue = rgb.Blue,
+            Alpha = (int)Math.Round(rgb.Alpha * 255.0)
         };
 
         Dispatcher.Dispatch(new FilterFeatureReducers.SetColorAction(_tab, updatedColor));
@@ -99,7 +88,7 @@
 
     private void AddNewRowAtBottom()
     {
-        FilterColor freshColor = new() { Name = "", R = 255, G = 255, B = 255, A = 255 };
+        FilterColor freshColor = new() { Name = "", Red = 255, Green = 255, Blue = 255, Alpha = 255 };
         Dispatcher.Dispatch(new FilterFeatureReducers.SetColorAction(_tab, freshColor));
     }
 
@@ -107,7 +96,6 @@
 
     private static BaseColor GetColor(FilterColor color)
     {
-        return new RgbColor(color.R, color.G, color.B, color.A / 255.0);
+        return new RgbColor(color.Red, color.Green, color.Blue, color.Alpha / 255.0);
     }
-
 }

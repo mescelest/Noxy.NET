@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 using LewdFilter.Domain.Abstractions;
 using LewdFilter.Domain.Enums;
 
@@ -6,8 +7,13 @@ namespace LewdFilter.Domain.Models;
 
 public record Filter : FilterEntity
 {
+    [JsonPropertyOrder(1)]
     public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyOrder(3)]
     public List<FilterGroup> GroupList { get; set; } = [];
+
+    [JsonPropertyOrder(2)]
     public Dictionary<FilterColorTypeEnum, List<FilterColor>> CustomColorCollection { get; set; } = new()
     {
         { FilterColorTypeEnum.Text, [] },

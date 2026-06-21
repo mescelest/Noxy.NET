@@ -40,7 +40,7 @@ public record FilterFeatureState
 
     public static Func<FilterFeatureState, int> SelectBlockBaseTypeCount(Guid groupId, Guid blockId) => state => SelectBlock(groupId, blockId)(state).BaseTypeList.Count;
 
-    public static Func<FilterFeatureState, Dictionary<FilterColorTypeEnum, List<FilterColor>>> SelectCustomColorList() => state => state.Filter.CustomColorCollection;
+    public static Func<FilterFeatureState, ImmutableDictionary<FilterColorTypeEnum, List<FilterColor>>> SelectCustomColorList() => state => state.Filter.CustomColorCollection.ToImmutableDictionary();
 
     public static Func<FilterFeatureState, ImmutableArray<FilterColor>> SelectColorListByTab(FilterColorTypeEnum tab) => state => state.Filter.CustomColorCollection.TryGetValue(tab, out List<FilterColor>? colors) ? [.. colors] : [];
 
@@ -80,7 +80,7 @@ public class FilterFeatureReducers
     public record ImportGroupSuccessAction;
     public record SaveFilterAction;
     public record SaveFilterSuccessAction;
-    public record MergeGroupAndColorsAction(FilterGroup Group, List<FilterColorExport> AssociatedColors);
+    public record MergeGroupAndColorsAction(FilterGroup Group, List<FilterColorExport> ColorList);
 
     [ReducerMethod]
     public static FilterFeatureState ReduceSetColor(FilterFeatureState state, SetColorAction action)
@@ -200,60 +200,43 @@ public class FilterFeatureReducers
     [ReducerMethod]
     public static FilterFeatureState OnMergeGroupAndColors(FilterFeatureState state, MergeGroupAndColorsAction action)
     {
-        Dictionary<FilterColorTypeEnum, List<FilterColor>> updatedColors = new(state.Filter.CustomColorCollection.ToDictionary(kvp => kvp.Key, kvp => new List<FilterColor>(kvp.Value)));
+        Dictionary<FilterColorTypeEnum, List<FilterColor>> collectionColor = new(state.Filter.CustomColorCollection.ToDictionary(kvp => kvp.Key, kvp => new List<FilterColor>(kvp.Value)));
+        Dictionary<FilterColor, FilterColor> referenceMap = [];
 
-        Dictionary<Guid, FilterColor> colorIdRemap = [];
-
-        foreach (FilterColorExport incoming in action.AssociatedColors)
+        foreach (FilterColorExport incoming in action.ColorList)
         {
-            if (!updatedColors.TryGetValue(incoming.Type, out List<FilterColor>? existingList))
+            if (!collectionColor.TryGetValue(incoming.Type, out List<FilterColor>? list))
             {
-                existingList = [];
-                updatedColors[incoming.Type] = existingList;
+                list = [];
+                collectionColor[incoming.Type] = list;
             }
 
-            FilterColor? structuralMatch = existingList.FirstOrDefault(c =>
-                c.R == incoming.Color.R &&
-                c.G == incoming.Color.G &&
-                c.B == incoming.Color.B &&
-                c.A == incoming.Color.A);
-
-            if (structuralMatch is not null)
+            FilterColor? match = list.FirstOrDefault(c => c.ValueEquals(incoming.Color));
+            if (match is not null)
             {
-                colorIdRemap[incoming.Color.ID] = structuralMatch;
+                referenceMap[incoming.Color] = match;
             }
             else
             {
-                existingList.Add(incoming.Color);
-                colorIdRemap[incoming.Color.ID] = incoming.Color;
+                FilterColor absoluteNewColor = incoming.Color with { ID = Guid.NewGuid() };
+                list.Add(absoluteNewColor);
+                referenceMap[incoming.Color] = absoluteNewColor;
             }
         }
 
-        List<FilterBlock> updatedBlocks = [];
-        foreach (FilterBlock block in action.Group.BlockList)
-        {
-            FilterBlock adjustedBlock = block with
+        List<FilterBlock> listUpdated =
+        [
+            .. action.Group.BlockList.Select(block => block with
             {
-                TextColor = block.TextColor is not null && colorIdRemap.TryGetValue(block.TextColor.ID, out FilterColor? newText) ? newText : block.TextColor,
-                BackgroundColor = block.BackgroundColor is not null && colorIdRemap.TryGetValue(block.BackgroundColor.ID, out FilterColor? newBg) ? newBg : block.BackgroundColor,
-                BorderColor = block.BorderColor is not null && colorIdRemap.TryGetValue(block.BorderColor.ID, out FilterColor? newBorder) ? newBorder : block.BorderColor
-            };
-            updatedBlocks.Add(adjustedBlock);
-        }
+                TextColor = block.TextColor is not null && referenceMap.TryGetValue(block.TextColor, out FilterColor? newText) ? newText : block.TextColor,
+                BackgroundColor = block.BackgroundColor is not null && referenceMap.TryGetValue(block.BackgroundColor, out FilterColor? newBg) ? newBg : block.BackgroundColor,
+                BorderColor = block.BorderColor is not null && referenceMap.TryGetValue(block.BorderColor, out FilterColor? newBorder) ? newBorder : block.BorderColor
+            })
+        ];
 
-        FilterGroup finalizedGroup = action.Group with { BlockList = updatedBlocks };
-
-        return state with
-        {
-            Filter = state.Filter with
-            {
-                GroupList = [.. state.Filter.GroupList, finalizedGroup],
-                CustomColorCollection = updatedColors
-            }
-        };
+        FilterGroup group = action.Group with { BlockList = listUpdated };
+        return state with { Filter = state.Filter with { GroupList = [.. state.Filter.GroupList, group], CustomColorCollection = collectionColor } };
     }
-
-    // --- Private Helper Methods ---
 
     private static FilterFeatureState UpdateGroupInState(FilterFeatureState state, Guid groupId, Func<FilterGroup, FilterGroup> updateLogic)
     {
@@ -269,7 +252,8 @@ public class FilterFeatureReducers
 
 public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageService storage, IState<FilterFeatureState> state, IDispatcher dispatcher, IJSRuntime js)
 {
-    private const string DefaultName = "filter";
+    private const string DefaultFilterName = "filter";
+    private const string DefaultGroupName = "group";
 
     private const string DownloadModulePath = "./js/download.js";
     private const string DownloadIdentifier = "download";
@@ -297,7 +281,7 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
             FilterGroupExport package = new(group, listColor);
             string json = storage.SerializeGroupExport(package);
 
-            await DownloadAsync($"{GetGroupName(group)}_export.{JsonExtension}", json);
+            await DownloadAsync($"{GetFilterName()}.{GetGroupName(group)}.{JsonExtension}", json);
             return new FilterFeatureReducers.ExportGroupSuccessAction();
         });
     }
@@ -349,12 +333,12 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
 
     private string GetFilterName()
     {
-        return !string.IsNullOrWhiteSpace(state.Value.Filter.Name) ? state.Value.Filter.Name : DefaultName;
+        return !string.IsNullOrWhiteSpace(state.Value.Filter.Name) ? state.Value.Filter.Name : DefaultFilterName;
     }
 
     private static string GetGroupName(FilterGroup group)
     {
-        return !string.IsNullOrWhiteSpace(group.Name) ? group.Name : DefaultName;
+        return !string.IsNullOrWhiteSpace(group.Name) ? group.Name : DefaultGroupName;
     }
 
     private async Task DownloadAsync(string fileName, string content)
@@ -373,7 +357,7 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
         {
             successAction = await process();
         }
-        catch
+        catch (Exception ex)
         {
             // ignored
         }
