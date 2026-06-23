@@ -1,5 +1,5 @@
 ﻿@inject IDispatcher Dispatcher
-@inject IStateSelection<FilterFeatureState, FilterBlock?> BlockSelection
+@inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -17,7 +17,7 @@
         @if (!string.IsNullOrEmpty(_inputGroup))
         {
             <div class="action-list">
-                <InputControlCheckbox ID="@GetBaseTypeID("select-all")" Option="true" @bind-Value:get="@GetSelectAll()" @bind-Value:set="@SetSelectAll">
+            <InputControlCheckbox ID="@GetBaseTypeID("select-all")" Option="true" @bind-Value:get="@GetSelectAll()" @bind-Value:set="@SetSelectAll">
                     Select All
                 </InputControlCheckbox>
 
@@ -42,8 +42,8 @@
                 {
                     bool isChecked = CurrentBaseTypeList.Contains(type);
 
-                    <InputControlCheckbox @key="type" ID="@GetBaseTypeID(type)" Name="base-type" Option="true" @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(type, v)">
-                        @type
+                    <InputControlCheckbox @key="type" class="base-type-checkbox" ID="@GetBaseTypeID(type)" Name="base-type" Option="true" @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(type, v)">
+                        <span class="base-type-text">@type</span>
                     </InputControlCheckbox>
                 }
             }

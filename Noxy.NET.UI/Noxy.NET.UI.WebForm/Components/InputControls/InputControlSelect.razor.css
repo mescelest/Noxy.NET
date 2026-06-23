@@ -1,14 +1,13 @@
 .InputControlSelect {
     display: flex;
     position: relative;
-    align-self: flex-start;
 }
 
 .InputControlSelect ::deep select {
     width: 100%;
     height: var(--size-control-input, 36px);
     padding-left: var(--size-gap-xxs, 8px);
-    padding-right: var(--size-gap-xxl, 32px);
+    padding-right: calc(var(--size-control-icon) + var(--size-gap-xxxs, 4px) * 2);
     border: var(--size-border-width-sm, 1) solid var(--color-offset-primary-lg);
     border-radius: var(--size-border-radius-md, 2px);
     font-size: inherit;
@@ -26,7 +25,7 @@
 
 .InputControlSelect ::deep select:focus {
     padding-left: calc(var(--size-gap-xxs, 8px) - 1px);
-    padding-right: calc(var(--size-gap-xxl, 32px) - 1px);
+    padding-right: calc(var(--size-control-icon) + var(--size-gap-xxxs, 4px) * 2 - 1px);
     border-color: var(--color-highlight);
     border-width: var(--size-border-width-md);
     outline: none;
@@ -36,7 +35,7 @@
     display: flex;
     align-items: center;
     width: auto;
-    height: auto;
+    height: var(--size-control-icon, 16px);
     position: absolute;
     right: 12px;
     top: calc(50% + 0px);

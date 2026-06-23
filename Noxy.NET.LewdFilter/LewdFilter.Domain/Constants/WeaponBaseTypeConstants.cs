@@ -69,7 +69,6 @@ public static class WeaponBaseTypeConstants
         "Structured Hammer",
         "Flanged Mace",
         "Crown Mace",
-        "Brigand Mace",
         "Marauding Mace",
         "Molten Hammer",
         "Akoyan Club",

@@ -2,15 +2,15 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <InputControlSelect TOption="FilterIconShapeEnum?" OptionList="_shapeOptions" ID="@ID" Name="@Name" @bind-Value:get="_shape" @bind-Value:set="OnShapeChange">
-        @(context?.ToString() ?? "-- Disabled --")
+        @(context?.ToTextString() ?? "[Default]")
     </InputControlSelect>
 
     <InputControlSelect TOption="FilterColorNameEnum" OptionList="_colorOptions" Disabled="@(Value is null)" @bind-Value:get="_color" @bind-Value:set="OnColorChange">
-        @context.ToString()
+        @context.ToTextString()
     </InputControlSelect>
 
     <InputControlSelect TOption="FilterIconSizeEnum" OptionList="_sizeOptions" Disabled="@(Value is null)" @bind-Value:get="_size" @bind-Value:set="OnSizeChange">
-        @context.ToString()
+        @context.ToTextString()
     </InputControlSelect>
 </div>
 

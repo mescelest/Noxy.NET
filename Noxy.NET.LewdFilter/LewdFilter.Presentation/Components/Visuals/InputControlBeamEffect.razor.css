@@ -1,0 +1,13 @@
+.InputControlBeamEffect {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    align-items: center;
+    column-gap: var(--size-gap-xxs);
+}
+
+.InputControlBeamEffect ::deep .temporary .visual {
+    width: calc(var(--size-control-input) - var(--size-border-width-md) * 2);
+    height: calc(var(--size-control-input) - var(--size-border-width-md) * 2);
+    font-size: 20px;
+}

@@ -3,11 +3,11 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <InputControlInteger class="left" ID="@ID" Name="left" Size="5" @bind-Value="@_left" @bind-Value:after="PushUpdate"/>
 
-    <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" ID="@ID" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
+    <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
         @context.ToTextSymbol()
     </InputControlSelect>
 
-    <InputControlInteger class="right" ID="@ID" Name="right" Size="5" Disabled="@(_operator != FilterComparatorTypeEnum.Between)" @bind-Value="@_right" @bind-Value:after="PushUpdate"/>
+    <InputControlInteger class="right" Name="right" Size="5" Disabled="@(_operator != FilterComparatorTypeEnum.Between)" @bind-Value="@_right" @bind-Value:after="PushUpdate"/>
 </div>
 
 @code {

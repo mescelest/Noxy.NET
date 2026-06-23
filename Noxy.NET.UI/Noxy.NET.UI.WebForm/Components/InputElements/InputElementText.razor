@@ -1,6 +1,7 @@
 ﻿@inherits BaseInputTextual<string>
 
-<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" Name="@GetName()" type="@TypeCurrent" size="@SizeCurrent" value="@ValueInternal" @onchange="OnValueChange" @oninput="OnValueInput"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="@TypeCurrent" size="@SizeCurrent" autocomplete="@GetAutocompleteAttributeValue()"
+       value="@ValueInternal" @onchange="OnValueChange" @oninput="OnValueInput"/>
 
 @code {
 
@@ -8,9 +9,28 @@
     public WebFormInputTextTypeEnum? Type { get; set; }
     private string TypeCurrent => (Type ?? WebFormInputTextTypeEnum.Text).ToText();
 
-    protected override string? GetParsedValue(string value)
+    [Parameter]
+    public WebFormInputElementTextAutocompleteEnum? Autocomplete { get; set; }
+    private WebFormInputElementTextAutocompleteEnum AutocompleteCurrent => Autocomplete ?? WebFormInputElementTextAutocompleteEnum.Off;
+
+    [Parameter]
+    public string? AutocompleteSection { get; set; }
+
+    protected override string GetParsedValue(string value)
     {
         return value;
     }
+
+    private string GetAutocompleteAttributeValue()
+    {
+        string token = AutocompleteCurrent.ToAttributeValue();
+        if (AutocompleteCurrent is WebFormInputElementTextAutocompleteEnum.On or WebFormInputElementTextAutocompleteEnum.Off)
+        {
+            return token;
+        }
+
+        return !string.IsNullOrWhiteSpace(AutocompleteSection) ? $"section-{AutocompleteSection.Trim()} {token}" : token;
+    }
+
 }
 

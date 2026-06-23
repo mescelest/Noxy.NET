@@ -3,8 +3,8 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    min-width: var(--size-control-input, 36px);
-    min-height: var(--size-control-input, 36px); 
+    min-width: var(--size-control-input, 32px);
+    min-height: var(--size-control-input, 32px); 
     position: relative;
     padding: 0 var(--size-gap-xxs, 8px);
     background-color: var(--color-button, #4D4AD3);

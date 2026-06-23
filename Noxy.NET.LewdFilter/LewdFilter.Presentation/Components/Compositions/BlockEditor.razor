@@ -9,7 +9,7 @@
     <div @attributes="AdditionalAttributes" class="@CssClass" role="form" aria-label="Edit filter block">
         <div class="header">
             <div class="config">
-                <InputControlCheckbox ID="@($"show-{Block.ID}")" class="show" Option="true" @bind-Value:get="Block.IsShow" @bind-Value:set="OnShowToggle"/>
+                @* <InputControlCheckbox ID="@($"show-{Block.ID}")" class="show" Option="true" @bind-Value:get="Block.IsShow" @bind-Value:set="OnShowToggle"/> *@
 
                 <InputControlText class="name" Size="16" @bind-Value:get="@Block.Name" @bind-Value:set="OnInputNameChange"/>
 
@@ -26,17 +26,38 @@
         </div>
 
         <div class="content">
-            <FormGroup Label="Styling">
-                <BlockStyleSelector GroupId="GroupId" BlockId="BlockId"/>
-            </FormGroup>
+            <Collapsible class="styling" @bind-Collapsed="_collapsedStyling">
+                <Header>
+                    <h4>
+                        Styling
+                    </h4>
+                </Header>
+                <Content>
+                    <BlockStyleSelector GroupId="GroupId" BlockId="BlockId"/>
+                </Content>
+            </Collapsible>
 
-            <FormGroup Label="@BaseTypeLabel">
-                <BlockBaseTypeSelector GroupId="GroupId" BlockId="BlockId"/>
-            </FormGroup>
+            <Collapsible class="conditions" @bind-Collapsed="_collapsedCondition">
+                <Header>
+                    <h4>
+                        Conditions
+                    </h4>
+                </Header>
+                <Content>
+                    <BlockConditionSelector GroupId="GroupId" BlockId="BlockId"/>
+                </Content>
+            </Collapsible>
 
-            <FormGroup Label="Comparison">
-                <BlockConditionSelector GroupId="GroupId" BlockId="BlockId"/>
-            </FormGroup>
+            <Collapsible class="base-types" @bind-Collapsed="_collapsedBaseType">
+                <Header>
+                    <h4>
+                        @BaseTypeLabel
+                    </h4>
+                </Header>
+                <Content>
+                    <BlockBaseTypeSelector GroupId="GroupId" BlockId="BlockId"/>
+                </Content>
+            </Collapsible>
         </div>
     </div>
 }
@@ -51,6 +72,10 @@
     private int BaseTypeCount => BaseTypeCountSelection.Value;
     private string PreviewStyles => PreviewStylesSelection.Value;
     private string BaseTypeLabel => $"Base Type ({BaseTypeCount})";
+
+    private bool _collapsedStyling = true;
+    private bool _collapsedBaseType = true;
+    private bool _collapsedCondition = true;
 
     protected override void OnInitialized()
     {
@@ -84,4 +109,5 @@
     {
         Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, updatedBlock));
     }
+
 }

@@ -33,15 +33,15 @@ public static class FilterIconShapeEnumExtensions
 
         public string ToTextString() => shape switch
         {
-            FilterIconShapeEnum.Circle => "● Circle",
-            FilterIconShapeEnum.Diamond => "◆ Diamond",
-            FilterIconShapeEnum.Hexagon => "⬢ Hexagon",
-            FilterIconShapeEnum.Square => "■ Square",
-            FilterIconShapeEnum.Star => "★ Star",
-            FilterIconShapeEnum.Triangle => "▲ Triangle",
-            FilterIconShapeEnum.Cross => "✚ Cross",
-            FilterIconShapeEnum.Moon => "🌙 Moon",
-            FilterIconShapeEnum.Raindrop => "💧 Raindrop",
+            FilterIconShapeEnum.Circle => "Circle",
+            FilterIconShapeEnum.Diamond => "Diamond",
+            FilterIconShapeEnum.Hexagon => "Hexagon",
+            FilterIconShapeEnum.Square => "Square",
+            FilterIconShapeEnum.Star => "Star",
+            FilterIconShapeEnum.Triangle => "Triangle",
+            FilterIconShapeEnum.Cross => "Cross",
+            FilterIconShapeEnum.Moon => "Moon",
+            FilterIconShapeEnum.Raindrop => "Raindrop",
             _ => string.Empty
         };
     }

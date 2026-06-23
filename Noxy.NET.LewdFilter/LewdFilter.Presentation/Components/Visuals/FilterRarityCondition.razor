@@ -5,11 +5,11 @@
         @(context?.ToFilterString() ?? "")
     </InputControlSelect>
 
-    <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" ID="@ID" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
+    <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
         @context.ToTextSymbol()
     </InputControlSelect>
 
-    <InputControlSelect TOption="FilterRarityTypeEnum?" OptionList="_setRarityTypeEnum" ID="@ID" Name="right" Disabled="@(_operator != FilterComparatorTypeEnum.Between)" @bind-Value:get="_right" @bind-Value:set="OnRightChange">
+    <InputControlSelect TOption="FilterRarityTypeEnum?" OptionList="_setRarityTypeEnum" Name="right" Disabled="@(_operator != FilterComparatorTypeEnum.Between)" @bind-Value:get="_right" @bind-Value:set="OnRightChange">
         @(context?.ToFilterString() ?? "")
     </InputControlSelect>
 </div>

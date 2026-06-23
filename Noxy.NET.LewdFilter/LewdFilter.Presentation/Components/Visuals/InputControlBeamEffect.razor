@@ -2,11 +2,11 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <InputControlSelect TOption="FilterColorNameEnum?" OptionList="_colorOptions" ID="@ID" Name="@Name" @bind-Value:get="_color" @bind-Value:set="OnColorChange">
-        @(context?.ToString() ?? "-- Disabled --")
+        @(context?.ToTextString() ?? "[Default]")
     </InputControlSelect>
 
-    <InputControlCheckbox Option="true" Disabled="@(Value is null)" @bind-Value:get="_isTemporary" @bind-Value:set="OnTempChange">
-        Is Temporary
+    <InputControlCheckbox class="temporary" Option="true" Disabled="@(Value is null)" @bind-Value:get="_isTemporary" @bind-Value:set="OnTempChange">
+        Temp
     </InputControlCheckbox>
 </div>
 

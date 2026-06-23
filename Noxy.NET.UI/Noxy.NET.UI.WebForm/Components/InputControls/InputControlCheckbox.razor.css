@@ -12,7 +12,7 @@
 }
 
 .InputControlCheckbox[disabled] .visual {
-    background-color: var(--color-offset-primary-lg);
+    background-color: var(--color-offset-primary-sm);
     border-color: var(--color-disabled);
 }
 
@@ -23,6 +23,7 @@
 
 .visual {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     width: var(--size-control-choice);

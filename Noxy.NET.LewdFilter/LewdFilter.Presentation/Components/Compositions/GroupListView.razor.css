@@ -5,7 +5,7 @@
     row-gap: var(--size-gap-md);
 }
 
-.GroupListView ::deep .group {
+.GroupListView ::deep > .group {
     display: flex;
     flex: 0 0 auto;
     flex-flow: column;
@@ -14,7 +14,7 @@
     background-color: var(--color-offset-primary-sm);
 }
 
-.GroupListView ::deep .group .content {
+.GroupListView ::deep > .group > .content-wrapper > .content {
     margin-top: var(--size-gap-xxs);
 }
 

@@ -1,6 +1,10 @@
 ﻿.BlockStyleSelector {
-    display: flex;
-    flex: 0 0 auto;
-    flex-flow: column;
+    display: grid;
+    grid-template-columns: max-content max-content max-content;
     row-gap: var(--size-gap-xs);
+    column-gap: var(--size-gap-xs);
+}
+
+.BlockStyleSelector ::deep .font-size {
+    height: 100%;
 }

@@ -333,12 +333,12 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
 
     private string GetFilterName()
     {
-        return !string.IsNullOrWhiteSpace(state.Value.Filter.Name) ? state.Value.Filter.Name : DefaultFilterName;
+        return !string.IsNullOrWhiteSpace(state.Value.Filter.Name) ? state.Value.Filter.Name.SanitizeFileName() : DefaultFilterName;
     }
 
     private static string GetGroupName(FilterGroup group)
     {
-        return !string.IsNullOrWhiteSpace(group.Name) ? group.Name : DefaultGroupName;
+        return !string.IsNullOrWhiteSpace(group.Name) ? group.Name.SanitizeFileName() : DefaultGroupName;
     }
 
     private async Task DownloadAsync(string fileName, string content)

@@ -19,7 +19,7 @@ public static class FilterColorNameEnumExtensions
 {
     extension(FilterColorNameEnum comparator)
     {
-        public string ToFilterSymbol() => comparator switch
+        public string ToFilterString() => comparator switch
         {
             FilterColorNameEnum.Red => "Red",
             FilterColorNameEnum.Green => "Green",
@@ -35,7 +35,7 @@ public static class FilterColorNameEnumExtensions
             _ => string.Empty
         };
 
-        public string ToTextSymbol() => comparator switch
+        public string ToTextString() => comparator switch
         {
             FilterColorNameEnum.Red => "Red",
             FilterColorNameEnum.Green => "Green",
