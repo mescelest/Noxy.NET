@@ -99,6 +99,7 @@
     private void SetPlayEffect(FilterBeamEffect? value) => DispatchUpdate(Block with { PlayEffect = value });
     private void SetMinimapIcon(FilterMinimapIcon? value) => DispatchUpdate(Block with { MinimapIcon = value });
 
-    private void DispatchUpdate(FilterBlock block) => Di> Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, block
+    private void DispatchUpdate(FilterBlock block) => Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, block));
+
     private static string GetColorName(FilterColor? color) => color?.Name ?? "[Default]";
 }
