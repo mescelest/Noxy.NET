@@ -1,4 +1,6 @@
-﻿namespace LewdFilter.Domain.Enums;
+﻿using System.ComponentModel;
+
+namespace LewdFilter.Domain.Enums;
 
 public enum FilterComparatorTypeEnum
 {
@@ -8,7 +10,7 @@ public enum FilterComparatorTypeEnum
     LessThanOrEqual = 3,
     GreaterThan = 4,
     GreaterThanOrEqual = 5,
-    Between = 6,
+    Exact = 6,
 }
 
 public static class ComparatorTypeEnumExtensions
@@ -17,26 +19,26 @@ public static class ComparatorTypeEnumExtensions
     {
         public string ToFilterSymbol() => filterComparator switch
         {
-            FilterComparatorTypeEnum.Equal => "==",
-            FilterComparatorTypeEnum.NotEqual => "!=",
+            FilterComparatorTypeEnum.Equal => "=",
+            FilterComparatorTypeEnum.NotEqual => "!",
             FilterComparatorTypeEnum.LessThan => "<",
             FilterComparatorTypeEnum.LessThanOrEqual => "<=",
             FilterComparatorTypeEnum.GreaterThan => ">",
             FilterComparatorTypeEnum.GreaterThanOrEqual => ">=",
-            FilterComparatorTypeEnum.Between => "BETWEEN",
-            _ => string.Empty
+            FilterComparatorTypeEnum.Exact => "==",
+            _ => throw new InvalidEnumArgumentException(nameof(filterComparator), (int)filterComparator, typeof(FilterComparatorTypeEnum))
         };
 
         public string ToTextSymbol() => filterComparator switch
         {
-            FilterComparatorTypeEnum.Equal => "⩵",
+            FilterComparatorTypeEnum.Equal => "=",
             FilterComparatorTypeEnum.NotEqual => "≠",
             FilterComparatorTypeEnum.LessThan => "<",
             FilterComparatorTypeEnum.LessThanOrEqual => "≤",
             FilterComparatorTypeEnum.GreaterThan => ">",
             FilterComparatorTypeEnum.GreaterThanOrEqual => "≥",
-            FilterComparatorTypeEnum.Between => "≤ x ≤",
-            _ => string.Empty
+            FilterComparatorTypeEnum.Exact => "⩵",
+            _ => throw new InvalidEnumArgumentException(nameof(filterComparator), (int)filterComparator, typeof(FilterComparatorTypeEnum))
         };
     }
 }

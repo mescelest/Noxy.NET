@@ -1,0 +1,125 @@
+@inject IDispatcher Dispatcher
+@inject IStateSelection<FilterFeatureState, ImmutableDictionary<FilterColorTypeEnum, List<FilterColor>>> ColorCollectionSelection
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @switch (Rule)
+    {
+        case FilterRule<FilterComparatorInt> intRule:
+            <FilterIntCondition @bind-Value:get="intRule.Value" @bind-Value:set="v => UpdateIntRule(intRule, v)"/>
+            break;
+
+        case FilterRule<FilterComparatorRarity> rarityRule:
+            <FilterRarityCondition @bind-Value:get="rarityRule.Value" @bind-Value:set="v => UpdateRarityRule(rarityRule, v)"/>
+            break;
+
+        case FilterRule<FilterColor> colorRule:
+            <InputControlSelect TOption="FilterColor" OptionList="GetColorsForKeyword(colorRule.Keyword)" @bind-Value:get="colorRule.Value" @bind-Value:set="v => UpdateColorRule(colorRule, v)">
+                @GetColorName(context)
+            </InputControlSelect>
+            break;
+
+        case FilterRule<FilterMinimapIcon> minimapRule:
+            <InputControlMinimapIcon @bind-Value:get="minimapRule.Value" @bind-Value:set="v => UpdateMinimapRule(minimapRule, v)"/>
+            break;
+
+        case FilterRule<FilterBeamEffect> beamRule:
+            <InputControlBeamEffect @bind-Value:get="beamRule.Value" @bind-Value:set="v => UpdateBeamRule(beamRule, v)"/>
+            break;
+
+        case FilterRule<int> fontSizeRule:
+            <InputElementRange Min="18" Max="45" @bind-Value:get="GetFontSize(fontSizeRule)" @bind-Value:set="v => UpdateFontSizeRule(fontSizeRule, v)"/>
+            break;
+
+        case FilterRule<bool> boolRule:
+            <InputControlCheckbox Option="true" @bind-Value:get="boolRule.Value" @bind-Value:set="v => UpdateBoolRule(boolRule, v)"/>
+            break;
+
+        default:
+            <span class="flag-badge">Enabled</span>
+            break;
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid GroupId { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid BlockId { get; set; }
+
+    [Parameter, EditorRequired]
+    public FilterRule Rule { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        ColorCollectionSelection.Select(FilterFeatureState.SelectCustomColorList());
+    }
+
+    private double? GetFontSize(FilterRule<int> rule) => rule.Value;
+
+    private void UpdateIntRule(FilterRule<FilterComparatorInt> rule, FilterComparatorInt? value)
+    {
+        if (value is null) return;
+        DispatchChange(rule with { Value = value });
+    }
+
+    private void UpdateRarityRule(FilterRule<FilterComparatorRarity> rule, FilterComparatorRarity? value)
+    {
+        if (value is null) return;
+        DispatchChange(rule with { Value = value });
+    }
+
+    private void UpdateColorRule(FilterRule<FilterColor> rule, FilterColor? value)
+    {
+        if (value is null) return;
+        DispatchChange(rule with { Value = value });
+    }
+
+    private void UpdateMinimapRule(FilterRule<FilterMinimapIcon> rule, FilterMinimapIcon? value)
+    {
+        if (value is null) return;
+        DispatchChange(rule with { Value = value });
+    }
+
+    private void UpdateBeamRule(FilterRule<FilterBeamEffect> rule, FilterBeamEffect? value)
+    {
+        if (value is null) return;
+        DispatchChange(rule with { Value = value });
+    }
+
+    private void UpdateFontSizeRule(FilterRule<int> rule, double? value)
+    {
+        if (value is null) return;
+        DispatchChange(rule with { Value = (int)value.Value });
+    }
+
+    private void UpdateBoolRule(FilterRule<bool> rule, bool? value)
+    {
+        if (value is null) return;
+        DispatchChange(rule with { Value = value.Value });
+    }
+
+    private void DispatchChange(FilterRule updatedRule)
+    {
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupId, BlockId, updatedRule));
+    }
+
+    private HashSet<FilterColor?> GetColorsForKeyword(FilterKeywordEnum keyword)
+    {
+        FilterColorTypeEnum colorType = keyword switch
+        {
+            FilterKeywordEnum.SetTextColor => FilterColorTypeEnum.Text,
+            FilterKeywordEnum.SetBackgroundColor => FilterColorTypeEnum.Background,
+            FilterKeywordEnum.SetBorderColor => FilterColorTypeEnum.Border,
+            _ => throw new InvalidEnumArgumentException(nameof(keyword), (int)keyword, typeof(FilterKeywordEnum))
+        };
+
+        ImmutableDictionary<FilterColorTypeEnum, List<FilterColor>> collection = ColorCollectionSelection.Value;
+        return collection.TryGetValue(colorType, out List<FilterColor>? list) ? [null, .. list] : [null];
+    }
+
+    private static string GetColorName(FilterColor? color) => color?.Name ?? "[Default]";
+}

@@ -1,10 +1,12 @@
+using System.ComponentModel;
+
 namespace LewdFilter.Domain.Enums;
 
 public enum FilterIconSizeEnum
 {
-    Small = 2,
+    Small = 0,
     Medium = 1,
-    Large = 0
+    Large = 2
 }
 
 public static class FilterIconSizeEnumExtensions
@@ -16,7 +18,7 @@ public static class FilterIconSizeEnumExtensions
             FilterIconSizeEnum.Large => "0",
             FilterIconSizeEnum.Medium => "1",
             FilterIconSizeEnum.Small => "2",
-            _ => "1"
+            _ => throw new InvalidEnumArgumentException(nameof(size), (int)size, typeof(FilterIconSizeEnum))
         };
 
         public string ToTextString() => size switch
@@ -24,7 +26,7 @@ public static class FilterIconSizeEnumExtensions
             FilterIconSizeEnum.Large => "Large",
             FilterIconSizeEnum.Medium => "Medium",
             FilterIconSizeEnum.Small => "Small",
-            _ => string.Empty
+            _ => throw new InvalidEnumArgumentException(nameof(size), (int)size, typeof(FilterIconSizeEnum))
         };
     }
 }

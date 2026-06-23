@@ -9,6 +9,7 @@ public record FilterBlock : FilterEntity
 
     public HashSet<string> ClassList { get; set; } = [];
     public HashSet<string> BaseTypeList { get; set; } = [];
+    public IReadOnlyList<FilterRule> RuleList { get; set; } = [];
 
     public FilterComparatorRarity? Rarity { get; set; }
     public FilterComparatorInt? ItemLevel { get; set; }
@@ -37,36 +38,29 @@ public record FilterBlock : FilterEntity
 
     public static FilterBlock Default => new() { Name = "New block" };
 
-    public FilterBlock()
-    {
-    }
-
     protected FilterBlock(FilterBlock other) : base(other)
     {
         Name = other.Name;
         IsShow = other.IsShow;
         ClassList = [.. other.ClassList];
         BaseTypeList = [.. other.BaseTypeList];
-        Rarity = other.Rarity;
-        ItemLevel = other.ItemLevel;
-        AreaLevel = other.AreaLevel;
-        Sockets = other.Sockets;
-        Quality = other.Quality;
-        StackSize = other.StackSize;
-        UnidentifiedItemTier = other.UnidentifiedItemTier;
-        WaystoneTier = other.WaystoneTier;
-        GemLevel = other.GemLevel;
-        BaseArmour = other.BaseArmour;
-        BaseEvasion = other.BaseEvasion;
-        BaseEnergyShield = other.BaseEnergyShield;
-        Corrupted = other.Corrupted;
-        CorruptedMods = other.CorruptedMods;
-        AlwaysShow = other.AlwaysShow;
-        TextColor = other.TextColor;
-        BorderColor = other.BorderColor;
-        BackgroundColor = other.BackgroundColor;
-        FontSize = other.FontSize;
-        PlayEffect = other.PlayEffect;
-        MinimapIcon = other.MinimapIcon;
+        RuleList = other.RuleList.Select(r => r with { }).ToList();
+    }
+
+    public List<FilterRule> MoveRule(Guid ruleId, int destinationIndex)
+    {
+        List<FilterRule> list = RuleList.ToList();
+        int oldIndex = list.FindIndex(r => r.ID == ruleId);
+        if (oldIndex == -1 || destinationIndex < 0 || destinationIndex >= list.Count || oldIndex == destinationIndex) return list;
+
+        FilterRule item = list[oldIndex];
+        list.RemoveAt(oldIndex);
+        list.Insert(destinationIndex, item);
+        return list;
+    }
+
+    public List<FilterRule> RemoveRule(Guid ruleId)
+    {
+        return RuleList.Where(r => r.ID != ruleId).ToList();
     }
 }

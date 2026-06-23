@@ -72,7 +72,7 @@ public class FilterCompilerService
 
                 if (block.MinimapIcon != null)
                 {
-                    sb.AppendLine($"{Indent(1)}MinimapIcon {block.MinimapIcon.Size} {block.MinimapIcon.Color} {block.MinimapIcon.Shape}");
+                    sb.AppendLine($"{Indent(1)}{block.MinimapIcon}");
                 }
 
                 sb.AppendLine();

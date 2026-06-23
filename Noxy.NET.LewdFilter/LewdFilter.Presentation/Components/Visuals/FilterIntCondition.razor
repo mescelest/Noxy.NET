@@ -1,30 +1,33 @@
 ﻿@inherits BaseInput<FilterComparatorInt?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputControlInteger class="left" ID="@ID" Name="left" Size="5" @bind-Value="@_left" @bind-Value:after="PushUpdate"/>
-
     <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
         @context.ToTextSymbol()
     </InputControlSelect>
 
-    <InputControlInteger class="right" Name="right" Size="5" Disabled="@(_operator != FilterComparatorTypeEnum.Between)" @bind-Value="@_right" @bind-Value:after="PushUpdate"/>
+    <InputControlInteger class="value-input" ID="@ID" Name="value" Size="5" @bind-Value="@_numericValue" @bind-Value:after="PushUpdate"/>
 </div>
 
 @code {
-
-    private int? _left;
-    private int? _right;
+    private int? _numericValue;
     private FilterComparatorTypeEnum _operator = FilterComparatorTypeEnum.Equal;
 
     private readonly HashSet<FilterComparatorTypeEnum> _operators = Enum.GetValues<FilterComparatorTypeEnum>().ToHashSet();
-    
+
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
 
-        _left = Value?.Left;
-        _right = Value?.Right;
-        _operator = Value?.FilterComparatorType ?? FilterComparatorTypeEnum.Equal;
+        if (Value is not null)
+        {
+            _numericValue = Value.Value;
+            _operator = Value.FilterComparatorType;
+        }
+        else
+        {
+            _numericValue = null;
+            _operator = FilterComparatorTypeEnum.Equal;
+        }
     }
 
     private void SetOperator(FilterComparatorTypeEnum op)
@@ -35,13 +38,7 @@
 
     private void PushUpdate()
     {
-        FilterComparatorInt? result = _operator switch
-        {
-            FilterComparatorTypeEnum.Between when _left is not null && _right is not null => new() { Left = _left, Right = _right, FilterComparatorType = _operator },
-            FilterComparatorTypeEnum.Between => null,
-            _ => _left is not null ? new() { Left = _left, Right = null, FilterComparatorType = _operator } : null
-        };
-
+        FilterComparatorInt? result = _numericValue is not null ? new() { Value = _numericValue.Value, FilterComparatorType = _operator } : null;
         NotifyChange(result);
     }
 

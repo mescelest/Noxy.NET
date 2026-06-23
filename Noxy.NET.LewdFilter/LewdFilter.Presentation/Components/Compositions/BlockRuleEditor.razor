@@ -1,0 +1,115 @@
+@inject IDispatcher Dispatcher
+@inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" role="table">
+    <div class="header" role="rowheader">
+        <div class="handle" role="cell"></div>
+        <div class="action" role="cell"></div>
+        <div class="keyword" role="cell">Keyword</div>
+        <div class="control" role="cell">Configuration</div>
+    </div>
+
+    <div class="row">
+        <div class="handle">
+            <MaterialIcon Icon="drag_handle" Size="20px"/>
+        </div>
+
+        <div class="action">
+            <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonRuleAddClick">
+                <MaterialIcon Icon="add" Size="20px"/>
+            </Button>
+        </div>
+
+        <div class="keyword">
+            Block Visibility
+        </div>
+
+        <div class="control">
+            <InputControlCheckbox class="visibility" Option="true" @bind-Value:get="Block.IsShow" @bind-Value:set="SetIsShow">
+                <span class="label">@VisibilityText</span>
+            </InputControlCheckbox>
+        </div>
+    </div>
+
+    <SortableList class="list" List="EditableRuleList" KeySelector="GetRowKey" Handle="sortable-handle" OnUpdate="OnRulesReordered">
+        <div @key="context.Item.ID" class="row">
+
+            <div class="sortable-handle">
+                <MaterialIcon Icon="drag_handle" Size="20px"/>
+            </div>
+
+            <div class="action">
+                <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => OnButtonRuleRemoveClick(context.Item.ID)">
+                    <MaterialIcon Icon="remove" Size="20px"/>
+                </Button>
+            </div>
+
+            <div class="keyword">
+                <InputControlSelect TOption="FilterKeywordEnum" OptionList="_availableKeywords" @bind-Value:get="context.Item.Keyword" @bind-Value:set="v => OnSelectRuleKeywordChange(context.Item.ID, v)">
+                    <ChildContent Context="keyword">
+                        @keyword.ToTextString()
+                    </ChildContent>
+                </InputControlSelect>
+            </div>
+
+            <div class="control">
+                <RuleComponentDispatcher GroupId="GroupId" BlockId="BlockId" Rule="context.Item"/>
+            </div>
+        </div>
+    </SortableList>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid GroupId { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid BlockId { get; set; }
+
+    private readonly HashSet<FilterKeywordEnum> _availableKeywords = Enum.GetValues<FilterKeywordEnum>().ToHashSet();
+
+    private string VisibilityText => Block.IsShow ? "Show" : "Hide";
+    private FilterBlock Block => BlockSelection.Value;
+
+    private IReadOnlyList<FilterRule> EditableRuleList => Block.RuleList;
+
+    private static object GetRowKey(FilterRule rule, int index) => rule.ID;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
+    }
+
+    private void SetIsShow(bool value)
+    {
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, Block with { IsShow = value }));
+    }
+
+    private void OnButtonRuleAddClick()
+    {
+        FilterRule rule = FilterRule.FromKeyword(FilterKeywordEnum.Rarity);
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupId, BlockId, rule));
+    }
+
+    private void OnSelectRuleKeywordChange(Guid ruleId, FilterKeywordEnum keyword)
+    {
+        FilterRule rule = FilterRule.FromKeyword(keyword) with { ID = ruleId };
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupId, BlockId, rule));
+    }
+
+    private void OnButtonRuleRemoveClick(Guid ruleId)
+    {
+        Dispatcher.Dispatch(new FilterFeatureReducers.RemoveRuleAction(GroupId, BlockId, ruleId));
+    }
+
+    private void OnRulesReordered((int IndexOld, int IndexNew) indices)
+    {
+        FilterRule ruleToMove = EditableRuleList[indices.IndexOld];
+        Dispatcher.Dispatch(new FilterFeatureReducers.MoveRuleAction(GroupId, BlockId, ruleToMove.ID, indices.IndexNew));
+    }
+
+}

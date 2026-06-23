@@ -6,7 +6,7 @@
                         @bind-Value="Model.Email"/>
 
         <InputGroupPassword DisplayName="@GetDisplayName(nameof(Model.Password))" Description="@GetDescription(nameof(Model.Password))"
-                            Autocomplete="WebFormInputFieldPasswordAutocompleteEnum.CurrentPassword" @bind-Value="Model.Password"/>
+                            Autocomplete="WebFormInputElementPasswordAutocompleteEnum.CurrentPassword" @bind-Value="Model.Password"/>
 
         @ChildContent
     </WebForm>

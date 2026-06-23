@@ -1,71 +1,56 @@
 ﻿@inherits BaseInput<FilterComparatorRarity?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputControlSelect TOption="FilterRarityTypeEnum?" OptionList="_setRarityTypeEnum" ID="@ID" Name="left" @bind-Value:get="_left" @bind-Value:set="OnLeftChange">
-        @(context?.ToFilterString() ?? "")
-    </InputControlSelect>
-
     <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
         @context.ToTextSymbol()
     </InputControlSelect>
 
-    <InputControlSelect TOption="FilterRarityTypeEnum?" OptionList="_setRarityTypeEnum" Name="right" Disabled="@(_operator != FilterComparatorTypeEnum.Between)" @bind-Value:get="_right" @bind-Value:set="OnRightChange">
+    <InputControlSelect TOption="FilterRarityTypeEnum?" OptionList="_setRarityTypeEnum" ID="@ID" Name="rarityValue" @bind-Value:get="_rarityValue" @bind-Value:set="OnRarityChange">
         @(context?.ToFilterString() ?? "")
     </InputControlSelect>
 </div>
 
 @code {
-
     private readonly HashSet<FilterComparatorTypeEnum> _operators = Enum.GetValues<FilterComparatorTypeEnum>().ToHashSet();
     private readonly HashSet<FilterRarityTypeEnum?> _setRarityTypeEnum = [null, .. Enum.GetValues<FilterRarityTypeEnum>().Cast<FilterRarityTypeEnum?>()];
 
-    private FilterRarityTypeEnum? _left;
-    private FilterRarityTypeEnum? _right;
+    private FilterRarityTypeEnum? _rarityValue;
     private FilterComparatorTypeEnum _operator = FilterComparatorTypeEnum.Equal;
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
 
-        _left = Value?.Left;
-        _right = Value?.Right;
-        _operator = Value?.FilterComparatorType ?? FilterComparatorTypeEnum.Equal;
+        if (Value is not null)
+        {
+            _rarityValue = Value.Value;
+            _operator = Value.FilterComparatorType;
+        }
+        else
+        {
+            _rarityValue = null;
+            _operator = FilterComparatorTypeEnum.Equal;
+        }
     }
 
-    private void OnLeftChange(FilterRarityTypeEnum? value)
+    private void OnRarityChange(FilterRarityTypeEnum? value)
     {
-        _left = value;
-        PushUpdate();
-    }
-
-    private void OnRightChange(FilterRarityTypeEnum? value)
-    {
-        _right = value;
+        _rarityValue = value;
         PushUpdate();
     }
 
     private void SetOperator(FilterComparatorTypeEnum op)
     {
         _operator = op;
-
-        if (_operator == FilterComparatorTypeEnum.Between && _right is null)
-        {
-            _right = _left;
-        }
-
         PushUpdate();
     }
 
     private void PushUpdate()
     {
-        FilterComparatorRarity? result = _operator switch
-        {
-            FilterComparatorTypeEnum.Between when _left is not null && _right is not null => new() { Left = _left, Right = _right, FilterComparatorType = _operator },
-            FilterComparatorTypeEnum.Between => _left is not null ? new() { Left = _left, Right = _left, FilterComparatorType = _operator } : null,
-            _ => _left is not null ? new() { Left = _left, Right = null, FilterComparatorType = _operator } : null
-        };
+        FilterComparatorRarity? result = _rarityValue is not null
+            ? new() { Value = _rarityValue.Value, FilterComparatorType = _operator }
+            : null;
 
         NotifyChange(result);
     }
-
 }

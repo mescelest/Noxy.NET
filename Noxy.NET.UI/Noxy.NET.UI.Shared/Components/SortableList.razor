@@ -16,7 +16,7 @@
 @code {
 
     [Parameter, EditorRequired]
-    public required List<T> List { get; set; }
+    public required IReadOnlyList<T> List { get; set; }
 
     [Parameter, EditorRequired]
     public required RenderFragment<(T Item, int Index)> ChildContent { get; set; }

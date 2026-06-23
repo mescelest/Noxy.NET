@@ -9,7 +9,7 @@
                             @bind-Value="Model.Password"/>
 
         <InputGroupPassword DisplayName="@GetDisplayName(nameof(Model.ConfirmPassword))" Description="@GetDescription(nameof(Model.ConfirmPassword))"
-                            Autocomplete="WebFormInputFieldPasswordAutocompleteEnum.NewPassword" @bind-Value="Model.ConfirmPassword"/>
+                            Autocomplete="WebFormInputElementPasswordAutocompleteEnum.NewPassword" @bind-Value="Model.ConfirmPassword"/>
 
         @ChildContent
     </WebForm>
