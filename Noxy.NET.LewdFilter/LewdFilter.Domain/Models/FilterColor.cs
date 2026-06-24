@@ -12,6 +12,7 @@ public record FilterColor : FilterEntity
 
     public override string ToString() => Alpha < 255 ? $"{Red} {Green} {Blue} {Alpha}" : $"{Red} {Green} {Blue}";
 
+    public static FilterColor Default => new() { Name = "Default color", Red = 0, Green = 0, Blue = 0, Alpha = 0 };
     public static FilterColor DefaultBorder => new() { Name = "Default border", Red = 0, Green = 0, Blue = 0, Alpha = 0 };
     public static FilterColor DefaultText => new() { Name = "Default text", Red = 200, Green = 200, Blue = 200, Alpha = 255 };
     public static FilterColor DefaultBackground => new() { Name = "Default background", Red = 11, Green = 11, Blue = 11, Alpha = 230 };

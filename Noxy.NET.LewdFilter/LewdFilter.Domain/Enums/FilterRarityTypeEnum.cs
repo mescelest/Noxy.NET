@@ -10,12 +10,24 @@ public enum FilterRarityTypeEnum
 
 public static class RarityTypeEnumExtensions
 {
-    public static string ToFilterString(this FilterRarityTypeEnum filterRarity) => filterRarity switch
+    extension(FilterRarityTypeEnum filterRarity)
     {
-        FilterRarityTypeEnum.Normal => "Normal",
-        FilterRarityTypeEnum.Magic => "Magic",
-        FilterRarityTypeEnum.Rare => "Rare",
-        FilterRarityTypeEnum.Unique => "Unique",
-        _ => filterRarity.ToString()
-    };
+        public string ToFilterString() => filterRarity switch
+        {
+            FilterRarityTypeEnum.Normal => "Normal",
+            FilterRarityTypeEnum.Magic => "Magic",
+            FilterRarityTypeEnum.Rare => "Rare",
+            FilterRarityTypeEnum.Unique => "Unique",
+            _ => filterRarity.ToString()
+        };
+
+        public string ToTextString() => filterRarity switch
+        {
+            FilterRarityTypeEnum.Normal => "Normal",
+            FilterRarityTypeEnum.Magic => "Magic",
+            FilterRarityTypeEnum.Rare => "Rare",
+            FilterRarityTypeEnum.Unique => "Unique",
+            _ => filterRarity.ToString()
+        };
+    }
 }

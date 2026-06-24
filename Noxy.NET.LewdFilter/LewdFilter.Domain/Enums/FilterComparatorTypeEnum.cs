@@ -17,7 +17,7 @@ public static class ComparatorTypeEnumExtensions
 {
     extension(FilterComparatorTypeEnum filterComparator)
     {
-        public string ToFilterSymbol() => filterComparator switch
+        public string ToFilterString() => filterComparator switch
         {
             FilterComparatorTypeEnum.Equal => "=",
             FilterComparatorTypeEnum.NotEqual => "!",
@@ -29,7 +29,7 @@ public static class ComparatorTypeEnumExtensions
             _ => throw new InvalidEnumArgumentException(nameof(filterComparator), (int)filterComparator, typeof(FilterComparatorTypeEnum))
         };
 
-        public string ToTextSymbol() => filterComparator switch
+        public string ToTextString() => filterComparator switch
         {
             FilterComparatorTypeEnum.Equal => "=",
             FilterComparatorTypeEnum.NotEqual => "≠",

@@ -75,6 +75,15 @@ public class FilterCompilerService
                     sb.AppendLine($"{Indent(1)}{block.MinimapIcon}");
                 }
 
+                foreach (FilterRule rule in block.RuleList)
+                {
+                    string ruleLine = rule.ToFilterLine();
+                    if (!string.IsNullOrWhiteSpace(ruleLine))
+                    {
+                        sb.AppendLine($"{Indent(1)}{ruleLine}");
+                    }
+                }
+
                 sb.AppendLine();
             }
         }

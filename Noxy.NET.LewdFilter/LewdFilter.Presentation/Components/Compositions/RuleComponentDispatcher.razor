@@ -5,30 +5,30 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @switch (Rule)
     {
-        case FilterRule<FilterComparatorInt> intRule:
+        case FilterRule<FilterComparatorInt?> intRule:
             <FilterIntCondition @bind-Value:get="intRule.Value" @bind-Value:set="v => UpdateIntRule(intRule, v)"/>
             break;
 
-        case FilterRule<FilterComparatorRarity> rarityRule:
+        case FilterRule<FilterComparatorRarity?> rarityRule:
             <FilterRarityCondition @bind-Value:get="rarityRule.Value" @bind-Value:set="v => UpdateRarityRule(rarityRule, v)"/>
             break;
 
-        case FilterRule<FilterColor> colorRule:
+        case FilterRule<FilterColor?> colorRule:
             <InputControlSelect TOption="FilterColor" OptionList="GetColorsForKeyword(colorRule.Keyword)" @bind-Value:get="colorRule.Value" @bind-Value:set="v => UpdateColorRule(colorRule, v)">
                 @GetColorName(context)
             </InputControlSelect>
             break;
 
-        case FilterRule<FilterMinimapIcon> minimapRule:
+        case FilterRule<FilterMinimapIcon?> minimapRule:
             <InputControlMinimapIcon @bind-Value:get="minimapRule.Value" @bind-Value:set="v => UpdateMinimapRule(minimapRule, v)"/>
             break;
 
-        case FilterRule<FilterBeamEffect> beamRule:
+        case FilterRule<FilterBeamEffect?> beamRule:
             <InputControlBeamEffect @bind-Value:get="beamRule.Value" @bind-Value:set="v => UpdateBeamRule(beamRule, v)"/>
             break;
 
-        case FilterRule<int> fontSizeRule:
-            <InputElementRange Min="18" Max="45" @bind-Value:get="GetFontSize(fontSizeRule)" @bind-Value:set="v => UpdateFontSizeRule(fontSizeRule, v)"/>
+        case FilterRule<FilterFontSize> rangeRule:
+            <InputElementRange Min="FilterFontSize.Min" Max="FilterFontSize.Max" Step="FilterFontSize.Step" @bind-Value:get="rangeRule.Value.Value" @bind-Value:set="v => UpdateRangeRule(rangeRule, v)"/>
             break;
 
         case FilterRule<bool> boolRule:
@@ -58,48 +58,39 @@
         ColorCollectionSelection.Select(FilterFeatureState.SelectCustomColorList());
     }
 
-    private double? GetFontSize(FilterRule<int> rule) => rule.Value;
-
-    private void UpdateIntRule(FilterRule<FilterComparatorInt> rule, FilterComparatorInt? value)
+    private void UpdateIntRule(FilterRule<FilterComparatorInt?> rule, FilterComparatorInt? value)
     {
-        if (value is null) return;
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateRarityRule(FilterRule<FilterComparatorRarity> rule, FilterComparatorRarity? value)
+    private void UpdateRarityRule(FilterRule<FilterComparatorRarity?> rule, FilterComparatorRarity? value)
     {
-        if (value is null) return;
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateColorRule(FilterRule<FilterColor> rule, FilterColor? value)
+    private void UpdateColorRule(FilterRule<FilterColor?> rule, FilterColor? value)
     {
-        if (value is null) return;
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateMinimapRule(FilterRule<FilterMinimapIcon> rule, FilterMinimapIcon? value)
+    private void UpdateMinimapRule(FilterRule<FilterMinimapIcon?> rule, FilterMinimapIcon? value)
     {
-        if (value is null) return;
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateBeamRule(FilterRule<FilterBeamEffect> rule, FilterBeamEffect? value)
+    private void UpdateBeamRule(FilterRule<FilterBeamEffect?> rule, FilterBeamEffect? value)
     {
-        if (value is null) return;
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateFontSizeRule(FilterRule<int> rule, double? value)
+    private void UpdateRangeRule(FilterRule<FilterFontSize> rule, double? value)
     {
-        if (value is null) return;
-        DispatchChange(rule with { Value = (int)value.Value });
+        DispatchChange(rule with { Value = rule.Value with { Value = value ?? 0 } });
     }
 
     private void UpdateBoolRule(FilterRule<bool> rule, bool? value)
     {
-        if (value is null) return;
-        DispatchChange(rule with { Value = value.Value });
+        DispatchChange(rule with { Value = value ?? false });
     }
 
     private void DispatchChange(FilterRule updatedRule)

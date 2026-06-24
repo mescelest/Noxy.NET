@@ -30,26 +30,23 @@ public record FilterRule : FilterEntity
                 or FilterKeywordEnum.TwiceCorrupted =>
                 new FilterRule<bool> { Keyword = keyword, Value = true },
 
-            FilterKeywordEnum.Rarity =>
-                new FilterRule<FilterComparatorRarity> { Keyword = keyword, Value = new() },
-
             FilterKeywordEnum.SetTextColor =>
-                new FilterRule<FilterColor> { Keyword = keyword, Value = FilterColor.DefaultText },
+                new FilterRule<FilterColor?> { Keyword = keyword, Value = FilterColor.DefaultText },
 
             FilterKeywordEnum.SetBorderColor =>
-                new FilterRule<FilterColor> { Keyword = keyword, Value = FilterColor.DefaultBorder },
+                new FilterRule<FilterColor?> { Keyword = keyword, Value = FilterColor.DefaultBorder },
 
             FilterKeywordEnum.SetBackgroundColor =>
-                new FilterRule<FilterColor> { Keyword = keyword, Value = FilterColor.DefaultBackground },
+                new FilterRule<FilterColor?> { Keyword = keyword, Value = FilterColor.DefaultBackground },
 
             FilterKeywordEnum.SetFontSize =>
-                new FilterRule<int> { Keyword = keyword, Value = 32 },
+                new FilterRule<FilterFontSize> { Keyword = keyword, Value = new(32) },
 
             FilterKeywordEnum.PlayEffect =>
-                new FilterRule<FilterBeamEffect> { Keyword = keyword, Value = new(FilterColorNameEnum.Red) },
+                new FilterRule<FilterBeamEffect?> { Keyword = keyword, Value = new(FilterColorNameEnum.Red) },
 
             FilterKeywordEnum.MinimapIcon =>
-                new FilterRule<FilterMinimapIcon> { Keyword = keyword, Value = new(FilterColorNameEnum.Red, FilterIconSizeEnum.Small, FilterIconShapeEnum.Circle) },
+                new FilterRule<FilterMinimapIcon?> { Keyword = keyword, Value = new(FilterColorNameEnum.Red, FilterIconSizeEnum.Small, FilterIconShapeEnum.Circle) },
 
             FilterKeywordEnum.PlayAlertSound
                 or FilterKeywordEnum.PlayAlertSoundPositional =>
@@ -58,6 +55,9 @@ public record FilterRule : FilterEntity
             FilterKeywordEnum.CustomAlertSound
                 or FilterKeywordEnum.CustomAlertSoundOptional =>
                 new FilterRule<string> { Keyword = keyword, Value = string.Empty },
+
+            FilterKeywordEnum.Rarity =>
+                new FilterRule<FilterComparatorRarity?> { Keyword = keyword, Value = new() },
 
             FilterKeywordEnum.AreaLevel
                 or FilterKeywordEnum.DropLevel
@@ -73,7 +73,7 @@ public record FilterRule : FilterEntity
                 or FilterKeywordEnum.Quality
                 or FilterKeywordEnum.Sockets
                 or FilterKeywordEnum.StackSize
-                => new FilterRule<FilterComparatorInt> { Keyword = keyword, Value = new() },
+                => new FilterRule<FilterComparatorInt?> { Keyword = keyword, Value = new() },
 
             _ => throw new InvalidEnumArgumentException(nameof(keyword), (int)keyword, typeof(FilterKeywordEnum))
         };
@@ -82,15 +82,20 @@ public record FilterRule : FilterEntity
 
 public record FilterRule<T> : FilterRule
 {
-    public T Value { get; set; } = default!;
+    public required T Value { get; set; }
 
     public override string ValueAsString() => Value switch
     {
         null => string.Empty,
-        bool b => b ? "True" : "False",
+        bool x => x ? bool.TrueString : bool.FalseString,
+        int x => x.ToString(),
+        string x => x,
+        FilterColor x => x.ToString(),
+        FilterBeamEffect x => x.ToString(),
         FilterComparatorInt x => x.ToString(),
         FilterComparatorRarity r => r.ToString(),
         FilterMinimapIcon x => x.ToString(),
-        _ => throw new InvalidOperationException()
+        FilterFontSize x => x.ToString(),
+        _ => throw new InvalidOperationException($"Type {typeof(T).Name} is missing a serialization case.")
     };
 }

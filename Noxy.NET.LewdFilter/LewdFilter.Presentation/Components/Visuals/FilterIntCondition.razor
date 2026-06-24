@@ -2,7 +2,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
-        @context.ToTextSymbol()
+        @context.ToTextString()
     </InputControlSelect>
 
     <InputControlInteger class="value-input" ID="@ID" Name="value" Size="5" @bind-Value="@_numericValue" @bind-Value:after="PushUpdate"/>
