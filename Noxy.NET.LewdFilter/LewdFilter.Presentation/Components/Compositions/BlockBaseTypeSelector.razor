@@ -4,49 +4,28 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="header">
-        <FormField Label="Base type group" For="@BaseTypeGroupId">
-            <InputControlSelect TOption="string" class="base-type-group" ID="@BaseTypeGroupId" OptionList="BaseTypeGroupSet" @bind-Value:get="_inputGroup" @bind-Value:set="SetInputGroup">
-                @context
-            </InputControlSelect>
-        </FormField>
+        <div class="action-list">
+            <FormField Label="Filter by name" For="@FilterByNameId">
+                <InputControlText ID="@FilterByNameId" OnInputDelay="200" @bind-Value:get="@_inputSearch" @bind-Value:set="SetInputSearch"/>
+            </FormField>
 
-        <FormField Label="Filter by name" For="@FilterByNameId">
-            <InputControlText class="filter-by-name" ID="@FilterByNameId" OnInputDelay="200" @bind-Value="@_inputSearch"/>
-        </FormField>
-
-        @if (!string.IsNullOrEmpty(_inputGroup))
-        {
-            <div class="action-list">
-            <InputControlCheckbox ID="@GetBaseTypeID("select-all")" Option="true" @bind-Value:get="@GetSelectAll()" @bind-Value:set="@SetSelectAll">
-                    Select All
-                </InputControlCheckbox>
-
-                <Button type="button" Status="StatusEnum.Error" @onclick="OnResetBaseTypes" disabled="@(!CurrentBaseTypeList.Any())" class="btn btn-secondary reset-button">
-                    Reset Selections
-                </Button>
-            </div>
-        }
+            <Button type="button" Status="StatusEnum.Error" @onclick="OnResetBaseTypes" disabled="@(!CurrentBaseTypeList.Any())">
+                Reset All Selections
+            </Button>
+        </div>
     </div>
 
     <div class="content">
-        @if (!string.IsNullOrEmpty(_inputGroup))
+        @if (_filteredGroupsCache.Count > 0)
         {
-            string[] filtered = GetFilteredBaseTypes();
-            if (!filtered.Any())
+            @foreach (KeyValuePair<string, List<string>> group in _filteredGroupsCache)
             {
-                <p class="no-results">No base types match your search.</p>
+                <BaseTypeGroup @key="group.Key" GroupKey="@group.Key" GroupItems="@group.Value" CurrentBaseTypeList="@CurrentBaseTypeList" GroupId="@GroupId" BlockId="@BlockId" IsGroupSelected="@GetSelectAll(group.Key)"/>
             }
-            else
-            {
-                @foreach (string type in filtered)
-                {
-                    bool isChecked = CurrentBaseTypeList.Contains(type);
-
-                    <InputControlCheckbox @key="type" class="base-type-checkbox" ID="@GetBaseTypeID(type)" Name="base-type" Option="true" @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(type, v)">
-                        <span class="base-type-text" title="@type">@type</span>
-                    </InputControlCheckbox>
-                }
-            }
+        }
+        else
+        {
+            <p class="no-results">No base types match your search.</p>
         }
     </div>
 </div>
@@ -59,81 +38,74 @@
     [Parameter, EditorRequired]
     public Guid BlockId { get; set; }
 
-    private string _inputGroup = string.Empty;
-    private string _inputSearch = string.Empty;
+    private string? _inputSearch;
+    private Dictionary<string, List<string>> _filteredGroupsCache = [];
 
-    private FilterBlock? Block => BlockSelection.Value;
-    private HashSet<string> CurrentBaseTypeList => Block?.BaseTypeList ?? [];
-    private static HashSet<string> BaseTypeGroupSet => BaseTypeConstants.BaseTypes.Keys.ToHashSet();
-    private string BaseTypeGroupId => $"base-type-group-{GroupId}";
-    private string FilterByNameId => $"filter-by-name-{GroupId}";
+    private FilterBlock Block => BlockSelection.Value;
+    private HashSet<string> CurrentBaseTypeList => Block.BaseTypeList;
+
+    private string FilterByNameId => $"filter-{BlockId}";
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _inputGroup = BaseTypeConstants.BaseTypes.FirstOrDefault().Key;
 
         BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
+        UpdateFilteredGroupsCache();
     }
 
-    private string GetBaseTypeID(string type) => $"{UUIDCode}-{type}";
-
-    private string[] GetFilteredBaseTypes()
+    private void SetInputSearch(string? value)
     {
-        if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? list)) return [];
-        if (!string.IsNullOrWhiteSpace(_inputSearch)) list = list.Where(b => b.Contains(_inputSearch, StringComparison.OrdinalIgnoreCase)).ToList();
-        return list.ToArray();
+        if (_inputSearch == value) return;
+
+        _inputSearch = value;
+        UpdateFilteredGroupsCache();
     }
 
-    private void SetInputGroup(string? value)
+    private void UpdateFilteredGroupsCache()
     {
-        _inputGroup = value ?? string.Empty;
-        _inputSearch = string.Empty;
-    }
+        Dictionary<string, List<string>> updatedCache = new();
 
-    private bool? GetSelectAll()
-    {
-        if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? masterList)) return false;
-        return masterList.All(b => CurrentBaseTypeList.Contains(b));
-    }
-
-    private void SetSelectAll(bool? value)
-    {
-        if (string.IsNullOrEmpty(_inputGroup) || !BaseTypeConstants.BaseTypes.TryGetValue(_inputGroup, out IReadOnlyList<string>? list)) return;
-
-        HashSet<string> set = [.. CurrentBaseTypeList];
-        if (value ?? false)
+        foreach (KeyValuePair<string, IReadOnlyList<string>> pair in BaseTypeConstants.BaseTypes)
         {
-            foreach (string item in list) set.Add(item);
-        }
-        else
-        {
-            foreach (string item in list) set.Remove(item);
+            IEnumerable<string> matchedTypes = pair.Value.AsEnumerable();
+            if (!string.IsNullOrWhiteSpace(_inputSearch))
+            {
+                matchedTypes = matchedTypes.Where(b => b.Contains(_inputSearch, StringComparison.OrdinalIgnoreCase));
+            }
+
+            List<string> matchedList = matchedTypes.ToList();
+            if (matchedList.Count > 0)
+            {
+                updatedCache.Add(pair.Key, matchedList);
+            }
         }
 
-        DispatchUpdateWithNewBaseList(set);
+        _filteredGroupsCache = updatedCache;
     }
 
-    private void OnBaseTypeToggle(string type, bool value)
+    private bool? GetSelectAll(string key)
     {
-        HashSet<string> list = [.. CurrentBaseTypeList];
+        if (!BaseTypeConstants.BaseTypes.TryGetValue(key, out IReadOnlyList<string>? list) || !list.Any())
+        {
+            return false;
+        }
 
-        if (value) list.Add(type);
-        else list.Remove(type);
-
-        DispatchUpdateWithNewBaseList(list);
+        return list.All(b => CurrentBaseTypeList.Contains(b));
     }
 
     private void OnResetBaseTypes()
     {
-        _inputSearch = string.Empty;
-        DispatchUpdateWithNewBaseList([]);
+        SetInputSearch(string.Empty);
+
+        if (CurrentBaseTypeList.Count > 0)
+        {
+            DispatchUpdateWithNewBaseList([]);
+        }
     }
 
     private void DispatchUpdateWithNewBaseList(HashSet<string> list)
     {
-        if (Block == null) return;
-
         Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, Block with { BaseTypeList = list }));
     }
 

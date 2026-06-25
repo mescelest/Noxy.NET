@@ -1,0 +1,49 @@
+@inject IDispatcher Dispatcher
+@inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <InputControlCheckbox class="checkbox" ID="@Id" Name="@Name" Option="true" @bind-Value:get="@IsChecked" @bind-Value:set="OnToggle">
+        <span class="text" title="@TypeName">@TypeName</span>
+    </InputControlCheckbox>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Guid GroupId { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid BlockId { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string TypeName { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool IsChecked { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
+    }
+
+    private void OnToggle(bool value)
+    {
+        FilterBlock block = BlockSelection.Value;
+        HashSet<string> list = [.. block.BaseTypeList];
+        bool isChanged = value ? list.Add(TypeName) : list.Remove(TypeName);
+
+        if (isChanged)
+        {
+            Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, block with { BaseTypeList = list }));
+        }
+    }
+
+}

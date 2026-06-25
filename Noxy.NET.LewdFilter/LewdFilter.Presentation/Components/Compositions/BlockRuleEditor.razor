@@ -91,8 +91,7 @@
 
     private void OnButtonRuleAddClick()
     {
-        FilterRule rule = FilterRule.FromKeyword(FilterKeywordEnum.Rarity);
-        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupId, BlockId, rule));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupId, BlockId, FilterRule.Default));
     }
 
     private void OnSelectRuleKeywordChange(Guid ruleId, FilterKeywordEnum keyword)

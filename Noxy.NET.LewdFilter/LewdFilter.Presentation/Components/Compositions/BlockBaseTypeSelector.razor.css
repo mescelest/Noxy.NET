@@ -12,34 +12,27 @@
     row-gap: var(--size-gap-xs);
 }
 
-.content {
-    /*display: flex;*/
-    /*flex: 0 0 auto;*/
-    /*flex-flow: column;*/
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    row-gap: var(--size-gap-xxs);
-    column-gap: var(--size-gap-xxs);
-    padding: var(--size-gap-xxs);
-    border: var(--size-border-width-sm) solid var(--color-offset-primary-md);
-}
-
 .action-list {
     display: flex;
     flex: 0 0 auto;
     flex-flow: row;
     justify-content: space-between;
+    align-items: flex-end;
+    column-gap: var(--size-gap-md);
 }
 
-.content ::deep > .base-type-checkbox {
-    min-width: 0;
-    width: 100%;
+.content {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    row-gap: var(--size-gap-md);
+    padding: var(--size-gap-xxs);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-md);
+    max-height: 500px;
+    overflow: auto;
 }
 
-.base-type-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-    min-width: 0;
+.no-results {
+    grid-column: 1 / -1;
+    margin: var(--size-gap-md) 0;
+    text-align: center;
 }

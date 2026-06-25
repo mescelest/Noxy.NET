@@ -27,8 +27,6 @@
     font-size: 20px;
 }
 
-
-
 .preview {
     display: flex;
     justify-content: center;
@@ -56,11 +54,12 @@
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: subgrid;
-    row-gap: var(--size-gap-xs);
+    row-gap: var(--size-gap-sm);
 }
 
 .content ::deep > .Collapsible > .content-wrapper > .content {
     padding: var(--size-gap-sm);
+    padding-bottom: 0;
 }
     
     

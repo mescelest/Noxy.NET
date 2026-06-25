@@ -1,0 +1,31 @@
+.BaseTypeGroup {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    row-gap: var(--size-gap-xxs);
+}
+
+.header {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    padding-bottom: var(--size-gap-xxs);
+    border-bottom: var(--size-border-width-md) solid var(--color-offset-primary-lg);
+}
+
+.content {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    row-gap: var(--size-gap-xxs);
+    column-gap: var(--size-gap-xxs);
+    padding-bottom: var(--size-gap-xxs);
+    padding-inline: var(--size-gap-xxs);
+    margin-inline: calc(-1 * var(--size-gap-xxs));
+    border-bottom: var(--size-border-width-sm) solid var(--color-offset-primary-md);
+}
+
+.BaseTypeGroup:last-child .content {
+    padding-bottom: 0;
+    border-bottom: none;
+}

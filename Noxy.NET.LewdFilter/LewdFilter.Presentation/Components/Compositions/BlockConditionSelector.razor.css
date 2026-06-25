@@ -1,6 +1,0 @@
-﻿.BlockConditionSelector {
-    display: grid;
-    grid-template-columns: max-content max-content max-content;
-    row-gap: var(--size-gap-xs);
-    column-gap: var(--size-gap-xs);
-}

@@ -1,14 +1,26 @@
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 using LewdFilter.Domain.Abstractions;
 using LewdFilter.Domain.Enums;
 
 namespace LewdFilter.Domain.Models;
 
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(FilterRule), nameof(FilterRule))]
+[JsonDerivedType(typeof(FilterRule<bool>), nameof(Boolean))]
+[JsonDerivedType(typeof(FilterRule<int>), nameof(Int32))]
+[JsonDerivedType(typeof(FilterRule<string>), nameof(String))]
+[JsonDerivedType(typeof(FilterRule<FilterColor?>), nameof(FilterColor))]
+[JsonDerivedType(typeof(FilterRule<FilterFontSize>), nameof(FilterFontSize))]
+[JsonDerivedType(typeof(FilterRule<FilterBeamEffect?>), nameof(FilterBeamEffect))]
+[JsonDerivedType(typeof(FilterRule<FilterMinimapIcon?>), nameof(FilterMinimapIcon))]
+[JsonDerivedType(typeof(FilterRule<FilterComparatorRarity?>), nameof(FilterComparatorRarity))]
+[JsonDerivedType(typeof(FilterRule<FilterComparatorInt?>), nameof(FilterComparatorInt))]
 public record FilterRule : FilterEntity
 {
     public FilterKeywordEnum Keyword { get; set; }
 
-    public static FilterRule Default => new();
+    public static FilterRule Default => new() { Keyword = FilterKeywordEnum.SetTextColor };
 
     public virtual string ValueAsString() => string.Empty;
 

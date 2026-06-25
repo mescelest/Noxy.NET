@@ -233,7 +233,7 @@ public static class FilterFeatureReducers
     public static FilterFeatureState OnMergeGroupAndColors(FilterFeatureState state, MergeGroupAndColorsAction action)
     {
         Dictionary<FilterColorTypeEnum, List<FilterColor>> collectionColor = state.Filter.CustomColorCollection.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToList());
-        Dictionary<FilterColor, FilterColor> referenceMap = [];
+        Dictionary<FilterColor, FilterColor> map = [];
 
         foreach (FilterColorExport incoming in action.ColorList)
         {
@@ -243,25 +243,19 @@ public static class FilterFeatureReducers
                 collectionColor[incoming.Type] = list;
             }
 
-            FilterColor? match = list.FirstOrDefault(c => c.ValueEquals(incoming.Color));
+            FilterColor? match = list.FirstOrDefault(color => color.ValueEquals(incoming.Color));
             if (match is not null)
             {
-                referenceMap[incoming.Color] = match;
+                map[incoming.Color] = match;
             }
             else
             {
-                FilterColor color = incoming.Color with { ID = Guid.NewGuid() };
-                list.Add(color);
-                referenceMap[incoming.Color] = color;
+                map[incoming.Color] = incoming.Color with { ID = Guid.NewGuid() };
+                list.Add(map[incoming.Color]);
             }
         }
 
-        List<FilterBlock> listUpdated = action.Group.BlockList.Select(block => block with
-        {
-            TextColor = block.TextColor is not null && referenceMap.TryGetValue(block.TextColor, out FilterColor? newText) ? newText : block.TextColor,
-            BackgroundColor = block.BackgroundColor is not null && referenceMap.TryGetValue(block.BackgroundColor, out FilterColor? newBg) ? newBg : block.BackgroundColor,
-            BorderColor = block.BorderColor is not null && referenceMap.TryGetValue(block.BorderColor, out FilterColor? newBorder) ? newBorder : block.BorderColor
-        }).ToList();
+        List<FilterBlock> listUpdated = [.. action.Group.BlockList.Select(block => block with { RuleList = [..block.RuleList.Select(rule => MapRuleColorReferences(map, rule))] })];
 
         return state with
         {
@@ -311,5 +305,15 @@ public static class FilterFeatureReducers
     {
         action(obj);
         return obj;
+    }
+
+    private static FilterRule MapRuleColorReferences(Dictionary<FilterColor, FilterColor> map, FilterRule rule)
+    {
+        if (rule is FilterRule<FilterColor?> { Value: { } color } ruleColor && map.TryGetValue(color, out FilterColor? colorMatched))
+        {
+            return ruleColor with { Value = colorMatched };
+        }
+
+        return rule;
     }
 }

@@ -1,0 +1,18 @@
+.BaseTypeItem {
+    display: flex;
+    min-width: 0;
+    width: 100%;
+}
+
+.BaseTypeItem ::deep > .checkbox {
+    min-width: 0;
+    width: 100%;
+}
+
+.text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}

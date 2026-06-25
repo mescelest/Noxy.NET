@@ -57,6 +57,11 @@ public record FilterFeatureState
         return state => SelectBlock(groupId, blockId)(state).BaseTypeList.Count;
     }
 
+    public static Func<FilterFeatureState, int> SelectBlockRuleCount(Guid groupId, Guid blockId)
+    {
+        return state => SelectBlock(groupId, blockId)(state).RuleList.Count;
+    }
+
     public static Func<FilterFeatureState, ImmutableArray<FilterRule>> SelectRuleList(Guid groupId, Guid blockId)
     {
         return state => [.. SelectBlock(groupId, blockId)(state).RuleList];
@@ -87,13 +92,12 @@ public record FilterFeatureState
         return state =>
         {
             FilterBlock block = SelectBlock(groupId, blockId)(state);
+            FilterColor textColor = block.RuleList.OfType<FilterRule<FilterColor?>>().FirstOrDefault(rule => rule.Keyword == FilterKeywordEnum.SetTextColor)?.Value ?? FilterColor.DefaultText;
+            FilterColor bgColor = block.RuleList.OfType<FilterRule<FilterColor?>>().FirstOrDefault(rule => rule.Keyword == FilterKeywordEnum.SetBackgroundColor)?.Value ?? FilterColor.DefaultBackground;
+            FilterColor borderColor = block.RuleList.OfType<FilterRule<FilterColor?>>().FirstOrDefault(rule => rule.Keyword == FilterKeywordEnum.SetBorderColor)?.Value ?? FilterColor.DefaultBorder;
+            double rawFontSize = block.RuleList.OfType<FilterRule<FilterFontSize>>().FirstOrDefault(rule => rule.Keyword == FilterKeywordEnum.SetFontSize)?.Value?.Value ?? 32.0;
 
-            string textHex = (block.TextColor ?? FilterColor.DefaultText).ToHex();
-            string bgHex = (block.BackgroundColor ?? FilterColor.DefaultBackground).ToHex();
-            string borderStyle = (block.BorderColor ?? FilterColor.DefaultBorder).ToHex();
-            string fontSize = $"{(block.FontSize ?? 32) / 32.0:0.00}rem";
-
-            return $"color: {textHex}; background-color: {bgHex}; border: 1px solid {borderStyle}; font-size: {fontSize};";
+            return $"color: {textColor.ToHex()}; background-color: {bgColor.ToHex()}; border: 1px solid {borderColor.ToHex()}; font-size: {rawFontSize / 32.0:0.00}rem;";
         };
     }
 }

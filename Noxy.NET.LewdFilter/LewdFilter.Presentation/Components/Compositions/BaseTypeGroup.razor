@@ -1,0 +1,83 @@
+@inject IDispatcher Dispatcher
+@inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="header">
+        <InputControlCheckbox ID="@SelectAllId" Option="true" @bind-Value:get="@IsGroupSelected" @bind-Value:set="OnSelectAllToggle">
+            <h4>@GroupKey</h4>
+        </InputControlCheckbox>
+    </div>
+
+    <div class="content">
+        @foreach (string type in GroupItems)
+        {
+            bool isChecked = CurrentBaseTypeList.Contains(type);
+            string name = $"base-type-{GroupKey}";
+
+            <BaseTypeItem @key="type" GroupId="@GroupId" BlockId="@BlockId" Id="@GetBaseTypeID(type)" Name="@name" TypeName="@type" IsChecked="@isChecked"/>
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public string GroupKey { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public List<string> GroupItems { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public HashSet<string> CurrentBaseTypeList { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public Guid GroupId { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid BlockId { get; set; }
+
+    [Parameter]
+    public bool? IsGroupSelected { get; set; }
+
+    private FilterBlock Block => BlockSelection.Value;
+
+    private string SelectAllId => $"select-all-{GroupKey}-{BlockId}-";
+
+    private string GetBaseTypeID(string type) => $"{type}-{BlockId}-";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
+    }
+
+    private void OnSelectAllToggle(bool? value)
+    {
+        if (!BaseTypeConstants.BaseTypes.TryGetValue(GroupKey, out IReadOnlyList<string>? list)) return;
+
+        HashSet<string> set = [.. Block.BaseTypeList];
+        bool isChanged = false;
+
+        if (value ?? false)
+        {
+            foreach (string item in list)
+            {
+                if (set.Add(item)) isChanged = true;
+            }
+        }
+        else
+        {
+            foreach (string item in list)
+            {
+                if (set.Remove(item)) isChanged = true;
+            }
+        }
+
+        if (isChanged)
+        {
+            Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, Block with { BaseTypeList = set }));
+        }
+    }
+
+}

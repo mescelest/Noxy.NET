@@ -22,23 +22,26 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
     {
         return RunSafeAsync(async () =>
         {
-            FilterGroup group = FilterFeatureState.SelectGroup(action.GroupID)(state.Value);
-            if (group == FilterGroup.Default) return new FilterFeatureReducers.ExportGroupSuccessAction();
+            FilterGroup targetGroup = FilterFeatureState.SelectGroup(action.GroupID)(state.Value);
+            if (targetGroup == FilterGroup.Default) return new FilterFeatureReducers.ExportGroupSuccessAction();
 
             HashSet<Guid> listColorID = [];
-            foreach (FilterBlock block in group.BlockList)
+            foreach (FilterBlock block in targetGroup.BlockList)
             {
-                if (block.TextColor is not null) listColorID.Add(block.TextColor.ID);
-                if (block.BackgroundColor is not null) listColorID.Add(block.BackgroundColor.ID);
-                if (block.BorderColor is not null) listColorID.Add(block.BorderColor.ID);
+                foreach (FilterRule rule in block.RuleList)
+                {
+                    if (rule is FilterRule<FilterColor?> { Value: { } color })
+                    {
+                        listColorID.Add(color.ID);
+                    }
+                }
             }
 
             List<FilterColorExport> listColor = [.. from kvp in state.Value.Filter.CustomColorCollection from color in kvp.Value where listColorID.Contains(color.ID) select new FilterColorExport(kvp.Key, color)];
-
-            FilterGroupExport package = new(group, listColor);
+            FilterGroupExport package = new(targetGroup, listColor);
             string json = storage.SerializeGroupExport(package);
 
-            await DownloadAsync($"{GetFilterName()}.{GetGroupName(group)}.{JsonExtension}", json);
+            await DownloadAsync($"{GetFilterName()}.{GetGroupName(targetGroup)}.{JsonExtension}", json);
             return new FilterFeatureReducers.ExportGroupSuccessAction();
         });
     }
