@@ -19,23 +19,43 @@ public class MiscellaneousBaseTypeConstants
     [
         "Breach Splinter",
         "Breachstone",
+        "Breachlord Sac",
         "Simulacrum Splinter",
         "Simulacrum",
+        "Raven's Reflection",
         "An Audience with the King",
+        "Call of the Shadows",
+        "Head of the King",
         "Kulemak's Invitation",
+        "Expedition Logbook",
+        "Shattered Triskelion",
+        "Origin Spark",
+        "Origin Core",
+        "Origin Cradle",
+        "Ancient Crisis Fragment",
         "Faded Crisis Fragment",
         "Weathered Crisis Fragment",
         "Primary Calamity Fragment",
         "Secondary Calamity Fragment",
         "Tertiary Calamity Fragment",
-        "Djinn Barya",
-        "Inscribed Ultimatum",
         "Cowardly Fate",
         "Deadly Fate",
         "Victorious Fate",
-        "Ancient Crisis Fragment",
-        "Shattered Triskelion",
-        "Call of the Shadows"
+        "Twilight Reliquary Key",
+        "Azmeri Reliquary Key",
+        "Olroth's Reliquary Key",
+        "Ritualistic Reliquary Key",
+        "Tangmazu's Reliquary Key",
+        "The Arbiter's Reliquary Key",
+        "The Trialmaster's Reliquary Key",
+        "Xesht's Reliquary Key",
+        "Zarokh's Reliquary Key: Against the Darkness",
+        "Zarokh's Reliquary Key: Blessed Bonds",
+        "Zarokh's Reliquary Key: Sandstorm Visage",
+        "Zarokh's Reliquary Key: Sekhema's Resolve",
+        "Zarokh's Reliquary Key: Temporalis",
+        "Djinn Barya",
+        "Inscribed Ultimatum",
     ];
 
     public static readonly string[] Relics =
@@ -49,22 +69,6 @@ public class MiscellaneousBaseTypeConstants
         "Vase Relic",
     ];
 
-    public static readonly string[] ReliquaryKey =
-    [
-        "Olroth's Reliquary Key",
-        "Ritualistic Reliquary Key",
-        "Tangmazu's Reliquary Key",
-        "The Arbiter's Reliquary Key",
-        "The Trialmaster's Reliquary Key",
-        "Twilight Reliquary Key",
-        "Xesht's Reliquary Key",
-        "Zarokh's Reliquary Key: Against the Darkness",
-        "Zarokh's Reliquary Key: Blessed Bonds",
-        "Zarokh's Reliquary Key: Sandstorm Visage",
-        "Zarokh's Reliquary Key: Sekhema's Resolve",
-        "Zarokh's Reliquary Key: Temporalis",
-    ];
-
     public static readonly string[] Tablet =
     [
         "Abyss Tablet",
@@ -75,6 +79,13 @@ public class MiscellaneousBaseTypeConstants
         "Overseer Tablet",
         "Ritual Tablet",
         "Temple Tablet",
+    ];
+
+    public static readonly string[] SkillGem =
+    [
+        "Uncut Skill Gem",
+        "Uncut Spirit Gem",
+        "Uncut Support Gem"
     ];
 
     public static readonly string[] LineageSupportGemBase =
@@ -182,6 +193,7 @@ public class MiscellaneousBaseTypeConstants
         "Ixchel's Torment",
         "Tangmazu's Thurible",
         "Trickster's Shard",
+        "Mórrigan's Insight"
     ];
 
     public static readonly string[] FlaskLife =

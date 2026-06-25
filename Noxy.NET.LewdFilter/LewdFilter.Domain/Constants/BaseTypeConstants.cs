@@ -33,13 +33,13 @@ public static class BaseTypeConstants
         { "Omens (Abyssal)", CurrencyBaseTypeConstants.OmenAbyssal },
 
         { "Fragments", MiscellaneousBaseTypeConstants.Fragment },
-        { "Reliquary Keys", MiscellaneousBaseTypeConstants.ReliquaryKey },
         { "Tablets", MiscellaneousBaseTypeConstants.Tablet },
         { "Wombgifts", MiscellaneousBaseTypeConstants.Wombgift },
         { "Relics", MiscellaneousBaseTypeConstants.Relics },
         { "Flasks (Life)", MiscellaneousBaseTypeConstants.FlaskLife },
         { "Flasks (Mana)", MiscellaneousBaseTypeConstants.FlaskMana },
 
+        { "Skill Gems", MiscellaneousBaseTypeConstants.SkillGem },
         { "Lineage Gems (Base)", MiscellaneousBaseTypeConstants.LineageSupportGemBase },
         { "Lineage Gems (Abyss)", MiscellaneousBaseTypeConstants.LineageSupportGemAbyss },
         { "Lineage Gems (Aldur)", MiscellaneousBaseTypeConstants.LineageSupportGemAldur },
