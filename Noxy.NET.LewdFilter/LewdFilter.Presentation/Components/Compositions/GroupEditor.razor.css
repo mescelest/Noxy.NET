@@ -7,7 +7,7 @@
 
 .GroupEditor ::deep .table {
     display: grid;
-    grid-template-columns: max-content 1fr max-content max-content max-content;
+    grid-template-columns: max-content 1fr max-content max-content max-content max-content;
     align-items: center;
     row-gap: var(--size-gap-xs);
 }

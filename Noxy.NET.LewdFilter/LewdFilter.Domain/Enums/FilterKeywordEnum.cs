@@ -2,13 +2,14 @@ namespace LewdFilter.Domain.Enums;
 
 public enum FilterKeywordEnum
 {
-    AlwaysShow,
-    Mirrored,
-    Corrupted,
-    FracturedItem,
-    Identified,
-    IsVaalUnique,
-    TwiceCorrupted,
+    SetTextColor,
+    SetBorderColor,
+    SetBackgroundColor,
+    SetFontSize,
+    PlayEffect,
+    MinimapIcon,
+
+    Rarity,
 
     AreaLevel,
     DropLevel,
@@ -25,14 +26,13 @@ public enum FilterKeywordEnum
     Sockets,
     StackSize,
 
-    Rarity,
-
-    SetTextColor,
-    SetBorderColor,
-    SetBackgroundColor,
-    SetFontSize,
-    PlayEffect,
-    MinimapIcon,
+    Corrupted,
+    Mirrored,
+    FracturedItem,
+    Identified,
+    IsVaalUnique,
+    TwiceCorrupted,
+    AlwaysShow,
 
     PlayAlertSound,
     PlayAlertSoundPositional,
@@ -53,6 +53,30 @@ public static class FilterKeywordEnumExtensions
 
         public string ToTextString() => keyword switch
         {
+            FilterKeywordEnum.SetTextColor => "Text Color",
+            FilterKeywordEnum.SetBorderColor => "Border Color",
+            FilterKeywordEnum.SetBackgroundColor => "Background Color",
+            FilterKeywordEnum.SetFontSize => "Font Size",
+            FilterKeywordEnum.PlayEffect => "Beam Effect",
+            FilterKeywordEnum.MinimapIcon => "Minimap Icon",
+
+            FilterKeywordEnum.Rarity => "Rarity",
+
+            FilterKeywordEnum.AreaLevel => "Area Level",
+            FilterKeywordEnum.DropLevel => "Drop Level",
+            FilterKeywordEnum.ItemLevel => "Item Level",
+            FilterKeywordEnum.StackSize => "Stack Size",
+            FilterKeywordEnum.Sockets => "Sockets",
+            FilterKeywordEnum.Quality => "Quality",
+            FilterKeywordEnum.GemLevel => "Gem Level",
+            FilterKeywordEnum.WaystoneTier => "Waystone Tier",
+            FilterKeywordEnum.BaseArmour => "Base Armour",
+            FilterKeywordEnum.BaseEnergyShield => "Base Energy Shield",
+            FilterKeywordEnum.BaseEvasion => "Base Evasion",
+            FilterKeywordEnum.BaseWard => "Base Ward",
+            FilterKeywordEnum.Width => "Width",
+            FilterKeywordEnum.Height => "Height",
+
             FilterKeywordEnum.AlwaysShow => "Always Show",
             FilterKeywordEnum.Mirrored => "Mirrored",
             FilterKeywordEnum.Corrupted => "Corrupted",
@@ -60,30 +84,6 @@ public static class FilterKeywordEnumExtensions
             FilterKeywordEnum.Identified => "Identified",
             FilterKeywordEnum.IsVaalUnique => "Is Vaal Unique",
             FilterKeywordEnum.TwiceCorrupted => "Twice Corrupted",
-
-            FilterKeywordEnum.AreaLevel => "Area Level",
-            FilterKeywordEnum.DropLevel => "Drop Level",
-            FilterKeywordEnum.ItemLevel => "Item Level",
-            FilterKeywordEnum.WaystoneTier => "Waystone Tier",
-            FilterKeywordEnum.GemLevel => "Gem Level",
-            FilterKeywordEnum.BaseArmour => "Base Armour",
-            FilterKeywordEnum.BaseEnergyShield => "Base Energy Shield",
-            FilterKeywordEnum.BaseEvasion => "Base Evasion",
-            FilterKeywordEnum.BaseWard => "Base Ward",
-            FilterKeywordEnum.Height => "Height",
-            FilterKeywordEnum.Width => "Width",
-            FilterKeywordEnum.Quality => "Quality",
-            FilterKeywordEnum.Sockets => "Sockets",
-            FilterKeywordEnum.StackSize => "Stack Size",
-
-            FilterKeywordEnum.Rarity => "Rarity",
-
-            FilterKeywordEnum.SetTextColor => "Text Color",
-            FilterKeywordEnum.SetBorderColor => "Border Color",
-            FilterKeywordEnum.SetBackgroundColor => "Background Color",
-            FilterKeywordEnum.SetFontSize => "Font Size",
-            FilterKeywordEnum.PlayEffect => "Beam Effect",
-            FilterKeywordEnum.MinimapIcon => "Minimap Icon",
 
             FilterKeywordEnum.PlayAlertSound => "Alert Sound",
             FilterKeywordEnum.PlayAlertSoundPositional => "Alert Sound (Positional)",

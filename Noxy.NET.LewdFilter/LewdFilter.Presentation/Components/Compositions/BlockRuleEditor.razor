@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <SortableList class="list" List="EditableRuleList" KeySelector="GetRowKey" Handle="sortable-handle" OnUpdate="OnRulesReordered">
+    <SortableList class="list" List="EditableRuleList" KeySelector="GetRowKey" Handle="sortable-handle" Draggable="row" OnUpdate="OnRulesReordered">
         <div @key="context.Item.ID" class="row">
 
             <div class="sortable-handle">

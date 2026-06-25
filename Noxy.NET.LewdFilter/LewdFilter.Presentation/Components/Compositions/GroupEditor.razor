@@ -25,20 +25,26 @@
             <div class="table-cell" role="cell">
                 @if (context.Index == 0)
                 {
-                    <Button @key='"add-btn"' type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="AddNewRowAtBottom">
+                    <Button @key='"add-btn"' type="button" Status="StatusEnum.Success" IsIcon="true" title="Add group" @onclick="OnButtonAddGroupClick">
                         <MaterialIcon Icon="add" Size="20px"/>
                     </Button>
                 }
                 else
                 {
-                    <Button @key='"remove-btn"' type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => DeleteGroup(context.Row.ID)">
+                    <Button @key='"remove-btn"' type="button" Status="StatusEnum.Error" IsIcon="true" title="Delete group" @onclick="() => OnButtonDeleteGroupClick(context.Row.ID)">
                         <MaterialIcon Icon="remove" Size="20px"/>
                     </Button>
                 }
             </div>
 
             <div class="table-cell" role="cell">
-                <Button type="button" Status="StatusEnum.None" IsIcon="true" @onclick="() => ExportGroup(context.Row.ID)" title="Export group JSON">
+                <Button type="button" Status="StatusEnum.Notice" IsIcon="true" @onclick="() => OnButtonCloneGroupClick(context.Row.ID)" title="Clone group">
+                    <MaterialIcon Icon="content_copy" Size="20px"/>
+                </Button>
+            </div>
+
+            <div class="table-cell" role="cell">
+                <Button type="button" Status="StatusEnum.None" IsIcon="true" @onclick="() => OnButtonExportGroupClick(context.Row.ID)" title="Export group">
                     <MaterialIcon Icon="download" Size="20px"/>
                 </Button>
             </div>
@@ -76,13 +82,15 @@
         Dispatcher.Dispatch(new FilterFeatureReducers.SetGroupAction(group with { Name = value ?? string.Empty }));
     }
 
-    private void AddNewRowAtBottom()
+    private void OnButtonAddGroupClick()
     {
         Dispatcher.Dispatch(new FilterFeatureReducers.SetGroupAction(FilterGroup.Default));
     }
 
-    private void DeleteGroup(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveGroupAction(id));
+    private void OnButtonDeleteGroupClick(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveGroupAction(id));
 
-    private void ExportGroup(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.ExportGroupAction(id));
+    private void OnButtonExportGroupClick(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.ExportGroupAction(id));
+
+    private void OnButtonCloneGroupClick(Guid id) => Dispatcher.Dispatch(new FilterFeatureReducers.CloneGroupAction(id));
 
 }

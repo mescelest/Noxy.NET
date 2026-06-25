@@ -43,7 +43,7 @@
                     bool isChecked = CurrentBaseTypeList.Contains(type);
 
                     <InputControlCheckbox @key="type" class="base-type-checkbox" ID="@GetBaseTypeID(type)" Name="base-type" Option="true" @bind-Value:get="@isChecked" @bind-Value:set="v => OnBaseTypeToggle(type, v)">
-                        <span class="base-type-text">@type</span>
+                        <span class="base-type-text" title="@type">@type</span>
                     </InputControlCheckbox>
                 }
             }

@@ -14,7 +14,7 @@ public record Filter : FilterEntity
     public List<FilterGroup> GroupList { get; set; } = [];
 
     [JsonPropertyOrder(2)]
-    public Dictionary<FilterColorTypeEnum, List<FilterColor>> CustomColorCollection { get; set; } = new()
+    public Dictionary<FilterColorTypeEnum, IReadOnlyList<FilterColor>> CustomColorCollection { get; set; } = new()
     {
         { FilterColorTypeEnum.Text, [] },
         { FilterColorTypeEnum.Border, [] },
@@ -25,12 +25,12 @@ public record Filter : FilterEntity
     {
         Name = other.Name;
         GroupList = other.GroupList.Select(g => g with { }).ToList();
-        CustomColorCollection = other.CustomColorCollection.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Select(c => c with { }).ToList());
+        CustomColorCollection = other.CustomColorCollection.ToDictionary(kvp => kvp.Key, IReadOnlyList<FilterColor> (kvp) => kvp.Value.Select(c => c with { }).ToList());
     }
 
     public List<FilterColor> GetColorList(FilterColorTypeEnum type)
     {
-        return CustomColorCollection.GetValueOrDefault(type, []);
+        return CustomColorCollection.GetValueOrDefault(type, []).ToList();
     }
 
     public bool TryGetColor(FilterColorTypeEnum type, string? idString, [NotNullWhen(true)] out FilterColor? color)

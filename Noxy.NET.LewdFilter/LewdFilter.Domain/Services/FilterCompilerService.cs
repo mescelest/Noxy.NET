@@ -100,7 +100,7 @@ public class FilterCompilerService
 
         sb.AppendLine("## Custom Colors");
 
-        foreach ((FilterColorTypeEnum type, List<FilterColor> list) in filter.CustomColorCollection)
+        foreach ((FilterColorTypeEnum type, IReadOnlyList<FilterColor> list) in filter.CustomColorCollection)
         {
             if (list.Count == 0) continue;
 

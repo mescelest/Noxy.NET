@@ -11,7 +11,6 @@
 
 .header {
     grid-column: 1 / -1;
-
     display: grid;
     grid-template-columns: subgrid;
     border-bottom: var(--size-border-width-md) solid var(--color-offset-primary-lg);
@@ -20,7 +19,6 @@
 
 .row {
     grid-column: 1 / -1;
-
     display: grid;
     grid-template-columns: subgrid;
 }

@@ -1,5 +1,5 @@
 @inject IDispatcher Dispatcher
-@inject IStateSelection<FilterFeatureState, ImmutableDictionary<FilterColorTypeEnum, List<FilterColor>>> ColorCollectionSelection
+@inject IStateSelection<FilterFeatureState, ImmutableDictionary<FilterColorTypeEnum, IReadOnlyList<FilterColor>>> ColorCollectionSelection
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -32,7 +32,9 @@
             break;
 
         case FilterRule<bool> boolRule:
-            <InputControlCheckbox Option="true" @bind-Value:get="boolRule.Value" @bind-Value:set="v => UpdateBoolRule(boolRule, v)"/>
+            <InputControlCheckbox Option="true" @bind-Value:get="boolRule.Value" @bind-Value:set="v => UpdateBoolRule(boolRule, v)">
+                @context.ToString()
+            </InputControlCheckbox>
             break;
 
         default:
@@ -108,8 +110,8 @@
             _ => throw new InvalidEnumArgumentException(nameof(keyword), (int)keyword, typeof(FilterKeywordEnum))
         };
 
-        ImmutableDictionary<FilterColorTypeEnum, List<FilterColor>> collection = ColorCollectionSelection.Value;
-        return collection.TryGetValue(colorType, out List<FilterColor>? list) ? [null, .. list] : [null];
+        ImmutableDictionary<FilterColorTypeEnum, IReadOnlyList<FilterColor>> collection = ColorCollectionSelection.Value;
+        return collection.TryGetValue(colorType, out IReadOnlyList<FilterColor>? list) ? [null, .. list] : [null];
     }
 
     private static string GetColorName(FilterColor? color) => color?.Name ?? "[Default]";

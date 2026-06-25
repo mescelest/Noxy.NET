@@ -15,7 +15,10 @@
 
     <InputElementCheckbox TOption="TOption" @attributes="@AdditionalAttributes" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
 
-    @ChildContent   
+    @if (ChildContent != null)
+    {
+        @ChildContent(Checked)
+    }
 </label>
 
 @code {
@@ -24,7 +27,7 @@
     public TOption Option { get; set; }
 
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public RenderFragment<bool?>? ChildContent { get; set; }
 
     [Parameter]
     public RenderFragment<bool?>? Visual { get; set; }
