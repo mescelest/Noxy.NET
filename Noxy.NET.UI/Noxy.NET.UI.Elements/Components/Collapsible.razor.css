@@ -42,7 +42,7 @@
     transition: none;
 }
 
-.Collapsible[collapsed] .arrow {
+.Collapsible[arrow-collapsed] .arrow {
     transform: rotate(90deg);
 }
 

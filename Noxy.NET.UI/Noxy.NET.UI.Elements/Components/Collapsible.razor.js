@@ -11,6 +11,12 @@ export function RegisterCollapsible(isCollapsed, element, refDotNet, method) {
     element.addEventListener('transitionend', element._callback);
 }
 
+export function PrepareExpand(element) {
+    if (!element.style.gridTemplateRows) {
+        element.style.gridTemplateRows = 'minmax(0, 0fr)';
+    }
+}
+
 export function AnimateExpand(element) {
     element._state = false;
     element.style.gridTemplateRows = 'minmax(0, 1fr)';

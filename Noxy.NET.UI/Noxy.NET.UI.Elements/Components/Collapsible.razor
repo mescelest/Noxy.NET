@@ -2,7 +2,7 @@
 @inherits ElementComponent
 @implements IAsyncDisposable
 
-<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" loading="@_isLoading" collapsed="@(_isCollapsed && _isAnimating == null)">
+<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" loading="@_isLoading" collapsed="@(_isCollapsed && _isAnimating == null)" arrow-collapsed="@IsCollapsed">
     <div class="header-wrapper">
         @Header
 
@@ -30,7 +30,10 @@
 
     <div class="content-wrapper" @ref="_refContentWrapper">
         <div class="content">
-            @Content
+            @if (!UnloadContentCurrent || _renderContent)
+            {
+                @Content
+            }
         </div>
     </div>
 </div>
@@ -45,6 +48,10 @@
 
     [Parameter]
     public RenderFragment<bool>? Arrow { get; set; }
+
+    [Parameter]
+    public bool? UnloadContent { get; set; }
+    private bool UnloadContentCurrent => UnloadContent ?? true;
 
     [Parameter]
     public bool? Loading { get; set; }
@@ -64,7 +71,10 @@
     private bool _intent;
     private bool _isLoading;
     private bool _isCollapsed;
+    private bool _renderContent;
+    private bool _pendingExpand;
     private bool? _isAnimating;
+
     private IJSObjectReference? _module;
     private DotNetObjectReference<Collapsible>? _refDotNet;
     private ElementReference _refContentWrapper;
@@ -75,6 +85,18 @@
     {
         base.OnInitialized();
         _isCollapsed = CollapsedCurrent;
+        _renderContent = !_isCollapsed;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (_pendingExpand && _module is not null && !_disposed)
+        {
+            _pendingExpand = false;
+            await _module.InvokeVoidAsync("AnimateExpand", _refContentWrapper);
+        }
     }
 
     protected override async Task OnAfterFirstRenderAsync()
@@ -130,6 +152,12 @@
 
         _isAnimating = null;
         _isCollapsed = collapsed;
+
+        if (collapsed && UnloadContentCurrent)
+        {
+            _renderContent = false;
+        }
+
         await InvokeAsync(StateHasChanged);
     }
 
@@ -157,7 +185,18 @@
         if (_disposed || _module is null) return;
 
         _isAnimating = collapse;
-        await _module.InvokeVoidAsync(collapse ? "AnimateCollapse" : "AnimateExpand", _refContentWrapper);
+
+        if (!collapse && UnloadContentCurrent)
+        {
+            await _module.InvokeVoidAsync("PrepareExpand", _refContentWrapper);
+            _renderContent = true;
+            _pendingExpand = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            await _module.InvokeVoidAsync(collapse ? "AnimateCollapse" : "AnimateExpand", _refContentWrapper);
+        }
     }
 
     public async ValueTask DisposeAsync()
