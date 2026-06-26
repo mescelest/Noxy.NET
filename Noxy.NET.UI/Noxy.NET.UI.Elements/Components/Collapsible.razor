@@ -6,30 +6,30 @@
     <div class="header-wrapper">
         @Header
 
-        <div class="arrow" tabindex="0" @onclick="ArrowClicked" @onkeydown="ArrowKeyPressed">
+        <button class="arrow"
+                type="button"
+                @onclick="Toggle"
+                aria-expanded="@(!IsCollapsed ? "true" : "false")"
+                aria-controls="@($"{UUIDCode}-content")"
+                aria-label="@ToggleLabelCurrent">
 
             @if (LoadingCurrent)
             {
                 <Loader Width="40" Height="40"/>
             }
+            else if (Arrow != null)
+            {
+                @Arrow(IsCollapsed)
+            }
             else
             {
-                <div class="arrow">
-                    @if (Arrow != null)
-                    {
-                        @Arrow(IsCollapsed)
-                    }
-                    else
-                    {
-                        <span>▲</span>
-                    }
-                </div>
+                <span aria-hidden="true">▲</span>
             }
-        </div>
+        </button>
     </div>
 
-    <div class="content-wrapper" @ref="_refContentWrapper">
-        <div class="content">
+    <div class="content-wrapper" @ref="_refContentWrapper" aria-hidden="@(_isCollapsed && _isAnimating == null ? "true" : null)">
+        <div class="content" id="@($"{UUIDCode}-content")">
             @if (!UnloadContentCurrent || _renderContent)
             {
                 @Content
@@ -48,6 +48,10 @@
 
     [Parameter]
     public RenderFragment<bool>? Arrow { get; set; }
+
+    [Parameter]
+    public string? ToggleLabel { get; set; }
+    private string ToggleLabelCurrent => ToggleLabel ?? "Toggle";
 
     [Parameter]
     public bool? UnloadContent { get; set; }
@@ -161,19 +165,6 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task ArrowKeyPressed(KeyboardEventArgs args)
-    {
-        if (args.Code is " " or "Enter")
-        {
-            await Toggle();
-        }
-    }
-
-    private async Task ArrowClicked()
-    {
-        await Toggle();
-    }
-
     private async Task Toggle()
     {
         await Animate(!_isCollapsed);
@@ -215,6 +206,7 @@
             // Safe to ignore
         }
 
+        _refDotNet?.Dispose();
         _refDotNet = null;
     }
 
