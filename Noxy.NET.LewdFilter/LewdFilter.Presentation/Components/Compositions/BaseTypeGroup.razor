@@ -3,21 +3,24 @@
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <div class="header">
-        <InputControlCheckbox ID="@SelectAllId" Option="true" @bind-Value:get="@IsGroupSelected" @bind-Value:set="OnSelectAllToggle">
-            <h4>@GroupKey</h4>
-        </InputControlCheckbox>
-    </div>
+    <Collapsible class="group" @bind-Collapsed="_collapsed">
+        <Header>
+            <InputControlCheckbox class="checkbox" ID="@SelectAllId" Option="true" @bind-Value:get="@IsGroupSelected" @bind-Value:set="OnCheckboxSelectAllChange">
+                <h4>@GroupKey</h4>
+            </InputControlCheckbox>
+        </Header>
+        <Content>
+            <div class="content">
+                @foreach (string type in GroupItems)
+                {
+                    bool isChecked = CurrentBaseTypeList.Contains(type);
+                    string name = $"base-type-{GroupKey}";
 
-    <div class="content">
-        @foreach (string type in GroupItems)
-        {
-            bool isChecked = CurrentBaseTypeList.Contains(type);
-            string name = $"base-type-{GroupKey}";
-
-            <BaseTypeItem @key="type" GroupId="@GroupId" BlockId="@BlockId" Id="@GetBaseTypeID(type)" Name="@name" TypeName="@type" IsChecked="@isChecked"/>
-        }
-    </div>
+                    <BaseTypeItem @key="type" GroupID="@GroupID" BlockID="@BlockID" Id="@GetBaseTypeID(type)" Name="@name" TypeName="@type" IsChecked="@isChecked"/>
+                }
+            </div>
+        </Content>
+    </Collapsible>
 </div>
 
 @code {
@@ -32,43 +35,41 @@
     public HashSet<string> CurrentBaseTypeList { get; set; } = [];
 
     [Parameter, EditorRequired]
-    public Guid GroupId { get; set; }
+    public Guid GroupID { get; set; }
 
     [Parameter, EditorRequired]
-    public Guid BlockId { get; set; }
+    public Guid BlockID { get; set; }
 
     [Parameter]
     public bool? IsGroupSelected { get; set; }
 
+    private bool _collapsed = true;
+
     private FilterBlock Block => BlockSelection.Value;
-
-    private string SelectAllId => $"select-all-{GroupKey}-{BlockId}-";
-
-    private string GetBaseTypeID(string type) => $"{type}-{BlockId}-";
+    private string SelectAllId => $"select-all-{GroupKey}-{BlockID}-";
+    private string GetBaseTypeID(string type) => $"{type}-{BlockID}-";
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
+        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupID, BlockID));
     }
 
-    private void OnSelectAllToggle(bool? value)
+    private void OnCheckboxSelectAllChange(bool? value)
     {
-        if (!BaseTypeConstants.BaseTypes.TryGetValue(GroupKey, out IReadOnlyList<string>? list)) return;
-
         HashSet<string> set = [.. Block.BaseTypeList];
         bool isChanged = false;
 
         if (value ?? false)
         {
-            foreach (string item in list)
+            foreach (string item in GroupItems)
             {
                 if (set.Add(item)) isChanged = true;
             }
         }
         else
         {
-            foreach (string item in list)
+            foreach (string item in GroupItems)
             {
                 if (set.Remove(item)) isChanged = true;
             }
@@ -76,8 +77,9 @@
 
         if (isChanged)
         {
-            Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, Block with { BaseTypeList = set }));
+            Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupID, Block with { BaseTypeList = set }));
         }
     }
+
 
 }

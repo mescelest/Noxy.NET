@@ -12,6 +12,7 @@
     flex-flow: row;
     align-items: center;
     justify-content: space-between;
+    column-gap: var(--size-gap-sm);
 }
 
 .config {
@@ -61,6 +62,3 @@
     padding: var(--size-gap-sm);
     padding-bottom: 0;
 }
-    
-    
-    

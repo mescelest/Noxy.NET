@@ -6,33 +6,33 @@
     @switch (Rule)
     {
         case FilterRule<FilterComparatorInt?> intRule:
-            <FilterIntCondition @bind-Value:get="intRule.Value" @bind-Value:set="v => UpdateIntRule(intRule, v)"/>
+            <FilterIntCondition @bind-Value:get="intRule.Value" @bind-Value:set="v => OnIntConditionChange(intRule, v)"/>
             break;
 
         case FilterRule<FilterComparatorRarity?> rarityRule:
-            <FilterRarityCondition @bind-Value:get="rarityRule.Value" @bind-Value:set="v => UpdateRarityRule(rarityRule, v)"/>
+            <FilterRarityCondition @bind-Value:get="rarityRule.Value" @bind-Value:set="v => OnRarityConditionChange(rarityRule, v)"/>
             break;
 
         case FilterRule<FilterColor?> colorRule:
-            <InputControlSelect TOption="FilterColor" OptionList="GetColorsForKeyword(colorRule.Keyword)" @bind-Value:get="colorRule.Value" @bind-Value:set="v => UpdateColorRule(colorRule, v)">
+            <InputControlSelect TOption="FilterColor" OptionList="GetColorListByKeyword(colorRule.Keyword)" @bind-Value:get="colorRule.Value" @bind-Value:set="v => OnColorChange(colorRule, v)">
                 @GetColorName(context)
             </InputControlSelect>
             break;
 
         case FilterRule<FilterMinimapIcon?> minimapRule:
-            <InputControlMinimapIcon @bind-Value:get="minimapRule.Value" @bind-Value:set="v => UpdateMinimapRule(minimapRule, v)"/>
+            <InputControlMinimapIcon @bind-Value:get="minimapRule.Value" @bind-Value:set="v => OnMinimapIconChange(minimapRule, v)"/>
             break;
 
         case FilterRule<FilterBeamEffect?> beamRule:
-            <InputControlBeamEffect @bind-Value:get="beamRule.Value" @bind-Value:set="v => UpdateBeamRule(beamRule, v)"/>
+            <InputControlBeamEffect @bind-Value:get="beamRule.Value" @bind-Value:set="v => OnBeamEffectChange(beamRule, v)"/>
             break;
 
         case FilterRule<FilterFontSize> rangeRule:
-            <InputElementRange Min="FilterFontSize.Min" Max="FilterFontSize.Max" Step="FilterFontSize.Step" @bind-Value:get="rangeRule.Value.Value" @bind-Value:set="v => UpdateRangeRule(rangeRule, v)"/>
+            <InputElementRange Min="FilterFontSize.Min" Max="FilterFontSize.Max" Step="FilterFontSize.Step" @bind-Value:get="rangeRule.Value.Value" @bind-Value:set="v => OnFontSizeChange(rangeRule, v)"/>
             break;
 
         case FilterRule<bool> boolRule:
-            <InputControlCheckbox Option="true" @bind-Value:get="boolRule.Value" @bind-Value:set="v => UpdateBoolRule(boolRule, v)">
+            <InputControlCheckbox Option="true" @bind-Value:get="boolRule.Value" @bind-Value:set="v => OnBooleanChange(boolRule, v)">
                 @context.ToString()
             </InputControlCheckbox>
             break;
@@ -46,10 +46,10 @@
 @code {
 
     [Parameter, EditorRequired]
-    public Guid GroupId { get; set; }
+    public Guid GroupID { get; set; }
 
     [Parameter, EditorRequired]
-    public Guid BlockId { get; set; }
+    public Guid BlockID { get; set; }
 
     [Parameter, EditorRequired]
     public FilterRule Rule { get; set; }
@@ -60,47 +60,47 @@
         ColorCollectionSelection.Select(FilterFeatureState.SelectCustomColorList());
     }
 
-    private void UpdateIntRule(FilterRule<FilterComparatorInt?> rule, FilterComparatorInt? value)
+    private void OnIntConditionChange(FilterRule<FilterComparatorInt?> rule, FilterComparatorInt? value)
     {
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateRarityRule(FilterRule<FilterComparatorRarity?> rule, FilterComparatorRarity? value)
+    private void OnRarityConditionChange(FilterRule<FilterComparatorRarity?> rule, FilterComparatorRarity? value)
     {
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateColorRule(FilterRule<FilterColor?> rule, FilterColor? value)
+    private void OnColorChange(FilterRule<FilterColor?> rule, FilterColor? value)
     {
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateMinimapRule(FilterRule<FilterMinimapIcon?> rule, FilterMinimapIcon? value)
+    private void OnMinimapIconChange(FilterRule<FilterMinimapIcon?> rule, FilterMinimapIcon? value)
     {
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateBeamRule(FilterRule<FilterBeamEffect?> rule, FilterBeamEffect? value)
+    private void OnBeamEffectChange(FilterRule<FilterBeamEffect?> rule, FilterBeamEffect? value)
     {
         DispatchChange(rule with { Value = value });
     }
 
-    private void UpdateRangeRule(FilterRule<FilterFontSize> rule, double? value)
+    private void OnFontSizeChange(FilterRule<FilterFontSize> rule, double? value)
     {
         DispatchChange(rule with { Value = rule.Value with { Value = value ?? 0 } });
     }
 
-    private void UpdateBoolRule(FilterRule<bool> rule, bool? value)
+    private void OnBooleanChange(FilterRule<bool> rule, bool? value)
     {
         DispatchChange(rule with { Value = value ?? false });
     }
 
     private void DispatchChange(FilterRule updatedRule)
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupId, BlockId, updatedRule));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupID, BlockID, updatedRule));
     }
 
-    private HashSet<FilterColor?> GetColorsForKeyword(FilterKeywordEnum keyword)
+    private HashSet<FilterColor?> GetColorListByKeyword(FilterKeywordEnum keyword)
     {
         FilterColorTypeEnum colorType = keyword switch
         {

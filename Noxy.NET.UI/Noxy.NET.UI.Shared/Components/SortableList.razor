@@ -28,15 +28,15 @@
     public Func<T, int, object>? KeySelector { get; set; }
 
     [Parameter]
-    public string? Handle { get; set; }
-    private string HandleCurrent => !string.IsNullOrWhiteSpace(Handle) ? Handle : "sortable-handle";
+    public string? HandleClass { get; set; }
+    private string HandleClassCurrent => !string.IsNullOrWhiteSpace(HandleClass) ? HandleClass : "sortable-handle";
 
     [Parameter]
-    public string? Draggable { get; set; }
-    private string DraggableCurrent => !string.IsNullOrWhiteSpace(Draggable) ? Draggable : "sortable-item";
+    public string? DragClass { get; set; }
+    private string DragClassCurrent => !string.IsNullOrWhiteSpace(DragClass) ? DragClass : "sortable-item";
 
     [Parameter]
-    public string? GhostClass { get; set; } = "";
+    public string? GhostClass { get; set; }
     private string GhostClassCurrent => !string.IsNullOrWhiteSpace(GhostClass) ? GhostClass : "sortable-ghost";
 
     private ElementReference _refElement;
@@ -60,8 +60,8 @@
         {
                 { "animation", 150 },
                 { "ghostClass", GhostClassCurrent },
-                { "draggable", $".{DraggableCurrent}" },
-                { "handle", $".{HandleCurrent}" }
+                { "draggable", $".{DragClassCurrent}" },
+                { "handle", $".{HandleClassCurrent}" }
         };
         _refDotNet = DotNetObjectReference.Create(this);
         _refInstance = await _componentModule.InvokeAsync<IJSObjectReference>("initSortable", _refElement, _refDotNet, options);

@@ -1,15 +1,15 @@
 ﻿@inherits BaseInput<FilterComparatorInt?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="SetOperator">
+    <InputControlSelect TOption="FilterComparatorTypeEnum" OptionList="_operators" Name="operator" @bind-Value:get="_operator" @bind-Value:set="OnSelectOperatorChange">
         @context.ToTextString()
     </InputControlSelect>
 
-    <InputControlInteger class="value-input" ID="@ID" Name="value" Size="5" @bind-Value="@_numericValue" @bind-Value:after="PushUpdate"/>
+    <InputControlInteger class="value-input" ID="@ID" Name="value" Size="5" @bind-Value:get="@_value" @bind-Value:set="OnInputValueChange"/>
 </div>
 
 @code {
-    private int? _numericValue;
+    private int? _value;
     private FilterComparatorTypeEnum _operator = FilterComparatorTypeEnum.Equal;
 
     private readonly HashSet<FilterComparatorTypeEnum> _operators = Enum.GetValues<FilterComparatorTypeEnum>().ToHashSet();
@@ -20,25 +20,31 @@
 
         if (Value is not null)
         {
-            _numericValue = Value.Value;
+            _value = Value.Value;
             _operator = Value.FilterComparatorType;
         }
         else
         {
-            _numericValue = null;
+            _value = null;
             _operator = FilterComparatorTypeEnum.Equal;
         }
     }
 
-    private void SetOperator(FilterComparatorTypeEnum op)
+    private void OnInputValueChange(int? value)
     {
-        _operator = op;
-        PushUpdate();
+        _value = value;
+        RegisterChange();
     }
 
-    private void PushUpdate()
+    private void OnSelectOperatorChange(FilterComparatorTypeEnum op)
     {
-        FilterComparatorInt? result = _numericValue is not null ? new() { Value = _numericValue.Value, FilterComparatorType = _operator } : null;
+        _operator = op;
+        RegisterChange();
+    }
+
+    private void RegisterChange()
+    {
+        FilterComparatorInt? result = _value is not null ? new() { Value = _value.Value, FilterComparatorType = _operator } : null;
         NotifyChange(result);
     }
 

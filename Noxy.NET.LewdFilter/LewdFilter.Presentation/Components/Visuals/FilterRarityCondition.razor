@@ -5,7 +5,7 @@
         @context.ToTextString()
     </InputControlSelect>
 
-    <InputControlSelect TOption="FilterRarityTypeEnum" OptionList="_setRarityTypeEnum" ID="@ID" Name="value" @bind-Value:get="_rarityValue" @bind-Value:set="OnSelectValueChange">
+    <InputControlSelect TOption="FilterRarityTypeEnum" OptionList="_setRarityTypeEnum" ID="@ID" Name="value" @bind-Value:get="_value" @bind-Value:set="OnSelectValueChange">
         @context.ToTextString()
     </InputControlSelect>
 </div>
@@ -14,32 +14,32 @@
     private readonly HashSet<FilterComparatorTypeEnum> _operators = Enum.GetValues<FilterComparatorTypeEnum>().ToHashSet();
     private readonly HashSet<FilterRarityTypeEnum> _setRarityTypeEnum = Enum.GetValues<FilterRarityTypeEnum>().ToHashSet();
 
-    private FilterRarityTypeEnum _rarityValue;
+    private FilterRarityTypeEnum _value;
     private FilterComparatorTypeEnum _operator = FilterComparatorTypeEnum.Equal;
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
 
-        _rarityValue = Value?.Value ?? FilterRarityTypeEnum.Normal;
+        _value = Value?.Value ?? FilterRarityTypeEnum.Normal;
         _operator = Value?.FilterComparatorType ?? FilterComparatorTypeEnum.Equal;
     }
 
     private void OnSelectValueChange(FilterRarityTypeEnum value)
     {
-        _rarityValue = value;
-        PushUpdate();
+        _value = value;
+        RegisterChange();
     }
 
     private void OnSelectOperatorChange(FilterComparatorTypeEnum op)
     {
         _operator = op;
-        PushUpdate();
+        RegisterChange();
     }
 
-    private void PushUpdate()
+    private void RegisterChange()
     {
-        FilterComparatorRarity result = new() { Value = _rarityValue, FilterComparatorType = _operator };
+        FilterComparatorRarity result = new() { Value = _value, FilterComparatorType = _operator };
         NotifyChange(result);
     }
 

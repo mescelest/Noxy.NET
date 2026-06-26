@@ -11,13 +11,13 @@
             bool isSelected = item == _activePage;
             string isSelectedAria = isSelected ? "true" : "false";
             string? isSelectedClass = isSelected ? "active" : null;
-            string tabId = $"tab-{item.ID}";
-            string panelId = $"panel-{item.ID}";
+            string tabID = $"tab-{item.ID}";
+            string panelID = $"panel-{item.ID}";
             int tabIndex = isSelected ? 0 : -1;
 
             <div class="tab">
-                <button @ref="_tabReferences[item]" type="button" class="tab-button" id="@tabId" tabindex="@tabIndex" data-selected="@isSelectedClass"
-                        role="tab" aria-selected="@isSelectedAria" aria-controls="@panelId" @onclick="() => ActivatePage(item)">
+                <button @ref="_tabReferences[item]" type="button" class="tab-button" id="@tabID" tabindex="@tabIndex" data-selected="@isSelectedClass"
+                        role="tab" aria-selected="@isSelectedAria" aria-controls="@panelID" @onclick="() => ActivatePage(item)">
                     @item.Title
                 </button>
                 @if (!string.IsNullOrWhiteSpace(item.Link))
@@ -40,10 +40,10 @@
     @foreach (TabPage item in _pages)
     {
         bool isSelected = item == _activePage;
-        string tabId = $"tab-{item.ID}";
-        string panelId = $"panel-{item.ID}";
+        string tabID = $"tab-{item.ID}";
+        string panelID = $"panel-{item.ID}";
 
-        <div class="tab-panel" id="@panelId" role="tabpanel" hidden="@(!isSelected)" aria-labelledby="@tabId">
+        <div class="tab-panel" id="@panelID" role="tabpanel" hidden="@(!isSelected)" aria-labelledby="@tabID">
             @if (isSelected)
             {
                 @item.ChildContent

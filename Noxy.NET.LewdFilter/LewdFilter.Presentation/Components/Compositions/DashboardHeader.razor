@@ -9,21 +9,22 @@
     </div>
 
     <div class="header-actions">
-        <Button type="button" class="btn-header btn-secondary" disabled="@State.Value.IsLoading" @onclick="TriggerExport">
-            Export JSON
-        </Button>
-
-        <label class="btn-header btn-secondary @(State.Value.IsLoading ? "is-disabled" : "")" style="cursor: pointer;">
-            Import JSON
-            <InputFile OnChange="HandleImportFile" disabled="@State.Value.IsLoading" style="display: none;" accept=".json"/>
-        </label>
 
         <label class="btn-header btn-secondary @(State.Value.IsLoading ? "is-disabled" : "")" style="cursor: pointer;">
             Import Group
-            <InputFile OnChange="HandleImportGroupFile" disabled="@State.Value.IsLoading" style="display: none;" accept=".json"/>
+            <InputFile OnChange="OnFileImportGroupChange" disabled="@State.Value.IsLoading" style="display: none;" accept=".json"/>
         </label>
 
-        <Button type="button" class="btn-header btn-primary" disabled="@State.Value.IsLoading" @onclick="TriggerSave">
+        <label class="btn-header btn-secondary @(State.Value.IsLoading ? "is-disabled" : "")" style="cursor: pointer;">
+            Import JSON
+            <InputFile OnChange="OnFileImportFilterChange" disabled="@State.Value.IsLoading" style="display: none;" accept=".json"/>
+        </label>
+
+        <Button type="button" class="btn-header btn-secondary" disabled="@State.Value.IsLoading" @onclick="OnButtonExportClick">
+            Export JSON
+        </Button>
+
+        <Button type="button" class="btn-header btn-primary" disabled="@State.Value.IsLoading" @onclick="OnButtonCompileClick">
             Compile & Download
         </Button>
     </div>
@@ -31,10 +32,10 @@
 
 @code {
 
-    private void TriggerExport() => Dispatcher.Dispatch(new FilterFeatureReducers.ExportFilterAction());
-    private void TriggerSave() => Dispatcher.Dispatch(new FilterFeatureReducers.SaveFilterAction());
+    private void OnButtonExportClick() => Dispatcher.Dispatch(new FilterFeatureReducers.ExportFilterAction());
+    private void OnButtonCompileClick() => Dispatcher.Dispatch(new FilterFeatureReducers.SaveFilterAction());
 
-    private async Task HandleImportFile(InputFileChangeEventArgs e)
+    private async Task OnFileImportFilterChange(InputFileChangeEventArgs e)
     {
         string fileContent;
 
@@ -56,7 +57,7 @@
         }
     }
 
-    private async Task HandleImportGroupFile(InputFileChangeEventArgs e)
+    private async Task OnFileImportGroupChange(InputFileChangeEventArgs e)
     {
         string fileContent;
 

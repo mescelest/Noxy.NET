@@ -9,8 +9,8 @@
     <Loader class="loading" Loading="Loading">
         @if (List.Any())
         {
-            <SortableList List="List" OnUpdate="OnUpdate" KeySelector="KeySelector" Handle="@Handle" Draggable="sortable-row" GhostClass="@GhostClass" ItemAttributes="RowAttributes">
-                <div @key="@GetRowKey(context.Item, context.Index)" class="sortable-row" role="row">
+            <SortableList List="List" OnUpdate="OnUpdate" KeySelector="KeySelector" HandleClass="@HandleClass" DragClass="sortable-row" GhostClass="@GhostClass" ItemAttributes="RowAttributes">
+                <div @key="@GetRowKey(context)" class="sortable-row" role="row">
                     @TableRow((context.Item, context.Index))
                 </div>
             </SortableList>
@@ -43,7 +43,7 @@
     public EventCallback<(int IndexOld, int IndexNew)> OnUpdate { get; set; }
 
     [Parameter]
-    public string? Handle { get; set; }
+    public string? HandleClass { get; set; }
 
     [Parameter]
     public string? GhostClass { get; set; }
@@ -51,9 +51,9 @@
     [Parameter]
     public bool Loading { get; set; }
 
-    private object GetRowKey(T item, int index)
+    private object? GetRowKey((T Item, int Index) tuple)
     {
-        return KeySelector != null ? KeySelector(item, index) : item!;
+        return KeySelector != null ? KeySelector(tuple.Item, tuple.Index) : tuple.Item;
     }
 
 }

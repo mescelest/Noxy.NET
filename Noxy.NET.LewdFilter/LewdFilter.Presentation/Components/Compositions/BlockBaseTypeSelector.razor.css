@@ -24,8 +24,8 @@
 .content {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    row-gap: var(--size-gap-md);
-    padding: var(--size-gap-xxs);
+    padding-left: var(--size-gap-xxs);
+    padding-block: var(--size-gap-xxxs);
     border: var(--size-border-width-sm) solid var(--color-offset-primary-md);
     max-height: 500px;
     overflow: auto;

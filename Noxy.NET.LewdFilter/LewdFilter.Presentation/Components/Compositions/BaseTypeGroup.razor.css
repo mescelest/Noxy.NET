@@ -2,16 +2,37 @@
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
-    row-gap: var(--size-gap-xxs);
 }
 
-.header {
+.BaseTypeGroup ::deep > .group {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
-    padding-bottom: var(--size-gap-xxs);
-    border-bottom: var(--size-border-width-md) solid var(--color-offset-primary-lg);
 }
+
+.BaseTypeGroup ::deep > .group > .header-wrapper {
+    grid-column: 1 / -1;
+}
+
+.BaseTypeGroup ::deep > .group > .header-wrapper > .checkbox {
+    justify-self: flex-start;
+}
+
+.BaseTypeGroup ::deep > .group > .content-wrapper {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+}
+
+.BaseTypeGroup ::deep > .group > .content-wrapper > .content {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    padding: var(--size-gap-xxs);
+    padding-bottom: 0;
+}
+
+
 
 .content {
     display: grid;

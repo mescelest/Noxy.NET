@@ -13,6 +13,13 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
+    <ItemGroup>
+        <Compile Remove="wwwroot\**"/>
+        <Content Remove="wwwroot\**"/>
+        <EmbeddedResource Remove="wwwroot\**"/>
+        <None Remove="wwwroot\**"/>
+    </ItemGroup>
+
 
     <ItemGroup>
         <SupportedPlatform Include="browser"/>
@@ -20,10 +27,6 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.8"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="wwwroot\"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -3,7 +3,7 @@
 @inherits ElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputControlCheckbox class="checkbox" ID="@Id" Name="@Name" Option="true" @bind-Value:get="@IsChecked" @bind-Value:set="OnToggle">
+    <InputControlCheckbox class="checkbox" ID="@Id" Name="@Name" Option="true" @bind-Value:get="@IsChecked" @bind-Value:set="OnCheckboxSelectChange">
         <span class="text" title="@TypeName">@TypeName</span>
     </InputControlCheckbox>
 </div>
@@ -11,10 +11,10 @@
 @code {
 
     [Parameter, EditorRequired]
-    public Guid GroupId { get; set; }
+    public Guid GroupID { get; set; }
 
     [Parameter, EditorRequired]
-    public Guid BlockId { get; set; }
+    public Guid BlockID { get; set; }
 
     [Parameter, EditorRequired]
     public string Id { get; set; } = string.Empty;
@@ -31,10 +31,10 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
+        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupID, BlockID));
     }
 
-    private void OnToggle(bool value)
+    private void OnCheckboxSelectChange(bool value)
     {
         FilterBlock block = BlockSelection.Value;
         HashSet<string> list = [.. block.BaseTypeList];
@@ -42,7 +42,7 @@
 
         if (isChanged)
         {
-            Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, block with { BaseTypeList = list }));
+            Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupID, block with { BaseTypeList = list }));
         }
     }
 

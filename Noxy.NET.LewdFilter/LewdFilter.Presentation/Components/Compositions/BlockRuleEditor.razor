@@ -26,13 +26,13 @@
         </div>
 
         <div class="control">
-            <InputControlCheckbox class="visibility" Option="true" @bind-Value:get="Block.IsShow" @bind-Value:set="SetIsShow">
+            <InputControlCheckbox class="visibility" Option="true" @bind-Value:get="Block.IsShow" @bind-Value:set="OnCheckboxShowChange">
                 <span class="label">@VisibilityText</span>
             </InputControlCheckbox>
         </div>
     </div>
 
-    <SortableList class="list" List="EditableRuleList" KeySelector="GetRowKey" Handle="sortable-handle" Draggable="row" OnUpdate="OnRulesReordered">
+    <SortableList class="list" List="EditableRuleList" KeySelector="GetRowKey" HandleClass="sortable-handle" DragClass="row" OnUpdate="OnSortableListUpdate">
         <div @key="context.Item.ID" class="row">
 
             <div class="sortable-handle">
@@ -54,7 +54,7 @@
             </div>
 
             <div class="control">
-                <RuleComponentDispatcher GroupId="GroupId" BlockId="BlockId" Rule="context.Item"/>
+                <RuleComponentDispatcher GroupID="GroupID" BlockID="BlockID" Rule="context.Item"/>
             </div>
         </div>
     </SortableList>
@@ -63,10 +63,10 @@
 @code {
 
     [Parameter, EditorRequired]
-    public Guid GroupId { get; set; }
+    public Guid GroupID { get; set; }
 
     [Parameter, EditorRequired]
-    public Guid BlockId { get; set; }
+    public Guid BlockID { get; set; }
 
     private readonly HashSet<FilterKeywordEnum> _availableKeywords = Enum.GetValues<FilterKeywordEnum>().ToHashSet();
 
@@ -81,34 +81,34 @@
     {
         base.OnInitialized();
 
-        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupId, BlockId));
+        BlockSelection.Select(FilterFeatureState.SelectBlock(GroupID, BlockID));
     }
 
-    private void SetIsShow(bool value)
+    private void OnCheckboxShowChange(bool value)
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, Block with { IsShow = value }));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupID, Block with { IsShow = value }));
     }
 
     private void OnButtonRuleAddClick()
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupId, BlockId, FilterRule.Default));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupID, BlockID, FilterRule.Default));
     }
 
     private void OnSelectRuleKeywordChange(Guid ruleId, FilterKeywordEnum keyword)
     {
         FilterRule rule = FilterRule.FromKeyword(keyword) with { ID = ruleId };
-        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupId, BlockId, rule));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetRuleAction(GroupID, BlockID, rule));
     }
 
     private void OnButtonRuleRemoveClick(Guid ruleId)
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.RemoveRuleAction(GroupId, BlockId, ruleId));
+        Dispatcher.Dispatch(new FilterFeatureReducers.RemoveRuleAction(GroupID, BlockID, ruleId));
     }
 
-    private void OnRulesReordered((int IndexOld, int IndexNew) indices)
+    private void OnSortableListUpdate((int IndexOld, int IndexNew) indices)
     {
         FilterRule ruleToMove = EditableRuleList[indices.IndexOld];
-        Dispatcher.Dispatch(new FilterFeatureReducers.MoveRuleAction(GroupId, BlockId, ruleToMove.ID, indices.IndexNew));
+        Dispatcher.Dispatch(new FilterFeatureReducers.MoveRuleAction(GroupID, BlockID, ruleToMove.ID, indices.IndexNew));
     }
 
 }

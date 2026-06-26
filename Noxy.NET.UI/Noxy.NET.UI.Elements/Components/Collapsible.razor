@@ -2,16 +2,11 @@
 @inherits ElementComponent
 @implements IAsyncDisposable
 
-<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" loading="@_isLoading" collapsed="@(_isCollapsed && _isAnimating == null)" arrow-collapsed="@IsCollapsed">
+<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" loading="@_isLoading" collapsed="@IsCollapsed" arrow-collapsed="@IsCollapsing">
     <div class="header-wrapper">
         @Header
 
-        <button class="arrow"
-                type="button"
-                @onclick="Toggle"
-                aria-expanded="@(!IsCollapsed ? "true" : "false")"
-                aria-controls="@($"{UUIDCode}-content")"
-                aria-label="@ToggleLabelCurrent">
+        <button class="arrow" type="button" @onclick="OnButtonArrowClick" aria-expanded="@AriaCollapsed" aria-controls="@_ariaControls" aria-label="@ToggleLabelCurrent">
 
             @if (LoadingCurrent)
             {
@@ -19,17 +14,17 @@
             }
             else if (Arrow != null)
             {
-                @Arrow(IsCollapsed)
+                @Arrow(IsCollapsing)
             }
             else
             {
-                <span aria-hidden="true">▲</span>
+                <span class="arrow-icon" aria-hidden="true">▲</span>
             }
         </button>
     </div>
 
-    <div class="content-wrapper" @ref="_refContentWrapper" aria-hidden="@(_isCollapsed && _isAnimating == null ? "true" : null)">
-        <div class="content" id="@($"{UUIDCode}-content")">
+    <div class="content-wrapper" @ref="_refContentWrapper" aria-hidden="@AriaHidden">
+        <div class="content">
             @if (!UnloadContentCurrent || _renderContent)
             {
                 @Content
@@ -79,17 +74,23 @@
     private bool _pendingExpand;
     private bool? _isAnimating;
 
+    private string _ariaControls = string.Empty;
+
     private IJSObjectReference? _module;
     private DotNetObjectReference<Collapsible>? _refDotNet;
     private ElementReference _refContentWrapper;
 
-    private bool IsCollapsed => _isAnimating ?? _isCollapsed;
+    private bool IsCollapsed => _isCollapsed && _isAnimating == null;
+    private bool IsCollapsing => _isAnimating ?? _isCollapsed;
+    private string AriaCollapsed => IsCollapsing ? "true" : "false";
+    private string? AriaHidden => IsCollapsed ? "true" : null;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         _isCollapsed = CollapsedCurrent;
         _renderContent = !_isCollapsed;
+        _ariaControls = $"{UUIDCode}-content";
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -165,7 +166,7 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task Toggle()
+    private async Task OnButtonArrowClick()
     {
         await Animate(!_isCollapsed);
         await CollapsedChanged.InvokeAsync(!_isCollapsed);

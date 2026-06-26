@@ -1,15 +1,15 @@
 @inherits BaseInput<FilterMinimapIcon?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputControlSelect TOption="FilterIconShapeEnum?" OptionList="_shapeOptions" ID="@ID" Name="@Name" @bind-Value:get="_shape" @bind-Value:set="OnShapeChange">
+    <InputControlSelect TOption="FilterIconShapeEnum?" OptionList="_shapeOptions" ID="@ID" Name="@Name" @bind-Value:get="_shape" @bind-Value:set="OnSelectShapeChange">
         @(context?.ToTextString() ?? "[Default]")
     </InputControlSelect>
 
-    <InputControlSelect TOption="FilterColorNameEnum" OptionList="_colorOptions" Disabled="@(Value is null)" @bind-Value:get="_color" @bind-Value:set="OnColorChange">
+    <InputControlSelect TOption="FilterColorNameEnum" OptionList="_colorOptions" Disabled="@(Value is null)" @bind-Value:get="_color" @bind-Value:set="OnSelectColorChange">
         @context.ToTextString()
     </InputControlSelect>
 
-    <InputControlSelect TOption="FilterIconSizeEnum" OptionList="_sizeOptions" Disabled="@(Value is null)" @bind-Value:get="_size" @bind-Value:set="OnSizeChange">
+    <InputControlSelect TOption="FilterIconSizeEnum" OptionList="_sizeOptions" Disabled="@(Value is null)" @bind-Value:get="_size" @bind-Value:set="OnSelectSizeChange">
         @context.ToTextString()
     </InputControlSelect>
 </div>
@@ -22,7 +22,7 @@
 
     private FilterIconShapeEnum? _shape;
     private FilterColorNameEnum _color = FilterColorNameEnum.White;
-    private FilterIconSizeEnum _size = Enum.GetValues<FilterIconSizeEnum>().FirstOrDefault();
+    private FilterIconSizeEnum _size = FilterIconSizeEnum.Small;
 
     protected override void OnParametersSet()
     {
@@ -33,25 +33,25 @@
         _size = Value?.Size ?? Enum.GetValues<FilterIconSizeEnum>().FirstOrDefault();
     }
 
-    private void OnShapeChange(FilterIconShapeEnum? shape)
+    private void OnSelectShapeChange(FilterIconShapeEnum? shape)
     {
         _shape = shape;
-        PushUpdate();
+        RegisterChange();
     }
 
-    private void OnColorChange(FilterColorNameEnum color)
+    private void OnSelectColorChange(FilterColorNameEnum color)
     {
         _color = color;
-        PushUpdate();
+        RegisterChange();
     }
 
-    private void OnSizeChange(FilterIconSizeEnum size)
+    private void OnSelectSizeChange(FilterIconSizeEnum size)
     {
         _size = size;
-        PushUpdate();
+        RegisterChange();
     }
 
-    private void PushUpdate()
+    private void RegisterChange()
     {
         NotifyChange(_shape is not null ? new FilterMinimapIcon(_color, _size, _shape.Value) : null);
     }

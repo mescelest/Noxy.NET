@@ -13,6 +13,13 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
+    <ItemGroup>
+        <Compile Remove="wwwroot\**"/>
+        <Content Remove="wwwroot\**"/>
+        <EmbeddedResource Remove="wwwroot\**"/>
+        <None Remove="wwwroot\**"/>
+    </ItemGroup>
+
 
     <ItemGroup>
         <SupportedPlatform Include="browser"/>
@@ -47,10 +54,6 @@
         <Content Update="Components\InputGroups\InputGroupRadio.razor.css">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="wwwroot\"/>
     </ItemGroup>
 
 </Project>

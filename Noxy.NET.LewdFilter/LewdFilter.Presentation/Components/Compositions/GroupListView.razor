@@ -1,10 +1,10 @@
-﻿@inject IStateSelection<FilterFeatureState, ImmutableArray<Guid>> GroupIdsSelection
+﻿@inject IStateSelection<FilterFeatureState, ImmutableArray<Guid>> GroupIDsSelection
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @foreach (Guid groupId in GroupIdsSelection.Value)
+    @foreach (Guid groupId in GroupIDsSelection.Value)
     {
-        <GroupItemView @key="groupId" GroupId="groupId"/>
+        <GroupItemView @key="groupId" GroupID="groupId"/>
     }
 </div>
 
@@ -14,7 +14,7 @@
     {
         base.OnInitialized();
 
-        GroupIdsSelection.Select(FilterFeatureState.SelectGroupIDList());
+        GroupIDsSelection.Select(FilterFeatureState.SelectGroupIDList());
     }
 
 }

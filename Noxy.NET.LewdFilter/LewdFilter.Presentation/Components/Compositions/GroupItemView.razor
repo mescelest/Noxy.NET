@@ -3,17 +3,17 @@
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Collapsible class="group" id="@($"group-{GroupId}")" @bind-Collapsed="IsCollapsed">
+    <Collapsible class="group" id="@($"group-{GroupID}")" @bind-Collapsed="IsCollapsed">
         <Header>
             <div class="header">
                 <h3>@GroupName</h3>
-                <Button type="button" class="btn-create-block" Status="StatusEnum.Success" IsIcon="true" @onclick="OnCreateBlock">
+                <Button type="button" class="btn-create-block" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonAddBlockClick">
                     <MaterialIcon Icon="add" Size="20px"/>
                 </Button>
             </div>
         </Header>
         <Content>
-            <BlockListView GroupId="GroupId"/>
+            <BlockListView GroupID="GroupID"/>
         </Content>
     </Collapsible>
 </div>
@@ -21,7 +21,7 @@
 @code {
 
     [Parameter, EditorRequired]
-    public Guid GroupId { get; set; }
+    public Guid GroupID { get; set; }
 
     private bool IsCollapsed { get; set; }
 
@@ -31,12 +31,12 @@
     {
         base.OnInitialized();
 
-        GroupNameSelection.Select(FilterFeatureState.SelectGroupName(GroupId));
+        GroupNameSelection.Select(FilterFeatureState.SelectGroupName(GroupID));
     }
 
-    private void OnCreateBlock()
+    private void OnButtonAddBlockClick()
     {
-        Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupId, FilterBlock.Default));
+        Dispatcher.Dispatch(new FilterFeatureReducers.SetBlockAction(GroupID, FilterBlock.Default));
     }
 
 }

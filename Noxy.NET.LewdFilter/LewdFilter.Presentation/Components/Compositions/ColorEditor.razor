@@ -10,7 +10,7 @@
             string isSelectedAria = isSelected.ToString().ToLower();
             string? isSelectedAttribute = isSelected ? "selected" : null;
 
-            <button type="button" class="tab" role="tab" aria-selected="@isSelectedAria" selected="@isSelectedAttribute" @onclick="() => SetActiveTab(type)">
+            <button type="button" class="tab" role="tab" aria-selected="@isSelectedAria" selected="@isSelectedAttribute" @onclick="() => OnButtonTabClick(type)">
                 <strong>
                     @type.ToText()
                 </strong>
@@ -27,23 +27,23 @@
             </TableHeader>
             <TableRow>
                 <div class="table-cell" role="cell">
-                    <InputControlText class="name" Size="12" @bind-Value:get="@context.Row.Name" @bind-Value:set="e => OnInputColorEditNameChange(e, context.Row)"/>
+                    <InputControlText class="name" Size="12" @bind-Value:get="@context.Row.Name" @bind-Value:set="e => OnInputColorNameChange(e, context.Row)"/>
                 </div>
 
                 <div class="table-cell" role="cell">
-                    <InputControlColor @bind-Value:get="@GetColor(context.Row)" @bind-Value:set="e => OnInputColorEditValueChange(e, context.Row)"/>
+                    <InputControlColor @bind-Value:get="@GetColor(context.Row)" @bind-Value:set="e => OnInputColorValueChange(e, context.Row)"/>
                 </div>
 
                 <div class="table-cell" role="cell">
                     @if (context.Index == 0)
                     {
-                        <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="AddNewRowAtBottom">
+                        <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonAddRowClick">
                             <MaterialIcon Icon="add" Size="20px"/>
                         </Button>
                     }
                     else
                     {
-                        <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => DeleteColor(context.Row.ID)">
+                        <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => OnButtonDeleteRowClick(context.Row.ID)">
                             <MaterialIcon Icon="remove" Size="20px"/>
                         </Button>
                     }
@@ -59,17 +59,17 @@
 
     private List<FilterColor> ColorList => [.. FilterFeatureState.SelectColorListByTab(_tab)(FilterState.Value)];
 
-    private void SetActiveTab(FilterColorTypeEnum tab)
+    private void OnButtonTabClick(FilterColorTypeEnum tab)
     {
         _tab = tab;
     }
 
-    private void OnInputColorEditNameChange(string? value, FilterColor color)
+    private void OnInputColorNameChange(string? value, FilterColor color)
     {
         Dispatcher.Dispatch(new FilterFeatureReducers.SetColorAction(_tab, color with { Name = value ?? string.Empty }));
     }
 
-    private void OnInputColorEditValueChange(BaseColor? value, FilterColor color)
+    private void OnInputColorValueChange(BaseColor? value, FilterColor color)
     {
         if (value is null) return;
 
@@ -86,13 +86,13 @@
         Dispatcher.Dispatch(new FilterFeatureReducers.SetColorAction(_tab, updatedColor));
     }
 
-    private void AddNewRowAtBottom()
+    private void OnButtonAddRowClick()
     {
         FilterColor freshColor = new() { Name = "", Red = 255, Green = 255, Blue = 255, Alpha = 255 };
         Dispatcher.Dispatch(new FilterFeatureReducers.SetColorAction(_tab, freshColor));
     }
 
-    private void DeleteColor(Guid colorID) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveColorAction(_tab, colorID));
+    private void OnButtonDeleteRowClick(Guid colorID) => Dispatcher.Dispatch(new FilterFeatureReducers.RemoveColorAction(_tab, colorID));
 
     private static BaseColor GetColor(FilterColor color)
     {

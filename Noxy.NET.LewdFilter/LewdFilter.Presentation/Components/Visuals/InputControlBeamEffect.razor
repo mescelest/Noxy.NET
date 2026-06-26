@@ -1,11 +1,11 @@
 @inherits BaseInput<FilterBeamEffect?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputControlSelect TOption="FilterColorNameEnum?" OptionList="_colorOptions" ID="@ID" Name="@Name" @bind-Value:get="_color" @bind-Value:set="OnColorChange">
+    <InputControlSelect TOption="FilterColorNameEnum?" OptionList="_colorOptions" ID="@ID" Name="@Name" @bind-Value:get="_color" @bind-Value:set="OnSelectColorChange">
         @(context?.ToTextString() ?? "[Default]")
     </InputControlSelect>
 
-    <InputControlCheckbox class="temporary" Option="true" Disabled="@(Value is null)" @bind-Value:get="_isTemporary" @bind-Value:set="OnTempChange">
+    <InputControlCheckbox class="temporary" Option="true" Disabled="@(Value is null)" @bind-Value:get="_isTemporary" @bind-Value:set="OnCheckboxTempChange">
         Temp
     </InputControlCheckbox>
 </div>
@@ -25,19 +25,19 @@
         _isTemporary = Value?.IsTemporary ?? false;
     }
 
-    private void OnColorChange(FilterColorNameEnum? color)
+    private void OnSelectColorChange(FilterColorNameEnum? color)
     {
         _color = color;
-        PushUpdate();
+        RegisterChange();
     }
 
-    private void OnTempChange(bool isTemporary)
+    private void OnCheckboxTempChange(bool isTemporary)
     {
         _isTemporary = isTemporary;
-        PushUpdate();
+        RegisterChange();
     }
 
-    private void PushUpdate()
+    private void RegisterChange()
     {
         NotifyChange(_color is not null ? new FilterBeamEffect(_color.Value, _isTemporary) : null);
     }

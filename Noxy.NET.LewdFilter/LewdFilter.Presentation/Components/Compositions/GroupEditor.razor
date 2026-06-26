@@ -3,7 +3,7 @@
 @inherits FluxorElementComponent
 
 <nav class="GroupEditor">
-    <SortableTable class="table" List="GroupList" OnUpdate="OnSortableTableUpdate" KeySelector="(g, _) => g.ID" Handle="sortable-handle">
+    <SortableTable class="table" List="GroupList" OnUpdate="OnSortableTableUpdate" KeySelector="(g, _) => g.ID" HandleClass="sortable-handle">
         <TableHeader>
             <div role="cell"></div>
             <div role="cell">
