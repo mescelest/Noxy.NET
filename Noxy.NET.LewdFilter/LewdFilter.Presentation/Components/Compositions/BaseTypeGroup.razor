@@ -6,7 +6,7 @@
     <Collapsible class="group" @bind-Collapsed="_collapsed">
         <Header>
             <InputControlCheckbox class="checkbox" ID="@SelectAllId" Option="true" @bind-Value:get="@IsGroupSelected" @bind-Value:set="OnCheckboxSelectAllChange">
-                <h4>@GroupKey</h4>
+                <h4>@GroupKey @SelectedCountString</h4>
             </InputControlCheckbox>
         </Header>
         <Content>
@@ -48,6 +48,8 @@
     private FilterBlock Block => BlockSelection.Value;
     private string SelectAllId => $"select-all-{GroupKey}-{BlockID}-";
     private string GetBaseTypeID(string type) => $"{type}-{BlockID}-";
+    private int SelectedCount => GroupItems.Count(type => CurrentBaseTypeList.Contains(type));
+    private string SelectedCountString => SelectedCount > 0 ? $"({SelectedCount})" : string.Empty;
 
     protected override void OnInitialized()
     {
@@ -62,16 +64,16 @@
 
         if (value ?? false)
         {
-            foreach (string item in GroupItems)
+            foreach (string _ in GroupItems.Where(set.Add))
             {
-                if (set.Add(item)) isChanged = true;
+                isChanged = true;
             }
         }
         else
         {
-            foreach (string item in GroupItems)
+            foreach (string _ in GroupItems.Where(set.Remove))
             {
-                if (set.Remove(item)) isChanged = true;
+                isChanged = true;
             }
         }
 

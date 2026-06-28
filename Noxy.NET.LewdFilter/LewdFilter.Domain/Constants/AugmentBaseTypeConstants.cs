@@ -231,6 +231,7 @@ public static class AugmentBaseTypeConstants
         "Lady Hestra's Rune of Winter",
         "Medved's Tending",
         "Passion of Aldur",
+        "Raven-Touched Shard",
         "Saqawal's Rune of Erosion",
         "Saqawal's Rune of Memory",
         "Saqawal's Rune of the Sky",

@@ -40,6 +40,7 @@ public static class BaseTypeConstants
         { "Flasks (Mana)", MiscellaneousBaseTypeConstants.FlaskMana },
 
         { "Skill Gems", MiscellaneousBaseTypeConstants.SkillGem },
+        { "Skill Gems (Kalguuran)", MiscellaneousBaseTypeConstants.SkillGemKalguuran },
         { "Lineage Gems (Base)", MiscellaneousBaseTypeConstants.LineageSupportGemBase },
         { "Lineage Gems (Abyss)", MiscellaneousBaseTypeConstants.LineageSupportGemAbyss },
         { "Lineage Gems (Aldur)", MiscellaneousBaseTypeConstants.LineageSupportGemAldur },

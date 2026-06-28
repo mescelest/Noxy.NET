@@ -12,7 +12,6 @@ public class MiscellaneousBaseTypeConstants
         "Time-Lost Ruby",
         "Time-Lost Sapphire",
         "Time-Lost Diamond",
-        "Time-Lost Jewel",
     ];
 
     public static readonly IReadOnlyList<string> Fragment =
@@ -86,6 +85,59 @@ public class MiscellaneousBaseTypeConstants
         "Uncut Skill Gem",
         "Uncut Spirit Gem",
         "Uncut Support Gem"
+    ];
+
+    public static readonly string[] SkillGemKalguuran =
+    [
+        "Animus Exchange",
+        "Bitter Dead",
+        "Conductive Runes",
+        "Detonate Living",
+        "Eternal March",
+        "Explosive Transmutation",
+        "Fragments of the Past",
+        "Frostflame Nova",
+        "Grim Pillars",
+        "Hollow Shell",
+        "Leylines",
+        "Powered by Verisium",
+        "Rain of Blades",
+        "Refutation",
+        "Remnants of Kalguur",
+        "Repulsion",
+        "Runic Reprieve",
+        "Skyfall",
+        "Triskelion Cascade",
+        "Verisium Manifestations",
+        "Voltaic Barrier",
+        "Wardbound Minions",
+        "Healing Runes",
+        "Olroth's Conviction",
+        "Olroth's Hubris",
+        "Runic Extraction",
+        "Runic Infusion",
+        "Scouring Flames",
+        "Styrn's Ferocity",
+        "Thaumaturgic Flux (Level 1)",
+        "Thaumaturgic Flux (Level 2)",
+        "Thaumaturgic Flux (Level 3)",
+        "Thaumaturgic Flux (Level 4)",
+        "Thaumaturgic Flux (Level 5)",
+        "Thaumaturgic Flux (Level 6)",
+        "Thaumaturgic Flux (Level 7)",
+        "Thaumaturgic Flux (Level 8)",
+        "Thaumaturgic Flux (Level 9)",
+        "Thaumaturgic Flux (Level 10)",
+        "Thaumaturgic Flux (Level 11)",
+        "Thaumaturgic Flux (Level 12)",
+        "Thaumaturgic Flux (Level 13)",
+        "Thaumaturgic Flux (Level 14)",
+        "Thaumaturgic Flux (Level 15)",
+        "Thaumaturgic Flux (Level 16)",
+        "Thaumaturgic Flux (Level 17)",
+        "Thaumaturgic Flux (Level 18)",
+        "Thaumaturgic Flux (Level 19)",
+        "Thaumaturgic Flux (Level 20)",
     ];
 
     public static readonly string[] LineageSupportGemBase =
@@ -193,7 +245,8 @@ public class MiscellaneousBaseTypeConstants
         "Ixchel's Torment",
         "Tangmazu's Thurible",
         "Trickster's Shard",
-        "Mórrigan's Insight"
+        "Mórrigan's Insight",
+        "Zarokh's Revolt",
     ];
 
     public static readonly string[] FlaskLife =
