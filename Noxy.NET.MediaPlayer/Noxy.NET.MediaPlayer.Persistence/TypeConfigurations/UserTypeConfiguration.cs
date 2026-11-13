@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 
-namespace Noxy.NET.MediaPlayer.Persistence.Configurations;
+namespace Noxy.NET.MediaPlayer.Persistence.TypeConfigurations;
 
-public class UserConfiguration : IEntityTypeConfiguration<TableUser>
+public class UserTypeConfiguration : IEntityTypeConfiguration<TableUser>
 {
     public void Configure(EntityTypeBuilder<TableUser> builder)
     {

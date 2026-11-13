@@ -11,6 +11,8 @@ public class PasswordHashService : IPasswordHashService
     private const int HashSize = 32;
     private const int Iterations = 210_000; // OWASP recommendation for PBKDF2-HMAC-SHA512
 
+    private static readonly byte[] DummySalt = RandomNumberGenerator.GetBytes(SaltSize);
+
     public string Hash(string password)
     {
         byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
@@ -19,8 +21,15 @@ public class PasswordHashService : IPasswordHashService
         return $"{Prefix}${Iterations}${Convert.ToBase64String(salt)}${Convert.ToBase64String(hash)}";
     }
 
-    public bool Verify(string password, string storedHash)
+    public bool Verify(string password, string? storedHash)
     {
+        if (storedHash == null)
+        {
+            // No hash to check (unknown user, or no local password): do the same work anyway so the time taken doesn't give that away.
+            Derive(password, DummySalt, Iterations, HashSize);
+            return false;
+        }
+
         string[] parts = storedHash.Split('$');
         if (parts is not [Prefix, _, _, _] || !int.TryParse(parts[1], out int iterations) || iterations <= 0)
         {

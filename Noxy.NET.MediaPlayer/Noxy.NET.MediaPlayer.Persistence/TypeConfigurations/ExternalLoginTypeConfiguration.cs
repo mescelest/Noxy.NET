@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 
-namespace Noxy.NET.MediaPlayer.Persistence.Configurations;
+namespace Noxy.NET.MediaPlayer.Persistence.TypeConfigurations;
 
-public class ExternalLoginConfiguration : IEntityTypeConfiguration<TableExternalLogin>
+public class ExternalLoginTypeConfiguration : IEntityTypeConfiguration<TableExternalLogin>
 {
     public void Configure(EntityTypeBuilder<TableExternalLogin> builder)
     {

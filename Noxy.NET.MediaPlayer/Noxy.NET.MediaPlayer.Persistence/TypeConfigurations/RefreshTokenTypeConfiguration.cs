@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 
-namespace Noxy.NET.MediaPlayer.Persistence.Configurations;
+namespace Noxy.NET.MediaPlayer.Persistence.TypeConfigurations;
 
-public class RefreshTokenConfiguration : IEntityTypeConfiguration<TableRefreshToken>
+public class RefreshTokenTypeConfiguration : IEntityTypeConfiguration<TableRefreshToken>
 {
     public void Configure(EntityTypeBuilder<TableRefreshToken> builder)
     {

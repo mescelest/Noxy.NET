@@ -9,4 +9,11 @@ public class RefreshToken : BaseEntity
     public DateTime? TimeRevoked { get; set; }
 
     public required Guid UserID { get; set; }
+
+    public bool IsRevoked => TimeRevoked != null;
+
+    public bool IsExpired(DateTime now)
+    {
+        return TimeExpires <= now;
+    }
 }

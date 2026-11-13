@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Title>Noxy.NET.MediaPlayer.API</Title>
         <Authors>Noxy.NET</Authors>
+        <UserSecretsId>d5b6d76c-8701-45f0-809e-c5ade946b7d4</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>

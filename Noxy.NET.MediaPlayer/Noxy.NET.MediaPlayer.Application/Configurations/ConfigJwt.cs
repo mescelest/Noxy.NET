@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Noxy.NET.MediaPlayer.Application.Models;
+namespace Noxy.NET.MediaPlayer.Application.Configurations;
 
-public class JwtOptions
+public class ConfigJwt
 {
     public const string SectionName = "Authentication";
 
