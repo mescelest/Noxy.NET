@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Title>Noxy.NET.MediaPlayer.Persistence</Title>
+        <Authors>Noxy.NET</Authors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Noxy.NET.Shared\Noxy.NET.Shared.csproj"/>
+        <ProjectReference Include="..\Noxy.NET.MediaPlayer.Application\Noxy.NET.MediaPlayer.Application.csproj"/>
+        <ProjectReference Include="..\Noxy.NET.MediaPlayer.Domain\Noxy.NET.MediaPlayer.Domain.csproj"/>
+    </ItemGroup>
+
+</Project>
