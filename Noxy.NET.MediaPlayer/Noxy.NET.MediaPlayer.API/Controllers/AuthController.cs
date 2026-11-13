@@ -25,6 +25,12 @@ public class AuthController(IAuthenticationService authenticationService) : Cont
         return await authenticationService.SignIn(request, cancellationToken);
     }
 
+    [HttpPost("Google")]
+    public async Task<ActionResult<ResponseAuthentication>> SignInWithGoogle(RequestSignInGoogle request, CancellationToken cancellationToken)
+    {
+        return await authenticationService.SignInWithGoogle(request, cancellationToken);
+    }
+
     [HttpPost("Refresh")]
     public async Task<ActionResult<ResponseAuthentication>> Refresh(RequestRefresh request, CancellationToken cancellationToken)
     {

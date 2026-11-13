@@ -10,7 +10,6 @@ public class ExternalLoginTypeConfiguration : IEntityTypeConfiguration<TableExte
     {
         builder.Property(e => e.ID).ValueGeneratedNever();
 
-        // Stored as text so reordering/adding enum members never corrupts existing rows.
         builder.Property(e => e.Provider).HasConversion<string>().HasMaxLength(32);
     }
 }

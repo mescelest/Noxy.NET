@@ -9,7 +9,7 @@ public class PasswordHashService : IPasswordHashService
     private const string Prefix = "PBKDF2-SHA512";
     private const int SaltSize = 16;
     private const int HashSize = 32;
-    private const int Iterations = 210_000; // OWASP recommendation for PBKDF2-HMAC-SHA512
+    private const int Iterations = 210_000;
 
     private static readonly byte[] DummySalt = RandomNumberGenerator.GetBytes(SaltSize);
 
@@ -25,7 +25,6 @@ public class PasswordHashService : IPasswordHashService
     {
         if (storedHash == null)
         {
-            // No hash to check (unknown user, or no local password): do the same work anyway so the time taken doesn't give that away.
             Derive(password, DummySalt, Iterations, HashSize);
             return false;
         }

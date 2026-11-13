@@ -28,6 +28,13 @@ public class RefreshTokenRepository(DataContext context) : IRefreshTokenReposito
         return affected == 1;
     }
 
+    public Task<int> DeleteExpired(DateTime expiredBefore, CancellationToken cancellationToken = default)
+    {
+        return context.RefreshToken
+            .Where(x => x.TimeExpires < expiredBefore)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
     public async Task RevokeAllForUser(Guid userID, DateTime time, CancellationToken cancellationToken = default)
     {
         await context.RefreshToken

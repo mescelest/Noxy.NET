@@ -16,10 +16,20 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<ConfigCleanup>()
+            .BindConfiguration(ConfigCleanup.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<ConfigGoogle>()
+            .BindConfiguration(ConfigGoogle.SectionName);
+
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<IPasswordHashService, PasswordHashService>();
         services.AddSingleton<ITokenService, TokenService>();
+        services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddHostedService<CleanupService>();
 
         return services;
     }

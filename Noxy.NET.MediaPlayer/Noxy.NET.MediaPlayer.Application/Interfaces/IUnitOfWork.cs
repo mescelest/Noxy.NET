@@ -6,6 +6,7 @@ public interface IUnitOfWork : IAsyncDisposable
 {
     IUserRepository Users { get; }
     IRefreshTokenRepository RefreshTokens { get; }
+    IExternalLoginRepository ExternalLogins { get; }
 
     Task Commit(CancellationToken cancellationToken = default);
 }

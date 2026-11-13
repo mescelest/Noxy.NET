@@ -12,6 +12,7 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
         {
             EmailAlreadyInUseException => (StatusCodes.Status409Conflict, "The email is already in use."),
             AuthenticationFailedException => (StatusCodes.Status401Unauthorized, "Invalid credentials."),
+            GoogleLoginNotConfiguredException => (StatusCodes.Status503ServiceUnavailable, "Google login is not configured."),
             _ => null
         };
 

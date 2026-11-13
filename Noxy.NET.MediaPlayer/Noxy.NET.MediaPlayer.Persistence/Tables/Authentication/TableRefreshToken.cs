@@ -10,7 +10,6 @@ namespace Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 [Index(nameof(UserID))]
 public class TableRefreshToken : BaseTable
 {
-    // Hex SHA-256 of the token; the plain token is never stored.
     [Required]
     [MaxLength(64)]
     public required string TokenHash { get; set; }
