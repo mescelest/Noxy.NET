@@ -47,7 +47,41 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.HasIndex("Provider", "ProviderKey")
                         .IsUnique();
 
-                    b.ToTable("ExternalLogin", (string)null);
+                    b.ToTable("ExternalLogin");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableRefreshToken", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeExpires")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("TimeRevoked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("TimeCreated");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("RefreshToken");
                 });
 
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", b =>
@@ -77,13 +111,24 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
 
                     b.HasIndex("TimeCreated");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableExternalLogin", b =>
                 {
                     b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
                         .WithMany("ExternalLoginList")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableRefreshToken", b =>
+                {
+                    b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
+                        .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

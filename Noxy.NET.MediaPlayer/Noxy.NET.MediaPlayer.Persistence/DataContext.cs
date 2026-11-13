@@ -7,6 +7,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 {
     public DbSet<TableUser> User { get; set; } = null!;
     public DbSet<TableExternalLogin> ExternalLogin { get; set; } = null!;
+    public DbSet<TableRefreshToken> RefreshToken { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

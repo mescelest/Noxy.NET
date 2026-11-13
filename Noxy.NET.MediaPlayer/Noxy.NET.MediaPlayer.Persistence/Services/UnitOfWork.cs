@@ -7,6 +7,7 @@ namespace Noxy.NET.MediaPlayer.Persistence.Services;
 public sealed class UnitOfWork(DataContext context) : IUnitOfWork
 {
     public IUserRepository Users { get; } = new UserRepository(context);
+    public IRefreshTokenRepository RefreshTokens { get; } = new RefreshTokenRepository(context);
 
     public async Task Commit(CancellationToken cancellationToken = default)
     {
