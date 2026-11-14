@@ -1,4 +1,4 @@
-using Noxy.NET.MediaPlayer.Application.Services;
+using Noxy.NET.MediaPlayer.Application.Notifiers;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.Test.MediaPlayer.Playlists;
