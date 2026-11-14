@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Domain.Entities;
-using Noxy.NET.MediaPlayer.Persistence.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Persistence.Interfaces.Mappers;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Persistence.Repositories;

@@ -1,7 +1,7 @@
-using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
-namespace Noxy.NET.MediaPlayer.Application.Services;
+namespace Noxy.NET.MediaPlayer.Application.Notifiers;
 
 public class NoOpMediaNotifier : IMediaNotifier
 {

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.SignalR;
 using Noxy.NET.MediaPlayer.API.Hubs;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
-namespace Noxy.NET.MediaPlayer.API.Services;
+namespace Noxy.NET.MediaPlayer.API.Notifiers;
 
 public class SignalRMediaNotifier(IHubContext<MediaHub> hub) : IMediaNotifier
 {

@@ -10,8 +10,6 @@ public record FilterGroup : FilterEntity
 
     public static FilterGroup Default => new() { Name = "New group", BlockList = [FilterBlock.Default] };
 
-    public FilterGroup() { }
-
     protected FilterGroup(FilterGroup other) : base(other)
     {
         Name = other.Name;

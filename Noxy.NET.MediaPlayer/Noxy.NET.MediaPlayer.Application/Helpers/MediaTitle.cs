@@ -1,4 +1,4 @@
-namespace Noxy.NET.MediaPlayer.Application.Services;
+namespace Noxy.NET.MediaPlayer.Application.Helpers;
 
 public static class MediaTitle
 {

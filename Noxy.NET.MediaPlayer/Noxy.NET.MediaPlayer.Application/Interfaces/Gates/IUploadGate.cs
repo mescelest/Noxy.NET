@@ -1,4 +1,4 @@
-namespace Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+namespace Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
 
 public interface IUploadGate
 {

@@ -12,10 +12,9 @@ using Microsoft.IdentityModel.Tokens;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.API.Configurations;
 using Noxy.NET.MediaPlayer.API.Notifiers;
-using Noxy.NET.MediaPlayer.API.Services;
+using Noxy.NET.MediaPlayer.API.Providers;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace

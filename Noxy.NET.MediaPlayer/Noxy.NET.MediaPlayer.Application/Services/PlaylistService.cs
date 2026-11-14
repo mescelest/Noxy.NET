@@ -100,7 +100,7 @@ public class PlaylistService(
         if (request.AllowDuplicates.HasValue && request.AllowDuplicates.Value != playlist.AllowDuplicates)
         {
             // Duplicates can be turned off only once there are none, so a playlist never breaks its own rule.
-            if (!request.AllowDuplicates.Value && HasDuplicates(playlist.EntryList)) throw new PlaylistHasDuplicatesException();
+            if (!request.AllowDuplicates.Value && playlist.HasDuplicates()) throw new PlaylistHasDuplicatesException();
 
             playlist.AllowDuplicates = request.AllowDuplicates.Value;
             changed = true;
@@ -219,11 +219,6 @@ public class PlaylistService(
         }
 
         return await Save(uow, userID, playlist, cancellationToken);
-    }
-
-    private static bool HasDuplicates(List<PlaylistEntry> entryList)
-    {
-        return entryList.Select(x => x.MediaFileID).Distinct().Count() != entryList.Count;
     }
 
     // The entries are in position order, which is the order every change below works on.

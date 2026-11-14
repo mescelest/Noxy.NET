@@ -47,7 +47,7 @@ public record Filter : FilterEntity
 
     public bool TryGetBlock(Guid groupId, Guid blockId, [NotNullWhen(true)] out FilterGroup? group, [NotNullWhen(true)] out FilterBlock? block)
     {
-        block = TryGetGroup(groupId, out group) ? group?.BlockList.FirstOrDefault(b => b.ID == blockId) : null;
+        block = TryGetGroup(groupId, out group) ? group.BlockList.FirstOrDefault(b => b.ID == blockId) : null;
         return block != null;
     }
 }

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
-using Noxy.NET.MediaPlayer.Persistence.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Persistence.Interfaces.Mappers;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 
 namespace Noxy.NET.MediaPlayer.Persistence.Repositories;
@@ -57,7 +57,7 @@ public class AuthenticationRepository(DataContext context, IEntityToTableMapper 
     {
         int affected = await context.RefreshToken
             .Where(x => x.ID == id && x.TimeRevoked == null)
-            .ExecuteUpdateAsync(x => x.SetProperty(e => e.TimeRevoked, (DateTime?)time), cancellationToken);
+            .ExecuteUpdateAsync(x => x.SetProperty(e => e.TimeRevoked, time), cancellationToken);
 
         return affected == 1;
     }
@@ -66,7 +66,7 @@ public class AuthenticationRepository(DataContext context, IEntityToTableMapper 
     {
         await context.RefreshToken
             .Where(x => x.UserID == userID && x.TimeRevoked == null)
-            .ExecuteUpdateAsync(x => x.SetProperty(e => e.TimeRevoked, (DateTime?)time), cancellationToken);
+            .ExecuteUpdateAsync(x => x.SetProperty(e => e.TimeRevoked, time), cancellationToken);
     }
 
     public Task<int> DeleteExpiredRefreshTokens(DateTime expiredBefore, CancellationToken cancellationToken = default)

@@ -117,7 +117,7 @@ public class FilterFeatureEffects(FilterCompilerService compiler, FilterStorageS
         {
             successAction = await process();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // ignored
         }

@@ -1,7 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Noxy.NET.MediaPlayer.API.Services;
+namespace Noxy.NET.MediaPlayer.API.Providers;
 
 public class SubUserIdProvider : IUserIdProvider
 {

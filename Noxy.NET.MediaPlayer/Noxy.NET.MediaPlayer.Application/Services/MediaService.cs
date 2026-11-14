@@ -1,9 +1,13 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Helpers;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Validators;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Streams;
 using Noxy.NET.MediaPlayer.Domain.Entities;
@@ -110,7 +114,7 @@ public class MediaService(
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(request.Title.Value, nameof(request));
 
-            changed |= Apply(request.Title.Value.Trim(), metadata.Title, value => metadata.Title = value!);
+            changed |= Apply(request.Title.Value.Trim(), metadata.Title, value => metadata.Title = value);
         }
 
         changed |= ApplyText(request.Artist, metadata.Artist, value => metadata.Artist = value);

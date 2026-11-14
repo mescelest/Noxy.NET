@@ -1,6 +1,6 @@
 @inject IState<FeatureSchemaContextState> StateContext
 @inject TextParameterService TextParameterService
-@inject IDispatcher Dispatcher
+@* @inject IDispatcher Dispatcher *@
 @inherits FluxorElementComponent
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -48,24 +48,24 @@
 
     [Parameter]
     public HTMLHeaderLevelEnum? HeaderLevel { get; set; }
-    private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H4;
+    // private HTMLHeaderLevelEnum HeaderLevelCurrent => HeaderLevel ?? HTMLHeaderLevelEnum.H4;
 
     [Parameter]
     public string? Scope { get; set; }
     private string ScopeCurrent => Scope ?? $"{ComponentName}:{SchemaID}";
 
-    private bool _isCollapsed = true;
+    // private bool _isCollapsed = true;
 
-    private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
-    private string Link => $"/schema/{SchemaID}/context";
-    private bool IsLoading => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
+    // private string Size => $"var(--size-text-{HeaderLevelCurrent.ToText()})";
+    // private string Link => $"/schema/{SchemaID}/context";
+    // private bool IsLoading => StateContext.Value.TryGetLoading(ScopeCurrent, FeatureSchemaContextActionKind.List, out bool value) && value;
     private IReadOnlyList<EntitySchemaContext> List => StateContext.Value.TryGetList(ScopeCurrent, out IReadOnlyList<EntitySchemaContext>? value) ? value : [];
 
-    private void SetCollapsed(bool value)
-    {
-        _isCollapsed = value;
-        if (_isCollapsed || StateContext.Value.List.ContainsKey(ScopeCurrent) || IsLoading) return;
-        Dispatcher.Dispatch(new FeatureSchemaContextReducers.ListAction(ScopeCurrent, new() { SchemaID = SchemaID }));
-    }
+    // private void SetCollapsed(bool value)
+    // {
+    //     _isCollapsed = value;
+    //     if (_isCollapsed || StateContext.Value.List.ContainsKey(ScopeCurrent) || IsLoading) return;
+    //     Dispatcher.Dispatch(new FeatureSchemaContextReducers.ListAction(ScopeCurrent, new() { SchemaID = SchemaID }));
+    // }
 
 }

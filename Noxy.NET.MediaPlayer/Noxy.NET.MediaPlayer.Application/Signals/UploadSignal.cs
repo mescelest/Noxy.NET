@@ -1,6 +1,6 @@
-using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
 
-namespace Noxy.NET.MediaPlayer.Application.Services;
+namespace Noxy.NET.MediaPlayer.Application.Signals;
 
 public sealed class UploadSignal : IUploadSignal
 {

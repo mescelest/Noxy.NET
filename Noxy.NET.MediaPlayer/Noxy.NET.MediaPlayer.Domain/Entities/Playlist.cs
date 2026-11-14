@@ -13,6 +13,11 @@ public class Playlist : BaseEntity
 
     public List<PlaylistEntry> EntryList { get; set; } = [];
 
+    public bool HasDuplicates()
+    {
+        return EntryList.Select(x => x.MediaFileID).Distinct().Count() != EntryList.Count;
+    }
+
     // EntryList is the intended order. Positions become 0 to n-1 in that order, and the entries whose position changed are returned.
     public List<PlaylistEntry> RenumberEntryList()
     {

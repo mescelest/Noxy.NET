@@ -1,6 +1,6 @@
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
-namespace Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+namespace Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 
 public interface IUploadNotifier
 {

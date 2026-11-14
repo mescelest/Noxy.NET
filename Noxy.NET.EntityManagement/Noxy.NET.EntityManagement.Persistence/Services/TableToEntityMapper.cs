@@ -129,20 +129,20 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityDataParameter? MapInternal(TableDataParameter? table, Guid[]? listVisitedRelation = null)
+    private static EntityDataParameter? MapInternal(TableDataParameter? table)
     {
         if (table == null) return null;
 
         return table switch
         {
-            TableDataParameterStyle property => MapInternal(property, listVisitedRelation),
-            TableDataParameterSystem property => MapInternal(property, listVisitedRelation),
-            TableDataParameterText property => MapInternal(property, listVisitedRelation),
+            TableDataParameterStyle property => MapInternal(property),
+            TableDataParameterSystem property => MapInternal(property),
+            TableDataParameterText property => MapInternal(property),
             _ => throw new ArgumentOutOfRangeException(nameof(table), table, null)
         };
     }
 
-    private static EntityDataParameterStyle? MapInternal(TableDataParameterStyle? table, Guid[]? listVisitedRelation = null)
+    private static EntityDataParameterStyle? MapInternal(TableDataParameterStyle? table)
     {
         if (table == null) return null;
 
@@ -159,7 +159,7 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityDataParameterSystem? MapInternal(TableDataParameterSystem? table, Guid[]? listVisitedRelation = null)
+    private static EntityDataParameterSystem? MapInternal(TableDataParameterSystem? table)
     {
         if (table == null) return null;
 
@@ -176,7 +176,7 @@ public class TableToEntityMapper : ITableToEntityMapper
         return mapped;
     }
 
-    private static EntityDataParameterText? MapInternal(TableDataParameterText? table, Guid[]? listVisitedRelation = null)
+    private static EntityDataParameterText? MapInternal(TableDataParameterText? table)
     {
         if (table == null) return null;
 

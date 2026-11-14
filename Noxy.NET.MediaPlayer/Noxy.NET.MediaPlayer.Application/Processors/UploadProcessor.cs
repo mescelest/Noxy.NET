@@ -2,6 +2,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Processors;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
@@ -9,7 +11,7 @@ using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
-namespace Noxy.NET.MediaPlayer.Application.Services;
+namespace Noxy.NET.MediaPlayer.Application.Processors;
 
 public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService storage, IUploadNotifier notifier, IOptions<ConfigStorage> options, ILogger<UploadProcessor> logger) : IUploadProcessor
 {

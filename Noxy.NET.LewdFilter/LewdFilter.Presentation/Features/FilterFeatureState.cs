@@ -95,7 +95,7 @@ public record FilterFeatureState
             FilterColor textColor = block.RuleList.OfType<FilterRule<FilterColor?>>().FirstOrDefault(rule => rule.Keyword == FilterKeywordEnum.SetTextColor)?.Value ?? FilterColor.DefaultText;
             FilterColor bgColor = block.RuleList.OfType<FilterRule<FilterColor?>>().FirstOrDefault(rule => rule.Keyword == FilterKeywordEnum.SetBackgroundColor)?.Value ?? FilterColor.DefaultBackground;
             FilterColor borderColor = block.RuleList.OfType<FilterRule<FilterColor?>>().FirstOrDefault(rule => rule.Keyword == FilterKeywordEnum.SetBorderColor)?.Value ?? FilterColor.DefaultBorder;
-            double rawFontSize = block.RuleList.OfType<FilterRule<FilterFontSize>>().FirstOrDefault(rule => rule.Keyword == FilterKeywordEnum.SetFontSize)?.Value?.Value ?? 32.0;
+            double rawFontSize = block.RuleList.OfType<FilterRule<FilterFontSize>>().FirstOrDefault(rule => rule.Keyword == FilterKeywordEnum.SetFontSize)?.Value.Value ?? 32.0;
 
             return $"color: {textColor.ToHex()}; background-color: {bgColor.ToHex()}; border: 1px solid {borderColor.ToHex()}; font-size: {rawFontSize / 32.0:0.00}rem;";
         };

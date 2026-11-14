@@ -3,7 +3,7 @@ using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Media;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Playlist;
 
-namespace Noxy.NET.MediaPlayer.Persistence.Interfaces.Services;
+namespace Noxy.NET.MediaPlayer.Persistence.Interfaces.Mappers;
 
 public interface ITableToEntityMapper
 {

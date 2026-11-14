@@ -1,6 +1,6 @@
 using Noxy.NET.MediaPlayer.Application.Models;
 
-namespace Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+namespace Noxy.NET.MediaPlayer.Application.Interfaces.Validators;
 
 public interface IMediaFileValidator
 {
