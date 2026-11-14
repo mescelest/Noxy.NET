@@ -46,11 +46,11 @@ public record XyzColor : BaseColor
         return (int)Math.Clamp(Math.Round(v * 255), 0, 255);
     }
 
-    public void Deconstruct(out double X, out double Y, out double Z, out double Alpha)
+    public void Deconstruct(out double x, out double y, out double z, out double alpha)
     {
-        X = this.X;
-        Y = this.Y;
-        Z = this.Z;
-        Alpha = this.Alpha;
+        x = X;
+        y = Y;
+        z = Z;
+        alpha = Alpha;
     }
 }
