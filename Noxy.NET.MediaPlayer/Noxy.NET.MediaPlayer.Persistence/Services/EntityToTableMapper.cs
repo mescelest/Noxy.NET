@@ -1,6 +1,7 @@
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Persistence.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Media;
 
 namespace Noxy.NET.MediaPlayer.Persistence.Services;
 
@@ -47,4 +48,43 @@ public class EntityToTableMapper : IEntityToTableMapper
     }
 
     #endregion -- Authentication --
+
+    #region -- Media --
+
+    public TableMediaFile Map(MediaFile entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            TimeCreated = entity.TimeCreated,
+            FilePath = entity.FilePath,
+            ContentType = entity.ContentType,
+            SizeBytes = entity.SizeBytes,
+            UserID = entity.UserID,
+            Metadata = entity.Metadata == null ? null : Map(entity.Metadata)
+        };
+    }
+
+    public TableMediaFileMetadata Map(MediaFileMetadata entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            TimeCreated = entity.TimeCreated,
+            Title = entity.Title,
+            Artist = entity.Artist,
+            Album = entity.Album,
+            AlbumArtist = entity.AlbumArtist,
+            Genre = entity.Genre,
+            Subtitle = entity.Subtitle,
+            Comment = entity.Comment,
+            TrackNumber = entity.TrackNumber,
+            DiscNumber = entity.DiscNumber,
+            Year = entity.Year,
+            Duration = entity.Duration,
+            MediaFileID = entity.MediaFileID
+        };
+    }
+
+    #endregion -- Media --
 }

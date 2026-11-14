@@ -7,6 +7,7 @@ public sealed class FakeStore
     public List<User> Users { get; } = [];
     public List<ExternalLogin> ExternalLogins { get; } = [];
     public List<RefreshToken> RefreshTokens { get; } = [];
+    public List<MediaFile> MediaFiles { get; } = [];
 
     public int CommitCount { get; set; }
     public int RevokeAllCount { get; set; }

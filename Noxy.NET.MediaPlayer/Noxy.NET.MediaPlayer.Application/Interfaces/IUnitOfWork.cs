@@ -5,6 +5,7 @@ namespace Noxy.NET.MediaPlayer.Application.Interfaces;
 public interface IUnitOfWork : IAsyncDisposable
 {
     IAuthenticationRepository Authentication { get; }
+    IMediaRepository Media { get; }
 
     Task Commit(CancellationToken cancellationToken = default);
 }

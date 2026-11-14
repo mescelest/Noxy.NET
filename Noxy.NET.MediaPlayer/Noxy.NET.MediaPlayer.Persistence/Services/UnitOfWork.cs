@@ -8,6 +8,7 @@ namespace Noxy.NET.MediaPlayer.Persistence.Services;
 public sealed class UnitOfWork(DataContext context, IEntityToTableMapper mapperE2T, ITableToEntityMapper mapperT2E) : IUnitOfWork
 {
     public IAuthenticationRepository Authentication { get; } = new AuthenticationRepository(context, mapperE2T, mapperT2E);
+    public IMediaRepository Media { get; } = new MediaRepository(context, mapperE2T, mapperT2E);
 
     public async Task Commit(CancellationToken cancellationToken = default)
     {

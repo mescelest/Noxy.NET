@@ -6,19 +6,23 @@ namespace Noxy.NET.Test.MediaPlayer.Fakes;
 public sealed class FakeUnitOfWork : IUnitOfWork
 {
     private readonly FakeAuthenticationRepository _repository;
+    private readonly FakeMediaRepository _media;
     private readonly FakeStore _store;
 
     public FakeUnitOfWork(FakeStore store)
     {
         _store = store;
         _repository = new(store);
+        _media = new(store);
     }
 
     public IAuthenticationRepository Authentication => _repository;
+    public IMediaRepository Media => _media;
 
     public Task Commit(CancellationToken cancellationToken = default)
     {
         _repository.Flush();
+        _media.Flush();
         _store.CommitCount++;
         return Task.CompletedTask;
     }

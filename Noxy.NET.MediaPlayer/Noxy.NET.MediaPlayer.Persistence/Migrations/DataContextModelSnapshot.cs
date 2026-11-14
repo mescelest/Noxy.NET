@@ -114,6 +114,104 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.ToTable("User");
                 });
 
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaFile", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(127)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("FilePath")
+                        .IsUnique();
+
+                    b.HasIndex("TimeCreated");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("MediaFile");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaFileMetadata", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Album")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AlbumArtist")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Artist")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DiscNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<TimeSpan?>("Duration")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Genre")
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MediaFileID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Subtitle")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("TrackNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Year")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("MediaFileID")
+                        .IsUnique();
+
+                    b.HasIndex("TimeCreated");
+
+                    b.ToTable("MediaFileMetadata");
+                });
+
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableExternalLogin", b =>
                 {
                     b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
@@ -136,9 +234,36 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaFile", b =>
+                {
+                    b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaFileMetadata", b =>
+                {
+                    b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaFile", "MediaFile")
+                        .WithOne("Metadata")
+                        .HasForeignKey("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaFileMetadata", "MediaFileID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MediaFile");
+                });
+
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", b =>
                 {
                     b.Navigation("ExternalLoginList");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaFile", b =>
+                {
+                    b.Navigation("Metadata");
                 });
 #pragma warning restore 612, 618
         }
