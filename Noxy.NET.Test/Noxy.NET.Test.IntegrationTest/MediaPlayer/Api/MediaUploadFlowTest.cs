@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
 using Microsoft.Extensions.Configuration;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using System.Net;
@@ -6,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Noxy.NET.MediaPlayer.API;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 

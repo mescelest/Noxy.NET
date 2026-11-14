@@ -64,7 +64,7 @@ public class AuthenticationServiceTest : IDisposable
     [Fact]
     public async Task SignUp_DuplicateEmail_Throws()
     {
-        await SignUp("user@example.com");
+        await SignUp();
 
         await Assert.ThrowsAsync<EmailAlreadyInUseException>(() => SignUp("USER@example.com"));
     }
@@ -147,7 +147,7 @@ public class AuthenticationServiceTest : IDisposable
     [Fact]
     public async Task Google_ExistingUnverifiedPasswordAccount_ThrowsInsteadOfLinking()
     {
-        await SignUp("user@example.com");
+        await SignUp();
         RegisterGoogle("token", "sub-1", "user@example.com");
 
         await Assert.ThrowsAsync<EmailAlreadyInUseException>(() => SignInGoogle("token"));

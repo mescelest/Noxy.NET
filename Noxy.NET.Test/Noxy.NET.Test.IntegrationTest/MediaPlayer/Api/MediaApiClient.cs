@@ -51,7 +51,8 @@ public sealed class MediaApiClient(ApiFactory factory)
         if (title is not null) form.Add(new StringContent(title), Constants.UploadTitleField);
         form.Add(file, Constants.UploadFileField, fileName);
 
-        using HttpRequestMessage request = new(HttpMethod.Post, "/Media") { Content = form };
+        using HttpRequestMessage request = new(HttpMethod.Post, "/Media");
+        request.Content = form;
         Authorize(request, token);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
@@ -62,7 +63,8 @@ public sealed class MediaApiClient(ApiFactory factory)
         using MultipartFormDataContent form = [];
         form.Add(new StringContent(title), Constants.UploadTitleField);
 
-        using HttpRequestMessage request = new(HttpMethod.Post, "/Media") { Content = form };
+        using HttpRequestMessage request = new(HttpMethod.Post, "/Media");
+        request.Content = form;
         Authorize(request, token);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
@@ -102,7 +104,8 @@ public sealed class MediaApiClient(ApiFactory factory)
 
     public async Task<HttpResponseMessage> Patch(string? token, Guid id, string json)
     {
-        using HttpRequestMessage request = new(HttpMethod.Patch, $"/Media/{id}") { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+        using HttpRequestMessage request = new(HttpMethod.Patch, $"/Media/{id}");
+        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
         Authorize(request, token);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
@@ -172,7 +175,8 @@ public sealed class MediaApiClient(ApiFactory factory)
 
     private async Task<HttpResponseMessage> SendJson(HttpMethod method, string path, string? token, string json)
     {
-        using HttpRequestMessage request = new(method, path) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+        using HttpRequestMessage request = new(method, path);
+        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
         Authorize(request, token);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }

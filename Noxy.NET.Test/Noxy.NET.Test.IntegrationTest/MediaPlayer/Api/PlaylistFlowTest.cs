@@ -24,16 +24,27 @@ public class PlaylistFlowTest
         return [.. list.OrderBy(x => x.Title).Select(x => x.ID)];
     }
 
-    private static async Task<T> Read<T>(HttpResponseMessage response, HttpStatusCode expected = HttpStatusCode.OK)
+    private static async Task<T> Read<T>(HttpResponseMessage response)
     {
-        Assert.Equal(expected, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return await Deserialize<T>(response);
+    }
+
+    private static async Task<T> ReadCreated<T>(HttpResponseMessage response)
+    {
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        return await Deserialize<T>(response);
+    }
+
+    private static async Task<T> Deserialize<T>(HttpResponseMessage response)
+    {
         return (await response.Content.ReadFromJsonAsync<T>(TestContext.Current.CancellationToken))!;
     }
 
     private static async Task<ResponsePlaylist> CreatePlaylist(MediaApiClient api, ApiAccount user, string name = "Mix", bool allowDuplicates = true)
     {
         string json = JsonSerializer.Serialize(new { name, allowDuplicates });
-        return await Read<ResponsePlaylist>(await api.CreatePlaylist(user.Token, json), HttpStatusCode.Created);
+        return await ReadCreated<ResponsePlaylist>(await api.CreatePlaylist(user.Token, json));
     }
 
     private static string SongBody(IEnumerable<Guid> songIDList, int? position = null)
@@ -140,7 +151,7 @@ public class PlaylistFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         List<Guid> songList = await UploadSongList(api, user, 1);
-        ResponsePlaylist playlist = await CreatePlaylist(api, user, "Mix", allowDuplicates: false);
+        ResponsePlaylist playlist = await CreatePlaylist(api, user, allowDuplicates: false);
         ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, songList);
         string before = await LibraryETag(api, user);
 
@@ -172,7 +183,7 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        await CreatePlaylist(api, user, "Mix");
+        await CreatePlaylist(api, user);
 
         HttpResponseMessage response = await api.GetPlaylistLibrary(user.Token, acceptEncoding: "gzip");
 
@@ -258,7 +269,7 @@ public class PlaylistFlowTest
 
         HttpResponseMessage response = await api.CreatePlaylist(user.Token, """{"name":"  Road trip  "}""");
 
-        ResponsePlaylist created = await Read<ResponsePlaylist>(response, HttpStatusCode.Created);
+        ResponsePlaylist created = await ReadCreated<ResponsePlaylist>(response);
         Assert.Equal("Road trip", created.Name);
         Assert.True(created.AllowDuplicates);
         Assert.Equal(0, created.EntryCount);
@@ -658,7 +669,7 @@ public class PlaylistFlowTest
         await using LibraryHubListener computer = await LibraryHubListener.Connect(factory, user.Token, tokenInQueryString: true);
         await using LibraryHubListener stranger = await LibraryHubListener.Connect(factory, other.Token);
 
-        ResponsePlaylist playlist = await CreatePlaylist(api, user, "Mix");
+        ResponsePlaylist playlist = await CreatePlaylist(api, user);
         Assert.Equal(playlist.ID, (await phone.NextPlaylistUpdated()).ID);
         Assert.Equal(playlist.ID, (await computer.NextPlaylistUpdated()).ID);
 
@@ -690,7 +701,7 @@ public class PlaylistFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         List<Guid> songList = await UploadSongList(api, user, 1);
-        ResponsePlaylist playlist = await CreatePlaylist(api, user, "Mix", allowDuplicates: false);
+        ResponsePlaylist playlist = await CreatePlaylist(api, user, allowDuplicates: false);
         ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, songList);
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 

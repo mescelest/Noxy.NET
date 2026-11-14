@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Persistence.Mappers;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -5,7 +6,6 @@ using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Persistence;
-using Noxy.NET.MediaPlayer.Persistence.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;

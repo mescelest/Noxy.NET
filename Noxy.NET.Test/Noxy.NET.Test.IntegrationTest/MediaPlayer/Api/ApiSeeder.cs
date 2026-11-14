@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
 using Microsoft.Extensions.DependencyInjection;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;

@@ -106,7 +106,7 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task GetMediaFileList_ReturnsOnlyTheUsersFiles_NewestFirst()
     {
-        User user = await CreateUser("user@example.com");
+        User user = await CreateUser();
         User other = await CreateUser("other@example.com");
         DateTime now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
         await Add(

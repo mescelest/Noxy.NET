@@ -130,7 +130,7 @@ public class PlaylistRepositoryTest : IDisposable
     [Fact]
     public async Task GetPlaylistSummaryList_ReturnsOnlyTheUsersPlaylistsNewestFirstWithEntryCounts()
     {
-        User user = await CreateUser("user@example.com");
+        User user = await CreateUser();
         User other = await CreateUser("other@example.com");
         MediaFile song = await CreateSong(user.ID);
         DateTime now = DateTime.UtcNow;
@@ -153,7 +153,7 @@ public class PlaylistRepositoryTest : IDisposable
     [Fact]
     public async Task GetPlaylistStampList_ReturnsIdAndModifiedTimeOfOnlyTheUsersPlaylists()
     {
-        User user = await CreateUser("user@example.com");
+        User user = await CreateUser();
         User other = await CreateUser("other@example.com");
         Playlist mine = CreatePlaylist(user.ID);
         mine.TimeModified = new(2026, 3, 4, 5, 6, 7, DateTimeKind.Utc);
@@ -171,7 +171,7 @@ public class PlaylistRepositoryTest : IDisposable
     [Fact]
     public async Task CountPlaylists_CountsOnlyTheUsersPlaylists()
     {
-        User user = await CreateUser("user@example.com");
+        User user = await CreateUser();
         User other = await CreateUser("other@example.com");
         await Add(CreatePlaylist(user.ID));
         await Add(CreatePlaylist(user.ID));
@@ -346,7 +346,7 @@ public class PlaylistRepositoryTest : IDisposable
     [Fact]
     public async Task GetPlaylistListByMediaFileID_ReturnsOnlyThePlaylistsContainingTheSongWithAllTheirEntries()
     {
-        User user = await CreateUser("user@example.com");
+        User user = await CreateUser();
         User stranger = await CreateUser("stranger@example.com");
         MediaFile song = await CreateSong(user.ID);
         MediaFile other = await CreateSong(user.ID);
