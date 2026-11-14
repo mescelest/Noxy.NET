@@ -23,7 +23,7 @@ public class PlaylistServiceTest
 
     public PlaylistServiceTest()
     {
-        _service = new(new FakeUnitOfWorkFactory(_store), Options.Create(_config), _notifier, _time, NullLogger<PlaylistService>.Instance);
+        _service = new(new FakeUnitOfWorkFactory(_store), Options.Create(_config), _notifier, new ETagService(), _time, NullLogger<PlaylistService>.Instance);
     }
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;

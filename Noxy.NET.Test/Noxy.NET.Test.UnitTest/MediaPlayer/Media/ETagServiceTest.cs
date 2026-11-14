@@ -1,9 +1,11 @@
-using Noxy.NET.MediaPlayer.Application.Helpers;
+using Noxy.NET.MediaPlayer.Application.Services;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
 
-public class ETagTest
+public class ETagServiceTest
 {
+    private readonly ETagService _service = new();
+
     private static readonly Guid FirstID = Guid.Parse("00000000-0000-7000-8000-000000000001");
     private static readonly Guid SecondID = Guid.Parse("00000000-0000-7000-8000-000000000002");
     private static readonly DateTime Time = new(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc);
@@ -11,20 +13,20 @@ public class ETagTest
     [Fact]
     public void Compute_EmptyList_IsStable()
     {
-        Assert.Equal(ETag.Compute([]), ETag.Compute([]));
+        Assert.Equal(_service.Compute([]), _service.Compute([]));
     }
 
     [Fact]
     public void Compute_IsAQuotedLowercaseSha256()
     {
-        Assert.Matches("^\"[0-9a-f]{64}\"$", ETag.Compute([(FirstID, Time)]));
+        Assert.Matches("^\"[0-9a-f]{64}\"$", _service.Compute([(FirstID, Time)]));
     }
 
     [Fact]
     public void Compute_IgnoresTheOrderOfTheInput()
     {
-        string forward = ETag.Compute([(FirstID, Time), (SecondID, Time)]);
-        string backward = ETag.Compute([(SecondID, Time), (FirstID, Time)]);
+        string forward = _service.Compute([(FirstID, Time), (SecondID, Time)]);
+        string backward = _service.Compute([(SecondID, Time), (FirstID, Time)]);
 
         Assert.Equal(forward, backward);
     }
@@ -32,20 +34,20 @@ public class ETagTest
     [Fact]
     public void Compute_ChangesWhenAnIdOrATimeChanges()
     {
-        string original = ETag.Compute([(FirstID, Time)]);
+        string original = _service.Compute([(FirstID, Time)]);
 
-        Assert.NotEqual(original, ETag.Compute([(SecondID, Time)]));
-        Assert.NotEqual(original, ETag.Compute([(FirstID, Time.AddTicks(1))]));
+        Assert.NotEqual(original, _service.Compute([(SecondID, Time)]));
+        Assert.NotEqual(original, _service.Compute([(FirstID, Time.AddTicks(1))]));
     }
 
     [Fact]
     public void Compute_ChangesWhenAnItemIsAddedOrRemoved()
     {
-        string one = ETag.Compute([(FirstID, Time)]);
-        string two = ETag.Compute([(FirstID, Time), (SecondID, Time)]);
+        string one = _service.Compute([(FirstID, Time)]);
+        string two = _service.Compute([(FirstID, Time), (SecondID, Time)]);
 
         Assert.NotEqual(one, two);
-        Assert.NotEqual(one, ETag.Compute([]));
+        Assert.NotEqual(one, _service.Compute([]));
     }
 
     [Theory]
@@ -56,9 +58,9 @@ public class ETagTest
     [InlineData("*")]
     public void Matches_AcceptsTheTagInAnyOfTheHeaderForms(string template)
     {
-        string eTag = ETag.Compute([(FirstID, Time)]);
+        string eTag = _service.Compute([(FirstID, Time)]);
 
-        Assert.True(ETag.Matches(string.Format(template, eTag), eTag));
+        Assert.True(_service.Matches(string.Format(template, eTag), eTag));
     }
 
     [Theory]
@@ -68,6 +70,6 @@ public class ETagTest
     [InlineData("   ")]
     public void Matches_RejectsAMismatchedOrMalformedHeader(string header)
     {
-        Assert.False(ETag.Matches(header, ETag.Compute([(FirstID, Time)])));
+        Assert.False(_service.Matches(header, _service.Compute([(FirstID, Time)])));
     }
 }

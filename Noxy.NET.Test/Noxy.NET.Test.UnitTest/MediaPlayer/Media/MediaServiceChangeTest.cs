@@ -26,7 +26,7 @@ public class MediaServiceChangeTest
     public MediaServiceChangeTest()
     {
         IOptions<ConfigStorage> storageOptions = Options.Create(new ConfigStorage { RootPath = "x", AllowedExtensionList = ["mp3"] });
-        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, new FakeUploadSignal(), storageOptions, Options.Create(new ConfigUpload()), new UploadGate(), _notifier, _playlistNotifier, _time, NullLogger<MediaService>.Instance);
+        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, new FakeUploadSignal(), storageOptions, Options.Create(new ConfigUpload()), new UploadGate(), _notifier, _playlistNotifier, new ETagService(), _time, NullLogger<MediaService>.Instance);
     }
 
     private MediaFile Seed(Guid? userID = null, string title = "Song", DateTime? timeCreated = null, DateTime? timeModified = null)
