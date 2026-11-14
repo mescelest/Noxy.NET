@@ -9,6 +9,7 @@ public sealed class FakeStore
     public List<RefreshToken> RefreshTokenList { get; } = [];
     public List<MediaFile> MediaFileList { get; } = [];
     public List<MediaUploadJob> MediaUploadJobList { get; } = [];
+    public List<Playlist> PlaylistList { get; } = [];
 
     public int CommitCount { get; set; }
     public bool FailCommit { get; set; }

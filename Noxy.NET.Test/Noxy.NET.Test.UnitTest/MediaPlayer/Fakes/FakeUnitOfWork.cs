@@ -7,9 +7,11 @@ public sealed class FakeUnitOfWork(FakeStore store) : IUnitOfWork
 {
     private readonly FakeAuthenticationRepository _repository = new(store);
     private readonly FakeMediaRepository _media = new(store);
+    private readonly FakePlaylistRepository _playlist = new(store);
 
     public IAuthenticationRepository Authentication => _repository;
     public IMediaRepository Media => _media;
+    public IPlaylistRepository Playlist => _playlist;
 
     public Task Commit(CancellationToken cancellationToken = default)
     {
@@ -23,6 +25,7 @@ public sealed class FakeUnitOfWork(FakeStore store) : IUnitOfWork
 
         _repository.Flush();
         _media.Flush();
+        _playlist.Flush();
         store.CommitCount++;
         return Task.CompletedTask;
     }

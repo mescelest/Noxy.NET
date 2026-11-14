@@ -18,6 +18,7 @@ public class MediaServiceChangeTest
 
     private readonly FakeFileStorageService _storage = new();
     private readonly FakeMediaNotifier _notifier = new();
+    private readonly FakePlaylistNotifier _playlistNotifier = new();
     private readonly FakeTimeProvider _time = new();
     private readonly FakeStore _store = new();
     private readonly MediaService _service;
@@ -25,7 +26,7 @@ public class MediaServiceChangeTest
     public MediaServiceChangeTest()
     {
         IOptions<ConfigStorage> storageOptions = Options.Create(new ConfigStorage { RootPath = "x", AllowedExtensionList = ["mp3"] });
-        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, new FakeUploadSignal(), storageOptions, Options.Create(new ConfigUpload()), new UploadGate(), _notifier, _time, NullLogger<MediaService>.Instance);
+        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, new FakeUploadSignal(), storageOptions, Options.Create(new ConfigUpload()), new UploadGate(), _notifier, _playlistNotifier, _time, NullLogger<MediaService>.Instance);
     }
 
     private MediaFile Seed(Guid? userID = null, string title = "Song", DateTime? timeCreated = null, DateTime? timeModified = null)
@@ -294,6 +295,157 @@ public class MediaServiceChangeTest
         await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
 
         Assert.Empty(_store.MediaFileList);
+    }
+
+    private Playlist SeedPlaylist(Guid userID, params MediaFile[] songList)
+    {
+        Playlist playlist = new()
+        {
+            UserID = userID,
+            Name = "Mix",
+            TimeCreated = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            TimeModified = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+        };
+
+        for (int index = 0; index < songList.Length; index++)
+        {
+            playlist.EntryList.Add(new() { PlaylistID = playlist.ID, MediaFileID = songList[index].ID, Position = index });
+        }
+
+        _store.PlaylistList.Add(playlist);
+        return playlist;
+    }
+
+    private Playlist StoredPlaylist(Playlist playlist)
+    {
+        return _store.PlaylistList.Single(x => x.ID == playlist.ID);
+    }
+
+    [Fact]
+    public async Task Delete_RemovesTheSongFromEveryPlaylistOfTheUser()
+    {
+        MediaFile file = Seed();
+        MediaFile other = Seed();
+        Playlist one = SeedPlaylist(UserID, file, other);
+        Playlist two = SeedPlaylist(UserID, file);
+        Playlist unrelated = SeedPlaylist(UserID, other);
+
+        await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal([other.ID], StoredPlaylist(one).EntryList.Select(x => x.MediaFileID));
+        Assert.Empty(StoredPlaylist(two).EntryList);
+        Assert.Single(StoredPlaylist(unrelated).EntryList);
+    }
+
+    [Fact]
+    public async Task Delete_SongTwiceInOnePlaylist_RemovesBothEntries()
+    {
+        MediaFile file = Seed();
+        MediaFile other = Seed();
+        Playlist playlist = SeedPlaylist(UserID, file, other, file);
+
+        await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal([other.ID], StoredPlaylist(playlist).EntryList.Select(x => x.MediaFileID));
+    }
+
+    [Fact]
+    public async Task Delete_RenumbersThePlaylistsToDensePositions()
+    {
+        MediaFile file = Seed();
+        MediaFile first = Seed();
+        MediaFile second = Seed();
+        Playlist playlist = SeedPlaylist(UserID, first, file, second, file);
+
+        await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
+
+        List<PlaylistEntry> left = [.. StoredPlaylist(playlist).EntryList.OrderBy(x => x.Position)];
+        Assert.Equal([first.ID, second.ID], left.Select(x => x.MediaFileID));
+        Assert.Equal([0, 1], left.Select(x => x.Position));
+    }
+
+    [Fact]
+    public async Task Delete_BumpsTimeModifiedOfAffectedPlaylistsOnly()
+    {
+        MediaFile file = Seed();
+        MediaFile other = Seed();
+        Playlist affected = SeedPlaylist(UserID, file);
+        Playlist untouched = SeedPlaylist(UserID, other);
+        DateTime before = untouched.TimeModified;
+        _time.Now = _time.Now.AddHours(1);
+
+        await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(_time.Now.UtcDateTime, StoredPlaylist(affected).TimeModified);
+        Assert.Equal(before, StoredPlaylist(untouched).TimeModified);
+    }
+
+    [Fact]
+    public async Task Delete_PushesOneUpdatePerAffectedPlaylistWithTheNewCount()
+    {
+        MediaFile file = Seed();
+        MediaFile other = Seed();
+        Playlist one = SeedPlaylist(UserID, file, other);
+        Playlist two = SeedPlaylist(UserID, file, file);
+        SeedPlaylist(UserID, other);
+
+        await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, _playlistNotifier.UpdatedList.Count);
+        Assert.All(_playlistNotifier.UpdatedList, x => Assert.Equal(UserID, x.UserID));
+        Assert.Equal(1, _playlistNotifier.UpdatedList.Single(x => x.Playlist.ID == one.ID).Playlist.EntryCount);
+        Assert.Equal(0, _playlistNotifier.UpdatedList.Single(x => x.Playlist.ID == two.ID).Playlist.EntryCount);
+    }
+
+    [Fact]
+    public async Task Delete_AnotherUsersPlaylistsAreUntouched()
+    {
+        MediaFile file = Seed();
+        Playlist foreign = SeedPlaylist(Guid.CreateVersion7(), file);
+
+        await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
+
+        Assert.Empty(_playlistNotifier.UpdatedList);
+        Assert.Equal(new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), StoredPlaylist(foreign).TimeModified);
+    }
+
+    [Fact]
+    public async Task Delete_SongInNoPlaylist_ChangesNoPlaylistAndPushesNoUpdate()
+    {
+        MediaFile file = Seed();
+        MediaFile other = Seed();
+        Playlist playlist = SeedPlaylist(UserID, other);
+
+        await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
+
+        Assert.Empty(_playlistNotifier.UpdatedList);
+        Assert.Single(StoredPlaylist(playlist).EntryList);
+    }
+
+    [Fact]
+    public async Task Delete_PlaylistNotifierThrows_StillSucceeds()
+    {
+        MediaFile file = Seed();
+        SeedPlaylist(UserID, file);
+        _playlistNotifier.Failure = new InvalidOperationException("no connection");
+
+        await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
+
+        Assert.Empty(_store.MediaFileList);
+        Assert.Single(_notifier.DeletedList);
+    }
+
+    [Fact]
+    public async Task Delete_StillCommitsOnce_ForTheSongAndItsPlaylists()
+    {
+        MediaFile file = Seed();
+        SeedPlaylist(UserID, file);
+        SeedPlaylist(UserID, file);
+        int commits = _store.CommitCount;
+
+        await _service.Delete(UserID, file.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(commits + 1, _store.CommitCount);
     }
 
     #endregion -- Delete --

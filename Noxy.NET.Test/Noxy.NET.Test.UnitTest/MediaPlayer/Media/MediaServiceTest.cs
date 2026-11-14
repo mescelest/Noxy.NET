@@ -26,7 +26,7 @@ public class MediaServiceTest
     public MediaServiceTest()
     {
         IOptions<ConfigStorage> storageOptions = Options.Create(_storageConfig);
-        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate(), new FakeMediaNotifier(), new FakeTimeProvider(),
+        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate(), new FakeMediaNotifier(), new FakePlaylistNotifier(), new FakeTimeProvider(),
             NullLogger<MediaService>.Instance);
     }
 
