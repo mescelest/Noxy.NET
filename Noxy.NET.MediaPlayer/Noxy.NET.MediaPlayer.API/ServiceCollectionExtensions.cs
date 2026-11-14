@@ -21,6 +21,8 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
+    private const string UnknownClient = "unknown";
+
     extension(IServiceCollection services)
     {
         public IServiceCollection AddApiCors()
@@ -135,7 +137,7 @@ public static class ServiceCollectionExtensions
         {
             TConfig settings = context.RequestServices.GetRequiredService<IOptions<TConfig>>().Value;
 
-            return RateLimitPartition.GetSlidingWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? "unknown", _ => new()
+            return RateLimitPartition.GetSlidingWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? UnknownClient, _ => new()
             {
                 PermitLimit = settings.PermitLimit,
                 Window = settings.Window,

@@ -63,7 +63,7 @@ public class EntityToTableMapper : IEntityToTableMapper
             ContentHash = entity.ContentHash,
             TimeModified = entity.TimeModified,
             UserID = entity.UserID,
-            Metadata = entity.Metadata == null ? null : Map(entity.Metadata)
+            Metadata = entity.Metadata is null ? null : Map(entity.Metadata)
         };
     }
 

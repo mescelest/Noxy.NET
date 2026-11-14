@@ -9,6 +9,8 @@ namespace Noxy.NET.MediaPlayer.Persistence.Services;
 
 public class FileStorageService : IFileStorageService
 {
+    public const string StagingFolderName = "staging";
+
     private readonly string _root;
     private readonly string _staging;
     private readonly long _maxSizeBytes;
@@ -16,7 +18,7 @@ public class FileStorageService : IFileStorageService
     public FileStorageService(IOptions<ConfigStorage> options)
     {
         _root = Path.GetFullPath(options.Value.RootPath);
-        _staging = Path.Combine(_root, "staging");
+        _staging = Path.Combine(_root, StagingFolderName);
         _maxSizeBytes = options.Value.MaxSizeBytes;
 
         Directory.CreateDirectory(_root);

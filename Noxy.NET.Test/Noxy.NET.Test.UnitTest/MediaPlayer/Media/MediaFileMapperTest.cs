@@ -37,7 +37,7 @@ public class MediaFileMapperTest
         file.Metadata.Year = 1999;
         file.Metadata.Duration = TimeSpan.FromSeconds(215);
 
-        ResponseMediaFile response = MediaFileMapper.ToResponse(file);
+        ResponseMediaFile response = file.ToResponse();
 
         Assert.Equal("Song", response.Title);
         Assert.Equal("Artist", response.Artist);
@@ -58,7 +58,7 @@ public class MediaFileMapperTest
         MediaFile file = CreateFile();
         file.Metadata = null;
 
-        ResponseMediaFile response = MediaFileMapper.ToResponse(file);
+        ResponseMediaFile response = file.ToResponse();
 
         Assert.Equal("stored.mp3", response.Title);
         Assert.Null(response.Artist);
@@ -79,7 +79,7 @@ public class MediaFileMapperTest
     [InlineData(DateTimeKind.Utc)]
     public void ToResponse_TimesAreUtc(DateTimeKind kind)
     {
-        ResponseMediaFile response = MediaFileMapper.ToResponse(CreateFile(kind));
+        ResponseMediaFile response = CreateFile(kind).ToResponse();
 
         Assert.Equal(DateTimeKind.Utc, response.TimeCreated.Kind);
         Assert.Equal(DateTimeKind.Utc, response.TimeModified.Kind);

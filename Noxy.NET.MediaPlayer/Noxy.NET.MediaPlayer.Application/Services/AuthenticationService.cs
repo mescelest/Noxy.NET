@@ -40,7 +40,7 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
 
         // Verify even when there is no user, so an unknown email takes as long as a wrong password.
         bool isPasswordValid = passwordHashService.Verify(request.Password, user?.PasswordHash);
-        if (user == null || !isPasswordValid) throw new AuthenticationFailedException();
+        if (user is null || !isPasswordValid) throw new AuthenticationFailedException();
 
         ResponseAuthentication response = CreateTokenResponse(uow, user);
 
@@ -58,7 +58,7 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
         ExternalLogin? login = await uow.Authentication.FindExternalLogin(ExternalLoginProvider.Google, identity.Subject, cancellationToken);
 
         User user;
-        if (login != null)
+        if (login is not null)
         {
             user = await uow.Authentication.FindUserByID(login.UserID, cancellationToken) ?? throw new AuthenticationFailedException();
         }
@@ -74,7 +74,7 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
             string email = NormalizeEmail(identity.Email);
             User? existing = await uow.Authentication.FindUserByEmail(email, cancellationToken);
 
-            if (existing == null)
+            if (existing is null)
             {
                 user = new() { Email = email, IsEmailVerified = true };
                 user.ExternalLoginList.Add(new() { Provider = ExternalLoginProvider.Google, ProviderKey = identity.Subject, UserID = user.ID });

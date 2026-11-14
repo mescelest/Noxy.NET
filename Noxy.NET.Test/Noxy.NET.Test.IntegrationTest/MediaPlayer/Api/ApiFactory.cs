@@ -1,3 +1,7 @@
+using Noxy.NET.MediaPlayer.Persistence.Services;
+using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.API.Configurations;
+using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
@@ -15,15 +19,16 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     public ApiFactory(Dictionary<string, string?>? overrides = null)
     {
         Directory.CreateDirectory(_directory);
+        string connectionString = $"Data Source={Path.Combine(_directory, "test.sqlite")}";
 
         _settings = new()
         {
-            ["ConnectionStrings:Database"] = $"Data Source={Path.Combine(_directory, "test.sqlite")}",
-            ["Authentication:Secret"] = new string('s', 48),
-            ["Storage:RootPath"] = StorageRoot,
-            ["Storage:MaxSizeBytes"] = "100000",
+            [ConfigurationPath.Combine(ConfigConnectionString.SectionName, nameof(ConfigConnectionString.Database))] = connectionString,
+            [ConfigurationPath.Combine(ConfigJwt.SectionName, nameof(ConfigJwt.Secret))] = new string('s', 48),
+            [ConfigurationPath.Combine(ConfigStorage.SectionName, nameof(ConfigStorage.RootPath))] = StorageRoot,
+            [ConfigurationPath.Combine(ConfigStorage.SectionName, nameof(ConfigStorage.MaxSizeBytes))] = "100000",
             // The worker wakes on the upload signal only, so tests decide when it works.
-            ["Upload:PollSeconds"] = "3600"
+            [ConfigurationPath.Combine(ConfigUpload.SectionName, nameof(ConfigUpload.PollSeconds))] = "3600"
         };
         foreach ((string key, string? value) in overrides ?? [])
         {
@@ -31,17 +36,17 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         }
 
         // The schema comes from the real migrations, and exists before the host (and its worker) starts.
-        DbContextOptions<DataContext> options = new DbContextOptionsBuilder<DataContext>().UseSqlite(_settings["ConnectionStrings:Database"]).Options;
+        DbContextOptions<DataContext> options = new DbContextOptionsBuilder<DataContext>().UseSqlite(connectionString).Options;
         using DataContext context = new(options);
         context.Database.Migrate();
     }
 
     public string StorageRoot => Path.Combine(_directory, "media");
-    public string StagingFolder => Path.Combine(StorageRoot, "staging");
+    public string StagingFolder => Path.Combine(StorageRoot, FileStorageService.StagingFolderName);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Development");
+        builder.UseEnvironment(Environments.Development);
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(_settings));
     }
 

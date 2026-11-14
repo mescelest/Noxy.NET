@@ -40,11 +40,11 @@ public sealed class LibraryHubListener : IAsyncDisposable
                     WebSocketClient client = factory.Server.CreateWebSocketClient();
                     Uri uri = context.Uri;
 
-                    if (token != null && tokenInQueryString)
+                    if (token is not null && tokenInQueryString)
                     {
                         uri = new UriBuilder(uri) { Query = $"{uri.Query.TrimStart('?')}&{Constants.AccessTokenQueryKey}={Uri.EscapeDataString(token)}" }.Uri;
                     }
-                    else if (token != null)
+                    else if (token is not null)
                     {
                         client.ConfigureRequest = request => request.Headers.Authorization = $"{JwtBearerDefaults.AuthenticationScheme} {token}";
                     }

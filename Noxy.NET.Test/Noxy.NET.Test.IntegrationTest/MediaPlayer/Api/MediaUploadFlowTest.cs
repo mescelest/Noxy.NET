@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+using Noxy.NET.MediaPlayer.Application.Configurations;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
@@ -129,7 +131,7 @@ public class MediaUploadFlowTest
     [Fact]
     public async Task Upload_OverTheSizeLimit_Returns413_AndNothingIsStaged()
     {
-        await using ApiFactory factory = new(new() { ["Storage:MaxSizeBytes"] = "1000" });
+        await using ApiFactory factory = new(new() { [ConfigurationPath.Combine(ConfigStorage.SectionName, nameof(ConfigStorage.MaxSizeBytes))] = "1000" });
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
 
@@ -170,7 +172,7 @@ public class MediaUploadFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
 
-        HttpResponseMessage response = await factory.CreateClient().GetAsync($"/Media?access_token={user.Token}", TestContext.Current.CancellationToken);
+        HttpResponseMessage response = await factory.CreateClient().GetAsync($"/Media?{Constants.AccessTokenQueryKey}={user.Token}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -198,7 +200,7 @@ public class MediaUploadFlowTest
     [Fact]
     public async Task Upload_AtTheFileLimit_Returns409()
     {
-        await using ApiFactory factory = new(new() { ["Storage:MaxFilesPerUser"] = "1" });
+        await using ApiFactory factory = new(new() { [ConfigurationPath.Combine(ConfigStorage.SectionName, nameof(ConfigStorage.MaxFilesPerUser))] = "1" });
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         await new ApiSeeder(factory).SeedMediaFile(user.UserID);
@@ -212,7 +214,7 @@ public class MediaUploadFlowTest
     [Fact]
     public async Task Upload_AtThePendingCap_Returns429_AndNothingIsStaged()
     {
-        await using ApiFactory factory = new(new() { ["Upload:MaxPendingPerUser"] = "1" });
+        await using ApiFactory factory = new(new() { [ConfigurationPath.Combine(ConfigUpload.SectionName, nameof(ConfigUpload.MaxPendingPerUser))] = "1" });
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         // Marked as in progress, so the worker leaves it alone and it keeps the queue full.
@@ -228,7 +230,7 @@ public class MediaUploadFlowTest
     public async Task Worker_LibraryFullAtProcessingTime_PushesUploadFailed_AndConsumesTheJob()
     {
         // Two uploads that both passed the request check before either finished: only one fits.
-        await using ApiFactory factory = new(new() { ["Storage:MaxFilesPerUser"] = "1" });
+        await using ApiFactory factory = new(new() { [ConfigurationPath.Combine(ConfigStorage.SectionName, nameof(ConfigStorage.MaxFilesPerUser))] = "1" });
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ApiSeeder seeder = new(factory);

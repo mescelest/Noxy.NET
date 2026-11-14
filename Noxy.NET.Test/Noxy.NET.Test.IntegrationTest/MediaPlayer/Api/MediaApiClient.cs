@@ -1,3 +1,4 @@
+using Microsoft.Net.Http.Headers;
 using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
@@ -45,7 +46,7 @@ public sealed class MediaApiClient(ApiFactory factory)
     private async Task<HttpResponseMessage> Send(string? token, HttpContent file, string fileName, string? title)
     {
         using MultipartFormDataContent form = [];
-        if (title != null) form.Add(new StringContent(title), Constants.UploadTitleField);
+        if (title is not null) form.Add(new StringContent(title), Constants.UploadTitleField);
         form.Add(file, Constants.UploadFileField, fileName);
 
         using HttpRequestMessage request = new(HttpMethod.Post, "/Media") { Content = form };
@@ -92,8 +93,8 @@ public sealed class MediaApiClient(ApiFactory factory)
     {
         using HttpRequestMessage request = new(HttpMethod.Get, "/Media/Library");
         Authorize(request, token);
-        if (ifNoneMatch != null) request.Headers.TryAddWithoutValidation("If-None-Match", ifNoneMatch);
-        if (acceptEncoding != null) request.Headers.TryAddWithoutValidation("Accept-Encoding", acceptEncoding);
+        if (ifNoneMatch is not null) request.Headers.TryAddWithoutValidation(HeaderNames.IfNoneMatch, ifNoneMatch);
+        if (acceptEncoding is not null) request.Headers.TryAddWithoutValidation(HeaderNames.AcceptEncoding, acceptEncoding);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
@@ -120,7 +121,7 @@ public sealed class MediaApiClient(ApiFactory factory)
 
     private static void Authorize(HttpRequestMessage request, string? token)
     {
-        if (token != null) request.Headers.Authorization = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, token);
+        if (token is not null) request.Headers.Authorization = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, token);
     }
 
     private static Guid ReadSubject(string token)

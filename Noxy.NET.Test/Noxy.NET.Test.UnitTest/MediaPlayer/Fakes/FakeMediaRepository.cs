@@ -46,7 +46,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         MediaFile? found = store.MediaFileList.FirstOrDefault(x => x.ID == id && x.UserID == userID);
 
         // A copy, like the database hands back, so an edit that is never committed changes nothing.
-        return Task.FromResult(found == null ? null : Copy(found));
+        return Task.FromResult(found is null ? null : Copy(found));
     }
 
     public Task<int> CountMediaFiles(Guid userID, CancellationToken cancellationToken = default)
@@ -113,7 +113,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
             .FirstOrDefault();
 
         // A copy, like the database hands back, so changing the store later doesn't change what the caller holds.
-        return Task.FromResult(next == null ? null : Copy(next));
+        return Task.FromResult(next is null ? null : Copy(next));
     }
 
     public Task<bool> MarkMediaUploadJobProcessing(Guid id, CancellationToken cancellationToken = default)
@@ -121,7 +121,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         if (store.LoseJobClaim) return Task.FromResult(false);
 
         MediaUploadJob? job = store.MediaUploadJobList.FirstOrDefault(x => x.ID == id && x.Status == MediaUploadJobStatus.Pending);
-        if (job == null) return Task.FromResult(false);
+        if (job is null) return Task.FromResult(false);
 
         job.Status = MediaUploadJobStatus.Processing;
         return Task.FromResult(true);
@@ -157,7 +157,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
             UserID = file.UserID
         };
 
-        if (file.Metadata != null)
+        if (file.Metadata is not null)
         {
             copy.Metadata = new()
             {

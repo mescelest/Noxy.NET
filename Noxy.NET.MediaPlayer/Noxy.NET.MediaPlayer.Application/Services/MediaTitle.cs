@@ -3,6 +3,7 @@ namespace Noxy.NET.MediaPlayer.Application.Services;
 public static class MediaTitle
 {
     private const int MaxLength = 255;
+    private const string DefaultTitle = "Untitled";
 
     public static string Resolve(string? title, string fileName)
     {
@@ -10,7 +11,7 @@ public static class MediaTitle
         switch (resolved.Length)
         {
             case 0:
-                return "Untitled";
+                return DefaultTitle;
             case <= MaxLength:
                 return resolved;
         }

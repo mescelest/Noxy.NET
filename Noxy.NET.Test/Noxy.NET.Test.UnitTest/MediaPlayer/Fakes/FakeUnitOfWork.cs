@@ -3,35 +3,27 @@ using Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-public sealed class FakeUnitOfWork : IUnitOfWork
+public sealed class FakeUnitOfWork(FakeStore store) : IUnitOfWork
 {
-    private readonly FakeAuthenticationRepository _repository;
-    private readonly FakeMediaRepository _media;
-    private readonly FakeStore _store;
-
-    public FakeUnitOfWork(FakeStore store)
-    {
-        _store = store;
-        _repository = new(store);
-        _media = new(store);
-    }
+    private readonly FakeAuthenticationRepository _repository = new(store);
+    private readonly FakeMediaRepository _media = new(store);
 
     public IAuthenticationRepository Authentication => _repository;
     public IMediaRepository Media => _media;
 
     public Task Commit(CancellationToken cancellationToken = default)
     {
-        if (_store.FailCommit) throw new InvalidOperationException("The commit failed.");
+        if (store.FailCommit) throw new InvalidOperationException("The commit failed.");
 
-        if (_store.FailCommitCount > 0)
+        if (store.FailCommitCount > 0)
         {
-            _store.FailCommitCount--;
+            store.FailCommitCount--;
             throw new InvalidOperationException("The commit failed.");
         }
 
         _repository.Flush();
         _media.Flush();
-        _store.CommitCount++;
+        store.CommitCount++;
         return Task.CompletedTask;
     }
 

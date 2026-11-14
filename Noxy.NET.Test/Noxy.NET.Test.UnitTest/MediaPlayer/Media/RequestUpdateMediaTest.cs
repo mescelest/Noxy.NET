@@ -9,7 +9,7 @@ public class RequestUpdateMediaTest
     private static List<ValidationResult> Validate(RequestUpdateMedia request)
     {
         List<ValidationResult> results = [];
-        Validator.TryValidateObject(request, new(request), results, false);
+        Validator.TryValidateObject(request, new(request), results, true);
         return results;
     }
 

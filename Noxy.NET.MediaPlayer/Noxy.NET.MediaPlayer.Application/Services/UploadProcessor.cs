@@ -19,7 +19,7 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
         await using (IUnitOfWork claim = uowFactory.Create())
         {
             MediaUploadJob? next = await claim.Media.FindNextPendingMediaUploadJob(cancellationToken);
-            if (next == null) return false;
+            if (next is null) return false;
 
             // Someone else got there first: nothing to do for this one, but there may be more.
             if (!await claim.Media.MarkMediaUploadJobProcessing(next.ID, cancellationToken)) return true;
@@ -43,7 +43,7 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
         }
 
         // No result means the job could not be consumed and will be tried again, so there is nothing final to report yet.
-        if (result != null) await Notify(job.UserID, result, cancellationToken);
+        if (result is not null) await Notify(job.UserID, result, cancellationToken);
         return true;
     }
 
@@ -95,7 +95,7 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
             JobID = job.ID,
             Title = job.Title,
             Succeeded = true,
-            Media = MediaFileMapper.ToResponse(file)
+            Media = file.ToResponse()
         };
     }
 

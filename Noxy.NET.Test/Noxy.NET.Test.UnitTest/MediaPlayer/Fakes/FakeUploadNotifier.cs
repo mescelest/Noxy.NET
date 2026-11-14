@@ -10,7 +10,7 @@ public sealed class FakeUploadNotifier : IUploadNotifier
 
     public Task Notify(Guid userID, ResponseUploadResult result, CancellationToken cancellationToken = default)
     {
-        if (Failure != null) throw Failure;
+        if (Failure is not null) throw Failure;
 
         NotificationList.Add((userID, result));
         return Task.CompletedTask;

@@ -21,7 +21,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
             .Include(x => x.Metadata)
             .FirstOrDefaultAsync(x => x.ID == id && x.UserID == userID, cancellationToken);
 
-        return table == null ? null : mapperT2E.Map(table);
+        return table is null ? null : mapperT2E.Map(table);
     }
 
     public async Task<int> CountMediaFiles(Guid userID, CancellationToken cancellationToken = default)
@@ -106,7 +106,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
             .ThenBy(x => x.ID)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return table == null ? null : mapperT2E.Map(table);
+        return table is null ? null : mapperT2E.Map(table);
     }
 
     public async Task<bool> MarkMediaUploadJobProcessing(Guid id, CancellationToken cancellationToken = default)

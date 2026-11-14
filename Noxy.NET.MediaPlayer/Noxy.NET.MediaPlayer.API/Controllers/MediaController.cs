@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.Features;
@@ -22,6 +23,9 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
     // Room on top of the file for the multipart boundaries, headers and the title field.
     private const long MultipartOverheadBytes = 1024 * 1024;
     private const int MaxTitleChars = 512;
+    private const string IdRoute = "{id:guid}";
+
+    private static readonly string LibraryCacheControl = new CacheControlHeaderValue { Private = true, NoCache = true }.ToString();
 
     // Multipart so the file is streamed to disk instead of buffered. The optional "title" field must come before the "file" field.
     // Keep this action free of parameters: any parameter makes MVC read the form first, which consumes the body.
@@ -34,7 +38,7 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
         if (UserID is not { } userID) return Unauthorized();
 
         if (!MediaTypeHeaderValue.TryParse(Request.ContentType, out MediaTypeHeaderValue? contentType)
-            || !contentType.MediaType.Equals("multipart/form-data", StringComparison.OrdinalIgnoreCase)
+            || !contentType.MediaType.Equals(MediaTypeNames.Multipart.FormData, StringComparison.OrdinalIgnoreCase)
             || StringSegment.IsNullOrEmpty(contentType.Boundary))
         {
             return Problem(statusCode: StatusCodes.Status415UnsupportedMediaType, title: "Expected multipart/form-data.");
@@ -83,14 +87,14 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
         MediaLibrary library = await mediaService.GetMediaLibrary(userID, Request.Headers.IfNoneMatch.ToString(), cancellationToken);
 
         Response.Headers.ETag = library.ETag;
-        Response.Headers.CacheControl = "private, no-cache";
+        Response.Headers.CacheControl = LibraryCacheControl;
 
-        if (library.MediaFileList == null) return StatusCode(StatusCodes.Status304NotModified);
+        if (library.MediaFileList is null) return StatusCode(StatusCodes.Status304NotModified);
 
         return library.MediaFileList;
     }
 
-    [HttpPatch("{id:guid}")]
+    [HttpPatch(IdRoute)]
     public async Task<ActionResult<ResponseMediaFile>> Update(Guid id, RequestUpdateMedia request, CancellationToken cancellationToken)
     {
         if (UserID is not { } userID) return Unauthorized();
@@ -98,7 +102,7 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
         return await mediaService.Update(userID, id, request, cancellationToken);
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete(IdRoute)]
     public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         if (UserID is not { } userID) return Unauthorized();
@@ -108,7 +112,7 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
         return NoContent();
     }
 
-    [HttpGet("{id:guid}/File")]
+    [HttpGet($"{IdRoute}/File")]
     public async Task<ActionResult> Download(Guid id, CancellationToken cancellationToken)
     {
         if (UserID is not { } userID) return Unauthorized();

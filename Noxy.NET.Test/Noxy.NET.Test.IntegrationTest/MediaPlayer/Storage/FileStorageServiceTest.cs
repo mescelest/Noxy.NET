@@ -31,7 +31,7 @@ public class FileStorageServiceTest : IDisposable
 
     private string StagingPath(string fileName)
     {
-        return Path.Combine(_root, "staging", fileName);
+        return Path.Combine(_root, FileStorageService.StagingFolderName, fileName);
     }
 
     // Files reach the library by being staged and then promoted.
@@ -48,7 +48,7 @@ public class FileStorageServiceTest : IDisposable
         Create();
 
         Assert.True(Directory.Exists(_root));
-        Assert.True(Directory.Exists(Path.Combine(_root, "staging")));
+        Assert.True(Directory.Exists(Path.Combine(_root, FileStorageService.StagingFolderName)));
     }
 
     [Fact]

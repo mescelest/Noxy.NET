@@ -17,13 +17,13 @@ public class AuthenticationRepository(DataContext context, IEntityToTableMapper 
     public async Task<User?> FindUserByID(Guid id, CancellationToken cancellationToken = default)
     {
         TableUser? table = await context.User.AsNoTracking().FirstOrDefaultAsync(x => x.ID == id, cancellationToken);
-        return table == null ? null : mapperT2E.Map(table);
+        return table is null ? null : mapperT2E.Map(table);
     }
 
     public async Task<User?> FindUserByEmail(string email, CancellationToken cancellationToken = default)
     {
         TableUser? table = await context.User.AsNoTracking().FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
-        return table == null ? null : mapperT2E.Map(table);
+        return table is null ? null : mapperT2E.Map(table);
     }
 
     public void AddUser(User user)
@@ -34,7 +34,7 @@ public class AuthenticationRepository(DataContext context, IEntityToTableMapper 
     public async Task<ExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default)
     {
         TableExternalLogin? table = await context.ExternalLogin.AsNoTracking().FirstOrDefaultAsync(x => x.Provider == provider && x.ProviderKey == providerKey, cancellationToken);
-        return table == null ? null : mapperT2E.Map(table);
+        return table is null ? null : mapperT2E.Map(table);
     }
 
     public void AddExternalLogin(ExternalLogin externalLogin)
@@ -45,7 +45,7 @@ public class AuthenticationRepository(DataContext context, IEntityToTableMapper 
     public async Task<RefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default)
     {
         TableRefreshToken? table = await context.RefreshToken.AsNoTracking().FirstOrDefaultAsync(x => x.TokenHash == tokenHash, cancellationToken);
-        return table == null ? null : mapperT2E.Map(table);
+        return table is null ? null : mapperT2E.Map(table);
     }
 
     public void AddRefreshToken(RefreshToken refreshToken)

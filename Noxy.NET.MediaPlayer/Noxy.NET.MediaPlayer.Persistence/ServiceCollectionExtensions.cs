@@ -11,14 +11,17 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddPersistence(this IServiceCollection services, Action<IServiceProvider, DbContextOptionsBuilder> options)
+    extension(IServiceCollection services)
     {
-        services.AddDbContextFactory<DataContext>(options);
-        services.AddSingleton<IEntityToTableMapper, EntityToTableMapper>();
-        services.AddSingleton<ITableToEntityMapper, TableToEntityMapper>();
-        services.AddSingleton<IUnitOfWorkFactory, UnitOfWorkFactory>();
-        services.AddSingleton<IFileStorageService, FileStorageService>();
+        public IServiceCollection AddPersistence(Action<IServiceProvider, DbContextOptionsBuilder> options)
+        {
+            services.AddDbContextFactory<DataContext>(options);
+            services.AddSingleton<IEntityToTableMapper, EntityToTableMapper>();
+            services.AddSingleton<ITableToEntityMapper, TableToEntityMapper>();
+            services.AddSingleton<IUnitOfWorkFactory, UnitOfWorkFactory>();
+            services.AddSingleton<IFileStorageService, FileStorageService>();
 
-        return services;
+            return services;
+        }
     }
 }

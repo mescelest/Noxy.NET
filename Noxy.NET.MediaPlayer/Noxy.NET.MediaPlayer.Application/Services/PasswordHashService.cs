@@ -23,7 +23,7 @@ public class PasswordHashService : IPasswordHashService
 
     public bool Verify(string password, string? storedHash)
     {
-        if (storedHash == null)
+        if (storedHash is null)
         {
             Derive(password, DummySalt, Iterations, HashSize);
             return false;

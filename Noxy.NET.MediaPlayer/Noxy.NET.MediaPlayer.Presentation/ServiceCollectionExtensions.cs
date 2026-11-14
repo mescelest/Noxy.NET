@@ -6,10 +6,13 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddPresentation(this IServiceCollection services, string url)
+    extension(IServiceCollection services)
     {
-        services.AddHttpClient<APIHttpClient>(client => client.BaseAddress = new(url));
+        public IServiceCollection AddPresentation(string url)
+        {
+            services.AddHttpClient<APIHttpClient>(client => client.BaseAddress = new(url));
 
-        return services;
+            return services;
+        }
     }
 }

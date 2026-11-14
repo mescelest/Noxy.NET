@@ -10,46 +10,49 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddOptions<ConfigJwt>()
-            .BindConfiguration(ConfigJwt.SectionName)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        public IServiceCollection AddApplication()
+        {
+            services.AddOptions<ConfigJwt>()
+                .BindConfiguration(ConfigJwt.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
-        services.AddOptions<ConfigCleanup>()
-            .BindConfiguration(ConfigCleanup.SectionName)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+            services.AddOptions<ConfigCleanup>()
+                .BindConfiguration(ConfigCleanup.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
-        services.AddOptions<ConfigStorage>()
-            .BindConfiguration(ConfigStorage.SectionName)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+            services.AddOptions<ConfigStorage>()
+                .BindConfiguration(ConfigStorage.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
-        services.AddOptions<ConfigUpload>()
-            .BindConfiguration(ConfigUpload.SectionName)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+            services.AddOptions<ConfigUpload>()
+                .BindConfiguration(ConfigUpload.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
-        services.AddOptions<ConfigGoogle>()
-            .BindConfiguration(ConfigGoogle.SectionName);
+            services.AddOptions<ConfigGoogle>()
+                .BindConfiguration(ConfigGoogle.SectionName);
 
-        services.TryAddSingleton(TimeProvider.System);
-        services.AddSingleton<IPasswordHashService, PasswordHashService>();
-        services.AddSingleton<IMediaFileValidator, MediaFileValidator>();
-        services.AddSingleton<IUploadSignal, UploadSignal>();
-        services.AddSingleton<IUploadGate, UploadGate>();
-        services.AddSingleton<IUploadProcessor, UploadProcessor>();
-        services.TryAddSingleton<IUploadNotifier, NoOpUploadNotifier>();
-        services.TryAddSingleton<IMediaNotifier, NoOpMediaNotifier>();
-        services.AddScoped<IMediaService, MediaService>();
-        services.AddSingleton<ITokenService, TokenService>();
-        services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
-        services.AddHostedService<CleanupService>();
-        services.AddHostedService<UploadWorker>();
+            services.TryAddSingleton(TimeProvider.System);
+            services.AddSingleton<IPasswordHashService, PasswordHashService>();
+            services.AddSingleton<IMediaFileValidator, MediaFileValidator>();
+            services.AddSingleton<IUploadSignal, UploadSignal>();
+            services.AddSingleton<IUploadGate, UploadGate>();
+            services.AddSingleton<IUploadProcessor, UploadProcessor>();
+            services.TryAddSingleton<IUploadNotifier, NoOpUploadNotifier>();
+            services.TryAddSingleton<IMediaNotifier, NoOpMediaNotifier>();
+            services.AddScoped<IMediaService, MediaService>();
+            services.AddSingleton<ITokenService, TokenService>();
+            services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddHostedService<CleanupService>();
+            services.AddHostedService<UploadWorker>();
 
-        return services;
+            return services;
+        }
     }
 }

@@ -7,6 +7,8 @@ namespace Noxy.NET.MediaPlayer.API.Handlers;
 
 public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
 {
+    private const string FileTooLargeTitle = "The file is too large.";
+
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         ApiError? mapped = exception switch
@@ -19,25 +21,25 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
             UploadInProgressException => new(StatusCodes.Status429TooManyRequests, "An upload is already in progress."),
             LibraryFullException => new(StatusCodes.Status409Conflict, "The library limit has been reached."),
             MediaNotFoundException => new(StatusCodes.Status404NotFound, "The media file was not found."),
-            FileTooLargeException => new(StatusCodes.Status413PayloadTooLarge, "The file is too large."),
+            FileTooLargeException => new(StatusCodes.Status413PayloadTooLarge, FileTooLargeTitle),
             // Thrown by Kestrel when the body goes over the limit the upload action set.
-            BadHttpRequestException { StatusCode: StatusCodes.Status413PayloadTooLarge } => new(StatusCodes.Status413PayloadTooLarge, "The file is too large."),
+            BadHttpRequestException { StatusCode: StatusCodes.Status413PayloadTooLarge } => new(StatusCodes.Status413PayloadTooLarge, FileTooLargeTitle),
             _ => null
         };
 
         // Anything unrecognised falls through to the default 500 handling.
-        if (mapped is not { } error)
+        if (mapped is null)
         {
             return false;
         }
 
-        httpContext.Response.StatusCode = error.Status;
+        httpContext.Response.StatusCode = mapped.Status;
 
         return await problemDetailsService.TryWriteAsync(new()
         {
             HttpContext = httpContext,
             Exception = exception,
-            ProblemDetails = new ProblemDetails { Status = error.Status, Title = error.Title }
+            ProblemDetails = new ProblemDetails { Status = mapped.Status, Title = mapped.Title }
         });
     }
 }

@@ -65,7 +65,7 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
     public Task<bool> TryRevokeRefreshToken(Guid id, DateTime time, CancellationToken cancellationToken = default)
     {
         RefreshToken? token = store.RefreshTokenList.FirstOrDefault(x => x.ID == id && !x.IsRevoked);
-        if (token == null || store.LoseRevokeRace) return Task.FromResult(false);
+        if (token is null || store.LoseRevokeRace) return Task.FromResult(false);
 
         token.TimeRevoked = time;
         return Task.FromResult(true);

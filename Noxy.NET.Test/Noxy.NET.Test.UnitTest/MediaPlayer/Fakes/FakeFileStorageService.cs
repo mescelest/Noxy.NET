@@ -19,7 +19,7 @@ public sealed class FakeFileStorageService : IFileStorageService
 
     public async Task<StoredFile> StageAsync(Stream content, string extension, CancellationToken cancellationToken = default)
     {
-        if (StageFailure != null) throw StageFailure;
+        if (StageFailure is not null) throw StageFailure;
 
         (string fileName, byte[] bytes) = await Read(content, extension, cancellationToken);
         Staged[fileName] = bytes;
@@ -29,7 +29,7 @@ public sealed class FakeFileStorageService : IFileStorageService
 
     public async Task<StoredFile> StageAsync(Stream content, string extension, long maxBytes, CancellationToken cancellationToken = default)
     {
-        if (StageFailure != null) throw StageFailure;
+        if (StageFailure is not null) throw StageFailure;
 
         (string fileName, byte[] bytes) = await Read(content, extension, cancellationToken);
         if (bytes.Length > maxBytes) throw new FileTooLargeException(maxBytes);
@@ -41,7 +41,7 @@ public sealed class FakeFileStorageService : IFileStorageService
 
     public void Promote(string fileName)
     {
-        if (PromoteFailure != null) throw PromoteFailure;
+        if (PromoteFailure is not null) throw PromoteFailure;
 
         if (!Staged.Remove(fileName, out byte[]? bytes))
         {
@@ -55,7 +55,7 @@ public sealed class FakeFileStorageService : IFileStorageService
 
     public void DeleteStaged(string fileName)
     {
-        if (DeleteStagedFailure != null) throw DeleteStagedFailure;
+        if (DeleteStagedFailure is not null) throw DeleteStagedFailure;
 
         Staged.Remove(fileName);
         DeletedStagedList.Add(fileName);
@@ -75,7 +75,7 @@ public sealed class FakeFileStorageService : IFileStorageService
 
     public void Delete(string fileName)
     {
-        if (DeleteFailure != null) throw DeleteFailure;
+        if (DeleteFailure is not null) throw DeleteFailure;
 
         Files.Remove(fileName);
         DeletedList.Add(fileName);

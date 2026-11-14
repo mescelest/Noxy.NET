@@ -11,7 +11,7 @@ public sealed class FakeMediaNotifier : IMediaNotifier
 
     public Task Updated(Guid userID, ResponseMediaFile mediaFile, CancellationToken cancellationToken = default)
     {
-        if (Failure != null) throw Failure;
+        if (Failure is not null) throw Failure;
 
         UpdatedList.Add((userID, mediaFile));
         return Task.CompletedTask;
@@ -19,7 +19,7 @@ public sealed class FakeMediaNotifier : IMediaNotifier
 
     public Task Deleted(Guid userID, Guid id, CancellationToken cancellationToken = default)
     {
-        if (Failure != null) throw Failure;
+        if (Failure is not null) throw Failure;
 
         DeletedList.Add((userID, id));
         return Task.CompletedTask;

@@ -27,6 +27,10 @@ public class MediaService(
     TimeProvider time,
     ILogger<MediaService> logger) : IMediaService
 {
+    private const string WeakETagPrefix = "W/";
+    private const string Wildcard = "*";
+    private const char ETagQuote = '"';
+
     public async Task<ResponseUploadAccepted> Enqueue(Guid userID, string fileName, string? title, Stream content, CancellationToken cancellationToken = default)
     {
         // One upload per user at a time, held until its job is saved, so the checks below see every earlier upload.
@@ -73,7 +77,7 @@ public class MediaService(
         await using IUnitOfWork uow = uowFactory.Create();
 
         List<MediaFile> fileList = await uow.Media.GetMediaFileList(userID, skip, take, cancellationToken);
-        return [.. fileList.Select(MediaFileMapper.ToResponse)];
+        return [.. fileList.Select(x => x.ToResponse())];
     }
 
     public async Task<MediaDownload> Open(Guid userID, Guid id, CancellationToken cancellationToken = default)
@@ -83,7 +87,7 @@ public class MediaService(
         MediaFile mediaFile = await uow.Media.FindMediaFile(id, userID, cancellationToken) ?? throw new MediaNotFoundException();
 
         // The download is named after the title, with the extension of the stored file.
-        string fileName = mediaFile.Metadata == null ? mediaFile.FilePath : $"{mediaFile.Metadata.Title}{Path.GetExtension(mediaFile.FilePath)}";
+        string fileName = mediaFile.Metadata is null ? mediaFile.FilePath : $"{mediaFile.Metadata.Title}{Path.GetExtension(mediaFile.FilePath)}";
 
         try
         {
@@ -105,7 +109,7 @@ public class MediaService(
         bool changed = false;
         if (request.Title.HasValue)
         {
-            if (string.IsNullOrWhiteSpace(request.Title.Value)) throw new ArgumentException("The title can't be empty.", nameof(request));
+            ArgumentException.ThrowIfNullOrWhiteSpace(request.Title.Value, nameof(request));
 
             changed |= Apply(request.Title.Value.Trim(), metadata.Title, value => metadata.Title = value!);
         }
@@ -121,13 +125,13 @@ public class MediaService(
         changed |= ApplyNumber(request.Year, metadata.Year, value => metadata.Year = value);
 
         // An edit that changes nothing leaves the modified time alone, so it can't change the library ETag or push anything.
-        if (!changed) return MediaFileMapper.ToResponse(file);
+        if (!changed) return file.ToResponse();
 
         file.TimeModified = time.GetUtcNow().UtcDateTime;
         uow.Media.UpdateMediaFile(file);
         await uow.Commit(cancellationToken);
 
-        ResponseMediaFile response = MediaFileMapper.ToResponse(file);
+        ResponseMediaFile response = file.ToResponse();
         await NotifyQuietly(() => notifier.Updated(userID, response, cancellationToken), id);
         return response;
     }
@@ -166,7 +170,7 @@ public class MediaService(
 
         // The ETag comes from the list that is returned, so the two can never disagree.
         List<MediaFile> fileList = await uow.Media.GetMediaFileList(userID, cancellationToken);
-        return new(ComputeETag(fileList.Select(x => new MediaFileStamp(x.ID, x.TimeModified))), [.. fileList.Select(MediaFileMapper.ToResponse)]);
+        return new(ComputeETag(fileList.Select(x => new MediaFileStamp(x.ID, x.TimeModified))), [.. fileList.Select(x => x.ToResponse())]);
     }
 
     private static bool Apply(string value, string? current, Action<string> set)
@@ -205,7 +209,7 @@ public class MediaService(
             hash.AppendData(Encoding.UTF8.GetBytes($"{stamp.ID:D}:{stamp.TimeModified.Ticks}\n"));
         }
 
-        return $"\"{Convert.ToHexStringLower(hash.GetHashAndReset())}\"";
+        return $"{ETagQuote}{Convert.ToHexStringLower(hash.GetHashAndReset())}{ETagQuote}";
     }
 
     // The header holds a comma separated list of tags, any of which may be weak ("W/") or the wildcard.
@@ -214,9 +218,9 @@ public class MediaService(
         foreach (string token in ifNoneMatch.Split(','))
         {
             string tag = token.Trim();
-            if (tag.StartsWith("W/", StringComparison.Ordinal)) tag = tag[2..];
+            if (tag.StartsWith(WeakETagPrefix, StringComparison.Ordinal)) tag = tag[WeakETagPrefix.Length..];
 
-            if (tag == "*" || tag == eTag) return true;
+            if (tag == Wildcard || tag == eTag) return true;
         }
 
         return false;
