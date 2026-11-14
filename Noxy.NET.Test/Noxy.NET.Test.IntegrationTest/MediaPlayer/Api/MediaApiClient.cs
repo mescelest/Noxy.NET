@@ -1,7 +1,11 @@
 using System.Buffers.Text;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
@@ -41,8 +45,19 @@ public sealed class MediaApiClient(ApiFactory factory)
     private async Task<HttpResponseMessage> Send(string? token, HttpContent file, string fileName, string? title)
     {
         using MultipartFormDataContent form = [];
-        if (title != null) form.Add(new StringContent(title), "title");
-        form.Add(file, "file", fileName);
+        if (title != null) form.Add(new StringContent(title), Constants.UploadTitleField);
+        form.Add(file, Constants.UploadFileField, fileName);
+
+        using HttpRequestMessage request = new(HttpMethod.Post, "/Media") { Content = form };
+        Authorize(request, token);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    // A well-formed multipart request that has a title but no file.
+    public async Task<HttpResponseMessage> UploadWithoutFile(string? token, string title)
+    {
+        using MultipartFormDataContent form = [];
+        form.Add(new StringContent(title), Constants.UploadTitleField);
 
         using HttpRequestMessage request = new(HttpMethod.Post, "/Media") { Content = form };
         Authorize(request, token);
@@ -59,6 +74,43 @@ public sealed class MediaApiClient(ApiFactory factory)
         return (await response.Content.ReadFromJsonAsync<List<ResponseMediaFile>>(TestContext.Current.CancellationToken))!;
     }
 
+    // Waits for the worker to finish the uploads, since an upload is only accepted when the request returns.
+    public async Task<List<ResponseMediaFile>> WaitForMediaFileList(string token, int count)
+    {
+        DateTime deadline = DateTime.UtcNow.AddSeconds(15);
+        while (true)
+        {
+            List<ResponseMediaFile> list = await GetMediaFileList(token);
+            if (list.Count >= count) return list;
+
+            Assert.True(DateTime.UtcNow < deadline, "The library did not fill up in time.");
+            await Task.Delay(25, TestContext.Current.CancellationToken);
+        }
+    }
+
+    public async Task<HttpResponseMessage> GetLibrary(string? token, string? ifNoneMatch = null, string? acceptEncoding = null)
+    {
+        using HttpRequestMessage request = new(HttpMethod.Get, "/Media/Library");
+        Authorize(request, token);
+        if (ifNoneMatch != null) request.Headers.TryAddWithoutValidation("If-None-Match", ifNoneMatch);
+        if (acceptEncoding != null) request.Headers.TryAddWithoutValidation("Accept-Encoding", acceptEncoding);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    public async Task<HttpResponseMessage> Patch(string? token, Guid id, string json)
+    {
+        using HttpRequestMessage request = new(HttpMethod.Patch, $"/Media/{id}") { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+        Authorize(request, token);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    public async Task<HttpResponseMessage> Delete(string? token, Guid id)
+    {
+        using HttpRequestMessage request = new(HttpMethod.Delete, $"/Media/{id}");
+        Authorize(request, token);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
     public async Task<HttpResponseMessage> Download(string token, Guid id)
     {
         using HttpRequestMessage request = new(HttpMethod.Get, $"/Media/{id}/File");
@@ -68,7 +120,7 @@ public sealed class MediaApiClient(ApiFactory factory)
 
     private static void Authorize(HttpRequestMessage request, string? token)
     {
-        if (token != null) request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        if (token != null) request.Headers.Authorization = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, token);
     }
 
     private static Guid ReadSubject(string token)
@@ -76,6 +128,6 @@ public sealed class MediaApiClient(ApiFactory factory)
         string payload = token.Split('.')[1];
         using JsonDocument document = JsonDocument.Parse(Base64Url.DecodeFromChars(payload));
 
-        return document.RootElement.GetProperty("sub").GetGuid();
+        return document.RootElement.GetProperty(JwtRegisteredClaimNames.Sub).GetGuid();
     }
 }

@@ -15,6 +15,7 @@ public sealed class FakeFileStorageService : IFileStorageService
     public Exception? StageFailure { get; set; }
     public Exception? PromoteFailure { get; set; }
     public Exception? DeleteStagedFailure { get; set; }
+    public Exception? DeleteFailure { get; set; }
 
     public async Task<StoredFile> StageAsync(Stream content, string extension, CancellationToken cancellationToken = default)
     {
@@ -74,6 +75,8 @@ public sealed class FakeFileStorageService : IFileStorageService
 
     public void Delete(string fileName)
     {
+        if (DeleteFailure != null) throw DeleteFailure;
+
         Files.Remove(fileName);
         DeletedList.Add(fileName);
     }

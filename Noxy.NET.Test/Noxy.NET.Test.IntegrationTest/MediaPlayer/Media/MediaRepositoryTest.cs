@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
+using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
+using Noxy.NET.MediaPlayer.Persistence;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
@@ -372,5 +374,106 @@ public class MediaRepositoryTest : IDisposable
     public async Task AddMediaUploadJob_ForAnUnknownUser_Throws()
     {
         await Assert.ThrowsAsync<DbUpdateException>(() => AddJobs(CreateJob(Guid.CreateVersion7())));
+    }
+
+    [Fact]
+    public async Task GetMediaFileList_ReturnsEveryFileOfTheUserNewestFirst()
+    {
+        User user = await CreateUser();
+        User other = await CreateUser("other@example.com");
+        DateTime now = DateTime.UtcNow;
+        await Add(CreateMediaFile(user.ID, "Oldest", now.AddMinutes(-3)), CreateMediaFile(user.ID, "Newest", now), CreateMediaFile(user.ID, "Middle", now.AddMinutes(-1)), CreateMediaFile(other.ID, "Not mine", now));
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        List<MediaFile> list = await uow.Media.GetMediaFileList(user.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(["Newest", "Middle", "Oldest"], list.Select(x => x.Metadata!.Title));
+    }
+
+    [Fact]
+    public async Task GetMediaFileStampList_ReturnsIdAndModifiedTimeOfOnlyTheUsersFiles()
+    {
+        User user = await CreateUser();
+        User other = await CreateUser("other@example.com");
+        MediaFile first = CreateMediaFile(user.ID);
+        first.TimeModified = new(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+        MediaFile second = CreateMediaFile(user.ID);
+        second.TimeModified = new(2026, 2, 3, 4, 5, 6, DateTimeKind.Utc);
+        await Add(first, second, CreateMediaFile(other.ID));
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        List<MediaFileStamp> stamps = await uow.Media.GetMediaFileStampList(user.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, stamps.Count);
+        Assert.Equal(first.TimeModified, stamps.Single(x => x.ID == first.ID).TimeModified);
+        Assert.Equal(second.TimeModified, stamps.Single(x => x.ID == second.ID).TimeModified);
+    }
+
+    [Fact]
+    public async Task UpdateMediaFile_SavesTagsAndTimeModifiedTogether()
+    {
+        User user = await CreateUser();
+        MediaFile file = CreateMediaFile(user.ID, "Before");
+        await Add(file);
+
+        await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
+        {
+            MediaFile loaded = (await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!;
+            loaded.Metadata!.Title = "After";
+            loaded.Metadata.Artist = "Someone";
+            loaded.Metadata.Year = 2001;
+            loaded.TimeModified = new(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            uow.Media.UpdateMediaFile(loaded);
+            await uow.Commit(TestContext.Current.CancellationToken);
+        }
+
+        await using IUnitOfWork check = _fixture.UoWFactory.Create();
+        MediaFile saved = (await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!;
+        Assert.Equal("After", saved.Metadata?.Title);
+        Assert.Equal("Someone", saved.Metadata?.Artist);
+        Assert.Equal(2001, saved.Metadata?.Year);
+        Assert.Equal(new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc), saved.TimeModified);
+        Assert.Equal(file.FilePath, saved.FilePath);
+    }
+
+    [Fact]
+    public async Task UpdateMediaFile_NotCommitted_ChangesNothing()
+    {
+        User user = await CreateUser();
+        MediaFile file = CreateMediaFile(user.ID, "Before");
+        await Add(file);
+
+        await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
+        {
+            MediaFile loaded = (await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!;
+            loaded.Metadata!.Title = "After";
+            uow.Media.UpdateMediaFile(loaded);
+        }
+
+        await using IUnitOfWork check = _fixture.UoWFactory.Create();
+        Assert.Equal("Before", (await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!.Metadata?.Title);
+    }
+
+    [Fact]
+    public async Task RemoveMediaFile_DeletesTheFileAndItsMetadata()
+    {
+        User user = await CreateUser();
+        MediaFile file = CreateMediaFile(user.ID);
+        MediaFile kept = CreateMediaFile(user.ID);
+        await Add(file, kept);
+
+        await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
+        {
+            MediaFile loaded = (await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!;
+            uow.Media.RemoveMediaFile(loaded);
+            await uow.Commit(TestContext.Current.CancellationToken);
+        }
+
+        await using IUnitOfWork check = _fixture.UoWFactory.Create();
+        Assert.Null(await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken));
+        Assert.NotNull(await check.Media.FindMediaFile(kept.ID, user.ID, TestContext.Current.CancellationToken));
+        await using DataContext context = _fixture.CreateContext();
+        Assert.Equal(0, await context.MediaFileMetadata.CountAsync(x => x.MediaFileID == file.ID, TestContext.Current.CancellationToken));
+        Assert.Equal(1, await context.MediaFileMetadata.CountAsync(x => x.MediaFileID == kept.ID, TestContext.Current.CancellationToken));
     }
 }

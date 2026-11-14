@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -35,13 +37,13 @@ public class MediaUploadFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        await using UploadHubListener hub = await UploadHubListener.Connect(factory, user.Token);
+        await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
         byte[] content = MediaApiClient.Mp3(1500);
 
         ResponseUploadAccepted accepted = await ReadAccepted(await api.Upload(user.Token, content, "song.test.mp3", "My Song"));
         (string name, ResponseUploadResult result) = await hub.Next();
 
-        Assert.Equal("UploadSucceeded", name);
+        Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), name);
         Assert.Equal(accepted.JobID, result.JobID);
         Assert.True(result.Succeeded);
         Assert.Equal("My Song", result.Title);
@@ -58,7 +60,7 @@ public class MediaUploadFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        await using UploadHubListener hub = await UploadHubListener.Connect(factory, user.Token);
+        await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
         byte[] content = MediaApiClient.Mp3(4321);
 
         await api.Upload(user.Token, content, "song.mp3", "My Song");
@@ -81,6 +83,21 @@ public class MediaUploadFlowTest
         List<ResponseMediaFile> list = await WaitForLibrary(api, user.Token, 1);
 
         Assert.Equal("song.test", Assert.Single(list).Title);
+    }
+
+    [Fact]
+    public async Task Upload_WithoutAFileField_Returns400_NamingTheField_AndNothingIsStaged()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+
+        HttpResponseMessage response = await api.UploadWithoutFile(user.Token, "Only a title");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        JsonElement problem = (await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken));
+        Assert.Equal($$"""Expected a "{{Constants.UploadFileField}}" field.""", problem.GetProperty("title").GetString());
+        Assert.Empty(Directory.GetFiles(factory.StagingFolder));
     }
 
     [Fact]
@@ -139,11 +156,11 @@ public class MediaUploadFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        await using UploadHubListener hub = await UploadHubListener.Connect(factory, user.Token, tokenInQueryString: true);
+        await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token, tokenInQueryString: true);
 
         await api.Upload(user.Token, MediaApiClient.Mp3());
 
-        Assert.Equal("UploadSucceeded", (await hub.Next()).Event);
+        Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), (await hub.Next()).Event);
     }
 
     [Fact]
@@ -163,7 +180,7 @@ public class MediaUploadFlowTest
     {
         await using ApiFactory factory = new();
 
-        HttpRequestException exception = await Assert.ThrowsAsync<HttpRequestException>(() => UploadHubListener.Connect(factory, null));
+        HttpRequestException exception = await Assert.ThrowsAsync<HttpRequestException>(() => LibraryHubListener.Connect(factory, null));
 
         Assert.Equal(HttpStatusCode.Unauthorized, exception.StatusCode);
     }
@@ -173,7 +190,7 @@ public class MediaUploadFlowTest
     {
         await using ApiFactory factory = new();
 
-        HttpRequestException exception = await Assert.ThrowsAsync<HttpRequestException>(() => UploadHubListener.Connect(factory, "not-a-token"));
+        HttpRequestException exception = await Assert.ThrowsAsync<HttpRequestException>(() => LibraryHubListener.Connect(factory, "not-a-token"));
 
         Assert.Equal(HttpStatusCode.Unauthorized, exception.StatusCode);
     }
@@ -217,12 +234,12 @@ public class MediaUploadFlowTest
         ApiSeeder seeder = new(factory);
         await seeder.SeedMediaFile(user.UserID);
         var job = await seeder.SeedJob(user.UserID, MediaUploadJobStatus.Pending, withStagedFile: true);
-        await using UploadHubListener hub = await UploadHubListener.Connect(factory, user.Token);
+        await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 
         seeder.WakeTheWorker();
         (string name, ResponseUploadResult result) = await hub.Next();
 
-        Assert.Equal("UploadFailed", name);
+        Assert.Equal(nameof(MediaHubEvent.UploadFailed), name);
         Assert.Equal(job.ID, result.JobID);
         Assert.False(result.Succeeded);
         Assert.Equal(UploadFailureReason.LibraryFull, result.Reason);
@@ -237,13 +254,13 @@ public class MediaUploadFlowTest
         MediaApiClient api = new(factory);
         ApiAccount owner = await api.SignUp("owner@example.com");
         ApiAccount other = await api.SignUp("other@example.com");
-        await using UploadHubListener ownerHub = await UploadHubListener.Connect(factory, owner.Token);
-        await using UploadHubListener otherHub = await UploadHubListener.Connect(factory, other.Token);
+        await using LibraryHubListener ownerHub = await LibraryHubListener.Connect(factory, owner.Token);
+        await using LibraryHubListener otherHub = await LibraryHubListener.Connect(factory, other.Token);
 
         await api.Upload(owner.Token, MediaApiClient.Mp3());
         (string name, _) = await ownerHub.Next();
 
-        Assert.Equal("UploadSucceeded", name);
+        Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), name);
         Assert.True(await otherHub.ReceivesNothingWithin(TimeSpan.FromSeconds(1)));
     }
 
@@ -263,7 +280,7 @@ public class MediaUploadFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        await using UploadHubListener hub = await UploadHubListener.Connect(factory, user.Token);
+        await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 
         List<Guid> jobIDList = [];
         for (int i = 0; i < 5; i++)

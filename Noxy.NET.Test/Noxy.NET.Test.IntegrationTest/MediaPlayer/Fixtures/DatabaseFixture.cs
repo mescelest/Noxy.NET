@@ -13,13 +13,14 @@ namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 public sealed class DatabaseFixture : IDisposable
 {
     private readonly SqliteConnection _connection = new("DataSource=:memory:");
+    private readonly DbContextOptions<DataContext> _options;
 
     public DatabaseFixture()
     {
         _connection.Open();
 
-        DbContextOptions<DataContext> options = new DbContextOptionsBuilder<DataContext>().UseSqlite(_connection).Options;
-        using (DataContext context = new(options))
+        _options = new DbContextOptionsBuilder<DataContext>().UseSqlite(_connection).Options;
+        using (DataContext context = new(_options))
         {
             context.Database.EnsureCreated();
         }
@@ -35,7 +36,7 @@ public sealed class DatabaseFixture : IDisposable
 
         Time = new();
         GoogleTokenService = new();
-        UoWFactory = new UnitOfWorkFactory(new ContextFactory(options), new EntityToTableMapper(), new TableToEntityMapper());
+        UoWFactory = new UnitOfWorkFactory(new ContextFactory(_options), new EntityToTableMapper(), new TableToEntityMapper());
         TokenService = new(Options.Create(config), Time);
         AuthenticationService = new(UoWFactory, new PasswordHashService(), TokenService, GoogleTokenService, Time);
     }
@@ -45,6 +46,12 @@ public sealed class DatabaseFixture : IDisposable
     public IUnitOfWorkFactory UoWFactory { get; }
     public TokenService TokenService { get; }
     public AuthenticationService AuthenticationService { get; }
+
+    // A separate context, for looking at the tables directly.
+    public DataContext CreateContext()
+    {
+        return new(_options);
+    }
 
     public void Dispose()
     {

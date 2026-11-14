@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Models;
@@ -25,7 +26,8 @@ public class MediaServiceTest
     public MediaServiceTest()
     {
         IOptions<ConfigStorage> storageOptions = Options.Create(_storageConfig);
-        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate());
+        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate(), new FakeMediaNotifier(), new FakeTimeProvider(),
+            NullLogger<MediaService>.Instance);
     }
 
     private static byte[] Mp3(int length = 100)

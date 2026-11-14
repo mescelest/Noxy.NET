@@ -1,4 +1,5 @@
 using Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
+using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 
@@ -9,11 +10,24 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
     private readonly List<MediaFile> _pendingMediaFileList = [];
     private readonly List<MediaUploadJob> _pendingJobAddList = [];
     private readonly List<Guid> _pendingJobRemovalList = [];
+    private readonly List<MediaFile> _pendingMediaFileUpdateList = [];
+    private readonly List<Guid> _pendingMediaFileRemovalList = [];
 
     public void Flush()
     {
         store.MediaFileList.AddRange(_pendingMediaFileList);
         _pendingMediaFileList.Clear();
+
+        foreach (MediaFile updated in _pendingMediaFileUpdateList)
+        {
+            int index = store.MediaFileList.FindIndex(x => x.ID == updated.ID);
+            if (index >= 0) store.MediaFileList[index] = updated;
+        }
+
+        _pendingMediaFileUpdateList.Clear();
+
+        store.MediaFileList.RemoveAll(x => _pendingMediaFileRemovalList.Contains(x.ID));
+        _pendingMediaFileRemovalList.Clear();
 
         store.MediaUploadJobList.AddRange(_pendingJobAddList);
         _pendingJobAddList.Clear();
@@ -29,7 +43,10 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
 
     public Task<MediaFile?> FindMediaFile(Guid id, Guid userID, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.MediaFileList.FirstOrDefault(x => x.ID == id && x.UserID == userID));
+        MediaFile? found = store.MediaFileList.FirstOrDefault(x => x.ID == id && x.UserID == userID);
+
+        // A copy, like the database hands back, so an edit that is never committed changes nothing.
+        return Task.FromResult(found == null ? null : Copy(found));
     }
 
     public Task<int> CountMediaFiles(Guid userID, CancellationToken cancellationToken = default)
@@ -44,7 +61,27 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
 
     public Task<List<MediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).OrderByDescending(x => x.TimeCreated).Skip(skip).Take(take).ToList());
+        return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).OrderByDescending(x => x.TimeCreated).Skip(skip).Take(take).Select(Copy).ToList());
+    }
+
+    public Task<List<MediaFile>> GetMediaFileList(Guid userID, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).OrderByDescending(x => x.TimeCreated).Select(Copy).ToList());
+    }
+
+    public Task<List<MediaFileStamp>> GetMediaFileStampList(Guid userID, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).Select(x => new MediaFileStamp(x.ID, x.TimeModified)).ToList());
+    }
+
+    public void UpdateMediaFile(MediaFile mediaFile)
+    {
+        _pendingMediaFileUpdateList.Add(Copy(mediaFile));
+    }
+
+    public void RemoveMediaFile(MediaFile mediaFile)
+    {
+        _pendingMediaFileRemovalList.Add(mediaFile.ID);
     }
 
     public void AddMediaUploadJob(MediaUploadJob job)
@@ -104,6 +141,44 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
     public Task<List<string>> GetMediaUploadJobFileNameList(CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.MediaUploadJobList.Select(x => x.StagedFileName).ToList());
+    }
+
+    private static MediaFile Copy(MediaFile file)
+    {
+        MediaFile copy = new()
+        {
+            ID = file.ID,
+            TimeCreated = file.TimeCreated,
+            TimeModified = file.TimeModified,
+            FilePath = file.FilePath,
+            ContentType = file.ContentType,
+            SizeBytes = file.SizeBytes,
+            ContentHash = file.ContentHash,
+            UserID = file.UserID
+        };
+
+        if (file.Metadata != null)
+        {
+            copy.Metadata = new()
+            {
+                ID = file.Metadata.ID,
+                TimeCreated = file.Metadata.TimeCreated,
+                Title = file.Metadata.Title,
+                Artist = file.Metadata.Artist,
+                Album = file.Metadata.Album,
+                AlbumArtist = file.Metadata.AlbumArtist,
+                Subtitle = file.Metadata.Subtitle,
+                Comment = file.Metadata.Comment,
+                Genre = file.Metadata.Genre,
+                TrackNumber = file.Metadata.TrackNumber,
+                DiscNumber = file.Metadata.DiscNumber,
+                Year = file.Metadata.Year,
+                Duration = file.Metadata.Duration,
+                MediaFileID = file.Metadata.MediaFileID
+            };
+        }
+
+        return copy;
     }
 
     private static MediaUploadJob Copy(MediaUploadJob job)
