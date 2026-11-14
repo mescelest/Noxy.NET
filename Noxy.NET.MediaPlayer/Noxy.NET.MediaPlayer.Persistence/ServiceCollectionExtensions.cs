@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Persistence;
 using Noxy.NET.MediaPlayer.Persistence.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Persistence.Services;
@@ -16,6 +17,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEntityToTableMapper, EntityToTableMapper>();
         services.AddSingleton<ITableToEntityMapper, TableToEntityMapper>();
         services.AddSingleton<IUnitOfWorkFactory, UnitOfWorkFactory>();
+        services.AddSingleton<IFileStorageService, FileStorageService>();
 
         return services;
     }

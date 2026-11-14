@@ -22,6 +22,11 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<ConfigStorage>()
+            .BindConfiguration(ConfigStorage.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.AddOptions<ConfigGoogle>()
             .BindConfiguration(ConfigGoogle.SectionName);
 
