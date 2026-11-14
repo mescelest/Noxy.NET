@@ -27,17 +27,27 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<ConfigUpload>()
+            .BindConfiguration(ConfigUpload.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.AddOptions<ConfigGoogle>()
             .BindConfiguration(ConfigGoogle.SectionName);
 
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<IPasswordHashService, PasswordHashService>();
         services.AddSingleton<IMediaFileValidator, MediaFileValidator>();
+        services.AddSingleton<IUploadSignal, UploadSignal>();
+        services.AddSingleton<IUploadGate, UploadGate>();
+        services.AddSingleton<IUploadProcessor, UploadProcessor>();
+        services.TryAddSingleton<IUploadNotifier, NoOpUploadNotifier>();
         services.AddScoped<IMediaService, MediaService>();
         services.AddSingleton<ITokenService, TokenService>();
         services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddHostedService<CleanupService>();
+        services.AddHostedService<UploadWorker>();
 
         return services;
     }

@@ -25,7 +25,7 @@ public class MediaServiceTest
     public MediaServiceTest()
     {
         IOptions<ConfigStorage> storageOptions = Options.Create(_storageConfig);
-        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig));
+        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate());
     }
 
     private static byte[] Mp3(int length = 100)
@@ -296,6 +296,67 @@ public class MediaServiceTest
         await Assert.ThrowsAsync<FileTooLargeException>(() => Enqueue("song.mp3", Mp3()));
 
         AssertNothingQueued();
+    }
+
+    private static async Task WaitUntil(Func<bool> condition)
+    {
+        DateTime deadline = DateTime.UtcNow.AddSeconds(10);
+        while (!condition())
+        {
+            Assert.True(DateTime.UtcNow < deadline, "The condition was not met in time.");
+            await Task.Delay(5, TestContext.Current.CancellationToken);
+        }
+    }
+
+    [Fact]
+    public async Task Enqueue_WhileTheSameUsersOtherUploadIsStillArriving_ThrowsUploadInProgress()
+    {
+        FakeBlockingStream arriving = new(Mp3(100));
+        Task<ResponseUploadAccepted> first = _service.Enqueue(UserID, "slow.mp3", null, arriving, TestContext.Current.CancellationToken);
+        await WaitUntil(() => arriving.IsWaiting);
+
+        await Assert.ThrowsAsync<UploadInProgressException>(() => Enqueue("second.mp3", Mp3()));
+        Assert.Empty(_storage.Staged);
+
+        arriving.Release();
+        await first;
+        Assert.Single(_store.MediaUploadJobs);
+    }
+
+    [Fact]
+    public async Task Enqueue_AnotherUsersUploadIsNotBlockedByAnArrivingOne()
+    {
+        FakeBlockingStream arriving = new(Mp3(100));
+        Task<ResponseUploadAccepted> first = _service.Enqueue(UserID, "slow.mp3", null, arriving, TestContext.Current.CancellationToken);
+        await WaitUntil(() => arriving.IsWaiting);
+
+        await Enqueue("other.mp3", Mp3(), userID: Guid.CreateVersion7());
+
+        arriving.Release();
+        await first;
+        Assert.Equal(2, _store.MediaUploadJobs.Count);
+    }
+
+    [Fact]
+    public async Task Enqueue_AfterOneFinishes_TheSameUsersNextIsAccepted()
+    {
+        await Enqueue("one.mp3", Mp3());
+        await Enqueue("two.mp3", Mp3());
+
+        Assert.Equal(2, _store.MediaUploadJobs.Count);
+    }
+
+    [Fact]
+    public async Task Enqueue_FreesTheUsersSlotWhenItFails()
+    {
+        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue("bad.exe", Mp3()));
+        _store.FailCommit = true;
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Enqueue("song.mp3", Mp3()));
+        _store.FailCommit = false;
+
+        await Enqueue("good.mp3", Mp3());
+
+        Assert.Single(_store.MediaUploadJobs);
     }
 
     private void AssertNothingQueued()

@@ -19,6 +19,8 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     FilePath = table.Column<string>(type: "TEXT", maxLength: 512, nullable: false),
                     ContentType = table.Column<string>(type: "TEXT", maxLength: 127, nullable: false),
                     SizeBytes = table.Column<long>(type: "INTEGER", nullable: false),
+                    ContentHash = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
+                    TimeModified = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UserID = table.Column<Guid>(type: "TEXT", nullable: false),
                     TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
@@ -27,6 +29,31 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     table.PrimaryKey("PK_MediaFile", x => x.ID);
                     table.ForeignKey(
                         name: "FK_MediaFile_User_UserID",
+                        column: x => x.UserID,
+                        principalTable: "User",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MediaUploadJob",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UserID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    StagedFileName = table.Column<string>(type: "TEXT", maxLength: 512, nullable: false),
+                    Title = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                    ContentType = table.Column<string>(type: "TEXT", maxLength: 127, nullable: false),
+                    SizeBytes = table.Column<long>(type: "INTEGER", nullable: false),
+                    ContentHash = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MediaUploadJob", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_MediaUploadJob_User_UserID",
                         column: x => x.UserID,
                         principalTable: "User",
                         principalColumn: "ID",
@@ -89,6 +116,21 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                 name: "IX_MediaFileMetadata_TimeCreated",
                 table: "MediaFileMetadata",
                 column: "TimeCreated");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MediaUploadJob_Status_TimeCreated",
+                table: "MediaUploadJob",
+                columns: new[] { "Status", "TimeCreated" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MediaUploadJob_TimeCreated",
+                table: "MediaUploadJob",
+                column: "TimeCreated");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MediaUploadJob_UserID",
+                table: "MediaUploadJob",
+                column: "UserID");
         }
 
         /// <inheritdoc />
@@ -96,6 +138,9 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
         {
             migrationBuilder.DropTable(
                 name: "MediaFileMetadata");
+
+            migrationBuilder.DropTable(
+                name: "MediaUploadJob");
 
             migrationBuilder.DropTable(
                 name: "MediaFile");

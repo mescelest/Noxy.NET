@@ -9,6 +9,8 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Domain.Requests.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.API.Controllers;
@@ -25,11 +27,11 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
     // Keep this action free of parameters: any parameter makes MVC read the form first, which consumes the body.
     [HttpPost]
     [EnableRateLimiting(Constants.RateLimitPolicyUpload)]
-    public async Task<ActionResult<ResponseMediaFile>> Upload()
+    public async Task<ActionResult<ResponseUploadAccepted>> Upload()
     {
         CancellationToken cancellationToken = HttpContext.RequestAborted;
 
-        if (!Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out Guid userID)) return Unauthorized();
+        if (UserID is not { } userID) return Unauthorized();
 
         if (!MediaTypeHeaderValue.TryParse(Request.ContentType, out MediaTypeHeaderValue? contentType)
             || !contentType.MediaType.Equals("multipart/form-data", StringComparison.OrdinalIgnoreCase)
@@ -55,14 +57,35 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
             }
             else if (disposition.Name.Value == "file" && !StringSegment.IsNullOrEmpty(disposition.FileName))
             {
-                ResponseMediaFile response = await mediaService.Upload(userID, HeaderUtilities.RemoveQuotes(disposition.FileName).Value!, title, section.Body, cancellationToken);
+                ResponseUploadAccepted response = await mediaService.Enqueue(userID, HeaderUtilities.RemoveQuotes(disposition.FileName).Value!, title, section.Body, cancellationToken);
 
-                return StatusCode(StatusCodes.Status201Created, response);
+                return StatusCode(StatusCodes.Status202Accepted, response);
             }
         }
 
         return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Expected a \"file\" field.");
     }
+
+    [HttpGet]
+    public async Task<ActionResult<List<ResponseMediaFile>>> List([FromQuery] RequestListMedia request, CancellationToken cancellationToken)
+    {
+        if (UserID is not { } userID) return Unauthorized();
+
+        return await mediaService.List(userID, request.Skip, request.Take, cancellationToken);
+    }
+
+    [HttpGet("{id:guid}/File")]
+    public async Task<ActionResult> Download(Guid id, CancellationToken cancellationToken)
+    {
+        if (UserID is not { } userID) return Unauthorized();
+
+        MediaDownload download = await mediaService.Open(userID, id, cancellationToken);
+
+        // Range requests let a player seek. The file result disposes the stream.
+        return File(download.Content, download.ContentType, download.FileName, true);
+    }
+
+    private Guid? UserID => Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out Guid userID) ? userID : null;
 
     private static async Task<string> ReadText(Stream body, CancellationToken cancellationToken)
     {

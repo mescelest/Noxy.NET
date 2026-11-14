@@ -11,7 +11,7 @@ using Noxy.NET.MediaPlayer.Persistence;
 namespace Noxy.NET.MediaPlayer.Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261114091234_AddMediaFile")]
+    [Migration("20261114120614_AddMediaFile")]
     partial class AddMediaFile
     {
         /// <inheritdoc />
@@ -122,6 +122,11 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.Property<Guid>("ID")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasMaxLength(127)
@@ -136,6 +141,9 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeModified")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("UserID")
@@ -215,6 +223,54 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.ToTable("MediaFileMetadata");
                 });
 
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaUploadJob", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(127)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StagedFileName")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("TimeCreated");
+
+                    b.HasIndex("UserID");
+
+                    b.HasIndex("Status", "TimeCreated");
+
+                    b.ToTable("MediaUploadJob");
+                });
+
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableExternalLogin", b =>
                 {
                     b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
@@ -257,6 +313,17 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("MediaFile");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaUploadJob", b =>
+                {
+                    b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", b =>

@@ -7,7 +7,6 @@ using Noxy.NET.MediaPlayer.Domain.Enums;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
 
-// Puts the server in states that are hard to reach by timing alone, the way a crash or a race would leave it.
 public sealed class ApiSeeder(ApiFactory factory)
 {
     public async Task SeedMediaFile(Guid userID)

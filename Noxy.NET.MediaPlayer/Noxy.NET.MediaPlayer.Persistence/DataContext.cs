@@ -11,6 +11,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableRefreshToken> RefreshToken { get; set; } = null!;
     public DbSet<TableMediaFile> MediaFile { get; set; } = null!;
     public DbSet<TableMediaFileMetadata> MediaFileMetadata { get; set; } = null!;
+    public DbSet<TableMediaUploadJob> MediaUploadJob { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

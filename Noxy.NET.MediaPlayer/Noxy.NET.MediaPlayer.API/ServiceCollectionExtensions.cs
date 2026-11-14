@@ -5,11 +5,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.API.Configurations;
+using Noxy.NET.MediaPlayer.API.Services;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -59,6 +63,17 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
+        public IServiceCollection AddApiSignalR()
+        {
+            services.AddSignalR();
+            services.AddSingleton<IUserIdProvider, SubUserIdProvider>();
+
+            // The application project only knows the interface, and defaults to a notifier that does nothing.
+            services.Replace(ServiceDescriptor.Singleton<IUploadNotifier, SignalRUploadNotifier>());
+
+            return services;
+        }
+
         public IServiceCollection AddApiAuthentication()
         {
             // Validation uses the same ConfigJwt that TokenService signs with, so the two can't drift apart.
@@ -78,6 +93,22 @@ public static class ServiceCollectionExtensions
                         IssuerSigningKey = jwt.Value.CreateSigningKey(),
                         ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
                         ClockSkew = TimeSpan.FromSeconds(30)
+                    };
+
+                    // A WebSocket can't carry an Authorization header from every client, so SignalR sends the token
+                    // in the query string. Only the hub paths may authenticate that way, never the rest of the API.
+                    bearer.Events = new()
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            string? token = context.Request.Query["access_token"];
+                            if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments(Constants.HubsPath))
+                            {
+                                context.Token = token;
+                            }
+
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 

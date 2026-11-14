@@ -60,6 +60,8 @@ public class TableToEntityMapper : ITableToEntityMapper
             FilePath = table.FilePath,
             ContentType = table.ContentType,
             SizeBytes = table.SizeBytes,
+            ContentHash = table.ContentHash,
+            TimeModified = table.TimeModified,
             UserID = table.UserID,
             Metadata = table.Metadata == null ? null : Map(table.Metadata)
         };
@@ -83,6 +85,22 @@ public class TableToEntityMapper : ITableToEntityMapper
             Year = table.Year,
             Duration = table.Duration,
             MediaFileID = table.MediaFileID
+        };
+    }
+
+    public MediaUploadJob Map(TableMediaUploadJob table)
+    {
+        return new()
+        {
+            ID = table.ID,
+            TimeCreated = table.TimeCreated,
+            UserID = table.UserID,
+            StagedFileName = table.StagedFileName,
+            Title = table.Title,
+            ContentType = table.ContentType,
+            SizeBytes = table.SizeBytes,
+            ContentHash = table.ContentHash,
+            Status = table.Status
         };
     }
 

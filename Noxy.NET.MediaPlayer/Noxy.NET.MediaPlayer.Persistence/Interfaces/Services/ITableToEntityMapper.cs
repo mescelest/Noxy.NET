@@ -18,6 +18,7 @@ public interface ITableToEntityMapper
 
     MediaFile Map(TableMediaFile table);
     MediaFileMetadata Map(TableMediaFileMetadata table);
+    MediaUploadJob Map(TableMediaUploadJob table);
 
     #endregion -- Media --
 }

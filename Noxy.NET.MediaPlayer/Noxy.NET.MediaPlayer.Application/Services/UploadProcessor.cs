@@ -1,0 +1,176 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Interfaces;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Domain.Entities;
+using Noxy.NET.MediaPlayer.Domain.Enums;
+using Noxy.NET.MediaPlayer.Domain.Exceptions;
+using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+
+namespace Noxy.NET.MediaPlayer.Application.Services;
+
+public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService storage, IUploadNotifier notifier, IOptions<ConfigStorage> options, ILogger<UploadProcessor> logger) : IUploadProcessor
+{
+    public async Task<bool> ProcessNext(CancellationToken cancellationToken = default)
+    {
+        MediaUploadJob job;
+
+        await using (IUnitOfWork claim = uowFactory.Create())
+        {
+            MediaUploadJob? next = await claim.Media.FindNextPendingMediaUploadJob(cancellationToken);
+            if (next == null) return false;
+
+            // Someone else got there first: nothing to do for this one, but there may be more.
+            if (!await claim.Media.MarkMediaUploadJobProcessing(next.ID, cancellationToken)) return true;
+
+            job = next;
+        }
+
+        ResponseUploadResult? result;
+        try
+        {
+            result = await Complete(job, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Shutting down: the job stays Processing and is picked up again after the restart.
+            throw;
+        }
+        catch (Exception ex)
+        {
+            result = await Fail(job, ex, cancellationToken);
+        }
+
+        // No result means the job could not be consumed and will be tried again, so there is nothing final to report yet.
+        if (result != null) await Notify(job.UserID, result, cancellationToken);
+        return true;
+    }
+
+    public async Task Recover(CancellationToken cancellationToken = default)
+    {
+        await using IUnitOfWork uow = uowFactory.Create();
+
+        int reset = await uow.Media.ResetProcessingMediaUploadJobs(cancellationToken);
+        HashSet<string> jobFiles = [.. await uow.Media.ListMediaUploadJobFileNames(cancellationToken)];
+
+        int orphans = 0;
+        foreach (string staged in storage.ListStaged().Where(x => !jobFiles.Contains(x)))
+        {
+            storage.DeleteStaged(staged);
+            orphans++;
+        }
+
+        logger.LogInformation("Upload recovery: {Reset} interrupted jobs queued again, {Orphans} orphaned staged files deleted", reset, orphans);
+    }
+
+    private async Task<ResponseUploadResult> Complete(MediaUploadJob job, CancellationToken cancellationToken)
+    {
+        await EnsureRoomInLibrary(job, cancellationToken);
+
+        storage.Promote(job.StagedFileName);
+
+        MediaFile file = new()
+        {
+            FilePath = job.StagedFileName,
+            ContentType = job.ContentType,
+            SizeBytes = job.SizeBytes,
+            ContentHash = job.ContentHash,
+            UserID = job.UserID
+        };
+        file.Metadata = new()
+        {
+            Title = job.Title,
+            MediaFileID = file.ID
+        };
+
+        // One commit, so a crash can't leave a library entry without its job being consumed, or the other way round.
+        await using IUnitOfWork uow = uowFactory.Create();
+        uow.Media.AddMediaFile(file);
+        uow.Media.RemoveMediaUploadJob(job);
+        await uow.Commit(cancellationToken);
+
+        return new()
+        {
+            JobID = job.ID,
+            Title = job.Title,
+            Succeeded = true,
+            Media = MediaFileMapper.ToResponse(file)
+        };
+    }
+
+    private async Task EnsureRoomInLibrary(MediaUploadJob job, CancellationToken cancellationToken)
+    {
+        await using IUnitOfWork uow = uowFactory.Create();
+
+        if (await uow.Media.CountMediaFiles(job.UserID, cancellationToken) >= options.Value.MaxFilesPerUser) throw new LibraryFullException();
+        if (options.Value.MaxBytesPerUser == 0) return;
+
+        long used = await uow.Media.SumMediaFileBytes(job.UserID, cancellationToken);
+        if (used + job.SizeBytes > options.Value.MaxBytesPerUser) throw new LibraryFullException();
+    }
+
+    private async Task<ResponseUploadResult?> Fail(MediaUploadJob job, Exception exception, CancellationToken cancellationToken)
+    {
+        UploadFailureReason reason = exception switch
+        {
+            LibraryFullException => UploadFailureReason.LibraryFull,
+            FileNotFoundException => UploadFailureReason.FileMissing,
+            _ => UploadFailureReason.Unknown
+        };
+
+        if (reason == UploadFailureReason.Unknown) logger.LogError(exception, "Upload job {JobID} failed", job.ID);
+        else logger.LogInformation("Upload job {JobID} was rejected: {Reason}", job.ID, reason);
+
+        // The job goes first. If that fails it stays queued with its files, so the next start tries it again.
+        try
+        {
+            await using IUnitOfWork uow = uowFactory.Create();
+            uow.Media.RemoveMediaUploadJob(job);
+            await uow.Commit(cancellationToken);
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(ex, "Could not remove upload job {JobID}, so it stays queued", job.ID);
+            return null;
+        }
+
+        // The name is unique, so a library file with it can only be one this job promoted before it failed.
+        DeleteQuietly(() => storage.DeleteStaged(job.StagedFileName), job);
+        DeleteQuietly(() => storage.Delete(job.StagedFileName), job);
+
+        return new()
+        {
+            JobID = job.ID,
+            Title = job.Title,
+            Succeeded = false,
+            Reason = reason
+        };
+    }
+
+    // Each deletion stands alone, so one failing can't stop the other.
+    private void DeleteQuietly(Action delete, MediaUploadJob job)
+    {
+        try
+        {
+            delete();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Could not delete a file of upload job {JobID}", job.ID);
+        }
+    }
+
+    private async Task Notify(Guid userID, ResponseUploadResult result, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await notifier.Notify(userID, result, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // The outcome is already decided and recorded: a missing connection must not change it.
+            logger.LogWarning(ex, "Could not notify about upload job {JobID}", result.JobID);
+        }
+    }
+}

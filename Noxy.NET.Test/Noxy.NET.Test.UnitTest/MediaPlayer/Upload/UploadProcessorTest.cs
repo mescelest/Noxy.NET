@@ -294,4 +294,49 @@ public class UploadProcessorTest
         Assert.Single(_store.MediaUploadJobs);
         Assert.Empty(_notifier.Notifications);
     }
+
+    [Fact]
+    public async Task ProcessNext_FailureCleanup_StagedDeleteThrows_StillDeletesTheLibraryFile()
+    {
+        MediaUploadJob job = AddJob();
+        _store.FailCommitCount = 1;
+        _storage.DeleteStagedFailure = new IOException("locked");
+
+        await ProcessNext();
+
+        Assert.Contains(job.StagedFileName, _storage.Deleted);
+        Assert.Empty(_storage.Files);
+        Assert.Empty(_store.MediaUploadJobs);
+    }
+
+    [Fact]
+    public async Task ProcessNext_JobCannotBeRemoved_KeepsTheFilesAndStaysSilentSoARestartCanRetry()
+    {
+        MediaUploadJob job = AddJob();
+        // The commit that finishes the job fails, and then so does the commit that removes it after the failure.
+        _store.FailCommitCount = 2;
+
+        Assert.True(await ProcessNext());
+
+        Assert.Single(_store.MediaUploadJobs);
+        Assert.Contains(job.StagedFileName, _storage.Files.Keys);
+        Assert.Empty(_storage.Deleted);
+        Assert.Empty(_storage.DeletedStaged);
+        Assert.Empty(_notifier.Notifications);
+    }
+
+    [Fact]
+    public async Task ProcessNext_JobCannotBeRemoved_ARestartThenCompletesIt()
+    {
+        MediaUploadJob job = AddJob();
+        _store.FailCommitCount = 2;
+        await ProcessNext();
+
+        await _processor.Recover(TestContext.Current.CancellationToken);
+        await ProcessNext();
+
+        Assert.Equal(job.StagedFileName, Assert.Single(_store.MediaFiles).FilePath);
+        Assert.Empty(_store.MediaUploadJobs);
+        Assert.True(Assert.Single(_notifier.Notifications).Result.Succeeded);
+    }
 }

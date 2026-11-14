@@ -23,6 +23,13 @@ public class TableMediaFile : BaseTable
     public required long SizeBytes { get; set; }
 
     [Required]
+    [MaxLength(64)]
+    public required string ContentHash { get; set; }
+
+    [Required]
+    public DateTime TimeModified { get; set; }
+
+    [Required]
     public Guid UserID { get; set; }
 
     [ForeignKey(nameof(UserID))]

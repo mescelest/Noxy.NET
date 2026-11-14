@@ -16,4 +16,12 @@ public class ConfigStorage
     // Listed in configuration only, because the binder appends to a default array instead of replacing it.
     [MinLength(1)]
     public string[] AllowedExtensions { get; set; } = [];
+
+    // Per user. Keeps the library list that every device downloads at a known size.
+    [Range(1, int.MaxValue)]
+    public int MaxFilesPerUser { get; set; } = 5000;
+
+    // Per user. Zero means no limit.
+    [Range(0, long.MaxValue)]
+    public long MaxBytesPerUser { get; set; }
 }

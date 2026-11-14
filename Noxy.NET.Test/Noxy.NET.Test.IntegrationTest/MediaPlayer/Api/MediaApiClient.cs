@@ -11,8 +11,6 @@ public sealed class MediaApiClient(ApiFactory factory)
 {
     private readonly HttpClient _client = factory.CreateClient();
 
-    public record Account(string Token, Guid UserID);
-
     public static byte[] Mp3(int length = 1000)
     {
         byte[] bytes = new byte[length];
@@ -25,7 +23,7 @@ public sealed class MediaApiClient(ApiFactory factory)
         return bytes;
     }
 
-    public async Task<Account> SignUp(string email)
+    public async Task<ApiAccount> SignUp(string email)
     {
         HttpResponseMessage response = await _client.PostAsJsonAsync("/Auth/SignUp", new { email, password = "a-long-enough-password" }, TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
@@ -37,9 +35,14 @@ public sealed class MediaApiClient(ApiFactory factory)
     // The title field goes first, because the server reads the body as a stream.
     public async Task<HttpResponseMessage> Upload(string? token, byte[] content, string fileName = "song.mp3", string? title = null)
     {
+        return await Send(token, new ByteArrayContent(content), fileName, title);
+    }
+
+    private async Task<HttpResponseMessage> Send(string? token, HttpContent file, string fileName, string? title)
+    {
         using MultipartFormDataContent form = [];
         if (title != null) form.Add(new StringContent(title), "title");
-        form.Add(new ByteArrayContent(content), "file", fileName);
+        form.Add(file, "file", fileName);
 
         using HttpRequestMessage request = new(HttpMethod.Post, "/Media") { Content = form };
         Authorize(request, token);
