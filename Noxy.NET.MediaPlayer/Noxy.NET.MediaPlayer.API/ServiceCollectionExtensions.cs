@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Noxy.NET.MediaPlayer.API;
@@ -32,21 +33,12 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddApiRateLimiting()
         {
             services.AddOptions<ConfigRateLimitAuth>().BindConfiguration(ConfigRateLimitAuth.SectionName).ValidateDataAnnotations().ValidateOnStart();
+            services.AddOptions<ConfigRateLimitUpload>().BindConfiguration(ConfigRateLimitUpload.SectionName).ValidateDataAnnotations().ValidateOnStart();
 
             services.AddRateLimiter(options =>
             {
-                options.AddPolicy(Constants.RateLimitPolicyAuth, context =>
-                {
-                    ConfigRateLimitAuth settings = context.RequestServices.GetRequiredService<IOptions<ConfigRateLimitAuth>>().Value;
-
-                    return RateLimitPartition.GetSlidingWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? "unknown", _ => new()
-                    {
-                        PermitLimit = settings.PermitLimit,
-                        Window = settings.Window,
-                        SegmentsPerWindow = 6,
-                        QueueLimit = 0
-                    });
-                });
+                AddSlidingWindowPolicy<ConfigRateLimitAuth>(options, Constants.RateLimitPolicyAuth);
+                AddSlidingWindowPolicy<ConfigRateLimitUpload>(options, Constants.RateLimitPolicyUpload);
 
                 options.OnRejected = async (context, cancellationToken) =>
                 {
@@ -54,7 +46,10 @@ public static class ServiceCollectionExtensions
                     response.StatusCode = StatusCodes.Status429TooManyRequests;
 
                     // The sliding window can't say when a permit frees up, so give the full window: always safe, sometimes pessimistic.
-                    ConfigRateLimitAuth settings = context.HttpContext.RequestServices.GetRequiredService<IOptions<ConfigRateLimitAuth>>().Value;
+                    string? policy = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName;
+                    ConfigRateLimit settings = policy == Constants.RateLimitPolicyUpload
+                        ? context.HttpContext.RequestServices.GetRequiredService<IOptions<ConfigRateLimitUpload>>().Value
+                        : context.HttpContext.RequestServices.GetRequiredService<IOptions<ConfigRateLimitAuth>>().Value;
                     response.Headers.RetryAfter = settings.WindowSeconds.ToString(CultureInfo.InvariantCulture);
 
                     await response.WriteAsJsonAsync(new ProblemDetails { Status = response.StatusCode, Title = "Too many requests." }, cancellationToken);
@@ -92,5 +87,21 @@ public static class ServiceCollectionExtensions
 
             return services;
         }
+    }
+
+    private static void AddSlidingWindowPolicy<TConfig>(RateLimiterOptions options, string policyName) where TConfig : ConfigRateLimit
+    {
+        options.AddPolicy(policyName, context =>
+        {
+            TConfig settings = context.RequestServices.GetRequiredService<IOptions<TConfig>>().Value;
+
+            return RateLimitPartition.GetSlidingWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? "unknown", _ => new()
+            {
+                PermitLimit = settings.PermitLimit,
+                Window = settings.Window,
+                SegmentsPerWindow = 6,
+                QueueLimit = 0
+            });
+        });
     }
 }

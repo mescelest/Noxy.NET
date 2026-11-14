@@ -16,6 +16,8 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
             GoogleLoginNotConfiguredException => new(StatusCodes.Status503ServiceUnavailable, "Google login is not configured."),
             UnsupportedMediaTypeException => new(StatusCodes.Status415UnsupportedMediaType, "The file type is not supported."),
             FileTooLargeException => new(StatusCodes.Status413PayloadTooLarge, "The file is too large."),
+            // Thrown by Kestrel when the body goes over the limit the upload action set.
+            BadHttpRequestException { StatusCode: StatusCodes.Status413PayloadTooLarge } => new(StatusCodes.Status413PayloadTooLarge, "The file is too large."),
             _ => null
         };
 
