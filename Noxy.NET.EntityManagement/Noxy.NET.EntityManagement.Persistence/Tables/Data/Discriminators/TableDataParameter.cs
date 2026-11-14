@@ -8,6 +8,7 @@ namespace Noxy.NET.EntityManagement.Persistence.Tables.Data.Discriminators;
 public abstract class TableDataParameter : BaseTableData
 {
     [Required]
+    [MaxLength(DefaultTextLength)]
     public required string Value { get; set; }
 
     public required DateTime? TimeApproved { get; set; }

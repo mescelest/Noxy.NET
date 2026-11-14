@@ -17,4 +17,7 @@ public abstract class BaseTable
 
     public const int DefaultNameLength = 255;
     public const int DefaultNoteLength = 255;
+
+    // For free text of any size. It only gives the column a bound, which is far above anything entered.
+    public const int DefaultTextLength = 1_000_000;
 }
