@@ -11,4 +11,15 @@ public class ResponseMediaFile : BaseResponse
     public required string ContentHash { get; init; }
     public required DateTime TimeCreated { get; init; }
     public required DateTime TimeModified { get; init; }
+
+    public string? Artist { get; init; }
+    public string? Album { get; init; }
+    public string? AlbumArtist { get; init; }
+    public string? Subtitle { get; init; }
+    public string? Comment { get; init; }
+    public string? Genre { get; init; }
+    public int? TrackNumber { get; init; }
+    public int? DiscNumber { get; init; }
+    public int? Year { get; init; }
+    public TimeSpan? Duration { get; init; }
 }

@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IUploadGate, UploadGate>();
         services.AddSingleton<IUploadProcessor, UploadProcessor>();
         services.TryAddSingleton<IUploadNotifier, NoOpUploadNotifier>();
+        services.TryAddSingleton<IMediaNotifier, NoOpMediaNotifier>();
         services.AddScoped<IMediaService, MediaService>();
         services.AddSingleton<ITokenService, TokenService>();
         services.AddSingleton<IGoogleTokenService, GoogleTokenService>();

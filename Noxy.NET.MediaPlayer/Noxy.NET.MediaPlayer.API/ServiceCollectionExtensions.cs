@@ -70,6 +70,15 @@ public static class ServiceCollectionExtensions
 
             // The application project only knows the interface, and defaults to a notifier that does nothing.
             services.Replace(ServiceDescriptor.Singleton<IUploadNotifier, SignalRUploadNotifier>());
+            services.Replace(ServiceDescriptor.Singleton<IMediaNotifier, SignalRMediaNotifier>());
+
+            return services;
+        }
+
+        public IServiceCollection AddApiResponseCompression()
+        {
+            // The library list holds no secrets and does not echo anything the caller sent, so compressing it over HTTPS is safe.
+            services.AddResponseCompression(options => options.EnableForHttps = true);
 
             return services;
         }
@@ -101,7 +110,7 @@ public static class ServiceCollectionExtensions
                     {
                         OnMessageReceived = context =>
                         {
-                            string? token = context.Request.Query["access_token"];
+                            string? token = context.Request.Query[Constants.AccessTokenQueryKey];
                             if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments(Constants.HubsPath))
                             {
                                 context.Token = token;

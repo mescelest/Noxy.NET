@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 
 namespace Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
@@ -15,6 +16,18 @@ public interface IMediaRepository
 
     // Newest first.
     Task<List<MediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default);
+
+    // The whole library, newest first.
+    Task<List<MediaFile>> GetMediaFileList(Guid userID, CancellationToken cancellationToken = default);
+
+    // Only the ID and modified time of each file, which is all the library ETag needs.
+    Task<List<MediaFileStamp>> GetMediaFileStampList(Guid userID, CancellationToken cancellationToken = default);
+
+    // Saves the file row and its metadata row, together with whatever else the unit of work holds.
+    void UpdateMediaFile(MediaFile mediaFile);
+
+    // Tracked, so it commits with the rest of the unit of work. The metadata row goes with the file.
+    void RemoveMediaFile(MediaFile mediaFile);
 
     void AddMediaUploadJob(MediaUploadJob job);
 

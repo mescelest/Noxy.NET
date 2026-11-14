@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
@@ -6,11 +9,23 @@ using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Streams;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
+using Noxy.NET.MediaPlayer.Domain.Requests;
+using Noxy.NET.MediaPlayer.Domain.Requests.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Application.Services;
 
-public class MediaService(IUnitOfWorkFactory uowFactory, IMediaFileValidator validator, IFileStorageService storage, IUploadSignal signal, IOptions<ConfigStorage> storageOptions, IOptions<ConfigUpload> uploadOptions, IUploadGate gate) : IMediaService
+public class MediaService(
+    IUnitOfWorkFactory uowFactory,
+    IMediaFileValidator validator,
+    IFileStorageService storage,
+    IUploadSignal signal,
+    IOptions<ConfigStorage> storageOptions,
+    IOptions<ConfigUpload> uploadOptions,
+    IUploadGate gate,
+    IMediaNotifier notifier,
+    TimeProvider time,
+    ILogger<MediaService> logger) : IMediaService
 {
     public async Task<ResponseUploadAccepted> Enqueue(Guid userID, string fileName, string? title, Stream content, CancellationToken cancellationToken = default)
     {
@@ -77,6 +92,146 @@ public class MediaService(IUnitOfWorkFactory uowFactory, IMediaFileValidator val
         catch (FileNotFoundException)
         {
             throw new MediaNotFoundException();
+        }
+    }
+
+    public async Task<ResponseMediaFile> Update(Guid userID, Guid id, RequestUpdateMedia request, CancellationToken cancellationToken = default)
+    {
+        await using IUnitOfWork uow = uowFactory.Create();
+
+        MediaFile file = await uow.Media.FindMediaFile(id, userID, cancellationToken) ?? throw new MediaNotFoundException();
+        MediaFileMetadata metadata = file.Metadata ?? throw new MediaNotFoundException();
+
+        bool changed = false;
+        if (request.Title.HasValue)
+        {
+            if (string.IsNullOrWhiteSpace(request.Title.Value)) throw new ArgumentException("The title can't be empty.", nameof(request));
+
+            changed |= Apply(request.Title.Value.Trim(), metadata.Title, value => metadata.Title = value!);
+        }
+
+        changed |= ApplyText(request.Artist, metadata.Artist, value => metadata.Artist = value);
+        changed |= ApplyText(request.Album, metadata.Album, value => metadata.Album = value);
+        changed |= ApplyText(request.AlbumArtist, metadata.AlbumArtist, value => metadata.AlbumArtist = value);
+        changed |= ApplyText(request.Subtitle, metadata.Subtitle, value => metadata.Subtitle = value);
+        changed |= ApplyText(request.Comment, metadata.Comment, value => metadata.Comment = value);
+        changed |= ApplyText(request.Genre, metadata.Genre, value => metadata.Genre = value);
+        changed |= ApplyNumber(request.TrackNumber, metadata.TrackNumber, value => metadata.TrackNumber = value);
+        changed |= ApplyNumber(request.DiscNumber, metadata.DiscNumber, value => metadata.DiscNumber = value);
+        changed |= ApplyNumber(request.Year, metadata.Year, value => metadata.Year = value);
+
+        // An edit that changes nothing leaves the modified time alone, so it can't change the library ETag or push anything.
+        if (!changed) return MediaFileMapper.ToResponse(file);
+
+        file.TimeModified = time.GetUtcNow().UtcDateTime;
+        uow.Media.UpdateMediaFile(file);
+        await uow.Commit(cancellationToken);
+
+        ResponseMediaFile response = MediaFileMapper.ToResponse(file);
+        await NotifyQuietly(() => notifier.Updated(userID, response, cancellationToken), id);
+        return response;
+    }
+
+    public async Task Delete(Guid userID, Guid id, CancellationToken cancellationToken = default)
+    {
+        await using IUnitOfWork uow = uowFactory.Create();
+
+        MediaFile file = await uow.Media.FindMediaFile(id, userID, cancellationToken) ?? throw new MediaNotFoundException();
+
+        // The row goes first: a failure after it leaves an orphaned file, never a song that points at nothing.
+        uow.Media.RemoveMediaFile(file);
+        await uow.Commit(cancellationToken);
+
+        try
+        {
+            storage.Delete(file.FilePath);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Could not delete the file of deleted song {MediaFileID}", id);
+        }
+
+        await NotifyQuietly(() => notifier.Deleted(userID, id, cancellationToken), id);
+    }
+
+    public async Task<MediaLibrary> GetMediaLibrary(Guid userID, string? ifNoneMatch, CancellationToken cancellationToken = default)
+    {
+        await using IUnitOfWork uow = uowFactory.Create();
+
+        if (!string.IsNullOrWhiteSpace(ifNoneMatch))
+        {
+            string current = ComputeETag(await uow.Media.GetMediaFileStampList(userID, cancellationToken));
+            if (Matches(ifNoneMatch, current)) return new(current, null);
+        }
+
+        // The ETag comes from the list that is returned, so the two can never disagree.
+        List<MediaFile> fileList = await uow.Media.GetMediaFileList(userID, cancellationToken);
+        return new(ComputeETag(fileList.Select(x => new MediaFileStamp(x.ID, x.TimeModified))), [.. fileList.Select(MediaFileMapper.ToResponse)]);
+    }
+
+    private static bool Apply(string value, string? current, Action<string> set)
+    {
+        if (value == current) return false;
+
+        set(value);
+        return true;
+    }
+
+    // A blank value clears the tag, so a tag never holds an empty string.
+    private static bool ApplyText(Optional<string?> requested, string? current, Action<string?> set)
+    {
+        if (!requested.HasValue) return false;
+
+        string? value = string.IsNullOrWhiteSpace(requested.Value) ? null : requested.Value.Trim();
+        if (value == current) return false;
+
+        set(value);
+        return true;
+    }
+
+    private static bool ApplyNumber(Optional<int?> requested, int? current, Action<int?> set)
+    {
+        if (!requested.HasValue || requested.Value == current) return false;
+
+        set(requested.Value);
+        return true;
+    }
+
+    private static string ComputeETag(IEnumerable<MediaFileStamp> stampList)
+    {
+        using IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        foreach (MediaFileStamp stamp in stampList.OrderBy(x => x.ID))
+        {
+            hash.AppendData(Encoding.UTF8.GetBytes($"{stamp.ID:D}:{stamp.TimeModified.Ticks}\n"));
+        }
+
+        return $"\"{Convert.ToHexStringLower(hash.GetHashAndReset())}\"";
+    }
+
+    // The header holds a comma separated list of tags, any of which may be weak ("W/") or the wildcard.
+    private static bool Matches(string ifNoneMatch, string eTag)
+    {
+        foreach (string token in ifNoneMatch.Split(','))
+        {
+            string tag = token.Trim();
+            if (tag.StartsWith("W/", StringComparison.Ordinal)) tag = tag[2..];
+
+            if (tag == "*" || tag == eTag) return true;
+        }
+
+        return false;
+    }
+
+    // A failed notification is only logged: the change itself has already happened.
+    private async Task NotifyQuietly(Func<Task> notify, Guid id)
+    {
+        try
+        {
+            await notify();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Could not notify about media file {MediaFileID}", id);
         }
     }
 

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
+using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Persistence.Interfaces.Services;
@@ -45,6 +46,36 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
             .ToListAsync(cancellationToken);
 
         return [.. list.Select(x => mapperT2E.Map(x))];
+    }
+
+    public async Task<List<MediaFile>> GetMediaFileList(Guid userID, CancellationToken cancellationToken = default)
+    {
+        List<TableMediaFile> list = await context.MediaFile.AsNoTracking()
+            .Include(x => x.Metadata)
+            .Where(x => x.UserID == userID)
+            .OrderByDescending(x => x.TimeCreated)
+            .ThenByDescending(x => x.ID)
+            .ToListAsync(cancellationToken);
+
+        return [.. list.Select(mapperT2E.Map)];
+    }
+
+    public async Task<List<MediaFileStamp>> GetMediaFileStampList(Guid userID, CancellationToken cancellationToken = default)
+    {
+        return await context.MediaFile.AsNoTracking()
+            .Where(x => x.UserID == userID)
+            .Select(x => new MediaFileStamp(x.ID, x.TimeModified))
+            .ToListAsync(cancellationToken);
+    }
+
+    public void UpdateMediaFile(MediaFile mediaFile)
+    {
+        context.MediaFile.Update(mapperE2T.Map(mediaFile));
+    }
+
+    public void RemoveMediaFile(MediaFile mediaFile)
+    {
+        context.MediaFile.Remove(mapperE2T.Map(mediaFile));
     }
 
     public void AddMediaUploadJob(MediaUploadJob job)

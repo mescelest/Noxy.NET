@@ -22,11 +22,13 @@ builder.Services.AddApiCors();
 builder.Services.AddApiRateLimiting();
 builder.Services.AddApiAuthentication();
 builder.Services.AddApiSignalR();
+builder.Services.AddApiResponseCompression();
 builder.Services.AddControllers();
 
 WebApplication app = builder.Build();
 
 app.UseExceptionHandler();
+app.UseResponseCompression();
 app.UseCors(Constants.CorsPolicyName);
 app.UseRateLimiter();
 

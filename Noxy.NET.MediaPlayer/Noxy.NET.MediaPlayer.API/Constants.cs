@@ -7,4 +7,7 @@ public static class Constants
     public const string RateLimitPolicyUpload = "upload";
     public const string HubsPath = "/hubs";
     public const string MediaHubPath = "/hubs/media";
+    public const string AccessTokenQueryKey = "access_token";
+    public const string UploadTitleField = "title";
+    public const string UploadFileField = "file";
 }

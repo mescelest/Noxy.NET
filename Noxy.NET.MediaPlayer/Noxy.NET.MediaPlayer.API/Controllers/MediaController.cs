@@ -51,11 +51,11 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
         {
             if (!ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out ContentDispositionHeaderValue? disposition)) continue;
 
-            if (disposition.Name.Value == "title")
+            if (disposition.Name.Value == Constants.UploadTitleField)
             {
                 title = await ReadText(section.Body, cancellationToken);
             }
-            else if (disposition.Name.Value == "file" && !StringSegment.IsNullOrEmpty(disposition.FileName))
+            else if (disposition.Name.Value == Constants.UploadFileField && !StringSegment.IsNullOrEmpty(disposition.FileName))
             {
                 ResponseUploadAccepted response = await mediaService.Enqueue(userID, HeaderUtilities.RemoveQuotes(disposition.FileName).Value!, title, section.Body, cancellationToken);
 
@@ -63,7 +63,7 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
             }
         }
 
-        return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Expected a \"file\" field.");
+        return Problem(statusCode: StatusCodes.Status400BadRequest, title: $$"""Expected a "{{Constants.UploadFileField}}" field.""");
     }
 
     [HttpGet]
@@ -72,6 +72,40 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
         if (UserID is not { } userID) return Unauthorized();
 
         return await mediaService.GetMediaFileList(userID, request.Skip, request.Take, cancellationToken);
+    }
+
+    // The whole library for a device's start-up diff. A matching If-None-Match gets a 304 and no body.
+    [HttpGet("Library")]
+    public async Task<ActionResult<List<ResponseMediaFile>>> GetMediaLibrary(CancellationToken cancellationToken)
+    {
+        if (UserID is not { } userID) return Unauthorized();
+
+        MediaLibrary library = await mediaService.GetMediaLibrary(userID, Request.Headers.IfNoneMatch.ToString(), cancellationToken);
+
+        Response.Headers.ETag = library.ETag;
+        Response.Headers.CacheControl = "private, no-cache";
+
+        if (library.MediaFileList == null) return StatusCode(StatusCodes.Status304NotModified);
+
+        return library.MediaFileList;
+    }
+
+    [HttpPatch("{id:guid}")]
+    public async Task<ActionResult<ResponseMediaFile>> Update(Guid id, RequestUpdateMedia request, CancellationToken cancellationToken)
+    {
+        if (UserID is not { } userID) return Unauthorized();
+
+        return await mediaService.Update(userID, id, request, cancellationToken);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        if (UserID is not { } userID) return Unauthorized();
+
+        await mediaService.Delete(userID, id, cancellationToken);
+
+        return NoContent();
     }
 
     [HttpGet("{id:guid}/File")]
