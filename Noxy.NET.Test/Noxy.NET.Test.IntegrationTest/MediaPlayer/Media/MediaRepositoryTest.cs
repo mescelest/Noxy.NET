@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Domain.Entities;
+using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
@@ -33,6 +34,7 @@ public class MediaRepositoryTest : IDisposable
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
             SizeBytes = 1234,
+            ContentHash = new string('a', 64),
             UserID = userID
         };
 
@@ -131,6 +133,50 @@ public class MediaRepositoryTest : IDisposable
     }
 
     [Fact]
+    public async Task Add_ThenFind_KeepsTheHashAndModifiedTime()
+    {
+        User user = await CreateUser();
+        MediaFile file = CreateMediaFile(user.ID);
+        file.ContentHash = new string('b', 64);
+        file.TimeModified = new(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+        await Add(file);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        MediaFile? found = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(new string('b', 64), found?.ContentHash);
+        Assert.Equal(file.TimeModified, found?.TimeModified);
+    }
+
+    [Fact]
+    public async Task CountAndSum_CoverOnlyTheUsersFiles()
+    {
+        User user = await CreateUser();
+        User other = await CreateUser("other@example.com");
+        MediaFile first = CreateMediaFile(user.ID);
+        first.SizeBytes = 1000;
+        MediaFile second = CreateMediaFile(user.ID);
+        second.SizeBytes = 2500;
+        await Add(first, second, CreateMediaFile(other.ID));
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+
+        Assert.Equal(2, await uow.Media.CountMediaFiles(user.ID, TestContext.Current.CancellationToken));
+        Assert.Equal(3500, await uow.Media.SumMediaFileBytes(user.ID, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task CountAndSum_NoFiles_AreZero()
+    {
+        User user = await CreateUser();
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+
+        Assert.Equal(0, await uow.Media.CountMediaFiles(user.ID, TestContext.Current.CancellationToken));
+        Assert.Equal(0, await uow.Media.SumMediaFileBytes(user.ID, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task Add_DuplicateFilePath_Throws()
     {
         User user = await CreateUser();
@@ -147,5 +193,184 @@ public class MediaRepositoryTest : IDisposable
     public async Task Add_ForAnUnknownUser_Throws()
     {
         await Assert.ThrowsAsync<DbUpdateException>(() => Add(CreateMediaFile(Guid.CreateVersion7())));
+    }
+
+    private static MediaUploadJob CreateJob(Guid userID, DateTime? timeCreated = null)
+    {
+        return new()
+        {
+            TimeCreated = timeCreated ?? DateTime.UtcNow,
+            UserID = userID,
+            StagedFileName = $"{Guid.CreateVersion7()}.mp3",
+            Title = "Song",
+            ContentType = "audio/mpeg",
+            SizeBytes = 100,
+            ContentHash = new string('c', 64)
+        };
+    }
+
+    private async Task AddJobs(params MediaUploadJob[] jobs)
+    {
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        foreach (MediaUploadJob job in jobs)
+        {
+            uow.Media.AddMediaUploadJob(job);
+        }
+
+        await uow.Commit(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task AddMediaUploadJob_ThenFindNext_ReturnsTheOldestPending()
+    {
+        User user = await CreateUser();
+        DateTime now = DateTime.UtcNow;
+        MediaUploadJob newer = CreateJob(user.ID, now);
+        MediaUploadJob older = CreateJob(user.ID, now.AddMinutes(-5));
+        await AddJobs(newer, older);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        MediaUploadJob? next = await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken);
+
+        Assert.Equal(older.ID, next?.ID);
+        Assert.Equal(older.StagedFileName, next?.StagedFileName);
+        Assert.Equal("Song", next?.Title);
+        Assert.Equal(MediaUploadJobStatus.Pending, next?.Status);
+    }
+
+    [Fact]
+    public async Task FindNext_NoJobs_ReturnsNull()
+    {
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+
+        Assert.Null(await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task FindNext_SkipsProcessingJobs()
+    {
+        User user = await CreateUser();
+        DateTime now = DateTime.UtcNow;
+        MediaUploadJob first = CreateJob(user.ID, now.AddMinutes(-5));
+        MediaUploadJob second = CreateJob(user.ID, now);
+        await AddJobs(first, second);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        await uow.Media.MarkMediaUploadJobProcessing(first.ID, TestContext.Current.CancellationToken);
+        MediaUploadJob? next = await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken);
+
+        Assert.Equal(second.ID, next?.ID);
+    }
+
+    [Fact]
+    public async Task MarkProcessing_SecondCallReturnsFalse()
+    {
+        User user = await CreateUser();
+        MediaUploadJob job = CreateJob(user.ID);
+        await AddJobs(job);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+
+        Assert.True(await uow.Media.MarkMediaUploadJobProcessing(job.ID, TestContext.Current.CancellationToken));
+        Assert.False(await uow.Media.MarkMediaUploadJobProcessing(job.ID, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task CountMediaUploadJobs_CoversOnlyTheUsersJobs()
+    {
+        User user = await CreateUser();
+        User other = await CreateUser("other@example.com");
+        await AddJobs(CreateJob(user.ID), CreateJob(user.ID), CreateJob(other.ID));
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+
+        Assert.Equal(2, await uow.Media.CountMediaUploadJobs(user.ID, TestContext.Current.CancellationToken));
+        Assert.Equal(1, await uow.Media.CountMediaUploadJobs(other.ID, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ResetProcessing_MakesThemPendingAgain()
+    {
+        User user = await CreateUser();
+        MediaUploadJob job = CreateJob(user.ID);
+        MediaUploadJob untouched = CreateJob(user.ID, DateTime.UtcNow.AddMinutes(1));
+        await AddJobs(job, untouched);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        await uow.Media.MarkMediaUploadJobProcessing(job.ID, TestContext.Current.CancellationToken);
+
+        int reset = await uow.Media.ResetProcessingMediaUploadJobs(TestContext.Current.CancellationToken);
+        MediaUploadJob? next = await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, reset);
+        Assert.Equal(job.ID, next?.ID);
+    }
+
+    [Fact]
+    public async Task RemoveMediaUploadJob_InTheSameCommitAsAddMediaFile_AppliesBoth()
+    {
+        User user = await CreateUser();
+        MediaUploadJob job = CreateJob(user.ID);
+        await AddJobs(job);
+        MediaFile file = CreateMediaFile(user.ID);
+
+        await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
+        {
+            uow.Media.AddMediaFile(file);
+            uow.Media.RemoveMediaUploadJob(job);
+            await uow.Commit(TestContext.Current.CancellationToken);
+        }
+
+        await using IUnitOfWork check = _fixture.UoWFactory.Create();
+        Assert.NotNull(await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken));
+        Assert.Equal(0, await check.Media.CountMediaUploadJobs(user.ID, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task SumMediaUploadJobBytes_CoversOnlyTheUsersJobs()
+    {
+        User user = await CreateUser();
+        User other = await CreateUser("other@example.com");
+        MediaUploadJob first = CreateJob(user.ID);
+        first.SizeBytes = 1000;
+        MediaUploadJob second = CreateJob(user.ID);
+        second.SizeBytes = 2500;
+        await AddJobs(first, second, CreateJob(other.ID));
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+
+        Assert.Equal(3500, await uow.Media.SumMediaUploadJobBytes(user.ID, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task SumMediaUploadJobBytes_NoJobs_IsZero()
+    {
+        User user = await CreateUser();
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+
+        Assert.Equal(0, await uow.Media.SumMediaUploadJobBytes(user.ID, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ListMediaUploadJobFileNames_ReturnsAllStagedNames()
+    {
+        User user = await CreateUser();
+        User other = await CreateUser("other@example.com");
+        MediaUploadJob first = CreateJob(user.ID);
+        MediaUploadJob second = CreateJob(other.ID);
+        await AddJobs(first, second);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        List<string> names = await uow.Media.ListMediaUploadJobFileNames(TestContext.Current.CancellationToken);
+
+        // Both names are made in the same millisecond, so which one sorts first is not fixed.
+        Assert.Equal(new[] { first.StagedFileName, second.StagedFileName }.Order(), names.Order());
+    }
+
+    [Fact]
+    public async Task AddMediaUploadJob_ForAnUnknownUser_Throws()
+    {
+        await Assert.ThrowsAsync<DbUpdateException>(() => AddJobs(CreateJob(Guid.CreateVersion7())));
     }
 }

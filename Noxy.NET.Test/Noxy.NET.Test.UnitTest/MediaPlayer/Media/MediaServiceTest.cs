@@ -1,7 +1,10 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
+using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -12,14 +15,17 @@ public class MediaServiceTest
 {
     private static readonly Guid UserID = Guid.CreateVersion7();
 
+    private readonly ConfigStorage _storageConfig = new() { RootPath = "x", AllowedExtensions = ["mp3", "flac"] };
+    private readonly ConfigUpload _uploadConfig = new();
     private readonly FakeFileStorageService _storage = new();
-    private readonly MediaService _service;
+    private readonly FakeUploadSignal _signal = new();
     private readonly FakeStore _store = new();
+    private readonly MediaService _service;
 
     public MediaServiceTest()
     {
-        MediaFileValidator validator = new(Options.Create(new ConfigStorage { RootPath = "x", AllowedExtensions = ["mp3", "flac"] }));
-        _service = new(new FakeUnitOfWorkFactory(_store), validator, _storage);
+        IOptions<ConfigStorage> storageOptions = Options.Create(_storageConfig);
+        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig));
     }
 
     private static byte[] Mp3(int length = 100)
@@ -29,100 +35,351 @@ public class MediaServiceTest
         return bytes;
     }
 
-    private Task<ResponseMediaFile> Upload(string fileName, byte[] content, string? title = null)
+    private Task<ResponseUploadAccepted> Enqueue(string fileName, byte[] content, string? title = null, Guid? userID = null)
     {
-        return _service.Upload(UserID, fileName, title, new MemoryStream(content), TestContext.Current.CancellationToken);
+        return _service.Enqueue(userID ?? UserID, fileName, title, new MemoryStream(content), TestContext.Current.CancellationToken);
+    }
+
+    // A file that is already in the library, as the worker would have left it.
+    private MediaFile Seed(Guid userID, string title, int length = 100, DateTime? timeCreated = null)
+    {
+        byte[] bytes = Mp3(length);
+        MediaFile file = new()
+        {
+            TimeCreated = timeCreated ?? DateTime.UtcNow,
+            FilePath = $"{Guid.CreateVersion7()}.mp3",
+            ContentType = "audio/mpeg",
+            SizeBytes = length,
+            ContentHash = Convert.ToHexStringLower(SHA256.HashData(bytes)),
+            UserID = userID
+        };
+        file.Metadata = new() { Title = title, MediaFileID = file.ID };
+
+        _storage.Files[file.FilePath] = bytes;
+        _store.MediaFiles.Add(file);
+        return file;
+    }
+
+    private void SeedPendingJob(Guid userID, long sizeBytes = 10)
+    {
+        _store.MediaUploadJobs.Add(new()
+        {
+            UserID = userID,
+            StagedFileName = $"{Guid.CreateVersion7()}.mp3",
+            Title = "Waiting",
+            ContentType = "audio/mpeg",
+            SizeBytes = sizeBytes,
+            ContentHash = new string('a', 64)
+        });
     }
 
     [Fact]
-    public async Task Upload_StoresTheWholeFileIncludingTheHeader()
+    public async Task Enqueue_StagesTheWholeFileIncludingTheHeader()
     {
         byte[] content = Mp3();
 
-        await Upload("song.mp3", content);
+        await Enqueue("song.mp3", content);
 
-        Assert.Equal(content, Assert.Single(_storage.Files).Value);
+        Assert.Equal(content, Assert.Single(_storage.Staged).Value);
+        Assert.Empty(_storage.Files);
     }
 
     [Fact]
-    public async Task Upload_SavesMediaFileAndMetadataForTheUser()
+    public async Task Enqueue_CreatesAPendingJobWithTheFileFacts()
     {
-        ResponseMediaFile response = await Upload("song.test.mp3", Mp3(100));
+        byte[] content = Mp3(100);
 
-        MediaFile saved = Assert.Single(_store.MediaFiles);
-        Assert.Equal(response.ID, saved.ID);
-        Assert.Equal(UserID, saved.UserID);
-        Assert.Equal("audio/mpeg", saved.ContentType);
-        Assert.Equal(100, saved.SizeBytes);
-        Assert.Equal(_storage.Files.Keys.Single(), saved.FilePath);
-        Assert.EndsWith(".mp3", saved.FilePath);
-        Assert.Equal(saved.ID, saved.Metadata?.MediaFileID);
+        ResponseUploadAccepted response = await Enqueue("song.test.mp3", content, "My song");
+
+        MediaUploadJob job = Assert.Single(_store.MediaUploadJobs);
+        Assert.Equal(response.JobID, job.ID);
+        Assert.Equal(UserID, job.UserID);
+        Assert.Equal(_storage.Staged.Keys.Single(), job.StagedFileName);
+        Assert.Equal("My song", job.Title);
+        Assert.Equal("audio/mpeg", job.ContentType);
+        Assert.Equal(100, job.SizeBytes);
+        Assert.Equal(Convert.ToHexStringLower(SHA256.HashData(content)), job.ContentHash);
+        Assert.Equal(MediaUploadJobStatus.Pending, job.Status);
         Assert.Equal(1, _store.CommitCount);
     }
 
     [Fact]
-    public async Task Upload_ReturnsTheSavedFile()
+    public async Task Enqueue_NoTitle_UsesTheFileNameWithoutItsExtension()
     {
-        ResponseMediaFile response = await Upload("song.mp3", Mp3(100), "My song");
+        await Enqueue("song.mp3", Mp3());
 
-        Assert.Equal("My song", response.Title);
-        Assert.Equal("audio/mpeg", response.ContentType);
-        Assert.Equal(100, response.SizeBytes);
-    }
-
-    [Theory]
-    [InlineData("song.test.mp3", null, "song.test")]
-    [InlineData("song.mp3", "", "song")]
-    [InlineData("song.mp3", "   ", "song")]
-    [InlineData("song.mp3", "  Given  ", "Given")]
-    [InlineData(".mp3", null, "Untitled")]
-    public async Task Upload_ResolvesTheTitle(string fileName, string? title, string expected)
-    {
-        ResponseMediaFile response = await Upload(fileName, Mp3(), title);
-
-        Assert.Equal(expected, response.Title);
+        Assert.Equal("song", Assert.Single(_store.MediaUploadJobs).Title);
     }
 
     [Fact]
-    public async Task Upload_TooLongTitle_IsCut()
+    public async Task Enqueue_TooLongTitleOrFileName_IsCutToTheColumnLength()
     {
-        ResponseMediaFile response = await Upload("song.mp3", Mp3(), new string('a', 400));
+        await Enqueue("a.mp3", Mp3(), new string('t', 400));
+        await Enqueue(new string('a', 600) + ".mp3", Mp3());
 
-        Assert.Equal(255, response.Title.Length);
+        Assert.All(_store.MediaUploadJobs, job => Assert.Equal(255, job.Title.Length));
     }
 
     [Fact]
-    public async Task Upload_FileShorterThanTheHeader_IsStoredWhole()
+    public async Task Enqueue_NotifiesTheSignalOnce()
     {
-        byte[] content = "ID3"u8.ToArray();
+        await Enqueue("song.mp3", Mp3());
 
-        ResponseMediaFile response = await Upload("tiny.mp3", content);
+        Assert.Equal(1, _signal.NotifyCount);
+    }
 
-        Assert.Equal(content, Assert.Single(_storage.Files).Value);
-        Assert.Equal(3, response.SizeBytes);
+    [Fact]
+    public async Task Enqueue_DoesNotCreateAMediaFileYet()
+    {
+        await Enqueue("song.mp3", Mp3());
+
+        Assert.Empty(_store.MediaFiles);
     }
 
     [Theory]
     [InlineData("song.exe")]
     [InlineData("song.flac")]
-    public async Task Upload_HeaderOrExtensionWrong_ThrowsAndStoresNothing(string fileName)
+    public async Task Enqueue_ExtensionNotMatchingTheHeader_ThrowsAndStagesNothing(string fileName)
     {
-        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Upload(fileName, Mp3()));
+        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue(fileName, Mp3()));
 
-        Assert.Empty(_storage.Files);
-        Assert.Empty(_store.MediaFiles);
-        Assert.Equal(0, _store.CommitCount);
+        AssertNothingQueued();
     }
 
     [Fact]
-    public async Task Upload_CommitFails_DeletesTheStoredFile()
+    public async Task Enqueue_EmptyFile_ThrowsAndStagesNothing()
+    {
+        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue("song.mp3", []));
+
+        AssertNothingQueued();
+    }
+
+    [Fact]
+    public async Task Enqueue_ShortFileWithAWrongHeader_ThrowsAndStagesNothing()
+    {
+        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue("song.mp3", "abc"u8.ToArray()));
+
+        AssertNothingQueued();
+    }
+
+    [Fact]
+    public async Task Enqueue_MediaPlusPendingAtTheFileLimit_ThrowsAndStagesNothingMore()
+    {
+        _storageConfig.MaxFilesPerUser = 2;
+        Seed(UserID, "one");
+        await Enqueue("two.mp3", Mp3());
+
+        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("three.mp3", Mp3()));
+
+        Assert.Single(_storage.Staged);
+        Assert.Single(_store.MediaUploadJobs);
+        Assert.Equal(1, _signal.NotifyCount);
+    }
+
+    [Fact]
+    public async Task Enqueue_FileLimitIsPerUser()
+    {
+        _storageConfig.MaxFilesPerUser = 1;
+        Seed(UserID, "mine");
+
+        await Enqueue("theirs.mp3", Mp3(), userID: Guid.CreateVersion7());
+
+        Assert.Single(_store.MediaUploadJobs);
+    }
+
+    [Fact]
+    public async Task Enqueue_ByteLimitAlreadyReached_ThrowsLibraryFullAndStagesNothing()
+    {
+        _storageConfig.MaxBytesPerUser = 150;
+        Seed(UserID, "full", 150);
+
+        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("song.mp3", Mp3(10)));
+
+        AssertNothingQueued();
+    }
+
+    [Fact]
+    public async Task Enqueue_PendingJobsCountTowardsTheByteLimit()
+    {
+        _storageConfig.MaxBytesPerUser = 150;
+        Seed(UserID, "mine", 50);
+        SeedPendingJob(UserID, 100);
+
+        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("song.mp3", Mp3(10)));
+
+        Assert.Empty(_storage.Staged);
+    }
+
+    [Fact]
+    public async Task Enqueue_FileLargerThanTheRemainingQuota_ThrowsLibraryFullAndLeavesNothingStaged()
+    {
+        _storageConfig.MaxBytesPerUser = 150;
+        Seed(UserID, "mine", 100);
+
+        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("song.mp3", Mp3(51)));
+
+        AssertNothingQueued();
+    }
+
+    [Fact]
+    public async Task Enqueue_FileExactlyFillingTheQuota_Succeeds()
+    {
+        _storageConfig.MaxBytesPerUser = 150;
+        Seed(UserID, "mine", 100);
+
+        await Enqueue("song.mp3", Mp3(50));
+
+        Assert.Single(_store.MediaUploadJobs);
+    }
+
+    [Fact]
+    public async Task Enqueue_QuotaIsPerUser()
+    {
+        _storageConfig.MaxBytesPerUser = 150;
+        Seed(UserID, "mine", 150);
+
+        await Enqueue("song.mp3", Mp3(100), userID: Guid.CreateVersion7());
+
+        Assert.Single(_store.MediaUploadJobs);
+    }
+
+    [Fact]
+    public async Task Enqueue_OverTheConfiguredFileSizeWithNoQuota_StillPropagatesFileTooLarge()
+    {
+        _storage.StageFailure = new FileTooLargeException(10);
+
+        await Assert.ThrowsAsync<FileTooLargeException>(() => Enqueue("song.mp3", Mp3()));
+    }
+
+    [Fact]
+    public async Task Enqueue_AtThePendingCap_ThrowsUploadQueueFull()
+    {
+        _uploadConfig.MaxPendingPerUser = 2;
+        SeedPendingJob(UserID);
+        SeedPendingJob(UserID);
+
+        await Assert.ThrowsAsync<UploadQueueFullException>(() => Enqueue("song.mp3", Mp3()));
+
+        Assert.Empty(_storage.Staged);
+        Assert.Equal(2, _store.MediaUploadJobs.Count);
+    }
+
+    [Fact]
+    public async Task Enqueue_PendingCapIsPerUser()
+    {
+        _uploadConfig.MaxPendingPerUser = 1;
+        SeedPendingJob(UserID);
+
+        await Enqueue("song.mp3", Mp3(), userID: Guid.CreateVersion7());
+
+        Assert.Equal(2, _store.MediaUploadJobs.Count);
+    }
+
+    [Fact]
+    public async Task Enqueue_CommitFails_DeletesTheStagedFileAndDoesNotNotify()
     {
         _store.FailCommit = true;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => Upload("song.mp3", Mp3()));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Enqueue("song.mp3", Mp3()));
 
-        Assert.Empty(_storage.Files);
-        Assert.Single(_storage.Deleted);
-        Assert.Empty(_store.MediaFiles);
+        Assert.Empty(_storage.Staged);
+        Assert.Single(_storage.DeletedStaged);
+        Assert.Empty(_store.MediaUploadJobs);
+        Assert.Equal(0, _signal.NotifyCount);
+    }
+
+    [Fact]
+    public async Task Enqueue_StagingFails_LeavesNoJob()
+    {
+        _storage.StageFailure = new FileTooLargeException(10);
+
+        await Assert.ThrowsAsync<FileTooLargeException>(() => Enqueue("song.mp3", Mp3()));
+
+        AssertNothingQueued();
+    }
+
+    private void AssertNothingQueued()
+    {
+        Assert.Empty(_storage.Staged);
+        Assert.Empty(_store.MediaUploadJobs);
+        Assert.Equal(0, _store.CommitCount);
+        Assert.Equal(0, _signal.NotifyCount);
+    }
+
+    [Fact]
+    public async Task List_ReturnsOnlyTheUsersFilesNewestFirst()
+    {
+        DateTime now = DateTime.UtcNow;
+        MediaFile older = Seed(UserID, "old", timeCreated: now.AddMinutes(-5));
+        MediaFile newer = Seed(UserID, "new", timeCreated: now);
+        Seed(Guid.CreateVersion7(), "other");
+
+        List<ResponseMediaFile> list = await _service.List(UserID, 0, 10, TestContext.Current.CancellationToken);
+
+        Assert.Equal([newer.ID, older.ID], list.Select(x => x.ID));
+        Assert.Equal(["new", "old"], list.Select(x => x.Title));
+    }
+
+    [Fact]
+    public async Task List_AppliesSkipAndTake()
+    {
+        DateTime now = DateTime.UtcNow;
+        Seed(UserID, "song0", timeCreated: now.AddMinutes(-2));
+        Seed(UserID, "song1", timeCreated: now.AddMinutes(-1));
+        Seed(UserID, "song2", timeCreated: now);
+
+        List<ResponseMediaFile> page = await _service.List(UserID, 1, 1, TestContext.Current.CancellationToken);
+
+        Assert.Equal("song1", Assert.Single(page).Title);
+    }
+
+    [Fact]
+    public async Task List_ReturnsTheHashAndUtcTimes()
+    {
+        MediaFile file = Seed(UserID, "song", timeCreated: new(2026, 1, 2, 3, 4, 5, DateTimeKind.Unspecified));
+
+        ResponseMediaFile response = Assert.Single(await _service.List(UserID, 0, 10, TestContext.Current.CancellationToken));
+
+        Assert.Equal(file.ContentHash, response.ContentHash);
+        Assert.Equal(DateTimeKind.Utc, response.TimeCreated.Kind);
+        Assert.Equal(DateTimeKind.Utc, response.TimeModified.Kind);
+    }
+
+    [Fact]
+    public async Task Open_ReturnsTheContentNamedAfterTheTitle()
+    {
+        MediaFile file = Seed(UserID, "My Song", 50);
+
+        MediaDownload download = await _service.Open(UserID, file.ID, TestContext.Current.CancellationToken);
+        await using Stream stream = download.Content;
+        using MemoryStream copy = new();
+        await stream.CopyToAsync(copy, TestContext.Current.CancellationToken);
+
+        Assert.Equal(Mp3(50), copy.ToArray());
+        Assert.Equal("audio/mpeg", download.ContentType);
+        Assert.Equal("My Song.mp3", download.FileName);
+    }
+
+    [Fact]
+    public async Task Open_UnknownId_ThrowsNotFound()
+    {
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.Open(UserID, Guid.CreateVersion7(), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Open_AnotherUsersFile_ThrowsNotFound()
+    {
+        MediaFile file = Seed(UserID, "song");
+
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.Open(Guid.CreateVersion7(), file.ID, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Open_FileMissingFromStorage_ThrowsNotFound()
+    {
+        MediaFile file = Seed(UserID, "song");
+        _storage.Files.Clear();
+
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.Open(UserID, file.ID, TestContext.Current.CancellationToken));
     }
 }

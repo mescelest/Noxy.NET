@@ -46,6 +46,33 @@ public class ConfigStorageTest
     }
 
     [Fact]
+    public void DefaultLimits_Are5000FilesAndNoByteLimit()
+    {
+        ConfigStorage config = Valid();
+
+        Assert.Equal(5000, config.MaxFilesPerUser);
+        Assert.Equal(0, config.MaxBytesPerUser);
+    }
+
+    [Fact]
+    public void NonPositiveMaxFiles_Fails()
+    {
+        ConfigStorage config = Valid();
+        config.MaxFilesPerUser = 0;
+
+        Assert.False(IsValid(config));
+    }
+
+    [Fact]
+    public void NegativeMaxBytes_Fails()
+    {
+        ConfigStorage config = Valid();
+        config.MaxBytesPerUser = -1;
+
+        Assert.False(IsValid(config));
+    }
+
+    [Fact]
     public void NonPositiveMaxSize_Fails()
     {
         ConfigStorage config = Valid();

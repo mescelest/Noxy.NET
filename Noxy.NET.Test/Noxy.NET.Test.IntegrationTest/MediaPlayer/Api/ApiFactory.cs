@@ -1,0 +1,64 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Noxy.NET.MediaPlayer.Persistence;
+
+namespace Noxy.NET.Test.MediaPlayer.Api;
+
+public sealed class ApiFactory : WebApplicationFactory<Program>
+{
+    private readonly string _directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+    private readonly Dictionary<string, string?> _settings;
+
+    public ApiFactory(Dictionary<string, string?>? overrides = null)
+    {
+        Directory.CreateDirectory(_directory);
+
+        _settings = new()
+        {
+            ["ConnectionStrings:Database"] = $"Data Source={Path.Combine(_directory, "test.sqlite")}",
+            ["Authentication:Secret"] = new string('s', 48),
+            ["Storage:RootPath"] = StorageRoot,
+            ["Storage:MaxSizeBytes"] = "100000",
+            // The worker wakes on the upload signal only, so tests decide when it works.
+            ["Upload:PollSeconds"] = "3600"
+        };
+        foreach ((string key, string? value) in overrides ?? [])
+        {
+            _settings[key] = value;
+        }
+
+        // The schema comes from the real migrations, and exists before the host (and its worker) starts.
+        DbContextOptions<DataContext> options = new DbContextOptionsBuilder<DataContext>().UseSqlite(_settings["ConnectionStrings:Database"]).Options;
+        using DataContext context = new(options);
+        context.Database.Migrate();
+    }
+
+    public string StorageRoot => Path.Combine(_directory, "media");
+    public string StagingFolder => Path.Combine(StorageRoot, "staging");
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Development");
+        builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(_settings));
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        if (!disposing) return;
+
+        SqliteConnection.ClearAllPools();
+        try
+        {
+            Directory.Delete(_directory, true);
+        }
+        catch (IOException)
+        {
+            // A temp folder that is still in use is not worth failing a test for.
+        }
+    }
+}

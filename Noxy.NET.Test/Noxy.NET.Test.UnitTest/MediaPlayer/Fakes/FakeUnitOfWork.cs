@@ -23,6 +23,12 @@ public sealed class FakeUnitOfWork : IUnitOfWork
     {
         if (_store.FailCommit) throw new InvalidOperationException("The commit failed.");
 
+        if (_store.FailCommitCount > 0)
+        {
+            _store.FailCommitCount--;
+            throw new InvalidOperationException("The commit failed.");
+        }
+
         _repository.Flush();
         _media.Flush();
         _store.CommitCount++;
