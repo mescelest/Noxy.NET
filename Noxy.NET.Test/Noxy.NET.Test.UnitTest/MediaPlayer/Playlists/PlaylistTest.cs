@@ -16,6 +16,22 @@ public class PlaylistTest
     }
 
     [Fact]
+    public void HasDuplicates_TheSameSongTwice_IsTrue()
+    {
+        Playlist playlist = CreatePlaylist(0, 1, 2);
+        playlist.EntryList[2] = new() { PlaylistID = playlist.ID, MediaFileID = playlist.EntryList[0].MediaFileID, Position = 2 };
+
+        Assert.True(playlist.HasDuplicates());
+    }
+
+    [Fact]
+    public void HasDuplicates_DistinctSongsOrNoEntries_IsFalse()
+    {
+        Assert.False(CreatePlaylist(0, 1, 2).HasDuplicates());
+        Assert.False(CreatePlaylist().HasDuplicates());
+    }
+
+    [Fact]
     public void RenumberEntryList_MakesPositionsDenseInTheOrderOfTheList()
     {
         Playlist playlist = CreatePlaylist(4, 9, 2);

@@ -1,4 +1,4 @@
-using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;

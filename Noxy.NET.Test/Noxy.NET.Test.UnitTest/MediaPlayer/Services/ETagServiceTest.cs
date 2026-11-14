@@ -1,6 +1,6 @@
 using Noxy.NET.MediaPlayer.Application.Services;
 
-namespace Noxy.NET.Test.MediaPlayer.Media;
+namespace Noxy.NET.Test.MediaPlayer.Services;
 
 public class ETagServiceTest
 {

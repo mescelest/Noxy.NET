@@ -1,3 +1,5 @@
+using Noxy.NET.MediaPlayer.Application.Validators;
+using Noxy.NET.MediaPlayer.Application.Gates;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;

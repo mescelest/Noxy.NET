@@ -1,7 +1,7 @@
+using Noxy.NET.MediaPlayer.Application.Validators;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Models;
-using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.Test.MediaPlayer.Storage;

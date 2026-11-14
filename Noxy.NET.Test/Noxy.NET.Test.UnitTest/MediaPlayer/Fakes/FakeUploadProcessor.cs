@@ -1,5 +1,5 @@
+using Noxy.NET.MediaPlayer.Application.Interfaces.Processors;
 using System.Collections.Concurrent;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
