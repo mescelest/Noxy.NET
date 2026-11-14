@@ -26,7 +26,7 @@ public class CleanupService(IUnitOfWorkFactory uowFactory, IOptions<ConfigCleanu
         DateTime expiredBefore = time.GetUtcNow().UtcDateTime.AddDays(-config.Value.RetentionDays);
 
         await using IUnitOfWork uow = uowFactory.Create();
-        int deleted = await uow.RefreshTokens.DeleteExpired(expiredBefore, cancellationToken);
+        int deleted = await uow.Authentication.DeleteExpiredRefreshTokens(expiredBefore, cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))
         {

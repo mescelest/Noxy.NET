@@ -8,6 +8,7 @@ using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Domain.Entities;
+using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.RefreshToken;
 
 namespace Noxy.NET.MediaPlayer.Application.Services;
 
@@ -39,7 +40,7 @@ public class TokenService(IOptions<ConfigJwt> options, TimeProvider time) : ITok
         return new(Handler.CreateToken(descriptor), expires);
     }
 
-    public RefreshTokenSecret CreateRefreshToken()
+    public RefreshToken CreateRefreshToken()
     {
         string token = Base64Url.EncodeToString(RandomNumberGenerator.GetBytes(32));
         DateTime expires = time.GetUtcNow().UtcDateTime.AddDays(Config.RefreshTokenDays);

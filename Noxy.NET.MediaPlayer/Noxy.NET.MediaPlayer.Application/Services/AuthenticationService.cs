@@ -6,6 +6,7 @@ using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Requests.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
+using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.RefreshToken;
 
 namespace Noxy.NET.MediaPlayer.Application.Services;
 
@@ -16,19 +17,16 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
         await using IUnitOfWork uow = uowFactory.Create();
 
         string email = NormalizeEmail(request.Email);
-        if (await uow.Users.EmailExists(email, cancellationToken))
-        {
-            throw new EmailAlreadyInUseException();
-        }
+        if (await uow.Authentication.EmailExists(email, cancellationToken)) throw new EmailAlreadyInUseException();
 
         User user = new()
         {
             Email = email,
             PasswordHash = passwordHashService.Hash(request.Password)
         };
-        uow.Users.Add(user);
+        uow.Authentication.AddUser(user);
 
-        ResponseAuthentication response = IssueTokens(uow, user);
+        ResponseAuthentication response = CreateTokenResponse(uow, user);
 
         await uow.Commit(cancellationToken);
         return response;
@@ -38,16 +36,13 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
     {
         await using IUnitOfWork uow = uowFactory.Create();
 
-        User? user = await uow.Users.FindByEmail(NormalizeEmail(request.Email), cancellationToken);
+        User? user = await uow.Authentication.FindUserByEmail(NormalizeEmail(request.Email), cancellationToken);
 
         // Verify even when there is no user, so an unknown email takes as long as a wrong password.
         bool isPasswordValid = passwordHashService.Verify(request.Password, user?.PasswordHash);
-        if (user == null || !isPasswordValid)
-        {
-            throw new AuthenticationFailedException();
-        }
+        if (user == null || !isPasswordValid) throw new AuthenticationFailedException();
 
-        ResponseAuthentication response = IssueTokens(uow, user);
+        ResponseAuthentication response = CreateTokenResponse(uow, user);
 
         await uow.Commit(cancellationToken);
         return response;
@@ -60,12 +55,12 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
         await using IUnitOfWork uow = uowFactory.Create();
 
         // Google's user ID is the identity, not the email: emails can change, and can be reused by someone else.
-        ExternalLogin? login = await uow.ExternalLogins.FindByProviderKey(ExternalLoginProvider.Google, identity.Subject, cancellationToken);
+        ExternalLogin? login = await uow.Authentication.FindExternalLogin(ExternalLoginProvider.Google, identity.Subject, cancellationToken);
 
         User user;
         if (login != null)
         {
-            user = await uow.Users.FindByID(login.UserID, cancellationToken) ?? throw new AuthenticationFailedException();
+            user = await uow.Authentication.FindUserByID(login.UserID, cancellationToken) ?? throw new AuthenticationFailedException();
         }
         else
         {
@@ -77,19 +72,19 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
             }
 
             string email = NormalizeEmail(identity.Email);
-            User? existing = await uow.Users.FindByEmail(email, cancellationToken);
+            User? existing = await uow.Authentication.FindUserByEmail(email, cancellationToken);
 
             if (existing == null)
             {
                 user = new() { Email = email, IsEmailVerified = true };
                 user.ExternalLogins.Add(new() { Provider = ExternalLoginProvider.Google, ProviderKey = identity.Subject, UserID = user.ID });
-                uow.Users.Add(user);
+                uow.Authentication.AddUser(user);
             }
             else if (existing.IsEmailVerified)
             {
                 // Both sides have proven they own the address, so it's safe to attach Google to the existing account.
                 user = existing;
-                uow.ExternalLogins.Add(new() { Provider = ExternalLoginProvider.Google, ProviderKey = identity.Subject, UserID = user.ID });
+                uow.Authentication.AddExternalLogin(new() { Provider = ExternalLoginProvider.Google, ProviderKey = identity.Subject, UserID = user.ID });
             }
             else
             {
@@ -99,7 +94,7 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
             }
         }
 
-        ResponseAuthentication response = IssueTokens(uow, user);
+        ResponseAuthentication response = CreateTokenResponse(uow, user);
 
         await uow.Commit(cancellationToken);
         return response;
@@ -111,14 +106,14 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
 
         await using IUnitOfWork uow = uowFactory.Create();
 
-        RefreshToken stored = await uow.RefreshTokens.FindByHash(tokenService.HashRefreshToken(request.RefreshToken), cancellationToken)
-                              ?? throw new AuthenticationFailedException();
+        Domain.Entities.RefreshToken stored = await uow.Authentication.FindRefreshToken(tokenService.HashRefreshToken(request.RefreshToken), cancellationToken)
+                                              ?? throw new AuthenticationFailedException();
 
         // Tokens are single-use, so a revoked one coming back means someone has a copy.
         // Revoke everything this user has and make them sign in again.
         if (stored.IsRevoked)
         {
-            await uow.RefreshTokens.RevokeAllForUser(stored.UserID, now, cancellationToken);
+            await uow.Authentication.RevokeAllRefreshTokens(stored.UserID, now, cancellationToken);
             throw new AuthenticationFailedException();
         }
 
@@ -128,26 +123,25 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
         }
 
         // Losing this race to another request using the same token counts as reuse too.
-        if (!await uow.RefreshTokens.TryRevoke(stored.ID, now, cancellationToken))
+        if (!await uow.Authentication.TryRevokeRefreshToken(stored.ID, now, cancellationToken))
         {
-            await uow.RefreshTokens.RevokeAllForUser(stored.UserID, now, cancellationToken);
+            await uow.Authentication.RevokeAllRefreshTokens(stored.UserID, now, cancellationToken);
             throw new AuthenticationFailedException();
         }
 
-        User user = await uow.Users.FindByID(stored.UserID, cancellationToken) ?? throw new AuthenticationFailedException();
-
-        ResponseAuthentication response = IssueTokens(uow, user);
+        User user = await uow.Authentication.FindUserByID(stored.UserID, cancellationToken) ?? throw new AuthenticationFailedException();
+        ResponseAuthentication response = CreateTokenResponse(uow, user);
 
         await uow.Commit(cancellationToken);
         return response;
     }
 
-    private ResponseAuthentication IssueTokens(IUnitOfWork uow, User user)
+    private ResponseAuthentication CreateTokenResponse(IUnitOfWork uow, User user)
     {
         AccessToken accessToken = tokenService.CreateAccessToken(user);
-        RefreshTokenSecret refreshToken = tokenService.CreateRefreshToken();
+        RefreshToken refreshToken = tokenService.CreateRefreshToken();
 
-        uow.RefreshTokens.Add(new()
+        uow.Authentication.AddRefreshToken(new()
         {
             UserID = user.ID,
             TokenHash = refreshToken.Hash,
