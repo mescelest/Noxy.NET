@@ -10,7 +10,7 @@
     public int? Rows { get; set; }
     private int RowsCurrent => Rows ?? 6;
 
-    protected override string? GetParsedValue(string value)
+    protected override string GetParsedValue(string value)
     {
         return value;
     }

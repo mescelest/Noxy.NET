@@ -44,11 +44,6 @@
     private IJSObjectReference? _refInstance;
     private DotNetObjectReference<SortableList<T>>? _refDotNet;
 
-    private object GetRowKey(T item, int index)
-    {
-        return KeySelector != null ? KeySelector(item, index) : item!;
-    }
-
     protected override async Task OnAfterFirstRenderAsync()
     {
         await base.OnAfterFirstRenderAsync();

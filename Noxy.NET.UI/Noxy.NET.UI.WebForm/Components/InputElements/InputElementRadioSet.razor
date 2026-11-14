@@ -48,8 +48,6 @@
         _cacheList = OptionList.Select(x => new InputElementRadioSetProperties<TOption>(Guid.NewGuid().ToString(), name, x, OnChoiceChange)).ToArray();
     }
 
-    private bool IsChecked(TOption option) => EqualityComparer<TOption>.Default.Equals(Value, option);
-
     private void OnChoiceChange(ChangeEventArgs args, TOption option)
     {
         OnChange.InvokeAsync(args);
