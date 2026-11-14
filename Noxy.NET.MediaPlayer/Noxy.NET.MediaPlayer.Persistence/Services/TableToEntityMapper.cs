@@ -2,6 +2,7 @@ using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Persistence.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Media;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Persistence.Services;
 
@@ -105,4 +106,34 @@ public class TableToEntityMapper : ITableToEntityMapper
     }
 
     #endregion -- Media --
+
+    #region -- Playlist --
+
+    public Playlist Map(TablePlaylist table)
+    {
+        return new()
+        {
+            ID = table.ID,
+            TimeCreated = table.TimeCreated,
+            UserID = table.UserID,
+            Name = table.Name,
+            AllowDuplicates = table.AllowDuplicates,
+            TimeModified = table.TimeModified,
+            EntryList = [.. table.EntryList.Select(Map)]
+        };
+    }
+
+    public PlaylistEntry Map(TablePlaylistEntry table)
+    {
+        return new()
+        {
+            ID = table.ID,
+            TimeCreated = table.TimeCreated,
+            PlaylistID = table.PlaylistID,
+            MediaFileID = table.MediaFileID,
+            Position = table.Position
+        };
+    }
+
+    #endregion -- Playlist --
 }

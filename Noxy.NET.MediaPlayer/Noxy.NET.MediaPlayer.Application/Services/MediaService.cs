@@ -1,17 +1,18 @@
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Streams;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
+using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Requests;
 using Noxy.NET.MediaPlayer.Domain.Requests.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Application.Services;
 
@@ -24,13 +25,11 @@ public class MediaService(
     IOptions<ConfigUpload> uploadOptions,
     IUploadGate gate,
     IMediaNotifier notifier,
+    IPlaylistNotifier playlistNotifier,
+    IETagService eTagService,
     TimeProvider time,
     ILogger<MediaService> logger) : IMediaService
 {
-    private const string WeakETagPrefix = "W/";
-    private const string Wildcard = "*";
-    private const char ETagQuote = '"';
-
     public async Task<ResponseUploadAccepted> Enqueue(Guid userID, string fileName, string? title, Stream content, CancellationToken cancellationToken = default)
     {
         // One upload per user at a time, held until its job is saved, so the checks below see every earlier upload.
@@ -142,6 +141,27 @@ public class MediaService(
 
         MediaFile file = await uow.Media.FindMediaFile(id, userID, cancellationToken) ?? throw new MediaNotFoundException();
 
+        // The song leaves every playlist in the same commit, so no entry is ever left pointing at it.
+        DateTime now = time.GetUtcNow().UtcDateTime;
+        List<ResponsePlaylist> playlistUpdatedList = [];
+        foreach (Playlist playlist in await uow.Playlist.GetPlaylistListByMediaFileID(userID, id, cancellationToken))
+        {
+            foreach (PlaylistEntry removed in playlist.EntryList.Where(x => x.MediaFileID == id))
+            {
+                uow.Playlist.RemovePlaylistEntry(removed);
+            }
+
+            playlist.EntryList.RemoveAll(x => x.MediaFileID == id);
+            foreach (PlaylistEntry changed in playlist.RenumberEntryList())
+            {
+                uow.Playlist.UpdatePlaylistEntry(changed);
+            }
+
+            playlist.TimeModified = now;
+            uow.Playlist.UpdatePlaylist(playlist);
+            playlistUpdatedList.Add(playlist.ToResponse(playlist.EntryList.Count));
+        }
+
         // The row goes first: a failure after it leaves an orphaned file, never a song that points at nothing.
         uow.Media.RemoveMediaFile(file);
         await uow.Commit(cancellationToken);
@@ -156,6 +176,11 @@ public class MediaService(
         }
 
         await NotifyQuietly(() => notifier.Deleted(userID, id, cancellationToken), id);
+
+        foreach (ResponsePlaylist updated in playlistUpdatedList)
+        {
+            await NotifyQuietly(() => playlistNotifier.Updated(userID, updated, cancellationToken), updated.ID);
+        }
     }
 
     public async Task<MediaLibrary> GetMediaLibrary(Guid userID, string? ifNoneMatch, CancellationToken cancellationToken = default)
@@ -164,13 +189,14 @@ public class MediaService(
 
         if (!string.IsNullOrWhiteSpace(ifNoneMatch))
         {
-            string current = ComputeETag(await uow.Media.GetMediaFileStampList(userID, cancellationToken));
-            if (Matches(ifNoneMatch, current)) return new(current, null);
+            List<MediaFileStamp> stampList = await uow.Media.GetMediaFileStampList(userID, cancellationToken);
+            string current = eTagService.Compute(stampList.Select(x => (x.ID, x.TimeModified)));
+            if (eTagService.Matches(ifNoneMatch, current)) return new(current, null);
         }
 
         // The ETag comes from the list that is returned, so the two can never disagree.
         List<MediaFile> fileList = await uow.Media.GetMediaFileList(userID, cancellationToken);
-        return new(ComputeETag(fileList.Select(x => new MediaFileStamp(x.ID, x.TimeModified))), [.. fileList.Select(x => x.ToResponse())]);
+        return new(eTagService.Compute(fileList.Select(x => (x.ID, x.TimeModified))), [.. fileList.Select(x => x.ToResponse())]);
     }
 
     private static bool Apply(string value, string? current, Action<string> set)
@@ -201,31 +227,6 @@ public class MediaService(
         return true;
     }
 
-    private static string ComputeETag(IEnumerable<MediaFileStamp> stampList)
-    {
-        using IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        foreach (MediaFileStamp stamp in stampList.OrderBy(x => x.ID))
-        {
-            hash.AppendData(Encoding.UTF8.GetBytes($"{stamp.ID:D}:{stamp.TimeModified.Ticks}\n"));
-        }
-
-        return $"{ETagQuote}{Convert.ToHexStringLower(hash.GetHashAndReset())}{ETagQuote}";
-    }
-
-    // The header holds a comma separated list of tags, any of which may be weak ("W/") or the wildcard.
-    private static bool Matches(string ifNoneMatch, string eTag)
-    {
-        foreach (string token in ifNoneMatch.Split(','))
-        {
-            string tag = token.Trim();
-            if (tag.StartsWith(WeakETagPrefix, StringComparison.Ordinal)) tag = tag[WeakETagPrefix.Length..];
-
-            if (tag == Wildcard || tag == eTag) return true;
-        }
-
-        return false;
-    }
-
     // A failed notification is only logged: the change itself has already happened.
     private async Task NotifyQuietly(Func<Task> notify, Guid id)
     {
@@ -235,7 +236,7 @@ public class MediaService(
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Could not notify about media file {MediaFileID}", id);
+            logger.LogWarning(ex, "Could not notify about {EntityID}", id);
         }
     }
 

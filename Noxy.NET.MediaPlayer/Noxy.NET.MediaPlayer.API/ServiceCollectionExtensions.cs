@@ -11,8 +11,10 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.API.Configurations;
+using Noxy.NET.MediaPlayer.API.Notifiers;
 using Noxy.NET.MediaPlayer.API.Services;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 
 #pragma warning disable IDE0130, S1200
@@ -73,6 +75,7 @@ public static class ServiceCollectionExtensions
             // The application project only knows the interface, and defaults to a notifier that does nothing.
             services.Replace(ServiceDescriptor.Singleton<IUploadNotifier, SignalRUploadNotifier>());
             services.Replace(ServiceDescriptor.Singleton<IMediaNotifier, SignalRMediaNotifier>());
+            services.Replace(ServiceDescriptor.Singleton<IPlaylistNotifier, SignalRPlaylistNotifier>());
 
             return services;
         }

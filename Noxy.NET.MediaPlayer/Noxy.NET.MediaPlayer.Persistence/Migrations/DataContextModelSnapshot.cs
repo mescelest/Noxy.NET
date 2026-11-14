@@ -15,7 +15,7 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.8");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.15");
 
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableExternalLogin", b =>
                 {
@@ -268,6 +268,65 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.ToTable("MediaUploadJob");
                 });
 
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylist", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("AllowDuplicates")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("TimeCreated");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("Playlist");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylistEntry", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MediaFileID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PlaylistID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("MediaFileID");
+
+                    b.HasIndex("TimeCreated");
+
+                    b.HasIndex("PlaylistID", "Position");
+
+                    b.ToTable("PlaylistEntry");
+                });
+
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableExternalLogin", b =>
                 {
                     b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
@@ -323,6 +382,36 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylist", b =>
+                {
+                    b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylistEntry", b =>
+                {
+                    b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaFile", "MediaFile")
+                        .WithMany()
+                        .HasForeignKey("MediaFileID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylist", "Playlist")
+                        .WithMany("EntryList")
+                        .HasForeignKey("PlaylistID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MediaFile");
+
+                    b.Navigation("Playlist");
+                });
+
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", b =>
                 {
                     b.Navigation("ExternalLoginList");
@@ -331,6 +420,11 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Media.TableMediaFile", b =>
                 {
                     b.Navigation("Metadata");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylist", b =>
+                {
+                    b.Navigation("EntryList");
                 });
 #pragma warning restore 612, 618
         }

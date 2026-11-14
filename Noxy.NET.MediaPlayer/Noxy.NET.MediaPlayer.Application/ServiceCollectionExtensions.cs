@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Noxy.NET.MediaPlayer.Application.BackgroundServices;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Notifiers;
 using Noxy.NET.MediaPlayer.Application.Services;
 
 #pragma warning disable IDE0130, S1200
@@ -34,6 +36,11 @@ public static class ServiceCollectionExtensions
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            services.AddOptions<ConfigPlaylist>()
+                .BindConfiguration(ConfigPlaylist.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             services.AddOptions<ConfigGoogle>()
                 .BindConfiguration(ConfigGoogle.SectionName);
 
@@ -45,7 +52,10 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IUploadProcessor, UploadProcessor>();
             services.TryAddSingleton<IUploadNotifier, NoOpUploadNotifier>();
             services.TryAddSingleton<IMediaNotifier, NoOpMediaNotifier>();
+            services.TryAddSingleton<IPlaylistNotifier, NoOpPlaylistNotifier>();
+            services.AddSingleton<IETagService, ETagService>();
             services.AddScoped<IMediaService, MediaService>();
+            services.AddScoped<IPlaylistService, PlaylistService>();
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();

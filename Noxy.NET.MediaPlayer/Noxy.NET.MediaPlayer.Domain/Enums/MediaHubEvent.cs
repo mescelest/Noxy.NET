@@ -5,5 +5,7 @@ public enum MediaHubEvent
     UploadSucceeded,
     UploadFailed,
     MediaUpdated,
-    MediaDeleted
+    MediaDeleted,
+    PlaylistUpdated,
+    PlaylistDeleted
 }

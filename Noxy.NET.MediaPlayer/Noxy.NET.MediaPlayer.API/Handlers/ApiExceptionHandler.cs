@@ -21,6 +21,12 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
             UploadInProgressException => new(StatusCodes.Status429TooManyRequests, "An upload is already in progress."),
             LibraryFullException => new(StatusCodes.Status409Conflict, "The library limit has been reached."),
             MediaNotFoundException => new(StatusCodes.Status404NotFound, "The media file was not found."),
+            PlaylistNotFoundException => new(StatusCodes.Status404NotFound, "The playlist was not found."),
+            PlaylistEntryNotFoundException => new(StatusCodes.Status404NotFound, "The playlist entry was not found."),
+            PlaylistLimitReachedException => new(StatusCodes.Status409Conflict, "The playlist limit has been reached."),
+            PlaylistEntryLimitReachedException => new(StatusCodes.Status409Conflict, "The playlist is full."),
+            PlaylistHasDuplicatesException => new(StatusCodes.Status409Conflict, "The playlist contains duplicate songs."),
+            InvalidPlaylistPositionException => new(StatusCodes.Status400BadRequest, "The position is outside the playlist."),
             FileTooLargeException => new(StatusCodes.Status413PayloadTooLarge, FileTooLargeTitle),
             // Thrown by Kestrel when the body goes over the limit the upload action set.
             BadHttpRequestException { StatusCode: StatusCodes.Status413PayloadTooLarge } => new(StatusCodes.Status413PayloadTooLarge, FileTooLargeTitle),

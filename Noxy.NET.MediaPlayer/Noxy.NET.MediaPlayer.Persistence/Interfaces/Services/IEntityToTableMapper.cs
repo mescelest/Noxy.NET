@@ -1,6 +1,7 @@
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Media;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Persistence.Interfaces.Services;
 
@@ -21,4 +22,11 @@ public interface IEntityToTableMapper
     TableMediaUploadJob Map(MediaUploadJob entity);
 
     #endregion -- Media --
+
+    #region -- Playlist --
+
+    TablePlaylist Map(Playlist entity);
+    TablePlaylistEntry Map(PlaylistEntry entity);
+
+    #endregion -- Playlist --
 }

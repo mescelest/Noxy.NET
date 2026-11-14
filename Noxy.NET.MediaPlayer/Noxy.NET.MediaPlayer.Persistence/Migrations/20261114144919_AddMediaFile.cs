@@ -61,6 +61,28 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Playlist",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UserID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                    AllowDuplicates = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TimeModified = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Playlist", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Playlist_User_UserID",
+                        column: x => x.UserID,
+                        principalTable: "User",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MediaFileMetadata",
                 columns: table => new
                 {
@@ -86,6 +108,33 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                         name: "FK_MediaFileMetadata_MediaFile_MediaFileID",
                         column: x => x.MediaFileID,
                         principalTable: "MediaFile",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlaylistEntry",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PlaylistID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    MediaFileID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Position = table.Column<int>(type: "INTEGER", nullable: false),
+                    TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlaylistEntry", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_PlaylistEntry_MediaFile_MediaFileID",
+                        column: x => x.MediaFileID,
+                        principalTable: "MediaFile",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlaylistEntry_Playlist_PlaylistID",
+                        column: x => x.PlaylistID,
+                        principalTable: "Playlist",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -131,6 +180,31 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                 name: "IX_MediaUploadJob_UserID",
                 table: "MediaUploadJob",
                 column: "UserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Playlist_TimeCreated",
+                table: "Playlist",
+                column: "TimeCreated");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Playlist_UserID",
+                table: "Playlist",
+                column: "UserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaylistEntry_MediaFileID",
+                table: "PlaylistEntry",
+                column: "MediaFileID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaylistEntry_PlaylistID_Position",
+                table: "PlaylistEntry",
+                columns: new[] { "PlaylistID", "Position" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaylistEntry_TimeCreated",
+                table: "PlaylistEntry",
+                column: "TimeCreated");
         }
 
         /// <inheritdoc />
@@ -143,7 +217,13 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                 name: "MediaUploadJob");
 
             migrationBuilder.DropTable(
+                name: "PlaylistEntry");
+
+            migrationBuilder.DropTable(
                 name: "MediaFile");
+
+            migrationBuilder.DropTable(
+                name: "Playlist");
         }
     }
 }
