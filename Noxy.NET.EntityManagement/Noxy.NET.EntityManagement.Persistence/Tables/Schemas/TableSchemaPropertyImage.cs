@@ -6,7 +6,7 @@ namespace Noxy.NET.EntityManagement.Persistence.Tables.Schemas;
 public class TableSchemaPropertyImage : TableSchemaProperty
 {
     // A comma separated list, so this is far above any realistic length. It exists to give the column a bound.
-    public const int AllowedExtensionsLength = 1024;
+    private const int AllowedExtensionsLength = 1024;
 
     [Required]
     [MaxLength(AllowedExtensionsLength)]
