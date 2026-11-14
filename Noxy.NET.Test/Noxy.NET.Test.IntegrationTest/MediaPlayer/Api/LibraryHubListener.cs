@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
 
@@ -15,6 +16,8 @@ public sealed class LibraryHubListener : IAsyncDisposable
     private readonly Channel<(string Event, ResponseUploadResult Result)> _messages = Channel.CreateUnbounded<(string, ResponseUploadResult)>();
     private readonly Channel<ResponseMediaFile> _updatedMessages = Channel.CreateUnbounded<ResponseMediaFile>();
     private readonly Channel<Guid> _deletedMessages = Channel.CreateUnbounded<Guid>();
+    private readonly Channel<ResponsePlaylist> _playlistUpdatedMessages = Channel.CreateUnbounded<ResponsePlaylist>();
+    private readonly Channel<Guid> _playlistDeletedMessages = Channel.CreateUnbounded<Guid>();
     private readonly Channel<string> _anyMessages = Channel.CreateUnbounded<string>();
 
     private LibraryHubListener(HubConnection connection)
@@ -24,6 +27,8 @@ public sealed class LibraryHubListener : IAsyncDisposable
         connection.On<ResponseUploadResult>(nameof(MediaHubEvent.UploadFailed), result => Receive(nameof(MediaHubEvent.UploadFailed), () => _messages.Writer.TryWrite((nameof(MediaHubEvent.UploadFailed), result))));
         connection.On<ResponseMediaFile>(nameof(MediaHubEvent.MediaUpdated), mediaFile => Receive(nameof(MediaHubEvent.MediaUpdated), () => _updatedMessages.Writer.TryWrite(mediaFile)));
         connection.On<Guid>(nameof(MediaHubEvent.MediaDeleted), id => Receive(nameof(MediaHubEvent.MediaDeleted), () => _deletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponsePlaylist>(nameof(MediaHubEvent.PlaylistUpdated), playlist => Receive(nameof(MediaHubEvent.PlaylistUpdated), () => _playlistUpdatedMessages.Writer.TryWrite(playlist)));
+        connection.On<Guid>(nameof(MediaHubEvent.PlaylistDeleted), id => Receive(nameof(MediaHubEvent.PlaylistDeleted), () => _playlistDeletedMessages.Writer.TryWrite(id)));
     }
 
     // Connects over WebSockets. A .NET client sends the token as a header; a browser client puts it in the query string.
@@ -72,6 +77,16 @@ public sealed class LibraryHubListener : IAsyncDisposable
     public async Task<Guid> NextMediaDeleted()
     {
         return await Read(_deletedMessages);
+    }
+
+    public async Task<ResponsePlaylist> NextPlaylistUpdated()
+    {
+        return await Read(_playlistUpdatedMessages);
+    }
+
+    public async Task<Guid> NextPlaylistDeleted()
+    {
+        return await Read(_playlistDeletedMessages);
     }
 
     private void Receive(string name, Action store)

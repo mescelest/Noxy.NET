@@ -14,6 +14,8 @@ namespace Noxy.NET.Test.MediaPlayer.Api;
 
 public sealed class MediaApiClient(ApiFactory factory)
 {
+    private const string PlaylistsPath = "/Playlists";
+
     private readonly HttpClient _client = factory.CreateClient();
 
     public static byte[] Mp3(int length = 1000)
@@ -115,6 +117,62 @@ public sealed class MediaApiClient(ApiFactory factory)
     public async Task<HttpResponseMessage> Download(string token, Guid id)
     {
         using HttpRequestMessage request = new(HttpMethod.Get, $"/Media/{id}/File");
+        Authorize(request, token);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    public async Task<HttpResponseMessage> GetPlaylistLibrary(string? token, string? ifNoneMatch = null, string? acceptEncoding = null)
+    {
+        using HttpRequestMessage request = new(HttpMethod.Get, PlaylistsPath);
+        Authorize(request, token);
+        if (ifNoneMatch is not null) request.Headers.TryAddWithoutValidation(HeaderNames.IfNoneMatch, ifNoneMatch);
+        if (acceptEncoding is not null) request.Headers.TryAddWithoutValidation(HeaderNames.AcceptEncoding, acceptEncoding);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    public async Task<HttpResponseMessage> GetPlaylist(string? token, Guid id, string? ifNoneMatch = null)
+    {
+        using HttpRequestMessage request = new(HttpMethod.Get, $"{PlaylistsPath}/{id}");
+        Authorize(request, token);
+        if (ifNoneMatch is not null) request.Headers.TryAddWithoutValidation(HeaderNames.IfNoneMatch, ifNoneMatch);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    public Task<HttpResponseMessage> CreatePlaylist(string? token, string json)
+    {
+        return SendJson(HttpMethod.Post, PlaylistsPath, token, json);
+    }
+
+    public Task<HttpResponseMessage> PatchPlaylist(string? token, Guid id, string json)
+    {
+        return SendJson(HttpMethod.Patch, $"{PlaylistsPath}/{id}", token, json);
+    }
+
+    public async Task<HttpResponseMessage> DeletePlaylist(string? token, Guid id)
+    {
+        using HttpRequestMessage request = new(HttpMethod.Delete, $"{PlaylistsPath}/{id}");
+        Authorize(request, token);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    public Task<HttpResponseMessage> AddPlaylistEntryList(string? token, Guid id, string json)
+    {
+        return SendJson(HttpMethod.Post, $"{PlaylistsPath}/{id}/Entries", token, json);
+    }
+
+    public Task<HttpResponseMessage> RemovePlaylistEntryList(string? token, Guid id, string json)
+    {
+        return SendJson(HttpMethod.Post, $"{PlaylistsPath}/{id}/Entries/Remove", token, json);
+    }
+
+    public Task<HttpResponseMessage> MovePlaylistEntry(string? token, Guid id, Guid entryID, string json)
+    {
+        return SendJson(HttpMethod.Put, $"{PlaylistsPath}/{id}/Entries/{entryID}/Position", token, json);
+    }
+
+    private async Task<HttpResponseMessage> SendJson(HttpMethod method, string path, string? token, string json)
+    {
+        using HttpRequestMessage request = new(method, path) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
         Authorize(request, token);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
