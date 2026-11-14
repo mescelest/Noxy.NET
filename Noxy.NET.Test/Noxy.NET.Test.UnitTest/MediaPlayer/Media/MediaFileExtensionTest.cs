@@ -1,10 +1,10 @@
-using Noxy.NET.MediaPlayer.Application.Services;
+using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
 
-public class MediaFileMapperTest
+public class MediaFileExtensionTest
 {
     private static MediaFile CreateFile(DateTimeKind kind = DateTimeKind.Unspecified)
     {
