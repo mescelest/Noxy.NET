@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 
-namespace Noxy.NET.MediaPlayer.Application.Services;
+namespace Noxy.NET.MediaPlayer.Application.BackgroundServices;
 
 public class CleanupService(IUnitOfWorkFactory uowFactory, IOptions<ConfigCleanup> config, TimeProvider time, ILogger<CleanupService> logger) : BackgroundService
 {

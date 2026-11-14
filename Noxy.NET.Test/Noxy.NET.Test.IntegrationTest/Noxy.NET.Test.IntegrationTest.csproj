@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <RootNamespace>Noxy.NET.Test</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="10.0.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1"/>
+        <PackageReference Include="xunit.v3" Version="3.2.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Application\Noxy.NET.MediaPlayer.Application.csproj"/>
+        <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Persistence\Noxy.NET.MediaPlayer.Persistence.csproj"/>
+    </ItemGroup>
+
+</Project>

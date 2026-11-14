@@ -2,12 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
-using Noxy.NET.MediaPlayer.Persistence.Mappers;
+using Noxy.NET.MediaPlayer.Persistence.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 
 namespace Noxy.NET.MediaPlayer.Persistence.Repositories;
 
-public class AuthenticationRepository(DataContext context) : IAuthenticationRepository
+public class AuthenticationRepository(DataContext context, IEntityToTableMapper mapperE2T, ITableToEntityMapper mapperT2E) : IAuthenticationRepository
 {
     public Task<bool> EmailExists(string email, CancellationToken cancellationToken = default)
     {
@@ -17,40 +17,40 @@ public class AuthenticationRepository(DataContext context) : IAuthenticationRepo
     public async Task<User?> FindUserByID(Guid id, CancellationToken cancellationToken = default)
     {
         TableUser? table = await context.User.AsNoTracking().FirstOrDefaultAsync(x => x.ID == id, cancellationToken);
-        return table?.ToEntity();
+        return table == null ? null : mapperT2E.Map(table);
     }
 
     public async Task<User?> FindUserByEmail(string email, CancellationToken cancellationToken = default)
     {
         TableUser? table = await context.User.AsNoTracking().FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
-        return table?.ToEntity();
+        return table == null ? null : mapperT2E.Map(table);
     }
 
     public void AddUser(User user)
     {
-        context.User.Add(user.ToTable());
+        context.User.Add(mapperE2T.Map(user));
     }
 
     public async Task<ExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default)
     {
         TableExternalLogin? table = await context.ExternalLogin.AsNoTracking().FirstOrDefaultAsync(x => x.Provider == provider && x.ProviderKey == providerKey, cancellationToken);
-        return table?.ToEntity();
+        return table == null ? null : mapperT2E.Map(table);
     }
 
     public void AddExternalLogin(ExternalLogin externalLogin)
     {
-        context.ExternalLogin.Add(externalLogin.ToTable());
+        context.ExternalLogin.Add(mapperE2T.Map(externalLogin));
     }
 
     public async Task<RefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default)
     {
         TableRefreshToken? table = await context.RefreshToken.AsNoTracking().FirstOrDefaultAsync(x => x.TokenHash == tokenHash, cancellationToken);
-        return table?.ToEntity();
+        return table == null ? null : mapperT2E.Map(table);
     }
 
     public void AddRefreshToken(RefreshToken refreshToken)
     {
-        context.RefreshToken.Add(refreshToken.ToTable());
+        context.RefreshToken.Add(mapperE2T.Map(refreshToken));
     }
 
     public async Task<bool> TryRevokeRefreshToken(Guid id, DateTime time, CancellationToken cancellationToken = default)

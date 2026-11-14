@@ -23,6 +23,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Noxy.NET.Shared\Noxy.NET.Shared.csproj"/>
+        <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Application\Noxy.NET.MediaPlayer.Application.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

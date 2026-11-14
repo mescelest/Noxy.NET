@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Noxy.NET.MediaPlayer.Application.BackgroundServices;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Services;
