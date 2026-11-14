@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Noxy.NET.MediaPlayer.API.Models;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.MediaPlayer.API.Handlers;
@@ -8,11 +9,13 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        (int Status, string Title)? mapped = exception switch
+        ApiError? mapped = exception switch
         {
-            EmailAlreadyInUseException => (StatusCodes.Status409Conflict, "The email is already in use."),
-            AuthenticationFailedException => (StatusCodes.Status401Unauthorized, "Invalid credentials."),
-            GoogleLoginNotConfiguredException => (StatusCodes.Status503ServiceUnavailable, "Google login is not configured."),
+            EmailAlreadyInUseException => new(StatusCodes.Status409Conflict, "The email is already in use."),
+            AuthenticationFailedException => new(StatusCodes.Status401Unauthorized, "Invalid credentials."),
+            GoogleLoginNotConfiguredException => new(StatusCodes.Status503ServiceUnavailable, "Google login is not configured."),
+            UnsupportedMediaTypeException => new(StatusCodes.Status415UnsupportedMediaType, "The file type is not supported."),
+            FileTooLargeException => new(StatusCodes.Status413PayloadTooLarge, "The file is too large."),
             _ => null
         };
 

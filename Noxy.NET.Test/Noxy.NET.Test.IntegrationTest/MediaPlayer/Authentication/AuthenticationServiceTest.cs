@@ -10,7 +10,7 @@ public class AuthenticationServiceTest : IDisposable
 {
     private const string Password = "a-long-enough-password";
 
-    private readonly AuthenticationFixture _fixture = new();
+    private readonly DatabaseFixture _fixture = new();
 
     public void Dispose()
     {
@@ -78,7 +78,7 @@ public class AuthenticationServiceTest : IDisposable
     {
         await SignUp();
 
-        ResponseAuthentication response = await _fixture.AuthenticationService.SignIn(new() { Email = "User@Example.com", Password = Password });
+        ResponseAuthentication response = await _fixture.AuthenticationService.SignIn(new() { Email = "User@Example.com", Password = Password }, TestContext.Current.CancellationToken);
 
         Assert.False(string.IsNullOrEmpty(response.RefreshToken));
     }
@@ -88,13 +88,13 @@ public class AuthenticationServiceTest : IDisposable
     {
         await SignUp();
 
-        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.SignIn(new() { Email = "user@example.com", Password = "not-the-password-at-all" }));
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.SignIn(new() { Email = "user@example.com", Password = "not-the-password-at-all" }, TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task SignIn_UnknownEmail_Throws()
     {
-        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.SignIn(new() { Email = "nobody@example.com", Password = Password }));
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.SignIn(new() { Email = "nobody@example.com", Password = Password }, TestContext.Current.CancellationToken));
     }
 
     #endregion -- Sign in --
@@ -162,7 +162,7 @@ public class AuthenticationServiceTest : IDisposable
     {
         ResponseAuthentication first = await SignUp();
 
-        ResponseAuthentication second = await _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken });
+        ResponseAuthentication second = await _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken }, TestContext.Current.CancellationToken);
 
         Assert.NotEqual(first.RefreshToken, second.RefreshToken);
     }
@@ -170,20 +170,20 @@ public class AuthenticationServiceTest : IDisposable
     [Fact]
     public async Task Refresh_UnknownToken_Throws()
     {
-        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = "nope" }));
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = "nope" }, TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task Refresh_ReusedToken_RevokesEveryTokenOfTheUser()
     {
         ResponseAuthentication first = await SignUp();
-        ResponseAuthentication second = await _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken });
+        ResponseAuthentication second = await _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken }, TestContext.Current.CancellationToken);
 
         // Presenting the already-used token means someone has a copy.
-        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken }));
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken }, TestContext.Current.CancellationToken));
 
         // The newer token must be dead too.
-        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = second.RefreshToken }));
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = second.RefreshToken }, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -193,7 +193,7 @@ public class AuthenticationServiceTest : IDisposable
 
         _fixture.Time.Now = _fixture.Time.Now.AddDays(31);
 
-        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken }));
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken }, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -201,17 +201,17 @@ public class AuthenticationServiceTest : IDisposable
     {
         ResponseAuthentication first = await SignUp();
         _fixture.Time.Now = _fixture.Time.Now.AddDays(31);
-        ResponseAuthentication second = await _fixture.AuthenticationService.SignIn(new() { Email = "user@example.com", Password = Password });
+        ResponseAuthentication second = await _fixture.AuthenticationService.SignIn(new() { Email = "user@example.com", Password = Password }, TestContext.Current.CancellationToken);
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
-            int deleted = await uow.Authentication.DeleteExpiredRefreshTokens(_fixture.Time.Now.UtcDateTime);
+            int deleted = await uow.Authentication.DeleteExpiredRefreshTokens(_fixture.Time.Now.UtcDateTime, TestContext.Current.CancellationToken);
             Assert.Equal(1, deleted);
         }
 
         // The surviving token still works, and the deleted one is gone.
-        await _fixture.AuthenticationService.Refresh(new() { RefreshToken = second.RefreshToken });
-        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken }));
+        await _fixture.AuthenticationService.Refresh(new() { RefreshToken = second.RefreshToken }, TestContext.Current.CancellationToken);
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _fixture.AuthenticationService.Refresh(new() { RefreshToken = first.RefreshToken }, TestContext.Current.CancellationToken));
     }
 
     #endregion -- Refresh --

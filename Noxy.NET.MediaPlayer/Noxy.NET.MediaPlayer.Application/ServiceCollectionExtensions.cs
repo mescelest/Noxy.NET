@@ -32,6 +32,8 @@ public static class ServiceCollectionExtensions
 
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<IPasswordHashService, PasswordHashService>();
+        services.AddSingleton<IMediaFileValidator, MediaFileValidator>();
+        services.AddScoped<IMediaService, MediaService>();
         services.AddSingleton<ITokenService, TokenService>();
         services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();

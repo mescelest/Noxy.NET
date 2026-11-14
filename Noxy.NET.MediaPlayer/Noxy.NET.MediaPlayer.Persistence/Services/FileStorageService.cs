@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.MediaPlayer.Persistence.Services;
@@ -18,7 +19,7 @@ public class FileStorageService : IFileStorageService
         Directory.CreateDirectory(_root);
     }
 
-    public async Task<string> SaveAsync(Stream content, string extension, CancellationToken cancellationToken = default)
+    public async Task<StoredFile> SaveAsync(Stream content, string extension, CancellationToken cancellationToken = default)
     {
         string normalized = extension.TrimStart('.').ToLowerInvariant();
         if (normalized.Length == 0 || !normalized.All(char.IsAsciiLetterOrDigit))
@@ -28,11 +29,12 @@ public class FileStorageService : IFileStorageService
 
         string fileName = $"{Guid.CreateVersion7()}.{normalized}";
         string path = Path.Combine(_root, fileName);
+        long size;
 
         try
         {
             await using FileStream file = new(path, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, true);
-            await CopyWithLimitAsync(content, file, cancellationToken);
+            size = await CopyWithLimitAsync(content, file, cancellationToken);
         }
         catch
         {
@@ -40,7 +42,7 @@ public class FileStorageService : IFileStorageService
             throw;
         }
 
-        return fileName;
+        return new(fileName, size);
     }
 
     public Stream OpenRead(string fileName)
@@ -53,7 +55,7 @@ public class FileStorageService : IFileStorageService
         File.Delete(ResolvePath(fileName));
     }
 
-    private async Task CopyWithLimitAsync(Stream source, Stream destination, CancellationToken cancellationToken)
+    private async Task<long> CopyWithLimitAsync(Stream source, Stream destination, CancellationToken cancellationToken)
     {
         byte[] buffer = new byte[81920];
         long total = 0;
@@ -69,6 +71,8 @@ public class FileStorageService : IFileStorageService
 
             await destination.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
         }
+
+        return total;
     }
 
     private string ResolvePath(string fileName)

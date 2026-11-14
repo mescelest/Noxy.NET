@@ -10,11 +10,11 @@ using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
-public sealed class AuthenticationFixture : IDisposable
+public sealed class DatabaseFixture : IDisposable
 {
     private readonly SqliteConnection _connection = new("DataSource=:memory:");
 
-    public AuthenticationFixture()
+    public DatabaseFixture()
     {
         _connection.Open();
 

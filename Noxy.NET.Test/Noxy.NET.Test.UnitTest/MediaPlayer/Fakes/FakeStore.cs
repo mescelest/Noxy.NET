@@ -10,6 +10,7 @@ public sealed class FakeStore
     public List<MediaFile> MediaFiles { get; } = [];
 
     public int CommitCount { get; set; }
+    public bool FailCommit { get; set; }
     public int RevokeAllCount { get; set; }
     public bool LoseRevokeRace { get; set; }
 }

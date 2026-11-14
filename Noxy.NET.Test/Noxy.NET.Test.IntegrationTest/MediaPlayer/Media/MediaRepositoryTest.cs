@@ -7,7 +7,7 @@ namespace Noxy.NET.Test.MediaPlayer.Media;
 
 public class MediaRepositoryTest : IDisposable
 {
-    private readonly AuthenticationFixture _fixture = new();
+    private readonly DatabaseFixture _fixture = new();
 
     public void Dispose()
     {

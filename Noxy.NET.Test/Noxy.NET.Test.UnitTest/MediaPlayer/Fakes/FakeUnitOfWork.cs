@@ -21,6 +21,8 @@ public sealed class FakeUnitOfWork : IUnitOfWork
 
     public Task Commit(CancellationToken cancellationToken = default)
     {
+        if (_store.FailCommit) throw new InvalidOperationException("The commit failed.");
+
         _repository.Flush();
         _media.Flush();
         _store.CommitCount++;

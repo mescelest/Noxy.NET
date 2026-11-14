@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Persistence.Services;
 
@@ -40,7 +41,7 @@ public class FileStorageServiceTest : IDisposable
     {
         FileStorageService service = Create();
 
-        string fileName = await service.SaveAsync(new MemoryStream([1, 2, 3]), ".MP3", TestContext.Current.CancellationToken);
+        string fileName = (await service.SaveAsync(new MemoryStream([1, 2, 3]), ".MP3", TestContext.Current.CancellationToken)).FileName;
 
         Assert.EndsWith(".mp3", fileName);
         Assert.True(Guid.TryParse(Path.GetFileNameWithoutExtension(fileName), out _));
@@ -48,12 +49,20 @@ public class FileStorageServiceTest : IDisposable
     }
 
     [Fact]
+    public async Task Save_ReportsStoredSize()
+    {
+        StoredFile stored = await Create().SaveAsync(Bytes(42), "mp3", TestContext.Current.CancellationToken);
+
+        Assert.Equal(42, stored.SizeBytes);
+    }
+
+    [Fact]
     public async Task Save_TwiceGivesDifferentNames()
     {
         FileStorageService service = Create();
 
-        string first = await service.SaveAsync(Bytes(1), "mp3", TestContext.Current.CancellationToken);
-        string second = await service.SaveAsync(Bytes(1), "mp3", TestContext.Current.CancellationToken);
+        string first = (await service.SaveAsync(Bytes(1), "mp3", TestContext.Current.CancellationToken)).FileName;
+        string second = (await service.SaveAsync(Bytes(1), "mp3", TestContext.Current.CancellationToken)).FileName;
 
         Assert.NotEqual(first, second);
     }
@@ -63,7 +72,7 @@ public class FileStorageServiceTest : IDisposable
     {
         FileStorageService service = Create(100);
 
-        string fileName = await service.SaveAsync(Bytes(100), "mp3", TestContext.Current.CancellationToken);
+        string fileName = (await service.SaveAsync(Bytes(100), "mp3", TestContext.Current.CancellationToken)).FileName;
 
         Assert.True(File.Exists(Path.Combine(_root, fileName)));
     }
@@ -94,7 +103,7 @@ public class FileStorageServiceTest : IDisposable
     public async Task OpenRead_ReturnsSavedContent()
     {
         FileStorageService service = Create();
-        string fileName = await service.SaveAsync(new MemoryStream([9, 8, 7]), "mp3", TestContext.Current.CancellationToken);
+        string fileName = (await service.SaveAsync(new MemoryStream([9, 8, 7]), "mp3", TestContext.Current.CancellationToken)).FileName;
 
         await using Stream stream = service.OpenRead(fileName);
         using MemoryStream copy = new();
@@ -107,7 +116,7 @@ public class FileStorageServiceTest : IDisposable
     public async Task Delete_RemovesFile()
     {
         FileStorageService service = Create();
-        string fileName = await service.SaveAsync(Bytes(1), "mp3", TestContext.Current.CancellationToken);
+        string fileName = (await service.SaveAsync(Bytes(1), "mp3", TestContext.Current.CancellationToken)).FileName;
 
         service.Delete(fileName);
 
