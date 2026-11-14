@@ -61,7 +61,7 @@ public class AuthenticationServiceTest
     [Fact]
     public async Task SignUp_DuplicateEmail_ThrowsAndCommitsNothing()
     {
-        await SignUp("user@example.com");
+        await SignUp();
         int commits = _store.CommitCount;
 
         await Assert.ThrowsAsync<EmailAlreadyInUseException>(() => SignUp("USER@example.com"));
@@ -96,7 +96,7 @@ public class AuthenticationServiceTest
     [Fact]
     public async Task SignIn_NormalizesEmail()
     {
-        await SignUp("user@example.com");
+        await SignUp();
 
         ResponseAuthentication response = await _service.SignIn(new() { Email = " USER@example.com ", Password = "a-long-enough-password" }, TestContext.Current.CancellationToken);
 
@@ -166,7 +166,7 @@ public class AuthenticationServiceTest
     [Fact]
     public async Task Google_ExistingUnverifiedUser_Throws_SoWhoeverRegisteredFirstCannotKeepTheAccount()
     {
-        await SignUp("user@example.com");
+        await SignUp();
         RegisterGoogle("token", "sub-1", "user@example.com");
 
         await Assert.ThrowsAsync<EmailAlreadyInUseException>(() => SignInGoogle("token"));

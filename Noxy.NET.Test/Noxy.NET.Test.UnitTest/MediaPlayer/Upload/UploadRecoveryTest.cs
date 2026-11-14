@@ -23,7 +23,7 @@ public class UploadRecoveryTest
         _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _notifier, Options.Create(config), NullLogger<UploadProcessor>.Instance);
     }
 
-    private MediaUploadJob AddJob(MediaUploadJobStatus status = MediaUploadJobStatus.Pending, bool staged = true)
+    private MediaUploadJob AddJob(MediaUploadJobStatus status, bool staged = true)
     {
         MediaUploadJob job = new()
         {
@@ -32,7 +32,7 @@ public class UploadRecoveryTest
             Title = "Song",
             ContentType = "audio/mpeg",
             SizeBytes = 10,
-            ContentHash = new string('c', 64),
+            ContentHash = new('c', 64),
             Status = status
         };
 
@@ -66,7 +66,7 @@ public class UploadRecoveryTest
     [Fact]
     public async Task Recover_KeepsStagedFilesThatHaveAJob()
     {
-        MediaUploadJob job = AddJob();
+        MediaUploadJob job = AddJob(MediaUploadJobStatus.Pending);
         _storage.Staged["orphan.mp3"] = [1];
 
         await _processor.Recover(TestContext.Current.CancellationToken);

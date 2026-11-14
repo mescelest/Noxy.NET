@@ -5,7 +5,6 @@ using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
-using Noxy.NET.MediaPlayer.Domain.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -180,7 +179,7 @@ public class PlaylistServiceTest
     [Fact]
     public async Task Update_NoChange_DoesNotCommitBumpOrPush()
     {
-        Guid id = await Create("Mix");
+        Guid id = await Create();
         DateTime modified = Stored(id).TimeModified;
         int commits = _store.CommitCount;
         int pushes = _notifier.UpdatedList.Count;
@@ -631,7 +630,7 @@ public class PlaylistServiceTest
         ResponsePlaylistDetail detail = await Add(id, [repeated, .. SongList(3), repeated]);
         AssertDense(id);
 
-        detail = await Move(id, detail.EntryList[4].ID, 0);
+        await Move(id, detail.EntryList[4].ID, 0);
         AssertDense(id);
 
         detail = await Add(id, SongList(2), 2);

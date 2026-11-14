@@ -13,7 +13,7 @@ public class MediaFileValidatorTest
     private static readonly byte[] Mp3WithTag = [.. "ID3"u8, 3, 0, 0, 0, 0, 0, 0, 0, 0];
     private static readonly byte[] Mp3Frame = [0xFF, 0xFB, 0x90, 0x00, 0, 0, 0, 0, 0, 0, 0, 0];
     private static readonly byte[] Flac = [.. "fLaC"u8, 0, 0, 0, 0x22, 0, 0, 0, 0];
-    private static readonly byte[] M4a = [0, 0, 0, 0x20, .. "ftypM4A "u8];
+    private static readonly byte[] M4A = [0, 0, 0, 0x20, .. "ftypM4A "u8];
     private static readonly byte[] Ogg = [.. "OggS"u8, 0, 2, 0, 0, 0, 0, 0, 0];
     private static readonly byte[] Wav = [.. "RIFF"u8, 1, 2, 3, 4, .. "WAVE"u8];
 
@@ -36,7 +36,7 @@ public class MediaFileValidatorTest
         {
             "mp3" => Mp3WithTag,
             "flac" => Flac,
-            "m4a" => M4a,
+            "m4a" => M4A,
             "wav" => Wav,
             _ => Ogg
         };

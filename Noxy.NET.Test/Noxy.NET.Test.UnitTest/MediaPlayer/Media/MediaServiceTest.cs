@@ -91,7 +91,7 @@ public class MediaServiceTest
     [Fact]
     public async Task Enqueue_CreatesAPendingJobWithTheFileFacts()
     {
-        byte[] content = Mp3(100);
+        byte[] content = Mp3();
 
         ResponseUploadAccepted response = await Enqueue("song.test.mp3", content, "My song");
 
@@ -218,7 +218,7 @@ public class MediaServiceTest
     public async Task Enqueue_FileLargerThanTheRemainingQuota_ThrowsLibraryFullAndLeavesNothingStaged()
     {
         _storageConfig.MaxBytesPerUser = 150;
-        Seed(UserID, "mine", 100);
+        Seed(UserID, "mine");
 
         await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("song.mp3", Mp3(51)));
 
@@ -229,7 +229,7 @@ public class MediaServiceTest
     public async Task Enqueue_FileExactlyFillingTheQuota_Succeeds()
     {
         _storageConfig.MaxBytesPerUser = 150;
-        Seed(UserID, "mine", 100);
+        Seed(UserID, "mine");
 
         await Enqueue("song.mp3", Mp3(50));
 
@@ -242,7 +242,7 @@ public class MediaServiceTest
         _storageConfig.MaxBytesPerUser = 150;
         Seed(UserID, "mine", 150);
 
-        await Enqueue("song.mp3", Mp3(100), userID: Guid.CreateVersion7());
+        await Enqueue("song.mp3", Mp3(), userID: Guid.CreateVersion7());
 
         Assert.Single(_store.MediaUploadJobList);
     }
@@ -315,7 +315,7 @@ public class MediaServiceTest
     [Fact]
     public async Task Enqueue_WhileTheSameUsersOtherUploadIsStillArriving_ThrowsUploadInProgress()
     {
-        FakeBlockingStream arriving = new(Mp3(100));
+        FakeBlockingStream arriving = new(Mp3());
         Task<ResponseUploadAccepted> first = _service.Enqueue(UserID, "slow.mp3", null, arriving, TestContext.Current.CancellationToken);
         await WaitUntil(() => arriving.IsWaiting);
 
@@ -330,7 +330,7 @@ public class MediaServiceTest
     [Fact]
     public async Task Enqueue_AnotherUsersUploadIsNotBlockedByAnArrivingOne()
     {
-        FakeBlockingStream arriving = new(Mp3(100));
+        FakeBlockingStream arriving = new(Mp3());
         Task<ResponseUploadAccepted> first = _service.Enqueue(UserID, "slow.mp3", null, arriving, TestContext.Current.CancellationToken);
         await WaitUntil(() => arriving.IsWaiting);
 
