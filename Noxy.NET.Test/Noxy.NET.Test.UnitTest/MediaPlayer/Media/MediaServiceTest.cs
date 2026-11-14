@@ -15,7 +15,7 @@ public class MediaServiceTest
 {
     private static readonly Guid UserID = Guid.CreateVersion7();
 
-    private readonly ConfigStorage _storageConfig = new() { RootPath = "x", AllowedExtensions = ["mp3", "flac"] };
+    private readonly ConfigStorage _storageConfig = new() { RootPath = "x", AllowedExtensionList = ["mp3", "flac"] };
     private readonly ConfigUpload _uploadConfig = new();
     private readonly FakeFileStorageService _storage = new();
     private readonly FakeUploadSignal _signal = new();
@@ -56,13 +56,13 @@ public class MediaServiceTest
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
 
         _storage.Files[file.FilePath] = bytes;
-        _store.MediaFiles.Add(file);
+        _store.MediaFileList.Add(file);
         return file;
     }
 
     private void SeedPendingJob(Guid userID, long sizeBytes = 10)
     {
-        _store.MediaUploadJobs.Add(new()
+        _store.MediaUploadJobList.Add(new()
         {
             UserID = userID,
             StagedFileName = $"{Guid.CreateVersion7()}.mp3",
@@ -91,7 +91,7 @@ public class MediaServiceTest
 
         ResponseUploadAccepted response = await Enqueue("song.test.mp3", content, "My song");
 
-        MediaUploadJob job = Assert.Single(_store.MediaUploadJobs);
+        MediaUploadJob job = Assert.Single(_store.MediaUploadJobList);
         Assert.Equal(response.JobID, job.ID);
         Assert.Equal(UserID, job.UserID);
         Assert.Equal(_storage.Staged.Keys.Single(), job.StagedFileName);
@@ -108,7 +108,7 @@ public class MediaServiceTest
     {
         await Enqueue("song.mp3", Mp3());
 
-        Assert.Equal("song", Assert.Single(_store.MediaUploadJobs).Title);
+        Assert.Equal("song", Assert.Single(_store.MediaUploadJobList).Title);
     }
 
     [Fact]
@@ -117,7 +117,7 @@ public class MediaServiceTest
         await Enqueue("a.mp3", Mp3(), new string('t', 400));
         await Enqueue(new string('a', 600) + ".mp3", Mp3());
 
-        Assert.All(_store.MediaUploadJobs, job => Assert.Equal(255, job.Title.Length));
+        Assert.All(_store.MediaUploadJobList, job => Assert.Equal(255, job.Title.Length));
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class MediaServiceTest
     {
         await Enqueue("song.mp3", Mp3());
 
-        Assert.Empty(_store.MediaFiles);
+        Assert.Empty(_store.MediaFileList);
     }
 
     [Theory]
@@ -172,7 +172,7 @@ public class MediaServiceTest
         await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("three.mp3", Mp3()));
 
         Assert.Single(_storage.Staged);
-        Assert.Single(_store.MediaUploadJobs);
+        Assert.Single(_store.MediaUploadJobList);
         Assert.Equal(1, _signal.NotifyCount);
     }
 
@@ -184,7 +184,7 @@ public class MediaServiceTest
 
         await Enqueue("theirs.mp3", Mp3(), userID: Guid.CreateVersion7());
 
-        Assert.Single(_store.MediaUploadJobs);
+        Assert.Single(_store.MediaUploadJobList);
     }
 
     [Fact]
@@ -229,7 +229,7 @@ public class MediaServiceTest
 
         await Enqueue("song.mp3", Mp3(50));
 
-        Assert.Single(_store.MediaUploadJobs);
+        Assert.Single(_store.MediaUploadJobList);
     }
 
     [Fact]
@@ -240,7 +240,7 @@ public class MediaServiceTest
 
         await Enqueue("song.mp3", Mp3(100), userID: Guid.CreateVersion7());
 
-        Assert.Single(_store.MediaUploadJobs);
+        Assert.Single(_store.MediaUploadJobList);
     }
 
     [Fact]
@@ -261,7 +261,7 @@ public class MediaServiceTest
         await Assert.ThrowsAsync<UploadQueueFullException>(() => Enqueue("song.mp3", Mp3()));
 
         Assert.Empty(_storage.Staged);
-        Assert.Equal(2, _store.MediaUploadJobs.Count);
+        Assert.Equal(2, _store.MediaUploadJobList.Count);
     }
 
     [Fact]
@@ -272,7 +272,7 @@ public class MediaServiceTest
 
         await Enqueue("song.mp3", Mp3(), userID: Guid.CreateVersion7());
 
-        Assert.Equal(2, _store.MediaUploadJobs.Count);
+        Assert.Equal(2, _store.MediaUploadJobList.Count);
     }
 
     [Fact]
@@ -283,8 +283,8 @@ public class MediaServiceTest
         await Assert.ThrowsAsync<InvalidOperationException>(() => Enqueue("song.mp3", Mp3()));
 
         Assert.Empty(_storage.Staged);
-        Assert.Single(_storage.DeletedStaged);
-        Assert.Empty(_store.MediaUploadJobs);
+        Assert.Single(_storage.DeletedStagedList);
+        Assert.Empty(_store.MediaUploadJobList);
         Assert.Equal(0, _signal.NotifyCount);
     }
 
@@ -320,7 +320,7 @@ public class MediaServiceTest
 
         arriving.Release();
         await first;
-        Assert.Single(_store.MediaUploadJobs);
+        Assert.Single(_store.MediaUploadJobList);
     }
 
     [Fact]
@@ -334,7 +334,7 @@ public class MediaServiceTest
 
         arriving.Release();
         await first;
-        Assert.Equal(2, _store.MediaUploadJobs.Count);
+        Assert.Equal(2, _store.MediaUploadJobList.Count);
     }
 
     [Fact]
@@ -343,7 +343,7 @@ public class MediaServiceTest
         await Enqueue("one.mp3", Mp3());
         await Enqueue("two.mp3", Mp3());
 
-        Assert.Equal(2, _store.MediaUploadJobs.Count);
+        Assert.Equal(2, _store.MediaUploadJobList.Count);
     }
 
     [Fact]
@@ -356,50 +356,50 @@ public class MediaServiceTest
 
         await Enqueue("good.mp3", Mp3());
 
-        Assert.Single(_store.MediaUploadJobs);
+        Assert.Single(_store.MediaUploadJobList);
     }
 
     private void AssertNothingQueued()
     {
         Assert.Empty(_storage.Staged);
-        Assert.Empty(_store.MediaUploadJobs);
+        Assert.Empty(_store.MediaUploadJobList);
         Assert.Equal(0, _store.CommitCount);
         Assert.Equal(0, _signal.NotifyCount);
     }
 
     [Fact]
-    public async Task List_ReturnsOnlyTheUsersFilesNewestFirst()
+    public async Task GetMediaFileList_ReturnsOnlyTheUsersFilesNewestFirst()
     {
         DateTime now = DateTime.UtcNow;
         MediaFile older = Seed(UserID, "old", timeCreated: now.AddMinutes(-5));
         MediaFile newer = Seed(UserID, "new", timeCreated: now);
         Seed(Guid.CreateVersion7(), "other");
 
-        List<ResponseMediaFile> list = await _service.List(UserID, 0, 10, TestContext.Current.CancellationToken);
+        List<ResponseMediaFile> list = await _service.GetMediaFileList(UserID, 0, 10, TestContext.Current.CancellationToken);
 
         Assert.Equal([newer.ID, older.ID], list.Select(x => x.ID));
         Assert.Equal(["new", "old"], list.Select(x => x.Title));
     }
 
     [Fact]
-    public async Task List_AppliesSkipAndTake()
+    public async Task GetMediaFileList_AppliesSkipAndTake()
     {
         DateTime now = DateTime.UtcNow;
         Seed(UserID, "song0", timeCreated: now.AddMinutes(-2));
         Seed(UserID, "song1", timeCreated: now.AddMinutes(-1));
         Seed(UserID, "song2", timeCreated: now);
 
-        List<ResponseMediaFile> page = await _service.List(UserID, 1, 1, TestContext.Current.CancellationToken);
+        List<ResponseMediaFile> page = await _service.GetMediaFileList(UserID, 1, 1, TestContext.Current.CancellationToken);
 
         Assert.Equal("song1", Assert.Single(page).Title);
     }
 
     [Fact]
-    public async Task List_ReturnsTheHashAndUtcTimes()
+    public async Task GetMediaFileList_ReturnsTheHashAndUtcTimes()
     {
         MediaFile file = Seed(UserID, "song", timeCreated: new(2026, 1, 2, 3, 4, 5, DateTimeKind.Unspecified));
 
-        ResponseMediaFile response = Assert.Single(await _service.List(UserID, 0, 10, TestContext.Current.CancellationToken));
+        ResponseMediaFile response = Assert.Single(await _service.GetMediaFileList(UserID, 0, 10, TestContext.Current.CancellationToken));
 
         Assert.Equal(file.ContentHash, response.ContentHash);
         Assert.Equal(DateTimeKind.Utc, response.TimeCreated.Kind);

@@ -53,12 +53,12 @@ public class MediaService(IUnitOfWorkFactory uowFactory, IMediaFileValidator val
         return new() { JobID = job.ID };
     }
 
-    public async Task<List<ResponseMediaFile>> List(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
+    public async Task<List<ResponseMediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
     {
         await using IUnitOfWork uow = uowFactory.Create();
 
-        List<MediaFile> files = await uow.Media.ListMediaFiles(userID, skip, take, cancellationToken);
-        return [.. files.Select(MediaFileMapper.ToResponse)];
+        List<MediaFile> fileList = await uow.Media.GetMediaFileList(userID, skip, take, cancellationToken);
+        return [.. fileList.Select(MediaFileMapper.ToResponse)];
     }
 
     public async Task<MediaDownload> Open(Guid userID, Guid id, CancellationToken cancellationToken = default)

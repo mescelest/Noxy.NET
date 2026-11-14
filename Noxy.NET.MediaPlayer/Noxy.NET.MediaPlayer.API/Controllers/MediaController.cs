@@ -67,11 +67,11 @@ public class MediaController(IMediaService mediaService, IOptions<ConfigStorage>
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<ResponseMediaFile>>> List([FromQuery] RequestListMedia request, CancellationToken cancellationToken)
+    public async Task<ActionResult<List<ResponseMediaFile>>> GetMediaFileList([FromQuery] RequestListMedia request, CancellationToken cancellationToken)
     {
         if (UserID is not { } userID) return Unauthorized();
 
-        return await mediaService.List(userID, request.Skip, request.Take, cancellationToken);
+        return await mediaService.GetMediaFileList(userID, request.Skip, request.Take, cancellationToken);
     }
 
     [HttpGet("{id:guid}/File")]

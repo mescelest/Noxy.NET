@@ -21,7 +21,7 @@ public class MediaFileValidator(IOptions<ConfigStorage> options) : IMediaFileVal
         ["wav"] = ("audio/wav", header => header.StartsWith("RIFF"u8) && header.Length >= 12 && header[8..12].SequenceEqual("WAVE"u8))
     };
 
-    private readonly HashSet<string> _allowed = options.Value.AllowedExtensions
+    private readonly HashSet<string> _allowed = options.Value.AllowedExtensionList
         .Select(extension => extension.TrimStart('.').ToLowerInvariant())
         .ToHashSet();
 

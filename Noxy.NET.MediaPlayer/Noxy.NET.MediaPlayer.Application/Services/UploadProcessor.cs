@@ -52,10 +52,10 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
         await using IUnitOfWork uow = uowFactory.Create();
 
         int reset = await uow.Media.ResetProcessingMediaUploadJobs(cancellationToken);
-        HashSet<string> jobFiles = [.. await uow.Media.ListMediaUploadJobFileNames(cancellationToken)];
+        HashSet<string> jobFileNameSet = [.. await uow.Media.GetMediaUploadJobFileNameList(cancellationToken)];
 
         int orphans = 0;
-        foreach (string staged in storage.ListStaged().Where(x => !jobFiles.Contains(x)))
+        foreach (string staged in storage.GetStagedFileNameList().Where(x => !jobFileNameSet.Contains(x)))
         {
             storage.DeleteStaged(staged);
             orphans++;

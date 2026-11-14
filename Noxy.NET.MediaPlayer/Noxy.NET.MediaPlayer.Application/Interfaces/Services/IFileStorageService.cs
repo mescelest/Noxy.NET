@@ -18,5 +18,5 @@ public interface IFileStorageService
 
     void DeleteStaged(string fileName);
 
-    IReadOnlyList<string> ListStaged();
+    IReadOnlyList<string> GetStagedFileNameList();
 }

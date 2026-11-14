@@ -47,12 +47,12 @@ public class AuthenticationServiceTest
     {
         ResponseAuthentication response = await SignUp("  User@Example.COM ");
 
-        User user = Assert.Single(_store.Users);
+        User user = Assert.Single(_store.UserList);
         Assert.Equal("user@example.com", user.Email);
         Assert.Equal("hashed:a-long-enough-password", user.PasswordHash);
         Assert.False(user.IsEmailVerified);
 
-        RefreshToken token = Assert.Single(_store.RefreshTokens);
+        RefreshToken token = Assert.Single(_store.RefreshTokenList);
         Assert.Equal(user.ID, token.UserID);
         Assert.Equal("hash-of-" + response.RefreshToken, token.TokenHash);
         Assert.Equal(1, _store.CommitCount);
@@ -67,7 +67,7 @@ public class AuthenticationServiceTest
         await Assert.ThrowsAsync<EmailAlreadyInUseException>(() => SignUp("USER@example.com"));
 
         Assert.Equal(commits, _store.CommitCount);
-        Assert.Single(_store.Users);
+        Assert.Single(_store.UserList);
     }
 
     #endregion -- Sign up --
@@ -86,11 +86,11 @@ public class AuthenticationServiceTest
     public async Task SignIn_WrongPassword_ThrowsAndIssuesNoToken()
     {
         await SignUp();
-        int tokens = _store.RefreshTokens.Count;
+        int tokens = _store.RefreshTokenList.Count;
 
         await Assert.ThrowsAsync<AuthenticationFailedException>(() => _service.SignIn(new() { Email = "user@example.com", Password = "wrong" }, TestContext.Current.CancellationToken));
 
-        Assert.Equal(tokens, _store.RefreshTokens.Count);
+        Assert.Equal(tokens, _store.RefreshTokenList.Count);
     }
 
     [Fact]
@@ -114,12 +114,12 @@ public class AuthenticationServiceTest
 
         await SignInGoogle("token");
 
-        User user = Assert.Single(_store.Users);
+        User user = Assert.Single(_store.UserList);
         Assert.Equal("new@example.com", user.Email);
         Assert.True(user.IsEmailVerified);
         Assert.Null(user.PasswordHash);
 
-        ExternalLogin login = Assert.Single(_store.ExternalLogins);
+        ExternalLogin login = Assert.Single(_store.ExternalLoginList);
         Assert.Equal(ExternalLoginProvider.Google, login.Provider);
         Assert.Equal("sub-1", login.ProviderKey);
         Assert.Equal(user.ID, login.UserID);
@@ -134,7 +134,7 @@ public class AuthenticationServiceTest
         RegisterGoogle("token2", "sub-1", "changed@example.com");
         ResponseAuthentication response = await SignInGoogle("token2");
 
-        Assert.Single(_store.Users);
+        Assert.Single(_store.UserList);
         Assert.Equal("access-for-old@example.com", response.AccessToken);
     }
 
@@ -145,22 +145,22 @@ public class AuthenticationServiceTest
 
         await Assert.ThrowsAsync<AuthenticationFailedException>(() => SignInGoogle("token"));
 
-        Assert.Empty(_store.Users);
-        Assert.Empty(_store.ExternalLogins);
+        Assert.Empty(_store.UserList);
+        Assert.Empty(_store.ExternalLoginList);
         Assert.Equal(0, _store.CommitCount);
     }
 
     [Fact]
     public async Task Google_ExistingVerifiedUser_GetsGoogleLinked()
     {
-        _store.Users.Add(new() { Email = "user@example.com", IsEmailVerified = true, PasswordHash = "hashed:x" });
+        _store.UserList.Add(new() { Email = "user@example.com", IsEmailVerified = true, PasswordHash = "hashed:x" });
         RegisterGoogle("token", "sub-1", "user@example.com");
 
         await SignInGoogle("token");
 
-        Assert.Single(_store.Users);
-        ExternalLogin login = Assert.Single(_store.ExternalLogins);
-        Assert.Equal(_store.Users[0].ID, login.UserID);
+        Assert.Single(_store.UserList);
+        ExternalLogin login = Assert.Single(_store.ExternalLoginList);
+        Assert.Equal(_store.UserList[0].ID, login.UserID);
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public class AuthenticationServiceTest
 
         await Assert.ThrowsAsync<EmailAlreadyInUseException>(() => SignInGoogle("token"));
 
-        Assert.Empty(_store.ExternalLogins);
+        Assert.Empty(_store.ExternalLoginList);
     }
 
     [Fact]
@@ -192,9 +192,9 @@ public class AuthenticationServiceTest
         ResponseAuthentication second = await Refresh(first.RefreshToken);
 
         Assert.NotEqual(first.RefreshToken, second.RefreshToken);
-        Assert.Equal(2, _store.RefreshTokens.Count);
-        Assert.True(_store.RefreshTokens.Single(x => x.TokenHash == "hash-of-" + first.RefreshToken).IsRevoked);
-        Assert.False(_store.RefreshTokens.Single(x => x.TokenHash == "hash-of-" + second.RefreshToken).IsRevoked);
+        Assert.Equal(2, _store.RefreshTokenList.Count);
+        Assert.True(_store.RefreshTokenList.Single(x => x.TokenHash == "hash-of-" + first.RefreshToken).IsRevoked);
+        Assert.False(_store.RefreshTokenList.Single(x => x.TokenHash == "hash-of-" + second.RefreshToken).IsRevoked);
     }
 
     [Fact]
@@ -212,7 +212,7 @@ public class AuthenticationServiceTest
         await Assert.ThrowsAsync<AuthenticationFailedException>(() => Refresh(first.RefreshToken));
 
         Assert.Equal(1, _store.RevokeAllCount);
-        Assert.All(_store.RefreshTokens, x => Assert.True(x.IsRevoked));
+        Assert.All(_store.RefreshTokenList, x => Assert.True(x.IsRevoked));
         await Assert.ThrowsAsync<AuthenticationFailedException>(() => Refresh(second.RefreshToken));
     }
 
@@ -225,7 +225,7 @@ public class AuthenticationServiceTest
         await Assert.ThrowsAsync<AuthenticationFailedException>(() => Refresh(first.RefreshToken));
 
         Assert.Equal(0, _store.RevokeAllCount);
-        Assert.False(_store.RefreshTokens.Single().IsRevoked);
+        Assert.False(_store.RefreshTokenList.Single().IsRevoked);
     }
 
     [Fact]

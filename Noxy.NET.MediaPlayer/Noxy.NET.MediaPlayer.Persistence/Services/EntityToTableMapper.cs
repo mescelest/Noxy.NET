@@ -43,7 +43,7 @@ public class EntityToTableMapper : IEntityToTableMapper
             Email = entity.Email,
             IsEmailVerified = entity.IsEmailVerified,
             PasswordHash = entity.PasswordHash,
-            ExternalLoginList = [.. entity.ExternalLogins.Select(Map)]
+            ExternalLoginList = [.. entity.ExternalLoginList.Select(Map)]
         };
     }
 

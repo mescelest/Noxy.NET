@@ -12,10 +12,10 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
 
     public void Flush()
     {
-        store.Users.AddRange(_pendingUsers);
-        store.ExternalLogins.AddRange(_pendingUsers.SelectMany(x => x.ExternalLogins));
-        store.ExternalLogins.AddRange(_pendingExternalLogins);
-        store.RefreshTokens.AddRange(_pendingRefreshTokens);
+        store.UserList.AddRange(_pendingUsers);
+        store.ExternalLoginList.AddRange(_pendingUsers.SelectMany(x => x.ExternalLoginList));
+        store.ExternalLoginList.AddRange(_pendingExternalLogins);
+        store.RefreshTokenList.AddRange(_pendingRefreshTokens);
 
         _pendingUsers.Clear();
         _pendingExternalLogins.Clear();
@@ -24,17 +24,17 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
 
     public Task<bool> EmailExists(string email, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.Users.Any(x => x.Email == email));
+        return Task.FromResult(store.UserList.Any(x => x.Email == email));
     }
 
     public Task<User?> FindUserByID(Guid id, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.Users.FirstOrDefault(x => x.ID == id));
+        return Task.FromResult(store.UserList.FirstOrDefault(x => x.ID == id));
     }
 
     public Task<User?> FindUserByEmail(string email, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.Users.FirstOrDefault(x => x.Email == email));
+        return Task.FromResult(store.UserList.FirstOrDefault(x => x.Email == email));
     }
 
     public void AddUser(User user)
@@ -44,7 +44,7 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
 
     public Task<ExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.ExternalLogins.FirstOrDefault(x => x.Provider == provider && x.ProviderKey == providerKey));
+        return Task.FromResult(store.ExternalLoginList.FirstOrDefault(x => x.Provider == provider && x.ProviderKey == providerKey));
     }
 
     public void AddExternalLogin(ExternalLogin externalLogin)
@@ -54,7 +54,7 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
 
     public Task<RefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.RefreshTokens.FirstOrDefault(x => x.TokenHash == tokenHash));
+        return Task.FromResult(store.RefreshTokenList.FirstOrDefault(x => x.TokenHash == tokenHash));
     }
 
     public void AddRefreshToken(RefreshToken refreshToken)
@@ -64,7 +64,7 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
 
     public Task<bool> TryRevokeRefreshToken(Guid id, DateTime time, CancellationToken cancellationToken = default)
     {
-        RefreshToken? token = store.RefreshTokens.FirstOrDefault(x => x.ID == id && !x.IsRevoked);
+        RefreshToken? token = store.RefreshTokenList.FirstOrDefault(x => x.ID == id && !x.IsRevoked);
         if (token == null || store.LoseRevokeRace) return Task.FromResult(false);
 
         token.TimeRevoked = time;
@@ -74,7 +74,7 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
     public Task RevokeAllRefreshTokens(Guid userID, DateTime time, CancellationToken cancellationToken = default)
     {
         store.RevokeAllCount++;
-        foreach (RefreshToken token in store.RefreshTokens.Where(x => x.UserID == userID && !x.IsRevoked))
+        foreach (RefreshToken token in store.RefreshTokenList.Where(x => x.UserID == userID && !x.IsRevoked))
         {
             token.TimeRevoked = time;
         }
@@ -84,6 +84,6 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
 
     public Task<int> DeleteExpiredRefreshTokens(DateTime expiredBefore, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.RefreshTokens.RemoveAll(x => x.TimeExpires < expiredBefore));
+        return Task.FromResult(store.RefreshTokenList.RemoveAll(x => x.TimeExpires < expiredBefore));
     }
 }

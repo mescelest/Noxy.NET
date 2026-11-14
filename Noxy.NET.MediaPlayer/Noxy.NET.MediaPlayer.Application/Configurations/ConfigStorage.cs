@@ -15,7 +15,7 @@ public class ConfigStorage
 
     // Listed in configuration only, because the binder appends to a default array instead of replacing it.
     [MinLength(1)]
-    public string[] AllowedExtensions { get; set; } = [];
+    public string[] AllowedExtensionList { get; set; } = [];
 
     // Per user. Keeps the library list that every device downloads at a known size.
     [Range(1, int.MaxValue)]

@@ -54,7 +54,7 @@ public class FileStorageService : IFileStorageService
         File.Delete(ResolvePath(_staging, fileName));
     }
 
-    public IReadOnlyList<string> ListStaged()
+    public IReadOnlyList<string> GetStagedFileNameList()
     {
         return [.. Directory.EnumerateFiles(_staging).Select(x => Path.GetFileName(x))];
     }

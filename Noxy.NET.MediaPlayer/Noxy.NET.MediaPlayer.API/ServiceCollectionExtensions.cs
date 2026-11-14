@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
 
             services.AddCors();
             services.AddOptions<CorsOptions>()
-                .Configure<IOptions<ConfigCors>>((cors, settings) => cors.AddPolicy(Constants.CorsPolicyName, policy => policy.WithOrigins(settings.Value.Origins).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+                .Configure<IOptions<ConfigCors>>((cors, settings) => cors.AddPolicy(Constants.CorsPolicyName, policy => policy.WithOrigins(settings.Value.OriginList).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
             return services;
         }

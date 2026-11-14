@@ -49,7 +49,7 @@ public sealed class MediaApiClient(ApiFactory factory)
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
-    public async Task<List<ResponseMediaFile>> List(string token)
+    public async Task<List<ResponseMediaFile>> GetMediaFileList(string token)
     {
         using HttpRequestMessage request = new(HttpMethod.Get, "/Media");
         Authorize(request, token);

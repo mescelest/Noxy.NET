@@ -7,7 +7,7 @@ public class ConfigStorageTest
 {
     private static ConfigStorage Valid()
     {
-        return new() { RootPath = "Media", AllowedExtensions = ["mp3"] };
+        return new() { RootPath = "Media", AllowedExtensionList = ["mp3"] };
     }
 
     private static bool IsValid(ConfigStorage config)
@@ -40,7 +40,7 @@ public class ConfigStorageTest
     public void NoAllowedExtensions_Fails()
     {
         ConfigStorage config = Valid();
-        config.AllowedExtensions = [];
+        config.AllowedExtensionList = [];
 
         Assert.False(IsValid(config));
     }

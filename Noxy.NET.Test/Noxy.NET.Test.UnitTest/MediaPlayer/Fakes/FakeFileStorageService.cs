@@ -9,8 +9,8 @@ public sealed class FakeFileStorageService : IFileStorageService
 {
     public Dictionary<string, byte[]> Files { get; } = [];
     public Dictionary<string, byte[]> Staged { get; } = [];
-    public List<string> Deleted { get; } = [];
-    public List<string> DeletedStaged { get; } = [];
+    public List<string> DeletedList { get; } = [];
+    public List<string> DeletedStagedList { get; } = [];
 
     public Exception? StageFailure { get; set; }
     public Exception? PromoteFailure { get; set; }
@@ -57,10 +57,10 @@ public sealed class FakeFileStorageService : IFileStorageService
         if (DeleteStagedFailure != null) throw DeleteStagedFailure;
 
         Staged.Remove(fileName);
-        DeletedStaged.Add(fileName);
+        DeletedStagedList.Add(fileName);
     }
 
-    public IReadOnlyList<string> ListStaged()
+    public IReadOnlyList<string> GetStagedFileNameList()
     {
         return [.. Staged.Keys];
     }
@@ -75,7 +75,7 @@ public sealed class FakeFileStorageService : IFileStorageService
     public void Delete(string fileName)
     {
         Files.Remove(fileName);
-        Deleted.Add(fileName);
+        DeletedList.Add(fileName);
     }
 
     private static async Task<(string FileName, byte[] Bytes)> Read(Stream content, string extension, CancellationToken cancellationToken)

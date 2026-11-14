@@ -4,5 +4,5 @@ public class ConfigCors
 {
     public const string SectionName = "CORS";
 
-    public string[] Origins { get; set; } = [];
+    public string[] OriginList { get; set; } = [];
 }

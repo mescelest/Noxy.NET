@@ -102,7 +102,7 @@ public class MediaRepositoryTest : IDisposable
     }
 
     [Fact]
-    public async Task List_ReturnsOnlyTheUsersFiles_NewestFirst()
+    public async Task GetMediaFileList_ReturnsOnlyTheUsersFiles_NewestFirst()
     {
         User user = await CreateUser("user@example.com");
         User other = await CreateUser("other@example.com");
@@ -114,20 +114,20 @@ public class MediaRepositoryTest : IDisposable
             CreateMediaFile(other.ID, "Someone else's", now));
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        List<MediaFile> list = await uow.Media.ListMediaFiles(user.ID, 0, 10, TestContext.Current.CancellationToken);
+        List<MediaFile> list = await uow.Media.GetMediaFileList(user.ID, 0, 10, TestContext.Current.CancellationToken);
 
         Assert.Equal(["Newest", "Middle", "Oldest"], list.Select(x => x.Metadata!.Title));
     }
 
     [Fact]
-    public async Task List_PagesWithSkipAndTake()
+    public async Task GetMediaFileList_PagesWithSkipAndTake()
     {
         User user = await CreateUser();
         DateTime now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
         await Add(Enumerable.Range(0, 5).Select(i => CreateMediaFile(user.ID, $"Song {i}", now.AddMinutes(i))).ToArray());
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        List<MediaFile> page = await uow.Media.ListMediaFiles(user.ID, 1, 2, TestContext.Current.CancellationToken);
+        List<MediaFile> page = await uow.Media.GetMediaFileList(user.ID, 1, 2, TestContext.Current.CancellationToken);
 
         Assert.Equal(["Song 3", "Song 2"], page.Select(x => x.Metadata!.Title));
     }
@@ -353,7 +353,7 @@ public class MediaRepositoryTest : IDisposable
     }
 
     [Fact]
-    public async Task ListMediaUploadJobFileNames_ReturnsAllStagedNames()
+    public async Task GetMediaUploadJobFileNameList_ReturnsAllStagedNames()
     {
         User user = await CreateUser();
         User other = await CreateUser("other@example.com");
@@ -362,7 +362,7 @@ public class MediaRepositoryTest : IDisposable
         await AddJobs(first, second);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        List<string> names = await uow.Media.ListMediaUploadJobFileNames(TestContext.Current.CancellationToken);
+        List<string> names = await uow.Media.GetMediaUploadJobFileNameList(TestContext.Current.CancellationToken);
 
         // Both names are made in the same millisecond, so which one sorts first is not fixed.
         Assert.Equal(new[] { first.StagedFileName, second.StagedFileName }.Order(), names.Order());

@@ -19,7 +19,7 @@ public class UploadRecoveryTest
 
     public UploadRecoveryTest()
     {
-        ConfigStorage config = new() { RootPath = "x", AllowedExtensions = ["mp3"] };
+        ConfigStorage config = new() { RootPath = "x", AllowedExtensionList = ["mp3"] };
         _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _notifier, Options.Create(config), NullLogger<UploadProcessor>.Instance);
     }
 
@@ -36,7 +36,7 @@ public class UploadRecoveryTest
             Status = status
         };
 
-        _store.MediaUploadJobs.Add(job);
+        _store.MediaUploadJobList.Add(job);
         if (staged) _storage.Staged[job.StagedFileName] = new byte[10];
         return job;
     }
@@ -49,7 +49,7 @@ public class UploadRecoveryTest
 
         await _processor.Recover(TestContext.Current.CancellationToken);
 
-        Assert.All(_store.MediaUploadJobs, job => Assert.Equal(MediaUploadJobStatus.Pending, job.Status));
+        Assert.All(_store.MediaUploadJobList, job => Assert.Equal(MediaUploadJobStatus.Pending, job.Status));
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public class UploadRecoveryTest
         await _processor.Recover(TestContext.Current.CancellationToken);
 
         Assert.Empty(_storage.Staged);
-        Assert.Contains("orphan.mp3", _storage.DeletedStaged);
+        Assert.Contains("orphan.mp3", _storage.DeletedStagedList);
     }
 
     [Fact]
@@ -79,8 +79,8 @@ public class UploadRecoveryTest
     {
         await _processor.Recover(TestContext.Current.CancellationToken);
 
-        Assert.Empty(_storage.DeletedStaged);
-        Assert.Empty(_notifier.Notifications);
+        Assert.Empty(_storage.DeletedStagedList);
+        Assert.Empty(_notifier.NotificationList);
     }
 
     [Fact]
@@ -93,9 +93,9 @@ public class UploadRecoveryTest
         await _processor.Recover(TestContext.Current.CancellationToken);
         Assert.True(await _processor.ProcessNext(TestContext.Current.CancellationToken));
 
-        Assert.Equal(job.StagedFileName, Assert.Single(_store.MediaFiles).FilePath);
-        Assert.Empty(_store.MediaUploadJobs);
-        Assert.True(Assert.Single(_notifier.Notifications).Result.Succeeded);
+        Assert.Equal(job.StagedFileName, Assert.Single(_store.MediaFileList).FilePath);
+        Assert.Empty(_store.MediaUploadJobList);
+        Assert.True(Assert.Single(_notifier.NotificationList).Result.Succeeded);
         Assert.Equal([job.StagedFileName], _storage.Files.Keys);
     }
 
@@ -107,6 +107,6 @@ public class UploadRecoveryTest
         await _processor.Recover(TestContext.Current.CancellationToken);
         await _processor.ProcessNext(TestContext.Current.CancellationToken);
 
-        Assert.Equal(job.StagedFileName, Assert.Single(_store.MediaFiles).FilePath);
+        Assert.Equal(job.StagedFileName, Assert.Single(_store.MediaFileList).FilePath);
     }
 }

@@ -77,7 +77,7 @@ public class AuthenticationService(IUnitOfWorkFactory uowFactory, IPasswordHashS
             if (existing == null)
             {
                 user = new() { Email = email, IsEmailVerified = true };
-                user.ExternalLogins.Add(new() { Provider = ExternalLoginProvider.Google, ProviderKey = identity.Subject, UserID = user.ID });
+                user.ExternalLoginList.Add(new() { Provider = ExternalLoginProvider.Google, ProviderKey = identity.Subject, UserID = user.ID });
                 uow.Authentication.AddUser(user);
             }
             else if (existing.IsEmailVerified)

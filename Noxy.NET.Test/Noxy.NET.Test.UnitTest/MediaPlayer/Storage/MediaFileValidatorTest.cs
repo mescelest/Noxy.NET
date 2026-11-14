@@ -19,7 +19,7 @@ public class MediaFileValidatorTest
 
     private static MediaFileValidator Create(params string[] allowed)
     {
-        return new(Options.Create(new ConfigStorage { RootPath = "x", AllowedExtensions = allowed }));
+        return new(Options.Create(new ConfigStorage { RootPath = "x", AllowedExtensionList = allowed }));
     }
 
     [Theory]

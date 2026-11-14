@@ -21,7 +21,7 @@ public class MediaUploadFlowTest
         DateTime deadline = DateTime.UtcNow.AddSeconds(15);
         while (true)
         {
-            List<ResponseMediaFile> list = await api.List(token);
+            List<ResponseMediaFile> list = await api.GetMediaFileList(token);
             if (list.Count >= count) return list;
 
             Assert.True(DateTime.UtcNow < deadline, "The library did not fill up in time.");
@@ -47,7 +47,7 @@ public class MediaUploadFlowTest
         Assert.Equal("My Song", result.Title);
         Assert.Equal("audio/mpeg", result.Media?.ContentType);
         Assert.Equal(1500, result.Media?.SizeBytes);
-        ResponseMediaFile listed = Assert.Single(await api.List(user.Token));
+        ResponseMediaFile listed = Assert.Single(await api.GetMediaFileList(user.Token));
         Assert.Equal(result.Media?.ID, listed.ID);
         Assert.Empty(Directory.GetFiles(factory.StagingFolder));
     }
@@ -226,7 +226,7 @@ public class MediaUploadFlowTest
         Assert.Equal(job.ID, result.JobID);
         Assert.False(result.Succeeded);
         Assert.Equal(UploadFailureReason.LibraryFull, result.Reason);
-        Assert.Single(await api.List(user.Token));
+        Assert.Single(await api.GetMediaFileList(user.Token));
         Assert.Empty(Directory.GetFiles(factory.StagingFolder));
     }
 
@@ -265,10 +265,10 @@ public class MediaUploadFlowTest
         ApiAccount user = await api.SignUp("a@example.com");
         await using UploadHubListener hub = await UploadHubListener.Connect(factory, user.Token);
 
-        List<Guid> jobs = [];
+        List<Guid> jobIDList = [];
         for (int i = 0; i < 5; i++)
         {
-            jobs.Add((await ReadAccepted(await api.Upload(user.Token, MediaApiClient.Mp3(500 + i), $"song{i}.mp3"))).JobID);
+            jobIDList.Add((await ReadAccepted(await api.Upload(user.Token, MediaApiClient.Mp3(500 + i), $"song{i}.mp3"))).JobID);
         }
 
         List<Guid> finished = [];
@@ -277,8 +277,8 @@ public class MediaUploadFlowTest
             finished.Add((await hub.Next()).Result.JobID);
         }
 
-        Assert.Equal(jobs, finished);
-        Assert.Equal(5, (await api.List(user.Token)).Count);
+        Assert.Equal(jobIDList, finished);
+        Assert.Equal(5, (await api.GetMediaFileList(user.Token)).Count);
         Assert.Empty(Directory.GetFiles(factory.StagingFolder));
     }
 }

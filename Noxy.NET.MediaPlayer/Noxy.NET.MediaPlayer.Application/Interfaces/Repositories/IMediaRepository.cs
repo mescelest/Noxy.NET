@@ -14,7 +14,7 @@ public interface IMediaRepository
     Task<long> SumMediaFileBytes(Guid userID, CancellationToken cancellationToken = default);
 
     // Newest first.
-    Task<List<MediaFile>> ListMediaFiles(Guid userID, int skip, int take, CancellationToken cancellationToken = default);
+    Task<List<MediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default);
 
     void AddMediaUploadJob(MediaUploadJob job);
 
@@ -34,5 +34,5 @@ public interface IMediaRepository
     // Runs immediately.
     Task<int> ResetProcessingMediaUploadJobs(CancellationToken cancellationToken = default);
 
-    Task<List<string>> ListMediaUploadJobFileNames(CancellationToken cancellationToken = default);
+    Task<List<string>> GetMediaUploadJobFileNameList(CancellationToken cancellationToken = default);
 }

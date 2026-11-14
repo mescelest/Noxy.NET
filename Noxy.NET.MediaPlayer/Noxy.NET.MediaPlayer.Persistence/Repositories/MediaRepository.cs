@@ -33,7 +33,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
         return await context.MediaFile.Where(x => x.UserID == userID).SumAsync(x => x.SizeBytes, cancellationToken);
     }
 
-    public async Task<List<MediaFile>> ListMediaFiles(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
+    public async Task<List<MediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
     {
         List<TableMediaFile> list = await context.MediaFile.AsNoTracking()
             .Include(x => x.Metadata)
@@ -94,7 +94,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
             .ExecuteUpdateAsync(x => x.SetProperty(e => e.Status, MediaUploadJobStatus.Pending), cancellationToken);
     }
 
-    public async Task<List<string>> ListMediaUploadJobFileNames(CancellationToken cancellationToken = default)
+    public async Task<List<string>> GetMediaUploadJobFileNameList(CancellationToken cancellationToken = default)
     {
         return await context.MediaUploadJob.AsNoTracking().Select(x => x.StagedFileName).ToListAsync(cancellationToken);
     }

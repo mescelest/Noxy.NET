@@ -21,7 +21,7 @@ public class FileStorageServiceTest : IDisposable
 
     private FileStorageService Create(long maxSizeBytes = 1024)
     {
-        return new(Options.Create(new ConfigStorage { RootPath = _root, MaxSizeBytes = maxSizeBytes, AllowedExtensions = ["mp3"] }));
+        return new(Options.Create(new ConfigStorage { RootPath = _root, MaxSizeBytes = maxSizeBytes, AllowedExtensionList = ["mp3"] }));
     }
 
     private static MemoryStream Bytes(int count)
@@ -125,7 +125,7 @@ public class FileStorageServiceTest : IDisposable
 
         await Assert.ThrowsAsync<FileTooLargeException>(() => service.StageAsync(Bytes(101), "mp3", TestContext.Current.CancellationToken));
 
-        Assert.Empty(service.ListStaged());
+        Assert.Empty(service.GetStagedFileNameList());
     }
 
     [Theory]
@@ -147,7 +147,7 @@ public class FileStorageServiceTest : IDisposable
 
         await Assert.ThrowsAsync<FileTooLargeException>(() => service.StageAsync(Bytes(51), "mp3", 50, TestContext.Current.CancellationToken));
 
-        Assert.Empty(service.ListStaged());
+        Assert.Empty(service.GetStagedFileNameList());
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public class FileStorageServiceTest : IDisposable
 
         await Assert.ThrowsAsync<FileTooLargeException>(() => service.StageAsync(Bytes(101), "mp3", 5000, TestContext.Current.CancellationToken));
 
-        Assert.Empty(service.ListStaged());
+        Assert.Empty(service.GetStagedFileNameList());
     }
 
     [Fact]
@@ -180,7 +180,7 @@ public class FileStorageServiceTest : IDisposable
         using MemoryStream copy = new();
         await stream.CopyToAsync(copy, TestContext.Current.CancellationToken);
         Assert.Equal([9, 8, 7], copy.ToArray());
-        Assert.Empty(service.ListStaged());
+        Assert.Empty(service.GetStagedFileNameList());
     }
 
     [Fact]
@@ -236,14 +236,14 @@ public class FileStorageServiceTest : IDisposable
     }
 
     [Fact]
-    public async Task ListStaged_ReturnsOnlyStagedNames()
+    public async Task GetStagedFileNameList_ReturnsOnlyStagedNames()
     {
         FileStorageService service = Create();
         StoredFile first = await service.StageAsync(Bytes(3), "mp3", TestContext.Current.CancellationToken);
         StoredFile second = await service.StageAsync(Bytes(3), "mp3", TestContext.Current.CancellationToken);
         await AddToLibrary(service, [1]);
 
-        Assert.Equal(new[] { first.FileName, second.FileName }.Order(), service.ListStaged().Order());
+        Assert.Equal(new[] { first.FileName, second.FileName }.Order(), service.GetStagedFileNameList().Order());
     }
 
     [Theory]

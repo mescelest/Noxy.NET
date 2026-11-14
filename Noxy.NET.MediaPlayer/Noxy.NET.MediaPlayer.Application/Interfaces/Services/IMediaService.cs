@@ -9,7 +9,7 @@ public interface IMediaService
     Task<ResponseUploadAccepted> Enqueue(Guid userID, string fileName, string? title, Stream content, CancellationToken cancellationToken = default);
 
     // Newest first.
-    Task<List<ResponseMediaFile>> List(Guid userID, int skip, int take, CancellationToken cancellationToken = default);
+    Task<List<ResponseMediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default);
 
     // Throws MediaNotFoundException for an unknown file, another user's file, or a file that is missing from storage. The caller owns the returned stream and must dispose it.
     Task<MediaDownload> Open(Guid userID, Guid id, CancellationToken cancellationToken = default);

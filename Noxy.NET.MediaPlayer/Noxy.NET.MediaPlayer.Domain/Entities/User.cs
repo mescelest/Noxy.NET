@@ -13,5 +13,5 @@ public class User : BaseEntity
     /// <summary>Hash produced by the password hasher. Null for users who only sign in externally.</summary>
     public string? PasswordHash { get; set; }
 
-    public List<ExternalLogin> ExternalLogins { get; set; } = [];
+    public List<ExternalLogin> ExternalLoginList { get; set; } = [];
 }
