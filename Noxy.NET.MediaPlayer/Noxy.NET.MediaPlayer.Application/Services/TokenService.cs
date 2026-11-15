@@ -12,9 +12,9 @@ using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.RefreshToken;
 
 namespace Noxy.NET.MediaPlayer.Application.Services;
 
-public class TokenService(IOptions<ConfigJwt> options, TimeProvider time) : ITokenService
+public class TokenService(IOptions<ConfigJwt> configJwt, TimeProvider time) : ITokenService
 {
-    private ConfigJwt Config { get; } = options.Value;
+    private ConfigJwt Config { get; } = configJwt.Value;
     private JsonWebTokenHandler Handler { get; } = new();
 
     public AccessToken CreateAccessToken(User user)

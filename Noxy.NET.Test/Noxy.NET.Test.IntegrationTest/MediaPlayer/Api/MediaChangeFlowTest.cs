@@ -4,13 +4,14 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
 
 public class MediaChangeFlowTest
 {
-    // Uploads a song through the API and waits for the worker to put it in the library.
-    private static async Task<ResponseMediaFile> UploadSong(MediaApiClient api, ApiAccount user, string title, int alreadyThere = 0)
+    // Uploads a media file through the API and waits for the worker to put it in the library.
+    private static async Task<ResponseMediaFile> UploadMediaFile(MediaApiClient api, ApiAccount user, string title, int alreadyThere = 0)
     {
         HttpResponseMessage response = await api.Upload(user.Token, MediaApiClient.Mp3(300 + alreadyThere), $"{title}.mp3", title);
         Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
@@ -25,7 +26,7 @@ public class MediaChangeFlowTest
         return response.Headers.ETag!.Tag;
     }
 
-    private static async Task<ResponseMediaFile> ReadSong(HttpResponseMessage response)
+    private static async Task<ResponseMediaFile> ReadMediaFile(HttpResponseMessage response)
     {
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         return (await response.Content.ReadFromJsonAsync<ResponseMediaFile>(TestContext.Current.CancellationToken))!;
@@ -39,7 +40,7 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        await UploadSong(api, user, "One");
+        await UploadMediaFile(api, user, "One");
 
         HttpResponseMessage first = await api.GetLibrary(user.Token);
         string eTag = first.Headers.ETag!.Tag;
@@ -60,14 +61,14 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
         string afterUpload = await CurrentETag(api, user);
 
-        await api.Patch(user.Token, song.ID, """{"artist":"Someone"}""");
+        await api.Patch(user.Token, mediaFile.ID, """{"artist":"Someone"}""");
         string afterEdit = await CurrentETag(api, user);
-        await UploadSong(api, user, "Two", alreadyThere: 1);
+        await UploadMediaFile(api, user, "Two", alreadyThere: 1);
         string afterSecondUpload = await CurrentETag(api, user);
-        await api.Delete(user.Token, song.ID);
+        await api.Delete(user.Token, mediaFile.ID);
         string afterDelete = await CurrentETag(api, user);
 
         Assert.Equal(4, new[] { afterUpload, afterEdit, afterSecondUpload, afterDelete }.Distinct().Count());
@@ -79,10 +80,10 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
         string before = await CurrentETag(api, user);
 
-        HttpResponseMessage response = await api.Patch(user.Token, song.ID, """{"title":"One"}""");
+        HttpResponseMessage response = await api.Patch(user.Token, mediaFile.ID, """{"title":"One"}""");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(before, await CurrentETag(api, user));
@@ -108,7 +109,7 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        await UploadSong(api, user, "One");
+        await UploadMediaFile(api, user, "One");
 
         HttpResponseMessage response = await api.GetLibrary(user.Token, acceptEncoding: "gzip");
 
@@ -132,7 +133,7 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        await UploadSong(api, user, "One");
+        await UploadMediaFile(api, user, "One");
 
         HttpResponseMessage response = await api.GetLibrary(user.Token, "not a valid etag, ,,");
 
@@ -144,18 +145,18 @@ public class MediaChangeFlowTest
     #region -- Patch --
 
     [Fact]
-    public async Task Patch_ChangesTagsAndReturnsTheUpdatedSong_AndTheListShowsThem()
+    public async Task Patch_ChangesTagsAndReturnsTheUpdatedMediaFile_AndTheListShowsThem()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
 
-        ResponseMediaFile updated = await ReadSong(await api.Patch(user.Token, song.ID, """{"title":"Renamed","artist":"Someone","album":"Record","trackNumber":3,"year":1999}"""));
+        ResponseMediaFile updated = await ReadMediaFile(await api.Patch(user.Token, mediaFile.ID, """{"title":"Renamed","artist":"Someone","album":"Record","trackNumber":3,"year":1999}"""));
 
         Assert.Equal(["Renamed", "Someone", "Record"], [updated.Title, updated.Artist, updated.Album]);
         Assert.Equal([3, 1999], [updated.TrackNumber, updated.Year]);
-        Assert.True(updated.TimeModified > song.TimeModified);
+        Assert.True(updated.TimeModified > mediaFile.TimeModified);
         ResponseMediaFile listed = Assert.Single(await api.GetMediaFileList(user.Token));
         Assert.Equal("Someone", listed.Artist);
         Assert.Equal("Renamed", listed.Title);
@@ -167,10 +168,10 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
-        await api.Patch(user.Token, song.ID, """{"artist":"Someone","album":"Record"}""");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
+        await api.Patch(user.Token, mediaFile.ID, """{"artist":"Someone","album":"Record"}""");
 
-        ResponseMediaFile updated = await ReadSong(await api.Patch(user.Token, song.ID, """{"artist":null}"""));
+        ResponseMediaFile updated = await ReadMediaFile(await api.Patch(user.Token, mediaFile.ID, """{"artist":null}"""));
 
         Assert.Null(updated.Artist);
         Assert.Equal("Record", updated.Album);
@@ -189,9 +190,9 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
 
-        HttpResponseMessage response = await api.Patch(user.Token, song.ID, json);
+        HttpResponseMessage response = await api.Patch(user.Token, mediaFile.ID, json);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("One", Assert.Single(await api.GetMediaFileList(user.Token)).Title);
@@ -209,9 +210,9 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
 
-        ResponseMediaFile updated = await ReadSong(await api.Patch(user.Token, song.ID, JsonSerializer.Serialize(new { title = text, artist = text, album = text })));
+        ResponseMediaFile updated = await ReadMediaFile(await api.Patch(user.Token, mediaFile.ID, JsonSerializer.Serialize(new { title = text, artist = text, album = text })));
 
         Assert.Equal([text, text, text], [updated.Title, updated.Artist, updated.Album]);
         Assert.Equal(text, Assert.Single(await api.GetMediaFileList(user.Token)).Title);
@@ -223,9 +224,9 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
 
-        HttpResponseMessage response = await api.Patch(user.Token, song.ID, $$"""{"genre":"{{new string('a', 129)}}"}""");
+        HttpResponseMessage response = await api.Patch(user.Token, mediaFile.ID, $$"""{"genre":"{{new string('a', 129)}}"}""");
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -243,23 +244,23 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
 
-        HttpResponseMessage response = await api.Patch(user.Token, song.ID, json);
+        HttpResponseMessage response = await api.Patch(user.Token, mediaFile.ID, json);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
-    public async Task Patch_AnotherUsersSong_Returns404_AndChangesNothing()
+    public async Task Patch_AnotherUsersMediaFile_Returns404_AndChangesNothing()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount owner = await api.SignUp("owner@example.com");
         ApiAccount other = await api.SignUp("other@example.com");
-        ResponseMediaFile song = await UploadSong(api, owner, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, owner, "One");
 
-        HttpResponseMessage response = await api.Patch(other.Token, song.ID, """{"title":"Hijacked"}""");
+        HttpResponseMessage response = await api.Patch(other.Token, mediaFile.ID, """{"title":"Hijacked"}""");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal("One", Assert.Single(await api.GetMediaFileList(owner.Token)).Title);
@@ -288,32 +289,32 @@ public class MediaChangeFlowTest
     #region -- Delete --
 
     [Fact]
-    public async Task Delete_Returns204_TheSongIsGone_AndTheFileIsRemoved()
+    public async Task Delete_Returns204_TheMediaFileIsGone_AndTheFileIsRemoved()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
         Assert.Single(Directory.GetFiles(factory.StorageRoot));
 
-        HttpResponseMessage response = await api.Delete(user.Token, song.ID);
+        HttpResponseMessage response = await api.Delete(user.Token, mediaFile.ID);
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         Assert.Empty(await api.GetMediaFileList(user.Token));
-        Assert.Equal(HttpStatusCode.NotFound, (await api.Download(user.Token, song.ID)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await api.Download(user.Token, mediaFile.ID)).StatusCode);
         Assert.Empty(Directory.GetFiles(factory.StorageRoot));
     }
 
     [Fact]
-    public async Task Delete_AnotherUsersSong_Returns404_AndKeepsTheSong()
+    public async Task Delete_AnotherUsersMediaFile_Returns404_AndKeepsTheMediaFile()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount owner = await api.SignUp("owner@example.com");
         ApiAccount other = await api.SignUp("other@example.com");
-        ResponseMediaFile song = await UploadSong(api, owner, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, owner, "One");
 
-        HttpResponseMessage response = await api.Delete(other.Token, song.ID);
+        HttpResponseMessage response = await api.Delete(other.Token, mediaFile.ID);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Single(await api.GetMediaFileList(owner.Token));
@@ -326,10 +327,10 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
         File.Delete(Directory.GetFiles(factory.StorageRoot).Single());
 
-        HttpResponseMessage response = await api.Delete(user.Token, song.ID);
+        HttpResponseMessage response = await api.Delete(user.Token, mediaFile.ID);
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         Assert.Empty(await api.GetMediaFileList(user.Token));
@@ -357,16 +358,16 @@ public class MediaChangeFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ApiAccount other = await api.SignUp("other@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
         await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
         await using LibraryHubListener computer = await LibraryHubListener.Connect(factory, user.Token, tokenInQueryString: true);
         await using LibraryHubListener stranger = await LibraryHubListener.Connect(factory, other.Token);
 
-        ResponseMediaFile updated = await ReadSong(await api.Patch(user.Token, song.ID, """{"title":"Renamed","year":2001}"""));
+        ResponseMediaFile updated = await ReadMediaFile(await api.Patch(user.Token, mediaFile.ID, """{"title":"Renamed","year":2001}"""));
 
         ResponseMediaFile onPhone = await phone.NextMediaUpdated();
         ResponseMediaFile onComputer = await computer.NextMediaUpdated();
-        Assert.Equal([song.ID, song.ID], [onPhone.ID, onComputer.ID]);
+        Assert.Equal([mediaFile.ID, mediaFile.ID], [onPhone.ID, onComputer.ID]);
         Assert.Equal(["Renamed", "Renamed"], [onPhone.Title, onComputer.Title]);
         Assert.Equal(2001, onPhone.Year);
         Assert.Equal(updated.TimeModified, onPhone.TimeModified);
@@ -379,10 +380,10 @@ public class MediaChangeFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 
-        await api.Patch(user.Token, song.ID, """{"title":"One"}""");
+        await api.Patch(user.Token, mediaFile.ID, """{"title":"One"}""");
 
         Assert.True(await hub.ReceivesNothingWithin(TimeSpan.FromSeconds(1)));
     }
@@ -394,15 +395,15 @@ public class MediaChangeFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ApiAccount other = await api.SignUp("other@example.com");
-        ResponseMediaFile song = await UploadSong(api, user, "One");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
         await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
         await using LibraryHubListener computer = await LibraryHubListener.Connect(factory, user.Token);
         await using LibraryHubListener stranger = await LibraryHubListener.Connect(factory, other.Token);
 
-        await api.Delete(user.Token, song.ID);
+        await api.Delete(user.Token, mediaFile.ID);
 
-        Assert.Equal(song.ID, await phone.NextMediaDeleted());
-        Assert.Equal(song.ID, await computer.NextMediaDeleted());
+        Assert.Equal(mediaFile.ID, await phone.NextMediaDeleted());
+        Assert.Equal(mediaFile.ID, await computer.NextMediaDeleted());
         Assert.True(await stranger.ReceivesNothingWithin(TimeSpan.FromSeconds(1)));
     }
 
@@ -414,7 +415,7 @@ public class MediaChangeFlowTest
         ApiAccount user = await api.SignUp("a@example.com");
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 
-        await api.Upload(user.Token, MediaApiClient.Mp3(), "song.mp3", "One");
+        await api.Upload(user.Token, MediaApiClient.Mp3(), "media.mp3", "One");
 
         (string name, ResponseUploadResult result) = await hub.Next();
         Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), name);

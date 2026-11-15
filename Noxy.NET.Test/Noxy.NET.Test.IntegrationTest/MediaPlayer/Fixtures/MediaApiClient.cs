@@ -1,4 +1,3 @@
-using Microsoft.Net.Http.Headers;
 using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
@@ -6,15 +5,20 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Net.Http.Headers;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using EntityTagHeaderValue = System.Net.Http.Headers.EntityTagHeaderValue;
 
-namespace Noxy.NET.Test.MediaPlayer.Api;
+namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
 public sealed class MediaApiClient(ApiFactory factory)
 {
-    private const string PlaylistsPath = "/Playlists";
+    private const string PlaylistListPath = "/Playlist";
+    private const string PlaylistPath = "/Playlist";
+    private const string EntryListSegment = "EntryList";
+    private const string EntrySegment = "Entry";
 
     private readonly HttpClient _client = factory.CreateClient();
 
@@ -40,7 +44,7 @@ public sealed class MediaApiClient(ApiFactory factory)
     }
 
     // The title field goes first, because the server reads the body as a stream.
-    public async Task<HttpResponseMessage> Upload(string? token, byte[] content, string fileName = "song.mp3", string? title = null)
+    public async Task<HttpResponseMessage> Upload(string? token, byte[] content, string fileName = "media.mp3", string? title = null)
     {
         return await Send(token, new ByteArrayContent(content), fileName, title);
     }
@@ -117,16 +121,34 @@ public sealed class MediaApiClient(ApiFactory factory)
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
-    public async Task<HttpResponseMessage> Download(string token, Guid id)
+    public async Task<HttpResponseMessage> Download(string token, Guid id, string? ifNoneMatch = null, string? ifRangeETag = null, long? rangeFrom = null, long? rangeTo = null)
     {
         using HttpRequestMessage request = new(HttpMethod.Get, $"/Media/{id}/File");
+        Authorize(request, token);
+        if (ifNoneMatch is not null) request.Headers.TryAddWithoutValidation(HeaderNames.IfNoneMatch, ifNoneMatch);
+        if (ifRangeETag is not null) request.Headers.IfRange = new(new EntityTagHeaderValue(ifRangeETag));
+        if (rangeFrom is not null) request.Headers.Range = new(rangeFrom, rangeTo);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    public async Task<HttpResponseMessage> DownloadTagged(string token, Guid id, long? rangeFrom = null, long? rangeTo = null)
+    {
+        using HttpRequestMessage request = new(HttpMethod.Get, $"/Media/{id}/Download");
+        Authorize(request, token);
+        if (rangeFrom is not null) request.Headers.Range = new(rangeFrom, rangeTo);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    public async Task<HttpResponseMessage> GetPath(string? token, string path)
+    {
+        using HttpRequestMessage request = new(HttpMethod.Get, path);
         Authorize(request, token);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
     public async Task<HttpResponseMessage> GetPlaylistLibrary(string? token, string? ifNoneMatch = null, string? acceptEncoding = null)
     {
-        using HttpRequestMessage request = new(HttpMethod.Get, PlaylistsPath);
+        using HttpRequestMessage request = new(HttpMethod.Get, PlaylistListPath);
         Authorize(request, token);
         if (ifNoneMatch is not null) request.Headers.TryAddWithoutValidation(HeaderNames.IfNoneMatch, ifNoneMatch);
         if (acceptEncoding is not null) request.Headers.TryAddWithoutValidation(HeaderNames.AcceptEncoding, acceptEncoding);
@@ -135,7 +157,7 @@ public sealed class MediaApiClient(ApiFactory factory)
 
     public async Task<HttpResponseMessage> GetPlaylist(string? token, Guid id, string? ifNoneMatch = null)
     {
-        using HttpRequestMessage request = new(HttpMethod.Get, $"{PlaylistsPath}/{id}");
+        using HttpRequestMessage request = new(HttpMethod.Get, $"{PlaylistPath}/{id}");
         Authorize(request, token);
         if (ifNoneMatch is not null) request.Headers.TryAddWithoutValidation(HeaderNames.IfNoneMatch, ifNoneMatch);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
@@ -143,34 +165,34 @@ public sealed class MediaApiClient(ApiFactory factory)
 
     public Task<HttpResponseMessage> CreatePlaylist(string? token, string json)
     {
-        return SendJson(HttpMethod.Post, PlaylistsPath, token, json);
+        return SendJson(HttpMethod.Post, PlaylistPath, token, json);
     }
 
     public Task<HttpResponseMessage> PatchPlaylist(string? token, Guid id, string json)
     {
-        return SendJson(HttpMethod.Patch, $"{PlaylistsPath}/{id}", token, json);
+        return SendJson(HttpMethod.Patch, $"{PlaylistPath}/{id}", token, json);
     }
 
     public async Task<HttpResponseMessage> DeletePlaylist(string? token, Guid id)
     {
-        using HttpRequestMessage request = new(HttpMethod.Delete, $"{PlaylistsPath}/{id}");
+        using HttpRequestMessage request = new(HttpMethod.Delete, $"{PlaylistPath}/{id}");
         Authorize(request, token);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
     public Task<HttpResponseMessage> AddPlaylistEntryList(string? token, Guid id, string json)
     {
-        return SendJson(HttpMethod.Post, $"{PlaylistsPath}/{id}/Entries", token, json);
+        return SendJson(HttpMethod.Post, $"{PlaylistPath}/{id}/{EntryListSegment}", token, json);
     }
 
     public Task<HttpResponseMessage> RemovePlaylistEntryList(string? token, Guid id, string json)
     {
-        return SendJson(HttpMethod.Post, $"{PlaylistsPath}/{id}/Entries/Remove", token, json);
+        return SendJson(HttpMethod.Post, $"{PlaylistPath}/{id}/{EntryListSegment}/Remove", token, json);
     }
 
     public Task<HttpResponseMessage> MovePlaylistEntry(string? token, Guid id, Guid entryID, string json)
     {
-        return SendJson(HttpMethod.Put, $"{PlaylistsPath}/{id}/Entries/{entryID}/Position", token, json);
+        return SendJson(HttpMethod.Put, $"{PlaylistPath}/{id}/{EntrySegment}/{entryID}/Position", token, json);
     }
 
     private async Task<HttpResponseMessage> SendJson(HttpMethod method, string path, string? token, string json)

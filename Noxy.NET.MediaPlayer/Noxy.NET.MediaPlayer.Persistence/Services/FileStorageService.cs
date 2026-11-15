@@ -10,19 +10,36 @@ namespace Noxy.NET.MediaPlayer.Persistence.Services;
 public class FileStorageService : IFileStorageService
 {
     public const string StagingFolderName = "staging";
+    public const string TemporaryFolderName = "temporary";
 
     private readonly string _root;
     private readonly string _staging;
+    private readonly string _temporary;
     private readonly long _maxSizeBytes;
 
     public FileStorageService(IOptions<ConfigStorage> options)
     {
         _root = Path.GetFullPath(options.Value.RootPath);
         _staging = Path.Combine(_root, StagingFolderName);
+        _temporary = Path.Combine(_root, TemporaryFolderName);
         _maxSizeBytes = options.Value.MaxSizeBytes;
 
         Directory.CreateDirectory(_root);
         Directory.CreateDirectory(_staging);
+        Directory.CreateDirectory(_temporary);
+
+        // A copy only lives as long as its download, so whatever is here was left by a run that stopped in the middle of one.
+        foreach (string leftover in Directory.EnumerateFiles(_temporary))
+        {
+            try
+            {
+                File.Delete(leftover);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Held open by something else for now. A stale file must never stop the storage from starting.
+            }
+        }
     }
 
     public Task<StoredFile> StageAsync(Stream content, string extension, CancellationToken cancellationToken = default)
@@ -69,6 +86,25 @@ public class FileStorageService : IFileStorageService
     public void Delete(string fileName)
     {
         File.Delete(ResolvePath(_root, fileName));
+    }
+
+    public string CopyToTemporary(string fileName)
+    {
+        string source = ResolvePath(_root, fileName);
+        string copy = Path.Combine(_temporary, $"{Guid.CreateVersion7()}{Path.GetExtension(fileName)}");
+
+        File.Copy(source, copy);
+        return copy;
+    }
+
+    public Stream OpenTemporary(string path)
+    {
+        return new FileStream(ResolveTemporaryPath(path), FileMode.Open, FileAccess.Read, FileShare.Read, 81920, FileOptions.Asynchronous | FileOptions.DeleteOnClose);
+    }
+
+    public void DeleteTemporary(string path)
+    {
+        File.Delete(ResolveTemporaryPath(path));
     }
 
     private async Task<StoredFile> WriteAsync(string directory, Stream content, string extension, long maxBytes, CancellationToken cancellationToken)
@@ -119,6 +155,12 @@ public class FileStorageService : IFileStorageService
         }
 
         return (total, Convert.ToHexStringLower(hash.GetHashAndReset()));
+    }
+
+    private string ResolveTemporaryPath(string path)
+    {
+        string full = Path.GetFullPath(path);
+        return Path.GetDirectoryName(full) == _temporary ? full : throw new ArgumentException("The path is not in the temporary folder.", nameof(path));
     }
 
     private static string ResolvePath(string directory, string fileName)

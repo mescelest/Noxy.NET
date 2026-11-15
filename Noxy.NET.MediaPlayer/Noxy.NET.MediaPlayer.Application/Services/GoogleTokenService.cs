@@ -7,11 +7,11 @@ using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.MediaPlayer.Application.Services;
 
-public class GoogleTokenService(IOptions<ConfigGoogle> config) : IGoogleTokenService
+public class GoogleTokenService(IOptions<ConfigGoogle> configGoogle) : IGoogleTokenService
 {
     public async Task<GoogleIdentity> Validate(string idToken)
     {
-        if (string.IsNullOrWhiteSpace(config.Value.ClientId))
+        if (string.IsNullOrWhiteSpace(configGoogle.Value.ClientId))
         {
             throw new GoogleLoginNotConfiguredException();
         }
@@ -24,7 +24,7 @@ public class GoogleTokenService(IOptions<ConfigGoogle> config) : IGoogleTokenSer
         try
         {
             // Checks the signature against Google's published keys, the issuer, the expiry, and that the token was issued for our client ID.
-            GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new() { Audience = [config.Value.ClientId] });
+            GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new() { Audience = [configGoogle.Value.ClientId] });
 
             if (string.IsNullOrEmpty(payload.Subject) || string.IsNullOrEmpty(payload.Email))
             {

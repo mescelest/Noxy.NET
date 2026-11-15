@@ -1,5 +1,5 @@
-using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Entities;
+using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
@@ -18,7 +18,7 @@ public class MediaFileExtensionTest
             ContentHash = new string('a', 64),
             UserID = Guid.CreateVersion7()
         };
-        file.Metadata = new() { Title = "Song", MediaFileID = file.ID };
+        file.Metadata = new() { Title = "Media", MediaFileID = file.ID };
         return file;
     }
 
@@ -39,7 +39,7 @@ public class MediaFileExtensionTest
 
         ResponseMediaFile response = file.ToResponse();
 
-        Assert.Equal("Song", response.Title);
+        Assert.Equal("Media", response.Title);
         Assert.Equal("Artist", response.Artist);
         Assert.Equal("Album", response.Album);
         Assert.Equal("Album Artist", response.AlbumArtist);

@@ -6,7 +6,7 @@ using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.MediaPlayer.Application.Validators;
 
-public class MediaFileValidator(IOptions<ConfigStorage> options) : IMediaFileValidator
+public class MediaFileValidator(IOptions<ConfigStorage> configStorage) : IMediaFileValidator
 {
     private delegate bool HeaderMatcher(ReadOnlySpan<byte> header);
 
@@ -21,13 +21,13 @@ public class MediaFileValidator(IOptions<ConfigStorage> options) : IMediaFileVal
         ["wav"] = ("audio/wav", header => header.StartsWith("RIFF"u8) && header.Length >= 12 && header[8..12].SequenceEqual("WAVE"u8))
     };
 
-    private readonly HashSet<string> _allowed = options.Value.AllowedExtensionList
+    private readonly HashSet<string> _allowed = configStorage.Value.AllowedExtensionList
         .Select(extension => extension.TrimStart('.').ToLowerInvariant())
         .ToHashSet();
 
     public ValidatedMediaFile Validate(string fileName, ReadOnlySpan<byte> header)
     {
-        // Only the last extension counts, so "song.test.mp3" is mp3 and "song.mp3.exe" is exe.
+        // Only the last extension counts, so "media.test.mp3" is mp3 and "media.mp3.exe" is exe.
         string extension = Path.GetExtension(fileName).TrimStart('.').ToLowerInvariant();
 
         if (!_allowed.Contains(extension) || !Formats.TryGetValue(extension, out var format) || !format.Matches(header))

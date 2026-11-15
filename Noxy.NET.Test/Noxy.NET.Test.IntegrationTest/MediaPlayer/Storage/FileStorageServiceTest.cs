@@ -259,4 +259,99 @@ public class FileStorageServiceTest : IDisposable
         Assert.Throws<ArgumentException>(() => service.Promote(fileName));
         Assert.Throws<ArgumentException>(() => service.DeleteStaged(fileName));
     }
+
+    private string TemporaryFolder => Path.Combine(_root, FileStorageService.TemporaryFolderName);
+
+    [Fact]
+    public void Constructor_RemovesLeftoverTemporaryFiles()
+    {
+        Directory.CreateDirectory(TemporaryFolder);
+        string leftover = Path.Combine(TemporaryFolder, "left-behind.mp3");
+        File.WriteAllBytes(leftover, [1]);
+
+        Create();
+
+        Assert.False(File.Exists(leftover));
+    }
+
+    [Fact]
+    public void Constructor_LeftoverThatCannotBeDeleted_StillConstructs()
+    {
+        Directory.CreateDirectory(TemporaryFolder);
+        using FileStream held = new(Path.Combine(TemporaryFolder, "held.mp3"), FileMode.Create, FileAccess.Write, FileShare.None);
+
+        FileStorageService service = Create();
+
+        Assert.NotNull(service);
+    }
+
+    [Fact]
+    public async Task CopyToTemporary_TwoCopiesOfOneFile_GetDifferentPathsInTheTemporaryFolder()
+    {
+        FileStorageService service = Create();
+        string fileName = await AddToLibrary(service, [1, 2, 3]);
+
+        string first = service.CopyToTemporary(fileName);
+        string second = service.CopyToTemporary(fileName);
+
+        Assert.NotEqual(first, second);
+        Assert.Equal(TemporaryFolder, Path.GetDirectoryName(first));
+        Assert.Equal([1, 2, 3], await File.ReadAllBytesAsync(first, TestContext.Current.CancellationToken));
+        Assert.Equal([1, 2, 3], await File.ReadAllBytesAsync(Path.Combine(_root, fileName), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task OpenTemporary_DisposingTheStream_RemovesTheCopy_AndLeavesTheStoredFile()
+    {
+        FileStorageService service = Create();
+        string fileName = await AddToLibrary(service, [1, 2, 3]);
+        string copy = service.CopyToTemporary(fileName);
+
+        await using (Stream _ = service.OpenTemporary(copy))
+        {
+            Assert.True(File.Exists(copy));
+        }
+
+        Assert.False(File.Exists(copy));
+        Assert.True(File.Exists(Path.Combine(_root, fileName)));
+    }
+
+    [Fact]
+    public async Task DeleteTemporary_RemovesTheCopy_AndRepeatingIsSafe()
+    {
+        FileStorageService service = Create();
+        string copy = service.CopyToTemporary(await AddToLibrary(service, [1]));
+
+        service.DeleteTemporary(copy);
+        service.DeleteTemporary(copy);
+
+        Assert.False(File.Exists(copy));
+    }
+
+    [Fact]
+    public async Task CopyToTemporary_MissingFile_ThrowsFileNotFound()
+    {
+        FileStorageService service = Create();
+        string fileName = await AddToLibrary(service, [1]);
+        File.Delete(Path.Combine(_root, fileName));
+
+        Assert.Throws<FileNotFoundException>(() => service.CopyToTemporary(fileName));
+    }
+
+    [Theory]
+    [InlineData("temporary/../outside.mp3")]
+    [InlineData("outside.mp3")]
+    [InlineData("staging/inside-staging.mp3")]
+    [InlineData("temporary/sub/nested.mp3")]
+    public void OpenTemporaryAndDeleteTemporary_PathOutsideTheTemporaryFolder_AreRejected(string relative)
+    {
+        FileStorageService service = Create();
+        string path = Path.Combine(_root, relative);
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
+        File.WriteAllBytes(Path.GetFullPath(path), [1]);
+
+        Assert.Throws<ArgumentException>(() => service.OpenTemporary(path));
+        Assert.Throws<ArgumentException>(() => service.DeleteTemporary(path));
+        Assert.True(File.Exists(Path.GetFullPath(path)));
+    }
 }

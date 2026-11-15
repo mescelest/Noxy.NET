@@ -1,12 +1,12 @@
-using Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
 using Microsoft.Extensions.DependencyInjection;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 
-namespace Noxy.NET.Test.MediaPlayer.Api;
+namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
 public sealed class ApiSeeder(ApiFactory factory)
 {

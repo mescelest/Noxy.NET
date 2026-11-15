@@ -1,14 +1,15 @@
-using Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
-using Microsoft.Extensions.Configuration;
-using Noxy.NET.MediaPlayer.Application.Configurations;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Noxy.NET.MediaPlayer.API;
+using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
 
@@ -42,13 +43,13 @@ public class MediaUploadFlowTest
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
         byte[] content = MediaApiClient.Mp3(1500);
 
-        ResponseUploadAccepted accepted = await ReadAccepted(await api.Upload(user.Token, content, "song.test.mp3", "My Song"));
+        ResponseUploadAccepted accepted = await ReadAccepted(await api.Upload(user.Token, content, "media.test.mp3", "My Media"));
         (string name, ResponseUploadResult result) = await hub.Next();
 
         Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), name);
         Assert.Equal(accepted.JobID, result.JobID);
         Assert.True(result.Succeeded);
-        Assert.Equal("My Song", result.Title);
+        Assert.Equal("My Media", result.Title);
         Assert.Equal("audio/mpeg", result.Media?.ContentType);
         Assert.Equal(1500, result.Media?.SizeBytes);
         ResponseMediaFile listed = Assert.Single(await api.GetMediaFileList(user.Token));
@@ -65,13 +66,13 @@ public class MediaUploadFlowTest
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
         byte[] content = MediaApiClient.Mp3(4321);
 
-        await api.Upload(user.Token, content, "song.mp3", "My Song");
+        await api.Upload(user.Token, content, "media.mp3", "My Media");
         (_, ResponseUploadResult result) = await hub.Next();
         HttpResponseMessage download = await api.Download(user.Token, result.Media!.ID);
 
         Assert.Equal(content, await download.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken));
         Assert.Equal(Convert.ToHexStringLower(SHA256.HashData(content)), result.Media.ContentHash);
-        Assert.Equal("My Song.mp3", download.Content.Headers.ContentDisposition?.FileNameStar ?? download.Content.Headers.ContentDisposition?.FileName);
+        Assert.Equal("My Media.mp3", download.Content.Headers.ContentDisposition?.FileNameStar ?? download.Content.Headers.ContentDisposition?.FileName);
     }
 
     [Fact]
@@ -81,10 +82,10 @@ public class MediaUploadFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
 
-        await ReadAccepted(await api.Upload(user.Token, MediaApiClient.Mp3(), "song.test.mp3"));
+        await ReadAccepted(await api.Upload(user.Token, MediaApiClient.Mp3(), "media.test.mp3"));
         List<ResponseMediaFile> list = await WaitForLibrary(api, user.Token, 1);
 
-        Assert.Equal("song.test", Assert.Single(list).Title);
+        Assert.Equal("media.test", Assert.Single(list).Title);
     }
 
     [Fact]
@@ -287,7 +288,7 @@ public class MediaUploadFlowTest
         List<Guid> jobIDList = [];
         for (int i = 0; i < 5; i++)
         {
-            jobIDList.Add((await ReadAccepted(await api.Upload(user.Token, MediaApiClient.Mp3(500 + i), $"song{i}.mp3"))).JobID);
+            jobIDList.Add((await ReadAccepted(await api.Upload(user.Token, MediaApiClient.Mp3(500 + i), $"media{i}.mp3"))).JobID);
         }
 
         List<Guid> finished = [];

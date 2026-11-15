@@ -55,6 +55,7 @@ public static class ServiceCollectionExtensions
             services.TryAddSingleton(TimeProvider.System);
             services.AddSingleton<IPasswordHashService, PasswordHashService>();
             services.AddSingleton<IMediaFileValidator, MediaFileValidator>();
+            services.AddSingleton<IMediaTagWriter, TagLibMediaTagWriter>();
             services.AddSingleton<IUploadSignal, UploadSignal>();
             services.AddSingleton<IUploadGate, UploadGate>();
             services.AddSingleton<IUploadProcessor, UploadProcessor>();

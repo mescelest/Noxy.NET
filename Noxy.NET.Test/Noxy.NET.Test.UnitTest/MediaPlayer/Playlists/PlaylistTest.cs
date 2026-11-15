@@ -16,7 +16,7 @@ public class PlaylistTest
     }
 
     [Fact]
-    public void HasDuplicates_TheSameSongTwice_IsTrue()
+    public void HasDuplicates_TheSameMediaFileTwice_IsTrue()
     {
         Playlist playlist = CreatePlaylist(0, 1, 2);
         playlist.EntryList[2] = new() { PlaylistID = playlist.ID, MediaFileID = playlist.EntryList[0].MediaFileID, Position = 2 };
@@ -25,7 +25,7 @@ public class PlaylistTest
     }
 
     [Fact]
-    public void HasDuplicates_DistinctSongsOrNoEntries_IsFalse()
+    public void HasDuplicates_DistinctMediaFilesOrNoEntries_IsFalse()
     {
         Assert.False(CreatePlaylist(0, 1, 2).HasDuplicates());
         Assert.False(CreatePlaylist().HasDuplicates());

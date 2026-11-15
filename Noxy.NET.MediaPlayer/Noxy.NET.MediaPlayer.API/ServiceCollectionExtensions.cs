@@ -41,11 +41,13 @@ public static class ServiceCollectionExtensions
         {
             services.AddOptions<ConfigRateLimitAuth>().BindConfiguration(ConfigRateLimitAuth.SectionName).ValidateDataAnnotations().ValidateOnStart();
             services.AddOptions<ConfigRateLimitUpload>().BindConfiguration(ConfigRateLimitUpload.SectionName).ValidateDataAnnotations().ValidateOnStart();
+            services.AddOptions<ConfigRateLimitDownload>().BindConfiguration(ConfigRateLimitDownload.SectionName).ValidateDataAnnotations().ValidateOnStart();
 
             services.AddRateLimiter(options =>
             {
                 AddSlidingWindowPolicy<ConfigRateLimitAuth>(options, Constants.RateLimitPolicyAuth);
                 AddSlidingWindowPolicy<ConfigRateLimitUpload>(options, Constants.RateLimitPolicyUpload);
+                AddSlidingWindowPolicy<ConfigRateLimitDownload>(options, Constants.RateLimitPolicyDownload);
 
                 options.OnRejected = async (context, cancellationToken) =>
                 {
@@ -54,9 +56,13 @@ public static class ServiceCollectionExtensions
 
                     // The sliding window can't say when a permit frees up, so give the full window: always safe, sometimes pessimistic.
                     string? policy = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName;
-                    ConfigRateLimit settings = policy == Constants.RateLimitPolicyUpload
-                        ? context.HttpContext.RequestServices.GetRequiredService<IOptions<ConfigRateLimitUpload>>().Value
-                        : context.HttpContext.RequestServices.GetRequiredService<IOptions<ConfigRateLimitAuth>>().Value;
+                    IServiceProvider services = context.HttpContext.RequestServices;
+                    ConfigRateLimit settings = policy switch
+                    {
+                        Constants.RateLimitPolicyUpload => services.GetRequiredService<IOptions<ConfigRateLimitUpload>>().Value,
+                        Constants.RateLimitPolicyDownload => services.GetRequiredService<IOptions<ConfigRateLimitDownload>>().Value,
+                        _ => services.GetRequiredService<IOptions<ConfigRateLimitAuth>>().Value
+                    };
                     response.Headers.RetryAfter = settings.WindowSeconds.ToString(CultureInfo.InvariantCulture);
 
                     await response.WriteAsJsonAsync(new ProblemDetails { Status = response.StatusCode, Title = "Too many requests." }, cancellationToken);

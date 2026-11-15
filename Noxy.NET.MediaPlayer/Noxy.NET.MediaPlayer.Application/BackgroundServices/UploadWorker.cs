@@ -7,7 +7,7 @@ using Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
 
 namespace Noxy.NET.MediaPlayer.Application.BackgroundServices;
 
-public class UploadWorker(IUploadProcessor processor, IUploadSignal signal, IOptions<ConfigUpload> options, ILogger<UploadWorker> logger) : BackgroundService
+public class UploadWorker(IUploadProcessor processorUpload, IUploadSignal signalUpload, IOptions<ConfigUpload> configUpload, ILogger<UploadWorker> logger) : BackgroundService
 {
     private static readonly TimeSpan ErrorDelay = TimeSpan.FromSeconds(1);
 
@@ -17,7 +17,7 @@ public class UploadWorker(IUploadProcessor processor, IUploadSignal signal, IOpt
     {
         try
         {
-            await processor.Recover(cancellationToken);
+            await processorUpload.Recover(cancellationToken);
         }
         catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
         {
@@ -29,16 +29,16 @@ public class UploadWorker(IUploadProcessor processor, IUploadSignal signal, IOpt
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        TimeSpan poll = TimeSpan.FromSeconds(options.Value.PollSeconds);
+        TimeSpan poll = TimeSpan.FromSeconds(configUpload.Value.PollSeconds);
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 // Work through everything that is pending, then sleep until woken or the poll interval passes.
-                if (await processor.ProcessNext(stoppingToken)) continue;
+                if (await processorUpload.ProcessNext(stoppingToken)) continue;
 
-                await signal.WaitAsync(poll, stoppingToken);
+                await signalUpload.WaitAsync(poll, stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {

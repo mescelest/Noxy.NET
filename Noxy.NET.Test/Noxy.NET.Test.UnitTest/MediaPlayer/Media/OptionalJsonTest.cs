@@ -35,9 +35,9 @@ public class OptionalJsonTest
     [Fact]
     public void Value_IsPresent()
     {
-        RequestUpdateMedia request = Read("""{"title":"Song","albumArtist":"Someone","trackNumber":3,"year":1999}""");
+        RequestUpdateMedia request = Read("""{"title":"Media","albumArtist":"Someone","trackNumber":3,"year":1999}""");
 
-        Assert.Equal("Song", request.Title.Value);
+        Assert.Equal("Media", request.Title.Value);
         Assert.Equal("Someone", request.AlbumArtist.Value);
         Assert.Equal(3, request.TrackNumber.Value);
         Assert.Equal(1999, request.Year.Value);

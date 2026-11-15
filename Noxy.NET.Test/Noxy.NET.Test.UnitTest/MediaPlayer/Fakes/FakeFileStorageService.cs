@@ -11,11 +11,14 @@ public sealed class FakeFileStorageService : IFileStorageService
     public Dictionary<string, byte[]> Staged { get; } = [];
     public List<string> DeletedList { get; } = [];
     public List<string> DeletedStagedList { get; } = [];
+    public Dictionary<string, byte[]> Temporary { get; } = [];
+    public List<string> DeletedTemporaryList { get; } = [];
 
     public Exception? StageFailure { get; set; }
     public Exception? PromoteFailure { get; set; }
     public Exception? DeleteStagedFailure { get; set; }
     public Exception? DeleteFailure { get; set; }
+    public Exception? OpenTemporaryFailure { get; set; }
 
     public async Task<StoredFile> StageAsync(Stream content, string extension, CancellationToken cancellationToken = default)
     {
@@ -71,6 +74,28 @@ public sealed class FakeFileStorageService : IFileStorageService
         if (!Files.TryGetValue(fileName, out byte[]? bytes)) throw new FileNotFoundException(fileName);
 
         return new MemoryStream(bytes);
+    }
+
+    public string CopyToTemporary(string fileName)
+    {
+        if (!Files.TryGetValue(fileName, out byte[]? bytes)) throw new FileNotFoundException(fileName);
+
+        string path = $"temporary/{Guid.CreateVersion7()}{Path.GetExtension(fileName)}";
+        Temporary[path] = [.. bytes];
+        return path;
+    }
+
+    public Stream OpenTemporary(string path)
+    {
+        if (OpenTemporaryFailure is not null) throw OpenTemporaryFailure;
+
+        return new FakeDisposeCallbackStream(Temporary[path], () => DeleteTemporary(path));
+    }
+
+    public void DeleteTemporary(string path)
+    {
+        Temporary.Remove(path);
+        DeletedTemporaryList.Add(path);
     }
 
     public void Delete(string fileName)

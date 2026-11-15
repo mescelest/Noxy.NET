@@ -37,7 +37,8 @@ public static class PlaylistExtension
                     {
                         ID = x.ID,
                         MediaFileID = x.MediaFileID,
-                        Position = x.Position
+                        Position = x.Position,
+                        MediaFile = x.GetLoadedMediaFile().ToResponse()
                     })
                 ]
             };

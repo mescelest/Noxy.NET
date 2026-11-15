@@ -5,6 +5,7 @@ public static class Constants
     public const string CorsPolicyName = "Noxy.NET-CORS-Policy";
     public const string RateLimitPolicyAuth = "auth";
     public const string RateLimitPolicyUpload = "upload";
+    public const string RateLimitPolicyDownload = "download";
     public const string HubsPath = "/hubs";
     public const string MediaHubPath = "/hubs/media";
     public const string AccessTokenQueryKey = "access_token";

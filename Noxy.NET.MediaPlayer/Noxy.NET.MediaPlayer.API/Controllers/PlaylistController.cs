@@ -9,22 +9,23 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.MediaPlayer.API.Controllers;
 
-[Route("Playlists")]
+[Route("Playlist")]
 [ApiController]
-public class PlaylistController(IPlaylistService playlistService) : ControllerBase
+public class PlaylistController(IPlaylistService servicePlaylist) : ControllerBase
 {
     private const string IdRoute = "{id:guid}";
-    private const string EntryListRoute = $"{IdRoute}/Entries";
+    private const string EntryListRoute = $"{IdRoute}/EntryList";
+    private const string EntryRoute = $"{IdRoute}/Entry";
 
     private static readonly string CacheControl = new CacheControlHeaderValue { Private = true, NoCache = true }.ToString();
 
     // The playlists without their entries, for a device's start-up diff. A matching If-None-Match gets a 304 and no body.
     [HttpGet]
-    public async Task<ActionResult<List<ResponsePlaylist>>> GetPlaylistLibrary(CancellationToken cancellationToken)
+    public async Task<ActionResult<List<ResponsePlaylist>>> GetPlaylistList(CancellationToken cancellationToken)
     {
         if (UserID is not { } userID) return Unauthorized();
 
-        PlaylistLibrary library = await playlistService.GetPlaylistLibrary(userID, Request.Headers.IfNoneMatch.ToString(), cancellationToken);
+        PlaylistLibrary library = await servicePlaylist.GetPlaylistLibrary(userID, Request.Headers.IfNoneMatch.ToString(), cancellationToken);
 
         Response.Headers.ETag = library.ETag;
         Response.Headers.CacheControl = CacheControl;
@@ -40,7 +41,7 @@ public class PlaylistController(IPlaylistService playlistService) : ControllerBa
     {
         if (UserID is not { } userID) return Unauthorized();
 
-        PlaylistView view = await playlistService.GetPlaylist(userID, id, Request.Headers.IfNoneMatch.ToString(), cancellationToken);
+        PlaylistView view = await servicePlaylist.GetPlaylist(userID, id, Request.Headers.IfNoneMatch.ToString(), cancellationToken);
 
         Response.Headers.ETag = view.ETag;
         Response.Headers.CacheControl = CacheControl;
@@ -55,7 +56,7 @@ public class PlaylistController(IPlaylistService playlistService) : ControllerBa
     {
         if (UserID is not { } userID) return Unauthorized();
 
-        ResponsePlaylist response = await playlistService.Create(userID, request, cancellationToken);
+        ResponsePlaylist response = await servicePlaylist.Create(userID, request, cancellationToken);
 
         return CreatedAtAction(nameof(GetPlaylist), new { id = response.ID }, response);
     }
@@ -65,7 +66,7 @@ public class PlaylistController(IPlaylistService playlistService) : ControllerBa
     {
         if (UserID is not { } userID) return Unauthorized();
 
-        return await playlistService.Update(userID, id, request, cancellationToken);
+        return await servicePlaylist.Update(userID, id, request, cancellationToken);
     }
 
     [HttpDelete(IdRoute)]
@@ -73,7 +74,7 @@ public class PlaylistController(IPlaylistService playlistService) : ControllerBa
     {
         if (UserID is not { } userID) return Unauthorized();
 
-        await playlistService.Delete(userID, id, cancellationToken);
+        await servicePlaylist.Delete(userID, id, cancellationToken);
 
         return NoContent();
     }
@@ -83,7 +84,7 @@ public class PlaylistController(IPlaylistService playlistService) : ControllerBa
     {
         if (UserID is not { } userID) return Unauthorized();
 
-        return await playlistService.AddEntryList(userID, id, request, cancellationToken);
+        return await servicePlaylist.AddEntryList(userID, id, request, cancellationToken);
     }
 
     [HttpPost($"{EntryListRoute}/Remove")]
@@ -91,15 +92,15 @@ public class PlaylistController(IPlaylistService playlistService) : ControllerBa
     {
         if (UserID is not { } userID) return Unauthorized();
 
-        return await playlistService.RemoveEntryList(userID, id, request, cancellationToken);
+        return await servicePlaylist.RemoveEntryList(userID, id, request, cancellationToken);
     }
 
-    [HttpPut($"{EntryListRoute}/{{entryID:guid}}/Position")]
+    [HttpPut($"{EntryRoute}/{{entryID:guid}}/Position")]
     public async Task<ActionResult<ResponsePlaylistDetail>> MoveEntry(Guid id, Guid entryID, RequestMovePlaylistEntry request, CancellationToken cancellationToken)
     {
         if (UserID is not { } userID) return Unauthorized();
 
-        return await playlistService.MoveEntry(userID, id, entryID, request, cancellationToken);
+        return await servicePlaylist.MoveEntry(userID, id, entryID, request, cancellationToken);
     }
 
     private Guid? UserID => Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out Guid userID) ? userID : null;

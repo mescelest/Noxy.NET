@@ -20,8 +20,8 @@ public class RequestPlaylistEntryTest
     [Fact]
     public void Add_AValidRequest_IsValid()
     {
-        Assert.Empty(Validate(new RequestAddPlaylistEntry { SongIDList = Ids(2), Position = 3 }));
-        Assert.Empty(Validate(new RequestAddPlaylistEntry { SongIDList = Ids(1) }));
+        Assert.Empty(Validate(new RequestAddPlaylistEntry { MediaFileIDList = Ids(2), Position = 3 }));
+        Assert.Empty(Validate(new RequestAddPlaylistEntry { MediaFileIDList = Ids(1) }));
     }
 
     [Theory]
@@ -29,13 +29,13 @@ public class RequestPlaylistEntryTest
     [InlineData(1001)]
     public void Add_AnEmptyOrTooLongList_IsInvalid(int count)
     {
-        Assert.NotEmpty(Validate(new RequestAddPlaylistEntry { SongIDList = Ids(count) }));
+        Assert.NotEmpty(Validate(new RequestAddPlaylistEntry { MediaFileIDList = Ids(count) }));
     }
 
     [Fact]
     public void Add_ANegativePosition_IsInvalid()
     {
-        Assert.NotEmpty(Validate(new RequestAddPlaylistEntry { SongIDList = Ids(1), Position = -1 }));
+        Assert.NotEmpty(Validate(new RequestAddPlaylistEntry { MediaFileIDList = Ids(1), Position = -1 }));
     }
 
     [Fact]

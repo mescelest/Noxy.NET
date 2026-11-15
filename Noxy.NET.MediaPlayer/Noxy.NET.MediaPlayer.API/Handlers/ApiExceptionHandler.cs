@@ -5,7 +5,7 @@ using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.MediaPlayer.API.Handlers;
 
-public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
+public class ApiExceptionHandler(IProblemDetailsService serviceProblemDetails) : IExceptionHandler
 {
     private const string FileTooLargeTitle = "The file is too large.";
 
@@ -25,7 +25,7 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
             PlaylistEntryNotFoundException => new(StatusCodes.Status404NotFound, "The playlist entry was not found."),
             PlaylistLimitReachedException => new(StatusCodes.Status409Conflict, "The playlist limit has been reached."),
             PlaylistEntryLimitReachedException => new(StatusCodes.Status409Conflict, "The playlist is full."),
-            PlaylistHasDuplicatesException => new(StatusCodes.Status409Conflict, "The playlist contains duplicate songs."),
+            PlaylistHasDuplicatesException => new(StatusCodes.Status409Conflict, "The playlist contains duplicate media files."),
             InvalidPlaylistPositionException => new(StatusCodes.Status400BadRequest, "The position is outside the playlist."),
             FileTooLargeException => new(StatusCodes.Status413PayloadTooLarge, FileTooLargeTitle),
             // Thrown by Kestrel when the body goes over the limit the upload action set.
@@ -33,7 +33,7 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
             _ => null
         };
 
-        // Anything unrecognised falls through to the default 500 handling.
+        // Anything unrecognized falls through to the default 500 handling.
         if (mapped is null)
         {
             return false;
@@ -41,7 +41,7 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
 
         httpContext.Response.StatusCode = mapped.Status;
 
-        return await problemDetailsService.TryWriteAsync(new()
+        return await serviceProblemDetails.TryWriteAsync(new()
         {
             HttpContext = httpContext,
             Exception = exception,

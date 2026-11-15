@@ -27,7 +27,7 @@ public class PlaylistRepositoryTest : IDisposable
         return user;
     }
 
-    private async Task<MediaFile> CreateSong(Guid userID)
+    private async Task<MediaFile> CreateMediaFile(Guid userID)
     {
         MediaFile file = new()
         {
@@ -38,7 +38,7 @@ public class PlaylistRepositoryTest : IDisposable
             UserID = userID
         };
 
-        file.Metadata = new() { Title = "Song", MediaFileID = file.ID };
+        file.Metadata = new() { Title = "Media", MediaFileID = file.ID };
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         uow.Media.AddMediaFile(file);
@@ -57,12 +57,12 @@ public class PlaylistRepositoryTest : IDisposable
         };
     }
 
-    private static PlaylistEntry CreateEntry(Playlist playlist, MediaFile song, int position)
+    private static PlaylistEntry CreateEntry(Playlist playlist, MediaFile mediaFile, int position)
     {
         return new()
         {
             PlaylistID = playlist.ID,
-            MediaFileID = song.ID,
+            MediaFileID = mediaFile.ID,
             Position = position
         };
     }
@@ -78,9 +78,9 @@ public class PlaylistRepositoryTest : IDisposable
     public async Task AddPlaylist_ThenFind_ReturnsItWithoutEntries()
     {
         User user = await CreateUser();
-        MediaFile song = await CreateSong(user.ID);
+        MediaFile mediaFile = await CreateMediaFile(user.ID);
         Playlist playlist = CreatePlaylist(user.ID, "Road trip");
-        playlist.EntryList.Add(CreateEntry(playlist, song, 0));
+        playlist.EntryList.Add(CreateEntry(playlist, mediaFile, 0));
         await Add(playlist);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
@@ -96,9 +96,9 @@ public class PlaylistRepositoryTest : IDisposable
     public async Task AddPlaylist_WithEntries_FindWithEntriesReturnsThemByPosition()
     {
         User user = await CreateUser();
-        MediaFile first = await CreateSong(user.ID);
-        MediaFile second = await CreateSong(user.ID);
-        MediaFile third = await CreateSong(user.ID);
+        MediaFile first = await CreateMediaFile(user.ID);
+        MediaFile second = await CreateMediaFile(user.ID);
+        MediaFile third = await CreateMediaFile(user.ID);
         Playlist playlist = CreatePlaylist(user.ID);
         playlist.EntryList.Add(CreateEntry(playlist, third, 2));
         playlist.EntryList.Add(CreateEntry(playlist, first, 0));
@@ -132,11 +132,11 @@ public class PlaylistRepositoryTest : IDisposable
     {
         User user = await CreateUser();
         User other = await CreateUser("other@example.com");
-        MediaFile song = await CreateSong(user.ID);
+        MediaFile mediaFile = await CreateMediaFile(user.ID);
         DateTime now = DateTime.UtcNow;
         Playlist older = CreatePlaylist(user.ID, "Older", now.AddMinutes(-5));
-        older.EntryList.Add(CreateEntry(older, song, 0));
-        older.EntryList.Add(CreateEntry(older, song, 1));
+        older.EntryList.Add(CreateEntry(older, mediaFile, 0));
+        older.EntryList.Add(CreateEntry(older, mediaFile, 1));
         Playlist newer = CreatePlaylist(user.ID, "Newer", now);
         await Add(older);
         await Add(newer);
@@ -187,9 +187,9 @@ public class PlaylistRepositoryTest : IDisposable
     public async Task UpdatePlaylist_SavesNameFlagAndModifiedTime_AndLeavesTheEntriesAlone()
     {
         User user = await CreateUser();
-        MediaFile song = await CreateSong(user.ID);
+        MediaFile mediaFile = await CreateMediaFile(user.ID);
         Playlist playlist = CreatePlaylist(user.ID, "Before");
-        playlist.EntryList.Add(CreateEntry(playlist, song, 0));
+        playlist.EntryList.Add(CreateEntry(playlist, mediaFile, 0));
         await Add(playlist);
         DateTime modified = new(2026, 5, 6, 7, 8, 9, DateTimeKind.Utc);
 
@@ -217,9 +217,9 @@ public class PlaylistRepositoryTest : IDisposable
     public async Task UpdatePlaylistEntry_SavesAPositionChange()
     {
         User user = await CreateUser();
-        MediaFile song = await CreateSong(user.ID);
+        MediaFile mediaFile = await CreateMediaFile(user.ID);
         Playlist playlist = CreatePlaylist(user.ID);
-        PlaylistEntry entry = CreateEntry(playlist, song, 0);
+        PlaylistEntry entry = CreateEntry(playlist, mediaFile, 0);
         playlist.EntryList.Add(entry);
         await Add(playlist);
 
@@ -240,9 +240,9 @@ public class PlaylistRepositoryTest : IDisposable
     public async Task AddRemoveAndUpdateEntries_AreAppliedInOneCommit()
     {
         User user = await CreateUser();
-        MediaFile first = await CreateSong(user.ID);
-        MediaFile second = await CreateSong(user.ID);
-        MediaFile third = await CreateSong(user.ID);
+        MediaFile first = await CreateMediaFile(user.ID);
+        MediaFile second = await CreateMediaFile(user.ID);
+        MediaFile third = await CreateMediaFile(user.ID);
         Playlist playlist = CreatePlaylist(user.ID);
         PlaylistEntry keep = CreateEntry(playlist, first, 0);
         PlaylistEntry drop = CreateEntry(playlist, second, 1);
@@ -271,8 +271,8 @@ public class PlaylistRepositoryTest : IDisposable
     public async Task UpdatePlaylistEntry_ManyPositionsAtOnce_DoesNotViolateAnyConstraint()
     {
         User user = await CreateUser();
-        MediaFile first = await CreateSong(user.ID);
-        MediaFile second = await CreateSong(user.ID);
+        MediaFile first = await CreateMediaFile(user.ID);
+        MediaFile second = await CreateMediaFile(user.ID);
         Playlist playlist = CreatePlaylist(user.ID);
         PlaylistEntry a = CreateEntry(playlist, first, 0);
         PlaylistEntry b = CreateEntry(playlist, second, 1);
@@ -296,12 +296,12 @@ public class PlaylistRepositoryTest : IDisposable
     }
 
     [Fact]
-    public async Task RemovePlaylist_DeletesItsEntriesButNotTheSongs()
+    public async Task RemovePlaylist_DeletesItsEntriesButNotTheMediaFiles()
     {
         User user = await CreateUser();
-        MediaFile song = await CreateSong(user.ID);
+        MediaFile mediaFile = await CreateMediaFile(user.ID);
         Playlist playlist = CreatePlaylist(user.ID);
-        playlist.EntryList.Add(CreateEntry(playlist, song, 0));
+        playlist.EntryList.Add(CreateEntry(playlist, mediaFile, 0));
         await Add(playlist);
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
@@ -321,19 +321,19 @@ public class PlaylistRepositoryTest : IDisposable
     public async Task RemoveMediaFile_DeletesItsEntriesFromEveryPlaylist()
     {
         User user = await CreateUser();
-        MediaFile song = await CreateSong(user.ID);
-        MediaFile other = await CreateSong(user.ID);
+        MediaFile mediaFile = await CreateMediaFile(user.ID);
+        MediaFile other = await CreateMediaFile(user.ID);
         Playlist one = CreatePlaylist(user.ID, "One");
-        one.EntryList.Add(CreateEntry(one, song, 0));
+        one.EntryList.Add(CreateEntry(one, mediaFile, 0));
         one.EntryList.Add(CreateEntry(one, other, 1));
         Playlist two = CreatePlaylist(user.ID, "Two");
-        two.EntryList.Add(CreateEntry(two, song, 0));
+        two.EntryList.Add(CreateEntry(two, mediaFile, 0));
         await Add(one);
         await Add(two);
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
-            uow.Media.RemoveMediaFile(song);
+            uow.Media.RemoveMediaFile(mediaFile);
             await uow.Commit(TestContext.Current.CancellationToken);
         }
 
@@ -344,44 +344,98 @@ public class PlaylistRepositoryTest : IDisposable
     }
 
     [Fact]
-    public async Task GetPlaylistListByMediaFileID_ReturnsOnlyThePlaylistsContainingTheSongWithAllTheirEntries()
+    public async Task GetPlaylistListByMediaFileID_ReturnsOnlyThePlaylistsContainingTheMediaFileWithAllTheirEntries()
     {
         User user = await CreateUser();
         User stranger = await CreateUser("stranger@example.com");
-        MediaFile song = await CreateSong(user.ID);
-        MediaFile other = await CreateSong(user.ID);
+        MediaFile mediaFile = await CreateMediaFile(user.ID);
+        MediaFile other = await CreateMediaFile(user.ID);
         Playlist holds = CreatePlaylist(user.ID, "Holds");
         holds.EntryList.Add(CreateEntry(holds, other, 0));
-        holds.EntryList.Add(CreateEntry(holds, song, 1));
+        holds.EntryList.Add(CreateEntry(holds, mediaFile, 1));
         Playlist without = CreatePlaylist(user.ID, "Without");
         without.EntryList.Add(CreateEntry(without, other, 0));
         Playlist foreign = CreatePlaylist(stranger.ID, "Foreign");
-        foreign.EntryList.Add(CreateEntry(foreign, song, 0));
+        foreign.EntryList.Add(CreateEntry(foreign, mediaFile, 0));
         await Add(holds);
         await Add(without);
         await Add(foreign);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        List<Playlist> list = await uow.Playlist.GetPlaylistListByMediaFileID(user.ID, song.ID, TestContext.Current.CancellationToken);
+        List<Playlist> list = await uow.Playlist.GetPlaylistListByMediaFileID(user.ID, mediaFile.ID, TestContext.Current.CancellationToken);
 
         Playlist found = Assert.Single(list);
         Assert.Equal("Holds", found.Name);
-        Assert.Equal([other.ID, song.ID], found.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([other.ID, mediaFile.ID], found.EntryList.Select(x => x.MediaFileID));
     }
 
     [Fact]
-    public async Task SameSongTwiceInOnePlaylist_IsAllowed()
+    public async Task SameMediaFileTwiceInOnePlaylist_IsAllowed()
     {
         User user = await CreateUser();
-        MediaFile song = await CreateSong(user.ID);
+        MediaFile mediaFile = await CreateMediaFile(user.ID);
         Playlist playlist = CreatePlaylist(user.ID);
-        playlist.EntryList.Add(CreateEntry(playlist, song, 0));
-        playlist.EntryList.Add(CreateEntry(playlist, song, 1));
+        playlist.EntryList.Add(CreateEntry(playlist, mediaFile, 0));
+        playlist.EntryList.Add(CreateEntry(playlist, mediaFile, 1));
         await Add(playlist);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         Playlist? found = await uow.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, found!.EntryList.Count);
+    }
+
+    [Fact]
+    public async Task FindPlaylistWithEntries_LoadsEachEntrysMediaFileWithMetadata()
+    {
+        User user = await CreateUser();
+        MediaFile mediaFile = await CreateMediaFile(user.ID);
+        Playlist playlist = CreatePlaylist(user.ID);
+        playlist.EntryList.Add(CreateEntry(playlist, mediaFile, 0));
+        await Add(playlist);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        Playlist? found = await uow.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken);
+
+        MediaFile loaded = Assert.IsType<MediaFile>(Assert.Single(found!.EntryList).MediaFile);
+        Assert.Equal(mediaFile.ID, loaded.ID);
+        Assert.Equal(mediaFile.ContentHash, loaded.ContentHash);
+        Assert.Equal("Media", loaded.Metadata!.Title);
+    }
+
+    [Fact]
+    public async Task GetEntryMediaFileStampList_ReturnsTheMediaFileIdAndModifiedTimeForEveryEntry_IncludingRepeatedMediaFiles()
+    {
+        User user = await CreateUser();
+        MediaFile first = await CreateMediaFile(user.ID);
+        MediaFile second = await CreateMediaFile(user.ID);
+        Playlist playlist = CreatePlaylist(user.ID);
+        playlist.EntryList.Add(CreateEntry(playlist, first, 0));
+        playlist.EntryList.Add(CreateEntry(playlist, second, 1));
+        playlist.EntryList.Add(CreateEntry(playlist, first, 2));
+        await Add(playlist);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        List<PlaylistStamp> stampList = await uow.Playlist.GetEntryMediaFileStampList(playlist.ID, user.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(3, stampList.Count);
+        Assert.Equal(2, stampList.Count(x => x.ID == first.ID));
+        Assert.Equal(first.TimeModified, stampList.First(x => x.ID == first.ID).TimeModified);
+        Assert.Equal(second.TimeModified, stampList.Single(x => x.ID == second.ID).TimeModified);
+    }
+
+    [Fact]
+    public async Task GetEntryMediaFileStampList_AnotherUsersPlaylist_ReturnsEmpty()
+    {
+        User owner = await CreateUser("owner@example.com");
+        User other = await CreateUser("other@example.com");
+        MediaFile mediaFile = await CreateMediaFile(owner.ID);
+        Playlist playlist = CreatePlaylist(owner.ID);
+        playlist.EntryList.Add(CreateEntry(playlist, mediaFile, 0));
+        await Add(playlist);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+
+        Assert.Empty(await uow.Playlist.GetEntryMediaFileStampList(playlist.ID, other.ID, TestContext.Current.CancellationToken));
     }
 }

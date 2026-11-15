@@ -27,7 +27,7 @@ public class PlaylistServiceTest
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
-    private Guid Song(Guid? userID = null)
+    private Guid MediaFile(Guid? userID = null)
     {
         MediaFile file = new()
         {
@@ -42,9 +42,9 @@ public class PlaylistServiceTest
         return file.ID;
     }
 
-    private List<Guid> SongList(int count)
+    private List<Guid> MediaFileList(int count)
     {
-        return [.. Enumerable.Range(0, count).Select(_ => Song())];
+        return [.. Enumerable.Range(0, count).Select(_ => MediaFile())];
     }
 
     private void Advance()
@@ -58,9 +58,9 @@ public class PlaylistServiceTest
         return created.ID;
     }
 
-    private Task<ResponsePlaylistDetail> Add(Guid playlistID, IEnumerable<Guid> songList, int? position = null, Guid? userID = null)
+    private Task<ResponsePlaylistDetail> Add(Guid playlistID, IEnumerable<Guid> mediaFileList, int? position = null, Guid? userID = null)
     {
-        return _service.AddEntryList(userID ?? UserID, playlistID, new() { SongIDList = [.. songList], Position = position }, Token);
+        return _service.AddEntryList(userID ?? UserID, playlistID, new() { MediaFileIDList = [.. mediaFileList], Position = position }, Token);
     }
 
     private Task<ResponsePlaylistDetail> Remove(Guid playlistID, params Guid[] entryIDList)
@@ -78,7 +78,7 @@ public class PlaylistServiceTest
         return _store.PlaylistList.Single(x => x.ID == playlistID);
     }
 
-    private List<Guid> StoredSongOrder(Guid playlistID)
+    private List<Guid> StoredMediaFileOrder(Guid playlistID)
     {
         return [.. Stored(playlistID).EntryList.OrderBy(x => x.Position).Select(x => x.MediaFileID)];
     }
@@ -210,7 +210,7 @@ public class PlaylistServiceTest
     public async Task Update_APushCarriesTheEntryCountButNoEntries()
     {
         Guid id = await Create();
-        await Add(id, SongList(2));
+        await Add(id, MediaFileList(2));
 
         await _service.Update(UserID, id, new() { Name = new("Renamed") }, Token);
 
@@ -223,8 +223,8 @@ public class PlaylistServiceTest
     public async Task Update_DuplicatesOffWithDuplicates_Throws_AndChangesNothing()
     {
         Guid id = await Create();
-        Guid song = Song();
-        await Add(id, [song, song]);
+        Guid mediaFile = MediaFile();
+        await Add(id, [mediaFile, mediaFile]);
 
         await Assert.ThrowsAsync<PlaylistHasDuplicatesException>(() => _service.Update(UserID, id, new() { AllowDuplicates = new(false), Name = new("Renamed") }, Token));
 
@@ -236,7 +236,7 @@ public class PlaylistServiceTest
     public async Task Update_DuplicatesOffWithoutDuplicates_Works()
     {
         Guid id = await Create();
-        await Add(id, SongList(3));
+        await Add(id, MediaFileList(3));
 
         ResponsePlaylist response = await _service.Update(UserID, id, new() { AllowDuplicates = new(false) }, Token);
 
@@ -278,10 +278,10 @@ public class PlaylistServiceTest
     }
 
     [Fact]
-    public async Task Delete_KeepsTheSongs()
+    public async Task Delete_KeepsTheMediaFiles()
     {
         Guid id = await Create();
-        await Add(id, SongList(2));
+        await Add(id, MediaFileList(2));
 
         await _service.Delete(UserID, id, Token);
 
@@ -305,15 +305,15 @@ public class PlaylistServiceTest
     public async Task Add_AppendsInOrder_WithDensePositions()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(3);
+        List<Guid> mediaFileList = MediaFileList(3);
 
-        await Add(id, songList.Take(2));
-        ResponsePlaylistDetail detail = await Add(id, songList.Skip(2));
+        await Add(id, mediaFileList.Take(2));
+        ResponsePlaylistDetail detail = await Add(id, mediaFileList.Skip(2));
 
-        Assert.Equal(songList, detail.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal(mediaFileList, detail.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1, 2], detail.EntryList.Select(x => x.Position));
         Assert.Equal(3, detail.EntryCount);
-        Assert.Equal(songList, StoredSongOrder(id));
+        Assert.Equal(mediaFileList, StoredMediaFileOrder(id));
         AssertDense(id);
     }
 
@@ -321,14 +321,14 @@ public class PlaylistServiceTest
     public async Task Add_AtAPosition_ShiftsTheOthers()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(3);
-        Guid inserted = Song();
-        await Add(id, songList);
+        List<Guid> mediaFileList = MediaFileList(3);
+        Guid inserted = MediaFile();
+        await Add(id, mediaFileList);
 
         ResponsePlaylistDetail detail = await Add(id, [inserted], 1);
 
-        Assert.Equal([songList[0], inserted, songList[1], songList[2]], detail.EntryList.Select(x => x.MediaFileID));
-        Assert.Equal([songList[0], inserted, songList[1], songList[2]], StoredSongOrder(id));
+        Assert.Equal([mediaFileList[0], inserted, mediaFileList[1], mediaFileList[2]], detail.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[0], inserted, mediaFileList[1], mediaFileList[2]], StoredMediaFileOrder(id));
         AssertDense(id);
     }
 
@@ -336,13 +336,13 @@ public class PlaylistServiceTest
     public async Task Add_SeveralAtAPosition_KeepTheirOrder()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(2);
-        List<Guid> inserted = SongList(2);
-        await Add(id, songList);
+        List<Guid> mediaFileList = MediaFileList(2);
+        List<Guid> inserted = MediaFileList(2);
+        await Add(id, mediaFileList);
 
         await Add(id, inserted, 0);
 
-        Assert.Equal([inserted[0], inserted[1], songList[0], songList[1]], StoredSongOrder(id));
+        Assert.Equal([inserted[0], inserted[1], mediaFileList[0], mediaFileList[1]], StoredMediaFileOrder(id));
         AssertDense(id);
     }
 
@@ -350,41 +350,41 @@ public class PlaylistServiceTest
     public async Task Add_PositionEqualToCount_AppendsAndGreaterThrows()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(2);
-        await Add(id, songList);
+        List<Guid> mediaFileList = MediaFileList(2);
+        await Add(id, mediaFileList);
 
-        Guid appended = Song();
+        Guid appended = MediaFile();
         await Add(id, [appended], 2);
 
-        Assert.Equal(appended, StoredSongOrder(id)[^1]);
-        await Assert.ThrowsAsync<InvalidPlaylistPositionException>(() => Add(id, [Song()], 4));
+        Assert.Equal(appended, StoredMediaFileOrder(id)[^1]);
+        await Assert.ThrowsAsync<InvalidPlaylistPositionException>(() => Add(id, [MediaFile()], 4));
         Assert.Equal(3, Stored(id).EntryList.Count);
     }
 
     [Fact]
-    public async Task Add_SameSongTwice_AllowedWhenDuplicatesAreOn()
+    public async Task Add_SameMediaFileTwice_AllowedWhenDuplicatesAreOn()
     {
         Guid id = await Create();
-        Guid song = Song();
+        Guid mediaFile = MediaFile();
 
-        await Add(id, [song, song]);
-        await Add(id, [song]);
+        await Add(id, [mediaFile, mediaFile]);
+        await Add(id, [mediaFile]);
 
-        Assert.Equal([song, song, song], StoredSongOrder(id));
+        Assert.Equal([mediaFile, mediaFile, mediaFile], StoredMediaFileOrder(id));
         AssertDense(id);
     }
 
     [Fact]
-    public async Task Add_DuplicatesOff_SkipsSongsAlreadyInAndRepeatsInTheRequest()
+    public async Task Add_DuplicatesOff_SkipsMediaFilesAlreadyInAndRepeatsInTheRequest()
     {
         Guid id = await Create(allowDuplicates: false);
-        List<Guid> songList = SongList(3);
-        await Add(id, [songList[0]]);
+        List<Guid> mediaFileList = MediaFileList(3);
+        await Add(id, [mediaFileList[0]]);
 
-        ResponsePlaylistDetail detail = await Add(id, [songList[0], songList[1], songList[1], songList[2]]);
+        ResponsePlaylistDetail detail = await Add(id, [mediaFileList[0], mediaFileList[1], mediaFileList[1], mediaFileList[2]]);
 
-        Assert.Equal(songList, detail.EntryList.Select(x => x.MediaFileID));
-        Assert.Equal(songList, StoredSongOrder(id));
+        Assert.Equal(mediaFileList, detail.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal(mediaFileList, StoredMediaFileOrder(id));
         AssertDense(id);
     }
 
@@ -392,14 +392,14 @@ public class PlaylistServiceTest
     public async Task Add_AllSkipped_IsANoOp()
     {
         Guid id = await Create(allowDuplicates: false);
-        Guid song = Song();
-        await Add(id, [song]);
+        Guid mediaFile = MediaFile();
+        await Add(id, [mediaFile]);
         DateTime modified = Stored(id).TimeModified;
         int commits = _store.CommitCount;
         int pushes = _notifier.UpdatedList.Count;
         Advance();
 
-        ResponsePlaylistDetail detail = await Add(id, [song]);
+        ResponsePlaylistDetail detail = await Add(id, [mediaFile]);
 
         Assert.Single(detail.EntryList);
         Assert.Equal(commits, _store.CommitCount);
@@ -408,11 +408,11 @@ public class PlaylistServiceTest
     }
 
     [Fact]
-    public async Task Add_UnknownOrOtherUsersSong_ThrowsNotFound_AndAddsNothing()
+    public async Task Add_UnknownOrOtherUsersMediaFile_ThrowsNotFound_AndAddsNothing()
     {
         Guid id = await Create();
-        Guid mine = Song();
-        Guid theirs = Song(Guid.CreateVersion7());
+        Guid mine = MediaFile();
+        Guid theirs = MediaFile(Guid.CreateVersion7());
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => Add(id, [mine, theirs]));
         await Assert.ThrowsAsync<MediaNotFoundException>(() => Add(id, [mine, Guid.CreateVersion7()]));
@@ -425,13 +425,13 @@ public class PlaylistServiceTest
     {
         _config.MaxEntriesPerPlaylist = 2;
         Guid id = await Create();
-        Guid song = Song();
+        Guid mediaFile = MediaFile();
 
-        await Assert.ThrowsAsync<PlaylistEntryLimitReachedException>(() => Add(id, [song, song, song]));
+        await Assert.ThrowsAsync<PlaylistEntryLimitReachedException>(() => Add(id, [mediaFile, mediaFile, mediaFile]));
         Assert.Empty(Stored(id).EntryList);
 
-        await Add(id, [song, song]);
-        await Assert.ThrowsAsync<PlaylistEntryLimitReachedException>(() => Add(id, [song]));
+        await Add(id, [mediaFile, mediaFile]);
+        await Assert.ThrowsAsync<PlaylistEntryLimitReachedException>(() => Add(id, [mediaFile]));
         Assert.Equal(2, Stored(id).EntryList.Count);
     }
 
@@ -440,12 +440,12 @@ public class PlaylistServiceTest
     {
         _config.MaxEntriesPerPlaylist = 2;
         Guid id = await Create(allowDuplicates: false);
-        List<Guid> songList = SongList(3);
-        await Add(id, songList.Take(2));
+        List<Guid> mediaFileList = MediaFileList(3);
+        await Add(id, mediaFileList.Take(2));
 
-        await Add(id, songList.Take(2));
+        await Add(id, mediaFileList.Take(2));
 
-        await Assert.ThrowsAsync<PlaylistEntryLimitReachedException>(() => Add(id, [songList[2]]));
+        await Assert.ThrowsAsync<PlaylistEntryLimitReachedException>(() => Add(id, [mediaFileList[2]]));
         Assert.Equal(2, Stored(id).EntryList.Count);
     }
 
@@ -456,7 +456,7 @@ public class PlaylistServiceTest
         int pushes = _notifier.UpdatedList.Count;
         Advance();
 
-        await Add(id, SongList(3));
+        await Add(id, MediaFileList(3));
 
         Assert.Equal(_time.Now.UtcDateTime, Stored(id).TimeModified);
         Assert.Equal(pushes + 1, _notifier.UpdatedList.Count);
@@ -468,9 +468,9 @@ public class PlaylistServiceTest
     {
         Guid id = await Create();
         Guid stranger = Guid.CreateVersion7();
-        Guid song = Song(stranger);
+        Guid mediaFile = MediaFile(stranger);
 
-        await Assert.ThrowsAsync<PlaylistNotFoundException>(() => Add(id, [song], userID: stranger));
+        await Assert.ThrowsAsync<PlaylistNotFoundException>(() => Add(id, [mediaFile], userID: stranger));
     }
 
     #endregion -- Add --
@@ -481,14 +481,14 @@ public class PlaylistServiceTest
     public async Task Remove_RemovesAndRenumbers()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(3);
-        ResponsePlaylistDetail detail = await Add(id, songList);
+        List<Guid> mediaFileList = MediaFileList(3);
+        ResponsePlaylistDetail detail = await Add(id, mediaFileList);
 
         ResponsePlaylistDetail after = await Remove(id, detail.EntryList[0].ID);
 
-        Assert.Equal([songList[1], songList[2]], after.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[1], mediaFileList[2]], after.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1], after.EntryList.Select(x => x.Position));
-        Assert.Equal([songList[1], songList[2]], StoredSongOrder(id));
+        Assert.Equal([mediaFileList[1], mediaFileList[2]], StoredMediaFileOrder(id));
         AssertDense(id);
     }
 
@@ -496,12 +496,12 @@ public class PlaylistServiceTest
     public async Task Remove_SeveralAtOnce_LeavesDensePositions()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(5);
-        ResponsePlaylistDetail detail = await Add(id, songList);
+        List<Guid> mediaFileList = MediaFileList(5);
+        ResponsePlaylistDetail detail = await Add(id, mediaFileList);
 
         await Remove(id, detail.EntryList[1].ID, detail.EntryList[3].ID, detail.EntryList[1].ID);
 
-        Assert.Equal([songList[0], songList[2], songList[4]], StoredSongOrder(id));
+        Assert.Equal([mediaFileList[0], mediaFileList[2], mediaFileList[4]], StoredMediaFileOrder(id));
         AssertDense(id);
     }
 
@@ -509,7 +509,7 @@ public class PlaylistServiceTest
     public async Task Remove_UnknownEntry_ThrowsAndRemovesNothing()
     {
         Guid id = await Create();
-        ResponsePlaylistDetail detail = await Add(id, SongList(2));
+        ResponsePlaylistDetail detail = await Add(id, MediaFileList(2));
 
         await Assert.ThrowsAsync<PlaylistEntryNotFoundException>(() => Remove(id, detail.EntryList[0].ID, Guid.CreateVersion7()));
 
@@ -521,8 +521,8 @@ public class PlaylistServiceTest
     {
         Guid id = await Create();
         Guid other = await Create("Other");
-        ResponsePlaylistDetail otherDetail = await Add(other, SongList(1));
-        await Add(id, SongList(1));
+        ResponsePlaylistDetail otherDetail = await Add(other, MediaFileList(1));
+        await Add(id, MediaFileList(1));
 
         await Assert.ThrowsAsync<PlaylistEntryNotFoundException>(() => Remove(id, otherDetail.EntryList[0].ID));
         Assert.Single(Stored(other).EntryList);
@@ -532,7 +532,7 @@ public class PlaylistServiceTest
     public async Task Remove_BumpsAndPushes()
     {
         Guid id = await Create();
-        ResponsePlaylistDetail detail = await Add(id, SongList(2));
+        ResponsePlaylistDetail detail = await Add(id, MediaFileList(2));
         int pushes = _notifier.UpdatedList.Count;
         Advance();
 
@@ -551,13 +551,13 @@ public class PlaylistServiceTest
     public async Task Move_Down_ShiftsTheOthersUp()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(4);
-        ResponsePlaylistDetail detail = await Add(id, songList);
+        List<Guid> mediaFileList = MediaFileList(4);
+        ResponsePlaylistDetail detail = await Add(id, mediaFileList);
 
         ResponsePlaylistDetail after = await Move(id, detail.EntryList[0].ID, 2);
 
-        Assert.Equal([songList[1], songList[2], songList[0], songList[3]], after.EntryList.Select(x => x.MediaFileID));
-        Assert.Equal([songList[1], songList[2], songList[0], songList[3]], StoredSongOrder(id));
+        Assert.Equal([mediaFileList[1], mediaFileList[2], mediaFileList[0], mediaFileList[3]], after.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[1], mediaFileList[2], mediaFileList[0], mediaFileList[3]], StoredMediaFileOrder(id));
         AssertDense(id);
     }
 
@@ -565,12 +565,12 @@ public class PlaylistServiceTest
     public async Task Move_Up_ShiftsTheOthersDown()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(4);
-        ResponsePlaylistDetail detail = await Add(id, songList);
+        List<Guid> mediaFileList = MediaFileList(4);
+        ResponsePlaylistDetail detail = await Add(id, mediaFileList);
 
         await Move(id, detail.EntryList[3].ID, 1);
 
-        Assert.Equal([songList[0], songList[3], songList[1], songList[2]], StoredSongOrder(id));
+        Assert.Equal([mediaFileList[0], mediaFileList[3], mediaFileList[1], mediaFileList[2]], StoredMediaFileOrder(id));
         AssertDense(id);
     }
 
@@ -578,7 +578,7 @@ public class PlaylistServiceTest
     public async Task Move_ToTheSamePosition_IsANoOp()
     {
         Guid id = await Create();
-        ResponsePlaylistDetail detail = await Add(id, SongList(3));
+        ResponsePlaylistDetail detail = await Add(id, MediaFileList(3));
         DateTime modified = Stored(id).TimeModified;
         int commits = _store.CommitCount;
         int pushes = _notifier.UpdatedList.Count;
@@ -595,7 +595,7 @@ public class PlaylistServiceTest
     public async Task Move_OutOfRange_Throws()
     {
         Guid id = await Create();
-        ResponsePlaylistDetail detail = await Add(id, SongList(3));
+        ResponsePlaylistDetail detail = await Add(id, MediaFileList(3));
 
         await Assert.ThrowsAsync<InvalidPlaylistPositionException>(() => Move(id, detail.EntryList[0].ID, 3));
         await Assert.ThrowsAsync<InvalidPlaylistPositionException>(() => Move(id, detail.EntryList[0].ID, -1));
@@ -605,7 +605,7 @@ public class PlaylistServiceTest
     public async Task Move_UnknownEntry_ThrowsNotFound()
     {
         Guid id = await Create();
-        await Add(id, SongList(2));
+        await Add(id, MediaFileList(2));
 
         await Assert.ThrowsAsync<PlaylistEntryNotFoundException>(() => Move(id, Guid.CreateVersion7(), 0));
     }
@@ -614,26 +614,26 @@ public class PlaylistServiceTest
     public async Task Move_ToTheLastPosition_Works()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(3);
-        ResponsePlaylistDetail detail = await Add(id, songList);
+        List<Guid> mediaFileList = MediaFileList(3);
+        ResponsePlaylistDetail detail = await Add(id, mediaFileList);
 
         await Move(id, detail.EntryList[0].ID, 2);
 
-        Assert.Equal([songList[1], songList[2], songList[0]], StoredSongOrder(id));
+        Assert.Equal([mediaFileList[1], mediaFileList[2], mediaFileList[0]], StoredMediaFileOrder(id));
     }
 
     [Fact]
     public async Task Positions_AreAlwaysDense_AfterAMixOfOperations()
     {
         Guid id = await Create();
-        Guid repeated = Song();
-        ResponsePlaylistDetail detail = await Add(id, [repeated, .. SongList(3), repeated]);
+        Guid repeated = MediaFile();
+        ResponsePlaylistDetail detail = await Add(id, [repeated, .. MediaFileList(3), repeated]);
         AssertDense(id);
 
         await Move(id, detail.EntryList[4].ID, 0);
         AssertDense(id);
 
-        detail = await Add(id, SongList(2), 2);
+        detail = await Add(id, MediaFileList(2), 2);
         AssertDense(id);
 
         detail = await Remove(id, detail.EntryList[0].ID, detail.EntryList[3].ID, detail.EntryList[6].ID);
@@ -653,7 +653,7 @@ public class PlaylistServiceTest
         Guid first = await Create("First");
         Advance();
         Guid second = await Create("Second");
-        await Add(first, SongList(3));
+        await Add(first, MediaFileList(3));
         await Create("Not mine", userID: Guid.CreateVersion7());
 
         PlaylistLibrary library = await Library();
@@ -681,7 +681,7 @@ public class PlaylistServiceTest
     public async Task GetPlaylistLibrary_ETagChangesAfterEveryKindOfChange()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(3);
+        List<Guid> mediaFileList = MediaFileList(3);
         List<string> eTagList = [(await Library()).ETag];
 
         async Task Step(Func<Task> change)
@@ -694,7 +694,7 @@ public class PlaylistServiceTest
         ResponsePlaylistDetail detail = null!;
         await Step(() => _service.Update(UserID, id, new() { Name = new("Renamed") }, Token));
         await Step(() => _service.Update(UserID, id, new() { AllowDuplicates = new(false) }, Token));
-        await Step(async () => detail = await Add(id, songList));
+        await Step(async () => detail = await Add(id, mediaFileList));
         await Step(() => Move(id, detail.EntryList[0].ID, 2));
         await Step(() => Remove(id, detail.EntryList[1].ID));
         Guid other = Guid.Empty;
@@ -711,7 +711,7 @@ public class PlaylistServiceTest
     public async Task GetPlaylistLibrary_NoOpsKeepTheETag()
     {
         Guid id = await Create(allowDuplicates: false);
-        ResponsePlaylistDetail detail = await Add(id, SongList(2));
+        ResponsePlaylistDetail detail = await Add(id, MediaFileList(2));
         string before = (await Library()).ETag;
         Advance();
 
@@ -775,12 +775,12 @@ public class PlaylistServiceTest
     public async Task GetPlaylist_ReturnsEntriesByPosition()
     {
         Guid id = await Create();
-        List<Guid> songList = SongList(3);
-        await Add(id, songList);
+        List<Guid> mediaFileList = MediaFileList(3);
+        await Add(id, mediaFileList);
 
         PlaylistView view = await _service.GetPlaylist(UserID, id, null, Token);
 
-        Assert.Equal(songList, view.Detail!.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal(mediaFileList, view.Detail!.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1, 2], view.Detail.EntryList.Select(x => x.Position));
         Assert.Equal(3, view.Detail.EntryCount);
     }
@@ -805,10 +805,10 @@ public class PlaylistServiceTest
         string before = (await _service.GetPlaylist(UserID, id, null, Token)).ETag;
         Advance();
 
-        await Add(other, SongList(1));
+        await Add(other, MediaFileList(1));
         Assert.Equal(before, (await _service.GetPlaylist(UserID, id, null, Token)).ETag);
 
-        await Add(id, SongList(1));
+        await Add(id, MediaFileList(1));
         Assert.NotEqual(before, (await _service.GetPlaylist(UserID, id, null, Token)).ETag);
     }
 
@@ -820,6 +820,108 @@ public class PlaylistServiceTest
         await Assert.ThrowsAsync<PlaylistNotFoundException>(() => _service.GetPlaylist(Guid.CreateVersion7(), id, null, Token));
     }
 
+    [Fact]
+    public async Task GetPlaylist_ReturnsEntriesWithTheirMediaFileMetadata()
+    {
+        Guid mediaFileID = MediaFile();
+        MediaFile mediaFile = _store.MediaFileList.Single(x => x.ID == mediaFileID);
+        mediaFile.Metadata = new() { Title = "Hello", Artist = "Someone", MediaFileID = mediaFileID };
+        Guid id = await Create();
+        await Add(id, [mediaFileID]);
+
+        ResponsePlaylistEntry entry = Assert.Single((await _service.GetPlaylist(UserID, id, null, Token)).Detail!.EntryList);
+
+        Assert.Equal(mediaFileID, entry.MediaFileID);
+        Assert.Equal(mediaFileID, entry.MediaFile.ID);
+        Assert.Equal("Hello", entry.MediaFile.Title);
+        Assert.Equal("Someone", entry.MediaFile.Artist);
+        Assert.Equal(mediaFile.ContentHash, entry.MediaFile.ContentHash);
+    }
+
+    [Fact]
+    public async Task Mutations_ReturnEntriesWithTheirMediaFileMetadata()
+    {
+        Guid mediaFileID = MediaFile();
+        _store.MediaFileList.Single(x => x.ID == mediaFileID).Metadata = new() { Title = "Hello", MediaFileID = mediaFileID };
+        Guid id = await Create();
+
+        ResponsePlaylistDetail added = await Add(id, [mediaFileID]);
+        ResponsePlaylistDetail moved = await Move(id, added.EntryList[0].ID, 0);
+        ResponsePlaylistDetail twice = await Add(id, [mediaFileID]);
+
+        Assert.Equal("Hello", added.EntryList.Single().MediaFile.Title);
+        Assert.Equal("Hello", moved.EntryList.Single().MediaFile.Title);
+        Assert.All(twice.EntryList, entry => Assert.Equal("Hello", entry.MediaFile.Title));
+    }
+
+    [Fact]
+    public async Task GetPlaylist_AfterAMediaFilesMetadataChanged_NoLongerMatchesTheOldETag()
+    {
+        Guid mediaFileID = MediaFile();
+        Guid id = await Create();
+        await Add(id, [mediaFileID]);
+        string eTag = (await _service.GetPlaylist(UserID, id, null, Token)).ETag;
+        Advance();
+        _store.MediaFileList.Single(x => x.ID == mediaFileID).TimeModified = _time.Now.UtcDateTime;
+
+        PlaylistView view = await _service.GetPlaylist(UserID, id, eTag, Token);
+
+        Assert.NotNull(view.Detail);
+        Assert.NotEqual(eTag, view.ETag);
+    }
+
+    [Fact]
+    public async Task GetPlaylist_WhenNothingChanged_ReturnsNullDetail()
+    {
+        Guid id = await Create();
+        await Add(id, MediaFileList(2));
+        string eTag = (await _service.GetPlaylist(UserID, id, null, Token)).ETag;
+
+        PlaylistView view = await _service.GetPlaylist(UserID, id, eTag, Token);
+
+        Assert.Null(view.Detail);
+        Assert.Equal(eTag, view.ETag);
+    }
+
+    [Fact]
+    public async Task GetPlaylist_SameMediaFileTwice_ReturnsBothEntriesAndAnETag()
+    {
+        Guid mediaFileID = MediaFile();
+        Guid id = await Create();
+        await Add(id, [mediaFileID, mediaFileID]);
+
+        PlaylistView view = await _service.GetPlaylist(UserID, id, null, Token);
+
+        Assert.Equal(2, view.Detail!.EntryList.Count);
+        Assert.NotEmpty(view.ETag);
+        Assert.Null((await _service.GetPlaylist(UserID, id, view.ETag, Token)).Detail);
+    }
+
+    [Fact]
+    public async Task GetPlaylist_EmptyPlaylist_ReturnsADetailWithAnETag()
+    {
+        Guid id = await Create();
+
+        PlaylistView view = await _service.GetPlaylist(UserID, id, null, Token);
+
+        Assert.Empty(view.Detail!.EntryList);
+        Assert.NotEmpty(view.ETag);
+        Assert.Null((await _service.GetPlaylist(UserID, id, view.ETag, Token)).Detail);
+    }
+
+    [Fact]
+    public async Task GetPlaylistLibrary_ETagIsUnchangedByAMediaFileEdit()
+    {
+        Guid mediaFileID = MediaFile();
+        Guid id = await Create();
+        await Add(id, [mediaFileID]);
+        string before = (await Library()).ETag;
+        Advance();
+        _store.MediaFileList.Single(x => x.ID == mediaFileID).TimeModified = _time.Now.UtcDateTime;
+
+        Assert.Equal(before, (await Library()).ETag);
+    }
+
     #endregion -- Reads --
 
     [Fact]
@@ -829,7 +931,7 @@ public class PlaylistServiceTest
 
         Guid id = await Create();
         await _service.Update(UserID, id, new() { Name = new("Renamed") }, Token);
-        ResponsePlaylistDetail detail = await Add(id, SongList(2));
+        ResponsePlaylistDetail detail = await Add(id, MediaFileList(2));
         await Move(id, detail.EntryList[0].ID, 1);
         await Remove(id, detail.EntryList[0].ID);
         await _service.Delete(UserID, id, Token);

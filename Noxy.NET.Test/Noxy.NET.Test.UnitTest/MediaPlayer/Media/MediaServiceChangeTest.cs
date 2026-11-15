@@ -1,11 +1,11 @@
-using Noxy.NET.MediaPlayer.Application.Validators;
-using Noxy.NET.MediaPlayer.Application.Gates;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Gates;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Services;
+using Noxy.NET.MediaPlayer.Application.Validators;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Requests.Media;
@@ -28,10 +28,11 @@ public class MediaServiceChangeTest
     public MediaServiceChangeTest()
     {
         IOptions<ConfigStorage> storageOptions = Options.Create(new ConfigStorage { RootPath = "x", AllowedExtensionList = ["mp3"] });
-        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, new FakeUploadSignal(), storageOptions, Options.Create(new ConfigUpload()), new UploadGate(), _notifier, _playlistNotifier, new ETagService(), _time, NullLogger<MediaService>.Instance);
+        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, new FakeMediaTagWriter(), new FakeUploadSignal(), storageOptions, Options.Create(new ConfigUpload()), new UploadGate(), _notifier, _playlistNotifier,
+            new ETagService(), _time, NullLogger<MediaService>.Instance);
     }
 
-    private MediaFile Seed(Guid? userID = null, string title = "Song", DateTime? timeCreated = null, DateTime? timeModified = null)
+    private MediaFile Seed(Guid? userID = null, string title = "Media", DateTime? timeCreated = null, DateTime? timeModified = null)
     {
         byte[] bytes = [1, 2, 3];
         MediaFile file = new()
@@ -77,7 +78,7 @@ public class MediaServiceChangeTest
 
         Assert.Equal("New Artist", response.Artist);
         Assert.Equal("Album", response.Album);
-        Assert.Equal("Song", response.Title);
+        Assert.Equal("Media", response.Title);
         Assert.Equal("New Artist", Stored(file).Metadata?.Artist);
         Assert.Equal("Album", Stored(file).Metadata?.Album);
     }
@@ -174,30 +175,30 @@ public class MediaServiceChangeTest
     }
 
     [Fact]
-    public async Task Update_NothingChanged_DoesNotCommitBumpOrPush_AndReturnsTheSong()
+    public async Task Update_NothingChanged_DoesNotCommitBumpOrPush_AndReturnsTheMediaFile()
     {
         MediaFile file = Seed();
         DateTime before = file.TimeModified;
         _time.Now = new(2030, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
-        ResponseMediaFile same = await Update(file, new() { Title = new("Song"), Artist = new("Artist"), Year = new(1999) });
+        ResponseMediaFile same = await Update(file, new() { Title = new("Media"), Artist = new("Artist"), Year = new(1999) });
         ResponseMediaFile empty = await Update(file, new());
 
         Assert.Equal(0, _store.CommitCount);
         Assert.Empty(_notifier.UpdatedList);
         Assert.Equal(before, Stored(file).TimeModified);
-        Assert.Equal("Song", same.Title);
+        Assert.Equal("Media", same.Title);
         Assert.Equal(file.ID, empty.ID);
     }
 
     [Fact]
-    public async Task Update_AnotherUsersSong_ThrowsNotFound_AndPushesNothing()
+    public async Task Update_AnotherUsersMediaFile_ThrowsNotFound_AndPushesNothing()
     {
         MediaFile file = Seed();
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => Update(file, new() { Title = new("Hijacked") }, Guid.CreateVersion7()));
 
-        Assert.Equal("Song", Stored(file).Metadata?.Title);
+        Assert.Equal("Media", Stored(file).Metadata?.Title);
         Assert.Empty(_notifier.UpdatedList);
         Assert.Equal(0, _store.CommitCount);
     }
@@ -209,7 +210,7 @@ public class MediaServiceChangeTest
     }
 
     [Fact]
-    public async Task Update_SongWithoutMetadata_ThrowsNotFound()
+    public async Task Update_MediaFileWithoutMetadata_ThrowsNotFound()
     {
         MediaFile file = Seed();
         file.Metadata = null;
@@ -218,7 +219,7 @@ public class MediaServiceChangeTest
     }
 
     [Fact]
-    public async Task Update_NotifierThrows_StillReturnsTheSong()
+    public async Task Update_NotifierThrows_StillReturnsTheMediaFile()
     {
         MediaFile file = Seed();
         _notifier.Failure = new InvalidOperationException("no connection");
@@ -234,7 +235,7 @@ public class MediaServiceChangeTest
     #region -- Delete --
 
     [Fact]
-    public async Task Delete_RemovesTheSongItsFileAndPushesDeleted()
+    public async Task Delete_RemovesTheMediaFileItsFileAndPushesDeleted()
     {
         MediaFile file = Seed();
         MediaFile kept = Seed();
@@ -271,7 +272,7 @@ public class MediaServiceChangeTest
     }
 
     [Fact]
-    public async Task Delete_AnotherUsersSong_ThrowsNotFound_AndKeepsTheFile()
+    public async Task Delete_AnotherUsersMediaFile_ThrowsNotFound_AndKeepsTheFile()
     {
         MediaFile file = Seed();
 
@@ -299,7 +300,7 @@ public class MediaServiceChangeTest
         Assert.Empty(_store.MediaFileList);
     }
 
-    private Playlist SeedPlaylist(Guid userID, params MediaFile[] songList)
+    private Playlist SeedPlaylist(Guid userID, params MediaFile[] mediaFileList)
     {
         Playlist playlist = new()
         {
@@ -309,9 +310,9 @@ public class MediaServiceChangeTest
             TimeModified = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         };
 
-        for (int index = 0; index < songList.Length; index++)
+        for (int index = 0; index < mediaFileList.Length; index++)
         {
-            playlist.EntryList.Add(new() { PlaylistID = playlist.ID, MediaFileID = songList[index].ID, Position = index });
+            playlist.EntryList.Add(new() { PlaylistID = playlist.ID, MediaFileID = mediaFileList[index].ID, Position = index });
         }
 
         _store.PlaylistList.Add(playlist);
@@ -324,7 +325,7 @@ public class MediaServiceChangeTest
     }
 
     [Fact]
-    public async Task Delete_RemovesTheSongFromEveryPlaylistOfTheUser()
+    public async Task Delete_RemovesTheMediaFileFromEveryPlaylistOfTheUser()
     {
         MediaFile file = Seed();
         MediaFile other = Seed();
@@ -340,7 +341,7 @@ public class MediaServiceChangeTest
     }
 
     [Fact]
-    public async Task Delete_SongTwiceInOnePlaylist_RemovesBothEntries()
+    public async Task Delete_MediaFileTwiceInOnePlaylist_RemovesBothEntries()
     {
         MediaFile file = Seed();
         MediaFile other = Seed();
@@ -412,7 +413,7 @@ public class MediaServiceChangeTest
     }
 
     [Fact]
-    public async Task Delete_SongInNoPlaylist_ChangesNoPlaylistAndPushesNoUpdate()
+    public async Task Delete_MediaFileInNoPlaylist_ChangesNoPlaylistAndPushesNoUpdate()
     {
         MediaFile file = Seed();
         MediaFile other = Seed();
@@ -438,7 +439,7 @@ public class MediaServiceChangeTest
     }
 
     [Fact]
-    public async Task Delete_StillCommitsOnce_ForTheSongAndItsPlaylists()
+    public async Task Delete_StillCommitsOnce_ForTheMediaFileAndItsPlaylists()
     {
         MediaFile file = Seed();
         SeedPlaylist(UserID, file);
@@ -581,7 +582,7 @@ public class MediaServiceChangeTest
         MediaFile file = Seed();
         string before = (await Library()).ETag;
 
-        await Update(file, new() { Title = new("Song") });
+        await Update(file, new() { Title = new("Media") });
 
         Assert.Equal(before, (await Library()).ETag);
     }

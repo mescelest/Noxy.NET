@@ -28,7 +28,7 @@ public class MediaRepositoryTest : IDisposable
         return user;
     }
 
-    private static MediaFile CreateMediaFile(Guid userID, string title = "Song", DateTime? timeCreated = null)
+    private static MediaFile CreateMediaFile(Guid userID, string title = "Media", DateTime? timeCreated = null)
     {
         MediaFile file = new()
         {
@@ -59,7 +59,7 @@ public class MediaRepositoryTest : IDisposable
     public async Task Add_ThenFind_ReturnsTheFileWithItsMetadata()
     {
         User user = await CreateUser();
-        MediaFile file = CreateMediaFile(user.ID, "My Song");
+        MediaFile file = CreateMediaFile(user.ID, "My Media");
         file.Metadata!.Artist = "An Artist";
         file.Metadata.Year = 1999;
         file.Metadata.Duration = TimeSpan.FromSeconds(215);
@@ -73,7 +73,7 @@ public class MediaRepositoryTest : IDisposable
         Assert.Equal("audio/mpeg", found.ContentType);
         Assert.Equal(1234, found.SizeBytes);
         Assert.NotNull(found.Metadata);
-        Assert.Equal("My Song", found.Metadata.Title);
+        Assert.Equal("My Media", found.Metadata.Title);
         Assert.Equal("An Artist", found.Metadata.Artist);
         Assert.Equal(1999, found.Metadata.Year);
         Assert.Equal(TimeSpan.FromSeconds(215), found.Metadata.Duration);
@@ -126,12 +126,12 @@ public class MediaRepositoryTest : IDisposable
     {
         User user = await CreateUser();
         DateTime now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
-        await Add(Enumerable.Range(0, 5).Select(i => CreateMediaFile(user.ID, $"Song {i}", now.AddMinutes(i))).ToArray());
+        await Add(Enumerable.Range(0, 5).Select(i => CreateMediaFile(user.ID, $"Media {i}", now.AddMinutes(i))).ToArray());
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         List<MediaFile> page = await uow.Media.GetMediaFileList(user.ID, 1, 2, TestContext.Current.CancellationToken);
 
-        Assert.Equal(["Song 3", "Song 2"], page.Select(x => x.Metadata!.Title));
+        Assert.Equal(["Media 3", "Media 2"], page.Select(x => x.Metadata!.Title));
     }
 
     [Fact]
@@ -204,7 +204,7 @@ public class MediaRepositoryTest : IDisposable
             TimeCreated = timeCreated ?? DateTime.UtcNow,
             UserID = userID,
             StagedFileName = $"{Guid.CreateVersion7()}.mp3",
-            Title = "Song",
+            Title = "Media",
             ContentType = "audio/mpeg",
             SizeBytes = 100,
             ContentHash = new string('c', 64)
@@ -236,7 +236,7 @@ public class MediaRepositoryTest : IDisposable
 
         Assert.Equal(older.ID, next?.ID);
         Assert.Equal(older.StagedFileName, next?.StagedFileName);
-        Assert.Equal("Song", next?.Title);
+        Assert.Equal("Media", next?.Title);
         Assert.Equal(MediaUploadJobStatus.Pending, next?.Status);
     }
 

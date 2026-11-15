@@ -1,7 +1,7 @@
-using Noxy.NET.MediaPlayer.Application.Processors;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Processors;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -29,7 +29,7 @@ public class UploadRecoveryTest
         {
             UserID = UserID,
             StagedFileName = $"{Guid.CreateVersion7()}.mp3",
-            Title = "Song",
+            Title = "Media",
             ContentType = "audio/mpeg",
             SizeBytes = 10,
             ContentHash = new('c', 64),

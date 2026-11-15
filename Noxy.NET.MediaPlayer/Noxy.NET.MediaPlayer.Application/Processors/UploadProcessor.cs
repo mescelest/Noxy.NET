@@ -13,13 +13,13 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Application.Processors;
 
-public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService storage, IUploadNotifier notifier, IOptions<ConfigStorage> options, ILogger<UploadProcessor> logger) : IUploadProcessor
+public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageService serviceFileStorage, IUploadNotifier notifierUpload, IOptions<ConfigStorage> configStorage, ILogger<UploadProcessor> logger) : IUploadProcessor
 {
     public async Task<bool> ProcessNext(CancellationToken cancellationToken = default)
     {
         MediaUploadJob job;
 
-        await using (IUnitOfWork claim = uowFactory.Create())
+        await using (IUnitOfWork claim = factoryUnitOfWork.Create())
         {
             MediaUploadJob? next = await claim.Media.FindNextPendingMediaUploadJob(cancellationToken);
             if (next is null) return false;
@@ -52,15 +52,15 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
 
     public async Task Recover(CancellationToken cancellationToken = default)
     {
-        await using IUnitOfWork uow = uowFactory.Create();
+        await using IUnitOfWork uow = factoryUnitOfWork.Create();
 
         int reset = await uow.Media.ResetProcessingMediaUploadJobs(cancellationToken);
         HashSet<string> jobFileNameSet = [.. await uow.Media.GetMediaUploadJobFileNameList(cancellationToken)];
 
         int orphans = 0;
-        foreach (string staged in storage.GetStagedFileNameList().Where(x => !jobFileNameSet.Contains(x)))
+        foreach (string staged in serviceFileStorage.GetStagedFileNameList().Where(x => !jobFileNameSet.Contains(x)))
         {
-            storage.DeleteStaged(staged);
+            serviceFileStorage.DeleteStaged(staged);
             orphans++;
         }
 
@@ -71,7 +71,7 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
     {
         await EnsureRoomInLibrary(job, cancellationToken);
 
-        storage.Promote(job.StagedFileName);
+        serviceFileStorage.Promote(job.StagedFileName);
 
         MediaFile file = new()
         {
@@ -88,7 +88,7 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
         };
 
         // One commit, so a crash can't leave a library entry without its job being consumed, or the other way round.
-        await using IUnitOfWork uow = uowFactory.Create();
+        await using IUnitOfWork uow = factoryUnitOfWork.Create();
         uow.Media.AddMediaFile(file);
         uow.Media.RemoveMediaUploadJob(job);
         await uow.Commit(cancellationToken);
@@ -104,13 +104,13 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
 
     private async Task EnsureRoomInLibrary(MediaUploadJob job, CancellationToken cancellationToken)
     {
-        await using IUnitOfWork uow = uowFactory.Create();
+        await using IUnitOfWork uow = factoryUnitOfWork.Create();
 
-        if (await uow.Media.CountMediaFiles(job.UserID, cancellationToken) >= options.Value.MaxFilesPerUser) throw new LibraryFullException();
-        if (options.Value.MaxBytesPerUser == 0) return;
+        if (await uow.Media.CountMediaFiles(job.UserID, cancellationToken) >= configStorage.Value.MaxFilesPerUser) throw new LibraryFullException();
+        if (configStorage.Value.MaxBytesPerUser == 0) return;
 
         long used = await uow.Media.SumMediaFileBytes(job.UserID, cancellationToken);
-        if (used + job.SizeBytes > options.Value.MaxBytesPerUser) throw new LibraryFullException();
+        if (used + job.SizeBytes > configStorage.Value.MaxBytesPerUser) throw new LibraryFullException();
     }
 
     private async Task<ResponseUploadResult?> Fail(MediaUploadJob job, Exception exception, CancellationToken cancellationToken)
@@ -128,7 +128,7 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
         // The job goes first. If that fails it stays queued with its files, so the next start tries it again.
         try
         {
-            await using IUnitOfWork uow = uowFactory.Create();
+            await using IUnitOfWork uow = factoryUnitOfWork.Create();
             uow.Media.RemoveMediaUploadJob(job);
             await uow.Commit(cancellationToken);
         }
@@ -139,8 +139,8 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
         }
 
         // The name is unique, so a library file with it can only be one this job promoted before it failed.
-        DeleteQuietly(() => storage.DeleteStaged(job.StagedFileName), job);
-        DeleteQuietly(() => storage.Delete(job.StagedFileName), job);
+        DeleteQuietly(() => serviceFileStorage.DeleteStaged(job.StagedFileName), job);
+        DeleteQuietly(() => serviceFileStorage.Delete(job.StagedFileName), job);
 
         return new()
         {
@@ -168,7 +168,7 @@ public class UploadProcessor(IUnitOfWorkFactory uowFactory, IFileStorageService 
     {
         try
         {
-            await notifier.Notify(userID, result, cancellationToken);
+            await notifierUpload.Notify(userID, result, cancellationToken);
         }
         catch (Exception ex)
         {

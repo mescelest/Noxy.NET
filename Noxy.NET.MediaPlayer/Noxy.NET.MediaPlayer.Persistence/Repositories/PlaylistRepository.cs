@@ -25,7 +25,7 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
     public async Task<Playlist?> FindPlaylistWithEntries(Guid id, Guid userID, CancellationToken cancellationToken = default)
     {
         TablePlaylist? table = await context.Playlist.AsNoTracking()
-            .Include(x => x.EntryList.OrderBy(e => e.Position))
+            .Include(x => x.EntryList.OrderBy(e => e.Position)).ThenInclude(e => e.MediaFile!.Metadata)
             .FirstOrDefaultAsync(x => x.ID == id && x.UserID == userID, cancellationToken);
 
         return table is null ? null : mapperT2E.Map(table);
@@ -48,6 +48,14 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
         return await context.Playlist.AsNoTracking()
             .Where(x => x.UserID == userID)
             .Select(x => new PlaylistStamp(x.ID, x.TimeModified))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<PlaylistStamp>> GetEntryMediaFileStampList(Guid playlistID, Guid userID, CancellationToken cancellationToken = default)
+    {
+        return await context.PlaylistEntry.AsNoTracking()
+            .Where(x => x.PlaylistID == playlistID && x.Playlist!.UserID == userID)
+            .Select(x => new PlaylistStamp(x.MediaFileID, x.MediaFile!.TimeModified))
             .ToListAsync(cancellationToken);
     }
 

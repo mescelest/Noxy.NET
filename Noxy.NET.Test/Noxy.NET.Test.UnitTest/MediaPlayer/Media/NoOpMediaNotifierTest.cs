@@ -12,7 +12,7 @@ public class NoOpMediaNotifierTest
         ResponseMediaFile file = new()
         {
             ID = Guid.CreateVersion7(),
-            Title = "Song",
+            Title = "Media",
             ContentType = "audio/mpeg",
             SizeBytes = 1,
             ContentHash = new string('a', 64),

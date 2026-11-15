@@ -131,7 +131,8 @@ public class TableToEntityMapper : ITableToEntityMapper
             TimeCreated = table.TimeCreated,
             PlaylistID = table.PlaylistID,
             MediaFileID = table.MediaFileID,
-            Position = table.Position
+            Position = table.Position,
+            MediaFile = table.MediaFile is null ? null : Map(table.MediaFile)
         };
     }
 

@@ -11,29 +11,29 @@ namespace Noxy.NET.MediaPlayer.API.Controllers;
 [EnableRateLimiting(Constants.RateLimitPolicyAuth)]
 [Route("[controller]")]
 [ApiController]
-public class AuthController(IAuthenticationService authenticationService) : ControllerBase
+public class AuthController(IAuthenticationService serviceAuthentication) : ControllerBase
 {
     [HttpPost("SignUp")]
     public async Task<ActionResult<ResponseAuthentication>> SignUp(RequestSignUp request, CancellationToken cancellationToken)
     {
-        return await authenticationService.SignUp(request, cancellationToken);
+        return await serviceAuthentication.SignUp(request, cancellationToken);
     }
 
     [HttpPost("SignIn")]
     public async Task<ActionResult<ResponseAuthentication>> SignIn(RequestSignIn request, CancellationToken cancellationToken)
     {
-        return await authenticationService.SignIn(request, cancellationToken);
+        return await serviceAuthentication.SignIn(request, cancellationToken);
     }
 
     [HttpPost("Google")]
     public async Task<ActionResult<ResponseAuthentication>> SignInWithGoogle(RequestSignInGoogle request, CancellationToken cancellationToken)
     {
-        return await authenticationService.SignInWithGoogle(request, cancellationToken);
+        return await serviceAuthentication.SignInWithGoogle(request, cancellationToken);
     }
 
     [HttpPost("Refresh")]
     public async Task<ActionResult<ResponseAuthentication>> Refresh(RequestRefresh request, CancellationToken cancellationToken)
     {
-        return await authenticationService.Refresh(request, cancellationToken);
+        return await serviceAuthentication.Refresh(request, cancellationToken);
     }
 }

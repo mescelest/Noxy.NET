@@ -75,7 +75,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
     {
         Playlist? found = store.PlaylistList.FirstOrDefault(x => x.ID == id && x.UserID == userID);
 
-        return Task.FromResult(found is null ? null : Copy(found, true));
+        return Task.FromResult(found is null ? null : WithMediaFileList(Copy(found, true)));
     }
 
     public Task<List<PlaylistSummary>> GetPlaylistSummaryList(Guid userID, CancellationToken cancellationToken = default)
@@ -93,6 +93,14 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
     public Task<List<PlaylistStamp>> GetPlaylistStampList(Guid userID, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.PlaylistList.Where(x => x.UserID == userID).Select(x => new PlaylistStamp(x.ID, x.TimeModified)).ToList());
+    }
+
+    public Task<List<PlaylistStamp>> GetEntryMediaFileStampList(Guid playlistID, Guid userID, CancellationToken cancellationToken = default)
+    {
+        Playlist? found = store.PlaylistList.FirstOrDefault(x => x.ID == playlistID && x.UserID == userID);
+        List<PlaylistStamp> list = found is null ? [] : [.. found.EntryList.OrderBy(x => x.Position).Select(x => new PlaylistStamp(x.MediaFileID, store.MediaFileList.Single(file => file.ID == x.MediaFileID).TimeModified))];
+
+        return Task.FromResult(list);
     }
 
     public Task<int> CountPlaylists(Guid userID, CancellationToken cancellationToken = default)
@@ -135,6 +143,28 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
     public void RemovePlaylistEntry(PlaylistEntry entry)
     {
         _pendingEntryRemovalList.Add(entry.ID);
+    }
+
+    private Playlist WithMediaFileList(Playlist playlist)
+    {
+        foreach (PlaylistEntry entry in playlist.EntryList)
+        {
+            MediaFile file = store.MediaFileList.Single(x => x.ID == entry.MediaFileID);
+            entry.MediaFile = new()
+            {
+                ID = file.ID,
+                TimeCreated = file.TimeCreated,
+                FilePath = file.FilePath,
+                ContentType = file.ContentType,
+                SizeBytes = file.SizeBytes,
+                ContentHash = file.ContentHash,
+                TimeModified = file.TimeModified,
+                UserID = file.UserID,
+                Metadata = file.Metadata
+            };
+        }
+
+        return playlist;
     }
 
     private static Playlist Copy(Playlist playlist, bool withEntries)

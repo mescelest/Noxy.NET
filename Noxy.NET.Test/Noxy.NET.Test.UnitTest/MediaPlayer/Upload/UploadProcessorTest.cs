@@ -1,7 +1,7 @@
-using Noxy.NET.MediaPlayer.Application.Processors;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Processors;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -25,7 +25,7 @@ public class UploadProcessorTest
     }
 
     // A job as Enqueue leaves it, with its file waiting in staging.
-    private MediaUploadJob AddJob(Guid? userID = null, long size = 100, string title = "Song", DateTime? timeCreated = null, bool staged = true)
+    private MediaUploadJob AddJob(Guid? userID = null, long size = 100, string title = "Media", DateTime? timeCreated = null, bool staged = true)
     {
         MediaUploadJob job = new()
         {
@@ -71,7 +71,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_Success_CreatesMediaFileAndMetadataAndDeletesTheJob()
     {
-        MediaUploadJob job = AddJob(title: "My Song");
+        MediaUploadJob job = AddJob(title: "My Media");
 
         Assert.True(await ProcessNext());
 
@@ -81,7 +81,7 @@ public class UploadProcessorTest
         Assert.Equal(100, file.SizeBytes);
         Assert.Equal(job.ContentHash, file.ContentHash);
         Assert.Equal(UserID, file.UserID);
-        Assert.Equal("My Song", file.Metadata?.Title);
+        Assert.Equal("My Media", file.Metadata?.Title);
         Assert.Equal(file.ID, file.Metadata?.MediaFileID);
         Assert.Empty(_store.MediaUploadJobList);
         Assert.Contains(job.StagedFileName, _storage.Files.Keys);
@@ -92,7 +92,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_Success_NotifiesTheOwnerOnce()
     {
-        MediaUploadJob job = AddJob(title: "My Song");
+        MediaUploadJob job = AddJob(title: "My Media");
 
         await ProcessNext();
 
@@ -100,7 +100,7 @@ public class UploadProcessorTest
         Assert.Equal(UserID, userID);
         Assert.True(result.Succeeded);
         Assert.Equal(job.ID, result.JobID);
-        Assert.Equal("My Song", result.Title);
+        Assert.Equal("My Media", result.Title);
         Assert.Equal(Assert.Single(_store.MediaFileList).ID, result.Media?.ID);
         Assert.Null(result.Reason);
     }

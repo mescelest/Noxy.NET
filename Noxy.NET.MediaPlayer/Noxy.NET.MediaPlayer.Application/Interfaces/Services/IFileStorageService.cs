@@ -7,6 +7,15 @@ public interface IFileStorageService
     Stream OpenRead(string fileName);
     void Delete(string fileName);
 
+    // Copies a stored file to a new file in the temporary folder and returns its path. Throws FileNotFoundException when the stored file is missing.
+    string CopyToTemporary(string fileName);
+
+    // The caller owns the stream. Disposing it deletes the temporary file.
+    Stream OpenTemporary(string path);
+
+    // Safe to repeat: a file that is already gone is left alone.
+    void DeleteTemporary(string path);
+
     // Writes to the staging folder, where a file waits until its upload job has been processed.
     Task<StoredFile> StageAsync(Stream content, string extension, CancellationToken cancellationToken = default);
 

@@ -1,7 +1,7 @@
-using Noxy.NET.MediaPlayer.Application.Validators;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Validators;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.Test.MediaPlayer.Storage;
@@ -23,13 +23,13 @@ public class MediaFileValidatorTest
     }
 
     [Theory]
-    [InlineData("song.mp3", "mp3", "audio/mpeg")]
-    [InlineData("song.FLAC", "flac", "audio/flac")]
-    [InlineData("song.m4a", "m4a", "audio/mp4")]
-    [InlineData("song.ogg", "ogg", "audio/ogg")]
-    [InlineData("song.opus", "opus", "audio/ogg")]
-    [InlineData("song.wav", "wav", "audio/wav")]
-    [InlineData("song.test.mp3", "mp3", "audio/mpeg")]
+    [InlineData("media.mp3", "mp3", "audio/mpeg")]
+    [InlineData("media.FLAC", "flac", "audio/flac")]
+    [InlineData("media.m4a", "m4a", "audio/mp4")]
+    [InlineData("media.ogg", "ogg", "audio/ogg")]
+    [InlineData("media.opus", "opus", "audio/ogg")]
+    [InlineData("media.wav", "wav", "audio/wav")]
+    [InlineData("media.test.mp3", "mp3", "audio/mpeg")]
     public void Validate_MatchingExtensionAndHeader_ReturnsNormalizedFile(string fileName, string extension, string contentType)
     {
         byte[] header = extension switch
@@ -49,14 +49,14 @@ public class MediaFileValidatorTest
     [Fact]
     public void Validate_Mp3FrameSyncWithoutTag_IsAccepted()
     {
-        Assert.Equal("mp3", Create(All).Validate("song.mp3", Mp3Frame).Extension);
+        Assert.Equal("mp3", Create(All).Validate("media.mp3", Mp3Frame).Extension);
     }
 
     [Theory]
-    [InlineData("song.mp3.exe")]
-    [InlineData("song.exe")]
-    [InlineData("song")]
-    [InlineData("song.")]
+    [InlineData("media.mp3.exe")]
+    [InlineData("media.exe")]
+    [InlineData("media")]
+    [InlineData("media.")]
     public void Validate_ExtensionNotAllowed_Throws(string fileName)
     {
         Assert.Throws<UnsupportedMediaTypeException>(() => Create(All).Validate(fileName, Mp3WithTag));
@@ -65,19 +65,19 @@ public class MediaFileValidatorTest
     [Fact]
     public void Validate_ExtensionNotInConfiguredList_Throws()
     {
-        Assert.Throws<UnsupportedMediaTypeException>(() => Create("flac").Validate("song.mp3", Mp3WithTag));
+        Assert.Throws<UnsupportedMediaTypeException>(() => Create("flac").Validate("media.mp3", Mp3WithTag));
     }
 
     [Fact]
     public void Validate_AllowedExtensionWithoutKnownFormat_Throws()
     {
-        Assert.Throws<UnsupportedMediaTypeException>(() => Create("aiff").Validate("song.aiff", Mp3WithTag));
+        Assert.Throws<UnsupportedMediaTypeException>(() => Create("aiff").Validate("media.aiff", Mp3WithTag));
     }
 
     [Fact]
     public void Validate_HeaderOfAnotherFormat_Throws()
     {
-        Assert.Throws<UnsupportedMediaTypeException>(() => Create(All).Validate("song.mp3", Flac));
+        Assert.Throws<UnsupportedMediaTypeException>(() => Create(All).Validate("media.mp3", Flac));
     }
 
     [Fact]
@@ -85,19 +85,19 @@ public class MediaFileValidatorTest
     {
         byte[] avi = [.. "RIFF"u8, 1, 2, 3, 4, .. "AVI "u8];
 
-        Assert.Throws<UnsupportedMediaTypeException>(() => Create(All).Validate("song.wav", avi));
+        Assert.Throws<UnsupportedMediaTypeException>(() => Create(All).Validate("media.wav", avi));
     }
 
     [Fact]
     public void Validate_HeaderTooShort_Throws()
     {
-        Assert.Throws<UnsupportedMediaTypeException>(() => Create(All).Validate("song.m4a", [0, 0, 0]));
-        Assert.Throws<UnsupportedMediaTypeException>(() => Create(All).Validate("song.mp3", []));
+        Assert.Throws<UnsupportedMediaTypeException>(() => Create(All).Validate("media.m4a", [0, 0, 0]));
+        Assert.Throws<UnsupportedMediaTypeException>(() => Create(All).Validate("media.mp3", []));
     }
 
     [Fact]
     public void Validate_ConfiguredExtensionWithDotAndCase_IsNormalized()
     {
-        Assert.Equal("mp3", Create(".MP3").Validate("song.mp3", Mp3WithTag).Extension);
+        Assert.Equal("mp3", Create(".MP3").Validate("media.mp3", Mp3WithTag).Extension);
     }
 }

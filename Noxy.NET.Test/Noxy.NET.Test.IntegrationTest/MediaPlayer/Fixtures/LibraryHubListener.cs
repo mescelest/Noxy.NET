@@ -8,7 +8,7 @@ using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
-namespace Noxy.NET.Test.MediaPlayer.Api;
+namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
 public sealed class LibraryHubListener : IAsyncDisposable
 {

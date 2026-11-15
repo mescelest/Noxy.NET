@@ -6,16 +6,17 @@ using Microsoft.Extensions.Configuration;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
 
 public class PlaylistFlowTest
 {
-    private static async Task<List<Guid>> UploadSongList(MediaApiClient api, ApiAccount user, int count)
+    private static async Task<List<Guid>> UploadMediaFileList(MediaApiClient api, ApiAccount user, int count)
     {
         for (int index = 1; index <= count; index++)
         {
-            HttpResponseMessage response = await api.Upload(user.Token, MediaApiClient.Mp3(300 + index), $"Song {index}.mp3", $"Song {index}");
+            HttpResponseMessage response = await api.Upload(user.Token, MediaApiClient.Mp3(300 + index), $"Media {index}.mp3", $"Media {index}");
             Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
             await api.WaitForMediaFileList(user.Token, index);
         }
@@ -47,9 +48,9 @@ public class PlaylistFlowTest
         return await ReadCreated<ResponsePlaylist>(await api.CreatePlaylist(user.Token, json));
     }
 
-    private static string SongBody(IEnumerable<Guid> songIDList, int? position = null)
+    private static string MediaFileBody(IEnumerable<Guid> mediaFileIDList, int? position = null)
     {
-        return JsonSerializer.Serialize(new { songIDList, position });
+        return JsonSerializer.Serialize(new { mediaFileIDList, position });
     }
 
     private static string EntryBody(IEnumerable<Guid> entryIDList)
@@ -57,9 +58,9 @@ public class PlaylistFlowTest
         return JsonSerializer.Serialize(new { entryIDList });
     }
 
-    private static async Task<ResponsePlaylistDetail> AddSongList(MediaApiClient api, ApiAccount user, Guid playlistID, IEnumerable<Guid> songIDList, int? position = null)
+    private static async Task<ResponsePlaylistDetail> AddMediaFileList(MediaApiClient api, ApiAccount user, Guid playlistID, IEnumerable<Guid> mediaFileIDList, int? position = null)
     {
-        return await Read<ResponsePlaylistDetail>(await api.AddPlaylistEntryList(user.Token, playlistID, SongBody(songIDList, position)));
+        return await Read<ResponsePlaylistDetail>(await api.AddPlaylistEntryList(user.Token, playlistID, MediaFileBody(mediaFileIDList, position)));
     }
 
     private static async Task<ResponsePlaylistDetail> GetDetail(MediaApiClient api, ApiAccount user, Guid playlistID)
@@ -82,13 +83,25 @@ public class PlaylistFlowTest
     #region -- Library --
 
     [Fact]
+    public async Task OldPlaylistsRoute_IsNotFound()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+
+        HttpResponseMessage response = await api.GetPath(user.Token, "/Playlists");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Library_Returns200WithAnETagAndNoEntries_AndAMatchingRequestGets304()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ResponsePlaylist created = await CreatePlaylist(api, user, "Road trip");
-        await AddSongList(api, user, created.ID, await UploadSongList(api, user, 2));
+        await AddMediaFileList(api, user, created.ID, await UploadMediaFileList(api, user, 2));
 
         HttpResponseMessage first = await api.GetPlaylistLibrary(user.Token);
         string eTag = first.Headers.ETag!.Tag;
@@ -113,7 +126,7 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 3);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 3);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
         List<string> eTagList = [await LibraryETag(api, user)];
 
@@ -129,7 +142,7 @@ public class PlaylistFlowTest
         await Step(() => api.PatchPlaylist(user.Token, playlist.ID, """{"allowDuplicates":false}"""));
         await Step(async () =>
         {
-            HttpResponseMessage response = await api.AddPlaylistEntryList(user.Token, playlist.ID, SongBody(songList));
+            HttpResponseMessage response = await api.AddPlaylistEntryList(user.Token, playlist.ID, MediaFileBody(mediaFileList));
             detail = (await response.Content.ReadFromJsonAsync<ResponsePlaylistDetail>(TestContext.Current.CancellationToken))!;
             return response;
         });
@@ -150,15 +163,15 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 1);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 1);
         ResponsePlaylist playlist = await CreatePlaylist(api, user, allowDuplicates: false);
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, songList);
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, mediaFileList);
         string before = await LibraryETag(api, user);
 
         await api.MovePlaylistEntry(user.Token, playlist.ID, detail.EntryList[0].ID, """{"position":0}""");
         await api.PatchPlaylist(user.Token, playlist.ID, """{"name":"Mix","allowDuplicates":false}""");
         await api.PatchPlaylist(user.Token, playlist.ID, "{}");
-        await AddSongList(api, user, playlist.ID, songList);
+        await AddMediaFileList(api, user, playlist.ID, mediaFileList);
 
         Assert.Equal(before, await LibraryETag(api, user));
     }
@@ -223,20 +236,57 @@ public class PlaylistFlowTest
     #region -- Detail --
 
     [Fact]
+    public async Task Detail_EntriesCarryTheMediaFilesTitleAndArtist()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 1);
+        Assert.Equal(HttpStatusCode.OK, (await api.Patch(user.Token, mediaFileList[0], """{"artist":"Someone"}""")).StatusCode);
+        ResponsePlaylist playlist = await CreatePlaylist(api, user);
+        await AddMediaFileList(api, user, playlist.ID, mediaFileList);
+
+        ResponsePlaylistEntry entry = Assert.Single((await GetDetail(api, user, playlist.ID)).EntryList);
+
+        Assert.Equal(mediaFileList[0], entry.MediaFile.ID);
+        Assert.Equal("Media 1", entry.MediaFile.Title);
+        Assert.Equal("Someone", entry.MediaFile.Artist);
+    }
+
+    [Fact]
+    public async Task Detail_AfterPatchingAMediaFileTitle_AnOldIfNoneMatchGetsTheNewTitle()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 1);
+        ResponsePlaylist playlist = await CreatePlaylist(api, user);
+        await AddMediaFileList(api, user, playlist.ID, mediaFileList);
+        string eTag = (await api.GetPlaylist(user.Token, playlist.ID)).Headers.ETag!.Tag;
+        Assert.Equal(HttpStatusCode.OK, (await api.Patch(user.Token, mediaFileList[0], """{"title":"Renamed"}""")).StatusCode);
+
+        HttpResponseMessage response = await api.GetPlaylist(user.Token, playlist.ID, eTag);
+
+        ResponsePlaylistDetail detail = await Read<ResponsePlaylistDetail>(response);
+        Assert.Equal("Renamed", detail.EntryList.Single().MediaFile.Title);
+        Assert.NotEqual(eTag, response.Headers.ETag!.Tag);
+    }
+
+    [Fact]
     public async Task Get_ReturnsEntriesByPosition_And304OnAMatchingETag()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 3);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 3);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        await AddSongList(api, user, playlist.ID, songList);
+        await AddMediaFileList(api, user, playlist.ID, mediaFileList);
 
         HttpResponseMessage first = await api.GetPlaylist(user.Token, playlist.ID);
         ResponsePlaylistDetail detail = await Read<ResponsePlaylistDetail>(first);
         HttpResponseMessage second = await api.GetPlaylist(user.Token, playlist.ID, first.Headers.ETag!.Tag);
 
-        Assert.Equal(songList, detail.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal(mediaFileList, detail.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1, 2], detail.EntryList.Select(x => x.Position));
         Assert.Equal(3, detail.EntryCount);
         Assert.Equal(HttpStatusCode.NotModified, second.StatusCode);
@@ -274,7 +324,7 @@ public class PlaylistFlowTest
         Assert.True(created.AllowDuplicates);
         Assert.Equal(0, created.EntryCount);
         Assert.Equal(DateTimeKind.Utc, created.TimeModified.Kind);
-        Assert.EndsWith($"/Playlists/{created.ID}", response.Headers.Location!.AbsolutePath);
+        Assert.EndsWith($"/Playlist/{created.ID}", response.Headers.Location!.AbsolutePath);
     }
 
     [Theory]
@@ -340,9 +390,9 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 1);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 1);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        await AddSongList(api, user, playlist.ID, [songList[0], songList[0]]);
+        await AddMediaFileList(api, user, playlist.ID, [mediaFileList[0], mediaFileList[0]]);
 
         HttpResponseMessage response = await api.PatchPlaylist(user.Token, playlist.ID, """{"allowDuplicates":false,"name":"Renamed"}""");
 
@@ -358,9 +408,9 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 1);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 1);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, [songList[0], songList[0]]);
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, [mediaFileList[0], mediaFileList[0]]);
 
         await Read<ResponsePlaylistDetail>(await api.RemovePlaylistEntryList(user.Token, playlist.ID, EntryBody([detail.EntryList[1].ID])));
         ResponsePlaylist flagged = await Read<ResponsePlaylist>(await api.PatchPlaylist(user.Token, playlist.ID, """{"allowDuplicates":false}"""));
@@ -397,14 +447,14 @@ public class PlaylistFlowTest
     }
 
     [Fact]
-    public async Task Delete_Returns204_AndTheSongsRemain()
+    public async Task Delete_Returns204_AndTheMediaFilesRemain()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ApiAccount other = await api.SignUp("other@example.com");
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        await AddSongList(api, user, playlist.ID, await UploadSongList(api, user, 2));
+        await AddMediaFileList(api, user, playlist.ID, await UploadMediaFileList(api, user, 2));
 
         Assert.Equal(HttpStatusCode.NotFound, (await api.DeletePlaylist(other.Token, playlist.ID)).StatusCode);
         Assert.Equal(HttpStatusCode.NoContent, (await api.DeletePlaylist(user.Token, playlist.ID)).StatusCode);
@@ -423,13 +473,13 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 3);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 3);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
 
-        await AddSongList(api, user, playlist.ID, songList.Take(2));
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, songList.Skip(2));
+        await AddMediaFileList(api, user, playlist.ID, mediaFileList.Take(2));
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, mediaFileList.Skip(2));
 
-        Assert.Equal(songList, detail.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal(mediaFileList, detail.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1, 2], detail.EntryList.Select(x => x.Position));
         Assert.Equal(3, detail.EntryCount);
     }
@@ -440,13 +490,13 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 4);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 4);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        await AddSongList(api, user, playlist.ID, [songList[0], songList[1], songList[2]]);
+        await AddMediaFileList(api, user, playlist.ID, [mediaFileList[0], mediaFileList[1], mediaFileList[2]]);
 
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, [songList[3]], 1);
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, [mediaFileList[3]], 1);
 
-        Assert.Equal([songList[0], songList[3], songList[1], songList[2]], detail.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[0], mediaFileList[3], mediaFileList[1], mediaFileList[2]], detail.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1, 2, 3], detail.EntryList.Select(x => x.Position));
         Assert.Equal(detail.EntryList.Select(x => x.MediaFileID), (await GetDetail(api, user, playlist.ID)).EntryList.Select(x => x.MediaFileID));
     }
@@ -457,32 +507,32 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 2);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 2);
         ResponsePlaylist strict = await CreatePlaylist(api, user, "Strict", allowDuplicates: false);
         ResponsePlaylist loose = await CreatePlaylist(api, user, "Loose");
 
-        ResponsePlaylistDetail strictDetail = await AddSongList(api, user, strict.ID, [songList[0], songList[0], songList[1]]);
-        ResponsePlaylistDetail again = await AddSongList(api, user, strict.ID, [songList[1]]);
-        ResponsePlaylistDetail looseDetail = await AddSongList(api, user, loose.ID, [songList[0], songList[0]]);
+        ResponsePlaylistDetail strictDetail = await AddMediaFileList(api, user, strict.ID, [mediaFileList[0], mediaFileList[0], mediaFileList[1]]);
+        ResponsePlaylistDetail again = await AddMediaFileList(api, user, strict.ID, [mediaFileList[1]]);
+        ResponsePlaylistDetail looseDetail = await AddMediaFileList(api, user, loose.ID, [mediaFileList[0], mediaFileList[0]]);
 
-        Assert.Equal([songList[0], songList[1]], strictDetail.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[0], mediaFileList[1]], strictDetail.EntryList.Select(x => x.MediaFileID));
         Assert.Equal(2, again.EntryList.Count);
-        Assert.Equal([songList[0], songList[0]], looseDetail.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[0], mediaFileList[0]], looseDetail.EntryList.Select(x => x.MediaFileID));
     }
 
     [Fact]
-    public async Task AddEntries_UnknownOrOtherUsersSong_Returns404_AndAddsNothing()
+    public async Task AddEntries_UnknownOrOtherUsersMediaFile_Returns404_AndAddsNothing()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ApiAccount other = await api.SignUp("other@example.com");
-        List<Guid> mine = await UploadSongList(api, user, 1);
-        List<Guid> theirs = await UploadSongList(api, other, 1);
+        List<Guid> mine = await UploadMediaFileList(api, user, 1);
+        List<Guid> theirs = await UploadMediaFileList(api, other, 1);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
 
-        Assert.Equal(HttpStatusCode.NotFound, (await api.AddPlaylistEntryList(user.Token, playlist.ID, SongBody([mine[0], theirs[0]]))).StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await api.AddPlaylistEntryList(user.Token, playlist.ID, SongBody([Guid.CreateVersion7()]))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await api.AddPlaylistEntryList(user.Token, playlist.ID, MediaFileBody([mine[0], theirs[0]]))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await api.AddPlaylistEntryList(user.Token, playlist.ID, MediaFileBody([Guid.CreateVersion7()]))).StatusCode);
 
         Assert.Empty((await GetDetail(api, user, playlist.ID)).EntryList);
     }
@@ -494,16 +544,16 @@ public class PlaylistFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ApiAccount other = await api.SignUp("other@example.com");
-        List<Guid> theirs = await UploadSongList(api, other, 1);
+        List<Guid> theirs = await UploadMediaFileList(api, other, 1);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
 
-        Assert.Equal(HttpStatusCode.NotFound, (await api.AddPlaylistEntryList(other.Token, playlist.ID, SongBody(theirs))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await api.AddPlaylistEntryList(other.Token, playlist.ID, MediaFileBody(theirs))).StatusCode);
     }
 
     [Theory]
-    [InlineData("""{"songIDList":[]}""")]
+    [InlineData("""{"mediaFileIDList":[]}""")]
     [InlineData("""{}""")]
-    [InlineData("""{"songIDList":["not-a-guid"]}""")]
+    [InlineData("""{"mediaFileIDList":["not-a-guid"]}""")]
     public async Task AddEntries_BadBodies_Return400(string json)
     {
         await using ApiFactory factory = new();
@@ -520,11 +570,11 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 1);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 1);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
 
-        Assert.Equal(HttpStatusCode.BadRequest, (await api.AddPlaylistEntryList(user.Token, playlist.ID, SongBody(songList, -1))).StatusCode);
-        Assert.Equal(HttpStatusCode.BadRequest, (await api.AddPlaylistEntryList(user.Token, playlist.ID, SongBody(songList, 5))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await api.AddPlaylistEntryList(user.Token, playlist.ID, MediaFileBody(mediaFileList, -1))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await api.AddPlaylistEntryList(user.Token, playlist.ID, MediaFileBody(mediaFileList, 5))).StatusCode);
         Assert.Empty((await GetDetail(api, user, playlist.ID)).EntryList);
     }
 
@@ -534,11 +584,11 @@ public class PlaylistFlowTest
         await using ApiFactory factory = Factory(nameof(ConfigPlaylist.MaxEntriesPerPlaylist), "2");
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 3);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 3);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        await AddSongList(api, user, playlist.ID, songList.Take(2));
+        await AddMediaFileList(api, user, playlist.ID, mediaFileList.Take(2));
 
-        Assert.Equal(HttpStatusCode.Conflict, (await api.AddPlaylistEntryList(user.Token, playlist.ID, SongBody([songList[2]]))).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await api.AddPlaylistEntryList(user.Token, playlist.ID, MediaFileBody([mediaFileList[2]]))).StatusCode);
         Assert.Equal(2, (await GetDetail(api, user, playlist.ID)).EntryList.Count);
     }
 
@@ -548,13 +598,13 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 4);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 4);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, songList);
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, mediaFileList);
 
         ResponsePlaylistDetail after = await Read<ResponsePlaylistDetail>(await api.RemovePlaylistEntryList(user.Token, playlist.ID, EntryBody([detail.EntryList[0].ID, detail.EntryList[2].ID])));
 
-        Assert.Equal([songList[1], songList[3]], after.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[1], mediaFileList[3]], after.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1], after.EntryList.Select(x => x.Position));
         Assert.Equal([0, 1], (await GetDetail(api, user, playlist.ID)).EntryList.Select(x => x.Position));
     }
@@ -566,7 +616,7 @@ public class PlaylistFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, await UploadSongList(api, user, 2));
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, await UploadMediaFileList(api, user, 2));
 
         Assert.Equal(HttpStatusCode.NotFound, (await api.RemovePlaylistEntryList(user.Token, playlist.ID, EntryBody([detail.EntryList[0].ID, Guid.CreateVersion7()]))).StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, (await api.RemovePlaylistEntryList(user.Token, playlist.ID, EntryBody([]))).StatusCode);
@@ -580,15 +630,15 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 4);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 4);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, songList);
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, mediaFileList);
 
         ResponsePlaylistDetail down = await Read<ResponsePlaylistDetail>(await api.MovePlaylistEntry(user.Token, playlist.ID, detail.EntryList[0].ID, """{"position":2}"""));
         ResponsePlaylistDetail up = await Read<ResponsePlaylistDetail>(await api.MovePlaylistEntry(user.Token, playlist.ID, detail.EntryList[3].ID, """{"position":0}"""));
 
-        Assert.Equal([songList[1], songList[2], songList[0], songList[3]], down.EntryList.Select(x => x.MediaFileID));
-        Assert.Equal([songList[3], songList[1], songList[2], songList[0]], up.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[1], mediaFileList[2], mediaFileList[0], mediaFileList[3]], down.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[3], mediaFileList[1], mediaFileList[2], mediaFileList[0]], up.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1, 2, 3], up.EntryList.Select(x => x.Position));
         Assert.Equal(up.EntryList.Select(x => x.MediaFileID), (await GetDetail(api, user, playlist.ID)).EntryList.Select(x => x.MediaFileID));
     }
@@ -603,7 +653,7 @@ public class PlaylistFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, await UploadSongList(api, user, 3));
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, await UploadMediaFileList(api, user, 3));
 
         Assert.Equal(HttpStatusCode.BadRequest, (await api.MovePlaylistEntry(user.Token, playlist.ID, detail.EntryList[0].ID, json)).StatusCode);
     }
@@ -615,7 +665,7 @@ public class PlaylistFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, await UploadSongList(api, user, 2));
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, await UploadMediaFileList(api, user, 2));
 
         Assert.Equal(HttpStatusCode.NotFound, (await api.MovePlaylistEntry(user.Token, playlist.ID, Guid.CreateVersion7(), """{"position":0}""")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await api.MovePlaylistEntry(user.Token, Guid.CreateVersion7(), detail.EntryList[0].ID, """{"position":0}""")).StatusCode);
@@ -623,26 +673,26 @@ public class PlaylistFlowTest
 
     #endregion -- Entries --
 
-    #region -- Deleting a song --
+    #region -- Deleting a mediaFile --
 
     [Fact]
-    public async Task DeleteSong_RemovesItFromPlaylists_AndPushesTheChange()
+    public async Task DeleteMediaFile_RemovesItFromPlaylists_AndPushesTheChange()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 3);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 3);
         ResponsePlaylist one = await CreatePlaylist(api, user, "One");
         ResponsePlaylist two = await CreatePlaylist(api, user, "Two");
-        await AddSongList(api, user, one.ID, [songList[0], songList[1], songList[0], songList[2]]);
-        await AddSongList(api, user, two.ID, [songList[1]]);
+        await AddMediaFileList(api, user, one.ID, [mediaFileList[0], mediaFileList[1], mediaFileList[0], mediaFileList[2]]);
+        await AddMediaFileList(api, user, two.ID, [mediaFileList[1]]);
         string before = await LibraryETag(api, user);
         await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
 
-        Assert.Equal(HttpStatusCode.NoContent, (await api.Delete(user.Token, songList[0])).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await api.Delete(user.Token, mediaFileList[0])).StatusCode);
 
         ResponsePlaylistDetail afterOne = await GetDetail(api, user, one.ID);
-        Assert.Equal([songList[1], songList[2]], afterOne.EntryList.Select(x => x.MediaFileID));
+        Assert.Equal([mediaFileList[1], mediaFileList[2]], afterOne.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1], afterOne.EntryList.Select(x => x.Position));
         Assert.Single((await GetDetail(api, user, two.ID)).EntryList);
         Assert.NotEqual(before, await LibraryETag(api, user));
@@ -650,10 +700,10 @@ public class PlaylistFlowTest
         ResponsePlaylist pushed = await phone.NextPlaylistUpdated();
         Assert.Equal(one.ID, pushed.ID);
         Assert.Equal(2, pushed.EntryCount);
-        Assert.Equal(songList[0], await phone.NextMediaDeleted());
+        Assert.Equal(mediaFileList[0], await phone.NextMediaDeleted());
     }
 
-    #endregion -- Deleting a song --
+    #endregion -- Deleting a mediaFile --
 
     #region -- Push --
 
@@ -664,7 +714,7 @@ public class PlaylistFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ApiAccount other = await api.SignUp("other@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 2);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 2);
         await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
         await using LibraryHubListener computer = await LibraryHubListener.Connect(factory, user.Token, tokenInQueryString: true);
         await using LibraryHubListener stranger = await LibraryHubListener.Connect(factory, other.Token);
@@ -673,7 +723,7 @@ public class PlaylistFlowTest
         Assert.Equal(playlist.ID, (await phone.NextPlaylistUpdated()).ID);
         Assert.Equal(playlist.ID, (await computer.NextPlaylistUpdated()).ID);
 
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, songList);
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, mediaFileList);
         ResponsePlaylist added = await phone.NextPlaylistUpdated();
         Assert.Equal(2, added.EntryCount);
         Assert.Equal(2, (await computer.NextPlaylistUpdated()).EntryCount);
@@ -700,14 +750,14 @@ public class PlaylistFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        List<Guid> songList = await UploadSongList(api, user, 1);
+        List<Guid> mediaFileList = await UploadMediaFileList(api, user, 1);
         ResponsePlaylist playlist = await CreatePlaylist(api, user, allowDuplicates: false);
-        ResponsePlaylistDetail detail = await AddSongList(api, user, playlist.ID, songList);
+        ResponsePlaylistDetail detail = await AddMediaFileList(api, user, playlist.ID, mediaFileList);
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 
         await api.PatchPlaylist(user.Token, playlist.ID, """{"name":"Mix"}""");
         await api.MovePlaylistEntry(user.Token, playlist.ID, detail.EntryList[0].ID, """{"position":0}""");
-        await api.AddPlaylistEntryList(user.Token, playlist.ID, SongBody(songList));
+        await api.AddPlaylistEntryList(user.Token, playlist.ID, MediaFileBody(mediaFileList));
 
         Assert.True(await hub.ReceivesNothingWithin(TimeSpan.FromSeconds(1)));
     }

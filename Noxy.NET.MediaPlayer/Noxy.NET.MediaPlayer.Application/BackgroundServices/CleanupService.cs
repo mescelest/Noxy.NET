@@ -6,14 +6,14 @@ using Noxy.NET.MediaPlayer.Application.Interfaces;
 
 namespace Noxy.NET.MediaPlayer.Application.BackgroundServices;
 
-public class CleanupService(IUnitOfWorkFactory uowFactory, IOptions<ConfigCleanup> config, TimeProvider time, ILogger<CleanupService> logger) : BackgroundService
+public class CleanupService(IUnitOfWorkFactory factoryUnitOfWork, IOptions<ConfigCleanup> configCleanup, TimeProvider time, ILogger<CleanupService> logger) : BackgroundService
 {
     // The schedule: once at startup, then on every tick.
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await TryDeleteExpired(stoppingToken);
 
-        using PeriodicTimer timer = new(TimeSpan.FromHours(config.Value.IntervalHours), time);
+        using PeriodicTimer timer = new(TimeSpan.FromHours(configCleanup.Value.IntervalHours), time);
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             await TryDeleteExpired(stoppingToken);
@@ -23,9 +23,9 @@ public class CleanupService(IUnitOfWorkFactory uowFactory, IOptions<ConfigCleanu
     // The work. Can be called on its own, and throws if it fails.
     public async Task DeleteExpired(CancellationToken cancellationToken = default)
     {
-        DateTime expiredBefore = time.GetUtcNow().UtcDateTime.AddDays(-config.Value.RetentionDays);
+        DateTime expiredBefore = time.GetUtcNow().UtcDateTime.AddDays(-configCleanup.Value.RetentionDays);
 
-        await using IUnitOfWork uow = uowFactory.Create();
+        await using IUnitOfWork uow = factoryUnitOfWork.Create();
         int deleted = await uow.Authentication.DeleteExpiredRefreshTokens(expiredBefore, cancellationToken);
 
         if (logger.IsEnabled(LogLevel.Information))

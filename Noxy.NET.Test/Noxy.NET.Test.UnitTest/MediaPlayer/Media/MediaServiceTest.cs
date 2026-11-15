@@ -1,11 +1,11 @@
-using Noxy.NET.MediaPlayer.Application.Validators;
-using Noxy.NET.MediaPlayer.Application.Gates;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Gates;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Services;
+using Noxy.NET.MediaPlayer.Application.Validators;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
@@ -28,7 +28,8 @@ public class MediaServiceTest
     public MediaServiceTest()
     {
         IOptions<ConfigStorage> storageOptions = Options.Create(_storageConfig);
-        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate(), new FakeMediaNotifier(), new FakePlaylistNotifier(), new ETagService(), new FakeTimeProvider(),
+        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, new FakeMediaTagWriter(), _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate(), new FakeMediaNotifier(), new FakePlaylistNotifier(),
+            new ETagService(), new FakeTimeProvider(),
             NullLogger<MediaService>.Instance);
     }
 
@@ -82,7 +83,7 @@ public class MediaServiceTest
     {
         byte[] content = Mp3();
 
-        await Enqueue("song.mp3", content);
+        await Enqueue("media.mp3", content);
 
         Assert.Equal(content, Assert.Single(_storage.Staged).Value);
         Assert.Empty(_storage.Files);
@@ -93,13 +94,13 @@ public class MediaServiceTest
     {
         byte[] content = Mp3();
 
-        ResponseUploadAccepted response = await Enqueue("song.test.mp3", content, "My song");
+        ResponseUploadAccepted response = await Enqueue("media.test.mp3", content, "My media");
 
         MediaUploadJob job = Assert.Single(_store.MediaUploadJobList);
         Assert.Equal(response.JobID, job.ID);
         Assert.Equal(UserID, job.UserID);
         Assert.Equal(_storage.Staged.Keys.Single(), job.StagedFileName);
-        Assert.Equal("My song", job.Title);
+        Assert.Equal("My media", job.Title);
         Assert.Equal("audio/mpeg", job.ContentType);
         Assert.Equal(100, job.SizeBytes);
         Assert.Equal(Convert.ToHexStringLower(SHA256.HashData(content)), job.ContentHash);
@@ -110,9 +111,9 @@ public class MediaServiceTest
     [Fact]
     public async Task Enqueue_NoTitle_UsesTheFileNameWithoutItsExtension()
     {
-        await Enqueue("song.mp3", Mp3());
+        await Enqueue("media.mp3", Mp3());
 
-        Assert.Equal("song", Assert.Single(_store.MediaUploadJobList).Title);
+        Assert.Equal("media", Assert.Single(_store.MediaUploadJobList).Title);
     }
 
     [Fact]
@@ -127,7 +128,7 @@ public class MediaServiceTest
     [Fact]
     public async Task Enqueue_NotifiesTheSignalOnce()
     {
-        await Enqueue("song.mp3", Mp3());
+        await Enqueue("media.mp3", Mp3());
 
         Assert.Equal(1, _signal.NotifyCount);
     }
@@ -135,14 +136,14 @@ public class MediaServiceTest
     [Fact]
     public async Task Enqueue_DoesNotCreateAMediaFileYet()
     {
-        await Enqueue("song.mp3", Mp3());
+        await Enqueue("media.mp3", Mp3());
 
         Assert.Empty(_store.MediaFileList);
     }
 
     [Theory]
-    [InlineData("song.exe")]
-    [InlineData("song.flac")]
+    [InlineData("media.exe")]
+    [InlineData("media.flac")]
     public async Task Enqueue_ExtensionNotMatchingTheHeader_ThrowsAndStagesNothing(string fileName)
     {
         await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue(fileName, Mp3()));
@@ -153,7 +154,7 @@ public class MediaServiceTest
     [Fact]
     public async Task Enqueue_EmptyFile_ThrowsAndStagesNothing()
     {
-        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue("song.mp3", []));
+        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue("media.mp3", []));
 
         AssertNothingQueued();
     }
@@ -161,7 +162,7 @@ public class MediaServiceTest
     [Fact]
     public async Task Enqueue_ShortFileWithAWrongHeader_ThrowsAndStagesNothing()
     {
-        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue("song.mp3", "abc"u8.ToArray()));
+        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue("media.mp3", "abc"u8.ToArray()));
 
         AssertNothingQueued();
     }
@@ -197,7 +198,7 @@ public class MediaServiceTest
         _storageConfig.MaxBytesPerUser = 150;
         Seed(UserID, "full", 150);
 
-        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("song.mp3", Mp3(10)));
+        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("media.mp3", Mp3(10)));
 
         AssertNothingQueued();
     }
@@ -209,7 +210,7 @@ public class MediaServiceTest
         Seed(UserID, "mine", 50);
         SeedPendingJob(UserID, 100);
 
-        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("song.mp3", Mp3(10)));
+        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("media.mp3", Mp3(10)));
 
         Assert.Empty(_storage.Staged);
     }
@@ -220,7 +221,7 @@ public class MediaServiceTest
         _storageConfig.MaxBytesPerUser = 150;
         Seed(UserID, "mine");
 
-        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("song.mp3", Mp3(51)));
+        await Assert.ThrowsAsync<LibraryFullException>(() => Enqueue("media.mp3", Mp3(51)));
 
         AssertNothingQueued();
     }
@@ -231,7 +232,7 @@ public class MediaServiceTest
         _storageConfig.MaxBytesPerUser = 150;
         Seed(UserID, "mine");
 
-        await Enqueue("song.mp3", Mp3(50));
+        await Enqueue("media.mp3", Mp3(50));
 
         Assert.Single(_store.MediaUploadJobList);
     }
@@ -242,7 +243,7 @@ public class MediaServiceTest
         _storageConfig.MaxBytesPerUser = 150;
         Seed(UserID, "mine", 150);
 
-        await Enqueue("song.mp3", Mp3(), userID: Guid.CreateVersion7());
+        await Enqueue("media.mp3", Mp3(), userID: Guid.CreateVersion7());
 
         Assert.Single(_store.MediaUploadJobList);
     }
@@ -252,7 +253,7 @@ public class MediaServiceTest
     {
         _storage.StageFailure = new FileTooLargeException(10);
 
-        await Assert.ThrowsAsync<FileTooLargeException>(() => Enqueue("song.mp3", Mp3()));
+        await Assert.ThrowsAsync<FileTooLargeException>(() => Enqueue("media.mp3", Mp3()));
     }
 
     [Fact]
@@ -262,7 +263,7 @@ public class MediaServiceTest
         SeedPendingJob(UserID);
         SeedPendingJob(UserID);
 
-        await Assert.ThrowsAsync<UploadQueueFullException>(() => Enqueue("song.mp3", Mp3()));
+        await Assert.ThrowsAsync<UploadQueueFullException>(() => Enqueue("media.mp3", Mp3()));
 
         Assert.Empty(_storage.Staged);
         Assert.Equal(2, _store.MediaUploadJobList.Count);
@@ -274,7 +275,7 @@ public class MediaServiceTest
         _uploadConfig.MaxPendingPerUser = 1;
         SeedPendingJob(UserID);
 
-        await Enqueue("song.mp3", Mp3(), userID: Guid.CreateVersion7());
+        await Enqueue("media.mp3", Mp3(), userID: Guid.CreateVersion7());
 
         Assert.Equal(2, _store.MediaUploadJobList.Count);
     }
@@ -284,7 +285,7 @@ public class MediaServiceTest
     {
         _store.FailCommit = true;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => Enqueue("song.mp3", Mp3()));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Enqueue("media.mp3", Mp3()));
 
         Assert.Empty(_storage.Staged);
         Assert.Single(_storage.DeletedStagedList);
@@ -297,7 +298,7 @@ public class MediaServiceTest
     {
         _storage.StageFailure = new FileTooLargeException(10);
 
-        await Assert.ThrowsAsync<FileTooLargeException>(() => Enqueue("song.mp3", Mp3()));
+        await Assert.ThrowsAsync<FileTooLargeException>(() => Enqueue("media.mp3", Mp3()));
 
         AssertNothingQueued();
     }
@@ -355,7 +356,7 @@ public class MediaServiceTest
     {
         await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => Enqueue("bad.exe", Mp3()));
         _store.FailCommit = true;
-        await Assert.ThrowsAsync<InvalidOperationException>(() => Enqueue("song.mp3", Mp3()));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Enqueue("media.mp3", Mp3()));
         _store.FailCommit = false;
 
         await Enqueue("good.mp3", Mp3());
@@ -389,19 +390,19 @@ public class MediaServiceTest
     public async Task GetMediaFileList_AppliesSkipAndTake()
     {
         DateTime now = DateTime.UtcNow;
-        Seed(UserID, "song0", timeCreated: now.AddMinutes(-2));
-        Seed(UserID, "song1", timeCreated: now.AddMinutes(-1));
-        Seed(UserID, "song2", timeCreated: now);
+        Seed(UserID, "media0", timeCreated: now.AddMinutes(-2));
+        Seed(UserID, "media1", timeCreated: now.AddMinutes(-1));
+        Seed(UserID, "media2", timeCreated: now);
 
         List<ResponseMediaFile> page = await _service.GetMediaFileList(UserID, 1, 1, TestContext.Current.CancellationToken);
 
-        Assert.Equal("song1", Assert.Single(page).Title);
+        Assert.Equal("media1", Assert.Single(page).Title);
     }
 
     [Fact]
     public async Task GetMediaFileList_ReturnsTheHashAndUtcTimes()
     {
-        MediaFile file = Seed(UserID, "song", timeCreated: new(2026, 1, 2, 3, 4, 5, DateTimeKind.Unspecified));
+        MediaFile file = Seed(UserID, "media", timeCreated: new(2026, 1, 2, 3, 4, 5, DateTimeKind.Unspecified));
 
         ResponseMediaFile response = Assert.Single(await _service.GetMediaFileList(UserID, 0, 10, TestContext.Current.CancellationToken));
 
@@ -413,7 +414,7 @@ public class MediaServiceTest
     [Fact]
     public async Task Open_ReturnsTheContentNamedAfterTheTitle()
     {
-        MediaFile file = Seed(UserID, "My Song", 50);
+        MediaFile file = Seed(UserID, "My Media", 50);
 
         MediaDownload download = await _service.Open(UserID, file.ID, TestContext.Current.CancellationToken);
         await using Stream stream = download.Content;
@@ -422,7 +423,18 @@ public class MediaServiceTest
 
         Assert.Equal(Mp3(50), copy.ToArray());
         Assert.Equal("audio/mpeg", download.ContentType);
-        Assert.Equal("My Song.mp3", download.FileName);
+        Assert.Equal("My Media.mp3", download.FileName);
+    }
+
+    [Fact]
+    public async Task Open_ReturnsTheStoredContentHash()
+    {
+        MediaFile file = Seed(UserID, "My Media", 50);
+
+        MediaDownload download = await _service.Open(UserID, file.ID, TestContext.Current.CancellationToken);
+        await download.Content.DisposeAsync();
+
+        Assert.Equal(file.ContentHash, download.ContentHash);
     }
 
     [Fact]
@@ -434,7 +446,7 @@ public class MediaServiceTest
     [Fact]
     public async Task Open_AnotherUsersFile_ThrowsNotFound()
     {
-        MediaFile file = Seed(UserID, "song");
+        MediaFile file = Seed(UserID, "media");
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.Open(Guid.CreateVersion7(), file.ID, TestContext.Current.CancellationToken));
     }
@@ -442,7 +454,7 @@ public class MediaServiceTest
     [Fact]
     public async Task Open_FileMissingFromStorage_ThrowsNotFound()
     {
-        MediaFile file = Seed(UserID, "song");
+        MediaFile file = Seed(UserID, "media");
         _storage.Files.Clear();
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.Open(UserID, file.ID, TestContext.Current.CancellationToken));

@@ -28,7 +28,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
 
         store.MediaFileList.RemoveAll(x => _pendingMediaFileRemovalList.Contains(x.ID));
 
-        // The database cascade: a removed song leaves every playlist.
+        // The database cascade: a removed media file leaves every playlist.
         foreach (Playlist playlist in store.PlaylistList)
         {
             playlist.EntryList.RemoveAll(x => _pendingMediaFileRemovalList.Contains(x.MediaFileID));
