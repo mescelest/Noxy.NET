@@ -103,6 +103,14 @@ public sealed class LibraryHubListener : IAsyncDisposable
         return await channel.Reader.ReadAsync(timeout.Token);
     }
 
+    // How many events this connection has received in total, after waiting a moment for stragglers.
+    public async Task<int> CountReceivedAfter(TimeSpan wait)
+    {
+        await Task.Delay(wait, TestContext.Current.CancellationToken);
+
+        return _anyMessages.Reader.Count;
+    }
+
     public async Task<bool> ReceivesNothingWithin(TimeSpan time)
     {
         using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);

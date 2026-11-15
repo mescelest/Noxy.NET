@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Noxy.NET.MediaPlayer.Domain.Requests.Media;
+using Noxy.NET.MediaPlayer.Application.Requests.Media;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
 

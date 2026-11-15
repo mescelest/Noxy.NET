@@ -375,6 +375,21 @@ public class MediaChangeFlowTest
     }
 
     [Fact]
+    public async Task Push_AMediaUpdate_ReachesAConnectionExactlyOnce()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
+        await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
+
+        await api.Patch(user.Token, mediaFile.ID, """{"title":"Renamed"}""");
+
+        await phone.NextMediaUpdated();
+        Assert.Equal(1, await phone.CountReceivedAfter(TimeSpan.FromSeconds(1)));
+    }
+
+    [Fact]
     public async Task Push_NoOpPatch_PushesNothing()
     {
         await using ApiFactory factory = new();
@@ -420,6 +435,20 @@ public class MediaChangeFlowTest
         (string name, ResponseUploadResult result) = await hub.Next();
         Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), name);
         Assert.Equal("One", result.Media?.Title);
+    }
+
+    [Fact]
+    public async Task Push_AnUpload_ReachesAConnectionExactlyOnce()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
+
+        await api.Upload(user.Token, MediaApiClient.Mp3(), "media.mp3", "One");
+
+        await hub.Next();
+        Assert.Equal(1, await hub.CountReceivedAfter(TimeSpan.FromSeconds(1)));
     }
 
     #endregion -- Push --

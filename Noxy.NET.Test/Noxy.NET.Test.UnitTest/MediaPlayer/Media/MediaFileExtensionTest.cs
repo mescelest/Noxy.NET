@@ -84,4 +84,21 @@ public class MediaFileExtensionTest
         Assert.Equal(DateTimeKind.Utc, response.TimeCreated.Kind);
         Assert.Equal(DateTimeKind.Utc, response.TimeModified.Kind);
     }
+
+    [Fact]
+    public void GetDownloadFileName_UsesTheTitleAndTheStoredExtension()
+    {
+        MediaFile file = CreateFile();
+
+        Assert.Equal("Media.mp3", file.GetDownloadFileName());
+    }
+
+    [Fact]
+    public void GetDownloadFileName_WithoutMetadata_UsesTheStoredFileName()
+    {
+        MediaFile file = CreateFile();
+        file.Metadata = null;
+
+        Assert.Equal("stored.mp3", file.GetDownloadFileName());
+    }
 }

@@ -1,10 +1,8 @@
 using System.Security.Cryptography;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Gates;
-using Noxy.NET.MediaPlayer.Application.Models;
-using Noxy.NET.MediaPlayer.Application.Services;
+using Noxy.NET.MediaPlayer.Application.Handlers.Media;
 using Noxy.NET.MediaPlayer.Application.Validators;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
@@ -14,7 +12,7 @@ using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
 
-public class MediaServiceTest
+public class HandlerMediaUploadTest
 {
     private static readonly Guid UserID = Guid.CreateVersion7();
 
@@ -23,14 +21,12 @@ public class MediaServiceTest
     private readonly FakeFileStorageService _storage = new();
     private readonly FakeUploadSignal _signal = new();
     private readonly FakeStore _store = new();
-    private readonly MediaService _service;
+    private readonly HandlerMediaUpload _handler;
 
-    public MediaServiceTest()
+    public HandlerMediaUploadTest()
     {
         IOptions<ConfigStorage> storageOptions = Options.Create(_storageConfig);
-        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, new FakeMediaTagWriter(), _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate(), new FakeMediaNotifier(), new FakePlaylistNotifier(),
-            new ETagService(), new FakeTimeProvider(),
-            NullLogger<MediaService>.Instance);
+        _handler = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate());
     }
 
     private static byte[] Mp3(int length = 100)
@@ -42,7 +38,7 @@ public class MediaServiceTest
 
     private Task<ResponseUploadAccepted> Enqueue(string fileName, byte[] content, string? title = null, Guid? userID = null)
     {
-        return _service.Enqueue(userID ?? UserID, fileName, title, new MemoryStream(content), TestContext.Current.CancellationToken);
+        return _handler.Handle(new(userID ?? UserID, fileName, title, new MemoryStream(content)), TestContext.Current.CancellationToken).AsTask();
     }
 
     // A file that is already in the library, as the worker would have left it.
@@ -317,7 +313,7 @@ public class MediaServiceTest
     public async Task Enqueue_WhileTheSameUsersOtherUploadIsStillArriving_ThrowsUploadInProgress()
     {
         FakeBlockingStream arriving = new(Mp3());
-        Task<ResponseUploadAccepted> first = _service.Enqueue(UserID, "slow.mp3", null, arriving, TestContext.Current.CancellationToken);
+        Task<ResponseUploadAccepted> first = _handler.Handle(new(UserID, "slow.mp3", null, arriving), TestContext.Current.CancellationToken).AsTask();
         await WaitUntil(() => arriving.IsWaiting);
 
         await Assert.ThrowsAsync<UploadInProgressException>(() => Enqueue("second.mp3", Mp3()));
@@ -332,7 +328,7 @@ public class MediaServiceTest
     public async Task Enqueue_AnotherUsersUploadIsNotBlockedByAnArrivingOne()
     {
         FakeBlockingStream arriving = new(Mp3());
-        Task<ResponseUploadAccepted> first = _service.Enqueue(UserID, "slow.mp3", null, arriving, TestContext.Current.CancellationToken);
+        Task<ResponseUploadAccepted> first = _handler.Handle(new(UserID, "slow.mp3", null, arriving), TestContext.Current.CancellationToken).AsTask();
         await WaitUntil(() => arriving.IsWaiting);
 
         await Enqueue("other.mp3", Mp3(), userID: Guid.CreateVersion7());
@@ -364,99 +360,40 @@ public class MediaServiceTest
         Assert.Single(_store.MediaUploadJobList);
     }
 
+    [Fact]
+    public async Task Upload_Cancelled_ReleasesTheUsersSlotAndStagesNothing()
+    {
+        using CancellationTokenSource cancelled = new();
+        await cancelled.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => _handler.Handle(new(UserID, "media.mp3", null, new MemoryStream(Mp3())), cancelled.Token).AsTask());
+        AssertNothingQueued();
+
+        await Enqueue("next.mp3", Mp3());
+
+        Assert.Single(_store.MediaUploadJobList);
+    }
+
+    [Fact]
+    public async Task Upload_DoesNotDisposeTheContentStream()
+    {
+        bool disposed = false;
+        await using FakeDisposeCallbackStream accepted = new(Mp3(), () => disposed = true);
+
+        await _handler.Handle(new(UserID, "media.mp3", null, accepted), TestContext.Current.CancellationToken);
+        Assert.False(disposed);
+
+        await using FakeDisposeCallbackStream rejected = new(Mp3(), () => disposed = true);
+
+        await Assert.ThrowsAsync<UnsupportedMediaTypeException>(() => _handler.Handle(new(UserID, "media.exe", null, rejected), TestContext.Current.CancellationToken).AsTask());
+        Assert.False(disposed);
+    }
+
     private void AssertNothingQueued()
     {
         Assert.Empty(_storage.Staged);
         Assert.Empty(_store.MediaUploadJobList);
         Assert.Equal(0, _store.CommitCount);
         Assert.Equal(0, _signal.NotifyCount);
-    }
-
-    [Fact]
-    public async Task GetMediaFileList_ReturnsOnlyTheUsersFilesNewestFirst()
-    {
-        DateTime now = DateTime.UtcNow;
-        MediaFile older = Seed(UserID, "old", timeCreated: now.AddMinutes(-5));
-        MediaFile newer = Seed(UserID, "new", timeCreated: now);
-        Seed(Guid.CreateVersion7(), "other");
-
-        List<ResponseMediaFile> list = await _service.GetMediaFileList(UserID, 0, 10, TestContext.Current.CancellationToken);
-
-        Assert.Equal([newer.ID, older.ID], list.Select(x => x.ID));
-        Assert.Equal(["new", "old"], list.Select(x => x.Title));
-    }
-
-    [Fact]
-    public async Task GetMediaFileList_AppliesSkipAndTake()
-    {
-        DateTime now = DateTime.UtcNow;
-        Seed(UserID, "media0", timeCreated: now.AddMinutes(-2));
-        Seed(UserID, "media1", timeCreated: now.AddMinutes(-1));
-        Seed(UserID, "media2", timeCreated: now);
-
-        List<ResponseMediaFile> page = await _service.GetMediaFileList(UserID, 1, 1, TestContext.Current.CancellationToken);
-
-        Assert.Equal("media1", Assert.Single(page).Title);
-    }
-
-    [Fact]
-    public async Task GetMediaFileList_ReturnsTheHashAndUtcTimes()
-    {
-        MediaFile file = Seed(UserID, "media", timeCreated: new(2026, 1, 2, 3, 4, 5, DateTimeKind.Unspecified));
-
-        ResponseMediaFile response = Assert.Single(await _service.GetMediaFileList(UserID, 0, 10, TestContext.Current.CancellationToken));
-
-        Assert.Equal(file.ContentHash, response.ContentHash);
-        Assert.Equal(DateTimeKind.Utc, response.TimeCreated.Kind);
-        Assert.Equal(DateTimeKind.Utc, response.TimeModified.Kind);
-    }
-
-    [Fact]
-    public async Task Open_ReturnsTheContentNamedAfterTheTitle()
-    {
-        MediaFile file = Seed(UserID, "My Media", 50);
-
-        MediaDownload download = await _service.Open(UserID, file.ID, TestContext.Current.CancellationToken);
-        await using Stream stream = download.Content;
-        using MemoryStream copy = new();
-        await stream.CopyToAsync(copy, TestContext.Current.CancellationToken);
-
-        Assert.Equal(Mp3(50), copy.ToArray());
-        Assert.Equal("audio/mpeg", download.ContentType);
-        Assert.Equal("My Media.mp3", download.FileName);
-    }
-
-    [Fact]
-    public async Task Open_ReturnsTheStoredContentHash()
-    {
-        MediaFile file = Seed(UserID, "My Media", 50);
-
-        MediaDownload download = await _service.Open(UserID, file.ID, TestContext.Current.CancellationToken);
-        await download.Content.DisposeAsync();
-
-        Assert.Equal(file.ContentHash, download.ContentHash);
-    }
-
-    [Fact]
-    public async Task Open_UnknownId_ThrowsNotFound()
-    {
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.Open(UserID, Guid.CreateVersion7(), TestContext.Current.CancellationToken));
-    }
-
-    [Fact]
-    public async Task Open_AnotherUsersFile_ThrowsNotFound()
-    {
-        MediaFile file = Seed(UserID, "media");
-
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.Open(Guid.CreateVersion7(), file.ID, TestContext.Current.CancellationToken));
-    }
-
-    [Fact]
-    public async Task Open_FileMissingFromStorage_ThrowsNotFound()
-    {
-        MediaFile file = Seed(UserID, "media");
-        _storage.Files.Clear();
-
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.Open(UserID, file.ID, TestContext.Current.CancellationToken));
     }
 }

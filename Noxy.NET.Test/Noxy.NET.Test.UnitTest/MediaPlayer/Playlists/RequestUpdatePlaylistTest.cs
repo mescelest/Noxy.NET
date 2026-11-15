@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
-using Noxy.NET.MediaPlayer.Domain.Requests.Playlist;
+using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 
 namespace Noxy.NET.Test.MediaPlayer.Playlists;
 

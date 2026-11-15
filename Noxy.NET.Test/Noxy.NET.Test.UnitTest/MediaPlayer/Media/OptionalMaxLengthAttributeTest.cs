@@ -1,4 +1,5 @@
-using Noxy.NET.MediaPlayer.Domain.Requests;
+using Noxy.NET.MediaPlayer.Application.Attributes;
+using Noxy.NET.MediaPlayer.Application.Models;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
 

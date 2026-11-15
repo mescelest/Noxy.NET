@@ -1,11 +1,12 @@
-using Noxy.NET.MediaPlayer.Persistence.Mappers;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Handlers.Authentication;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Persistence;
+using Noxy.NET.MediaPlayer.Persistence.Mappers;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
@@ -38,14 +39,21 @@ public sealed class DatabaseFixture : IDisposable
         GoogleTokenService = new();
         UoWFactory = new UnitOfWorkFactory(new ContextFactory(_options), new EntityToTableMapper(), new TableToEntityMapper());
         TokenService = new(Options.Create(config), Time);
-        AuthenticationService = new(UoWFactory, new PasswordHashService(), TokenService, GoogleTokenService, Time);
+        PasswordHashService servicePasswordHash = new();
+        SignUp = new(UoWFactory, servicePasswordHash, TokenService);
+        SignIn = new(UoWFactory, servicePasswordHash, TokenService);
+        SignInGoogle = new(UoWFactory, GoogleTokenService, TokenService);
+        Refresh = new(UoWFactory, TokenService, Time);
     }
 
     public FakeTimeProvider Time { get; }
     public FakeGoogleTokenService GoogleTokenService { get; }
     public IUnitOfWorkFactory UoWFactory { get; }
     public TokenService TokenService { get; }
-    public AuthenticationService AuthenticationService { get; }
+    public HandlerAuthenticationSignUp SignUp { get; }
+    public HandlerAuthenticationSignIn SignIn { get; }
+    public HandlerAuthenticationSignInGoogle SignInGoogle { get; }
+    public HandlerAuthenticationRefresh Refresh { get; }
 
     // A separate context, for looking at the tables directly.
     public DataContext CreateContext()

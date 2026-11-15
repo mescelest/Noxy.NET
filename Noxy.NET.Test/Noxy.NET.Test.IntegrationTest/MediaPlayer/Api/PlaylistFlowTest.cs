@@ -708,6 +708,20 @@ public class PlaylistFlowTest
     #region -- Push --
 
     [Fact]
+    public async Task Push_APlaylistUpdate_ReachesAConnectionExactlyOnce()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
+
+        await CreatePlaylist(api, user);
+
+        await phone.NextPlaylistUpdated();
+        Assert.Equal(1, await phone.CountReceivedAfter(TimeSpan.FromSeconds(1)));
+    }
+
+    [Fact]
     public async Task Push_EveryChange_SendsPlaylistUpdatedToEveryConnectionOfTheUser_AndNotToAnotherUser()
     {
         await using ApiFactory factory = new();

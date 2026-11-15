@@ -1,33 +1,26 @@
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Noxy.NET.MediaPlayer.Application.Configurations;
-using Noxy.NET.MediaPlayer.Application.Gates;
+using Noxy.NET.MediaPlayer.Application.Handlers.Media;
 using Noxy.NET.MediaPlayer.Application.Models;
-using Noxy.NET.MediaPlayer.Application.Services;
-using Noxy.NET.MediaPlayer.Application.Validators;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
 
-public class MediaServiceDownloadTest
+public class HandlerMediaFileWithTagsTest
 {
     private static readonly Guid UserID = Guid.CreateVersion7();
 
     private readonly FakeFileStorageService _storage = new();
     private readonly FakeMediaTagWriter _tagWriter = new();
-    private readonly FakeLogger<MediaService> _logger = new();
+    private readonly FakeLogger<HandlerMediaFileWithTags> _logger = new();
     private readonly FakeStore _store = new();
-    private readonly MediaService _service;
+    private readonly HandlerMediaFileWithTags _handler;
 
-    public MediaServiceDownloadTest()
+    public HandlerMediaFileWithTagsTest()
     {
-        IOptions<ConfigStorage> storageOptions = Options.Create(new ConfigStorage { RootPath = "x", AllowedExtensionList = ["mp3"] });
-        _service = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _tagWriter, new FakeUploadSignal(), storageOptions, Options.Create(new ConfigUpload()), new UploadGate(), new FakeMediaNotifier(),
-            new FakePlaylistNotifier(), new ETagService(),
-            new FakeTimeProvider(), _logger);
+        _handler = new(new FakeUnitOfWorkFactory(_store), _storage, _tagWriter, _logger);
     }
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
@@ -64,7 +57,7 @@ public class MediaServiceDownloadTest
         string hash = file.ContentHash;
         DateTime modified = file.TimeModified;
 
-        await using Stream stream = (await _service.OpenWithTags(UserID, file.ID, Token)).Content;
+        await using Stream stream = (await _handler.Handle(new(UserID, file.ID), Token)).Content;
 
         (string path, MediaFileMetadata metadata) = Assert.Single(_tagWriter.WriteList);
         Assert.NotEqual(file.FilePath, path);
@@ -82,7 +75,7 @@ public class MediaServiceDownloadTest
     {
         MediaFile file = Seed(UserID);
 
-        MediaDownload download = await _service.OpenWithTags(UserID, file.ID, Token);
+        MediaDownload download = await _handler.Handle(new(UserID, file.ID), Token);
         await using Stream stream = download.Content;
         using MemoryStream copy = new();
         await stream.CopyToAsync(copy, Token);
@@ -96,9 +89,9 @@ public class MediaServiceDownloadTest
     public async Task OpenWithTags_AfterAMetadataEdit_WritesTheNewTitle()
     {
         MediaFile file = Seed(UserID);
-        await _service.Update(UserID, file.ID, new() { Title = new("Renamed") }, Token);
+        file.Metadata = new() { Title = "Renamed", MediaFileID = file.ID };
 
-        MediaDownload download = await _service.OpenWithTags(UserID, file.ID, Token);
+        MediaDownload download = await _handler.Handle(new(UserID, file.ID), Token);
         await download.Content.DisposeAsync();
 
         Assert.Equal("Renamed", Assert.Single(_tagWriter.WriteList).Metadata.Title);
@@ -109,18 +102,20 @@ public class MediaServiceDownloadTest
     public async Task OpenWithTags_WhenTheWriterThrows_ServesTheUntaggedCopyAndLogsAWarning()
     {
         MediaFile file = Seed(UserID);
-        _tagWriter.BeforeWrite = path => _storage.Temporary[path] = [9, 9, 9];
+        _tagWriter.BeforeWrite = path => _storage.Temporary[path] = "\t\t\t"u8.ToArray();
         _tagWriter.Failure = new InvalidOperationException("Not parseable.");
 
-        MediaDownload download = await _service.OpenWithTags(UserID, file.ID, Token);
-        await using Stream stream = download.Content;
+        MediaDownload download = await _handler.Handle(new(UserID, file.ID), Token);
         using MemoryStream copy = new();
-        await stream.CopyToAsync(copy, Token);
+        await using (Stream stream = download.Content)
+        {
+            await stream.CopyToAsync(copy, Token);
+
+            Assert.Single(_storage.Temporary);
+        }
 
         Assert.Equal(Mp3(), copy.ToArray());
         Assert.Contains(_logger.EntryList, x => x.Level == LogLevel.Warning);
-        Assert.Single(_storage.Temporary);
-        await stream.DisposeAsync();
         Assert.Empty(_storage.Temporary);
     }
 
@@ -130,7 +125,7 @@ public class MediaServiceDownloadTest
         MediaFile file = Seed(UserID);
         _storage.OpenTemporaryFailure = new IOException("Disk gone.");
 
-        await Assert.ThrowsAsync<IOException>(() => _service.OpenWithTags(UserID, file.ID, Token));
+        await Assert.ThrowsAsync<IOException>(() => _handler.Handle(new(UserID, file.ID), Token).AsTask());
 
         Assert.Empty(_storage.Temporary);
     }
@@ -140,7 +135,7 @@ public class MediaServiceDownloadTest
     {
         MediaFile file = Seed(UserID);
 
-        MediaDownload download = await _service.OpenWithTags(UserID, file.ID, Token);
+        MediaDownload download = await _handler.Handle(new(UserID, file.ID), Token);
         Assert.Single(_storage.Temporary);
         await download.Content.DisposeAsync();
 
@@ -153,8 +148,8 @@ public class MediaServiceDownloadTest
     {
         MediaFile file = Seed(UserID);
 
-        await using Stream first = (await _service.OpenWithTags(UserID, file.ID, Token)).Content;
-        await using Stream second = (await _service.OpenWithTags(UserID, file.ID, Token)).Content;
+        await using Stream first = (await _handler.Handle(new(UserID, file.ID), Token)).Content;
+        await using Stream second = (await _handler.Handle(new(UserID, file.ID), Token)).Content;
 
         Assert.Equal(2, _storage.Temporary.Count);
         Assert.NotEqual(_tagWriter.WriteList[0].FilePath, _tagWriter.WriteList[1].FilePath);
@@ -163,7 +158,7 @@ public class MediaServiceDownloadTest
     [Fact]
     public async Task OpenWithTags_UnknownMediaFile_ThrowsMediaNotFound()
     {
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.OpenWithTags(UserID, Guid.CreateVersion7(), Token));
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, Guid.CreateVersion7()), Token).AsTask());
     }
 
     [Fact]
@@ -171,7 +166,7 @@ public class MediaServiceDownloadTest
     {
         MediaFile file = Seed(UserID);
 
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.OpenWithTags(Guid.CreateVersion7(), file.ID, Token));
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(Guid.CreateVersion7(), file.ID), Token).AsTask());
         Assert.Empty(_storage.Temporary);
     }
 
@@ -181,7 +176,7 @@ public class MediaServiceDownloadTest
         MediaFile file = Seed(UserID);
         _storage.Files.Remove(file.FilePath);
 
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _service.OpenWithTags(UserID, file.ID, Token));
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, file.ID), Token).AsTask());
         Assert.Empty(_tagWriter.WriteList);
     }
 
@@ -191,7 +186,7 @@ public class MediaServiceDownloadTest
         MediaFile file = Seed(UserID);
         file.Metadata = new() { Title = "Only", MediaFileID = file.ID };
 
-        await using Stream stream = (await _service.OpenWithTags(UserID, file.ID, Token)).Content;
+        await using Stream stream = (await _handler.Handle(new(UserID, file.ID), Token)).Content;
 
         MediaFileMetadata metadata = Assert.Single(_tagWriter.WriteList).Metadata;
         Assert.Equal("Only", metadata.Title);

@@ -1,9 +1,11 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Processors;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
+using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Upload;
@@ -14,13 +16,15 @@ public class UploadRecoveryTest
 
     private readonly FakeStore _store = new();
     private readonly FakeFileStorageService _storage = new();
-    private readonly FakeUploadNotifier _notifier = new();
+    private readonly FakePublisher _publisher = new();
     private readonly UploadProcessor _processor;
+
+    private List<(Guid UserID, ResponseUploadResult Result)> NotificationList => [.. _publisher.GetList<NotificationUploadSucceeded>().Select(x => (x.UserID, x.Result)), .. _publisher.GetList<NotificationUploadFailed>().Select(x => (x.UserID, x.Result))];
 
     public UploadRecoveryTest()
     {
         ConfigStorage config = new() { RootPath = "x", AllowedExtensionList = ["mp3"] };
-        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _notifier, Options.Create(config), NullLogger<UploadProcessor>.Instance);
+        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _publisher, Options.Create(config), NullLogger<UploadProcessor>.Instance);
     }
 
     private MediaUploadJob AddJob(MediaUploadJobStatus status, bool staged = true)
@@ -80,7 +84,7 @@ public class UploadRecoveryTest
         await _processor.Recover(TestContext.Current.CancellationToken);
 
         Assert.Empty(_storage.DeletedStagedList);
-        Assert.Empty(_notifier.NotificationList);
+        Assert.Empty(NotificationList);
     }
 
     [Fact]
@@ -95,7 +99,7 @@ public class UploadRecoveryTest
 
         Assert.Equal(job.StagedFileName, Assert.Single(_store.MediaFileList).FilePath);
         Assert.Empty(_store.MediaUploadJobList);
-        Assert.True(Assert.Single(_notifier.NotificationList).Result.Succeeded);
+        Assert.True(Assert.Single(NotificationList).Result.Succeeded);
         Assert.Equal([job.StagedFileName], _storage.Files.Keys);
     }
 

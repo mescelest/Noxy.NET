@@ -62,6 +62,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MediaPlayer", "MediaPlayer", "{EF8C2BC1-9A4B-4DA8-A17A-FA67DE27CFD4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{DE282433-DA3C-46BC-A143-8E5EE8AD4A11}"
+	ProjectSection(SolutionItems) = preProject
+		ApiExceptionHandler.cs = ApiExceptionHandler.cs
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontend", "Frontend", "{6F417E86-DBF0-4705-A854-E6CB561887BC}"
 EndProject

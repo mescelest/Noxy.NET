@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Processors;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
@@ -16,12 +17,14 @@ public class UploadProcessorTest
     private readonly ConfigStorage _config = new() { RootPath = "x", AllowedExtensionList = ["mp3"] };
     private readonly FakeStore _store = new();
     private readonly FakeFileStorageService _storage = new();
-    private readonly FakeUploadNotifier _notifier = new();
+    private readonly FakePublisher _publisher = new();
     private readonly UploadProcessor _processor;
+
+    private List<(Guid UserID, ResponseUploadResult Result)> NotificationList => [.. _publisher.GetList<NotificationUploadSucceeded>().Select(x => (x.UserID, x.Result)), .. _publisher.GetList<NotificationUploadFailed>().Select(x => (x.UserID, x.Result))];
 
     public UploadProcessorTest()
     {
-        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _notifier, Options.Create(_config), NullLogger<UploadProcessor>.Instance);
+        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _publisher, Options.Create(_config), NullLogger<UploadProcessor>.Instance);
     }
 
     // A job as Enqueue leaves it, with its file waiting in staging.
@@ -65,7 +68,7 @@ public class UploadProcessorTest
     {
         Assert.False(await ProcessNext());
 
-        Assert.Empty(_notifier.NotificationList);
+        Assert.Empty(NotificationList);
     }
 
     [Fact]
@@ -90,13 +93,30 @@ public class UploadProcessorTest
     }
 
     [Fact]
+    public async Task ProcessNext_SuccessPublishesOnlySucceeded_AndFailurePublishesOnlyFailed()
+    {
+        AddJob();
+        await ProcessNext();
+
+        Assert.Single(_publisher.GetList<NotificationUploadSucceeded>());
+        Assert.Empty(_publisher.GetList<NotificationUploadFailed>());
+
+        _config.MaxFilesPerUser = 1;
+        AddJob();
+        await ProcessNext();
+
+        Assert.Single(_publisher.GetList<NotificationUploadSucceeded>());
+        Assert.Equal(UploadFailureReason.LibraryFull, Assert.Single(_publisher.GetList<NotificationUploadFailed>()).Result.Reason);
+    }
+
+    [Fact]
     public async Task ProcessNext_Success_NotifiesTheOwnerOnce()
     {
         MediaUploadJob job = AddJob(title: "My Media");
 
         await ProcessNext();
 
-        (Guid userID, ResponseUploadResult result) = Assert.Single(_notifier.NotificationList);
+        (Guid userID, ResponseUploadResult result) = Assert.Single(NotificationList);
         Assert.Equal(UserID, userID);
         Assert.True(result.Succeeded);
         Assert.Equal(job.ID, result.JobID);
@@ -131,7 +151,7 @@ public class UploadProcessorTest
         Assert.Empty(_store.MediaUploadJobList);
         Assert.Empty(_storage.Staged);
         Assert.Contains(job.StagedFileName, _storage.DeletedStagedList);
-        (Guid userID, ResponseUploadResult result) = Assert.Single(_notifier.NotificationList);
+        (Guid userID, ResponseUploadResult result) = Assert.Single(NotificationList);
         Assert.Equal(UserID, userID);
         Assert.False(result.Succeeded);
         Assert.Equal(UploadFailureReason.LibraryFull, result.Reason);
@@ -150,7 +170,7 @@ public class UploadProcessorTest
 
         await ProcessNext();
 
-        Assert.Equal(succeeds, Assert.Single(_notifier.NotificationList).Result.Succeeded);
+        Assert.Equal(succeeds, Assert.Single(NotificationList).Result.Succeeded);
         Assert.Equal(succeeds ? 2 : 1, _store.MediaFileList.Count);
     }
 
@@ -163,7 +183,7 @@ public class UploadProcessorTest
 
         await ProcessNext();
 
-        Assert.True(Assert.Single(_notifier.NotificationList).Result.Succeeded);
+        Assert.True(Assert.Single(NotificationList).Result.Succeeded);
     }
 
     [Fact]
@@ -173,7 +193,7 @@ public class UploadProcessorTest
 
         await ProcessNext();
 
-        ResponseUploadResult result = Assert.Single(_notifier.NotificationList).Result;
+        ResponseUploadResult result = Assert.Single(NotificationList).Result;
         Assert.False(result.Succeeded);
         Assert.Equal(UploadFailureReason.FileMissing, result.Reason);
         Assert.Empty(_store.MediaFileList);
@@ -191,7 +211,7 @@ public class UploadProcessorTest
 
         Assert.Equal(job.StagedFileName, Assert.Single(_store.MediaFileList).FilePath);
         Assert.Empty(_store.MediaUploadJobList);
-        Assert.True(Assert.Single(_notifier.NotificationList).Result.Succeeded);
+        Assert.True(Assert.Single(NotificationList).Result.Succeeded);
     }
 
     [Fact]
@@ -206,7 +226,7 @@ public class UploadProcessorTest
         Assert.Empty(_store.MediaUploadJobList);
         Assert.Empty(_storage.Files);
         Assert.Contains(job.StagedFileName, _storage.DeletedList);
-        ResponseUploadResult result = Assert.Single(_notifier.NotificationList).Result;
+        ResponseUploadResult result = Assert.Single(NotificationList).Result;
         Assert.False(result.Succeeded);
         Assert.Equal(UploadFailureReason.Unknown, result.Reason);
     }
@@ -219,35 +239,9 @@ public class UploadProcessorTest
 
         await ProcessNext();
 
-        Assert.Equal(UploadFailureReason.Unknown, Assert.Single(_notifier.NotificationList).Result.Reason);
+        Assert.Equal(UploadFailureReason.Unknown, Assert.Single(NotificationList).Result.Reason);
         Assert.Empty(_store.MediaUploadJobList);
         Assert.Contains(job.StagedFileName, _storage.DeletedStagedList);
-    }
-
-    [Fact]
-    public async Task ProcessNext_NotifierThrows_JobStillCompletes()
-    {
-        AddJob();
-        _notifier.Failure = new InvalidOperationException("no connection");
-
-        Assert.True(await ProcessNext());
-
-        Assert.Single(_store.MediaFileList);
-        Assert.Empty(_store.MediaUploadJobList);
-    }
-
-    [Fact]
-    public async Task ProcessNext_NotifierThrowsOnAFailedJob_JobIsStillRemoved()
-    {
-        _config.MaxFilesPerUser = 1;
-        AddLibraryFile(UserID, 10);
-        AddJob();
-        _notifier.Failure = new InvalidOperationException("no connection");
-
-        Assert.True(await ProcessNext());
-
-        Assert.Empty(_store.MediaUploadJobList);
-        Assert.Empty(_storage.Staged);
     }
 
     [Fact]
@@ -262,7 +256,7 @@ public class UploadProcessorTest
 
         Assert.Equal(MediaUploadJobStatus.Processing, Assert.Single(_store.MediaUploadJobList).Status);
         Assert.Contains(job.StagedFileName, _storage.Staged.Keys);
-        Assert.Empty(_notifier.NotificationList);
+        Assert.Empty(NotificationList);
     }
 
     [Fact]
@@ -277,8 +271,8 @@ public class UploadProcessorTest
         await ProcessNext();
 
         Assert.Equal("first", Assert.Single(_store.MediaFileList).Metadata?.Title);
-        Assert.Equal([true, false], _notifier.NotificationList.Select(x => x.Result.Succeeded));
-        Assert.Equal(UploadFailureReason.LibraryFull, _notifier.NotificationList[1].Result.Reason);
+        Assert.Equal([true, false], NotificationList.Select(x => x.Result.Succeeded));
+        Assert.Equal(UploadFailureReason.LibraryFull, NotificationList[1].Result.Reason);
         Assert.Empty(_store.MediaUploadJobList);
     }
 
@@ -292,7 +286,7 @@ public class UploadProcessorTest
 
         Assert.Empty(_store.MediaFileList);
         Assert.Single(_store.MediaUploadJobList);
-        Assert.Empty(_notifier.NotificationList);
+        Assert.Empty(NotificationList);
     }
 
     [Fact]
@@ -322,7 +316,7 @@ public class UploadProcessorTest
         Assert.Contains(job.StagedFileName, _storage.Files.Keys);
         Assert.Empty(_storage.DeletedList);
         Assert.Empty(_storage.DeletedStagedList);
-        Assert.Empty(_notifier.NotificationList);
+        Assert.Empty(NotificationList);
     }
 
     [Fact]
@@ -337,6 +331,6 @@ public class UploadProcessorTest
 
         Assert.Equal(job.StagedFileName, Assert.Single(_store.MediaFileList).FilePath);
         Assert.Empty(_store.MediaUploadJobList);
-        Assert.True(Assert.Single(_notifier.NotificationList).Result.Succeeded);
+        Assert.True(Assert.Single(NotificationList).Result.Succeeded);
     }
 }
