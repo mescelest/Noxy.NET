@@ -7,6 +7,12 @@ public static class MediaFileExtension
 {
     extension(MediaFile mediaFile)
     {
+        // The title with the extension of the stored file, or the stored file name when there is no metadata.
+        public string GetDownloadFileName()
+        {
+            return mediaFile.Metadata is null ? mediaFile.FilePath : $"{mediaFile.Metadata.Title}{Path.GetExtension(mediaFile.FilePath)}";
+        }
+
         public ResponseMediaFile ToResponse()
         {
             return new()

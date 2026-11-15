@@ -1,10 +1,11 @@
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Processors;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
@@ -13,7 +14,7 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Application.Processors;
 
-public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageService serviceFileStorage, IUploadNotifier notifierUpload, IOptions<ConfigStorage> configStorage, ILogger<UploadProcessor> logger) : IUploadProcessor
+public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageService serviceFileStorage, IPublisher publisher, IOptions<ConfigStorage> configStorage, ILogger<UploadProcessor> logger) : IUploadProcessor
 {
     public async Task<bool> ProcessNext(CancellationToken cancellationToken = default)
     {
@@ -46,7 +47,7 @@ public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageS
         }
 
         // No result means the job could not be consumed and will be tried again, so there is nothing final to report yet.
-        if (result is not null) await Notify(job.UserID, result, cancellationToken);
+        if (result is not null) await PublishResult(job.UserID, result, cancellationToken);
         return true;
     }
 
@@ -164,16 +165,8 @@ public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageS
         }
     }
 
-    private async Task Notify(Guid userID, ResponseUploadResult result, CancellationToken cancellationToken)
+    private ValueTask PublishResult(Guid userID, ResponseUploadResult result, CancellationToken cancellationToken)
     {
-        try
-        {
-            await notifierUpload.Notify(userID, result, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            // The outcome is already decided and recorded: a missing connection must not change it.
-            logger.LogWarning(ex, "Could not notify about upload job {JobID}", result.JobID);
-        }
+        return result.Succeeded ? publisher.Publish(new NotificationUploadSucceeded(userID, result), cancellationToken) : publisher.Publish(new NotificationUploadFailed(userID, result), cancellationToken);
     }
 }

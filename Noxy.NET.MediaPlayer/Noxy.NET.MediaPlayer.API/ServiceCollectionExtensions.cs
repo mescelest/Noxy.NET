@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -6,15 +8,13 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.API.Configurations;
-using Noxy.NET.MediaPlayer.API.Notifiers;
 using Noxy.NET.MediaPlayer.API.Providers;
 using Noxy.NET.MediaPlayer.Application.Configurations;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -31,8 +31,15 @@ public static class ServiceCollectionExtensions
             services.AddOptions<ConfigCors>().BindConfiguration(ConfigCors.SectionName).ValidateDataAnnotations().ValidateOnStart();
 
             services.AddCors();
-            services.AddOptions<CorsOptions>()
-                .Configure<IOptions<ConfigCors>>((cors, settings) => cors.AddPolicy(Constants.CorsPolicyName, policy => policy.WithOrigins(settings.Value.OriginList).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+            services.AddOptions<CorsOptions>().Configure<IOptions<ConfigCors>>((cors, settings) =>
+                cors.AddPolicy(Constants.CorsPolicyName, policy => policy
+                    .WithOrigins(settings.Value.OriginList)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    .WithExposedHeaders(HeaderNames.ETag, HeaderNames.ContentRange, HeaderNames.AcceptRanges, HeaderNames.ContentDisposition)
+                )
+            );
 
             return services;
         }
@@ -77,11 +84,6 @@ public static class ServiceCollectionExtensions
             services.AddSignalR();
             services.AddSingleton<IUserIdProvider, SubUserIdProvider>();
 
-            // The application project only knows the interface, and defaults to a notifier that does nothing.
-            services.Replace(ServiceDescriptor.Singleton<IUploadNotifier, SignalRUploadNotifier>());
-            services.Replace(ServiceDescriptor.Singleton<IMediaNotifier, SignalRMediaNotifier>());
-            services.Replace(ServiceDescriptor.Singleton<IPlaylistNotifier, SignalRPlaylistNotifier>());
-
             return services;
         }
 
@@ -124,6 +126,16 @@ public static class ServiceCollectionExtensions
                             if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments(Constants.HubsPath))
                             {
                                 context.Token = token;
+                            }
+
+                            return Task.CompletedTask;
+                        },
+                        // Every endpoint and the hub identify the user by this claim, so a token without a user ID in it is no token at all.
+                        OnTokenValidated = context =>
+                        {
+                            if (!Guid.TryParse(context.Principal?.FindFirstValue(JwtRegisteredClaimNames.Sub), out _))
+                            {
+                                context.Fail("The token has no valid sub claim.");
                             }
 
                             return Task.CompletedTask;

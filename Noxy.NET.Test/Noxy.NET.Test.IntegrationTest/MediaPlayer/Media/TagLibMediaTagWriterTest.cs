@@ -1,4 +1,4 @@
-using Noxy.NET.MediaPlayer.Application.Services;
+using Noxy.NET.MediaPlayer.Application.Writers;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 

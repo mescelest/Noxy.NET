@@ -3,16 +3,16 @@ using Noxy.NET.MediaPlayer.Application.BackgroundServices;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Gates;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Notifiers;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Processors;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Validators;
-using Noxy.NET.MediaPlayer.Application.Notifiers;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Writers;
 using Noxy.NET.MediaPlayer.Application.Processors;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Application.Signals;
 using Noxy.NET.MediaPlayer.Application.Validators;
+using Noxy.NET.MediaPlayer.Application.Writers;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddApplication()
+        public void AddApplication()
         {
             services.AddOptions<ConfigJwt>()
                 .BindConfiguration(ConfigJwt.SectionName)
@@ -59,19 +59,11 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IUploadSignal, UploadSignal>();
             services.AddSingleton<IUploadGate, UploadGate>();
             services.AddSingleton<IUploadProcessor, UploadProcessor>();
-            services.TryAddSingleton<IUploadNotifier, NoOpUploadNotifier>();
-            services.TryAddSingleton<IMediaNotifier, NoOpMediaNotifier>();
-            services.TryAddSingleton<IPlaylistNotifier, NoOpPlaylistNotifier>();
             services.AddSingleton<IETagService, ETagService>();
-            services.AddScoped<IMediaService, MediaService>();
-            services.AddScoped<IPlaylistService, PlaylistService>();
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddHostedService<CleanupService>();
             services.AddHostedService<UploadWorker>();
-
-            return services;
         }
     }
 }

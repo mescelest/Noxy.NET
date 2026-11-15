@@ -1,17 +1,17 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
 using Noxy.NET.MediaPlayer.Application.Models;
-using Noxy.NET.MediaPlayer.Domain.Requests.Playlist;
+using Noxy.NET.MediaPlayer.Application.Queries.Playlist;
+using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.MediaPlayer.API.Controllers;
 
 [Route("Playlist")]
 [ApiController]
-public class PlaylistController(IPlaylistService servicePlaylist) : ControllerBase
+public class PlaylistController(IMediator mediator) : UserControllerBase
 {
     private const string IdRoute = "{id:guid}";
     private const string EntryListRoute = $"{IdRoute}/EntryList";
@@ -23,9 +23,7 @@ public class PlaylistController(IPlaylistService servicePlaylist) : ControllerBa
     [HttpGet]
     public async Task<ActionResult<List<ResponsePlaylist>>> GetPlaylistList(CancellationToken cancellationToken)
     {
-        if (UserID is not { } userID) return Unauthorized();
-
-        PlaylistLibrary library = await servicePlaylist.GetPlaylistLibrary(userID, Request.Headers.IfNoneMatch.ToString(), cancellationToken);
+        PlaylistLibrary library = await mediator.Send(new QueryPlaylistList(UserID, Request.Headers.IfNoneMatch.ToString()), cancellationToken);
 
         Response.Headers.ETag = library.ETag;
         Response.Headers.CacheControl = CacheControl;
@@ -39,9 +37,7 @@ public class PlaylistController(IPlaylistService servicePlaylist) : ControllerBa
     [HttpGet(IdRoute)]
     public async Task<ActionResult<ResponsePlaylistDetail>> GetPlaylist(Guid id, CancellationToken cancellationToken)
     {
-        if (UserID is not { } userID) return Unauthorized();
-
-        PlaylistView view = await servicePlaylist.GetPlaylist(userID, id, Request.Headers.IfNoneMatch.ToString(), cancellationToken);
+        PlaylistView view = await mediator.Send(new QueryPlaylist(UserID, id, Request.Headers.IfNoneMatch.ToString()), cancellationToken);
 
         Response.Headers.ETag = view.ETag;
         Response.Headers.CacheControl = CacheControl;
@@ -54,9 +50,7 @@ public class PlaylistController(IPlaylistService servicePlaylist) : ControllerBa
     [HttpPost]
     public async Task<ActionResult<ResponsePlaylist>> Create(RequestCreatePlaylist request, CancellationToken cancellationToken)
     {
-        if (UserID is not { } userID) return Unauthorized();
-
-        ResponsePlaylist response = await servicePlaylist.Create(userID, request, cancellationToken);
+        ResponsePlaylist response = await mediator.Send(request.ToCommand(UserID), cancellationToken);
 
         return CreatedAtAction(nameof(GetPlaylist), new { id = response.ID }, response);
     }
@@ -64,17 +58,13 @@ public class PlaylistController(IPlaylistService servicePlaylist) : ControllerBa
     [HttpPatch(IdRoute)]
     public async Task<ActionResult<ResponsePlaylist>> Update(Guid id, RequestUpdatePlaylist request, CancellationToken cancellationToken)
     {
-        if (UserID is not { } userID) return Unauthorized();
-
-        return await servicePlaylist.Update(userID, id, request, cancellationToken);
+        return await mediator.Send(request.ToCommand(UserID, id), cancellationToken);
     }
 
     [HttpDelete(IdRoute)]
     public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        if (UserID is not { } userID) return Unauthorized();
-
-        await servicePlaylist.Delete(userID, id, cancellationToken);
+        await mediator.Send(new CommandPlaylistDelete(UserID, id), cancellationToken);
 
         return NoContent();
     }
@@ -82,26 +72,18 @@ public class PlaylistController(IPlaylistService servicePlaylist) : ControllerBa
     [HttpPost(EntryListRoute)]
     public async Task<ActionResult<ResponsePlaylistDetail>> AddEntryList(Guid id, RequestAddPlaylistEntry request, CancellationToken cancellationToken)
     {
-        if (UserID is not { } userID) return Unauthorized();
-
-        return await servicePlaylist.AddEntryList(userID, id, request, cancellationToken);
+        return await mediator.Send(request.ToCommand(UserID, id), cancellationToken);
     }
 
     [HttpPost($"{EntryListRoute}/Remove")]
     public async Task<ActionResult<ResponsePlaylistDetail>> RemoveEntryList(Guid id, RequestRemovePlaylistEntry request, CancellationToken cancellationToken)
     {
-        if (UserID is not { } userID) return Unauthorized();
-
-        return await servicePlaylist.RemoveEntryList(userID, id, request, cancellationToken);
+        return await mediator.Send(request.ToCommand(UserID, id), cancellationToken);
     }
 
     [HttpPut($"{EntryRoute}/{{entryID:guid}}/Position")]
     public async Task<ActionResult<ResponsePlaylistDetail>> MoveEntry(Guid id, Guid entryID, RequestMovePlaylistEntry request, CancellationToken cancellationToken)
     {
-        if (UserID is not { } userID) return Unauthorized();
-
-        return await servicePlaylist.MoveEntry(userID, id, entryID, request, cancellationToken);
+        return await mediator.Send(request.ToCommand(UserID, id, entryID), cancellationToken);
     }
-
-    private Guid? UserID => Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out Guid userID) ? userID : null;
 }

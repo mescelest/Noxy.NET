@@ -2,10 +2,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.API.Configurations;
-using Noxy.NET.MediaPlayer.API.Handlers;
 using Noxy.NET.MediaPlayer.API.Hubs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Development validates the container when the host is built; production must too, so a handler that cannot be constructed stops the start-up instead of failing the first request that publishes after its commit.
+builder.Host.UseDefaultServiceProvider(options =>
+{
+    options.ValidateOnBuild = true;
+    options.ValidateScopes = true;
+});
 
 builder.Services.AddOpenApi();
 
@@ -13,6 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddOptions<ConfigConnectionString>().BindConfiguration(ConfigConnectionString.SectionName).ValidateDataAnnotations().ValidateOnStart();
 
 builder.Services.AddApplication();
+builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Singleton);
 builder.Services.AddPersistence((services, options) => options.UseSqlite(services.GetRequiredService<IOptions<ConfigConnectionString>>().Value.Database));
 
 builder.Services.AddProblemDetails();
