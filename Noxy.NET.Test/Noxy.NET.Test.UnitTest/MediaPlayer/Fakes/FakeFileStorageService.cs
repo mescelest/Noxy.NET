@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Upload;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;

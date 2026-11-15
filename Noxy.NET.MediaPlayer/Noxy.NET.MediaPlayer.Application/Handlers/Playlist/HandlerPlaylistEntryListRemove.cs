@@ -1,8 +1,10 @@
 using Mediator;
 using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
+using Noxy.NET.MediaPlayer.Application.Extensions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
+using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using EntityPlaylist = Noxy.NET.MediaPlayer.Domain.Entities.Playlist;
 
@@ -14,7 +16,7 @@ public class HandlerPlaylistEntryListRemove(IUnitOfWorkFactory factoryUnitOfWork
     {
         await using IUnitOfWork uow = FactoryUnitOfWork.Create();
 
-        EntityPlaylist playlist = await Load(uow, command.UserID, command.ID, cancellationToken);
+        EntityPlaylist playlist = await uow.LoadPlaylistWithEntries(command.UserID, command.ID, cancellationToken);
 
         HashSet<Guid> removeIDSet = [.. command.EntryIDList];
         List<PlaylistEntry> removedList = [.. playlist.EntryList.Where(x => removeIDSet.Contains(x.ID))];
@@ -33,6 +35,7 @@ public class HandlerPlaylistEntryListRemove(IUnitOfWorkFactory factoryUnitOfWork
             uow.Playlist.UpdatePlaylistEntry(entry);
         }
 
-        return await Save(uow, command.UserID, playlist, cancellationToken);
+        await Save(uow, command.UserID, playlist, cancellationToken);
+        return playlist.ToDetailResponse();
     }
 }

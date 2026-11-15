@@ -1,4 +1,4 @@
-namespace Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
+namespace Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 
 public interface IUploadSignal
 {

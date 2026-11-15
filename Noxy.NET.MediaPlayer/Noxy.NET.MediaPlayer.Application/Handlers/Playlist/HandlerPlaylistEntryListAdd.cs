@@ -2,6 +2,7 @@ using Mediator;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Extensions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
@@ -18,7 +19,7 @@ public class HandlerPlaylistEntryListAdd(IUnitOfWorkFactory factoryUnitOfWork, I
     {
         await using IUnitOfWork uow = FactoryUnitOfWork.Create();
 
-        EntityPlaylist playlist = await Load(uow, command.UserID, command.ID, cancellationToken);
+        EntityPlaylist playlist = await uow.LoadPlaylistWithEntries(command.UserID, command.ID, cancellationToken);
         List<PlaylistEntry> entryList = playlist.EntryList;
 
         int position = command.Position ?? entryList.Count;
@@ -59,6 +60,7 @@ public class HandlerPlaylistEntryListAdd(IUnitOfWorkFactory factoryUnitOfWork, I
             uow.Playlist.UpdatePlaylistEntry(entry);
         }
 
-        return await Save(uow, command.UserID, playlist, cancellationToken);
+        await Save(uow, command.UserID, playlist, cancellationToken);
+        return playlist.ToDetailResponse();
     }
 }

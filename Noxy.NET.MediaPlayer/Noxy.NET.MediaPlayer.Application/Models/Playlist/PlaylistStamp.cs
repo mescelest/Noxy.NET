@@ -1,3 +1,3 @@
-namespace Noxy.NET.MediaPlayer.Application.Models;
+namespace Noxy.NET.MediaPlayer.Application.Models.Playlist;
 
 public record PlaylistStamp(Guid ID, DateTime TimeModified);

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Persistence;
 using Noxy.NET.Test.MediaPlayer.Fixtures;

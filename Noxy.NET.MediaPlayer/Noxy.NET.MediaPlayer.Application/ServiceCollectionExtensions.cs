@@ -1,16 +1,12 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Noxy.NET.MediaPlayer.Application.BackgroundServices;
 using Noxy.NET.MediaPlayer.Application.Configurations;
-using Noxy.NET.MediaPlayer.Application.Gates;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Processors;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Validators;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Writers;
-using Noxy.NET.MediaPlayer.Application.Processors;
+using Noxy.NET.MediaPlayer.Application.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Services;
-using Noxy.NET.MediaPlayer.Application.Signals;
 using Noxy.NET.MediaPlayer.Application.Validators;
 using Noxy.NET.MediaPlayer.Application.Writers;
 

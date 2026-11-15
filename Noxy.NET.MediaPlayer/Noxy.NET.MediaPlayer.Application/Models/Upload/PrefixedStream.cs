@@ -1,4 +1,4 @@
-namespace Noxy.NET.MediaPlayer.Application.Streams;
+namespace Noxy.NET.MediaPlayer.Application.Models.Upload;
 
 public sealed class PrefixedStream(ReadOnlyMemory<byte> prefix, Stream inner) : Stream
 {

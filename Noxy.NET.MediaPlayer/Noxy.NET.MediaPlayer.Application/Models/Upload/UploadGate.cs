@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 
-namespace Noxy.NET.MediaPlayer.Application.Gates;
+namespace Noxy.NET.MediaPlayer.Application.Models.Upload;
 
 public sealed class UploadGate : IUploadGate
 {

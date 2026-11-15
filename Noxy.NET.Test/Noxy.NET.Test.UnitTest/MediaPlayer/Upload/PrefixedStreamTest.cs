@@ -1,6 +1,6 @@
-using Noxy.NET.MediaPlayer.Application.Streams;
+using Noxy.NET.MediaPlayer.Application.Models.Upload;
 
-namespace Noxy.NET.Test.MediaPlayer.Storage;
+namespace Noxy.NET.Test.MediaPlayer.Upload;
 
 public class PrefixedStreamTest
 {

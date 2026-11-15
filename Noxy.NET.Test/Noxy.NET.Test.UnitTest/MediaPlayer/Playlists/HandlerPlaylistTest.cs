@@ -1,5 +1,5 @@
 using Noxy.NET.MediaPlayer.Application.Handlers.Playlist;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Playlist;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;

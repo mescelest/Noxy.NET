@@ -1,4 +1,4 @@
-using Noxy.NET.MediaPlayer.Application.Gates;
+using Noxy.NET.MediaPlayer.Application.Models.Upload;
 
 namespace Noxy.NET.Test.MediaPlayer.Upload;
 

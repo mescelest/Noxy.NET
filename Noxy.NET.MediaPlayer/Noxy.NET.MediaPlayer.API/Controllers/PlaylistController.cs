@@ -2,7 +2,7 @@ using Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Playlist;
 using Noxy.NET.MediaPlayer.Application.Queries.Playlist;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;

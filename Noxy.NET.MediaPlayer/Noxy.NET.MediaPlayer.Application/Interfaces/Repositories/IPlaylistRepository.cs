@@ -1,4 +1,4 @@
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 
 namespace Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;

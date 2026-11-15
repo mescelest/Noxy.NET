@@ -1,4 +1,4 @@
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Authentication;
 
 namespace Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 

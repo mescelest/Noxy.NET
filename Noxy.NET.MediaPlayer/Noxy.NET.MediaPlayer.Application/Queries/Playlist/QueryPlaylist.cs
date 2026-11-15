@@ -1,5 +1,5 @@
 using Mediator;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Application.Queries.Playlist;
 

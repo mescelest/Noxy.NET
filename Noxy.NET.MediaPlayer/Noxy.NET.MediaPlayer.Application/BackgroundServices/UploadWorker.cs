@@ -2,8 +2,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Processors;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Signals;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 
 namespace Noxy.NET.MediaPlayer.Application.BackgroundServices;
 

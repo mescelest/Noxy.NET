@@ -143,9 +143,9 @@ public static class ServiceCollectionExtensions
                     };
                 });
 
-            // Secure by default: any endpoint without its own authorization metadata requires a signed-in user.
+            // Secure by default: any endpoint without its own authorization metadata requires a signed-in user, and a user is a sub claim that holds a user ID. The bearer validation already rejects a token without one; this keeps it true for any other way a principal could be built.
             services.AddAuthorizationBuilder()
-                .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+                .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().RequireAssertion(context => Guid.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out _)).Build());
 
             return services;
         }

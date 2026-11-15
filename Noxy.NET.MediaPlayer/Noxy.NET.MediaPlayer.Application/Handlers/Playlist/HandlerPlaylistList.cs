@@ -1,7 +1,7 @@
 using Mediator;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Playlist;
 using Noxy.NET.MediaPlayer.Application.Queries.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 

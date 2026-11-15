@@ -3,11 +3,11 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Noxy.NET.MediaPlayer.Application.Configurations;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Authentication;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.Test.MediaPlayer.Fakes;
-using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.RefreshToken;
+using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.Authentication.RefreshToken;
 
 namespace Noxy.NET.Test.MediaPlayer.Authentication;
 

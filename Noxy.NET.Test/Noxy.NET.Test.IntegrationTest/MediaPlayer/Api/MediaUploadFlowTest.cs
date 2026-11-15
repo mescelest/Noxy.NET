@@ -1,16 +1,16 @@
-using System.Net.Http.Json;
 using System.Net;
+using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Application.Configurations;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
+using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
 

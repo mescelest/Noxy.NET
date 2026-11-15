@@ -1,7 +1,8 @@
 using Mediator;
+using Noxy.NET.MediaPlayer.Application.Extensions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Playlist;
 using Noxy.NET.MediaPlayer.Application.Queries.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
@@ -24,8 +25,7 @@ public class HandlerPlaylist(IUnitOfWorkFactory factoryUnitOfWork, IETagService 
         }
 
         // The ETag comes from the entries that are returned, so the two can never disagree.
-        EntityPlaylist playlist = await uow.Playlist.FindPlaylistWithEntries(query.ID, query.UserID, cancellationToken) ?? throw new PlaylistNotFoundException();
-        playlist.EntryList = [.. playlist.EntryList.OrderBy(x => x.Position)];
+        EntityPlaylist playlist = await uow.LoadPlaylistWithEntries(query.UserID, query.ID, cancellationToken);
         string eTag = DetailETag(playlist.ID, playlist.TimeModified, playlist.EntryList.Select(x => (x.MediaFileID, x.GetLoadedMediaFile().TimeModified)));
         return new(eTag, playlist.ToDetailResponse());
     }

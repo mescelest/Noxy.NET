@@ -1,5 +1,6 @@
 using Mediator;
 using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
+using Noxy.NET.MediaPlayer.Application.Extensions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
@@ -14,7 +15,7 @@ public class HandlerPlaylistUpdate(IUnitOfWorkFactory factoryUnitOfWork, IPublis
     {
         await using IUnitOfWork uow = FactoryUnitOfWork.Create();
 
-        EntityPlaylist playlist = await Load(uow, command.UserID, command.ID, cancellationToken);
+        EntityPlaylist playlist = await uow.LoadPlaylistWithEntries(command.UserID, command.ID, cancellationToken);
 
         bool changed = false;
         if (command.Name.HasValue)

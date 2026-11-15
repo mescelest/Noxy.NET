@@ -9,7 +9,7 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Noxy.NET.MediaPlayer.Application.Commands.Media;
 using Noxy.NET.MediaPlayer.Application.Configurations;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Media;
 using Noxy.NET.MediaPlayer.Application.Queries.Media;
 using Noxy.NET.MediaPlayer.Application.Requests.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;

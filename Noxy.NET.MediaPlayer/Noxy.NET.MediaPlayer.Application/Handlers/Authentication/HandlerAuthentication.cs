@@ -1,10 +1,10 @@
 using Mediator;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
-using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.RefreshToken;
+using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.Authentication.RefreshToken;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Authentication;
 

@@ -1,5 +1,5 @@
-using Noxy.NET.MediaPlayer.Application.Signals;
 using System.Diagnostics;
+using Noxy.NET.MediaPlayer.Application.Models.Upload;
 
 namespace Noxy.NET.Test.MediaPlayer.Upload;
 

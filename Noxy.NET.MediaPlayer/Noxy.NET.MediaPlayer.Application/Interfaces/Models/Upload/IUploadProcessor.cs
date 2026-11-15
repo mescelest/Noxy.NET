@@ -1,4 +1,4 @@
-namespace Noxy.NET.MediaPlayer.Application.Interfaces.Processors;
+namespace Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 
 public interface IUploadProcessor
 {

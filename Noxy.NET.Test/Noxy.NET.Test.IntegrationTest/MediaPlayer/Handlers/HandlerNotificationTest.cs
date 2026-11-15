@@ -156,4 +156,28 @@ public class HandlerNotificationTest
         Assert.Contains(uploadSucceeded.EntryList, x => x.Level == LogLevel.Warning);
         Assert.Contains(uploadFailed.EntryList, x => x.Level == LogLevel.Warning);
     }
+
+    [Fact]
+    public async Task WhenThePushIsCancelledBecauseTheCallerCancelled_ItPropagatesAndIsNotLogged()
+    {
+        using CancellationTokenSource source = new();
+        await source.CancelAsync();
+        _hub.Failure = new OperationCanceledException(source.Token);
+        FakeLogger<HandlerNotificationMediaDeleted> logger = new();
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() => new HandlerNotificationMediaDeleted(_hub, logger).Handle(new(UserID, Guid.CreateVersion7()), source.Token).AsTask());
+
+        Assert.Empty(logger.EntryList);
+    }
+
+    [Fact]
+    public async Task WhenThePushTimesOutWhileTheCallerHasNotCancelled_ItIsLikeAnyOtherFailure()
+    {
+        _hub.Failure = new OperationCanceledException();
+        FakeLogger<HandlerNotificationMediaDeleted> logger = new();
+
+        await new HandlerNotificationMediaDeleted(_hub, logger).Handle(new(UserID, Guid.CreateVersion7()), Token);
+
+        Assert.Contains(logger.EntryList, x => x.Level == LogLevel.Warning);
+    }
 }

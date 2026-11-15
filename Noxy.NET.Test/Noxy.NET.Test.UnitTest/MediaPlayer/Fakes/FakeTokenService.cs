@@ -1,7 +1,7 @@
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Entities;
-using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.RefreshToken;
+using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.Authentication.RefreshToken;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 

@@ -1,5 +1,5 @@
 using Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
-using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Application.Models.Media;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 

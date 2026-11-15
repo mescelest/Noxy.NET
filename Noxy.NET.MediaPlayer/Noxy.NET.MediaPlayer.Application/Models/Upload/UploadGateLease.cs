@@ -1,4 +1,4 @@
-namespace Noxy.NET.MediaPlayer.Application.Gates;
+namespace Noxy.NET.MediaPlayer.Application.Models.Upload;
 
 internal sealed class UploadGateLease(Action release) : IDisposable
 {
