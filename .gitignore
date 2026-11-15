@@ -365,5 +365,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-# Design specs and implementation plans
-docs/superpowers/
+# Superpowers session scratch (brainstorm mockups, work ledgers); the specs and plans are versioned
+.superpowers/
+docs/superpowers/ledger-*.md
