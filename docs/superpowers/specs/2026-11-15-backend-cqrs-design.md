@@ -106,3 +106,7 @@ Phase 5 (Clean-up) is done: no service, notifier or `NoOp` type for a use case r
 ## Left to the builder
 
 The exact command and query members, the names of the mapping methods, the notification handler base class, how the fake publisher is shaped, the order of the use cases inside a phase, and the Mediator publisher strategy for notifications (sequential is fine).
+
+## Metadata use cases (added with `2026-11-15-metadata-entities-design.md`)
+
+The artist, genre and album use cases follow the same shape. Artist and genre share generic command records and generic abstract handlers (`HandlerNamedItem…`, over `INamedItemService<TItem, TResponse>`) with thin concrete classes per kind, as `HandlerPlaylistChange` does for playlists. All change handlers derive from `HandlerMetadataChange`, which owns "touch the files whose response changed in the same commit" and "publish after the commit". The album side of an artist change lives in `MetadataChangeService`.

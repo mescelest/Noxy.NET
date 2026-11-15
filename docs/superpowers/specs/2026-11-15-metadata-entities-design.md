@@ -1,6 +1,6 @@
 # Metadata entities: artists, albums and genres, filled in on upload
 
-Status: draft for the user's approval, written 2026-11-15 from the brainstorming conversation. Backend only. It takes the data layer out of `2026-11-15-library-organizer-design.md` (which stays the description of the later panel and drag-and-drop UI) and makes it the next backend project, before the frontend screens. Lines marked *(my call)* are decisions I made without asking, so check them.
+Status: implemented (backend only), checked against the code on 2026-11-15; see the plan `docs/superpowers/plans/2026-11-15-metadata-entities.md` for the build and the rulings it records. It takes the data layer out of `2026-11-15-library-organizer-design.md` (which stays the description of the later panel and drag-and-drop UI). Where the build differs from the draft the text says so. Lines marked *(my call)* are decisions made without asking.
 
 ## Intent
 
@@ -81,7 +81,7 @@ A media file's artist, album, album artist and genre are free text today, and an
 
 The user expects more settings over time but has not thought them through, so this adds only the minimum and keeps it extensible:
 
-- A per-user settings record (`EntityUserSettings`, one per user, created with defaults on first read) holding typed values. The first is `autoMergeOnRename`, a boolean, default `false`.
+- A per-user settings record (`EntityUserSettings`, one per user) holding typed values. The first is `autoMergeOnRename`, a boolean, default `false`. `GET /Settings` returns the defaults when the user has no row, and the row is created by the first `PATCH` that changes a setting (this replaces "created on first read"): a `PATCH` that leaves the settings as they are, including one that sends the default to a user with no row, saves and pushes nothing.
 - `GET /Settings` (strong ETag, `304`) and `PATCH /Settings` with the usual left-out-field-is-untouched semantics; a push `SettingsUpdated` so every device sees a change. Another user's settings are never reachable: the user comes from the token.
 - A new setting later is a new field, a new line in the PATCH request and a new test; no new endpoint.
 - The frontend gives it a place on the Settings page; the rest of that page is separate.
@@ -101,3 +101,15 @@ Table and class shapes, the exact normalisation (including which Unicode form), 
 ## Questions that could still change the design
 
 None open. Decided by the user: a rename that collides is controlled by the synced `autoMergeOnRename` setting (default off); deleting an artist, album or genre clears the link from its files and keeps the files; labels are left for later; credits are split only where it is unambiguous.
+
+## How it ended up
+
+Calls made while building, beyond the design above (the plan's ledger lists them with their cost if wrong):
+
+- **ETag of the item lists** covers each item's file count as well as its ID and modified time, because an upload or a delete changes a count without touching any item row.
+- **A unique-key conflict is detected at commit** (`MetadataKeyConflictException`), and the whole use case runs again in a fresh unit of work, which finds the winner's item. Find-by-key also sees an item added earlier in the same unit of work, so one batch never adds the same item twice.
+- **A name that is taken is a `409`** whose problem details carry the existing item in `existingID`. Merging into itself and a split with fewer than two different names are `400`.
+- **Album identity follows its artists.** Deleting, merging or splitting an artist replaces it in every album artist list, recomputes the identity key, and merges two albums that become the same.
+- **IDs and text for the same field, or `albumID` with album text, are a `400`** on `PATCH /Media/{id}`; a file belongs to the album with a given title and artist set, so changing the album artists moves it to the matching album.
+- **ID3v2.2 and 2.3 have no list of values**, and TagLib splits their text frames on "/". The reader puts the pieces back together so "AC/DC" stays one artist; the writer writes ID3v2.4 so several artists are separate values.
+- **Legacy text** stays in the old columns until the start-up backfill has linked it and cleared it; a response shows the legacy text only for a kind the file has no items of. Album artist text with no album keeps its legacy text.
