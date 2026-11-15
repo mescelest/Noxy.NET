@@ -792,4 +792,96 @@ public class PlaylistFlowTest
     }
 
     #endregion -- Push --
+
+    #region -- Played --
+
+    private static string PlayedPath(Guid id)
+    {
+        return $"/Playlist/{id}/Played";
+    }
+
+    [Fact]
+    public async Task Played_Is204_MovesTheLibraryETagButNeitherTheDetailETagNorTheModifiedTime_AndPushesTheStamp()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ResponsePlaylist playlist = await CreatePlaylist(api, user);
+        HttpResponseMessage detailBefore = await api.GetPlaylist(user.Token, playlist.ID);
+        string libraryBefore = await LibraryETag(api, user);
+        await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
+
+        HttpResponseMessage played = await api.SendJson(user.Token, HttpMethod.Post, PlayedPath(playlist.ID));
+
+        Assert.Equal(HttpStatusCode.NoContent, played.StatusCode);
+        Assert.NotEqual(libraryBefore, await LibraryETag(api, user));
+        Assert.Equal(HttpStatusCode.NotModified, (await api.GetPlaylist(user.Token, playlist.ID, detailBefore.GetETag())).StatusCode);
+
+        ResponsePlaylist pushed = await phone.NextPlaylistUpdated();
+        Assert.Equal(playlist.ID, pushed.ID);
+        Assert.NotNull(pushed.TimeLastPlayed);
+        Assert.Equal(playlist.TimeModified, pushed.TimeModified);
+
+        HttpResponseMessage libraryResponse = await api.GetPlaylistLibrary(user.Token);
+        ResponsePlaylist listed = (await Read<List<ResponsePlaylist>>(libraryResponse)).Single();
+        Assert.Equal(pushed.TimeLastPlayed, listed.TimeLastPlayed);
+        Assert.Equal(playlist.TimeModified, listed.TimeModified);
+    }
+
+    [Fact]
+    public async Task Played_ABurstInsideTheWindow_WritesAndPushesOnce()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ResponsePlaylist playlist = await CreatePlaylist(api, user);
+        await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
+
+        for (int index = 0; index < 3; index++)
+        {
+            Assert.Equal(HttpStatusCode.NoContent, (await api.SendJson(user.Token, HttpMethod.Post, PlayedPath(playlist.ID))).StatusCode);
+        }
+
+        await phone.NextPlaylistUpdated();
+        Assert.Equal(1, await phone.CountReceivedAfter(TimeSpan.FromMilliseconds(700)));
+    }
+
+    [Fact]
+    public async Task Played_WithAZeroWindow_UpdatesEveryTime()
+    {
+        await using ApiFactory factory = new(new() { [ConfigurationPath.Combine(ConfigPlayback.SectionName, nameof(ConfigPlayback.PlayedWindowSeconds))] = "0" });
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ResponsePlaylist playlist = await CreatePlaylist(api, user);
+        await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
+
+        await api.SendJson(user.Token, HttpMethod.Post, PlayedPath(playlist.ID));
+        await Task.Delay(20, TestContext.Current.CancellationToken);
+        await api.SendJson(user.Token, HttpMethod.Post, PlayedPath(playlist.ID));
+
+        ResponsePlaylist first = await phone.NextPlaylistUpdated();
+        ResponsePlaylist second = await phone.NextPlaylistUpdated();
+        Assert.True(second.TimeLastPlayed > first.TimeLastPlayed);
+    }
+
+    [Fact]
+    public async Task Played_AnotherUsersAnUnknownOrAMalformedPlaylist_Is404_AndWithoutATokenIs401()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ApiAccount other = await api.SignUp("b@example.com");
+        ResponsePlaylist playlist = await CreatePlaylist(api, user);
+        await using LibraryHubListener stranger = await LibraryHubListener.Connect(factory, other.Token);
+
+        Assert.Equal(HttpStatusCode.NotFound, (await api.SendJson(other.Token, HttpMethod.Post, PlayedPath(playlist.ID))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await api.SendJson(user.Token, HttpMethod.Post, PlayedPath(Guid.CreateVersion7()))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await api.SendJson(user.Token, HttpMethod.Post, "/Playlist/not-a-guid/Played")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await api.SendJson(null, HttpMethod.Post, PlayedPath(playlist.ID))).StatusCode);
+
+        Assert.Null((await Read<List<ResponsePlaylist>>(await api.GetPlaylistLibrary(user.Token))).Single().TimeLastPlayed);
+        Assert.True(await stranger.ReceivesNothingWithin(TimeSpan.FromMilliseconds(500)));
+    }
+
+    #endregion -- Played --
 }

@@ -7,6 +7,7 @@ using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
+using Noxy.NET.MediaPlayer.Domain.Responses.Playback;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 
@@ -27,6 +28,8 @@ public sealed class LibraryHubListener : IAsyncDisposable
     private readonly Channel<ResponseGenre> _genreUpdatedMessages = Channel.CreateUnbounded<ResponseGenre>();
     private readonly Channel<Guid> _genreDeletedMessages = Channel.CreateUnbounded<Guid>();
     private readonly Channel<ResponseSetting> _settingUpdatedMessages = Channel.CreateUnbounded<ResponseSetting>();
+    private readonly Channel<ResponsePlaybackSession> _playbackSessionUpdatedMessages = Channel.CreateUnbounded<ResponsePlaybackSession>();
+    private readonly Channel<bool> _playbackSessionClearedMessages = Channel.CreateUnbounded<bool>();
     private readonly Channel<string> _anyMessages = Channel.CreateUnbounded<string>();
 
     private LibraryHubListener(HubConnection connection)
@@ -45,6 +48,8 @@ public sealed class LibraryHubListener : IAsyncDisposable
         connection.On<ResponseGenre>(nameof(MediaHubEvent.GenreUpdated), genre => Receive(nameof(MediaHubEvent.GenreUpdated), () => _genreUpdatedMessages.Writer.TryWrite(genre)));
         connection.On<Guid>(nameof(MediaHubEvent.GenreDeleted), id => Receive(nameof(MediaHubEvent.GenreDeleted), () => _genreDeletedMessages.Writer.TryWrite(id)));
         connection.On<ResponseSetting>(nameof(MediaHubEvent.SettingUpdated), setting => Receive(nameof(MediaHubEvent.SettingUpdated), () => _settingUpdatedMessages.Writer.TryWrite(setting)));
+        connection.On<ResponsePlaybackSession>(nameof(MediaHubEvent.PlaybackSessionUpdated), session => Receive(nameof(MediaHubEvent.PlaybackSessionUpdated), () => _playbackSessionUpdatedMessages.Writer.TryWrite(session)));
+        connection.On(nameof(MediaHubEvent.PlaybackSessionCleared), () => Receive(nameof(MediaHubEvent.PlaybackSessionCleared), () => _playbackSessionClearedMessages.Writer.TryWrite(true)));
     }
 
     // Connects over WebSockets. A .NET client sends the token as a header; a browser client puts it in the query string.
@@ -133,6 +138,16 @@ public sealed class LibraryHubListener : IAsyncDisposable
     public async Task<ResponseSetting> NextSettingUpdated()
     {
         return await Read(_settingUpdatedMessages);
+    }
+
+    public async Task<ResponsePlaybackSession> NextPlaybackSessionUpdated()
+    {
+        return await Read(_playbackSessionUpdatedMessages);
+    }
+
+    public async Task NextPlaybackSessionCleared()
+    {
+        await Read(_playbackSessionClearedMessages);
     }
 
     public async Task<Guid> NextPlaylistDeleted()

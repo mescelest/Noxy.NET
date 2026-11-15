@@ -70,7 +70,8 @@ public class HubNotificationFlowTest
             AllowDuplicates = true,
             EntryCount = 0,
             TimeCreated = DateTime.UtcNow,
-            TimeModified = DateTime.UtcNow
+            TimeModified = DateTime.UtcNow,
+            TimeLastPlayed = null
         };
         Guid deletedID = Guid.CreateVersion7();
 

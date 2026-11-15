@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Media;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Metadata;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Playback;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Playlist;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Setting;
 
@@ -15,6 +16,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<TableMediaFile> MediaFile { get; set; } = null!;
     public DbSet<TableMediaFileMetadata> MediaFileMetadata { get; set; } = null!;
     public DbSet<TableMediaUploadJob> MediaUploadJob { get; set; } = null!;
+    public DbSet<TablePlaybackSession> PlaybackSession { get; set; } = null!;
     public DbSet<TablePlaylist> Playlist { get; set; } = null!;
     public DbSet<TablePlaylistEntry> PlaylistEntry { get; set; } = null!;
     public DbSet<TableArtist> Artist { get; set; } = null!;

@@ -467,6 +467,43 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.ToTable("MediaFileGenre");
                 });
 
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playback.TablePlaybackSession", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CurrentIndex")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("PlaylistID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("PositionSeconds")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("QueueMediaFileIDList")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("TimeModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("TimeCreated");
+
+                    b.HasIndex("UserID")
+                        .IsUnique();
+
+                    b.ToTable("PlaybackSession");
+                });
+
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylist", b =>
                 {
                     b.Property<Guid>("ID")
@@ -481,6 +518,9 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("TimeLastPlayed")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("TimeModified")
@@ -739,6 +779,17 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.Navigation("Genre");
 
                     b.Navigation("MediaFile");
+                });
+
+            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playback.TablePlaybackSession", b =>
+                {
+                    b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylist", b =>

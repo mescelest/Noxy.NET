@@ -169,6 +169,61 @@ public class PlaylistRepositoryTest : IDisposable
     }
 
     [Fact]
+    public async Task TimeLastPlayed_IsNullByDefault_ThenSavedAndReturnedByFindSummaryAndStamp_WithoutTouchingTheEntries()
+    {
+        EntityUser user = await CreateUser();
+        EntityMediaFile file = await CreateMediaFile(user.ID);
+        EntityPlaylist playlist = CreatePlaylist(user.ID);
+        playlist.EntryList.Add(CreateEntry(playlist, file, 0));
+        await Add(playlist);
+
+        await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
+        {
+            Assert.Null((await uow.Playlist.FindPlaylist(playlist.ID, user.ID, TestContext.Current.CancellationToken))?.TimeLastPlayed);
+            Assert.Null((await uow.Playlist.GetPlaylistStampList(user.ID, TestContext.Current.CancellationToken)).Single().TimeLastPlayed);
+        }
+
+        DateTime played = new(2026, 7, 8, 9, 10, 11, DateTimeKind.Utc);
+        await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
+        {
+            EntityPlaylist found = await uow.Playlist.FindPlaylist(playlist.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The playlist was not saved.");
+            found.TimeLastPlayed = played;
+            uow.Playlist.UpdatePlaylist(found);
+            await uow.Commit(TestContext.Current.CancellationToken);
+        }
+
+        await using IUnitOfWork check = _fixture.UoWFactory.Create();
+        Assert.Equal(played, (await check.Playlist.FindPlaylist(playlist.ID, user.ID, TestContext.Current.CancellationToken))?.TimeLastPlayed);
+        Assert.Equal(played, (await check.Playlist.GetPlaylistStampList(user.ID, TestContext.Current.CancellationToken)).Single().TimeLastPlayed);
+        Assert.Equal(played, (await check.Playlist.GetPlaylistSummaryList(user.ID, TestContext.Current.CancellationToken)).Single().Playlist.TimeLastPlayed);
+        EntityPlaylist withEntries = await check.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The playlist was not saved.");
+        Assert.Single(withEntries.EntryList);
+    }
+
+    [Fact]
+    public async Task FindPlaylistSummary_ReturnsThePlaylistWithItsEntryCountAndNoEntries_AndNullForAnotherUsersOrUnknown()
+    {
+        EntityUser user = await CreateUser();
+        EntityUser other = await CreateUser("other@example.com");
+        EntityMediaFile first = await CreateMediaFile(user.ID);
+        EntityMediaFile second = await CreateMediaFile(user.ID);
+        EntityPlaylist playlist = CreatePlaylist(user.ID);
+        playlist.EntryList.Add(CreateEntry(playlist, first, 0));
+        playlist.EntryList.Add(CreateEntry(playlist, second, 1));
+        await Add(playlist);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        PlaylistSummary? found = await uow.Playlist.FindPlaylistSummary(playlist.ID, user.ID, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(found);
+        Assert.Equal(2, found.EntryCount);
+        Assert.Equal(playlist.ID, found.Playlist.ID);
+        Assert.Empty(found.Playlist.EntryList);
+        Assert.Null(await uow.Playlist.FindPlaylistSummary(playlist.ID, other.ID, TestContext.Current.CancellationToken));
+        Assert.Null(await uow.Playlist.FindPlaylistSummary(Guid.CreateVersion7(), user.ID, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task CountPlaylists_CountsOnlyTheUsersPlaylists()
     {
         EntityUser user = await CreateUser();

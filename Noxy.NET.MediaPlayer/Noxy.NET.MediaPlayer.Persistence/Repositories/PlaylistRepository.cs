@@ -35,6 +35,16 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
         return table is null ? null : mapperT2E.Map(table);
     }
 
+    public async Task<PlaylistSummary?> FindPlaylistSummary(Guid id, Guid userID, CancellationToken cancellationToken = default)
+    {
+        var found = await context.Playlist.AsNoTracking()
+            .Where(x => x.ID == id && x.UserID == userID)
+            .Select(x => new { Table = x, EntryCount = x.EntryList.Count })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return found is null ? null : new PlaylistSummary(mapperT2E.Map(found.Table), found.EntryCount);
+    }
+
     public async Task<List<PlaylistSummary>> GetPlaylistSummaryList(Guid userID, CancellationToken cancellationToken = default)
     {
         var list = await context.Playlist.AsNoTracking()
@@ -51,7 +61,7 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
     {
         return await context.Playlist.AsNoTracking()
             .Where(x => x.UserID == userID)
-            .Select(x => new PlaylistStamp(x.ID, x.TimeModified))
+            .Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed))
             .ToListAsync(cancellationToken);
     }
 

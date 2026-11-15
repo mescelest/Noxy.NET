@@ -50,6 +50,14 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
         return [.. list.Select(mapperT2E.Map)];
     }
 
+    public async Task<List<Guid>> GetOwnedMediaFileIDList(Guid userID, List<Guid> idList, CancellationToken cancellationToken = default)
+    {
+        return await context.MediaFile.AsNoTracking()
+            .Where(x => x.UserID == userID && idList.Contains(x.ID))
+            .Select(x => x.ID)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<long> SumMediaFileBytes(Guid userID, CancellationToken cancellationToken = default)
     {
         return await context.MediaFile.Where(x => x.UserID == userID).SumAsync(x => x.SizeBytes, cancellationToken);

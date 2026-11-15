@@ -14,5 +14,7 @@ public enum MediaHubEvent
     AlbumDeleted,
     GenreUpdated,
     GenreDeleted,
-    SettingUpdated
+    SettingUpdated,
+    PlaybackSessionUpdated,
+    PlaybackSessionCleared
 }

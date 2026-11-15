@@ -10,4 +10,5 @@ public class ResponsePlaylist : BaseResponse
     public required int EntryCount { get; init; }
     public required DateTime TimeCreated { get; init; }
     public required DateTime TimeModified { get; init; }
+    public required DateTime? TimeLastPlayed { get; init; }
 }

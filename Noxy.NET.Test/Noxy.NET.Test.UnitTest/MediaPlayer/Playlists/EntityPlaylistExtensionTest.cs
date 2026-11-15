@@ -1,4 +1,5 @@
 using Noxy.NET.MediaPlayer.Domain.Entities;
+using Noxy.NET.MediaPlayer.Domain.Extensions;
 
 namespace Noxy.NET.Test.MediaPlayer.Playlists;
 
@@ -84,5 +85,20 @@ public class EntityPlaylistExtensionTest
     public void RenumberEntryList_EmptyList_ReturnsEmpty()
     {
         Assert.Empty(CreatePlaylist().RenumberEntryList());
+    }
+
+    [Fact]
+    public void ToResponse_CarriesTheLastPlayedTimeAsUtc_OrNullWhenNeverPlayed()
+    {
+        EntityPlaylist playlist = CreatePlaylist();
+        Assert.Null(playlist.ToResponse(0).TimeLastPlayed);
+        Assert.Null(playlist.ToDetailResponse().TimeLastPlayed);
+
+        // The database hands the time back without a kind.
+        playlist.TimeLastPlayed = new DateTime(2026, 5, 6, 7, 8, 9, DateTimeKind.Unspecified);
+
+        Assert.Equal(new DateTime(2026, 5, 6, 7, 8, 9, DateTimeKind.Utc), playlist.ToResponse(0).TimeLastPlayed);
+        Assert.Equal(DateTimeKind.Utc, playlist.ToResponse(0).TimeLastPlayed?.Kind);
+        Assert.Equal(DateTimeKind.Utc, playlist.ToDetailResponse().TimeLastPlayed?.Kind);
     }
 }

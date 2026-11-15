@@ -2,6 +2,7 @@ using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Media;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Metadata;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Playback;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Playlist;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Setting;
 
@@ -43,4 +44,10 @@ public interface IEntityToTableMapper
     TableUserSetting Map(EntityUserSetting entity);
 
     #endregion -- Metadata --
+
+    #region -- Playback --
+
+    TablePlaybackSession Map(EntityPlaybackSession entity);
+
+    #endregion -- Playback --
 }

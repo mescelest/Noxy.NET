@@ -11,12 +11,14 @@ public sealed class FakeUnitOfWork(FakeStore store) : IUnitOfWork
     private readonly FakePlaylistRepository _playlist = new(store);
     private readonly FakeMetadataRepository _metadata = new(store);
     private readonly FakeSettingRepository _setting = new(store);
+    private readonly FakePlaybackRepository _playback = new(store);
 
     public IAuthenticationRepository Authentication => _repository;
     public IMediaRepository Media => _media;
     public IPlaylistRepository Playlist => _playlist;
     public IMetadataRepository Metadata => _metadata;
     public ISettingRepository Setting => _setting;
+    public IPlaybackRepository Playback => _playback;
 
     public Task Commit(CancellationToken cancellationToken = default)
     {
@@ -41,6 +43,7 @@ public sealed class FakeUnitOfWork(FakeStore store) : IUnitOfWork
         _playlist.Flush();
         _metadata.Flush();
         _setting.Flush();
+        _playback.Flush();
         store.CommitCount++;
         return Task.CompletedTask;
     }

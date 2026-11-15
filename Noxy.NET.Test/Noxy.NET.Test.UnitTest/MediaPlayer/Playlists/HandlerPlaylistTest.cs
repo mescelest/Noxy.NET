@@ -109,6 +109,19 @@ public class HandlerPlaylistTest
     }
 
     [Fact]
+    public async Task Handle_ETagIgnoresTheLastPlayedTime()
+    {
+        EntityPlaylist playlist = Seed(MediaFileIDList(2));
+        string before = (await View(playlist.ID)).ETag;
+        Advance();
+
+        playlist.TimeLastPlayed = _now;
+
+        Assert.Equal(before, (await View(playlist.ID)).ETag);
+        Assert.Null((await View(playlist.ID, before)).Detail);
+    }
+
+    [Fact]
     public async Task Handle_ETagChangesWhenItsEntriesChange_AndNotWhenAnotherPlaylistChanges()
     {
         EntityPlaylist playlist = Seed();

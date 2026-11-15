@@ -137,6 +137,29 @@ public class HandlerPlaylistListTest
     }
 
     [Fact]
+    public async Task Handle_ETagChangesWhenOnlyTheLastPlayedTimeChanges_AndAnOldTagGetsTheNewList()
+    {
+        EntityPlaylist playlist = Seed();
+        string neverPlayed = (await Library()).ETag;
+        Advance();
+
+        playlist.TimeLastPlayed = _now;
+        PlaylistLibrary played = await Library();
+        Assert.NotEqual(neverPlayed, played.ETag);
+        Assert.Equal(_now, played.PlaylistList?.Single().TimeLastPlayed);
+
+        PlaylistLibrary old = await Library(neverPlayed);
+        Assert.NotNull(old.PlaylistList);
+
+        PlaylistLibrary current = await Library(played.ETag);
+        Assert.Null(current.PlaylistList);
+
+        Advance();
+        playlist.TimeLastPlayed = _now;
+        Assert.NotEqual(played.ETag, (await Library()).ETag);
+    }
+
+    [Fact]
     public async Task Handle_SameState_KeepsTheETag()
     {
         Seed(allowDuplicates: false, entryCount: 2);

@@ -9,6 +9,7 @@ public interface IUnitOfWork : IAsyncDisposable
     IPlaylistRepository Playlist { get; }
     IMetadataRepository Metadata { get; }
     ISettingRepository Setting { get; }
+    IPlaybackRepository Playback { get; }
 
     Task Commit(CancellationToken cancellationToken = default);
 }

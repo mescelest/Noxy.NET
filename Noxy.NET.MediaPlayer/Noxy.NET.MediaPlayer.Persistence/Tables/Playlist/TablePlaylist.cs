@@ -26,5 +26,7 @@ public class TablePlaylist : BaseTable
     [Required]
     public DateTime TimeModified { get; set; }
 
+    public DateTime? TimeLastPlayed { get; set; }
+
     public List<TablePlaylistEntry> EntryList { get; set; } = [];
 }

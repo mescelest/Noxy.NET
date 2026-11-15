@@ -10,6 +10,7 @@ public class EntityPlaylist : BaseEntity
     public bool AllowDuplicates { get; set; } = true;
 
     public DateTime TimeModified { get; set; } = DateTime.UtcNow;
+    public DateTime? TimeLastPlayed { get; set; }
 
     public List<EntityPlaylistEntry> EntryList { get; set; } = [];
 

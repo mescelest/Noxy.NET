@@ -55,6 +55,14 @@ public class PlaylistController(IMediator mediator) : UserControllerBase
         return CreatedAtAction(nameof(GetPlaylist), new { id = response.ID }, response);
     }
 
+    [HttpPost($"{IdRoute}/Played")]
+    public async Task<ActionResult> Played(Guid id, CancellationToken cancellationToken)
+    {
+        await mediator.Send(new CommandPlaylistPlayed(UserID, id), cancellationToken);
+
+        return NoContent();
+    }
+
     [HttpPatch(IdRoute)]
     public async Task<ActionResult<ResponsePlaylist>> Update(Guid id, RequestUpdatePlaylist request, CancellationToken cancellationToken)
     {

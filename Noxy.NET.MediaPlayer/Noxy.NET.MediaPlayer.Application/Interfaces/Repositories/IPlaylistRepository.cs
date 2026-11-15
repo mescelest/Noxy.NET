@@ -14,6 +14,9 @@ public interface IPlaylistRepository
     // The entries are loaded, ordered by position, each with its media file and the media file's metadata.
     Task<EntityPlaylist?> FindPlaylistWithEntries(Guid id, Guid userID, CancellationToken cancellationToken = default);
 
+    // The playlist with its entry count and no entries. Scoped to the owner: another user's playlist comes back as null.
+    Task<PlaylistSummary?> FindPlaylistSummary(Guid id, Guid userID, CancellationToken cancellationToken = default);
+
     // Newest first, without entries.
     Task<List<PlaylistSummary>> GetPlaylistSummaryList(Guid userID, CancellationToken cancellationToken = default);
 

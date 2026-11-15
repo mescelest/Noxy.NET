@@ -93,6 +93,11 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         return Task.FromResult(list);
     }
 
+    public Task<List<Guid>> GetOwnedMediaFileIDList(Guid userID, List<Guid> idList, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID && idList.Contains(x.ID)).Select(x => x.ID).ToList());
+    }
+
     public Task<long> SumMediaFileBytes(Guid userID, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).Sum(x => x.SizeBytes));

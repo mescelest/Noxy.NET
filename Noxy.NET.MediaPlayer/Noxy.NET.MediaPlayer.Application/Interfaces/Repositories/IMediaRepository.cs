@@ -18,6 +18,9 @@ public interface IMediaRepository
     // The files with those IDs, of any user, in ID order, with their links loaded. An ID that matches no file is skipped.
     Task<List<EntityMediaFile>> GetMediaFileListByID(List<Guid> idList, CancellationToken cancellationToken = default);
 
+    // Which of the given media files the user owns, in no particular order.
+    Task<List<Guid>> GetOwnedMediaFileIDList(Guid userID, List<Guid> idList, CancellationToken cancellationToken = default);
+
     Task<long> SumMediaFileBytes(Guid userID, CancellationToken cancellationToken = default);
 
     // Newest first.

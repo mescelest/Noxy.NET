@@ -34,6 +34,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
             existing.Name = updated.Name;
             existing.AllowDuplicates = updated.AllowDuplicates;
             existing.TimeModified = updated.TimeModified;
+            existing.TimeLastPlayed = updated.TimeLastPlayed;
         }
 
         _pendingPlaylistUpdateList.Clear();
@@ -78,6 +79,13 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
         return Task.FromResult(found is null ? null : WithMediaFileList(Copy(found, true)));
     }
 
+    public Task<PlaylistSummary?> FindPlaylistSummary(Guid id, Guid userID, CancellationToken cancellationToken = default)
+    {
+        EntityPlaylist? found = store.PlaylistList.FirstOrDefault(x => x.ID == id && x.UserID == userID);
+
+        return Task.FromResult(found is null ? null : new PlaylistSummary(Copy(found, false), found.EntryList.Count));
+    }
+
     public Task<List<PlaylistSummary>> GetPlaylistSummaryList(Guid userID, CancellationToken cancellationToken = default)
     {
         List<PlaylistSummary> list = store.PlaylistList
@@ -92,7 +100,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
 
     public Task<List<PlaylistStamp>> GetPlaylistStampList(Guid userID, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.PlaylistList.Where(x => x.UserID == userID).Select(x => new PlaylistStamp(x.ID, x.TimeModified)).ToList());
+        return Task.FromResult(store.PlaylistList.Where(x => x.UserID == userID).Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed)).ToList());
     }
 
     public Task<List<PlaylistStamp>> GetEntryMediaFileStampList(Guid playlistID, Guid userID, CancellationToken cancellationToken = default)
@@ -166,6 +174,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
             Name = playlist.Name,
             AllowDuplicates = playlist.AllowDuplicates,
             TimeModified = playlist.TimeModified,
+            TimeLastPlayed = playlist.TimeLastPlayed,
             EntryList = withEntries ? [.. playlist.EntryList.OrderBy(x => x.Position).Select(Copy)] : []
         };
     }

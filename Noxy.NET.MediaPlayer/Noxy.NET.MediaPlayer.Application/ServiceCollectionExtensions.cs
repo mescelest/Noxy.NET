@@ -43,6 +43,11 @@ public static class ServiceCollectionExtensions
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            services.AddOptions<ConfigPlayback>()
+                .BindConfiguration(ConfigPlayback.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             services.AddOptions<ConfigGoogle>()
                 .BindConfiguration(ConfigGoogle.SectionName);
 

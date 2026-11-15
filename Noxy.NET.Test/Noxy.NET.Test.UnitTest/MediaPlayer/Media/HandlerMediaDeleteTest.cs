@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.Logging.Abstractions;
 using Noxy.NET.MediaPlayer.Application.Handlers.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
+using Noxy.NET.MediaPlayer.Application.Notifications.Playback;
 using Noxy.NET.MediaPlayer.Application.Notifications.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
@@ -286,4 +287,133 @@ public class HandlerMediaDeleteTest
     }
 
     #endregion -- Delete --
+
+    #region -- Playback session --
+
+    private EntityPlaybackSession SeedSession(Guid userID, List<Guid> queue, int? index, double position = 30)
+    {
+        EntityPlaybackSession session = new()
+        {
+            UserID = userID,
+            QueueMediaFileIDList = queue,
+            CurrentIndex = index,
+            PositionSeconds = position,
+            TimeModified = _time.Now.UtcDateTime
+        };
+
+        _store.PlaybackSessionList.Add(session);
+        return session;
+    }
+
+    [Fact]
+    public async Task Delete_RemovesTheMediaFileFromTheSessionQueue_AdjustsTheIndex_AndPushesTheSession()
+    {
+        EntityMediaFile first = Seed();
+        EntityMediaFile removed = Seed();
+        EntityMediaFile last = Seed();
+        EntityPlaybackSession session = SeedSession(UserID, [first.ID, removed.ID, last.ID], 2);
+        DateTime before = session.TimeModified;
+        _time.Now = _time.Now.AddMinutes(1);
+
+        await _handler.Handle(new(UserID, removed.ID), TestContext.Current.CancellationToken);
+
+        EntityPlaybackSession stored = Assert.Single(_store.PlaybackSessionList);
+        Assert.Equal([first.ID, last.ID], stored.QueueMediaFileIDList);
+        Assert.Equal(1, stored.CurrentIndex);
+        Assert.Equal(30, stored.PositionSeconds);
+        Assert.True(stored.TimeModified > before);
+        NotificationPlaybackSessionUpdated pushed = Assert.Single(_publisher.GetList<NotificationPlaybackSessionUpdated>());
+        Assert.Equal(UserID, pushed.UserID);
+        Assert.Equal([first.ID, last.ID], pushed.Session.QueueMediaFileIDList);
+        Assert.Equal(1, pushed.Session.CurrentIndex);
+    }
+
+    [Fact]
+    public async Task Delete_OfTheCurrentMediaFile_ClearsTheIndexAndThePosition()
+    {
+        EntityMediaFile current = Seed();
+        EntityMediaFile other = Seed();
+        SeedSession(UserID, [other.ID, current.ID], 1, 77);
+
+        await _handler.Handle(new(UserID, current.ID), TestContext.Current.CancellationToken);
+
+        EntityPlaybackSession stored = Assert.Single(_store.PlaybackSessionList);
+        Assert.Equal([other.ID], stored.QueueMediaFileIDList);
+        Assert.Null(stored.CurrentIndex);
+        Assert.Equal(0, stored.PositionSeconds);
+    }
+
+    [Fact]
+    public async Task Delete_OfTheLastMediaFileInTheQueue_RemovesTheSession_AndPushesCleared()
+    {
+        EntityMediaFile file = Seed();
+        SeedSession(UserID, [file.ID, file.ID], 0);
+
+        await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
+
+        Assert.Empty(_store.PlaybackSessionList);
+        Assert.Equal(UserID, Assert.Single(_publisher.GetList<NotificationPlaybackSessionCleared>()).UserID);
+        Assert.Empty(_publisher.GetList<NotificationPlaybackSessionUpdated>());
+    }
+
+    [Fact]
+    public async Task Delete_OfAMediaFileNotInTheQueue_LeavesTheSessionAndPushesNoSession()
+    {
+        EntityMediaFile file = Seed();
+        EntityMediaFile other = Seed();
+        EntityPlaybackSession session = SeedSession(UserID, [other.ID], 0);
+        DateTime modified = session.TimeModified;
+        _time.Now = _time.Now.AddMinutes(1);
+
+        await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
+
+        EntityPlaybackSession stored = Assert.Single(_store.PlaybackSessionList);
+        Assert.Equal([other.ID], stored.QueueMediaFileIDList);
+        Assert.Equal(modified, stored.TimeModified);
+        Assert.Empty(_publisher.GetList<NotificationPlaybackSessionUpdated>());
+        Assert.Empty(_publisher.GetList<NotificationPlaybackSessionCleared>());
+    }
+
+    [Fact]
+    public async Task Delete_LeavesAnotherUsersSessionAlone()
+    {
+        EntityMediaFile file = Seed();
+        Guid other = Guid.CreateVersion7();
+        SeedSession(other, [file.ID], 0);
+
+        await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
+
+        Assert.Equal([file.ID], Assert.Single(_store.PlaybackSessionList).QueueMediaFileIDList);
+        Assert.Empty(_publisher.GetList<NotificationPlaybackSessionUpdated>());
+    }
+
+    [Fact]
+    public async Task Delete_ChangesTheSessionInTheSameCommitAsTheMediaFile_AndPublishesItLast()
+    {
+        EntityMediaFile file = Seed();
+        EntityMediaFile other = Seed();
+        SeedPlaylist(UserID, file);
+        SeedSession(UserID, [file.ID, other.ID], 1);
+        int commits = _store.CommitCount;
+
+        await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
+
+        Assert.Equal(commits + 1, _store.CommitCount);
+        Assert.Equal([typeof(NotificationMediaDeleted), typeof(NotificationPlaylistUpdated), typeof(NotificationPlaybackSessionUpdated)], _publisher.PublishedList.Select(x => x.GetType()));
+    }
+
+    [Fact]
+    public async Task Delete_WhenTheCommitFails_LeavesTheSessionAndPublishesNothing()
+    {
+        EntityMediaFile file = Seed();
+        SeedSession(UserID, [file.ID], 0);
+        _store.FailCommit = true;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Equal([file.ID], Assert.Single(_store.PlaybackSessionList).QueueMediaFileIDList);
+        Assert.Empty(_publisher.PublishedList);
+    }
+
+    #endregion -- Playback session --
 }

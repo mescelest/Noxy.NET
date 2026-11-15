@@ -3,6 +3,7 @@ using Noxy.NET.MediaPlayer.Persistence.Interfaces.Mappers;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Media;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Metadata;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Playback;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Playlist;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Setting;
 
@@ -123,6 +124,7 @@ public class EntityToTableMapper : IEntityToTableMapper
             Name = entity.Name,
             AllowDuplicates = entity.AllowDuplicates,
             TimeModified = entity.TimeModified,
+            TimeLastPlayed = entity.TimeLastPlayed,
             EntryList = [.. entity.EntryList.Select(Map)]
         };
     }
@@ -232,4 +234,23 @@ public class EntityToTableMapper : IEntityToTableMapper
     }
 
     #endregion -- Metadata --
+
+    #region -- Playback --
+
+    public TablePlaybackSession Map(EntityPlaybackSession entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            TimeCreated = entity.TimeCreated,
+            UserID = entity.UserID,
+            QueueMediaFileIDList = [.. entity.QueueMediaFileIDList],
+            CurrentIndex = entity.CurrentIndex,
+            PositionSeconds = entity.PositionSeconds,
+            PlaylistID = entity.PlaylistID,
+            TimeModified = entity.TimeModified
+        };
+    }
+
+    #endregion -- Playback --
 }
