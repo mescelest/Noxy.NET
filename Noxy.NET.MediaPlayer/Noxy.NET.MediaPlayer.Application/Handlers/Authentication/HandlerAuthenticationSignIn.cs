@@ -13,7 +13,7 @@ public class HandlerAuthenticationSignIn(IUnitOfWorkFactory factoryUnitOfWork, I
     {
         await using IUnitOfWork uow = FactoryUnitOfWork.Create();
 
-        User? user = await uow.Authentication.FindUserByEmail(NormalizeEmail(command.Email), cancellationToken);
+        EntityUser? user = await uow.Authentication.FindUserByEmail(NormalizeEmail(command.Email), cancellationToken);
 
         // Verify even when there is no user, so an unknown email takes as long as a wrong password.
         bool isPasswordValid = servicePasswordHash.Verify(command.Password, user?.PasswordHash);

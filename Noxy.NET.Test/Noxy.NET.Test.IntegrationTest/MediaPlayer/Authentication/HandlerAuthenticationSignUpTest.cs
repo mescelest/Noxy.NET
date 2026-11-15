@@ -22,7 +22,7 @@ public class HandlerAuthenticationSignUpTest : IDisposable
         return _fixture.SignUp.Handle(new(email, Password), TestContext.Current.CancellationToken).AsTask();
     }
 
-    private async Task<User?> FindUser(string email)
+    private async Task<EntityUser?> FindUser(string email)
     {
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         return await uow.Authentication.FindUserByEmail(email);
@@ -42,7 +42,7 @@ public class HandlerAuthenticationSignUpTest : IDisposable
     {
         await SignUp("  User@Example.COM ");
 
-        User? user = await FindUser("user@example.com");
+        EntityUser? user = await FindUser("user@example.com");
         Assert.NotNull(user);
         Assert.False(user.IsEmailVerified);
         Assert.NotNull(user.PasswordHash);

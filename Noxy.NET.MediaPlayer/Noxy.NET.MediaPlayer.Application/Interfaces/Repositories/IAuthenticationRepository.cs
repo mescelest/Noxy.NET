@@ -6,15 +6,15 @@ namespace Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
 public interface IAuthenticationRepository
 {
     Task<bool> EmailExists(string email, CancellationToken cancellationToken = default);
-    Task<User?> FindUserByID(Guid id, CancellationToken cancellationToken = default);
-    Task<User?> FindUserByEmail(string email, CancellationToken cancellationToken = default);
-    void AddUser(User user);
+    Task<EntityUser?> FindUserByID(Guid id, CancellationToken cancellationToken = default);
+    Task<EntityUser?> FindUserByEmail(string email, CancellationToken cancellationToken = default);
+    void AddUser(EntityUser user);
 
-    Task<ExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default);
-    void AddExternalLogin(ExternalLogin externalLogin);
+    Task<EntityExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default);
+    void AddExternalLogin(EntityExternalLogin externalLogin);
 
-    Task<RefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default);
-    void AddRefreshToken(RefreshToken refreshToken);
+    Task<EntityRefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default);
+    void AddRefreshToken(EntityRefreshToken refreshToken);
     Task<bool> TryRevokeRefreshToken(Guid id, DateTime time, CancellationToken cancellationToken = default);
     Task RevokeAllRefreshTokens(Guid userID, DateTime time, CancellationToken cancellationToken = default);
 

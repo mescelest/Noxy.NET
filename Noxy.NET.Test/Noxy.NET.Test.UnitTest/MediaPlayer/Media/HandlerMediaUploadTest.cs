@@ -42,10 +42,10 @@ public class HandlerMediaUploadTest
     }
 
     // A file that is already in the library, as the worker would have left it.
-    private MediaFile Seed(Guid userID, string title, int length = 100, DateTime? timeCreated = null)
+    private EntityMediaFile Seed(Guid userID, string title, int length = 100, DateTime? timeCreated = null)
     {
         byte[] bytes = Mp3(length);
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             TimeCreated = timeCreated ?? DateTime.UtcNow,
             FilePath = $"{Guid.CreateVersion7()}.mp3",
@@ -92,7 +92,7 @@ public class HandlerMediaUploadTest
 
         ResponseUploadAccepted response = await Enqueue("media.test.mp3", content, "My media");
 
-        MediaUploadJob job = Assert.Single(_store.MediaUploadJobList);
+        EntityMediaUploadJob job = Assert.Single(_store.MediaUploadJobList);
         Assert.Equal(response.JobID, job.ID);
         Assert.Equal(UserID, job.UserID);
         Assert.Equal(_storage.Staged.Keys.Single(), job.StagedFileName);

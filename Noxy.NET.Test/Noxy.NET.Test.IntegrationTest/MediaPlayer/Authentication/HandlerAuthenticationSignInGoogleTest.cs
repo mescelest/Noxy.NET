@@ -17,7 +17,7 @@ public class HandlerAuthenticationSignInGoogleTest : IDisposable
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
-    private async Task<User?> FindUser(string email)
+    private async Task<EntityUser?> FindUser(string email)
     {
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         return await uow.Authentication.FindUserByEmail(email);
@@ -41,7 +41,7 @@ public class HandlerAuthenticationSignInGoogleTest : IDisposable
         ResponseAuthentication response = await SignInGoogle("token");
 
         Assert.False(string.IsNullOrEmpty(response.AccessToken));
-        User? user = await FindUser("new@example.com");
+        EntityUser? user = await FindUser("new@example.com");
         Assert.NotNull(user);
         Assert.True(user.IsEmailVerified);
         Assert.Null(user.PasswordHash);

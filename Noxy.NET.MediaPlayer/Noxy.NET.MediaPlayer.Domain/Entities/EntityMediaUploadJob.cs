@@ -3,7 +3,7 @@ using Noxy.NET.MediaPlayer.Domain.Enums;
 
 namespace Noxy.NET.MediaPlayer.Domain.Entities;
 
-public class MediaUploadJob : BaseEntity
+public class EntityMediaUploadJob : BaseEntity
 {
     public required Guid UserID { get; set; }
 

@@ -3,9 +3,9 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Domain.Extensions;
 
-public static class PlaylistExtension
+public static class EntityPlaylistExtension
 {
-    extension(Playlist playlist)
+    extension(EntityPlaylist playlist)
     {
         public ResponsePlaylist ToResponse(int entryCount)
         {

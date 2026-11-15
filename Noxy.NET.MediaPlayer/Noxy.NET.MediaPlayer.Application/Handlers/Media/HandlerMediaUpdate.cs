@@ -17,8 +17,8 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IPublisher
     {
         await using IUnitOfWork uow = factoryUnitOfWork.Create();
 
-        MediaFile file = await uow.Media.FindMediaFile(command.ID, command.UserID, cancellationToken) ?? throw new MediaNotFoundException();
-        MediaFileMetadata metadata = file.Metadata ?? throw new MediaNotFoundException();
+        EntityMediaFile file = await uow.Media.FindMediaFile(command.ID, command.UserID, cancellationToken) ?? throw new MediaNotFoundException();
+        EntityMediaFileMetadata metadata = file.Metadata ?? throw new MediaNotFoundException();
 
         bool changed = false;
         if (command.Title.HasValue)

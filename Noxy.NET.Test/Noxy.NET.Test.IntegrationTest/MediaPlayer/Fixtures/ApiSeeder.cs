@@ -12,7 +12,7 @@ public sealed class ApiSeeder(ApiFactory factory)
 {
     public async Task SeedMediaFile(Guid userID)
     {
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
@@ -28,7 +28,7 @@ public sealed class ApiSeeder(ApiFactory factory)
     }
 
     // A job as an earlier request would have left it, with its file in staging when asked.
-    public async Task<MediaUploadJob> SeedJob(Guid userID, MediaUploadJobStatus status, bool withStagedFile)
+    public async Task<EntityMediaUploadJob> SeedJob(Guid userID, MediaUploadJobStatus status, bool withStagedFile)
     {
         byte[] content = MediaApiClient.Mp3(50);
         string stagedName = $"{Guid.CreateVersion7()}.mp3";
@@ -39,7 +39,7 @@ public sealed class ApiSeeder(ApiFactory factory)
             stagedName = stored.FileName;
         }
 
-        MediaUploadJob job = new()
+        EntityMediaUploadJob job = new()
         {
             UserID = userID,
             StagedFileName = stagedName,

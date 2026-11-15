@@ -16,7 +16,7 @@ public class HandlerMediaFile(IUnitOfWorkFactory factoryUnitOfWork, IFileStorage
     {
         await using IUnitOfWork uow = factoryUnitOfWork.Create();
 
-        MediaFile mediaFile = await uow.Media.FindMediaFile(query.ID, query.UserID, cancellationToken) ?? throw new MediaNotFoundException();
+        EntityMediaFile mediaFile = await uow.Media.FindMediaFile(query.ID, query.UserID, cancellationToken) ?? throw new MediaNotFoundException();
 
         try
         {

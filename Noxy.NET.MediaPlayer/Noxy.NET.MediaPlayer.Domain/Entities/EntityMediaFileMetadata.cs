@@ -2,7 +2,7 @@ using Noxy.NET.MediaPlayer.Domain.Abstractions.Entities;
 
 namespace Noxy.NET.MediaPlayer.Domain.Entities;
 
-public class MediaFileMetadata : BaseEntity
+public class EntityMediaFileMetadata : BaseEntity
 {
     public required string Title { get; set; }
     public string? Artist { get; set; }

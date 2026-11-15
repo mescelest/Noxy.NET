@@ -1,7 +1,6 @@
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Models.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Entities;
-using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.Authentication.RefreshToken;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -9,7 +8,7 @@ public sealed class FakeTokenService(TimeProvider time) : ITokenService
 {
     private int _counter;
 
-    public AccessToken CreateAccessToken(User user)
+    public AccessToken CreateAccessToken(EntityUser user)
     {
         return new($"access-for-{user.Email}", time.GetUtcNow().UtcDateTime.AddMinutes(15));
     }

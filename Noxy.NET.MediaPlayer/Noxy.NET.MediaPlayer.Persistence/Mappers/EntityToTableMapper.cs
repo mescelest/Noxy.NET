@@ -10,7 +10,7 @@ public class EntityToTableMapper : IEntityToTableMapper
 {
     #region -- Authentication --
 
-    public TableExternalLogin Map(ExternalLogin entity)
+    public TableExternalLogin Map(EntityExternalLogin entity)
     {
         return new()
         {
@@ -22,7 +22,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TableRefreshToken Map(RefreshToken entity)
+    public TableRefreshToken Map(EntityRefreshToken entity)
     {
         return new()
         {
@@ -35,7 +35,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TableUser Map(User entity)
+    public TableUser Map(EntityUser entity)
     {
         return new()
         {
@@ -52,7 +52,7 @@ public class EntityToTableMapper : IEntityToTableMapper
 
     #region -- Media --
 
-    public TableMediaFile Map(MediaFile entity)
+    public TableMediaFile Map(EntityMediaFile entity)
     {
         return new()
         {
@@ -68,7 +68,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TableMediaFileMetadata Map(MediaFileMetadata entity)
+    public TableMediaFileMetadata Map(EntityMediaFileMetadata entity)
     {
         return new()
         {
@@ -89,7 +89,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TableMediaUploadJob Map(MediaUploadJob entity)
+    public TableMediaUploadJob Map(EntityMediaUploadJob entity)
     {
         return new()
         {
@@ -109,7 +109,7 @@ public class EntityToTableMapper : IEntityToTableMapper
 
     #region -- Playlist --
 
-    public TablePlaylist Map(Playlist entity)
+    public TablePlaylist Map(EntityPlaylist entity)
     {
         return new()
         {
@@ -123,7 +123,7 @@ public class EntityToTableMapper : IEntityToTableMapper
         };
     }
 
-    public TablePlaylistEntry Map(PlaylistEntry entity)
+    public TablePlaylistEntry Map(EntityPlaylistEntry entity)
     {
         return new()
         {

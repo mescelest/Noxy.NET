@@ -28,7 +28,7 @@ public class HandlerPlaylistEntryListAddTest
 
     private Guid MediaFile(Guid? userID = null)
     {
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
@@ -54,7 +54,7 @@ public class HandlerPlaylistEntryListAddTest
     private Guid Create(bool allowDuplicates = true)
     {
         DateTime now = _time.Now.UtcDateTime;
-        Playlist playlist = new()
+        EntityPlaylist playlist = new()
         {
             UserID = UserID,
             Name = "Mix",
@@ -72,7 +72,7 @@ public class HandlerPlaylistEntryListAddTest
         return await _handler.Handle(new(userID ?? UserID, playlistID, [.. mediaFileList], position), Token);
     }
 
-    private Playlist Stored(Guid playlistID)
+    private EntityPlaylist Stored(Guid playlistID)
     {
         return _store.PlaylistList.Single(x => x.ID == playlistID);
     }

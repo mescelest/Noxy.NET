@@ -3,9 +3,9 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Domain.Extensions;
 
-public static class MediaFileExtension
+public static class EntityMediaFileExtension
 {
-    extension(MediaFile mediaFile)
+    extension(EntityMediaFile mediaFile)
     {
         // The title with the extension of the stored file, or the stored file name when there is no metadata.
         public string GetDownloadFileName()

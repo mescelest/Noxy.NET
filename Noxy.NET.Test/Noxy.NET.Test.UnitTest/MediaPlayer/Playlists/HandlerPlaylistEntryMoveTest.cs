@@ -25,7 +25,7 @@ public class HandlerPlaylistEntryMoveTest
 
     private Guid MediaFile()
     {
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
@@ -51,7 +51,7 @@ public class HandlerPlaylistEntryMoveTest
     private Guid Create(IEnumerable<Guid> mediaFileList)
     {
         DateTime now = _time.Now.UtcDateTime;
-        Playlist playlist = new()
+        EntityPlaylist playlist = new()
         {
             UserID = UserID,
             Name = "Mix",
@@ -73,7 +73,7 @@ public class HandlerPlaylistEntryMoveTest
         return _handler.Handle(new(UserID, playlistID, entryID, position), Token).AsTask();
     }
 
-    private Playlist Stored(Guid playlistID)
+    private EntityPlaylist Stored(Guid playlistID)
     {
         return _store.PlaylistList.Single(x => x.ID == playlistID);
     }

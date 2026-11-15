@@ -38,7 +38,7 @@ public class HandlerMediaUpload(
 
         StoredFile staged = await Stage(new PrefixedStream(header.AsMemory(0, headerLength), command.Content), file.Extension, remainingBytes, cancellationToken);
 
-        MediaUploadJob job = new()
+        EntityMediaUploadJob job = new()
         {
             UserID = command.UserID,
             StagedFileName = staged.FileName,

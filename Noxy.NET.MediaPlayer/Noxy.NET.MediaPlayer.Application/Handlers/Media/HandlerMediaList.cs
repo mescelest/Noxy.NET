@@ -14,7 +14,7 @@ public class HandlerMediaList(IUnitOfWorkFactory factoryUnitOfWork) : IQueryHand
     {
         await using IUnitOfWork uow = factoryUnitOfWork.Create();
 
-        List<MediaFile> fileList = await uow.Media.GetMediaFileList(query.UserID, query.Skip, query.Take, cancellationToken);
+        List<EntityMediaFile> fileList = await uow.Media.GetMediaFileList(query.UserID, query.Skip, query.Take, cancellationToken);
         return [.. fileList.Select(x => x.ToResponse())];
     }
 }

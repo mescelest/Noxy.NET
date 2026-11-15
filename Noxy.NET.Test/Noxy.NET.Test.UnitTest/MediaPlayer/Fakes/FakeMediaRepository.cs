@@ -7,10 +7,10 @@ namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
 public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
 {
-    private readonly List<MediaFile> _pendingMediaFileList = [];
-    private readonly List<MediaUploadJob> _pendingJobAddList = [];
+    private readonly List<EntityMediaFile> _pendingMediaFileList = [];
+    private readonly List<EntityMediaUploadJob> _pendingJobAddList = [];
     private readonly List<Guid> _pendingJobRemovalList = [];
-    private readonly List<MediaFile> _pendingMediaFileUpdateList = [];
+    private readonly List<EntityMediaFile> _pendingMediaFileUpdateList = [];
     private readonly List<Guid> _pendingMediaFileRemovalList = [];
 
     public void Flush()
@@ -18,7 +18,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         store.MediaFileList.AddRange(_pendingMediaFileList);
         _pendingMediaFileList.Clear();
 
-        foreach (MediaFile updated in _pendingMediaFileUpdateList)
+        foreach (EntityMediaFile updated in _pendingMediaFileUpdateList)
         {
             int index = store.MediaFileList.FindIndex(x => x.ID == updated.ID);
             if (index >= 0) store.MediaFileList[index] = updated;
@@ -29,7 +29,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         store.MediaFileList.RemoveAll(x => _pendingMediaFileRemovalList.Contains(x.ID));
 
         // The database cascade: a removed media file leaves every playlist.
-        foreach (Playlist playlist in store.PlaylistList)
+        foreach (EntityPlaylist playlist in store.PlaylistList)
         {
             playlist.EntryList.RemoveAll(x => _pendingMediaFileRemovalList.Contains(x.MediaFileID));
         }
@@ -43,14 +43,14 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         _pendingJobRemovalList.Clear();
     }
 
-    public void AddMediaFile(MediaFile mediaFile)
+    public void AddMediaFile(EntityMediaFile mediaFile)
     {
         _pendingMediaFileList.Add(mediaFile);
     }
 
-    public Task<MediaFile?> FindMediaFile(Guid id, Guid userID, CancellationToken cancellationToken = default)
+    public Task<EntityMediaFile?> FindMediaFile(Guid id, Guid userID, CancellationToken cancellationToken = default)
     {
-        MediaFile? found = store.MediaFileList.FirstOrDefault(x => x.ID == id && x.UserID == userID);
+        EntityMediaFile? found = store.MediaFileList.FirstOrDefault(x => x.ID == id && x.UserID == userID);
 
         // A copy, like the database hands back, so an edit that is never committed changes nothing.
         return Task.FromResult(found is null ? null : Copy(found));
@@ -66,12 +66,12 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).Sum(x => x.SizeBytes));
     }
 
-    public Task<List<MediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
+    public Task<List<EntityMediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).OrderByDescending(x => x.TimeCreated).Skip(skip).Take(take).Select(Copy).ToList());
     }
 
-    public Task<List<MediaFile>> GetMediaFileList(Guid userID, CancellationToken cancellationToken = default)
+    public Task<List<EntityMediaFile>> GetMediaFileList(Guid userID, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).OrderByDescending(x => x.TimeCreated).Select(Copy).ToList());
     }
@@ -81,22 +81,22 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).Select(x => new MediaFileStamp(x.ID, x.TimeModified)).ToList());
     }
 
-    public void UpdateMediaFile(MediaFile mediaFile)
+    public void UpdateMediaFile(EntityMediaFile mediaFile)
     {
         _pendingMediaFileUpdateList.Add(Copy(mediaFile));
     }
 
-    public void RemoveMediaFile(MediaFile mediaFile)
+    public void RemoveMediaFile(EntityMediaFile mediaFile)
     {
         _pendingMediaFileRemovalList.Add(mediaFile.ID);
     }
 
-    public void AddMediaUploadJob(MediaUploadJob job)
+    public void AddMediaUploadJob(EntityMediaUploadJob job)
     {
         _pendingJobAddList.Add(job);
     }
 
-    public void RemoveMediaUploadJob(MediaUploadJob job)
+    public void RemoveMediaUploadJob(EntityMediaUploadJob job)
     {
         _pendingJobRemovalList.Add(job.ID);
     }
@@ -111,9 +111,9 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         return Task.FromResult(store.MediaUploadJobList.Where(x => x.UserID == userID).Sum(x => x.SizeBytes));
     }
 
-    public Task<MediaUploadJob?> FindNextPendingMediaUploadJob(CancellationToken cancellationToken = default)
+    public Task<EntityMediaUploadJob?> FindNextPendingMediaUploadJob(CancellationToken cancellationToken = default)
     {
-        MediaUploadJob? next = store.MediaUploadJobList
+        EntityMediaUploadJob? next = store.MediaUploadJobList
             .Where(x => x.Status == MediaUploadJobStatus.Pending)
             .OrderBy(x => x.TimeCreated)
             .ThenBy(x => x.ID)
@@ -127,7 +127,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
     {
         if (store.LoseJobClaim) return Task.FromResult(false);
 
-        MediaUploadJob? job = store.MediaUploadJobList.FirstOrDefault(x => x.ID == id && x.Status == MediaUploadJobStatus.Pending);
+        EntityMediaUploadJob? job = store.MediaUploadJobList.FirstOrDefault(x => x.ID == id && x.Status == MediaUploadJobStatus.Pending);
         if (job is null) return Task.FromResult(false);
 
         job.Status = MediaUploadJobStatus.Processing;
@@ -136,8 +136,8 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
 
     public Task<int> ResetProcessingMediaUploadJobs(CancellationToken cancellationToken = default)
     {
-        List<MediaUploadJob> processing = store.MediaUploadJobList.Where(x => x.Status == MediaUploadJobStatus.Processing).ToList();
-        foreach (MediaUploadJob job in processing)
+        List<EntityMediaUploadJob> processing = store.MediaUploadJobList.Where(x => x.Status == MediaUploadJobStatus.Processing).ToList();
+        foreach (EntityMediaUploadJob job in processing)
         {
             job.Status = MediaUploadJobStatus.Pending;
         }
@@ -150,9 +150,9 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         return Task.FromResult(store.MediaUploadJobList.Select(x => x.StagedFileName).ToList());
     }
 
-    private static MediaFile Copy(MediaFile file)
+    private static EntityMediaFile Copy(EntityMediaFile file)
     {
-        MediaFile copy = new()
+        EntityMediaFile copy = new()
         {
             ID = file.ID,
             TimeCreated = file.TimeCreated,
@@ -188,7 +188,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         return copy;
     }
 
-    private static MediaUploadJob Copy(MediaUploadJob job)
+    private static EntityMediaUploadJob Copy(EntityMediaUploadJob job)
     {
         return new()
         {

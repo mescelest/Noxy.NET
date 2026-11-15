@@ -7,7 +7,6 @@ using Noxy.NET.MediaPlayer.Application.Models.Authentication;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.Test.MediaPlayer.Fakes;
-using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.Authentication.RefreshToken;
 
 namespace Noxy.NET.Test.MediaPlayer.Authentication;
 
@@ -47,7 +46,7 @@ public class TokenServiceTest
     [Fact]
     public async Task AccessToken_IsSignedAndCarriesTheUsersIdentity()
     {
-        User user = new() { Email = "user@example.com" };
+        EntityUser user = new() { Email = "user@example.com" };
 
         AccessToken token = _service.CreateAccessToken(user);
         TokenValidationResult result = await new JsonWebTokenHandler().ValidateTokenAsync(token.Token, Parameters(_config.Secret));
@@ -83,7 +82,7 @@ public class TokenServiceTest
     [Fact]
     public void AccessToken_IsUniquePerCall()
     {
-        User user = new() { Email = "user@example.com" };
+        EntityUser user = new() { Email = "user@example.com" };
 
         Assert.NotEqual(_service.CreateAccessToken(user).Token, _service.CreateAccessToken(user).Token);
     }

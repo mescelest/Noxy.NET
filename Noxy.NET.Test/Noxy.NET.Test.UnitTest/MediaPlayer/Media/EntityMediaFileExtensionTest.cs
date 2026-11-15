@@ -4,11 +4,11 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
 
-public class MediaFileExtensionTest
+public class EntityMediaFileExtensionTest
 {
-    private static MediaFile CreateFile(DateTimeKind kind = DateTimeKind.Unspecified)
+    private static EntityMediaFile CreateFile(DateTimeKind kind = DateTimeKind.Unspecified)
     {
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             TimeCreated = new(2026, 1, 2, 3, 4, 5, kind),
             TimeModified = new(2026, 2, 3, 4, 5, 6, kind),
@@ -25,7 +25,7 @@ public class MediaFileExtensionTest
     [Fact]
     public void ToResponse_CopiesEveryTagFromTheMetadata()
     {
-        MediaFile file = CreateFile();
+        EntityMediaFile file = CreateFile();
         Assert.NotNull(file.Metadata);
         file.Metadata.Artist = "Artist";
         file.Metadata.Album = "Album";
@@ -56,7 +56,7 @@ public class MediaFileExtensionTest
     [Fact]
     public void ToResponse_NoMetadata_LeavesTheTagsNullAndTitleIsTheFilePath()
     {
-        MediaFile file = CreateFile();
+        EntityMediaFile file = CreateFile();
         file.Metadata = null;
 
         ResponseMediaFile response = file.ToResponse();
@@ -89,7 +89,7 @@ public class MediaFileExtensionTest
     [Fact]
     public void GetDownloadFileName_UsesTheTitleAndTheStoredExtension()
     {
-        MediaFile file = CreateFile();
+        EntityMediaFile file = CreateFile();
 
         Assert.Equal("Media.mp3", file.GetDownloadFileName());
     }
@@ -97,7 +97,7 @@ public class MediaFileExtensionTest
     [Fact]
     public void GetDownloadFileName_WithoutMetadata_UsesTheStoredFileName()
     {
-        MediaFile file = CreateFile();
+        EntityMediaFile file = CreateFile();
         file.Metadata = null;
 
         Assert.Equal("stored.mp3", file.GetDownloadFileName());

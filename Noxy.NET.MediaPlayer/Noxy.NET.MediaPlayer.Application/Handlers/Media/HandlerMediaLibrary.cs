@@ -23,7 +23,7 @@ public class HandlerMediaLibrary(IUnitOfWorkFactory factoryUnitOfWork, IETagServ
         }
 
         // The ETag comes from the list that is returned, so the two can never disagree.
-        List<MediaFile> fileList = await uow.Media.GetMediaFileList(query.UserID, cancellationToken);
+        List<EntityMediaFile> fileList = await uow.Media.GetMediaFileList(query.UserID, cancellationToken);
         return new(serviceETag.Compute(fileList.Select(x => (x.ID, x.TimeModified))), [.. fileList.Select(x => x.ToResponse())]);
     }
 }

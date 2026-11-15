@@ -6,7 +6,6 @@ using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
-using EntityPlaylist = Noxy.NET.MediaPlayer.Domain.Entities.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Playlist;
 
@@ -19,18 +18,18 @@ public class HandlerPlaylistEntryListRemove(IUnitOfWorkFactory factoryUnitOfWork
         EntityPlaylist playlist = await uow.LoadPlaylistWithEntries(command.UserID, command.ID, cancellationToken);
 
         HashSet<Guid> removeIDSet = [.. command.EntryIDList];
-        List<PlaylistEntry> removedList = [.. playlist.EntryList.Where(x => removeIDSet.Contains(x.ID))];
+        List<EntityPlaylistEntry> removedList = [.. playlist.EntryList.Where(x => removeIDSet.Contains(x.ID))];
         if (removedList.Count != removeIDSet.Count) throw new PlaylistEntryNotFoundException();
 
         playlist.EntryList.RemoveAll(x => removeIDSet.Contains(x.ID));
-        List<PlaylistEntry> changedList = playlist.RenumberEntryList();
+        List<EntityPlaylistEntry> changedList = playlist.RenumberEntryList();
 
-        foreach (PlaylistEntry entry in removedList)
+        foreach (EntityPlaylistEntry entry in removedList)
         {
             uow.Playlist.RemovePlaylistEntry(entry);
         }
 
-        foreach (PlaylistEntry entry in changedList)
+        foreach (EntityPlaylistEntry entry in changedList)
         {
             uow.Playlist.UpdatePlaylistEntry(entry);
         }

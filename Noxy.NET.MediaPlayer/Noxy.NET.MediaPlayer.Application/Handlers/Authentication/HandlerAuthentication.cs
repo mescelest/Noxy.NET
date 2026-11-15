@@ -4,7 +4,6 @@ using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Models.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
-using RefreshToken = Noxy.NET.MediaPlayer.Application.Models.Authentication.RefreshToken;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Authentication;
 
@@ -16,7 +15,7 @@ public abstract class HandlerAuthentication<TCommand>(IUnitOfWorkFactory factory
 
     public abstract ValueTask<ResponseAuthentication> Handle(TCommand command, CancellationToken cancellationToken);
 
-    protected ResponseAuthentication CreateTokenResponse(IUnitOfWork uow, User user)
+    protected ResponseAuthentication CreateTokenResponse(IUnitOfWork uow, EntityUser user)
     {
         AccessToken accessToken = ServiceToken.CreateAccessToken(user);
         RefreshToken refreshToken = ServiceToken.CreateRefreshToken();

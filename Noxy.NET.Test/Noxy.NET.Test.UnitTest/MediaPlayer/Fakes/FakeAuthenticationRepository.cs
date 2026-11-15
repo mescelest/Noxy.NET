@@ -6,9 +6,9 @@ namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
 public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticationRepository
 {
-    private readonly List<ExternalLogin> _pendingExternalLogins = [];
-    private readonly List<RefreshToken> _pendingRefreshTokens = [];
-    private readonly List<User> _pendingUsers = [];
+    private readonly List<EntityExternalLogin> _pendingExternalLogins = [];
+    private readonly List<EntityRefreshToken> _pendingRefreshTokens = [];
+    private readonly List<EntityUser> _pendingUsers = [];
 
     public void Flush()
     {
@@ -27,44 +27,44 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
         return Task.FromResult(store.UserList.Any(x => x.Email == email));
     }
 
-    public Task<User?> FindUserByID(Guid id, CancellationToken cancellationToken = default)
+    public Task<EntityUser?> FindUserByID(Guid id, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.UserList.FirstOrDefault(x => x.ID == id));
     }
 
-    public Task<User?> FindUserByEmail(string email, CancellationToken cancellationToken = default)
+    public Task<EntityUser?> FindUserByEmail(string email, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.UserList.FirstOrDefault(x => x.Email == email));
     }
 
-    public void AddUser(User user)
+    public void AddUser(EntityUser user)
     {
         _pendingUsers.Add(user);
     }
 
-    public Task<ExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default)
+    public Task<EntityExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.ExternalLoginList.FirstOrDefault(x => x.Provider == provider && x.ProviderKey == providerKey));
     }
 
-    public void AddExternalLogin(ExternalLogin externalLogin)
+    public void AddExternalLogin(EntityExternalLogin externalLogin)
     {
         _pendingExternalLogins.Add(externalLogin);
     }
 
-    public Task<RefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default)
+    public Task<EntityRefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.RefreshTokenList.FirstOrDefault(x => x.TokenHash == tokenHash));
     }
 
-    public void AddRefreshToken(RefreshToken refreshToken)
+    public void AddRefreshToken(EntityRefreshToken refreshToken)
     {
         _pendingRefreshTokens.Add(refreshToken);
     }
 
     public Task<bool> TryRevokeRefreshToken(Guid id, DateTime time, CancellationToken cancellationToken = default)
     {
-        RefreshToken? token = store.RefreshTokenList.FirstOrDefault(x => x.ID == id && !x.IsRevoked);
+        EntityRefreshToken? token = store.RefreshTokenList.FirstOrDefault(x => x.ID == id && !x.IsRevoked);
         if (token is null || store.LoseRevokeRace) return Task.FromResult(false);
 
         token.TimeRevoked = time;
@@ -74,7 +74,7 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
     public Task RevokeAllRefreshTokens(Guid userID, DateTime time, CancellationToken cancellationToken = default)
     {
         store.RevokeAllCount++;
-        foreach (RefreshToken token in store.RefreshTokenList.Where(x => x.UserID == userID && !x.IsRevoked))
+        foreach (EntityRefreshToken token in store.RefreshTokenList.Where(x => x.UserID == userID && !x.IsRevoked))
         {
             token.TimeRevoked = time;
         }

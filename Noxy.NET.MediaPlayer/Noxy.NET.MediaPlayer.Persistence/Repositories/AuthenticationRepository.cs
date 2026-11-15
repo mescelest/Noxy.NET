@@ -14,41 +14,41 @@ public class AuthenticationRepository(DataContext context, IEntityToTableMapper 
         return context.User.AnyAsync(x => x.Email == email, cancellationToken);
     }
 
-    public async Task<User?> FindUserByID(Guid id, CancellationToken cancellationToken = default)
+    public async Task<EntityUser?> FindUserByID(Guid id, CancellationToken cancellationToken = default)
     {
         TableUser? table = await context.User.AsNoTracking().FirstOrDefaultAsync(x => x.ID == id, cancellationToken);
         return table is null ? null : mapperT2E.Map(table);
     }
 
-    public async Task<User?> FindUserByEmail(string email, CancellationToken cancellationToken = default)
+    public async Task<EntityUser?> FindUserByEmail(string email, CancellationToken cancellationToken = default)
     {
         TableUser? table = await context.User.AsNoTracking().FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
         return table is null ? null : mapperT2E.Map(table);
     }
 
-    public void AddUser(User user)
+    public void AddUser(EntityUser user)
     {
         context.User.Add(mapperE2T.Map(user));
     }
 
-    public async Task<ExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default)
+    public async Task<EntityExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default)
     {
         TableExternalLogin? table = await context.ExternalLogin.AsNoTracking().FirstOrDefaultAsync(x => x.Provider == provider && x.ProviderKey == providerKey, cancellationToken);
         return table is null ? null : mapperT2E.Map(table);
     }
 
-    public void AddExternalLogin(ExternalLogin externalLogin)
+    public void AddExternalLogin(EntityExternalLogin externalLogin)
     {
         context.ExternalLogin.Add(mapperE2T.Map(externalLogin));
     }
 
-    public async Task<RefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default)
+    public async Task<EntityRefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default)
     {
         TableRefreshToken? table = await context.RefreshToken.AsNoTracking().FirstOrDefaultAsync(x => x.TokenHash == tokenHash, cancellationToken);
         return table is null ? null : mapperT2E.Map(table);
     }
 
-    public void AddRefreshToken(RefreshToken refreshToken)
+    public void AddRefreshToken(EntityRefreshToken refreshToken)
     {
         context.RefreshToken.Add(mapperE2T.Map(refreshToken));
     }

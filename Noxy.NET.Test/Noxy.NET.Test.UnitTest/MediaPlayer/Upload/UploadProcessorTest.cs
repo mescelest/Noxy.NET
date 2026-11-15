@@ -28,9 +28,9 @@ public class UploadProcessorTest
     }
 
     // A job as Enqueue leaves it, with its file waiting in staging.
-    private MediaUploadJob AddJob(Guid? userID = null, long size = 100, string title = "Media", DateTime? timeCreated = null, bool staged = true)
+    private EntityMediaUploadJob AddJob(Guid? userID = null, long size = 100, string title = "Media", DateTime? timeCreated = null, bool staged = true)
     {
-        MediaUploadJob job = new()
+        EntityMediaUploadJob job = new()
         {
             TimeCreated = timeCreated ?? DateTime.UtcNow,
             UserID = userID ?? UserID,
@@ -74,11 +74,11 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_Success_CreatesMediaFileAndMetadataAndDeletesTheJob()
     {
-        MediaUploadJob job = AddJob(title: "My Media");
+        EntityMediaUploadJob job = AddJob(title: "My Media");
 
         Assert.True(await ProcessNext());
 
-        MediaFile file = Assert.Single(_store.MediaFileList);
+        EntityMediaFile file = Assert.Single(_store.MediaFileList);
         Assert.Equal(job.StagedFileName, file.FilePath);
         Assert.Equal("audio/mpeg", file.ContentType);
         Assert.Equal(100, file.SizeBytes);
@@ -112,7 +112,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_Success_NotifiesTheOwnerOnce()
     {
-        MediaUploadJob job = AddJob(title: "My Media");
+        EntityMediaUploadJob job = AddJob(title: "My Media");
 
         await ProcessNext();
 
@@ -129,8 +129,8 @@ public class UploadProcessorTest
     public async Task ProcessNext_ProcessesOldestFirst()
     {
         DateTime now = DateTime.UtcNow;
-        MediaUploadJob newer = AddJob(title: "newer", timeCreated: now);
-        MediaUploadJob older = AddJob(title: "older", timeCreated: now.AddMinutes(-5));
+        EntityMediaUploadJob newer = AddJob(title: "newer", timeCreated: now);
+        EntityMediaUploadJob older = AddJob(title: "older", timeCreated: now.AddMinutes(-5));
 
         await ProcessNext();
 
@@ -143,7 +143,7 @@ public class UploadProcessorTest
     {
         _config.MaxFilesPerUser = 1;
         AddLibraryFile(UserID, 10);
-        MediaUploadJob job = AddJob();
+        EntityMediaUploadJob job = AddJob();
 
         Assert.True(await ProcessNext());
 
@@ -203,7 +203,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_FileAlreadyPromoted_StillCompletes()
     {
-        MediaUploadJob job = AddJob();
+        EntityMediaUploadJob job = AddJob();
         _storage.Files[job.StagedFileName] = _storage.Staged[job.StagedFileName];
         _storage.Staged.Clear();
 
@@ -217,7 +217,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_CommitFailsAfterPromote_DeletesTheLibraryFileAndFailsTheJob()
     {
-        MediaUploadJob job = AddJob();
+        EntityMediaUploadJob job = AddJob();
         _store.FailCommitCount = 1;
 
         await ProcessNext();
@@ -234,7 +234,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_UnexpectedError_FailsWithUnknown_AndCleansUp()
     {
-        MediaUploadJob job = AddJob();
+        EntityMediaUploadJob job = AddJob();
         _storage.PromoteFailure = new IOException("disk gone");
 
         await ProcessNext();
@@ -247,7 +247,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_Cancelled_RethrowsAndLeavesTheJobProcessing()
     {
-        MediaUploadJob job = AddJob();
+        EntityMediaUploadJob job = AddJob();
         using CancellationTokenSource cts = new();
         await cts.CancelAsync();
         _storage.PromoteFailure = new OperationCanceledException(cts.Token);
@@ -292,7 +292,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_FailureCleanup_StagedDeleteThrows_StillDeletesTheLibraryFile()
     {
-        MediaUploadJob job = AddJob();
+        EntityMediaUploadJob job = AddJob();
         _store.FailCommitCount = 1;
         _storage.DeleteStagedFailure = new IOException("locked");
 
@@ -306,7 +306,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_JobCannotBeRemoved_KeepsTheFilesAndStaysSilentSoARestartCanRetry()
     {
-        MediaUploadJob job = AddJob();
+        EntityMediaUploadJob job = AddJob();
         // The commit that finishes the job fails, and then so does the commit that removes it after the failure.
         _store.FailCommitCount = 2;
 
@@ -322,7 +322,7 @@ public class UploadProcessorTest
     [Fact]
     public async Task ProcessNext_JobCannotBeRemoved_ARestartThenCompletesIt()
     {
-        MediaUploadJob job = AddJob();
+        EntityMediaUploadJob job = AddJob();
         _store.FailCommitCount = 2;
         await ProcessNext();
 

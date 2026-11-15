@@ -27,9 +27,9 @@ public class UploadRecoveryTest
         _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _publisher, Options.Create(config), NullLogger<UploadProcessor>.Instance);
     }
 
-    private MediaUploadJob AddJob(MediaUploadJobStatus status, bool staged = true)
+    private EntityMediaUploadJob AddJob(MediaUploadJobStatus status, bool staged = true)
     {
-        MediaUploadJob job = new()
+        EntityMediaUploadJob job = new()
         {
             UserID = UserID,
             StagedFileName = $"{Guid.CreateVersion7()}.mp3",
@@ -70,7 +70,7 @@ public class UploadRecoveryTest
     [Fact]
     public async Task Recover_KeepsStagedFilesThatHaveAJob()
     {
-        MediaUploadJob job = AddJob(MediaUploadJobStatus.Pending);
+        EntityMediaUploadJob job = AddJob(MediaUploadJobStatus.Pending);
         _storage.Staged["orphan.mp3"] = [1];
 
         await _processor.Recover(TestContext.Current.CancellationToken);
@@ -91,7 +91,7 @@ public class UploadRecoveryTest
     public async Task Recover_PromotedButUncommittedJob_CompletesOnTheNextProcessNext()
     {
         // The crash happened after the file was moved into the library but before the commit.
-        MediaUploadJob job = AddJob(MediaUploadJobStatus.Processing, staged: false);
+        EntityMediaUploadJob job = AddJob(MediaUploadJobStatus.Processing, staged: false);
         _storage.Files[job.StagedFileName] = new byte[10];
 
         await _processor.Recover(TestContext.Current.CancellationToken);
@@ -106,7 +106,7 @@ public class UploadRecoveryTest
     [Fact]
     public async Task Recover_ThenProcessNext_ProcessesAJobThatWasInterrupted()
     {
-        MediaUploadJob job = AddJob(MediaUploadJobStatus.Processing);
+        EntityMediaUploadJob job = AddJob(MediaUploadJobStatus.Processing);
 
         await _processor.Recover(TestContext.Current.CancellationToken);
         await _processor.ProcessNext(TestContext.Current.CancellationToken);

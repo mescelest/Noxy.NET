@@ -1,4 +1,4 @@
-using EntityPlaylist = Noxy.NET.MediaPlayer.Domain.Entities.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Entities;
 
 namespace Noxy.NET.MediaPlayer.Application.Models.Playlist;
 

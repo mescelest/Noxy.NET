@@ -28,9 +28,9 @@ public class HandlerPlaylistListTest
         _now = _now.AddSeconds(1);
     }
 
-    private MediaFile MediaFile()
+    private EntityMediaFile MediaFile()
     {
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
@@ -44,9 +44,9 @@ public class HandlerPlaylistListTest
         return file;
     }
 
-    private Playlist Seed(string name = "Mix", bool allowDuplicates = true, Guid? userID = null, int entryCount = 0)
+    private EntityPlaylist Seed(string name = "Mix", bool allowDuplicates = true, Guid? userID = null, int entryCount = 0)
     {
-        Playlist playlist = new()
+        EntityPlaylist playlist = new()
         {
             UserID = userID ?? UserID,
             Name = name,
@@ -72,9 +72,9 @@ public class HandlerPlaylistListTest
     [Fact]
     public async Task Handle_ReturnsTheUsersPlaylistsWithEntryCountsAndNoEntries()
     {
-        Playlist first = Seed("First", entryCount: 3);
+        EntityPlaylist first = Seed("First", entryCount: 3);
         Advance();
-        Playlist second = Seed("Second");
+        EntityPlaylist second = Seed("Second");
         Seed("Not mine", userID: Guid.CreateVersion7());
 
         PlaylistLibrary library = await Library();
@@ -101,7 +101,7 @@ public class HandlerPlaylistListTest
     [Fact]
     public async Task Handle_ETagChangesAfterEveryKindOfChange()
     {
-        Playlist playlist = Seed();
+        EntityPlaylist playlist = Seed();
         List<string> eTagList = [(await Library()).ETag];
 
         async Task Step(Action change)
@@ -111,7 +111,7 @@ public class HandlerPlaylistListTest
             eTagList.Add((await Library()).ETag);
         }
 
-        Playlist? other = null;
+        EntityPlaylist? other = null;
         await Step(() =>
         {
             playlist.Name = "Renamed";
@@ -199,7 +199,7 @@ public class HandlerPlaylistListTest
     [Fact]
     public async Task Handle_ETagIsUnchangedByAMediaFileEdit()
     {
-        Playlist playlist = Seed(entryCount: 1);
+        EntityPlaylist playlist = Seed(entryCount: 1);
         string before = (await Library()).ETag;
         Advance();
         _store.MediaFileList.Single(x => x.ID == playlist.EntryList[0].MediaFileID).TimeModified = _now;

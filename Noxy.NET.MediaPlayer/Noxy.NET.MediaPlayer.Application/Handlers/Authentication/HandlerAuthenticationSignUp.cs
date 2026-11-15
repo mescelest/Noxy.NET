@@ -16,7 +16,7 @@ public class HandlerAuthenticationSignUp(IUnitOfWorkFactory factoryUnitOfWork, I
         string email = NormalizeEmail(command.Email);
         if (await uow.Authentication.EmailExists(email, cancellationToken)) throw new EmailAlreadyInUseException();
 
-        User user = new()
+        EntityUser user = new()
         {
             Email = email,
             PasswordHash = servicePasswordHash.Hash(command.Password)

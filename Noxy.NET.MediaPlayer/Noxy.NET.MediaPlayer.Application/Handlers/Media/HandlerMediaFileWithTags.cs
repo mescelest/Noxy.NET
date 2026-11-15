@@ -18,7 +18,7 @@ public class HandlerMediaFileWithTags(IUnitOfWorkFactory factoryUnitOfWork, IFil
     {
         await using IUnitOfWork uow = factoryUnitOfWork.Create();
 
-        MediaFile mediaFile = await uow.Media.FindMediaFile(query.ID, query.UserID, cancellationToken) ?? throw new MediaNotFoundException();
+        EntityMediaFile mediaFile = await uow.Media.FindMediaFile(query.ID, query.UserID, cancellationToken) ?? throw new MediaNotFoundException();
 
         string path = CopyToTemporary(mediaFile);
         try
@@ -41,7 +41,7 @@ public class HandlerMediaFileWithTags(IUnitOfWorkFactory factoryUnitOfWork, IFil
         }
     }
 
-    private string CopyToTemporary(MediaFile mediaFile)
+    private string CopyToTemporary(EntityMediaFile mediaFile)
     {
         try
         {
@@ -54,7 +54,7 @@ public class HandlerMediaFileWithTags(IUnitOfWorkFactory factoryUnitOfWork, IFil
     }
 
     // A file the tagger cannot read is still a media file the user is entitled to, so the failure is logged and the untagged copy is served.
-    private bool TryWriteTags(string path, MediaFileMetadata metadata)
+    private bool TryWriteTags(string path, EntityMediaFileMetadata metadata)
     {
         try
         {

@@ -24,10 +24,10 @@ public class HandlerMediaDeleteTest
         _handler = new(new FakeUnitOfWorkFactory(_store), _storage, _publisher, _time, NullLogger<HandlerMediaDelete>.Instance);
     }
 
-    private MediaFile Seed(Guid? userID = null, string title = "Media", DateTime? timeCreated = null, DateTime? timeModified = null)
+    private EntityMediaFile Seed(Guid? userID = null, string title = "Media", DateTime? timeCreated = null, DateTime? timeModified = null)
     {
         byte[] bytes = [1, 2, 3];
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             TimeCreated = timeCreated ?? new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             TimeModified = timeModified ?? new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -44,7 +44,7 @@ public class HandlerMediaDeleteTest
         return file;
     }
 
-    private MediaFile Stored(MediaFile file)
+    private EntityMediaFile Stored(EntityMediaFile file)
     {
         return _store.MediaFileList.Single(x => x.ID == file.ID);
     }
@@ -54,8 +54,8 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_RemovesTheMediaFileItsFileAndPushesDeleted()
     {
-        MediaFile file = Seed();
-        MediaFile kept = Seed();
+        EntityMediaFile file = Seed();
+        EntityMediaFile kept = Seed();
 
         await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
 
@@ -70,7 +70,7 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_FileDeletionFails_StillSucceeds()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         _storage.DeleteFailure = new IOException("in use");
 
         await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
@@ -82,7 +82,7 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_FileAlreadyMissing_StillSucceeds()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         _storage.Files.Clear();
 
         await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
@@ -93,7 +93,7 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_AnotherUsersMediaFile_ThrowsNotFound_AndKeepsTheFile()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(Guid.CreateVersion7(), file.ID), TestContext.Current.CancellationToken).AsTask());
 
@@ -108,9 +108,9 @@ public class HandlerMediaDeleteTest
         await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, Guid.CreateVersion7()), TestContext.Current.CancellationToken).AsTask());
     }
 
-    private Playlist SeedPlaylist(Guid userID, params MediaFile[] mediaFileList)
+    private EntityPlaylist SeedPlaylist(Guid userID, params EntityMediaFile[] mediaFileList)
     {
-        Playlist playlist = new()
+        EntityPlaylist playlist = new()
         {
             UserID = userID,
             Name = "Mix",
@@ -127,7 +127,7 @@ public class HandlerMediaDeleteTest
         return playlist;
     }
 
-    private Playlist StoredPlaylist(Playlist playlist)
+    private EntityPlaylist StoredPlaylist(EntityPlaylist playlist)
     {
         return _store.PlaylistList.Single(x => x.ID == playlist.ID);
     }
@@ -135,11 +135,11 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_RemovesTheMediaFileFromEveryPlaylistOfTheUser()
     {
-        MediaFile file = Seed();
-        MediaFile other = Seed();
-        Playlist one = SeedPlaylist(UserID, file, other);
-        Playlist two = SeedPlaylist(UserID, file);
-        Playlist unrelated = SeedPlaylist(UserID, other);
+        EntityMediaFile file = Seed();
+        EntityMediaFile other = Seed();
+        EntityPlaylist one = SeedPlaylist(UserID, file, other);
+        EntityPlaylist two = SeedPlaylist(UserID, file);
+        EntityPlaylist unrelated = SeedPlaylist(UserID, other);
 
         await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
 
@@ -151,9 +151,9 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_MediaFileTwiceInOnePlaylist_RemovesBothEntries()
     {
-        MediaFile file = Seed();
-        MediaFile other = Seed();
-        Playlist playlist = SeedPlaylist(UserID, file, other, file);
+        EntityMediaFile file = Seed();
+        EntityMediaFile other = Seed();
+        EntityPlaylist playlist = SeedPlaylist(UserID, file, other, file);
 
         await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
 
@@ -163,14 +163,14 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_RenumbersThePlaylistsToDensePositions()
     {
-        MediaFile file = Seed();
-        MediaFile first = Seed();
-        MediaFile second = Seed();
-        Playlist playlist = SeedPlaylist(UserID, first, file, second, file);
+        EntityMediaFile file = Seed();
+        EntityMediaFile first = Seed();
+        EntityMediaFile second = Seed();
+        EntityPlaylist playlist = SeedPlaylist(UserID, first, file, second, file);
 
         await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
 
-        List<PlaylistEntry> left = [.. StoredPlaylist(playlist).EntryList.OrderBy(x => x.Position)];
+        List<EntityPlaylistEntry> left = [.. StoredPlaylist(playlist).EntryList.OrderBy(x => x.Position)];
         Assert.Equal([first.ID, second.ID], left.Select(x => x.MediaFileID));
         Assert.Equal([0, 1], left.Select(x => x.Position));
     }
@@ -178,10 +178,10 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_BumpsTimeModifiedOfAffectedPlaylistsOnly()
     {
-        MediaFile file = Seed();
-        MediaFile other = Seed();
-        Playlist affected = SeedPlaylist(UserID, file);
-        Playlist untouched = SeedPlaylist(UserID, other);
+        EntityMediaFile file = Seed();
+        EntityMediaFile other = Seed();
+        EntityPlaylist affected = SeedPlaylist(UserID, file);
+        EntityPlaylist untouched = SeedPlaylist(UserID, other);
         DateTime before = untouched.TimeModified;
         _time.Now = _time.Now.AddHours(1);
 
@@ -194,10 +194,10 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_PushesOneUpdatePerAffectedPlaylistWithTheNewCount()
     {
-        MediaFile file = Seed();
-        MediaFile other = Seed();
-        Playlist one = SeedPlaylist(UserID, file, other);
-        Playlist two = SeedPlaylist(UserID, file, file);
+        EntityMediaFile file = Seed();
+        EntityMediaFile other = Seed();
+        EntityPlaylist one = SeedPlaylist(UserID, file, other);
+        EntityPlaylist two = SeedPlaylist(UserID, file, file);
         SeedPlaylist(UserID, other);
 
         await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
@@ -211,8 +211,8 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_AnotherUsersPlaylistsAreUntouched()
     {
-        MediaFile file = Seed();
-        Playlist foreign = SeedPlaylist(Guid.CreateVersion7(), file);
+        EntityMediaFile file = Seed();
+        EntityPlaylist foreign = SeedPlaylist(Guid.CreateVersion7(), file);
 
         await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
 
@@ -223,9 +223,9 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_MediaFileInNoPlaylist_ChangesNoPlaylistAndPushesNoUpdate()
     {
-        MediaFile file = Seed();
-        MediaFile other = Seed();
-        Playlist playlist = SeedPlaylist(UserID, other);
+        EntityMediaFile file = Seed();
+        EntityMediaFile other = Seed();
+        EntityPlaylist playlist = SeedPlaylist(UserID, other);
 
         await _handler.Handle(new(UserID, file.ID), TestContext.Current.CancellationToken);
 
@@ -236,7 +236,7 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_StillCommitsOnce_ForTheMediaFileAndItsPlaylists()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         SeedPlaylist(UserID, file);
         SeedPlaylist(UserID, file);
         int commits = _store.CommitCount;
@@ -249,9 +249,9 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_PublishesMediaDeletedFirstThenOnePlaylistUpdatedPerAffectedPlaylist_AfterTheFileIsRemoved()
     {
-        MediaFile file = Seed();
-        Playlist one = SeedPlaylist(UserID, file);
-        Playlist two = SeedPlaylist(UserID, file);
+        EntityMediaFile file = Seed();
+        EntityPlaylist one = SeedPlaylist(UserID, file);
+        EntityPlaylist two = SeedPlaylist(UserID, file);
         List<bool> fileGoneAtPublishList = [];
         _publisher.OnPublish = _ => fileGoneAtPublishList.Add(!_storage.Files.ContainsKey(file.FilePath));
 
@@ -268,7 +268,7 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_WhenTheCommitFails_PublishesNothing()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         SeedPlaylist(UserID, file);
         _store.FailCommit = true;
 
@@ -280,7 +280,7 @@ public class HandlerMediaDeleteTest
     [Fact]
     public async Task Delete_PassesTheCancellationTokenToEveryPublish()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         SeedPlaylist(UserID, file);
         using CancellationTokenSource source = new();
 

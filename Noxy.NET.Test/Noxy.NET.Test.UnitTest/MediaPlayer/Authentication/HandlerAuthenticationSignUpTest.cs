@@ -30,12 +30,12 @@ public class HandlerAuthenticationSignUpTest
     {
         ResponseAuthentication response = await SignUp("  User@Example.COM ");
 
-        User user = Assert.Single(_store.UserList);
+        EntityUser user = Assert.Single(_store.UserList);
         Assert.Equal("user@example.com", user.Email);
         Assert.Equal("hashed:a-long-enough-password", user.PasswordHash);
         Assert.False(user.IsEmailVerified);
 
-        RefreshToken token = Assert.Single(_store.RefreshTokenList);
+        EntityRefreshToken token = Assert.Single(_store.RefreshTokenList);
         Assert.Equal(user.ID, token.UserID);
         Assert.Equal("hash-of-" + response.RefreshToken, token.TokenHash);
         Assert.Equal(1, _store.CommitCount);

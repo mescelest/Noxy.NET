@@ -29,9 +29,9 @@ public class HandlerPlaylistTest
         _now = _now.AddSeconds(1);
     }
 
-    private MediaFile MediaFile()
+    private EntityMediaFile MediaFile()
     {
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
@@ -45,9 +45,9 @@ public class HandlerPlaylistTest
         return file;
     }
 
-    private Playlist Seed(IEnumerable<Guid>? mediaFileIDList = null, string name = "Mix")
+    private EntityPlaylist Seed(IEnumerable<Guid>? mediaFileIDList = null, string name = "Mix")
     {
-        Playlist playlist = new()
+        EntityPlaylist playlist = new()
         {
             UserID = UserID,
             Name = name,
@@ -61,7 +61,7 @@ public class HandlerPlaylistTest
         return playlist;
     }
 
-    private void Append(Playlist playlist, IEnumerable<Guid> mediaFileIDList)
+    private void Append(EntityPlaylist playlist, IEnumerable<Guid> mediaFileIDList)
     {
         foreach (Guid mediaFileID in mediaFileIDList)
         {
@@ -85,7 +85,7 @@ public class HandlerPlaylistTest
     public async Task Handle_ReturnsEntriesByPosition()
     {
         List<Guid> mediaFileList = MediaFileIDList(3);
-        Playlist playlist = Seed(mediaFileList);
+        EntityPlaylist playlist = Seed(mediaFileList);
         playlist.EntryList.Reverse();
 
         PlaylistView view = await View(playlist.ID);
@@ -99,7 +99,7 @@ public class HandlerPlaylistTest
     [Fact]
     public async Task Handle_MatchingIfNoneMatch_ReturnsNoDetail()
     {
-        Playlist playlist = Seed();
+        EntityPlaylist playlist = Seed();
         string eTag = (await View(playlist.ID)).ETag;
 
         PlaylistView view = await View(playlist.ID, eTag);
@@ -111,8 +111,8 @@ public class HandlerPlaylistTest
     [Fact]
     public async Task Handle_ETagChangesWhenItsEntriesChange_AndNotWhenAnotherPlaylistChanges()
     {
-        Playlist playlist = Seed();
-        Playlist other = Seed(name: "Other");
+        EntityPlaylist playlist = Seed();
+        EntityPlaylist other = Seed(name: "Other");
         string before = (await View(playlist.ID)).ETag;
         Advance();
 
@@ -126,7 +126,7 @@ public class HandlerPlaylistTest
     [Fact]
     public async Task Handle_AnotherUsersPlaylist_ThrowsNotFound()
     {
-        Playlist playlist = Seed();
+        EntityPlaylist playlist = Seed();
 
         await Assert.ThrowsAsync<PlaylistNotFoundException>(() => View(playlist.ID, userID: Guid.CreateVersion7()));
     }
@@ -140,7 +140,7 @@ public class HandlerPlaylistTest
     [Fact]
     public async Task Handle_WithAnIfNoneMatch_UnknownOrAnotherUsersPlaylist_ThrowsNotFound()
     {
-        Playlist playlist = Seed();
+        EntityPlaylist playlist = Seed();
         string eTag = (await View(playlist.ID)).ETag;
 
         await Assert.ThrowsAsync<PlaylistNotFoundException>(() => View(playlist.ID, eTag, Guid.CreateVersion7()));
@@ -150,9 +150,9 @@ public class HandlerPlaylistTest
     [Fact]
     public async Task Handle_ReturnsEntriesWithTheirMediaFileMetadata()
     {
-        MediaFile mediaFile = MediaFile();
+        EntityMediaFile mediaFile = MediaFile();
         mediaFile.Metadata = new() { Title = "Hello", Artist = "Someone", MediaFileID = mediaFile.ID };
-        Playlist playlist = Seed([mediaFile.ID]);
+        EntityPlaylist playlist = Seed([mediaFile.ID]);
 
         PlaylistView view = await View(playlist.ID);
 
@@ -168,8 +168,8 @@ public class HandlerPlaylistTest
     [Fact]
     public async Task Handle_AfterAMediaFilesMetadataChanged_NoLongerMatchesTheOldETag()
     {
-        MediaFile mediaFile = MediaFile();
-        Playlist playlist = Seed([mediaFile.ID]);
+        EntityMediaFile mediaFile = MediaFile();
+        EntityPlaylist playlist = Seed([mediaFile.ID]);
         string eTag = (await View(playlist.ID)).ETag;
         Advance();
         mediaFile.TimeModified = _now;
@@ -183,7 +183,7 @@ public class HandlerPlaylistTest
     [Fact]
     public async Task Handle_WhenNothingChanged_ReturnsNullDetail()
     {
-        Playlist playlist = Seed(MediaFileIDList(2));
+        EntityPlaylist playlist = Seed(MediaFileIDList(2));
         string eTag = (await View(playlist.ID)).ETag;
 
         PlaylistView view = await View(playlist.ID, eTag);
@@ -196,7 +196,7 @@ public class HandlerPlaylistTest
     public async Task Handle_SameMediaFileTwice_ReturnsBothEntriesAndAnETag()
     {
         Guid mediaFileID = MediaFile().ID;
-        Playlist playlist = Seed([mediaFileID, mediaFileID]);
+        EntityPlaylist playlist = Seed([mediaFileID, mediaFileID]);
 
         PlaylistView view = await View(playlist.ID);
 
@@ -209,7 +209,7 @@ public class HandlerPlaylistTest
     [Fact]
     public async Task Handle_EmptyPlaylist_ReturnsADetailWithAnETag()
     {
-        Playlist playlist = Seed();
+        EntityPlaylist playlist = Seed();
 
         PlaylistView view = await View(playlist.ID);
 

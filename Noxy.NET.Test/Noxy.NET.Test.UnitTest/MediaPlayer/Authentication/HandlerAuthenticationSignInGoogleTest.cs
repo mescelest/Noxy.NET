@@ -44,12 +44,12 @@ public class HandlerAuthenticationSignInGoogleTest
 
         await SignInGoogle("token");
 
-        User user = Assert.Single(_store.UserList);
+        EntityUser user = Assert.Single(_store.UserList);
         Assert.Equal("new@example.com", user.Email);
         Assert.True(user.IsEmailVerified);
         Assert.Null(user.PasswordHash);
 
-        ExternalLogin login = Assert.Single(_store.ExternalLoginList);
+        EntityExternalLogin login = Assert.Single(_store.ExternalLoginList);
         Assert.Equal(ExternalLoginProvider.Google, login.Provider);
         Assert.Equal("sub-1", login.ProviderKey);
         Assert.Equal(user.ID, login.UserID);
@@ -89,7 +89,7 @@ public class HandlerAuthenticationSignInGoogleTest
         await SignInGoogle("token");
 
         Assert.Single(_store.UserList);
-        ExternalLogin login = Assert.Single(_store.ExternalLoginList);
+        EntityExternalLogin login = Assert.Single(_store.ExternalLoginList);
         Assert.Equal(_store.UserList[0].ID, login.UserID);
     }
 

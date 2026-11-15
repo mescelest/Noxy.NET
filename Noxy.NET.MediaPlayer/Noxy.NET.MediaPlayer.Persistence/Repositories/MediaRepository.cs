@@ -10,12 +10,12 @@ namespace Noxy.NET.MediaPlayer.Persistence.Repositories;
 
 public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T, ITableToEntityMapper mapperT2E) : IMediaRepository
 {
-    public void AddMediaFile(MediaFile mediaFile)
+    public void AddMediaFile(EntityMediaFile mediaFile)
     {
         context.MediaFile.Add(mapperE2T.Map(mediaFile));
     }
 
-    public async Task<MediaFile?> FindMediaFile(Guid id, Guid userID, CancellationToken cancellationToken = default)
+    public async Task<EntityMediaFile?> FindMediaFile(Guid id, Guid userID, CancellationToken cancellationToken = default)
     {
         TableMediaFile? table = await context.MediaFile.AsNoTracking()
             .Include(x => x.Metadata)
@@ -34,7 +34,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
         return await context.MediaFile.Where(x => x.UserID == userID).SumAsync(x => x.SizeBytes, cancellationToken);
     }
 
-    public async Task<List<MediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
+    public async Task<List<EntityMediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
     {
         List<TableMediaFile> list = await context.MediaFile.AsNoTracking()
             .Include(x => x.Metadata)
@@ -48,7 +48,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
         return [.. list.Select(x => mapperT2E.Map(x))];
     }
 
-    public async Task<List<MediaFile>> GetMediaFileList(Guid userID, CancellationToken cancellationToken = default)
+    public async Task<List<EntityMediaFile>> GetMediaFileList(Guid userID, CancellationToken cancellationToken = default)
     {
         List<TableMediaFile> list = await context.MediaFile.AsNoTracking()
             .Include(x => x.Metadata)
@@ -68,22 +68,22 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
             .ToListAsync(cancellationToken);
     }
 
-    public void UpdateMediaFile(MediaFile mediaFile)
+    public void UpdateMediaFile(EntityMediaFile mediaFile)
     {
         context.MediaFile.Update(mapperE2T.Map(mediaFile));
     }
 
-    public void RemoveMediaFile(MediaFile mediaFile)
+    public void RemoveMediaFile(EntityMediaFile mediaFile)
     {
         context.MediaFile.Remove(mapperE2T.Map(mediaFile));
     }
 
-    public void AddMediaUploadJob(MediaUploadJob job)
+    public void AddMediaUploadJob(EntityMediaUploadJob job)
     {
         context.MediaUploadJob.Add(mapperE2T.Map(job));
     }
 
-    public void RemoveMediaUploadJob(MediaUploadJob job)
+    public void RemoveMediaUploadJob(EntityMediaUploadJob job)
     {
         context.MediaUploadJob.Remove(mapperE2T.Map(job));
     }
@@ -98,7 +98,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
         return await context.MediaUploadJob.Where(x => x.UserID == userID).SumAsync(x => x.SizeBytes, cancellationToken);
     }
 
-    public async Task<MediaUploadJob?> FindNextPendingMediaUploadJob(CancellationToken cancellationToken = default)
+    public async Task<EntityMediaUploadJob?> FindNextPendingMediaUploadJob(CancellationToken cancellationToken = default)
     {
         TableMediaUploadJob? table = await context.MediaUploadJob.AsNoTracking()
             .Where(x => x.Status == MediaUploadJobStatus.Pending)

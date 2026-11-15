@@ -7,7 +7,7 @@ namespace Noxy.NET.MediaPlayer.Application.Writers;
 
 public class TagLibMediaTagWriter : IMediaTagWriter
 {
-    public void Write(string filePath, MediaFileMetadata metadata)
+    public void Write(string filePath, EntityMediaFileMetadata metadata)
     {
         using File file = File.Create(filePath);
         Tag tag = file.Tag;

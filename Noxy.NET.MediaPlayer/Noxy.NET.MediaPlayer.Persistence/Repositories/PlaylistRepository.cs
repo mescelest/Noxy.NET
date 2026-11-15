@@ -9,12 +9,12 @@ namespace Noxy.NET.MediaPlayer.Persistence.Repositories;
 
 public class PlaylistRepository(DataContext context, IEntityToTableMapper mapperE2T, ITableToEntityMapper mapperT2E) : IPlaylistRepository
 {
-    public void AddPlaylist(Playlist playlist)
+    public void AddPlaylist(EntityPlaylist playlist)
     {
         context.Playlist.Add(mapperE2T.Map(playlist));
     }
 
-    public async Task<Playlist?> FindPlaylist(Guid id, Guid userID, CancellationToken cancellationToken = default)
+    public async Task<EntityPlaylist?> FindPlaylist(Guid id, Guid userID, CancellationToken cancellationToken = default)
     {
         TablePlaylist? table = await context.Playlist.AsNoTracking()
             .FirstOrDefaultAsync(x => x.ID == id && x.UserID == userID, cancellationToken);
@@ -22,7 +22,7 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
         return table is null ? null : mapperT2E.Map(table);
     }
 
-    public async Task<Playlist?> FindPlaylistWithEntries(Guid id, Guid userID, CancellationToken cancellationToken = default)
+    public async Task<EntityPlaylist?> FindPlaylistWithEntries(Guid id, Guid userID, CancellationToken cancellationToken = default)
     {
         TablePlaylist? table = await context.Playlist.AsNoTracking()
             .Include(x => x.EntryList.OrderBy(e => e.Position)).ThenInclude(e => e.MediaFile!.Metadata)
@@ -64,7 +64,7 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
         return await context.Playlist.CountAsync(x => x.UserID == userID, cancellationToken);
     }
 
-    public async Task<List<Playlist>> GetPlaylistListByMediaFileID(Guid userID, Guid mediaFileID, CancellationToken cancellationToken = default)
+    public async Task<List<EntityPlaylist>> GetPlaylistListByMediaFileID(Guid userID, Guid mediaFileID, CancellationToken cancellationToken = default)
     {
         List<TablePlaylist> list = await context.Playlist.AsNoTracking()
             .Include(x => x.EntryList.OrderBy(e => e.Position))
@@ -76,7 +76,7 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
         return [.. list.Select(mapperT2E.Map)];
     }
 
-    public void UpdatePlaylist(Playlist playlist)
+    public void UpdatePlaylist(EntityPlaylist playlist)
     {
         TablePlaylist table = mapperE2T.Map(playlist);
 
@@ -85,7 +85,7 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
         context.Playlist.Update(table);
     }
 
-    public void RemovePlaylist(Playlist playlist)
+    public void RemovePlaylist(EntityPlaylist playlist)
     {
         TablePlaylist table = mapperE2T.Map(playlist);
 
@@ -94,17 +94,17 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
         context.Playlist.Remove(table);
     }
 
-    public void AddPlaylistEntry(PlaylistEntry entry)
+    public void AddPlaylistEntry(EntityPlaylistEntry entry)
     {
         context.PlaylistEntry.Add(mapperE2T.Map(entry));
     }
 
-    public void UpdatePlaylistEntry(PlaylistEntry entry)
+    public void UpdatePlaylistEntry(EntityPlaylistEntry entry)
     {
         context.PlaylistEntry.Update(mapperE2T.Map(entry));
     }
 
-    public void RemovePlaylistEntry(PlaylistEntry entry)
+    public void RemovePlaylistEntry(EntityPlaylistEntry entry)
     {
         context.PlaylistEntry.Remove(mapperE2T.Map(entry));
     }

@@ -9,7 +9,6 @@ using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
-using EntityPlaylist = Noxy.NET.MediaPlayer.Domain.Entities.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Media;
 
@@ -20,20 +19,20 @@ public class HandlerMediaDelete(IUnitOfWorkFactory factoryUnitOfWork, IFileStora
     {
         await using IUnitOfWork uow = factoryUnitOfWork.Create();
 
-        MediaFile file = await uow.Media.FindMediaFile(command.ID, command.UserID, cancellationToken) ?? throw new MediaNotFoundException();
+        EntityMediaFile file = await uow.Media.FindMediaFile(command.ID, command.UserID, cancellationToken) ?? throw new MediaNotFoundException();
 
         // The media file leaves every playlist in the same commit, so no entry is ever left pointing at it.
         DateTime now = time.GetUtcNow().UtcDateTime;
         List<ResponsePlaylist> playlistUpdatedList = [];
         foreach (EntityPlaylist playlist in await uow.Playlist.GetPlaylistListByMediaFileID(command.UserID, command.ID, cancellationToken))
         {
-            foreach (PlaylistEntry removed in playlist.EntryList.Where(x => x.MediaFileID == command.ID))
+            foreach (EntityPlaylistEntry removed in playlist.EntryList.Where(x => x.MediaFileID == command.ID))
             {
                 uow.Playlist.RemovePlaylistEntry(removed);
             }
 
             playlist.EntryList.RemoveAll(x => x.MediaFileID == command.ID);
-            foreach (PlaylistEntry changed in playlist.RenumberEntryList())
+            foreach (EntityPlaylistEntry changed in playlist.RenumberEntryList())
             {
                 uow.Playlist.UpdatePlaylistEntry(changed);
             }

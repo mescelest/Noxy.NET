@@ -6,7 +6,6 @@ using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
-using EntityPlaylist = Noxy.NET.MediaPlayer.Domain.Entities.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Playlist;
 
@@ -18,7 +17,7 @@ public class HandlerPlaylistEntryMove(IUnitOfWorkFactory factoryUnitOfWork, IPub
 
         EntityPlaylist playlist = await uow.LoadPlaylistWithEntries(command.UserID, command.ID, cancellationToken);
 
-        PlaylistEntry entry = playlist.EntryList.FirstOrDefault(x => x.ID == command.EntryID) ?? throw new PlaylistEntryNotFoundException();
+        EntityPlaylistEntry entry = playlist.EntryList.FirstOrDefault(x => x.ID == command.EntryID) ?? throw new PlaylistEntryNotFoundException();
         if (command.Position < 0 || command.Position >= playlist.EntryList.Count) throw new InvalidPlaylistPositionException();
 
         // A move to where the entry already is changes nothing, so it leaves the modified time and the ETag alone.
@@ -27,7 +26,7 @@ public class HandlerPlaylistEntryMove(IUnitOfWorkFactory factoryUnitOfWork, IPub
         playlist.EntryList.Remove(entry);
         playlist.EntryList.Insert(command.Position, entry);
 
-        foreach (PlaylistEntry changed in playlist.RenumberEntryList())
+        foreach (EntityPlaylistEntry changed in playlist.RenumberEntryList())
         {
             uow.Playlist.UpdatePlaylistEntry(changed);
         }

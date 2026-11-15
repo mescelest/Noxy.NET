@@ -19,10 +19,10 @@ public class HandlerMediaListTest
     }
 
     // A file that is already in the library, as the worker would have left it.
-    private MediaFile Seed(Guid userID, string title, DateTime? timeCreated = null)
+    private EntityMediaFile Seed(Guid userID, string title, DateTime? timeCreated = null)
     {
         byte[] bytes = [1, 2, 3];
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             TimeCreated = timeCreated ?? DateTime.UtcNow,
             FilePath = $"{Guid.CreateVersion7()}.mp3",
@@ -46,8 +46,8 @@ public class HandlerMediaListTest
     public async Task Handle_ReturnsOnlyTheUsersFilesNewestFirst()
     {
         DateTime now = DateTime.UtcNow;
-        MediaFile older = Seed(UserID, "old", now.AddMinutes(-5));
-        MediaFile newer = Seed(UserID, "new", now);
+        EntityMediaFile older = Seed(UserID, "old", now.AddMinutes(-5));
+        EntityMediaFile newer = Seed(UserID, "new", now);
         Seed(Guid.CreateVersion7(), "other");
 
         List<ResponseMediaFile> list = await Handle(0, 10);
@@ -72,7 +72,7 @@ public class HandlerMediaListTest
     [Fact]
     public async Task Handle_ReturnsTheHashAndUtcTimes()
     {
-        MediaFile file = Seed(UserID, "media", new(2026, 1, 2, 3, 4, 5, DateTimeKind.Unspecified));
+        EntityMediaFile file = Seed(UserID, "media", new(2026, 1, 2, 3, 4, 5, DateTimeKind.Unspecified));
 
         ResponseMediaFile response = Assert.Single(await Handle(0, 10));
 

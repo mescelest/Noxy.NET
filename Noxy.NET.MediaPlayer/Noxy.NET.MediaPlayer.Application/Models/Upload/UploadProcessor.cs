@@ -18,11 +18,11 @@ public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageS
 {
     public async Task<bool> ProcessNext(CancellationToken cancellationToken = default)
     {
-        MediaUploadJob job;
+        EntityMediaUploadJob job;
 
         await using (IUnitOfWork claim = factoryUnitOfWork.Create())
         {
-            MediaUploadJob? next = await claim.Media.FindNextPendingMediaUploadJob(cancellationToken);
+            EntityMediaUploadJob? next = await claim.Media.FindNextPendingMediaUploadJob(cancellationToken);
             if (next is null) return false;
 
             // Someone else got there first: nothing to do for this one, but there may be more.
@@ -68,13 +68,13 @@ public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageS
         logger.LogInformation("Upload recovery: {Reset} interrupted jobs queued again, {Orphans} orphaned staged files deleted", reset, orphans);
     }
 
-    private async Task<ResponseUploadResult> Complete(MediaUploadJob job, CancellationToken cancellationToken)
+    private async Task<ResponseUploadResult> Complete(EntityMediaUploadJob job, CancellationToken cancellationToken)
     {
         await EnsureRoomInLibrary(job, cancellationToken);
 
         serviceFileStorage.Promote(job.StagedFileName);
 
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             FilePath = job.StagedFileName,
             ContentType = job.ContentType,
@@ -103,7 +103,7 @@ public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageS
         };
     }
 
-    private async Task EnsureRoomInLibrary(MediaUploadJob job, CancellationToken cancellationToken)
+    private async Task EnsureRoomInLibrary(EntityMediaUploadJob job, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = factoryUnitOfWork.Create();
 
@@ -114,7 +114,7 @@ public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageS
         if (used + job.SizeBytes > configStorage.Value.MaxBytesPerUser) throw new LibraryFullException();
     }
 
-    private async Task<ResponseUploadResult?> Fail(MediaUploadJob job, Exception exception, CancellationToken cancellationToken)
+    private async Task<ResponseUploadResult?> Fail(EntityMediaUploadJob job, Exception exception, CancellationToken cancellationToken)
     {
         UploadFailureReason reason = exception switch
         {
@@ -153,7 +153,7 @@ public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageS
     }
 
     // Each deletion stands alone, so one failing can't stop the other.
-    private void DeleteQuietly(Action delete, MediaUploadJob job)
+    private void DeleteQuietly(Action delete, EntityMediaUploadJob job)
     {
         try
         {

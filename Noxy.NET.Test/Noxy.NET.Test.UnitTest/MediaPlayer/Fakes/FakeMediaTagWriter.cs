@@ -5,11 +5,11 @@ namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
 public sealed class FakeMediaTagWriter : IMediaTagWriter
 {
-    public List<(string FilePath, MediaFileMetadata Metadata)> WriteList { get; } = [];
+    public List<(string FilePath, EntityMediaFileMetadata Metadata)> WriteList { get; } = [];
     public Exception? Failure { get; set; }
     public Action<string>? BeforeWrite { get; set; }
 
-    public void Write(string filePath, MediaFileMetadata metadata)
+    public void Write(string filePath, EntityMediaFileMetadata metadata)
     {
         BeforeWrite?.Invoke(filePath);
 

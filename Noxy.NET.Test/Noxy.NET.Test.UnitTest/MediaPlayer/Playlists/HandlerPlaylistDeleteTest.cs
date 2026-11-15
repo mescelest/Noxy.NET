@@ -23,11 +23,11 @@ public class HandlerPlaylistDeleteTest
 
     private Guid Create(int entryCount = 0)
     {
-        Playlist playlist = new() { UserID = UserID, Name = "Mix", TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
+        EntityPlaylist playlist = new() { UserID = UserID, Name = "Mix", TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
 
         for (int index = 0; index < entryCount; index++)
         {
-            MediaFile file = new()
+            EntityMediaFile file = new()
             {
                 FilePath = $"{Guid.CreateVersion7()}.mp3",
                 ContentType = "audio/mpeg",

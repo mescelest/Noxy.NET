@@ -5,7 +5,7 @@ namespace Noxy.NET.MediaPlayer.Domain.Entities;
 /// <summary>
 ///     A person who can sign in. A user either has a local password, or signs in through an external provider (Google).
 /// </summary>
-public class User : BaseEntity
+public class EntityUser : BaseEntity
 {
     public required string Email { get; set; }
     public bool IsEmailVerified { get; set; }
@@ -13,5 +13,5 @@ public class User : BaseEntity
     /// <summary>Hash produced by the password hasher. Null for users who only sign in externally.</summary>
     public string? PasswordHash { get; set; }
 
-    public List<ExternalLogin> ExternalLoginList { get; set; } = [];
+    public List<EntityExternalLogin> ExternalLoginList { get; set; } = [];
 }

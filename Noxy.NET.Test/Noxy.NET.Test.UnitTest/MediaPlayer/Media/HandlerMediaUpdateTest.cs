@@ -24,10 +24,10 @@ public class HandlerMediaUpdateTest
         _handler = new(new FakeUnitOfWorkFactory(_store), _publisher, _time);
     }
 
-    private MediaFile Seed(Guid? userID = null, string title = "Media", DateTime? timeCreated = null, DateTime? timeModified = null)
+    private EntityMediaFile Seed(Guid? userID = null, string title = "Media", DateTime? timeCreated = null, DateTime? timeModified = null)
     {
         byte[] bytes = [1, 2, 3];
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             TimeCreated = timeCreated ?? new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             TimeModified = timeModified ?? new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -43,13 +43,13 @@ public class HandlerMediaUpdateTest
         return file;
     }
 
-    private MediaFile Stored(MediaFile file)
+    private EntityMediaFile Stored(EntityMediaFile file)
     {
         return _store.MediaFileList.Single(x => x.ID == file.ID);
     }
 
     // The changes are given as a command with placeholder user and ID, which are filled in here like the controller fills them from the token and the route.
-    private async Task<ResponseMediaFile> Update(MediaFile file, CommandMediaUpdate changes, Guid? userID = null)
+    private async Task<ResponseMediaFile> Update(EntityMediaFile file, CommandMediaUpdate changes, Guid? userID = null)
     {
         return await _handler.Handle(changes with { UserID = userID ?? UserID, ID = file.ID }, TestContext.Current.CancellationToken);
     }
@@ -57,7 +57,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_ChangesOnlyTheSentTags()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
 
         ResponseMediaFile response = await Update(file, new(Guid.Empty, Guid.Empty) { Artist = new("New Artist") });
 
@@ -71,7 +71,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_StoresEveryEditableTag()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
 
         ResponseMediaFile response = await Update(file, new(Guid.Empty, Guid.Empty)
         {
@@ -95,7 +95,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_NullClearsATag()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
 
         ResponseMediaFile response = await Update(file, new(Guid.Empty, Guid.Empty) { Artist = new(null), Year = new(null) });
 
@@ -111,7 +111,7 @@ public class HandlerMediaUpdateTest
     [InlineData("   ")]
     public async Task Update_EmptyOrWhitespaceNullableTag_ClearsIt(string value)
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
 
         ResponseMediaFile response = await Update(file, new(Guid.Empty, Guid.Empty) { Artist = new(value), Genre = new(value) });
 
@@ -123,7 +123,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_TextIsTrimmed()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
 
         ResponseMediaFile response = await Update(file, new(Guid.Empty, Guid.Empty) { Title = new("  New Title  "), Album = new("  Other ") });
 
@@ -134,7 +134,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_BumpsTimeModifiedToTheClock_AndKeepsTimeCreated()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         _time.Now = new(2027, 5, 6, 7, 8, 9, TimeSpan.Zero);
 
         ResponseMediaFile response = await Update(file, new(Guid.Empty, Guid.Empty) { Title = new("Changed") });
@@ -147,7 +147,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_CommitsOnceAndPushesTheNewStateToTheOwner()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
 
         ResponseMediaFile response = await Update(file, new(Guid.Empty, Guid.Empty) { Title = new("Changed") });
 
@@ -162,7 +162,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_NothingChanged_DoesNotCommitBumpOrPush_AndReturnsTheMediaFile()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         DateTime before = file.TimeModified;
         _time.Now = new(2030, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
@@ -179,7 +179,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_AnotherUsersMediaFile_ThrowsNotFound_AndPushesNothing()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => Update(file, new(Guid.Empty, Guid.Empty) { Title = new("Hijacked") }, Guid.CreateVersion7()));
 
@@ -197,7 +197,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_MediaFileWithoutMetadata_ThrowsNotFound()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         file.Metadata = null;
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => Update(file, new(Guid.Empty, Guid.Empty) { Title = new("x") }));
@@ -206,7 +206,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_NoOpEdit_DoesNotChangeTheLibraryETag()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         HandlerMediaLibrary library = new(new FakeUnitOfWorkFactory(_store), new ETagService());
         string before = (await library.Handle(new(UserID, null), TestContext.Current.CancellationToken)).ETag;
 
@@ -218,7 +218,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_WhenTheCommitFails_PublishesNothing()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         _store.FailCommit = true;
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => Update(file, new(Guid.Empty, Guid.Empty) { Title = new("Changed") }));
@@ -229,7 +229,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_PublishesOnlyAfterTheCommit()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         int commits = _store.CommitCount;
         int commitsAtPublish = -1;
         _publisher.OnPublish = _ => commitsAtPublish = _store.CommitCount;
@@ -242,7 +242,7 @@ public class HandlerMediaUpdateTest
     [Fact]
     public async Task Update_PassesTheCancellationTokenToThePublish()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         using CancellationTokenSource source = new();
 
         await _handler.Handle(new(UserID, file.ID) { Title = new("Changed") }, source.Token);

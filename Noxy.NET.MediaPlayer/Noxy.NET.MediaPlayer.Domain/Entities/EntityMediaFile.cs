@@ -2,7 +2,7 @@ using Noxy.NET.MediaPlayer.Domain.Abstractions.Entities;
 
 namespace Noxy.NET.MediaPlayer.Domain.Entities;
 
-public class MediaFile : BaseEntity
+public class EntityMediaFile : BaseEntity
 {
     public required string FilePath { get; set; }
 
@@ -16,5 +16,5 @@ public class MediaFile : BaseEntity
 
     public required Guid UserID { get; set; }
 
-    public MediaFileMetadata? Metadata { get; set; }
+    public EntityMediaFileMetadata? Metadata { get; set; }
 }

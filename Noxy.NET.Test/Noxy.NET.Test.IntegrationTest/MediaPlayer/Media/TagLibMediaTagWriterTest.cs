@@ -26,7 +26,7 @@ public class TagLibMediaTagWriterTest : IDisposable
         return path;
     }
 
-    private static MediaFileMetadata Full()
+    private static EntityMediaFileMetadata Full()
     {
         return new()
         {

@@ -15,8 +15,8 @@ public class HandlerAuthenticationRefresh(IUnitOfWorkFactory factoryUnitOfWork, 
 
         await using IUnitOfWork uow = FactoryUnitOfWork.Create();
 
-        RefreshToken stored = await uow.Authentication.FindRefreshToken(ServiceToken.HashRefreshToken(command.RefreshToken), cancellationToken)
-                              ?? throw new AuthenticationFailedException();
+        EntityRefreshToken stored = await uow.Authentication.FindRefreshToken(ServiceToken.HashRefreshToken(command.RefreshToken), cancellationToken)
+                                    ?? throw new AuthenticationFailedException();
 
         // Tokens are single-use, so a revoked one coming back means someone has a copy.
         // Revoke everything this user has and make them sign in again.
@@ -38,7 +38,7 @@ public class HandlerAuthenticationRefresh(IUnitOfWorkFactory factoryUnitOfWork, 
             throw new AuthenticationFailedException();
         }
 
-        User user = await uow.Authentication.FindUserByID(stored.UserID, cancellationToken) ?? throw new AuthenticationFailedException();
+        EntityUser user = await uow.Authentication.FindUserByID(stored.UserID, cancellationToken) ?? throw new AuthenticationFailedException();
         ResponseAuthentication response = CreateTokenResponse(uow, user);
 
         await uow.Commit(cancellationToken);

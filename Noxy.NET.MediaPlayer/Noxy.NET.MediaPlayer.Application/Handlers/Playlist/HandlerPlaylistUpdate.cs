@@ -2,10 +2,10 @@ using Mediator;
 using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
 using Noxy.NET.MediaPlayer.Application.Extensions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
+using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
-using EntityPlaylist = Noxy.NET.MediaPlayer.Domain.Entities.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Playlist;
 

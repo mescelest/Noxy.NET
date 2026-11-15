@@ -6,13 +6,13 @@ namespace Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
 public interface IPlaylistRepository
 {
     // Adds the playlist together with any entries in its EntryList.
-    void AddPlaylist(Playlist playlist);
+    void AddPlaylist(EntityPlaylist playlist);
 
     // Scoped to the owner: another user's playlist comes back as null. The entries are not loaded.
-    Task<Playlist?> FindPlaylist(Guid id, Guid userID, CancellationToken cancellationToken = default);
+    Task<EntityPlaylist?> FindPlaylist(Guid id, Guid userID, CancellationToken cancellationToken = default);
 
     // The entries are loaded, ordered by position, each with its media file and the media file's metadata.
-    Task<Playlist?> FindPlaylistWithEntries(Guid id, Guid userID, CancellationToken cancellationToken = default);
+    Task<EntityPlaylist?> FindPlaylistWithEntries(Guid id, Guid userID, CancellationToken cancellationToken = default);
 
     // Newest first, without entries.
     Task<List<PlaylistSummary>> GetPlaylistSummaryList(Guid userID, CancellationToken cancellationToken = default);
@@ -25,15 +25,15 @@ public interface IPlaylistRepository
     Task<int> CountPlaylists(Guid userID, CancellationToken cancellationToken = default);
 
     // The user's playlists that hold the media file, each with all of its entries ordered by position.
-    Task<List<Playlist>> GetPlaylistListByMediaFileID(Guid userID, Guid mediaFileID, CancellationToken cancellationToken = default);
+    Task<List<EntityPlaylist>> GetPlaylistListByMediaFileID(Guid userID, Guid mediaFileID, CancellationToken cancellationToken = default);
 
     // Saves the playlist row only, never its entries.
-    void UpdatePlaylist(Playlist playlist);
+    void UpdatePlaylist(EntityPlaylist playlist);
 
     // Its entries go with it.
-    void RemovePlaylist(Playlist playlist);
+    void RemovePlaylist(EntityPlaylist playlist);
 
-    void AddPlaylistEntry(PlaylistEntry entry);
-    void UpdatePlaylistEntry(PlaylistEntry entry);
-    void RemovePlaylistEntry(PlaylistEntry entry);
+    void AddPlaylistEntry(EntityPlaylistEntry entry);
+    void UpdatePlaylistEntry(EntityPlaylistEntry entry);
+    void RemovePlaylistEntry(EntityPlaylistEntry entry);
 }

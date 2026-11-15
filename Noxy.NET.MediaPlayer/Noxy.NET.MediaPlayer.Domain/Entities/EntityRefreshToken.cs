@@ -2,7 +2,7 @@ using Noxy.NET.MediaPlayer.Domain.Abstractions.Entities;
 
 namespace Noxy.NET.MediaPlayer.Domain.Entities;
 
-public class RefreshToken : BaseEntity
+public class EntityRefreshToken : BaseEntity
 {
     public required string TokenHash { get; set; }
     public required DateTime TimeExpires { get; set; }

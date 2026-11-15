@@ -19,10 +19,10 @@ public class HandlerMediaLibraryTest
         _handler = new(new FakeUnitOfWorkFactory(_store), new ETagService());
     }
 
-    private MediaFile Seed(Guid? userID = null, string title = "Media", DateTime? timeCreated = null)
+    private EntityMediaFile Seed(Guid? userID = null, string title = "Media", DateTime? timeCreated = null)
     {
         byte[] bytes = [1, 2, 3];
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             TimeCreated = timeCreated ?? new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             TimeModified = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -76,7 +76,7 @@ public class HandlerMediaLibraryTest
     [Fact]
     public async Task Handle_ChangesAfterAnEdit()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         string before = (await Library()).ETag;
 
         file.TimeModified = file.TimeModified.AddMinutes(1);
@@ -87,7 +87,7 @@ public class HandlerMediaLibraryTest
     [Fact]
     public async Task Handle_ChangesAfterADelete()
     {
-        MediaFile file = Seed();
+        EntityMediaFile file = Seed();
         Seed();
         string before = (await Library()).ETag;
 

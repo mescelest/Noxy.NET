@@ -30,10 +30,10 @@ public class HandlerMediaFileTest
     }
 
     // A file that is already in the library, as the worker would have left it.
-    private MediaFile Seed(Guid userID, string title, int length = 100)
+    private EntityMediaFile Seed(Guid userID, string title, int length = 100)
     {
         byte[] bytes = Mp3(length);
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
@@ -51,7 +51,7 @@ public class HandlerMediaFileTest
     [Fact]
     public async Task Handle_ReturnsTheContentNamedAfterTheTitle()
     {
-        MediaFile file = Seed(UserID, "My Media", 50);
+        EntityMediaFile file = Seed(UserID, "My Media", 50);
 
         MediaDownload download = await _handler.Handle(new(UserID, file.ID), Token);
         await using Stream stream = download.Content;
@@ -66,7 +66,7 @@ public class HandlerMediaFileTest
     [Fact]
     public async Task Handle_ReturnsTheStoredContentHash()
     {
-        MediaFile file = Seed(UserID, "My Media", 50);
+        EntityMediaFile file = Seed(UserID, "My Media", 50);
 
         MediaDownload download = await _handler.Handle(new(UserID, file.ID), Token);
         await download.Content.DisposeAsync();
@@ -83,7 +83,7 @@ public class HandlerMediaFileTest
     [Fact]
     public async Task Handle_AnotherUsersFile_ThrowsNotFound()
     {
-        MediaFile file = Seed(UserID, "media");
+        EntityMediaFile file = Seed(UserID, "media");
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(Guid.CreateVersion7(), file.ID), Token).AsTask());
     }
@@ -91,7 +91,7 @@ public class HandlerMediaFileTest
     [Fact]
     public async Task Handle_FileMissingFromStorage_ThrowsNotFound()
     {
-        MediaFile file = Seed(UserID, "media");
+        EntityMediaFile file = Seed(UserID, "media");
         _storage.Files.Clear();
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, file.ID), Token).AsTask());

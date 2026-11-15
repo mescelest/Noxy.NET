@@ -17,9 +17,9 @@ public class MediaRepositoryTest : IDisposable
         _fixture.Dispose();
     }
 
-    private async Task<User> CreateUser(string email = "user@example.com")
+    private async Task<EntityUser> CreateUser(string email = "user@example.com")
     {
-        User user = new() { Email = email };
+        EntityUser user = new() { Email = email };
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         uow.Authentication.AddUser(user);
@@ -28,9 +28,9 @@ public class MediaRepositoryTest : IDisposable
         return user;
     }
 
-    private static MediaFile CreateMediaFile(Guid userID, string title = "Media", DateTime? timeCreated = null)
+    private static EntityMediaFile CreateMediaFile(Guid userID, string title = "Media", DateTime? timeCreated = null)
     {
-        MediaFile file = new()
+        EntityMediaFile file = new()
         {
             TimeCreated = timeCreated ?? DateTime.UtcNow,
             FilePath = $"{Guid.CreateVersion7()}.mp3",
@@ -44,10 +44,10 @@ public class MediaRepositoryTest : IDisposable
         return file;
     }
 
-    private async Task Add(params MediaFile[] files)
+    private async Task Add(params EntityMediaFile[] files)
     {
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        foreach (MediaFile file in files)
+        foreach (EntityMediaFile file in files)
         {
             uow.Media.AddMediaFile(file);
         }
@@ -58,8 +58,8 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task Add_ThenFind_ReturnsTheFileWithItsMetadata()
     {
-        User user = await CreateUser();
-        MediaFile file = CreateMediaFile(user.ID, "My Media");
+        EntityUser user = await CreateUser();
+        EntityMediaFile file = CreateMediaFile(user.ID, "My Media");
         Assert.NotNull(file.Metadata);
         file.Metadata.Artist = "An Artist";
         file.Metadata.Year = 1999;
@@ -67,7 +67,7 @@ public class MediaRepositoryTest : IDisposable
         await Add(file);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        MediaFile? found = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken);
+        EntityMediaFile? found = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken);
 
         Assert.NotNull(found);
         Assert.Equal(file.FilePath, found.FilePath);
@@ -84,9 +84,9 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task Find_AnotherUsersFile_ReturnsNull()
     {
-        User owner = await CreateUser("owner@example.com");
-        User other = await CreateUser("other@example.com");
-        MediaFile file = CreateMediaFile(owner.ID);
+        EntityUser owner = await CreateUser("owner@example.com");
+        EntityUser other = await CreateUser("other@example.com");
+        EntityMediaFile file = CreateMediaFile(owner.ID);
         await Add(file);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
@@ -97,7 +97,7 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task Find_UnknownID_ReturnsNull()
     {
-        User user = await CreateUser();
+        EntityUser user = await CreateUser();
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
 
@@ -107,8 +107,8 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task GetMediaFileList_ReturnsOnlyTheUsersFiles_NewestFirst()
     {
-        User user = await CreateUser();
-        User other = await CreateUser("other@example.com");
+        EntityUser user = await CreateUser();
+        EntityUser other = await CreateUser("other@example.com");
         DateTime now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
         await Add(
             CreateMediaFile(user.ID, "Oldest", now.AddMinutes(-2)),
@@ -117,7 +117,7 @@ public class MediaRepositoryTest : IDisposable
             CreateMediaFile(other.ID, "Someone else's", now));
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        List<MediaFile> list = await uow.Media.GetMediaFileList(user.ID, 0, 10, TestContext.Current.CancellationToken);
+        List<EntityMediaFile> list = await uow.Media.GetMediaFileList(user.ID, 0, 10, TestContext.Current.CancellationToken);
 
         Assert.Equal(["Newest", "Middle", "Oldest"], list.Select(x => x.Metadata?.Title));
     }
@@ -125,12 +125,12 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task GetMediaFileList_PagesWithSkipAndTake()
     {
-        User user = await CreateUser();
+        EntityUser user = await CreateUser();
         DateTime now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
         await Add(Enumerable.Range(0, 5).Select(i => CreateMediaFile(user.ID, $"Media {i}", now.AddMinutes(i))).ToArray());
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        List<MediaFile> page = await uow.Media.GetMediaFileList(user.ID, 1, 2, TestContext.Current.CancellationToken);
+        List<EntityMediaFile> page = await uow.Media.GetMediaFileList(user.ID, 1, 2, TestContext.Current.CancellationToken);
 
         Assert.Equal(["Media 3", "Media 2"], page.Select(x => x.Metadata?.Title));
     }
@@ -138,14 +138,14 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task Add_ThenFind_KeepsTheHashAndModifiedTime()
     {
-        User user = await CreateUser();
-        MediaFile file = CreateMediaFile(user.ID);
+        EntityUser user = await CreateUser();
+        EntityMediaFile file = CreateMediaFile(user.ID);
         file.ContentHash = new string('b', 64);
         file.TimeModified = new(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc);
         await Add(file);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        MediaFile? found = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken);
+        EntityMediaFile? found = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken);
 
         Assert.Equal(new string('b', 64), found?.ContentHash);
         Assert.Equal(file.TimeModified, found?.TimeModified);
@@ -154,11 +154,11 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task CountAndSum_CoverOnlyTheUsersFiles()
     {
-        User user = await CreateUser();
-        User other = await CreateUser("other@example.com");
-        MediaFile first = CreateMediaFile(user.ID);
+        EntityUser user = await CreateUser();
+        EntityUser other = await CreateUser("other@example.com");
+        EntityMediaFile first = CreateMediaFile(user.ID);
         first.SizeBytes = 1000;
-        MediaFile second = CreateMediaFile(user.ID);
+        EntityMediaFile second = CreateMediaFile(user.ID);
         second.SizeBytes = 2500;
         await Add(first, second, CreateMediaFile(other.ID));
 
@@ -171,7 +171,7 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task CountAndSum_NoFiles_AreZero()
     {
-        User user = await CreateUser();
+        EntityUser user = await CreateUser();
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
 
@@ -182,11 +182,11 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task Add_DuplicateFilePath_Throws()
     {
-        User user = await CreateUser();
-        MediaFile first = CreateMediaFile(user.ID);
+        EntityUser user = await CreateUser();
+        EntityMediaFile first = CreateMediaFile(user.ID);
         await Add(first);
 
-        MediaFile duplicate = CreateMediaFile(user.ID);
+        EntityMediaFile duplicate = CreateMediaFile(user.ID);
         duplicate.FilePath = first.FilePath;
 
         await Assert.ThrowsAsync<DbUpdateException>(() => Add(duplicate));
@@ -198,7 +198,7 @@ public class MediaRepositoryTest : IDisposable
         await Assert.ThrowsAsync<DbUpdateException>(() => Add(CreateMediaFile(Guid.CreateVersion7())));
     }
 
-    private static MediaUploadJob CreateJob(Guid userID, DateTime? timeCreated = null)
+    private static EntityMediaUploadJob CreateJob(Guid userID, DateTime? timeCreated = null)
     {
         return new()
         {
@@ -212,10 +212,10 @@ public class MediaRepositoryTest : IDisposable
         };
     }
 
-    private async Task AddJobs(params MediaUploadJob[] jobs)
+    private async Task AddJobs(params EntityMediaUploadJob[] jobs)
     {
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        foreach (MediaUploadJob job in jobs)
+        foreach (EntityMediaUploadJob job in jobs)
         {
             uow.Media.AddMediaUploadJob(job);
         }
@@ -226,14 +226,14 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task AddMediaUploadJob_ThenFindNext_ReturnsTheOldestPending()
     {
-        User user = await CreateUser();
+        EntityUser user = await CreateUser();
         DateTime now = DateTime.UtcNow;
-        MediaUploadJob newer = CreateJob(user.ID, now);
-        MediaUploadJob older = CreateJob(user.ID, now.AddMinutes(-5));
+        EntityMediaUploadJob newer = CreateJob(user.ID, now);
+        EntityMediaUploadJob older = CreateJob(user.ID, now.AddMinutes(-5));
         await AddJobs(newer, older);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        MediaUploadJob? next = await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken);
+        EntityMediaUploadJob? next = await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken);
 
         Assert.Equal(older.ID, next?.ID);
         Assert.Equal(older.StagedFileName, next?.StagedFileName);
@@ -252,15 +252,15 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task FindNext_SkipsProcessingJobs()
     {
-        User user = await CreateUser();
+        EntityUser user = await CreateUser();
         DateTime now = DateTime.UtcNow;
-        MediaUploadJob first = CreateJob(user.ID, now.AddMinutes(-5));
-        MediaUploadJob second = CreateJob(user.ID, now);
+        EntityMediaUploadJob first = CreateJob(user.ID, now.AddMinutes(-5));
+        EntityMediaUploadJob second = CreateJob(user.ID, now);
         await AddJobs(first, second);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         await uow.Media.MarkMediaUploadJobProcessing(first.ID, TestContext.Current.CancellationToken);
-        MediaUploadJob? next = await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken);
+        EntityMediaUploadJob? next = await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken);
 
         Assert.Equal(second.ID, next?.ID);
     }
@@ -268,8 +268,8 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task MarkProcessing_SecondCallReturnsFalse()
     {
-        User user = await CreateUser();
-        MediaUploadJob job = CreateJob(user.ID);
+        EntityUser user = await CreateUser();
+        EntityMediaUploadJob job = CreateJob(user.ID);
         await AddJobs(job);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
@@ -281,8 +281,8 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task CountMediaUploadJobs_CoversOnlyTheUsersJobs()
     {
-        User user = await CreateUser();
-        User other = await CreateUser("other@example.com");
+        EntityUser user = await CreateUser();
+        EntityUser other = await CreateUser("other@example.com");
         await AddJobs(CreateJob(user.ID), CreateJob(user.ID), CreateJob(other.ID));
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
@@ -294,16 +294,16 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task ResetProcessing_MakesThemPendingAgain()
     {
-        User user = await CreateUser();
-        MediaUploadJob job = CreateJob(user.ID);
-        MediaUploadJob untouched = CreateJob(user.ID, DateTime.UtcNow.AddMinutes(1));
+        EntityUser user = await CreateUser();
+        EntityMediaUploadJob job = CreateJob(user.ID);
+        EntityMediaUploadJob untouched = CreateJob(user.ID, DateTime.UtcNow.AddMinutes(1));
         await AddJobs(job, untouched);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         await uow.Media.MarkMediaUploadJobProcessing(job.ID, TestContext.Current.CancellationToken);
 
         int reset = await uow.Media.ResetProcessingMediaUploadJobs(TestContext.Current.CancellationToken);
-        MediaUploadJob? next = await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken);
+        EntityMediaUploadJob? next = await uow.Media.FindNextPendingMediaUploadJob(TestContext.Current.CancellationToken);
 
         Assert.Equal(1, reset);
         Assert.Equal(job.ID, next?.ID);
@@ -312,10 +312,10 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task RemoveMediaUploadJob_InTheSameCommitAsAddMediaFile_AppliesBoth()
     {
-        User user = await CreateUser();
-        MediaUploadJob job = CreateJob(user.ID);
+        EntityUser user = await CreateUser();
+        EntityMediaUploadJob job = CreateJob(user.ID);
         await AddJobs(job);
-        MediaFile file = CreateMediaFile(user.ID);
+        EntityMediaFile file = CreateMediaFile(user.ID);
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
@@ -332,11 +332,11 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task SumMediaUploadJobBytes_CoversOnlyTheUsersJobs()
     {
-        User user = await CreateUser();
-        User other = await CreateUser("other@example.com");
-        MediaUploadJob first = CreateJob(user.ID);
+        EntityUser user = await CreateUser();
+        EntityUser other = await CreateUser("other@example.com");
+        EntityMediaUploadJob first = CreateJob(user.ID);
         first.SizeBytes = 1000;
-        MediaUploadJob second = CreateJob(user.ID);
+        EntityMediaUploadJob second = CreateJob(user.ID);
         second.SizeBytes = 2500;
         await AddJobs(first, second, CreateJob(other.ID));
 
@@ -348,7 +348,7 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task SumMediaUploadJobBytes_NoJobs_IsZero()
     {
-        User user = await CreateUser();
+        EntityUser user = await CreateUser();
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
 
@@ -358,10 +358,10 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task GetMediaUploadJobFileNameList_ReturnsAllStagedNames()
     {
-        User user = await CreateUser();
-        User other = await CreateUser("other@example.com");
-        MediaUploadJob first = CreateJob(user.ID);
-        MediaUploadJob second = CreateJob(other.ID);
+        EntityUser user = await CreateUser();
+        EntityUser other = await CreateUser("other@example.com");
+        EntityMediaUploadJob first = CreateJob(user.ID);
+        EntityMediaUploadJob second = CreateJob(other.ID);
         await AddJobs(first, second);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
@@ -380,13 +380,13 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task GetMediaFileList_ReturnsEveryFileOfTheUserNewestFirst()
     {
-        User user = await CreateUser();
-        User other = await CreateUser("other@example.com");
+        EntityUser user = await CreateUser();
+        EntityUser other = await CreateUser("other@example.com");
         DateTime now = DateTime.UtcNow;
         await Add(CreateMediaFile(user.ID, "Oldest", now.AddMinutes(-3)), CreateMediaFile(user.ID, "Newest", now), CreateMediaFile(user.ID, "Middle", now.AddMinutes(-1)), CreateMediaFile(other.ID, "Not mine", now));
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
-        List<MediaFile> list = await uow.Media.GetMediaFileList(user.ID, TestContext.Current.CancellationToken);
+        List<EntityMediaFile> list = await uow.Media.GetMediaFileList(user.ID, TestContext.Current.CancellationToken);
 
         Assert.Equal(["Newest", "Middle", "Oldest"], list.Select(x => x.Metadata?.Title));
     }
@@ -394,11 +394,11 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task GetMediaFileStampList_ReturnsIdAndModifiedTimeOfOnlyTheUsersFiles()
     {
-        User user = await CreateUser();
-        User other = await CreateUser("other@example.com");
-        MediaFile first = CreateMediaFile(user.ID);
+        EntityUser user = await CreateUser();
+        EntityUser other = await CreateUser("other@example.com");
+        EntityMediaFile first = CreateMediaFile(user.ID);
         first.TimeModified = new(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc);
-        MediaFile second = CreateMediaFile(user.ID);
+        EntityMediaFile second = CreateMediaFile(user.ID);
         second.TimeModified = new(2026, 2, 3, 4, 5, 6, DateTimeKind.Utc);
         await Add(first, second, CreateMediaFile(other.ID));
 
@@ -413,13 +413,13 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task UpdateMediaFile_SavesTagsAndTimeModifiedTogether()
     {
-        User user = await CreateUser();
-        MediaFile file = CreateMediaFile(user.ID, "Before");
+        EntityUser user = await CreateUser();
+        EntityMediaFile file = CreateMediaFile(user.ID, "Before");
         await Add(file);
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
-            MediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
+            EntityMediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
             Assert.NotNull(loaded.Metadata);
             loaded.Metadata.Title = "After";
             loaded.Metadata.Artist = "Someone";
@@ -430,7 +430,7 @@ public class MediaRepositoryTest : IDisposable
         }
 
         await using IUnitOfWork check = _fixture.UoWFactory.Create();
-        MediaFile saved = await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
+        EntityMediaFile saved = await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
         Assert.Equal("After", saved.Metadata?.Title);
         Assert.Equal("Someone", saved.Metadata?.Artist);
         Assert.Equal(2001, saved.Metadata?.Year);
@@ -441,13 +441,13 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task UpdateMediaFile_NotCommitted_ChangesNothing()
     {
-        User user = await CreateUser();
-        MediaFile file = CreateMediaFile(user.ID, "Before");
+        EntityUser user = await CreateUser();
+        EntityMediaFile file = CreateMediaFile(user.ID, "Before");
         await Add(file);
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
-            MediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
+            EntityMediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
             Assert.NotNull(loaded.Metadata);
             loaded.Metadata.Title = "After";
             uow.Media.UpdateMediaFile(loaded);
@@ -460,14 +460,14 @@ public class MediaRepositoryTest : IDisposable
     [Fact]
     public async Task RemoveMediaFile_DeletesTheFileAndItsMetadata()
     {
-        User user = await CreateUser();
-        MediaFile file = CreateMediaFile(user.ID);
-        MediaFile kept = CreateMediaFile(user.ID);
+        EntityUser user = await CreateUser();
+        EntityMediaFile file = CreateMediaFile(user.ID);
+        EntityMediaFile kept = CreateMediaFile(user.ID);
         await Add(file, kept);
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
-            MediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
+            EntityMediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
             uow.Media.RemoveMediaFile(loaded);
             await uow.Commit(TestContext.Current.CancellationToken);
         }

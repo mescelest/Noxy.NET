@@ -9,24 +9,24 @@ public interface IEntityToTableMapper
 {
     #region -- Authentication --
 
-    TableExternalLogin Map(ExternalLogin entity);
-    TableRefreshToken Map(RefreshToken entity);
-    TableUser Map(User entity);
+    TableExternalLogin Map(EntityExternalLogin entity);
+    TableRefreshToken Map(EntityRefreshToken entity);
+    TableUser Map(EntityUser entity);
 
     #endregion -- Authentication --
 
     #region -- Media --
 
-    TableMediaFile Map(MediaFile entity);
-    TableMediaFileMetadata Map(MediaFileMetadata entity);
-    TableMediaUploadJob Map(MediaUploadJob entity);
+    TableMediaFile Map(EntityMediaFile entity);
+    TableMediaFileMetadata Map(EntityMediaFileMetadata entity);
+    TableMediaUploadJob Map(EntityMediaUploadJob entity);
 
     #endregion -- Media --
 
     #region -- Playlist --
 
-    TablePlaylist Map(Playlist entity);
-    TablePlaylistEntry Map(PlaylistEntry entity);
+    TablePlaylist Map(EntityPlaylist entity);
+    TablePlaylistEntry Map(EntityPlaylistEntry entity);
 
     #endregion -- Playlist --
 }

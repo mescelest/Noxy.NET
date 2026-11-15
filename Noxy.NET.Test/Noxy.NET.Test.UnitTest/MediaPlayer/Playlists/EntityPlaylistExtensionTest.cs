@@ -2,11 +2,11 @@ using Noxy.NET.MediaPlayer.Domain.Entities;
 
 namespace Noxy.NET.Test.MediaPlayer.Playlists;
 
-public class PlaylistTest
+public class EntityPlaylistExtensionTest
 {
-    private static Playlist CreatePlaylist(params int[] positionList)
+    private static EntityPlaylist CreatePlaylist(params int[] positionList)
     {
-        Playlist playlist = new() { UserID = Guid.CreateVersion7(), Name = "Mix" };
+        EntityPlaylist playlist = new() { UserID = Guid.CreateVersion7(), Name = "Mix" };
         foreach (int position in positionList)
         {
             playlist.EntryList.Add(new() { PlaylistID = playlist.ID, MediaFileID = Guid.CreateVersion7(), Position = position });
@@ -18,7 +18,7 @@ public class PlaylistTest
     [Fact]
     public void HasDuplicates_TheSameMediaFileTwice_IsTrue()
     {
-        Playlist playlist = CreatePlaylist(0, 1, 2);
+        EntityPlaylist playlist = CreatePlaylist(0, 1, 2);
         playlist.EntryList[2] = new() { PlaylistID = playlist.ID, MediaFileID = playlist.EntryList[0].MediaFileID, Position = 2 };
 
         Assert.True(playlist.HasDuplicates());
@@ -34,7 +34,7 @@ public class PlaylistTest
     [Fact]
     public void RenumberEntryList_MakesPositionsDenseInTheOrderOfTheList()
     {
-        Playlist playlist = CreatePlaylist(4, 9, 2);
+        EntityPlaylist playlist = CreatePlaylist(4, 9, 2);
         List<Guid> order = [.. playlist.EntryList.Select(x => x.ID)];
 
         playlist.RenumberEntryList();
@@ -46,7 +46,7 @@ public class PlaylistTest
     [Fact]
     public void RenumberEntryList_UsesTheListOrder_NotTheOldPositions()
     {
-        Playlist playlist = CreatePlaylist(5, 1);
+        EntityPlaylist playlist = CreatePlaylist(5, 1);
 
         playlist.RenumberEntryList();
 
@@ -57,9 +57,9 @@ public class PlaylistTest
     [Fact]
     public void RenumberEntryList_ReturnsOnlyTheEntriesThatChanged()
     {
-        Playlist playlist = CreatePlaylist(0, 5);
+        EntityPlaylist playlist = CreatePlaylist(0, 5);
 
-        List<PlaylistEntry> changed = playlist.RenumberEntryList();
+        List<EntityPlaylistEntry> changed = playlist.RenumberEntryList();
 
         Assert.Equal([playlist.EntryList[1].ID], changed.Select(x => x.ID));
     }
@@ -73,7 +73,7 @@ public class PlaylistTest
     [Fact]
     public void RenumberEntryList_RepeatedPositions_AreSeparated()
     {
-        Playlist playlist = CreatePlaylist(3, 3, 3);
+        EntityPlaylist playlist = CreatePlaylist(3, 3, 3);
 
         playlist.RenumberEntryList();
 

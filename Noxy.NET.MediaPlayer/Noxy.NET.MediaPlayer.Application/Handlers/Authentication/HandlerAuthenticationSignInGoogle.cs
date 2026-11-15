@@ -18,9 +18,9 @@ public class HandlerAuthenticationSignInGoogle(IUnitOfWorkFactory factoryUnitOfW
         await using IUnitOfWork uow = FactoryUnitOfWork.Create();
 
         // Google's user ID is the identity, not the email: emails can change, and can be reused by someone else.
-        ExternalLogin? login = await uow.Authentication.FindExternalLogin(ExternalLoginProvider.Google, identity.Subject, cancellationToken);
+        EntityExternalLogin? login = await uow.Authentication.FindExternalLogin(ExternalLoginProvider.Google, identity.Subject, cancellationToken);
 
-        User user;
+        EntityUser user;
         if (login is not null)
         {
             user = await uow.Authentication.FindUserByID(login.UserID, cancellationToken) ?? throw new AuthenticationFailedException();
@@ -35,7 +35,7 @@ public class HandlerAuthenticationSignInGoogle(IUnitOfWorkFactory factoryUnitOfW
             }
 
             string email = NormalizeEmail(identity.Email);
-            User? existing = await uow.Authentication.FindUserByEmail(email, cancellationToken);
+            EntityUser? existing = await uow.Authentication.FindUserByEmail(email, cancellationToken);
 
             if (existing is null)
             {
