@@ -16,7 +16,8 @@ public class HandlerPlaybackSessionSave(IUnitOfWorkFactory factoryUnitOfWork, IO
 {
     public const double PositionToleranceSeconds = 0.5;
 
-    // The last save wins: a save replaces the whole session. A save that leaves the session as it is neither commits nor publishes. Throws InvalidPlaybackSessionException for a queue that is too long, an index outside the queue or a position that is negative or not a number, MediaNotFoundException for a media file the user does not own and PlaylistNotFoundException for a playlist the user does not own.
+    // Replaces the whole session, so the last save wins. A save that changes nothing is not committed or published.
+    // Throws InvalidPlaybackSessionException for a bad queue, index or position, and MediaNotFoundException or PlaylistNotFoundException for one the user does not own.
     public async ValueTask<ResponsePlaybackSession> Handle(CommandPlaybackSessionSave command, CancellationToken cancellationToken)
     {
         Validate(command);
