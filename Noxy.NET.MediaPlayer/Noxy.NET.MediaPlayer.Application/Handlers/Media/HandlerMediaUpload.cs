@@ -2,11 +2,9 @@ using Mediator;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Commands.Media;
 using Noxy.NET.MediaPlayer.Application.Configurations;
-using Noxy.NET.MediaPlayer.Application.Helpers;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Validators;
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
@@ -16,7 +14,7 @@ namespace Noxy.NET.MediaPlayer.Application.Handlers.Media;
 
 public class HandlerMediaUpload(
     IUnitOfWorkFactory factoryUnitOfWork,
-    IMediaFileValidator validatorMediaFile,
+    IMediaFileValidationService serviceMediaFileValidation,
     IFileStorageService serviceFileStorage,
     IUploadSignal signalUpload,
     IOptions<ConfigStorage> configStorage,
@@ -30,9 +28,9 @@ public class HandlerMediaUpload(
         using IDisposable lease = gateUpload.TryEnter(command.UserID) ?? throw new UploadInProgressException();
 
         // The body can't be rewound, so the header is read for the check and then replayed in front of the rest.
-        byte[] header = new byte[IMediaFileValidator.HeaderSize];
+        byte[] header = new byte[IMediaFileValidationService.HeaderSize];
         int headerLength = await command.Content.ReadAtLeastAsync(header, header.Length, false, cancellationToken);
-        ValidatedMediaFile file = validatorMediaFile.Validate(command.FileName, header.AsSpan(0, headerLength));
+        ValidatedMediaFile file = serviceMediaFileValidation.Validate(command.FileName, header.AsSpan(0, headerLength));
 
         long? remainingBytes = await EnsureRoomToEnqueue(command.UserID, cancellationToken);
 
@@ -42,7 +40,7 @@ public class HandlerMediaUpload(
         {
             UserID = command.UserID,
             StagedFileName = staged.FileName,
-            Title = MediaTitle.Resolve(command.Title, command.FileName),
+            Title = command.ResolveTitle(),
             ContentType = file.ContentType,
             SizeBytes = staged.SizeBytes,
             ContentHash = staged.ContentHash

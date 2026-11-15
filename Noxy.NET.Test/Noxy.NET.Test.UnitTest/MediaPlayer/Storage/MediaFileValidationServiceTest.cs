@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
-using Noxy.NET.MediaPlayer.Application.Validators;
+using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.Test.MediaPlayer.Storage;
 
-public class MediaFileValidatorTest
+public class MediaFileValidationServiceTest
 {
     private static readonly string[] All = ["mp3", "flac", "m4a", "ogg", "opus", "wav"];
 
@@ -17,7 +17,7 @@ public class MediaFileValidatorTest
     private static readonly byte[] Ogg = [.. "OggS"u8, 0, 2, 0, 0, 0, 0, 0, 0];
     private static readonly byte[] Wav = [.. "RIFF"u8, 1, 2, 3, 4, .. "WAVE"u8];
 
-    private static MediaFileValidator Create(params string[] allowed)
+    private static MediaFileValidationService Create(params string[] allowed)
     {
         return new(Options.Create(new ConfigStorage { RootPath = "x", AllowedExtensionList = allowed }));
     }

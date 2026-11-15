@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Handlers.Media;
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
-using Noxy.NET.MediaPlayer.Application.Validators;
+using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
@@ -26,7 +26,7 @@ public class HandlerMediaUploadTest
     public HandlerMediaUploadTest()
     {
         IOptions<ConfigStorage> storageOptions = Options.Create(_storageConfig);
-        _handler = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidator(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate());
+        _handler = new(new FakeUnitOfWorkFactory(_store), new MediaFileValidationService(storageOptions), _storage, _signal, storageOptions, Options.Create(_uploadConfig), new UploadGate());
     }
 
     private static byte[] Mp3(int length = 100)

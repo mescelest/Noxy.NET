@@ -1,8 +1,8 @@
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
 
-namespace Noxy.NET.MediaPlayer.Application.Interfaces.Validators;
+namespace Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 
-public interface IMediaFileValidator
+public interface IMediaFileValidationService
 {
     // Number of leading bytes of the file that Validate needs.
     const int HeaderSize = 12;

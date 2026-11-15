@@ -1,15 +1,15 @@
-using Noxy.NET.MediaPlayer.Application.Writers;
+using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
 
-public class TagLibMediaTagWriterTest : IDisposable
+public class MediaTagWritingServiceTest : IDisposable
 {
     private readonly string _directory = Path.Combine(Path.GetTempPath(), $"tagwriter-{Guid.CreateVersion7()}");
-    private readonly TagLibMediaTagWriter _writer = new();
+    private readonly MediaTagWritingService _writer = new();
 
-    public TagLibMediaTagWriterTest()
+    public MediaTagWritingServiceTest()
     {
         Directory.CreateDirectory(_directory);
     }

@@ -13,7 +13,7 @@ public class HandlerMediaFileWithTagsTest
     private static readonly Guid UserID = Guid.CreateVersion7();
 
     private readonly FakeFileStorageService _storage = new();
-    private readonly FakeMediaTagWriter _tagWriter = new();
+    private readonly FakeMediaTagWritingService _tagWriter = new();
     private readonly FakeLogger<HandlerMediaFileWithTags> _logger = new();
     private readonly FakeStore _store = new();
     private readonly HandlerMediaFileWithTags _handler;

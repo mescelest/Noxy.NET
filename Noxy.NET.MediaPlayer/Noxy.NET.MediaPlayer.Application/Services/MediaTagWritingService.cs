@@ -1,11 +1,11 @@
-using Noxy.NET.MediaPlayer.Application.Interfaces.Writers;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using TagLib;
 using File = TagLib.File;
 
-namespace Noxy.NET.MediaPlayer.Application.Writers;
+namespace Noxy.NET.MediaPlayer.Application.Services;
 
-public class TagLibMediaTagWriter : IMediaTagWriter
+public class MediaTagWritingService : IMediaTagWritingService
 {
     public void Write(string filePath, EntityMediaFileMetadata metadata)
     {

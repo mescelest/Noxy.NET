@@ -1,9 +1,9 @@
-using Noxy.NET.MediaPlayer.Application.Interfaces.Writers;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-public sealed class FakeMediaTagWriter : IMediaTagWriter
+public sealed class FakeMediaTagWritingService : IMediaTagWritingService
 {
     public List<(string FilePath, EntityMediaFileMetadata Metadata)> WriteList { get; } = [];
     public Exception? Failure { get; set; }

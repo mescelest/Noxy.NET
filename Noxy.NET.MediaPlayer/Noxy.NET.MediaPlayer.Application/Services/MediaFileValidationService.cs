@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Validators;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
-namespace Noxy.NET.MediaPlayer.Application.Validators;
+namespace Noxy.NET.MediaPlayer.Application.Services;
 
-public class MediaFileValidator(IOptions<ConfigStorage> configStorage) : IMediaFileValidator
+public class MediaFileValidationService(IOptions<ConfigStorage> configStorage) : IMediaFileValidationService
 {
     private delegate bool HeaderMatcher(ReadOnlySpan<byte> header);
 

@@ -3,12 +3,8 @@ using Noxy.NET.MediaPlayer.Application.BackgroundServices;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Validators;
-using Noxy.NET.MediaPlayer.Application.Interfaces.Writers;
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Services;
-using Noxy.NET.MediaPlayer.Application.Validators;
-using Noxy.NET.MediaPlayer.Application.Writers;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -50,8 +46,8 @@ public static class ServiceCollectionExtensions
 
             services.TryAddSingleton(TimeProvider.System);
             services.AddSingleton<IPasswordHashService, PasswordHashService>();
-            services.AddSingleton<IMediaFileValidator, MediaFileValidator>();
-            services.AddSingleton<IMediaTagWriter, TagLibMediaTagWriter>();
+            services.AddSingleton<IMediaFileValidationService, MediaFileValidationService>();
+            services.AddSingleton<IMediaTagWritingService, MediaTagWritingService>();
             services.AddSingleton<IUploadSignal, UploadSignal>();
             services.AddSingleton<IUploadGate, UploadGate>();
             services.AddSingleton<IUploadProcessor, UploadProcessor>();
