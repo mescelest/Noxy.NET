@@ -2,15 +2,15 @@ using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Text;
-using EntityTagHeaderValue = System.Net.Http.Headers.EntityTagHeaderValue;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Net.Http.Headers;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
+using EntityTagHeaderValue = System.Net.Http.Headers.EntityTagHeaderValue;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
@@ -118,6 +118,15 @@ public sealed class MediaApiClient(ApiFactory factory)
     public async Task<HttpResponseMessage> Delete(string? token, Guid id)
     {
         using HttpRequestMessage request = new(HttpMethod.Delete, $"/Media/{id}");
+        Authorize(request, token);
+        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    // Any request with an optional JSON body.
+    public async Task<HttpResponseMessage> SendJson(string? token, HttpMethod method, string path, string? json = null)
+    {
+        using HttpRequestMessage request = new(method, path);
+        if (json is not null) request.Content = new StringContent(json, Encoding.UTF8, "application/json");
         Authorize(request, token);
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }

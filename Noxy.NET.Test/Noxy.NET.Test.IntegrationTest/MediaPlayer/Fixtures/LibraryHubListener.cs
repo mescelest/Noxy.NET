@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
@@ -18,6 +19,13 @@ public sealed class LibraryHubListener : IAsyncDisposable
     private readonly Channel<Guid> _deletedMessages = Channel.CreateUnbounded<Guid>();
     private readonly Channel<ResponsePlaylist> _playlistUpdatedMessages = Channel.CreateUnbounded<ResponsePlaylist>();
     private readonly Channel<Guid> _playlistDeletedMessages = Channel.CreateUnbounded<Guid>();
+    private readonly Channel<ResponseArtist> _artistUpdatedMessages = Channel.CreateUnbounded<ResponseArtist>();
+    private readonly Channel<Guid> _artistDeletedMessages = Channel.CreateUnbounded<Guid>();
+    private readonly Channel<ResponseAlbum> _albumUpdatedMessages = Channel.CreateUnbounded<ResponseAlbum>();
+    private readonly Channel<Guid> _albumDeletedMessages = Channel.CreateUnbounded<Guid>();
+    private readonly Channel<ResponseGenre> _genreUpdatedMessages = Channel.CreateUnbounded<ResponseGenre>();
+    private readonly Channel<Guid> _genreDeletedMessages = Channel.CreateUnbounded<Guid>();
+    private readonly Channel<ResponseSettings> _settingsUpdatedMessages = Channel.CreateUnbounded<ResponseSettings>();
     private readonly Channel<string> _anyMessages = Channel.CreateUnbounded<string>();
 
     private LibraryHubListener(HubConnection connection)
@@ -29,6 +37,13 @@ public sealed class LibraryHubListener : IAsyncDisposable
         connection.On<Guid>(nameof(MediaHubEvent.MediaDeleted), id => Receive(nameof(MediaHubEvent.MediaDeleted), () => _deletedMessages.Writer.TryWrite(id)));
         connection.On<ResponsePlaylist>(nameof(MediaHubEvent.PlaylistUpdated), playlist => Receive(nameof(MediaHubEvent.PlaylistUpdated), () => _playlistUpdatedMessages.Writer.TryWrite(playlist)));
         connection.On<Guid>(nameof(MediaHubEvent.PlaylistDeleted), id => Receive(nameof(MediaHubEvent.PlaylistDeleted), () => _playlistDeletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponseArtist>(nameof(MediaHubEvent.ArtistUpdated), artist => Receive(nameof(MediaHubEvent.ArtistUpdated), () => _artistUpdatedMessages.Writer.TryWrite(artist)));
+        connection.On<Guid>(nameof(MediaHubEvent.ArtistDeleted), id => Receive(nameof(MediaHubEvent.ArtistDeleted), () => _artistDeletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponseAlbum>(nameof(MediaHubEvent.AlbumUpdated), album => Receive(nameof(MediaHubEvent.AlbumUpdated), () => _albumUpdatedMessages.Writer.TryWrite(album)));
+        connection.On<Guid>(nameof(MediaHubEvent.AlbumDeleted), id => Receive(nameof(MediaHubEvent.AlbumDeleted), () => _albumDeletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponseGenre>(nameof(MediaHubEvent.GenreUpdated), genre => Receive(nameof(MediaHubEvent.GenreUpdated), () => _genreUpdatedMessages.Writer.TryWrite(genre)));
+        connection.On<Guid>(nameof(MediaHubEvent.GenreDeleted), id => Receive(nameof(MediaHubEvent.GenreDeleted), () => _genreDeletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponseSettings>(nameof(MediaHubEvent.SettingsUpdated), settings => Receive(nameof(MediaHubEvent.SettingsUpdated), () => _settingsUpdatedMessages.Writer.TryWrite(settings)));
     }
 
     // Connects over WebSockets. A .NET client sends the token as a header; a browser client puts it in the query string.
@@ -82,6 +97,41 @@ public sealed class LibraryHubListener : IAsyncDisposable
     public async Task<ResponsePlaylist> NextPlaylistUpdated()
     {
         return await Read(_playlistUpdatedMessages);
+    }
+
+    public async Task<ResponseArtist> NextArtistUpdated()
+    {
+        return await Read(_artistUpdatedMessages);
+    }
+
+    public async Task<Guid> NextArtistDeleted()
+    {
+        return await Read(_artistDeletedMessages);
+    }
+
+    public async Task<ResponseAlbum> NextAlbumUpdated()
+    {
+        return await Read(_albumUpdatedMessages);
+    }
+
+    public async Task<Guid> NextAlbumDeleted()
+    {
+        return await Read(_albumDeletedMessages);
+    }
+
+    public async Task<ResponseGenre> NextGenreUpdated()
+    {
+        return await Read(_genreUpdatedMessages);
+    }
+
+    public async Task<Guid> NextGenreDeleted()
+    {
+        return await Read(_genreDeletedMessages);
+    }
+
+    public async Task<ResponseSettings> NextSettingsUpdated()
+    {
+        return await Read(_settingsUpdatedMessages);
     }
 
     public async Task<Guid> NextPlaylistDeleted()

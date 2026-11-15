@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Requests.Media;
 
@@ -101,6 +102,75 @@ public class RequestUpdateMediaTest
         Assert.Empty(Validate(Create(9999)));
         Assert.Contains(member, Assert.Single(Validate(Create(-1))).MemberNames);
         Assert.Single(Validate(Create(10000)));
+    }
+
+
+    [Fact]
+    public void IDFields_AreValidOnTheirOwn()
+    {
+        RequestUpdateMedia request = new()
+        {
+            ArtistIDList = new([Guid.CreateVersion7()]),
+            AlbumID = new(Guid.CreateVersion7()),
+            GenreIDList = new(null)
+        };
+
+        Assert.Empty(Validate(request));
+    }
+
+    [Fact]
+    public void AlbumArtistIDListAlone_IsValid()
+    {
+        Assert.Empty(Validate(new() { AlbumArtistIDList = new([Guid.CreateVersion7()]) }));
+    }
+
+    [Theory]
+    [InlineData("Artist", "ArtistIDList")]
+    [InlineData("Genre", "GenreIDList")]
+    [InlineData("AlbumArtist", "AlbumArtistIDList")]
+    [InlineData("Album", "AlbumID")]
+    public void TextAndIDsForTheSameField_AreInvalid(string text, string ids)
+    {
+        RequestUpdateMedia request = new();
+        SetText(request, text);
+        SetIDs(request, ids);
+
+        ValidationResult result = Assert.Single(Validate(request));
+
+        Assert.Contains(text, result.MemberNames);
+        Assert.Contains(ids, result.MemberNames);
+    }
+
+    [Theory]
+    [InlineData("AlbumArtist")]
+    [InlineData("AlbumArtistIDList")]
+    public void AnAlbumIDWithAnAlbumArtistField_IsInvalid(string other)
+    {
+        RequestUpdateMedia request = new() { AlbumID = new(Guid.CreateVersion7()) };
+        if (other == "AlbumArtist") SetText(request, other);
+        else SetIDs(request, other);
+
+        Assert.Single(Validate(request));
+    }
+
+    [Fact]
+    public void AnIDListOverTheLimit_IsInvalid()
+    {
+        List<Guid> idList = [.. Enumerable.Range(0, RequestUpdateMedia.MaxIDListLength + 1).Select(_ => Guid.CreateVersion7())];
+
+        Assert.Contains("ArtistIDList", Assert.Single(Validate(new() { ArtistIDList = new(idList) })).MemberNames);
+        Assert.Empty(Validate(new() { ArtistIDList = new(idList[..RequestUpdateMedia.MaxIDListLength]) }));
+    }
+
+    private static void SetText(RequestUpdateMedia request, string member)
+    {
+        (typeof(RequestUpdateMedia).GetProperty(member) ?? throw new InvalidOperationException($"RequestUpdateMedia has no {member} property.")).SetValue(request, new Optional<string?>("x"));
+    }
+
+    private static void SetIDs(RequestUpdateMedia request, string member)
+    {
+        PropertyInfo property = typeof(RequestUpdateMedia).GetProperty(member) ?? throw new InvalidOperationException($"RequestUpdateMedia has no {member} property.");
+        property.SetValue(request, member == "AlbumID" ? new Optional<Guid?>(Guid.CreateVersion7()) : new Optional<List<Guid>?>([Guid.CreateVersion7()]));
     }
 
     [Fact]

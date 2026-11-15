@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Noxy.NET.MediaPlayer.API;
@@ -9,6 +10,7 @@ using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Persistence;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 
@@ -88,6 +90,85 @@ public class MediaUploadFlowTest
         List<ResponseMediaFile> list = await WaitForLibrary(api, user.Token, 1);
 
         Assert.Equal("media.test", Assert.Single(list).Title);
+    }
+
+    private static byte[] TaggedTrack(int track, string title)
+    {
+        return MediaFileFixture.CreateTaggedMp3(tag =>
+        {
+            tag.Title = title;
+            tag.Performers = ["Main feat. Guest"];
+            tag.Album = "OK Computer";
+            tag.AlbumArtists = ["Main"];
+            tag.Genres = ["Rock"];
+            tag.Track = (uint)track;
+            tag.Year = 1997;
+        });
+    }
+
+    [Fact]
+    public async Task Upload_TwoTaggedTracksOfOneAlbum_MakeOneAlbumAndOneSetOfLinkedArtists()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+
+        await ReadAccepted(await api.Upload(user.Token, TaggedTrack(1, "First"), "one.mp3"));
+        await WaitForLibrary(api, user.Token, 1);
+        await ReadAccepted(await api.Upload(user.Token, TaggedTrack(2, "Second"), "two.mp3"));
+        List<ResponseMediaFile> list = await WaitForLibrary(api, user.Token, 2);
+
+        Assert.Equal(["First", "Second"], list.Select(x => x.Title).Order().ToList());
+        Assert.All(list, x =>
+        {
+            Assert.Equal("Main; Guest", x.Artist);
+            Assert.Equal("OK Computer", x.Album);
+            Assert.Equal("Main", x.AlbumArtist);
+            Assert.Equal("Rock", x.Genre);
+            Assert.Equal(1997, x.Year);
+            Assert.NotNull(x.Duration);
+            Assert.Equal(2, x.ArtistIDList.Count);
+            Assert.Single(x.AlbumArtistIDList);
+            Assert.Single(x.GenreIDList);
+        });
+        Assert.NotNull(list[0].AlbumID);
+        Assert.Equal(list[0].AlbumID, list[1].AlbumID);
+        Assert.Equal(list[0].ArtistIDList, list[1].ArtistIDList);
+        Assert.Equal(list[0].GenreIDList, list[1].GenreIDList);
+
+        await using DataContext context = await factory.Services.GetRequiredService<IDbContextFactory<DataContext>>().CreateDbContextAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(2, await context.Artist.CountAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, await context.Album.CountAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, await context.Genre.CountAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Upload_ATaggedFileWithATitleSent_KeepsTheSentTitle()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+
+        await ReadAccepted(await api.Upload(user.Token, TaggedTrack(1, "Embedded"), "one.mp3", "Sent"));
+        List<ResponseMediaFile> list = await WaitForLibrary(api, user.Token, 1);
+
+        Assert.Equal("Sent", Assert.Single(list).Title);
+    }
+
+    [Fact]
+    public async Task Upload_AFileWithUnreadableTags_StillBecomesALibraryEntryTitledFromItsFileName()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+
+        await ReadAccepted(await api.Upload(user.Token, MediaApiClient.Mp3(1500), "my song.mp3"));
+        ResponseMediaFile file = Assert.Single(await WaitForLibrary(api, user.Token, 1));
+
+        Assert.Equal("my song", file.Title);
+        Assert.Null(file.Artist);
+        Assert.Null(file.AlbumID);
+        Assert.Empty(file.ArtistIDList);
     }
 
     [Fact]

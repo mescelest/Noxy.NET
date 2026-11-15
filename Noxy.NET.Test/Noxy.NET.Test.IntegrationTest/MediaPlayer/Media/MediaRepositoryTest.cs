@@ -55,6 +55,81 @@ public class MediaRepositoryTest : IDisposable
         await uow.Commit(TestContext.Current.CancellationToken);
     }
 
+
+    private async Task<(EntityMediaFile File, EntityArtist Main, EntityArtist Guest, EntityAlbum Album)> AddLinkedFile(Guid userID)
+    {
+        EntityMediaFile file = CreateMediaFile(userID, "Linked");
+        EntityArtist main = new() { UserID = userID, Name = "Main", NameKey = "main" };
+        EntityArtist guest = new() { UserID = userID, Name = "Guest", NameKey = "guest" };
+        EntityGenre genre = new() { UserID = userID, Name = "Rock", NameKey = "rock" };
+        EntityAlbum album = new() { UserID = userID, Title = "Album", TitleKey = "album", IdentityKey = "album|x" };
+        album.ArtistLinkList = [new() { AlbumID = album.ID, ArtistID = main.ID, Position = 0 }];
+        file.AlbumID = album.ID;
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        uow.Metadata.AddArtist(main);
+        uow.Metadata.AddArtist(guest);
+        uow.Metadata.AddGenre(genre);
+        uow.Metadata.AddAlbum(album);
+        uow.Media.AddMediaFile(file);
+        uow.Metadata.AddMediaFileArtist(new() { MediaFileID = file.ID, ArtistID = guest.ID, Position = 1 });
+        uow.Metadata.AddMediaFileArtist(new() { MediaFileID = file.ID, ArtistID = main.ID, Position = 0 });
+        uow.Metadata.AddMediaFileGenre(new() { MediaFileID = file.ID, GenreID = genre.ID, Position = 0 });
+        await uow.Commit(TestContext.Current.CancellationToken);
+
+        return (file, main, guest, album);
+    }
+
+    [Fact]
+    public async Task Find_LoadsTheLinksInPositionOrderAndTheAlbumWithItsArtists()
+    {
+        EntityUser user = await CreateUser();
+        (EntityMediaFile file, EntityArtist main, EntityArtist guest, EntityAlbum album) = await AddLinkedFile(user.ID);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        EntityMediaFile? found = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(found);
+        Assert.Equal([main.ID, guest.ID], found.ArtistLinkList.Select(x => x.ArtistID).ToList());
+        Assert.Equal(["Main", "Guest"], found.ArtistLinkList.Select(x => x.Artist?.Name).ToList());
+        Assert.Equal("Rock", Assert.Single(found.GenreLinkList).Genre?.Name);
+        Assert.Equal(album.ID, found.AlbumID);
+        Assert.Equal("Album", found.Album?.Title);
+        Assert.Equal("Main", Assert.Single(found.Album?.ArtistLinkList ?? []).Artist?.Name);
+    }
+
+    [Fact]
+    public async Task GetMediaFileList_LoadsTheLinks()
+    {
+        EntityUser user = await CreateUser();
+        await AddLinkedFile(user.ID);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        EntityMediaFile found = Assert.Single(await uow.Media.GetMediaFileList(user.ID, TestContext.Current.CancellationToken));
+        EntityMediaFile paged = Assert.Single(await uow.Media.GetMediaFileList(user.ID, 0, 10, TestContext.Current.CancellationToken));
+
+        Assert.Equal(2, found.ArtistLinkList.Count);
+        Assert.Equal(2, paged.ArtistLinkList.Count);
+        Assert.Equal("Album", paged.Album?.Title);
+    }
+
+    [Fact]
+    public async Task Add_AFileWithoutLinks_LoadsEmptyLists()
+    {
+        EntityUser user = await CreateUser();
+        EntityMediaFile file = CreateMediaFile(user.ID);
+        await Add(file);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        EntityMediaFile? found = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(found);
+        Assert.Empty(found.ArtistLinkList);
+        Assert.Empty(found.GenreLinkList);
+        Assert.Null(found.Album);
+        Assert.Null(found.AlbumID);
+    }
+
     [Fact]
     public async Task Add_ThenFind_ReturnsTheFileWithItsMetadata()
     {

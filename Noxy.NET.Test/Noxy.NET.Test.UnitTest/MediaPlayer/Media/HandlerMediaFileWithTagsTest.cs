@@ -59,7 +59,8 @@ public class HandlerMediaFileWithTagsTest
 
         await using Stream stream = (await _handler.Handle(new(UserID, file.ID), Token)).Content;
 
-        (string path, EntityMediaFileMetadata metadata) = Assert.Single(_tagWriter.WriteList);
+        (string path, EntityMediaFile written) = Assert.Single(_tagWriter.WriteList);
+        EntityMediaFileMetadata metadata = Assert.IsType<EntityMediaFileMetadata>(written.Metadata);
         Assert.NotEqual(file.FilePath, path);
         Assert.Contains(path, _storage.Temporary.Keys);
         Assert.Equal("My Media", metadata.Title);
@@ -94,7 +95,7 @@ public class HandlerMediaFileWithTagsTest
         MediaDownload download = await _handler.Handle(new(UserID, file.ID), Token);
         await download.Content.DisposeAsync();
 
-        Assert.Equal("Renamed", Assert.Single(_tagWriter.WriteList).Metadata.Title);
+        Assert.Equal("Renamed", Assert.Single(_tagWriter.WriteList).MediaFile.Metadata?.Title);
         Assert.Equal("Renamed.mp3", download.FileName);
     }
 
@@ -188,7 +189,7 @@ public class HandlerMediaFileWithTagsTest
 
         await using Stream stream = (await _handler.Handle(new(UserID, file.ID), Token)).Content;
 
-        EntityMediaFileMetadata metadata = Assert.Single(_tagWriter.WriteList).Metadata;
+        EntityMediaFileMetadata metadata = Assert.IsType<EntityMediaFileMetadata>(Assert.Single(_tagWriter.WriteList).MediaFile.Metadata);
         Assert.Equal("Only", metadata.Title);
         Assert.Null(metadata.Artist);
         Assert.Null(metadata.Album);

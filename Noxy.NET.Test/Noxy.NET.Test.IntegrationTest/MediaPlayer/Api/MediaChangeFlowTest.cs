@@ -1,11 +1,10 @@
 using System.IO.Compression;
-using System.Net.Http.Json;
 using System.Net;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
+using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
 
@@ -161,6 +160,66 @@ public class MediaChangeFlowTest
         ResponseMediaFile listed = Assert.Single(await api.GetMediaFileList(user.Token));
         Assert.Equal("Someone", listed.Artist);
         Assert.Equal("Renamed", listed.Title);
+    }
+
+    [Fact]
+    public async Task Patch_ArtistText_LinksItemsTwoFilesShare_AndTheIDsCanBeSentToo()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ResponseMediaFile first = await UploadMediaFile(api, user, "One");
+        ResponseMediaFile second = await UploadMediaFile(api, user, "Two", 1);
+
+        ResponseMediaFile viaText = await ReadMediaFile(await api.Patch(user.Token, first.ID, """{"artist":"Main feat. Guest","genre":"Rock; Pop","album":"Record"}"""));
+        ResponseMediaFile viaIDs = await ReadMediaFile(await api.Patch(user.Token, second.ID, JsonSerializer.Serialize(new { artistIDList = viaText.ArtistIDList, genreIDList = viaText.GenreIDList, albumID = viaText.AlbumID })));
+
+        Assert.Equal("Main; Guest", viaText.Artist);
+        Assert.Equal("Rock; Pop", viaText.Genre);
+        Assert.Equal(2, viaText.ArtistIDList.Count);
+        Assert.Equal(viaText.ArtistIDList, viaIDs.ArtistIDList);
+        Assert.Equal(viaText.GenreIDList, viaIDs.GenreIDList);
+        Assert.Equal(viaText.AlbumID, viaIDs.AlbumID);
+        Assert.Equal("Main; Guest", viaIDs.Artist);
+        Assert.Equal("Record", viaIDs.Album);
+    }
+
+    [Fact]
+    public async Task Patch_AnEmptyIDList_ClearsTheLinks_AndTheLibraryETagChanges()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
+        await api.Patch(user.Token, mediaFile.ID, """{"artist":"Someone"}""");
+        string before = await CurrentETag(api, user);
+
+        ResponseMediaFile cleared = await ReadMediaFile(await api.Patch(user.Token, mediaFile.ID, """{"artistIDList":[]}"""));
+
+        Assert.Empty(cleared.ArtistIDList);
+        Assert.Null(cleared.Artist);
+        Assert.NotEqual(before, await CurrentETag(api, user));
+    }
+
+    [Fact]
+    public async Task Patch_AnUnknownOrForeignItemID_Returns404_AndTextWithIDsForTheSameFieldReturns400()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ApiAccount other = await api.SignUp("b@example.com");
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
+        ResponseMediaFile foreign = await UploadMediaFile(api, other, "Foreign");
+        ResponseMediaFile foreignLinked = await ReadMediaFile(await api.Patch(other.Token, foreign.ID, """{"artist":"Theirs"}"""));
+
+        HttpResponseMessage unknown = await api.Patch(user.Token, mediaFile.ID, JsonSerializer.Serialize(new { artistIDList = new[] { Guid.CreateVersion7() } }));
+        HttpResponseMessage foreignItem = await api.Patch(user.Token, mediaFile.ID, JsonSerializer.Serialize(new { artistIDList = foreignLinked.ArtistIDList }));
+        HttpResponseMessage both = await api.Patch(user.Token, mediaFile.ID, JsonSerializer.Serialize(new { artist = "A", artistIDList = Array.Empty<Guid>() }));
+
+        Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, foreignItem.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, both.StatusCode);
+        Assert.Empty(Assert.Single(await api.GetMediaFileList(user.Token)).ArtistIDList);
     }
 
     [Fact]

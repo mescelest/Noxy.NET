@@ -1,5 +1,6 @@
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
+using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -8,14 +9,24 @@ public sealed class FakeUnitOfWork(FakeStore store) : IUnitOfWork
     private readonly FakeAuthenticationRepository _repository = new(store);
     private readonly FakeMediaRepository _media = new(store);
     private readonly FakePlaylistRepository _playlist = new(store);
+    private readonly FakeMetadataRepository _metadata = new(store);
+    private readonly FakeSettingsRepository _settings = new(store);
 
     public IAuthenticationRepository Authentication => _repository;
     public IMediaRepository Media => _media;
     public IPlaylistRepository Playlist => _playlist;
+    public IMetadataRepository Metadata => _metadata;
+    public ISettingsRepository Settings => _settings;
 
     public Task Commit(CancellationToken cancellationToken = default)
     {
         if (store.FailCommit) throw new InvalidOperationException("The commit failed.");
+
+        if (store.KeyConflictCommitCount > 0)
+        {
+            store.KeyConflictCommitCount--;
+            throw new MetadataKeyConflictException();
+        }
 
         if (store.FailCommitCount > 0)
         {
@@ -26,6 +37,8 @@ public sealed class FakeUnitOfWork(FakeStore store) : IUnitOfWork
         _repository.Flush();
         _media.Flush();
         _playlist.Flush();
+        _metadata.Flush();
+        _settings.Flush();
         store.CommitCount++;
         return Task.CompletedTask;
     }

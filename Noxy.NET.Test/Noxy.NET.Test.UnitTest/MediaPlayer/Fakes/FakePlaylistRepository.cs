@@ -150,18 +150,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
         foreach (EntityPlaylistEntry entry in playlist.EntryList)
         {
             EntityMediaFile file = store.MediaFileList.Single(x => x.ID == entry.MediaFileID);
-            entry.MediaFile = new()
-            {
-                ID = file.ID,
-                TimeCreated = file.TimeCreated,
-                FilePath = file.FilePath,
-                ContentType = file.ContentType,
-                SizeBytes = file.SizeBytes,
-                ContentHash = file.ContentHash,
-                TimeModified = file.TimeModified,
-                UserID = file.UserID,
-                Metadata = file.Metadata
-            };
+            entry.MediaFile = store.CopyMediaFile(file);
         }
 
         return playlist;

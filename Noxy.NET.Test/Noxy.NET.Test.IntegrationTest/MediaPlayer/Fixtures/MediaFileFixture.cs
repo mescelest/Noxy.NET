@@ -1,3 +1,6 @@
+using TagLib;
+using File = System.IO.File;
+
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
 public static class MediaFileFixture
@@ -26,6 +29,68 @@ public static class MediaFileFixture
         writer.Flush();
 
         return stream.ToArray();
+    }
+
+    // A few MPEG-1 Layer III frames (128 kbit/s, 44.1 kHz, stereo, 417 bytes each) of silence: enough for a tag library to accept it as an mp3.
+    public static byte[] CreateMp3(int frameCount = 10)
+    {
+        using MemoryStream stream = new();
+        for (int index = 0; index < frameCount; index++)
+        {
+            byte[] frame = new byte[417];
+            frame[0] = 0xFF;
+            frame[1] = 0xFB;
+            frame[2] = 0x90;
+            frame[3] = 0x00;
+            stream.Write(frame);
+        }
+
+        return stream.ToArray();
+    }
+
+    // The flac signature, a STREAMINFO block for two seconds of 44.1 kHz stereo and a little data after it: enough for a tag library to accept it as flac.
+    public static byte[] CreateFlac()
+    {
+        const ulong sampleRate = 44100;
+        const ulong totalSamples = 88200;
+
+        using MemoryStream stream = new();
+        using BinaryWriter writer = new(stream);
+        writer.Write("fLaC"u8);
+        writer.Write([(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x22]);
+        writer.Write([(byte)0x10, (byte)0x00, (byte)0x10, (byte)0x00]);
+        writer.Write(new byte[6]);
+
+        ulong packed = (sampleRate << 44) | (1UL << 41) | (15UL << 36) | totalSamples;
+        byte[] packedBytes = BitConverter.GetBytes(packed);
+        Array.Reverse(packedBytes);
+        writer.Write(packedBytes);
+        writer.Write(new byte[16]);
+        writer.Write(new byte[200]);
+        writer.Flush();
+
+        return stream.ToArray();
+    }
+
+    // An mp3 with the tags the callback sets, as the bytes of the file.
+    public static byte[] CreateTaggedMp3(Action<Tag> apply)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"{Guid.CreateVersion7()}.mp3");
+        try
+        {
+            File.WriteAllBytes(path, CreateMp3());
+            using (TagLib.File file = TagLib.File.Create(path))
+            {
+                apply(file.Tag);
+                file.Save();
+            }
+
+            return File.ReadAllBytes(path);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
     }
 
     public static byte[] Pattern(int dataBytes = 1000)

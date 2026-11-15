@@ -105,6 +105,27 @@ public class HandlerMediaUploadTest
     }
 
     [Fact]
+    public async Task Enqueue_ATitleSent_IsRememberedAsSent()
+    {
+        await Enqueue("media.mp3", Mp3(), "My media");
+
+        Assert.True(Assert.Single(_store.MediaUploadJobList).TitleWasSent);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Enqueue_NoTitleSent_IsRememberedAsNotSent(string? title)
+    {
+        await Enqueue("media.mp3", Mp3(), title);
+
+        EntityMediaUploadJob job = Assert.Single(_store.MediaUploadJobList);
+        Assert.False(job.TitleWasSent);
+        Assert.Equal("media", job.Title);
+    }
+
+    [Fact]
     public async Task Enqueue_NoTitle_UsesTheFileNameWithoutItsExtension()
     {
         await Enqueue("media.mp3", Mp3());

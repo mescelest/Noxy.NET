@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
+using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -24,7 +25,9 @@ public class UploadRecoveryTest
     public UploadRecoveryTest()
     {
         ConfigStorage config = new() { RootPath = "x", AllowedExtensionList = ["mp3"] };
-        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _publisher, Options.Create(config), NullLogger<UploadProcessor>.Instance);
+        NameKeyService serviceNameKey = new();
+        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, new FakeMediaTagReadingService(), new MetadataResolutionService(serviceNameKey, new CreditSplittingService(serviceNameKey)), _publisher, Options.Create(config),
+            NullLogger<UploadProcessor>.Instance);
     }
 
     private EntityMediaUploadJob AddJob(MediaUploadJobStatus status, bool staged = true)

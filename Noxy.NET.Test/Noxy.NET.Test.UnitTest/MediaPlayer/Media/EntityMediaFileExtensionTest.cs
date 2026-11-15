@@ -86,6 +86,128 @@ public class EntityMediaFileExtensionTest
         Assert.Equal(DateTimeKind.Utc, response.TimeModified.Kind);
     }
 
+    private static EntityArtist Artist(string name)
+    {
+        return new() { UserID = Guid.CreateVersion7(), Name = name, NameKey = name.ToLowerInvariant() };
+    }
+
+    private static void LinkArtistList(EntityMediaFile file, params EntityArtist[] artistList)
+    {
+        file.ArtistLinkList = [.. artistList.Select((x, index) => new EntityMediaFileArtist { MediaFileID = file.ID, ArtistID = x.ID, Position = index, Artist = x })];
+    }
+
+    private static void LinkGenreList(EntityMediaFile file, params string[] nameList)
+    {
+        file.GenreLinkList = [.. nameList.Select((x, index) => new EntityMediaFileGenre { MediaFileID = file.ID, GenreID = Guid.CreateVersion7(), Position = index, Genre = new() { UserID = file.UserID, Name = x, NameKey = x.ToLowerInvariant() } })];
+    }
+
+    [Fact]
+    public void ToResponse_ArtistIsTheLinkedNamesJoinedInPositionOrder()
+    {
+        EntityMediaFile file = CreateFile();
+        EntityArtist first = Artist("Main");
+        EntityArtist second = Artist("Guest");
+        LinkArtistList(file, first, second);
+
+        ResponseMediaFile response = file.ToResponse();
+
+        Assert.Equal("Main; Guest", response.Artist);
+        Assert.Equal([first.ID, second.ID], response.ArtistIDList);
+    }
+
+    [Fact]
+    public void ToResponse_GenreIsTheLinkedNamesJoinedInPositionOrder()
+    {
+        EntityMediaFile file = CreateFile();
+        LinkGenreList(file, "Rock", "Pop");
+
+        ResponseMediaFile response = file.ToResponse();
+
+        Assert.Equal("Rock; Pop", response.Genre);
+        Assert.Equal(file.GenreLinkList.Select(x => x.GenreID).ToList(), response.GenreIDList);
+    }
+
+    [Fact]
+    public void ToResponse_AlbumAndAlbumArtistComeFromTheAlbumAndItsArtists()
+    {
+        EntityMediaFile file = CreateFile();
+        EntityArtist albumArtist = Artist("Queen");
+        EntityAlbum album = new() { UserID = file.UserID, Title = "Greatest Hits", TitleKey = "greatest hits", IdentityKey = "greatest hits|x" };
+        album.ArtistLinkList = [new() { AlbumID = album.ID, ArtistID = albumArtist.ID, Position = 0, Artist = albumArtist }];
+        file.AlbumID = album.ID;
+        file.Album = album;
+
+        ResponseMediaFile response = file.ToResponse();
+
+        Assert.Equal("Greatest Hits", response.Album);
+        Assert.Equal("Queen", response.AlbumArtist);
+        Assert.Equal(album.ID, response.AlbumID);
+        Assert.Equal([albumArtist.ID], response.AlbumArtistIDList);
+    }
+
+    [Fact]
+    public void ToResponse_AFileWithNoLinksAndNoLegacyText_HasNullTextAndEmptyIDLists()
+    {
+        EntityMediaFile file = CreateFile();
+
+        ResponseMediaFile response = file.ToResponse();
+
+        Assert.Null(response.Artist);
+        Assert.Null(response.Album);
+        Assert.Null(response.AlbumArtist);
+        Assert.Null(response.Genre);
+        Assert.Empty(response.ArtistIDList);
+        Assert.Null(response.AlbumID);
+        Assert.Empty(response.AlbumArtistIDList);
+        Assert.Empty(response.GenreIDList);
+    }
+
+    [Fact]
+    public void ToResponse_LinkedNames_WinOverTheLegacyText()
+    {
+        EntityMediaFile file = CreateFile();
+        Assert.NotNull(file.Metadata);
+        file.Metadata.Artist = "Legacy";
+        file.Metadata.Genre = "Legacy genre";
+        LinkArtistList(file, Artist("Linked"));
+        LinkGenreList(file, "Linked genre");
+
+        ResponseMediaFile response = file.ToResponse();
+
+        Assert.Equal("Linked", response.Artist);
+        Assert.Equal("Linked genre", response.Genre);
+    }
+
+    [Fact]
+    public void ToResponse_AFileNotYetBackfilled_StillShowsItsLegacyText()
+    {
+        EntityMediaFile file = CreateFile();
+        Assert.NotNull(file.Metadata);
+        file.Metadata.Artist = "Legacy";
+        file.Metadata.Album = "Legacy album";
+        file.Metadata.AlbumArtist = "Legacy album artist";
+        file.Metadata.Genre = "Legacy genre";
+
+        ResponseMediaFile response = file.ToResponse();
+
+        Assert.Equal("Legacy", response.Artist);
+        Assert.Equal("Legacy album", response.Album);
+        Assert.Equal("Legacy album artist", response.AlbumArtist);
+        Assert.Equal("Legacy genre", response.Genre);
+        Assert.Empty(response.ArtistIDList);
+    }
+
+    [Fact]
+    public void ToResponse_ALinkWhoseItemWasNotLoaded_IsABug_NamingTheMediaFile()
+    {
+        EntityMediaFile file = CreateFile();
+        file.ArtistLinkList = [new() { MediaFileID = file.ID, ArtistID = Guid.CreateVersion7(), Position = 0 }];
+
+        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => file.ToResponse());
+
+        Assert.Contains(file.ID.ToString(), exception.Message);
+    }
+
     [Fact]
     public void GetDownloadFileName_UsesTheTitleAndTheStoredExtension()
     {

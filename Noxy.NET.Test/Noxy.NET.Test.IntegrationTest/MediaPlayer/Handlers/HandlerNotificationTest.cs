@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.API.Handlers;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -108,6 +109,53 @@ public class HandlerNotificationTest
         Assert.Equal(nameof(MediaHubEvent.PlaylistDeleted), method);
         Assert.Equal(id, Assert.Single(argumentList));
         Assert.Equal(Token, token);
+    }
+
+    [Fact]
+    public async Task ArtistUpdated_PushesTheEventWithThePayloadToThatUserOnly()
+    {
+        ResponseArtist artist = new() { ID = Guid.CreateVersion7(), Name = "Artist", MediaFileCount = 1, TimeModified = DateTime.UtcNow };
+
+        await new HandlerNotificationArtistUpdated(_hub, new FakeLogger<HandlerNotificationArtistUpdated>()).Handle(new(UserID, artist), Token);
+
+        AssertPushed(nameof(MediaHubEvent.ArtistUpdated), artist);
+    }
+
+    [Fact]
+    public async Task GenreUpdated_PushesTheEventWithThePayloadToThatUserOnly()
+    {
+        ResponseGenre genre = new() { ID = Guid.CreateVersion7(), Name = "Genre", MediaFileCount = 1, TimeModified = DateTime.UtcNow };
+
+        await new HandlerNotificationGenreUpdated(_hub, new FakeLogger<HandlerNotificationGenreUpdated>()).Handle(new(UserID, genre), Token);
+
+        AssertPushed(nameof(MediaHubEvent.GenreUpdated), genre);
+    }
+
+    [Fact]
+    public async Task AlbumUpdated_PushesTheEventWithThePayloadToThatUserOnly()
+    {
+        ResponseAlbum album = new() { ID = Guid.CreateVersion7(), Title = "Album", ArtistIDList = [], MediaFileCount = 1, TimeModified = DateTime.UtcNow };
+
+        await new HandlerNotificationAlbumUpdated(_hub, new FakeLogger<HandlerNotificationAlbumUpdated>()).Handle(new(UserID, album), Token);
+
+        AssertPushed(nameof(MediaHubEvent.AlbumUpdated), album);
+    }
+
+    [Fact]
+    public async Task ArtistGenreAndAlbumDeleted_PushTheEventWithTheIdToThatUserOnly()
+    {
+        Guid artistID = Guid.CreateVersion7();
+        Guid genreID = Guid.CreateVersion7();
+        Guid albumID = Guid.CreateVersion7();
+
+        await new HandlerNotificationArtistDeleted(_hub, new FakeLogger<HandlerNotificationArtistDeleted>()).Handle(new(UserID, artistID), Token);
+        await new HandlerNotificationGenreDeleted(_hub, new FakeLogger<HandlerNotificationGenreDeleted>()).Handle(new(UserID, genreID), Token);
+        await new HandlerNotificationAlbumDeleted(_hub, new FakeLogger<HandlerNotificationAlbumDeleted>()).Handle(new(UserID, albumID), Token);
+
+        Assert.Equal(
+            [(nameof(MediaHubEvent.ArtistDeleted), artistID), (nameof(MediaHubEvent.GenreDeleted), genreID), (nameof(MediaHubEvent.AlbumDeleted), albumID)],
+            _hub.SendList.Select(x => (x.Method, (Guid)Assert.Single(x.ArgumentList)!)).ToList());
+        Assert.All(_hub.SendList, x => Assert.Equal(UserID.ToString(), x.UserID));
     }
 
     [Fact]

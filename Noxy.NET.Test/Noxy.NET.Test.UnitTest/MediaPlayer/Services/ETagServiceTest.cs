@@ -23,6 +23,36 @@ public class ETagServiceTest
     }
 
     [Fact]
+    public void Compute_WithCounts_IsAQuotedLowercaseSha256()
+    {
+        Assert.Matches("^\"[0-9a-f]{64}\"$", _service.ComputeCounted([(FirstID, Time, 3)]));
+    }
+
+    [Fact]
+    public void Compute_WithCounts_ChangesWhenOnlyACountChanges()
+    {
+        Assert.NotEqual(_service.ComputeCounted([(FirstID, Time, 3)]), _service.ComputeCounted([(FirstID, Time, 4)]));
+    }
+
+    [Fact]
+    public void Compute_WithCounts_ChangesWhenOnlyTheTimeChanges()
+    {
+        Assert.NotEqual(_service.ComputeCounted([(FirstID, Time, 3)]), _service.ComputeCounted([(FirstID, Time.AddTicks(1), 3)]));
+    }
+
+    [Fact]
+    public void Compute_WithCounts_IgnoresTheOrderOfTheInput()
+    {
+        Assert.Equal(_service.ComputeCounted([(FirstID, Time, 1), (SecondID, Time, 2)]), _service.ComputeCounted([(SecondID, Time, 2), (FirstID, Time, 1)]));
+    }
+
+    [Fact]
+    public void Compute_WithCounts_EmptyIsStable()
+    {
+        Assert.Equal(_service.ComputeCounted(Array.Empty<(Guid, DateTime, int)>()), _service.ComputeCounted(Array.Empty<(Guid, DateTime, int)>()));
+    }
+
+    [Fact]
     public void Compute_IgnoresTheOrderOfTheInput()
     {
         string forward = _service.Compute([(FirstID, Time), (SecondID, Time)]);

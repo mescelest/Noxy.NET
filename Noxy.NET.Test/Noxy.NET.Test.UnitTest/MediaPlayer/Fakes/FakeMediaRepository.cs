@@ -21,7 +21,12 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         foreach (EntityMediaFile updated in _pendingMediaFileUpdateList)
         {
             int index = store.MediaFileList.FindIndex(x => x.ID == updated.ID);
-            if (index >= 0) store.MediaFileList[index] = updated;
+            if (index < 0) continue;
+
+            // The links are saved on their own, never with the file row.
+            updated.ArtistLinkList = store.MediaFileList[index].ArtistLinkList;
+            updated.GenreLinkList = store.MediaFileList[index].GenreLinkList;
+            store.MediaFileList[index] = updated;
         }
 
         _pendingMediaFileUpdateList.Clear();
@@ -45,7 +50,12 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
 
     public void AddMediaFile(EntityMediaFile mediaFile)
     {
-        _pendingMediaFileList.Add(mediaFile);
+        // The links are added on their own, so the stored file starts without them, like the database row does.
+        EntityMediaFile copy = store.CopyMediaFile(mediaFile);
+        copy.ArtistLinkList = [];
+        copy.GenreLinkList = [];
+        copy.Album = null;
+        _pendingMediaFileList.Add(copy);
     }
 
     public Task<EntityMediaFile?> FindMediaFile(Guid id, Guid userID, CancellationToken cancellationToken = default)
@@ -53,12 +63,24 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         EntityMediaFile? found = store.MediaFileList.FirstOrDefault(x => x.ID == id && x.UserID == userID);
 
         // A copy, like the database hands back, so an edit that is never committed changes nothing.
-        return Task.FromResult(found is null ? null : Copy(found));
+        return Task.FromResult(found is null ? null : store.CopyMediaFile(found));
     }
 
     public Task<int> CountMediaFiles(Guid userID, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.MediaFileList.Count(x => x.UserID == userID));
+    }
+
+    public Task<List<EntityMediaFile>> GetMediaFileListWithLegacyText(Guid afterID, int take, CancellationToken cancellationToken = default)
+    {
+        List<EntityMediaFile> list = store.MediaFileList
+            .Where(x => x.ID.CompareTo(afterID) > 0 && x.Metadata is { } metadata && (metadata.Artist is not null || metadata.Album is not null || metadata.AlbumArtist is not null || metadata.Genre is not null))
+            .OrderBy(x => x.ID)
+            .Take(take)
+            .Select(store.CopyMediaFile)
+            .ToList();
+
+        return Task.FromResult(list);
     }
 
     public Task<long> SumMediaFileBytes(Guid userID, CancellationToken cancellationToken = default)
@@ -68,12 +90,12 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
 
     public Task<List<EntityMediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).OrderByDescending(x => x.TimeCreated).Skip(skip).Take(take).Select(Copy).ToList());
+        return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).OrderByDescending(x => x.TimeCreated).Skip(skip).Take(take).Select(store.CopyMediaFile).ToList());
     }
 
     public Task<List<EntityMediaFile>> GetMediaFileList(Guid userID, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).OrderByDescending(x => x.TimeCreated).Select(Copy).ToList());
+        return Task.FromResult(store.MediaFileList.Where(x => x.UserID == userID).OrderByDescending(x => x.TimeCreated).Select(store.CopyMediaFile).ToList());
     }
 
     public Task<List<MediaFileStamp>> GetMediaFileStampList(Guid userID, CancellationToken cancellationToken = default)
@@ -83,7 +105,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
 
     public void UpdateMediaFile(EntityMediaFile mediaFile)
     {
-        _pendingMediaFileUpdateList.Add(Copy(mediaFile));
+        _pendingMediaFileUpdateList.Add(store.CopyMediaFile(mediaFile));
     }
 
     public void RemoveMediaFile(EntityMediaFile mediaFile)
@@ -150,44 +172,6 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         return Task.FromResult(store.MediaUploadJobList.Select(x => x.StagedFileName).ToList());
     }
 
-    private static EntityMediaFile Copy(EntityMediaFile file)
-    {
-        EntityMediaFile copy = new()
-        {
-            ID = file.ID,
-            TimeCreated = file.TimeCreated,
-            TimeModified = file.TimeModified,
-            FilePath = file.FilePath,
-            ContentType = file.ContentType,
-            SizeBytes = file.SizeBytes,
-            ContentHash = file.ContentHash,
-            UserID = file.UserID
-        };
-
-        if (file.Metadata is not null)
-        {
-            copy.Metadata = new()
-            {
-                ID = file.Metadata.ID,
-                TimeCreated = file.Metadata.TimeCreated,
-                Title = file.Metadata.Title,
-                Artist = file.Metadata.Artist,
-                Album = file.Metadata.Album,
-                AlbumArtist = file.Metadata.AlbumArtist,
-                Subtitle = file.Metadata.Subtitle,
-                Comment = file.Metadata.Comment,
-                Genre = file.Metadata.Genre,
-                TrackNumber = file.Metadata.TrackNumber,
-                DiscNumber = file.Metadata.DiscNumber,
-                Year = file.Metadata.Year,
-                Duration = file.Metadata.Duration,
-                MediaFileID = file.Metadata.MediaFileID
-            };
-        }
-
-        return copy;
-    }
-
     private static EntityMediaUploadJob Copy(EntityMediaUploadJob job)
     {
         return new()
@@ -197,6 +181,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
             UserID = job.UserID,
             StagedFileName = job.StagedFileName,
             Title = job.Title,
+            TitleWasSent = job.TitleWasSent,
             ContentType = job.ContentType,
             SizeBytes = job.SizeBytes,
             ContentHash = job.ContentHash,

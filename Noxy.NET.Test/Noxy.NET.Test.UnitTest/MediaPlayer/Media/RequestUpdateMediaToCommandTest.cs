@@ -28,6 +28,22 @@ public class RequestUpdateMediaToCommandTest
         Assert.False(command.Year.HasValue);
     }
 
+
+    [Fact]
+    public void ToCommand_CarriesTheIDFieldsAndKeepsThoseLeftOutAbsent()
+    {
+        Guid artistID = Guid.CreateVersion7();
+        Guid albumID = Guid.CreateVersion7();
+
+        CommandMediaUpdate command = new RequestUpdateMedia { ArtistIDList = new([artistID]), AlbumID = new(albumID), GenreIDList = new(null) }.ToCommand(UserID, ID);
+
+        Assert.Equal([artistID], command.ArtistIDList.Value);
+        Assert.Equal(albumID, command.AlbumID.Value);
+        Assert.True(command.GenreIDList.HasValue);
+        Assert.Null(command.GenreIDList.Value);
+        Assert.False(command.AlbumArtistIDList.HasValue);
+    }
+
     [Fact]
     public void ToCommand_KeepsANullFieldPresentWithNull()
     {

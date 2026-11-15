@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Models.Metadata;
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
+using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -18,17 +20,19 @@ public class UploadProcessorTest
     private readonly FakeStore _store = new();
     private readonly FakeFileStorageService _storage = new();
     private readonly FakePublisher _publisher = new();
+    private readonly FakeMediaTagReadingService _tagReader = new();
     private readonly UploadProcessor _processor;
 
     private List<(Guid UserID, ResponseUploadResult Result)> NotificationList => [.. _publisher.GetList<NotificationUploadSucceeded>().Select(x => (x.UserID, x.Result)), .. _publisher.GetList<NotificationUploadFailed>().Select(x => (x.UserID, x.Result))];
 
     public UploadProcessorTest()
     {
-        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _publisher, Options.Create(_config), NullLogger<UploadProcessor>.Instance);
+        NameKeyService serviceNameKey = new();
+        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _tagReader, new MetadataResolutionService(serviceNameKey, new CreditSplittingService(serviceNameKey)), _publisher, Options.Create(_config), NullLogger<UploadProcessor>.Instance);
     }
 
     // A job as Enqueue leaves it, with its file waiting in staging.
-    private EntityMediaUploadJob AddJob(Guid? userID = null, long size = 100, string title = "Media", DateTime? timeCreated = null, bool staged = true)
+    private EntityMediaUploadJob AddJob(Guid? userID = null, long size = 100, string title = "Media", DateTime? timeCreated = null, bool staged = true, bool titleWasSent = true)
     {
         EntityMediaUploadJob job = new()
         {
@@ -36,6 +40,7 @@ public class UploadProcessorTest
             UserID = userID ?? UserID,
             StagedFileName = $"{Guid.CreateVersion7()}.mp3",
             Title = title,
+            TitleWasSent = titleWasSent,
             ContentType = "audio/mpeg",
             SizeBytes = size,
             ContentHash = new string('c', 64)
@@ -123,6 +128,229 @@ public class UploadProcessorTest
         Assert.Equal("My Media", result.Title);
         Assert.Equal(Assert.Single(_store.MediaFileList).ID, result.Media?.ID);
         Assert.Null(result.Reason);
+    }
+
+    private static MediaTagSet Tags(string? title = null, string[]? artist = null, string? album = null, string[]? albumArtist = null, string[]? genre = null)
+    {
+        return new(title, [.. artist ?? []], album, [.. albumArtist ?? []], [.. genre ?? []], null, null, null, null, null, null);
+    }
+
+    [Fact]
+    public async Task ProcessNext_ATaggedFile_CreatesAndLinksItsItemsInTheSameSingleCommit()
+    {
+        AddJob();
+        _tagReader.Result = Tags(artist: ["Main feat. Guest"], album: "OK Computer", albumArtist: ["Main"], genre: ["Rock"]);
+
+        await ProcessNext();
+
+        EntityMediaFile file = Assert.Single(_store.MediaFileList);
+        Assert.Equal(["Main", "Guest"], file.ArtistLinkList.OrderBy(x => x.Position).Select(x => _store.ArtistList.Single(a => a.ID == x.ArtistID).Name).ToList());
+        EntityAlbum album = Assert.Single(_store.AlbumList);
+        Assert.Equal(album.ID, file.AlbumID);
+        Assert.Equal("OK Computer", album.Title);
+        Assert.Equal(["Main"], album.ArtistLinkList.Select(x => _store.ArtistList.Single(a => a.ID == x.ArtistID).Name).ToList());
+        Assert.Equal("Rock", _store.GenreList.Single(x => x.ID == Assert.Single(file.GenreLinkList).GenreID).Name);
+        Assert.Equal(2, _store.ArtistList.Count);
+        Assert.Empty(_store.MediaUploadJobList);
+        Assert.Equal(1, _store.CommitCount);
+    }
+
+    [Fact]
+    public async Task ProcessNext_ASecondTrackOfTheSameAlbum_ReusesTheAlbumAndTheArtists()
+    {
+        AddJob();
+        AddJob();
+        _tagReader.Result = Tags(artist: ["Main"], album: "OK Computer", albumArtist: ["Main"], genre: ["Rock"]);
+
+        await ProcessNext();
+        await ProcessNext();
+
+        Assert.Equal(2, _store.MediaFileList.Count);
+        Assert.Single(_store.AlbumList);
+        Assert.Single(_store.ArtistList);
+        Assert.Single(_store.GenreList);
+        Assert.All(_store.MediaFileList, x => Assert.Equal(_store.AlbumList[0].ID, x.AlbumID));
+    }
+
+    [Fact]
+    public async Task ProcessNext_AKeyConflictOnCommit_RunsAgainAndStillCreatesOneFile()
+    {
+        AddJob();
+        _tagReader.Result = Tags(artist: ["Newcomer"]);
+        _store.KeyConflictCommitCount = 1;
+
+        await ProcessNext();
+
+        Assert.Single(_store.MediaFileList);
+        Assert.Single(_store.ArtistList);
+        Assert.Empty(_store.MediaUploadJobList);
+        Assert.Single(_publisher.GetList<NotificationUploadSucceeded>());
+        Assert.Empty(_publisher.GetList<NotificationUploadFailed>());
+    }
+
+    [Fact]
+    public async Task ProcessNext_ATitleTheUserSent_WinsOverTheEmbeddedTitle()
+    {
+        AddJob(title: "Sent title", titleWasSent: true);
+        _tagReader.Result = Tags(title: "Embedded title");
+
+        await ProcessNext();
+
+        Assert.Equal("Sent title", Assert.Single(_store.MediaFileList).Metadata?.Title);
+    }
+
+    [Fact]
+    public async Task ProcessNext_NoTitleSent_UsesTheEmbeddedTitle()
+    {
+        AddJob(title: "file name", titleWasSent: false);
+        _tagReader.Result = Tags(title: "  Embedded title ");
+
+        await ProcessNext();
+
+        Assert.Equal("Embedded title", Assert.Single(_store.MediaFileList).Metadata?.Title);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task ProcessNext_NoTitleSentAndNoEmbeddedTitle_UsesTheFileName(string? embedded)
+    {
+        AddJob(title: "file name", titleWasSent: false);
+        _tagReader.Result = Tags(title: embedded);
+
+        await ProcessNext();
+
+        Assert.Equal("file name", Assert.Single(_store.MediaFileList).Metadata?.Title);
+    }
+
+    [Fact]
+    public async Task ProcessNext_ALongEmbeddedTitle_IsCutTo255Characters()
+    {
+        AddJob(titleWasSent: false);
+        _tagReader.Result = Tags(title: new string('t', 400));
+
+        await ProcessNext();
+
+        Assert.Equal(255, Assert.Single(_store.MediaFileList).Metadata?.Title.Length);
+    }
+
+    [Fact]
+    public async Task ProcessNext_StoresTheValuesTheTagsCarry()
+    {
+        AddJob();
+        _tagReader.Result = new(null, [], null, [], [], 3, 2, 1999, "A comment", "A subtitle", TimeSpan.FromSeconds(215));
+
+        await ProcessNext();
+
+        EntityMediaFileMetadata metadata = Assert.IsType<EntityMediaFileMetadata>(Assert.Single(_store.MediaFileList).Metadata);
+        Assert.Equal(3, metadata.TrackNumber);
+        Assert.Equal(2, metadata.DiscNumber);
+        Assert.Equal(1999, metadata.Year);
+        Assert.Equal("A comment", metadata.Comment);
+        Assert.Equal("A subtitle", metadata.Subtitle);
+        Assert.Equal(TimeSpan.FromSeconds(215), metadata.Duration);
+    }
+
+    [Fact]
+    public async Task ProcessNext_LongCommentAndSubtitle_AreCutToTheirColumnLengths()
+    {
+        AddJob();
+        _tagReader.Result = new(null, [], null, [], [], null, null, null, new string('c', 5000), new string('s', 400), null);
+
+        await ProcessNext();
+
+        EntityMediaFileMetadata metadata = Assert.IsType<EntityMediaFileMetadata>(Assert.Single(_store.MediaFileList).Metadata);
+        Assert.Equal(2048, metadata.Comment?.Length);
+        Assert.Equal(256, metadata.Subtitle?.Length);
+    }
+
+    [Fact]
+    public async Task ProcessNext_ImplausibleNumbers_AreNotStored()
+    {
+        AddJob();
+        _tagReader.Result = new(null, [], null, [], [], -1, 0, int.MaxValue, null, null, null);
+
+        await ProcessNext();
+
+        EntityMediaFileMetadata metadata = Assert.IsType<EntityMediaFileMetadata>(Assert.Single(_store.MediaFileList).Metadata);
+        Assert.Null(metadata.TrackNumber);
+        Assert.Null(metadata.DiscNumber);
+        Assert.Null(metadata.Year);
+    }
+
+    [Fact]
+    public async Task ProcessNext_UnreadableTags_GiveALibraryEntryTitledFromTheFileNameWithNoItems()
+    {
+        AddJob(title: "file name", titleWasSent: false);
+
+        await ProcessNext();
+
+        EntityMediaFile file = Assert.Single(_store.MediaFileList);
+        Assert.Equal("file name", file.Metadata?.Title);
+        Assert.Empty(file.ArtistLinkList);
+        Assert.Empty(file.GenreLinkList);
+        Assert.Null(file.AlbumID);
+        Assert.Empty(_store.ArtistList);
+        Assert.Empty(_store.AlbumList);
+        Assert.Empty(_store.GenreList);
+    }
+
+    [Fact]
+    public async Task ProcessNext_AFailingTagRead_NeverFailsTheJob()
+    {
+        AddJob(title: "file name", titleWasSent: false);
+        _tagReader.Failure = new InvalidOperationException("boom");
+
+        await ProcessNext();
+
+        Assert.Equal("file name", Assert.Single(_store.MediaFileList).Metadata?.Title);
+        Assert.Single(_publisher.GetList<NotificationUploadSucceeded>());
+        Assert.Empty(_publisher.GetList<NotificationUploadFailed>());
+    }
+
+    [Fact]
+    public async Task ProcessNext_ReadsTheTagsOfTheStoredFileAndDeletesTheTemporaryCopy()
+    {
+        EntityMediaUploadJob job = AddJob();
+
+        await ProcessNext();
+
+        string path = Assert.Single(_tagReader.ReadList);
+        Assert.EndsWith(Path.GetExtension(job.StagedFileName), path);
+        Assert.Contains(path, _storage.DeletedTemporaryList);
+        Assert.Empty(_storage.Temporary);
+    }
+
+    [Fact]
+    public async Task ProcessNext_TheSuccessNotification_CarriesTheIDListsAndTheDerivedText()
+    {
+        AddJob();
+        _tagReader.Result = Tags(artist: ["Main; Guest"], album: "OK Computer", albumArtist: ["Main"], genre: ["Rock", "Pop"]);
+
+        await ProcessNext();
+
+        ResponseMediaFile response = Assert.IsType<ResponseMediaFile>(Assert.Single(_publisher.GetList<NotificationUploadSucceeded>()).Result.Media);
+        EntityMediaFile file = Assert.Single(_store.MediaFileList);
+        Assert.Equal("Main; Guest", response.Artist);
+        Assert.Equal("OK Computer", response.Album);
+        Assert.Equal("Main", response.AlbumArtist);
+        Assert.Equal("Rock; Pop", response.Genre);
+        Assert.Equal(file.ArtistLinkList.OrderBy(x => x.Position).Select(x => x.ArtistID).ToList(), response.ArtistIDList);
+        Assert.Equal(file.AlbumID, response.AlbumID);
+        Assert.Equal([_store.ArtistList.Single(x => x.Name == "Main").ID], response.AlbumArtistIDList);
+        Assert.Equal(2, response.GenreIDList.Count);
+    }
+
+    [Fact]
+    public async Task ProcessNext_AMissingStagedFile_StillFailsAsFileMissing()
+    {
+        AddJob(staged: false);
+
+        await ProcessNext();
+
+        Assert.Equal(UploadFailureReason.FileMissing, Assert.Single(_publisher.GetList<NotificationUploadFailed>()).Result.Reason);
+        Assert.Empty(_store.MediaFileList);
     }
 
     [Fact]
