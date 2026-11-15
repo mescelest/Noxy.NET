@@ -26,7 +26,8 @@ public class MediaFileExtensionTest
     public void ToResponse_CopiesEveryTagFromTheMetadata()
     {
         MediaFile file = CreateFile();
-        file.Metadata!.Artist = "Artist";
+        Assert.NotNull(file.Metadata);
+        file.Metadata.Artist = "Artist";
         file.Metadata.Album = "Album";
         file.Metadata.AlbumArtist = "Album Artist";
         file.Metadata.Subtitle = "Subtitle";

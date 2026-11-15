@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using Noxy.NET.MediaPlayer.API.Configurations;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
@@ -27,7 +28,8 @@ public class MediaDownloadFlowTest
         HttpResponseMessage response = await api.Download(user.Token, mediaFile.ID);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal($"\"{mediaFile.ContentHash}\"", response.Headers.ETag!.Tag);
+        Assert.Equal($"\"{mediaFile.ContentHash}\"", response.GetETag());
+        Assert.NotNull(response.Headers.ETag);
         Assert.False(response.Headers.ETag.IsWeak);
         Assert.Contains("bytes", response.Headers.AcceptRanges);
     }
@@ -151,14 +153,14 @@ public class MediaDownloadFlowTest
         ApiAccount user = await api.SignUp("a@example.com");
         ResponseMediaFile mediaFile = await UploadWav(api, user);
         byte[] before = await (await api.Download(user.Token, mediaFile.ID)).Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken);
-        string libraryETag = (await api.GetLibrary(user.Token)).Headers.ETag!.Tag;
+        string libraryETag = (await api.GetLibrary(user.Token)).GetETag();
 
         Assert.Equal(HttpStatusCode.OK, (await api.DownloadTagged(user.Token, mediaFile.ID)).StatusCode);
 
         HttpResponseMessage file = await api.Download(user.Token, mediaFile.ID);
         Assert.Equal(before, await file.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken));
-        Assert.Equal($"\"{mediaFile.ContentHash}\"", file.Headers.ETag!.Tag);
-        Assert.Equal(libraryETag, (await api.GetLibrary(user.Token)).Headers.ETag!.Tag);
+        Assert.Equal($"\"{mediaFile.ContentHash}\"", file.GetETag());
+        Assert.Equal(libraryETag, (await api.GetLibrary(user.Token)).GetETag());
     }
 
     [Fact]

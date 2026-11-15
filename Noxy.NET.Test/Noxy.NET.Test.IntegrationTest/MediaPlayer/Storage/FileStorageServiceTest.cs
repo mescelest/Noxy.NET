@@ -347,7 +347,7 @@ public class FileStorageServiceTest : IDisposable
     {
         FileStorageService service = Create();
         string path = Path.Combine(_root, relative);
-        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path)) ?? throw new InvalidOperationException("The path has no directory."));
         File.WriteAllBytes(Path.GetFullPath(path), [1]);
 
         Assert.Throws<ArgumentException>(() => service.OpenTemporary(path));

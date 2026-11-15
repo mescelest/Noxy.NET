@@ -1,5 +1,5 @@
-using System.Net;
 using System.Net.Http.Json;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +9,7 @@ using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Gates;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
@@ -18,7 +19,7 @@ public class MediaUploadFlowTest
     private static async Task<ResponseUploadAccepted> ReadAccepted(HttpResponseMessage response)
     {
         Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
-        return (await response.Content.ReadFromJsonAsync<ResponseUploadAccepted>(TestContext.Current.CancellationToken))!;
+        return await response.ReadJson<ResponseUploadAccepted>();
     }
 
     private static async Task<List<ResponseMediaFile>> WaitForLibrary(MediaApiClient api, string token, int count)
@@ -68,7 +69,8 @@ public class MediaUploadFlowTest
 
         await api.Upload(user.Token, content, "media.mp3", "My Media");
         (_, ResponseUploadResult result) = await hub.Next();
-        HttpResponseMessage download = await api.Download(user.Token, result.Media!.ID);
+        Assert.NotNull(result.Media);
+        HttpResponseMessage download = await api.Download(user.Token, result.Media.ID);
 
         Assert.Equal(content, await download.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken));
         Assert.Equal(Convert.ToHexStringLower(SHA256.HashData(content)), result.Media.ContentHash);

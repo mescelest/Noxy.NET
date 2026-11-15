@@ -15,7 +15,7 @@ public class RequestUpdatePlaylistTest
 
     private static RequestUpdatePlaylist Read(string json)
     {
-        return JsonSerializer.Deserialize<RequestUpdatePlaylist>(json, JsonSerializerOptions.Web)!;
+        return JsonSerializer.Deserialize<RequestUpdatePlaylist>(json, JsonSerializerOptions.Web) ?? throw new InvalidOperationException("The json is not an update playlist request.");
     }
 
     [Fact]

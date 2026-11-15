@@ -1,11 +1,12 @@
 using System.IO.Compression;
-using System.Net;
 using System.Net.Http.Json;
+using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
@@ -39,7 +40,7 @@ public class PlaylistFlowTest
 
     private static async Task<T> Deserialize<T>(HttpResponseMessage response)
     {
-        return (await response.Content.ReadFromJsonAsync<T>(TestContext.Current.CancellationToken))!;
+        return await response.ReadJson<T>();
     }
 
     private static async Task<ResponsePlaylist> CreatePlaylist(MediaApiClient api, ApiAccount user, string name = "Mix", bool allowDuplicates = true)
@@ -72,7 +73,7 @@ public class PlaylistFlowTest
     {
         HttpResponseMessage response = await api.GetPlaylistLibrary(user.Token);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        return response.Headers.ETag!.Tag;
+        return response.GetETag();
     }
 
     private static ApiFactory Factory(string key, string value)
@@ -104,13 +105,13 @@ public class PlaylistFlowTest
         await AddMediaFileList(api, user, created.ID, await UploadMediaFileList(api, user, 2));
 
         HttpResponseMessage first = await api.GetPlaylistLibrary(user.Token);
-        string eTag = first.Headers.ETag!.Tag;
+        string eTag = first.GetETag();
         string body = await first.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         HttpResponseMessage second = await api.GetPlaylistLibrary(user.Token, eTag);
 
         Assert.Equal(HttpStatusCode.OK, first.StatusCode);
         Assert.DoesNotContain("entryList", body, StringComparison.OrdinalIgnoreCase);
-        ResponsePlaylist listed = Assert.Single(JsonSerializer.Deserialize<List<ResponsePlaylist>>(body, JsonSerializerOptions.Web)!);
+        ResponsePlaylist listed = Assert.Single(JsonSerializer.Deserialize<List<ResponsePlaylist>>(body, JsonSerializerOptions.Web) ?? throw new InvalidOperationException("The body is not a playlist list."));
         Assert.Equal("Road trip", listed.Name);
         Assert.Equal(2, listed.EntryCount);
         Assert.True(first.Headers.CacheControl?.Private);
@@ -130,22 +131,18 @@ public class PlaylistFlowTest
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
         List<string> eTagList = [await LibraryETag(api, user)];
 
-        async Task Step(Func<Task<HttpResponseMessage>> change)
+        async Task<HttpResponseMessage> Step(Func<Task<HttpResponseMessage>> change)
         {
             HttpResponseMessage response = await change();
             Assert.True(response.IsSuccessStatusCode, $"The change failed with {(int)response.StatusCode}.");
             eTagList.Add(await LibraryETag(api, user));
+            return response;
         }
 
-        ResponsePlaylistDetail detail = null!;
         await Step(() => api.PatchPlaylist(user.Token, playlist.ID, """{"name":"Renamed"}"""));
         await Step(() => api.PatchPlaylist(user.Token, playlist.ID, """{"allowDuplicates":false}"""));
-        await Step(async () =>
-        {
-            HttpResponseMessage response = await api.AddPlaylistEntryList(user.Token, playlist.ID, MediaFileBody(mediaFileList));
-            detail = (await response.Content.ReadFromJsonAsync<ResponsePlaylistDetail>(TestContext.Current.CancellationToken))!;
-            return response;
-        });
+        HttpResponseMessage added = await Step(() => api.AddPlaylistEntryList(user.Token, playlist.ID, MediaFileBody(mediaFileList)));
+        ResponsePlaylistDetail detail = await added.ReadJson<ResponsePlaylistDetail>();
         await Step(() => api.MovePlaylistEntry(user.Token, playlist.ID, detail.EntryList[0].ID, """{"position":2}"""));
         await Step(() => api.RemovePlaylistEntryList(user.Token, playlist.ID, EntryBody([detail.EntryList[1].ID])));
         await Step(() => api.CreatePlaylist(user.Token, """{"name":"Second"}"""));
@@ -186,8 +183,8 @@ public class PlaylistFlowTest
         HttpResponseMessage first = await api.GetPlaylistLibrary(user.Token);
         HttpResponseMessage second = await api.GetPlaylistLibrary(user.Token);
 
-        Assert.Empty((await first.Content.ReadFromJsonAsync<List<ResponsePlaylist>>(TestContext.Current.CancellationToken))!);
-        Assert.Equal(first.Headers.ETag!.Tag, second.Headers.ETag!.Tag);
+        Assert.Empty(await first.ReadJson<List<ResponsePlaylist>>());
+        Assert.Equal(first.GetETag(), second.GetETag());
     }
 
     [Fact]
@@ -202,7 +199,7 @@ public class PlaylistFlowTest
 
         Assert.Contains("gzip", response.Content.Headers.ContentEncoding);
         await using GZipStream gzip = new(await response.Content.ReadAsStreamAsync(TestContext.Current.CancellationToken), CompressionMode.Decompress);
-        List<ResponsePlaylist> list = (await JsonSerializer.DeserializeAsync<List<ResponsePlaylist>>(gzip, JsonSerializerOptions.Web, TestContext.Current.CancellationToken))!;
+        List<ResponsePlaylist> list = await JsonSerializer.DeserializeAsync<List<ResponsePlaylist>>(gzip, JsonSerializerOptions.Web, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The body is not a playlist list.");
         Assert.Equal("Mix", Assert.Single(list).Name);
     }
 
@@ -219,7 +216,7 @@ public class PlaylistFlowTest
         await CreatePlaylist(api, other, "Theirs");
 
         Assert.Equal(before, await LibraryETag(api, user));
-        Assert.Single((await (await api.GetPlaylistLibrary(user.Token)).Content.ReadFromJsonAsync<List<ResponsePlaylist>>(TestContext.Current.CancellationToken))!);
+        Assert.Single(await (await api.GetPlaylistLibrary(user.Token)).ReadJson<List<ResponsePlaylist>>());
     }
 
     [Fact]
@@ -262,14 +259,14 @@ public class PlaylistFlowTest
         List<Guid> mediaFileList = await UploadMediaFileList(api, user, 1);
         ResponsePlaylist playlist = await CreatePlaylist(api, user);
         await AddMediaFileList(api, user, playlist.ID, mediaFileList);
-        string eTag = (await api.GetPlaylist(user.Token, playlist.ID)).Headers.ETag!.Tag;
+        string eTag = (await api.GetPlaylist(user.Token, playlist.ID)).GetETag();
         Assert.Equal(HttpStatusCode.OK, (await api.Patch(user.Token, mediaFileList[0], """{"title":"Renamed"}""")).StatusCode);
 
         HttpResponseMessage response = await api.GetPlaylist(user.Token, playlist.ID, eTag);
 
         ResponsePlaylistDetail detail = await Read<ResponsePlaylistDetail>(response);
         Assert.Equal("Renamed", detail.EntryList.Single().MediaFile.Title);
-        Assert.NotEqual(eTag, response.Headers.ETag!.Tag);
+        Assert.NotEqual(eTag, response.GetETag());
     }
 
     [Fact]
@@ -284,7 +281,7 @@ public class PlaylistFlowTest
 
         HttpResponseMessage first = await api.GetPlaylist(user.Token, playlist.ID);
         ResponsePlaylistDetail detail = await Read<ResponsePlaylistDetail>(first);
-        HttpResponseMessage second = await api.GetPlaylist(user.Token, playlist.ID, first.Headers.ETag!.Tag);
+        HttpResponseMessage second = await api.GetPlaylist(user.Token, playlist.ID, first.GetETag());
 
         Assert.Equal(mediaFileList, detail.EntryList.Select(x => x.MediaFileID));
         Assert.Equal([0, 1, 2], detail.EntryList.Select(x => x.Position));
@@ -324,7 +321,7 @@ public class PlaylistFlowTest
         Assert.True(created.AllowDuplicates);
         Assert.Equal(0, created.EntryCount);
         Assert.Equal(DateTimeKind.Utc, created.TimeModified.Kind);
-        Assert.EndsWith($"/Playlist/{created.ID}", response.Headers.Location!.AbsolutePath);
+        Assert.EndsWith($"/Playlist/{created.ID}", response.GetLocation().AbsolutePath);
     }
 
     [Theory]

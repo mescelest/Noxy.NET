@@ -7,7 +7,7 @@ public class OptionalJsonTest
 {
     private static RequestUpdateMedia Read(string json)
     {
-        return JsonSerializer.Deserialize<RequestUpdateMedia>(json, JsonSerializerOptions.Web)!;
+        return JsonSerializer.Deserialize<RequestUpdateMedia>(json, JsonSerializerOptions.Web) ?? throw new InvalidOperationException("The json is not an update media request.");
     }
 
     [Fact]

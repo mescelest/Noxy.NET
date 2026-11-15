@@ -195,7 +195,8 @@ public class PlaylistRepositoryTest : IDisposable
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
-            Playlist loaded = (await uow.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken))!;
+            Playlist loaded = await uow.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken)
+                              ?? throw new InvalidOperationException("The playlist was not found.");
             loaded.Name = "After";
             loaded.AllowDuplicates = false;
             loaded.TimeModified = modified;
@@ -233,7 +234,8 @@ public class PlaylistRepositoryTest : IDisposable
         await using IUnitOfWork check = _fixture.UoWFactory.Create();
         Playlist? found = await check.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken);
 
-        Assert.Equal(7, Assert.Single(found!.EntryList).Position);
+        Assert.NotNull(found);
+        Assert.Equal(7, Assert.Single(found.EntryList).Position);
     }
 
     [Fact]
@@ -263,7 +265,8 @@ public class PlaylistRepositoryTest : IDisposable
         await using IUnitOfWork check = _fixture.UoWFactory.Create();
         Playlist? found = await check.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken);
 
-        Assert.Equal([added.ID, keep.ID], found!.EntryList.Select(x => x.ID));
+        Assert.NotNull(found);
+        Assert.Equal([added.ID, keep.ID], found.EntryList.Select(x => x.ID));
         Assert.Equal([0, 1], found.EntryList.Select(x => x.Position));
     }
 
@@ -292,7 +295,8 @@ public class PlaylistRepositoryTest : IDisposable
         await using IUnitOfWork check = _fixture.UoWFactory.Create();
         Playlist? found = await check.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken);
 
-        Assert.Equal([b.ID, a.ID], found!.EntryList.Select(x => x.ID));
+        Assert.NotNull(found);
+        Assert.Equal([b.ID, a.ID], found.EntryList.Select(x => x.ID));
     }
 
     [Fact]
@@ -382,7 +386,8 @@ public class PlaylistRepositoryTest : IDisposable
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         Playlist? found = await uow.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken);
 
-        Assert.Equal(2, found!.EntryList.Count);
+        Assert.NotNull(found);
+        Assert.Equal(2, found.EntryList.Count);
     }
 
     [Fact]
@@ -397,10 +402,11 @@ public class PlaylistRepositoryTest : IDisposable
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         Playlist? found = await uow.Playlist.FindPlaylistWithEntries(playlist.ID, user.ID, TestContext.Current.CancellationToken);
 
-        MediaFile loaded = Assert.IsType<MediaFile>(Assert.Single(found!.EntryList).MediaFile);
+        Assert.NotNull(found);
+        MediaFile loaded = Assert.IsType<MediaFile>(Assert.Single(found.EntryList).MediaFile);
         Assert.Equal(mediaFile.ID, loaded.ID);
         Assert.Equal(mediaFile.ContentHash, loaded.ContentHash);
-        Assert.Equal("Media", loaded.Metadata!.Title);
+        Assert.Equal("Media", loaded.Metadata?.Title);
     }
 
     [Fact]

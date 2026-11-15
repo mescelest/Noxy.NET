@@ -2,14 +2,15 @@ using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
+using System.Text;
+using EntityTagHeaderValue = System.Net.Http.Headers.EntityTagHeaderValue;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Net.Http.Headers;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using EntityTagHeaderValue = System.Net.Http.Headers.EntityTagHeaderValue;
+using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
@@ -38,7 +39,7 @@ public sealed class MediaApiClient(ApiFactory factory)
     {
         HttpResponseMessage response = await _client.PostAsJsonAsync("/Auth/SignUp", new { email, password = "a-long-enough-password" }, TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
-        ResponseAuthentication authentication = (await response.Content.ReadFromJsonAsync<ResponseAuthentication>(TestContext.Current.CancellationToken))!;
+        ResponseAuthentication authentication = await response.ReadJson<ResponseAuthentication>();
 
         return new(authentication.AccessToken, ReadSubject(authentication.AccessToken));
     }
@@ -80,7 +81,7 @@ public sealed class MediaApiClient(ApiFactory factory)
         HttpResponseMessage response = await _client.SendAsync(request, TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        return (await response.Content.ReadFromJsonAsync<List<ResponseMediaFile>>(TestContext.Current.CancellationToken))!;
+        return await response.ReadJson<List<ResponseMediaFile>>();
     }
 
     // Waits for the worker to finish the uploads, since an upload is only accepted when the request returns.

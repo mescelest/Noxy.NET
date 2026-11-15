@@ -60,7 +60,8 @@ public class HandlerMediaLibraryTest
         MediaLibrary second = await Library();
 
         Assert.Equal(first.ETag, second.ETag);
-        Assert.Empty(first.MediaFileList!);
+        Assert.NotNull(first.MediaFileList);
+        Assert.Empty(first.MediaFileList);
     }
 
     [Fact]
@@ -159,8 +160,9 @@ public class HandlerMediaLibraryTest
 
         MediaLibrary library = await Library();
 
-        Assert.Equal(["Newer", "Older"], library.MediaFileList!.Select(x => x.Title));
-        Assert.Equal("Artist", library.MediaFileList![0].Artist);
-        Assert.Equal(1999, library.MediaFileList![0].Year);
+        Assert.NotNull(library.MediaFileList);
+        Assert.Equal(["Newer", "Older"], library.MediaFileList.Select(x => x.Title));
+        Assert.Equal("Artist", library.MediaFileList[0].Artist);
+        Assert.Equal(1999, library.MediaFileList[0].Year);
     }
 }

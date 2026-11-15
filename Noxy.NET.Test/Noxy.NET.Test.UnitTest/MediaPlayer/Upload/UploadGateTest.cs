@@ -33,7 +33,8 @@ public class UploadGateTest
     [Fact]
     public void TryEnter_AfterTheLeaseIsDisposed_SucceedsAgain()
     {
-        _gate.TryEnter(UserID)!.Dispose();
+        IDisposable lease = _gate.TryEnter(UserID) ?? throw new InvalidOperationException("The gate was not free.");
+        lease.Dispose();
 
         Assert.NotNull(_gate.TryEnter(UserID));
     }
@@ -41,7 +42,7 @@ public class UploadGateTest
     [Fact]
     public void Dispose_Twice_DoesNotFreeASlotThatSomeoneElseNowHolds()
     {
-        IDisposable first = _gate.TryEnter(UserID)!;
+        IDisposable first = _gate.TryEnter(UserID) ?? throw new InvalidOperationException("The gate was not free.");
         first.Dispose();
         using IDisposable? second = _gate.TryEnter(UserID);
 

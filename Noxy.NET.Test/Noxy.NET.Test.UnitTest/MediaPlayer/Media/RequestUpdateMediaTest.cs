@@ -76,7 +76,7 @@ public class RequestUpdateMediaTest
         RequestUpdateMedia Create(int length)
         {
             RequestUpdateMedia request = new();
-            typeof(RequestUpdateMedia).GetProperty(member)!.SetValue(request, Text(length));
+            (typeof(RequestUpdateMedia).GetProperty(member) ?? throw new InvalidOperationException($"RequestUpdateMedia has no {member} property.")).SetValue(request, Text(length));
             return request;
         }
 
@@ -93,7 +93,7 @@ public class RequestUpdateMediaTest
         RequestUpdateMedia Create(int value)
         {
             RequestUpdateMedia request = new();
-            typeof(RequestUpdateMedia).GetProperty(member)!.SetValue(request, new Optional<int?>(value));
+            (typeof(RequestUpdateMedia).GetProperty(member) ?? throw new InvalidOperationException($"RequestUpdateMedia has no {member} property.")).SetValue(request, new Optional<int?>(value));
             return request;
         }
 

@@ -60,7 +60,8 @@ public class MediaRepositoryTest : IDisposable
     {
         User user = await CreateUser();
         MediaFile file = CreateMediaFile(user.ID, "My Media");
-        file.Metadata!.Artist = "An Artist";
+        Assert.NotNull(file.Metadata);
+        file.Metadata.Artist = "An Artist";
         file.Metadata.Year = 1999;
         file.Metadata.Duration = TimeSpan.FromSeconds(215);
         await Add(file);
@@ -118,7 +119,7 @@ public class MediaRepositoryTest : IDisposable
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         List<MediaFile> list = await uow.Media.GetMediaFileList(user.ID, 0, 10, TestContext.Current.CancellationToken);
 
-        Assert.Equal(["Newest", "Middle", "Oldest"], list.Select(x => x.Metadata!.Title));
+        Assert.Equal(["Newest", "Middle", "Oldest"], list.Select(x => x.Metadata?.Title));
     }
 
     [Fact]
@@ -131,7 +132,7 @@ public class MediaRepositoryTest : IDisposable
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         List<MediaFile> page = await uow.Media.GetMediaFileList(user.ID, 1, 2, TestContext.Current.CancellationToken);
 
-        Assert.Equal(["Media 3", "Media 2"], page.Select(x => x.Metadata!.Title));
+        Assert.Equal(["Media 3", "Media 2"], page.Select(x => x.Metadata?.Title));
     }
 
     [Fact]
@@ -387,7 +388,7 @@ public class MediaRepositoryTest : IDisposable
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         List<MediaFile> list = await uow.Media.GetMediaFileList(user.ID, TestContext.Current.CancellationToken);
 
-        Assert.Equal(["Newest", "Middle", "Oldest"], list.Select(x => x.Metadata!.Title));
+        Assert.Equal(["Newest", "Middle", "Oldest"], list.Select(x => x.Metadata?.Title));
     }
 
     [Fact]
@@ -418,8 +419,9 @@ public class MediaRepositoryTest : IDisposable
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
-            MediaFile loaded = (await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!;
-            loaded.Metadata!.Title = "After";
+            MediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
+            Assert.NotNull(loaded.Metadata);
+            loaded.Metadata.Title = "After";
             loaded.Metadata.Artist = "Someone";
             loaded.Metadata.Year = 2001;
             loaded.TimeModified = new(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -428,7 +430,7 @@ public class MediaRepositoryTest : IDisposable
         }
 
         await using IUnitOfWork check = _fixture.UoWFactory.Create();
-        MediaFile saved = (await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!;
+        MediaFile saved = await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
         Assert.Equal("After", saved.Metadata?.Title);
         Assert.Equal("Someone", saved.Metadata?.Artist);
         Assert.Equal(2001, saved.Metadata?.Year);
@@ -445,13 +447,14 @@ public class MediaRepositoryTest : IDisposable
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
-            MediaFile loaded = (await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!;
-            loaded.Metadata!.Title = "After";
+            MediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
+            Assert.NotNull(loaded.Metadata);
+            loaded.Metadata.Title = "After";
             uow.Media.UpdateMediaFile(loaded);
         }
 
         await using IUnitOfWork check = _fixture.UoWFactory.Create();
-        Assert.Equal("Before", (await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!.Metadata?.Title);
+        Assert.Equal("Before", (await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))?.Metadata?.Title);
     }
 
     [Fact]
@@ -464,7 +467,7 @@ public class MediaRepositoryTest : IDisposable
 
         await using (IUnitOfWork uow = _fixture.UoWFactory.Create())
         {
-            MediaFile loaded = (await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken))!;
+            MediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
             uow.Media.RemoveMediaFile(loaded);
             await uow.Commit(TestContext.Current.CancellationToken);
         }

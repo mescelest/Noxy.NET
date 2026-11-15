@@ -1,9 +1,10 @@
 using System.IO.Compression;
-using System.Net;
 using System.Net.Http.Json;
+using System.Net;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
@@ -23,13 +24,13 @@ public class MediaChangeFlowTest
     {
         HttpResponseMessage response = await api.GetLibrary(user.Token);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        return response.Headers.ETag!.Tag;
+        return response.GetETag();
     }
 
     private static async Task<ResponseMediaFile> ReadMediaFile(HttpResponseMessage response)
     {
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        return (await response.Content.ReadFromJsonAsync<ResponseMediaFile>(TestContext.Current.CancellationToken))!;
+        return await response.ReadJson<ResponseMediaFile>();
     }
 
     #region -- Library --
@@ -43,11 +44,11 @@ public class MediaChangeFlowTest
         await UploadMediaFile(api, user, "One");
 
         HttpResponseMessage first = await api.GetLibrary(user.Token);
-        string eTag = first.Headers.ETag!.Tag;
+        string eTag = first.GetETag();
         HttpResponseMessage second = await api.GetLibrary(user.Token, eTag);
 
         Assert.Equal(HttpStatusCode.OK, first.StatusCode);
-        Assert.Single((await first.Content.ReadFromJsonAsync<List<ResponseMediaFile>>(TestContext.Current.CancellationToken))!);
+        Assert.Single(await first.ReadJson<List<ResponseMediaFile>>());
         Assert.True(first.Headers.CacheControl?.Private);
         Assert.True(first.Headers.CacheControl?.NoCache);
         Assert.Equal(HttpStatusCode.NotModified, second.StatusCode);
@@ -97,9 +98,9 @@ public class MediaChangeFlowTest
         ApiAccount user = await api.SignUp("a@example.com");
 
         HttpResponseMessage first = await api.GetLibrary(user.Token);
-        HttpResponseMessage second = await api.GetLibrary(user.Token, first.Headers.ETag!.Tag);
+        HttpResponseMessage second = await api.GetLibrary(user.Token, first.GetETag());
 
-        Assert.Empty((await first.Content.ReadFromJsonAsync<List<ResponseMediaFile>>(TestContext.Current.CancellationToken))!);
+        Assert.Empty(await first.ReadJson<List<ResponseMediaFile>>());
         Assert.Equal(HttpStatusCode.NotModified, second.StatusCode);
     }
 
@@ -115,7 +116,7 @@ public class MediaChangeFlowTest
 
         Assert.Contains("gzip", response.Content.Headers.ContentEncoding);
         await using GZipStream gzip = new(await response.Content.ReadAsStreamAsync(TestContext.Current.CancellationToken), CompressionMode.Decompress);
-        List<ResponseMediaFile> list = (await JsonSerializer.DeserializeAsync<List<ResponseMediaFile>>(gzip, JsonSerializerOptions.Web, TestContext.Current.CancellationToken))!;
+        List<ResponseMediaFile> list = await JsonSerializer.DeserializeAsync<List<ResponseMediaFile>>(gzip, JsonSerializerOptions.Web, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The body is not a media file list.");
         Assert.Equal("One", Assert.Single(list).Title);
     }
 
