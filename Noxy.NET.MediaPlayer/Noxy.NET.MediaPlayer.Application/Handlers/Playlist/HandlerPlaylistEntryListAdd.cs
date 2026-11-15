@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Extensions;
+using Noxy.NET.MediaPlayer.Application.Handlers.Abstractions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
@@ -12,7 +13,7 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Playlist;
 
 public class HandlerPlaylistEntryListAdd(IUnitOfWorkFactory factoryUnitOfWork, IOptions<ConfigPlaylist> configPlaylist, IPublisher publisher, TimeProvider time)
-    : HandlerPlaylistChange<CommandPlaylistEntryListAdd, ResponsePlaylistDetail>(factoryUnitOfWork, publisher, time)
+    : BaseHandlerPlaylistChange<CommandPlaylistEntryListAdd, ResponsePlaylistDetail>(factoryUnitOfWork, publisher, time)
 {
     public override async ValueTask<ResponsePlaylistDetail> Handle(CommandPlaylistEntryListAdd command, CancellationToken cancellationToken)
     {

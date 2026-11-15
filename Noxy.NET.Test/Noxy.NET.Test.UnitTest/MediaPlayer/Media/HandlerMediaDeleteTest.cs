@@ -44,11 +44,6 @@ public class HandlerMediaDeleteTest
         return file;
     }
 
-    private EntityMediaFile Stored(EntityMediaFile file)
-    {
-        return _store.MediaFileList.Single(x => x.ID == file.ID);
-    }
-
     #region -- Delete --
 
     [Fact]

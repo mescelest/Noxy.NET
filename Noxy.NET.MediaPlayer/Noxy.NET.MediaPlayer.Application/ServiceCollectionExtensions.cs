@@ -5,6 +5,8 @@ using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Services;
+using Noxy.NET.MediaPlayer.Domain.Entities;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -52,10 +54,18 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IUploadGate, UploadGate>();
             services.AddSingleton<IUploadProcessor, UploadProcessor>();
             services.AddSingleton<IETagService, ETagService>();
+            services.AddSingleton<INameKeyService, NameKeyService>();
+            services.AddSingleton<ICreditSplittingService, CreditSplittingService>();
+            services.AddSingleton<IMediaTagReadingService, MediaTagReadingService>();
+            services.AddSingleton<IMetadataResolutionService, MetadataResolutionService>();
+            services.AddSingleton<IMetadataChangeService, MetadataChangeService>();
+            services.AddSingleton<INamedItemService<EntityArtist, ResponseArtist>, ArtistItemService>();
+            services.AddSingleton<INamedItemService<EntityGenre, ResponseGenre>, GenreItemService>();
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
             services.AddHostedService<CleanupService>();
             services.AddHostedService<UploadWorker>();
+            services.AddHostedService<MetadataBackfillService>();
         }
     }
 }

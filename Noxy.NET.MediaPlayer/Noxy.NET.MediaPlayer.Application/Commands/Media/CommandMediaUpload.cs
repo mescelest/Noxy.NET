@@ -1,4 +1,5 @@
 using Mediator;
+using Noxy.NET.MediaPlayer.Application.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Application.Commands.Media;
@@ -13,18 +14,7 @@ public record CommandMediaUpload(Guid UserID, string FileName, string? Title, St
     public string ResolveTitle()
     {
         string resolved = (string.IsNullOrWhiteSpace(Title) ? Path.GetFileNameWithoutExtension(FileName) : Title).Trim();
-        switch (resolved.Length)
-        {
-            case 0:
-                return DefaultTitle;
-            case <= MaxTitleLength:
-                return resolved;
-        }
 
-        resolved = resolved[..MaxTitleLength];
-
-        // Don't leave half of a surrogate pair (an emoji, say), and don't end on the space the cut exposed.
-        if (char.IsHighSurrogate(resolved[^1])) resolved = resolved[..^1];
-        return resolved.TrimEnd();
+        return resolved.Length == 0 ? DefaultTitle : resolved.CutAt(MaxTitleLength);
     }
 }

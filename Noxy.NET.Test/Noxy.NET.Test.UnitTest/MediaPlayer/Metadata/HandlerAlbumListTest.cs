@@ -1,4 +1,4 @@
-using Noxy.NET.MediaPlayer.Application.Handlers.Metadata;
+using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Album;
 using Noxy.NET.MediaPlayer.Application.Models.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;

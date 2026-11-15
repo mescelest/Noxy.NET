@@ -1,4 +1,5 @@
 using Noxy.NET.MediaPlayer.Application.Commands.Authentication;
+using Noxy.NET.MediaPlayer.Application.Handlers.Abstractions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Models.Authentication;
@@ -9,7 +10,7 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Authentication;
 
-public class HandlerAuthenticationSignInGoogle(IUnitOfWorkFactory factoryUnitOfWork, IGoogleTokenService serviceGoogleToken, ITokenService serviceToken) : HandlerAuthentication<CommandAuthenticationSignInGoogle>(factoryUnitOfWork, serviceToken)
+public class HandlerAuthenticationSignInGoogle(IUnitOfWorkFactory factoryUnitOfWork, IGoogleTokenService serviceGoogleToken, ITokenService serviceToken) : BaseHandlerAuthentication<CommandAuthenticationSignInGoogle>(factoryUnitOfWork, serviceToken)
 {
     public override async ValueTask<ResponseAuthentication> Handle(CommandAuthenticationSignInGoogle command, CancellationToken cancellationToken)
     {

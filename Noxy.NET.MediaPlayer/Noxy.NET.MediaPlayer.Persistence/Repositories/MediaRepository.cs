@@ -3,6 +3,7 @@ using Noxy.NET.MediaPlayer.Application.Interfaces.Repositories;
 using Noxy.NET.MediaPlayer.Application.Models.Media;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
+using Noxy.NET.MediaPlayer.Persistence.Extensions;
 using Noxy.NET.MediaPlayer.Persistence.Interfaces.Mappers;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Media;
 
@@ -18,7 +19,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
     public async Task<EntityMediaFile?> FindMediaFile(Guid id, Guid userID, CancellationToken cancellationToken = default)
     {
         TableMediaFile? table = await context.MediaFile.AsNoTracking()
-            .Include(x => x.Metadata)
+            .IncludeLinks()
             .FirstOrDefaultAsync(x => x.ID == id && x.UserID == userID, cancellationToken);
 
         return table is null ? null : mapperT2E.Map(table);
@@ -29,6 +30,26 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
         return await context.MediaFile.CountAsync(x => x.UserID == userID, cancellationToken);
     }
 
+    public async Task<List<Guid>> GetMediaFileIDListWithLegacyText(CancellationToken cancellationToken = default)
+    {
+        return await context.MediaFile.AsNoTracking()
+            .Where(x => x.Metadata != null && (x.Metadata.Artist != null || x.Metadata.Album != null || x.Metadata.AlbumArtist != null || x.Metadata.Genre != null))
+            .OrderBy(x => x.ID)
+            .Select(x => x.ID)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<EntityMediaFile>> GetMediaFileListByID(List<Guid> idList, CancellationToken cancellationToken = default)
+    {
+        List<TableMediaFile> list = await context.MediaFile.AsNoTracking()
+            .IncludeLinks()
+            .Where(x => idList.Contains(x.ID))
+            .OrderBy(x => x.ID)
+            .ToListAsync(cancellationToken);
+
+        return [.. list.Select(mapperT2E.Map)];
+    }
+
     public async Task<long> SumMediaFileBytes(Guid userID, CancellationToken cancellationToken = default)
     {
         return await context.MediaFile.Where(x => x.UserID == userID).SumAsync(x => x.SizeBytes, cancellationToken);
@@ -37,7 +58,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
     public async Task<List<EntityMediaFile>> GetMediaFileList(Guid userID, int skip, int take, CancellationToken cancellationToken = default)
     {
         List<TableMediaFile> list = await context.MediaFile.AsNoTracking()
-            .Include(x => x.Metadata)
+            .IncludeLinks()
             .Where(x => x.UserID == userID)
             .OrderByDescending(x => x.TimeCreated)
             .ThenByDescending(x => x.ID)
@@ -51,7 +72,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
     public async Task<List<EntityMediaFile>> GetMediaFileList(Guid userID, CancellationToken cancellationToken = default)
     {
         List<TableMediaFile> list = await context.MediaFile.AsNoTracking()
-            .Include(x => x.Metadata)
+            .IncludeLinks()
             .Where(x => x.UserID == userID)
             .OrderByDescending(x => x.TimeCreated)
             .ThenByDescending(x => x.ID)

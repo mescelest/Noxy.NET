@@ -42,7 +42,7 @@ public class HandlerMediaUploadTest
     }
 
     // A file that is already in the library, as the worker would have left it.
-    private EntityMediaFile Seed(Guid userID, string title, int length = 100, DateTime? timeCreated = null)
+    private void Seed(Guid userID, string title, int length = 100, DateTime? timeCreated = null)
     {
         byte[] bytes = Mp3(length);
         EntityMediaFile file = new()
@@ -58,7 +58,6 @@ public class HandlerMediaUploadTest
 
         _storage.Files[file.FilePath] = bytes;
         _store.MediaFileList.Add(file);
-        return file;
     }
 
     private void SeedPendingJob(Guid userID, long sizeBytes = 10)

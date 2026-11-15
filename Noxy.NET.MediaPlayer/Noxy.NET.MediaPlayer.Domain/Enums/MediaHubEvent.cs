@@ -7,5 +7,12 @@ public enum MediaHubEvent
     MediaUpdated,
     MediaDeleted,
     PlaylistUpdated,
-    PlaylistDeleted
+    PlaylistDeleted,
+    ArtistUpdated,
+    ArtistDeleted,
+    AlbumUpdated,
+    AlbumDeleted,
+    GenreUpdated,
+    GenreDeleted,
+    SettingUpdated
 }

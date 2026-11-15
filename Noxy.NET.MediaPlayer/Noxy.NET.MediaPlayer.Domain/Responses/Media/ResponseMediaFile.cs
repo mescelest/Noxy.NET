@@ -22,4 +22,9 @@ public class ResponseMediaFile : BaseResponse
     public int? DiscNumber { get; init; }
     public int? Year { get; init; }
     public TimeSpan? Duration { get; init; }
+
+    public List<Guid> ArtistIDList { get; init; } = [];
+    public Guid? AlbumID { get; init; }
+    public List<Guid> AlbumArtistIDList { get; init; } = [];
+    public List<Guid> GenreIDList { get; init; } = [];
 }

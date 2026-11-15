@@ -1,4 +1,5 @@
 using Noxy.NET.MediaPlayer.Application.Commands.Authentication;
+using Noxy.NET.MediaPlayer.Application.Handlers.Abstractions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
@@ -7,7 +8,7 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Authentication;
 
-public class HandlerAuthenticationSignUp(IUnitOfWorkFactory factoryUnitOfWork, IPasswordHashService servicePasswordHash, ITokenService serviceToken) : HandlerAuthentication<CommandAuthenticationSignUp>(factoryUnitOfWork, serviceToken)
+public class HandlerAuthenticationSignUp(IUnitOfWorkFactory factoryUnitOfWork, IPasswordHashService servicePasswordHash, ITokenService serviceToken) : BaseHandlerAuthentication<CommandAuthenticationSignUp>(factoryUnitOfWork, serviceToken)
 {
     public override async ValueTask<ResponseAuthentication> Handle(CommandAuthenticationSignUp command, CancellationToken cancellationToken)
     {

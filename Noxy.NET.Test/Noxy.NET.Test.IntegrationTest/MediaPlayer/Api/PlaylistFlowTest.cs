@@ -1,13 +1,12 @@
 using System.IO.Compression;
-using System.Net.Http.Json;
 using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
-using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
+using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
 

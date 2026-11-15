@@ -1,8 +1,10 @@
 using System.Net;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.API;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 
@@ -148,7 +150,7 @@ public class MetadataChangeFlowTest
         ResponseMediaFile file = await UploadMediaFile(api, user, "One");
         ResponseMediaFile linked = await Send<ResponseMediaFile>(api, user, HttpMethod.Patch, $"/Media/{file.ID}", """{"artist":"A"}""");
         ResponseArtist other = await Send<ResponseArtist>(api, user, HttpMethod.Post, "/Artist", """{"name":"B"}""", HttpStatusCode.Created);
-        await Send<ResponseSettings>(api, user, HttpMethod.Patch, "/Settings", """{"autoMergeOnRename":true}""");
+        await Send<ResponseSetting>(api, user, HttpMethod.Patch, $"/Settings/{SettingKey.MergeOnRename}", """{"value":true}""");
 
         ResponseArtist merged = await Send<ResponseArtist>(api, user, HttpMethod.Patch, $"/Artist/{linked.ArtistIDList[0]}", """{"name":"b"}""");
 
@@ -234,74 +236,4 @@ public class MetadataChangeFlowTest
     }
 
     #endregion -- Album --
-
-    #region -- Settings --
-
-    [Fact]
-    public async Task Settings_GetReturnsTheDefaults_ThePatchCreatesTheRow_AndTheETagFollows()
-    {
-        await using ApiFactory factory = new();
-        MediaApiClient api = new(factory);
-        ApiAccount user = await api.SignUp("a@example.com");
-
-        HttpResponseMessage first = await api.GetPath(user.Token, "/Settings");
-        string firstETag = first.GetETag();
-        ResponseSettings defaults = await first.ReadJson<ResponseSettings>();
-        ResponseSettings updated = await Send<ResponseSettings>(api, user, HttpMethod.Patch, "/Settings", """{"autoMergeOnRename":true}""");
-        HttpResponseMessage second = await api.GetPath(user.Token, "/Settings");
-
-        Assert.False(defaults.AutoMergeOnRename);
-        Assert.True(updated.AutoMergeOnRename);
-        Assert.True((await second.ReadJson<ResponseSettings>()).AutoMergeOnRename);
-        Assert.NotEqual(firstETag, second.GetETag());
-        Assert.Matches("^\"[0-9a-f]{64}\"$", second.GetETag());
-    }
-
-    [Fact]
-    public async Task Settings_AMatchingIfNoneMatch_Gets304()
-    {
-        await using ApiFactory factory = new();
-        MediaApiClient api = new(factory);
-        ApiAccount user = await api.SignUp("a@example.com");
-        string eTag = (await api.GetPath(user.Token, "/Settings")).GetETag();
-        using HttpRequestMessage conditional = new(HttpMethod.Get, "/Settings");
-        conditional.Headers.Authorization = new("Bearer", user.Token);
-        conditional.Headers.TryAddWithoutValidation("If-None-Match", eTag);
-
-        HttpResponseMessage response = await factory.CreateClient().SendAsync(conditional, TestContext.Current.CancellationToken);
-
-        Assert.Equal(HttpStatusCode.NotModified, response.StatusCode);
-        Assert.Empty(await response.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken));
-    }
-
-    [Fact]
-    public async Task Settings_AreOnlyTheUsersOwn_AndNeedAToken()
-    {
-        await using ApiFactory factory = new();
-        MediaApiClient api = new(factory);
-        ApiAccount user = await api.SignUp("a@example.com");
-        ApiAccount other = await api.SignUp("b@example.com");
-        await Send<ResponseSettings>(api, user, HttpMethod.Patch, "/Settings", """{"autoMergeOnRename":true}""");
-
-        ResponseSettings theirs = await Send<ResponseSettings>(api, other, HttpMethod.Get, "/Settings");
-
-        Assert.False(theirs.AutoMergeOnRename);
-        Assert.Equal(HttpStatusCode.Unauthorized, (await api.GetPath(null, "/Settings")).StatusCode);
-        Assert.Equal(HttpStatusCode.Unauthorized, (await api.SendJson(null, HttpMethod.Patch, "/Settings", """{"autoMergeOnRename":true}""")).StatusCode);
-    }
-
-    [Theory]
-    [InlineData("""{"autoMergeOnRename":"yes"}""")]
-    [InlineData("""{"autoMergeOnRename":null}""")]
-    [InlineData("[]")]
-    public async Task Settings_InvalidBodies_Return400(string json)
-    {
-        await using ApiFactory factory = new();
-        MediaApiClient api = new(factory);
-        ApiAccount user = await api.SignUp("a@example.com");
-
-        Assert.Equal(HttpStatusCode.BadRequest, (await api.SendJson(user.Token, HttpMethod.Patch, "/Settings", json)).StatusCode);
-    }
-
-    #endregion -- Settings --
 }

@@ -10,6 +10,9 @@ public class EntityMediaUploadJob : BaseEntity
     public required string StagedFileName { get; set; }
     public required string Title { get; set; }
 
+    // False when Title is only the file name the worker falls back to, so an embedded title may win.
+    public bool TitleWasSent { get; set; }
+
     public required string ContentType { get; set; }
     public required long SizeBytes { get; set; }
     public required string ContentHash { get; set; }

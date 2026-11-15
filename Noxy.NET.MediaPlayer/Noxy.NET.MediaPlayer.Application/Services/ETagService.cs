@@ -12,13 +12,12 @@ public class ETagService : IETagService
 
     public string Compute(IEnumerable<(Guid ID, DateTime TimeModified)> stampList)
     {
-        using IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        foreach ((Guid id, DateTime timeModified) in stampList.OrderBy(x => x.ID))
-        {
-            hash.AppendData(Encoding.UTF8.GetBytes($"{id:D}:{timeModified.Ticks}\n"));
-        }
+        return Hash(stampList.OrderBy(x => x.ID).Select(x => $"{x.ID:D}:{x.TimeModified.Ticks}\n"));
+    }
 
-        return $"{ETagQuote}{Convert.ToHexStringLower(hash.GetHashAndReset())}{ETagQuote}";
+    public string ComputeCounted(IEnumerable<(Guid ID, DateTime TimeModified, int Count)> stampList)
+    {
+        return Hash(stampList.OrderBy(x => x.ID).Select(x => $"{x.ID:D}:{x.TimeModified.Ticks}:{x.Count}\n"));
     }
 
     // The header holds a comma separated list of tags, any of which may be weak ("W/") or the wildcard.
@@ -33,5 +32,16 @@ public class ETagService : IETagService
         }
 
         return false;
+    }
+
+    private static string Hash(IEnumerable<string> lineList)
+    {
+        using IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        foreach (string line in lineList)
+        {
+            hash.AppendData(Encoding.UTF8.GetBytes(line));
+        }
+
+        return $"{ETagQuote}{Convert.ToHexStringLower(hash.GetHashAndReset())}{ETagQuote}";
     }
 }

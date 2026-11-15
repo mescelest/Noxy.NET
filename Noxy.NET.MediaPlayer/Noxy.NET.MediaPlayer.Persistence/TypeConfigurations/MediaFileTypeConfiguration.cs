@@ -19,5 +19,20 @@ public class MediaFileTypeConfiguration : IEntityTypeConfiguration<TableMediaFil
             .WithOne(e => e.MediaFile)
             .HasForeignKey<TableMediaFileMetadata>(x => x.MediaFileID)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(e => e.Album)
+            .WithMany()
+            .HasForeignKey(x => x.AlbumID)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasMany(e => e.ArtistLinkList)
+            .WithOne(e => e.MediaFile)
+            .HasForeignKey(x => x.MediaFileID)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(e => e.GenreLinkList)
+            .WithOne(e => e.MediaFile)
+            .HasForeignKey(x => x.MediaFileID)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -7,6 +7,8 @@ namespace Noxy.NET.MediaPlayer.API;
 
 public class ApiExceptionHandler(IProblemDetailsService serviceProblemDetails) : IExceptionHandler
 {
+    public const string ExistingIDKey = "existingID";
+
     private const string FileTooLargeTitle = "The file is too large.";
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
@@ -22,6 +24,12 @@ public class ApiExceptionHandler(IProblemDetailsService serviceProblemDetails) :
             LibraryFullException => new(StatusCodes.Status409Conflict, "The library limit has been reached."),
             MediaNotFoundException => new(StatusCodes.Status404NotFound, "The media file was not found."),
             PlaylistNotFoundException => new(StatusCodes.Status404NotFound, "The playlist was not found."),
+            MetadataItemNotFoundException => new(StatusCodes.Status404NotFound, "The item was not found."),
+            NameAlreadyInUseException => new(StatusCodes.Status409Conflict, "An item with that name already exists."),
+            MetadataKeyConflictException => new(StatusCodes.Status409Conflict, "An item with that name already exists."),
+            InvalidMetadataOperationException invalid => new(StatusCodes.Status400BadRequest, invalid.Message),
+            SettingNotFoundException => new(StatusCodes.Status404NotFound, "The setting was not found."),
+            InvalidSettingValueException invalidSetting => new(StatusCodes.Status400BadRequest, invalidSetting.Message),
             PlaylistEntryNotFoundException => new(StatusCodes.Status404NotFound, "The playlist entry was not found."),
             PlaylistLimitReachedException => new(StatusCodes.Status409Conflict, "The playlist limit has been reached."),
             PlaylistEntryLimitReachedException => new(StatusCodes.Status409Conflict, "The playlist is full."),
@@ -41,11 +49,20 @@ public class ApiExceptionHandler(IProblemDetailsService serviceProblemDetails) :
 
         httpContext.Response.StatusCode = mapped.Status;
 
+        // A name that is taken tells the client which item has it, so it can offer to merge.
         return await serviceProblemDetails.TryWriteAsync(new()
         {
             HttpContext = httpContext,
             Exception = exception,
-            ProblemDetails = new ProblemDetails { Status = mapped.Status, Title = mapped.Title }
+            ProblemDetails = CreateProblemDetails(mapped, exception)
         });
+    }
+
+    private static ProblemDetails CreateProblemDetails(ApiError mapped, Exception exception)
+    {
+        ProblemDetails details = new() { Status = mapped.Status, Title = mapped.Title };
+        if (exception is NameAlreadyInUseException nameInUse) details.Extensions[ExistingIDKey] = nameInUse.ExistingID;
+
+        return details;
     }
 }

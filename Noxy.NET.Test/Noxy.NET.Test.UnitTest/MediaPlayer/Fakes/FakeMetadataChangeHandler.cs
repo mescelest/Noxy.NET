@@ -1,12 +1,12 @@
 using Mediator;
-using Noxy.NET.MediaPlayer.Application.Handlers.Metadata;
+using Noxy.NET.MediaPlayer.Application.Handlers.Abstractions.Metadata;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-public sealed class FakeMetadataChangeHandler(IUnitOfWorkFactory factoryUnitOfWork, IPublisher publisher, TimeProvider time) : HandlerMetadataChange<FakeCommandMetadataChange, Unit>(factoryUnitOfWork, publisher, time)
+public sealed class FakeMetadataChangeHandler(IUnitOfWorkFactory factoryUnitOfWork, IPublisher publisher, TimeProvider time) : BaseHandlerMetadataChange<FakeCommandMetadataChange, Unit>(factoryUnitOfWork, publisher, time)
 {
     public override ValueTask<Unit> Handle(FakeCommandMetadataChange command, CancellationToken cancellationToken)
     {

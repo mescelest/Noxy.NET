@@ -2,9 +2,11 @@ using Mediator;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.Application.Configurations;
+using Noxy.NET.MediaPlayer.Application.Extensions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Models.Metadata;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
@@ -14,8 +16,20 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Application.Models.Upload;
 
-public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageService serviceFileStorage, IPublisher publisher, IOptions<ConfigStorage> configStorage, ILogger<UploadProcessor> logger) : IUploadProcessor
+public class UploadProcessor(
+    IUnitOfWorkFactory factoryUnitOfWork,
+    IFileStorageService serviceFileStorage,
+    IMediaTagReadingService serviceMediaTagReading,
+    IMetadataResolutionService serviceMetadataResolution,
+    IPublisher publisher,
+    IOptions<ConfigStorage> configStorage,
+    ILogger<UploadProcessor> logger) : IUploadProcessor
 {
+    private const int MaxTitleLength = 255;
+    private const int MaxSubtitleLength = 256;
+    private const int MaxCommentLength = 2048;
+    private const int MaxTagNumber = 9999;
+
     public async Task<bool> ProcessNext(CancellationToken cancellationToken = default)
     {
         EntityMediaUploadJob job;
@@ -68,39 +82,99 @@ public class UploadProcessor(IUnitOfWorkFactory factoryUnitOfWork, IFileStorageS
         logger.LogInformation("Upload recovery: {Reset} interrupted jobs queued again, {Orphans} orphaned staged files deleted", reset, orphans);
     }
 
+
     private async Task<ResponseUploadResult> Complete(EntityMediaUploadJob job, CancellationToken cancellationToken)
     {
         await EnsureRoomInLibrary(job, cancellationToken);
 
         serviceFileStorage.Promote(job.StagedFileName);
 
-        EntityMediaFile file = new()
-        {
-            FilePath = job.StagedFileName,
-            ContentType = job.ContentType,
-            SizeBytes = job.SizeBytes,
-            ContentHash = job.ContentHash,
-            UserID = job.UserID
-        };
-        file.Metadata = new()
-        {
-            Title = job.Title,
-            MediaFileID = file.ID
-        };
+        MediaTagSet tags = ReadTags(job, cancellationToken);
 
-        // One commit, so a crash can't leave a library entry without its job being consumed, or the other way round.
-        await using IUnitOfWork uow = factoryUnitOfWork.Create();
-        uow.Media.AddMediaFile(file);
-        uow.Media.RemoveMediaUploadJob(job);
-        await uow.Commit(cancellationToken);
-
-        return new()
+        // One commit, so a crash can't leave a library entry without its job being consumed, or the other way round. Another upload may create the same artist first, and then the whole thing runs again and reuses it.
+        return await factoryUnitOfWork.RunWithKeyConflictRetry(async uow =>
         {
-            JobID = job.ID,
-            Title = job.Title,
-            Succeeded = true,
-            Media = file.ToResponse()
-        };
+            ResolvedMetadata resolved = await serviceMetadataResolution.Resolve(uow, job.UserID, tags, cancellationToken);
+
+            EntityMediaFile file = new()
+            {
+                FilePath = job.StagedFileName,
+                ContentType = job.ContentType,
+                SizeBytes = job.SizeBytes,
+                ContentHash = job.ContentHash,
+                UserID = job.UserID,
+                AlbumID = resolved.Album?.ID,
+                Album = resolved.Album
+            };
+            file.Metadata = new()
+            {
+                Title = ChooseTitle(job, tags),
+                Subtitle = Cut(tags.Subtitle, MaxSubtitleLength),
+                Comment = Cut(tags.Comment, MaxCommentLength),
+                TrackNumber = ToNumber(tags.TrackNumber),
+                DiscNumber = ToNumber(tags.DiscNumber),
+                Year = ToNumber(tags.Year),
+                Duration = tags.Duration,
+                MediaFileID = file.ID
+            };
+            file.ArtistLinkList = [.. resolved.ArtistList.Select((x, index) => new EntityMediaFileArtist { MediaFileID = file.ID, ArtistID = x.ID, Position = index, Artist = x })];
+            file.GenreLinkList = [.. resolved.GenreList.Select((x, index) => new EntityMediaFileGenre { MediaFileID = file.ID, GenreID = x.ID, Position = index, Genre = x })];
+
+            uow.Media.AddMediaFile(file);
+            foreach (EntityMediaFileArtist link in file.ArtistLinkList) uow.Metadata.AddMediaFileArtist(link);
+            foreach (EntityMediaFileGenre link in file.GenreLinkList) uow.Metadata.AddMediaFileGenre(link);
+            uow.Media.RemoveMediaUploadJob(job);
+            await uow.Commit(cancellationToken);
+
+            return new ResponseUploadResult
+            {
+                JobID = job.ID,
+                Title = job.Title,
+                Succeeded = true,
+                Media = file.ToResponse()
+            };
+        }, cancellationToken);
+    }
+
+    // The tags are best effort: a file whose tags cannot be read is still a library entry, titled from its file name.
+    private MediaTagSet ReadTags(EntityMediaUploadJob job, CancellationToken cancellationToken)
+    {
+        string path = serviceFileStorage.CopyToTemporary(job.StagedFileName);
+        try
+        {
+            return serviceMediaTagReading.Read(path);
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning(ex, "Could not read the tags of upload job {JobID}; using the file name", job.ID);
+            return MediaTagSet.Empty;
+        }
+        finally
+        {
+            serviceFileStorage.DeleteTemporary(path);
+        }
+    }
+
+    // The title the user sent wins, then the embedded title, then the file name.
+    private static string ChooseTitle(EntityMediaUploadJob job, MediaTagSet tags)
+    {
+        if (job.TitleWasSent) return job.Title;
+
+        return Cut(tags.Title, MaxTitleLength) ?? job.Title;
+    }
+
+    // Trimmed and cut to the column length, or null when nothing is left.
+    private static string? Cut(string? value, int maxLength)
+    {
+        string trimmed = value?.Trim() ?? string.Empty;
+
+        return trimmed.Length == 0 ? null : trimmed.CutAt(maxLength);
+    }
+
+    // The tag formats use zero for "not set", and a value outside the range an edit accepts is not a real one.
+    private static int? ToNumber(int? value)
+    {
+        return value is > 0 and <= MaxTagNumber ? value : null;
     }
 
     private async Task EnsureRoomInLibrary(EntityMediaUploadJob job, CancellationToken cancellationToken)

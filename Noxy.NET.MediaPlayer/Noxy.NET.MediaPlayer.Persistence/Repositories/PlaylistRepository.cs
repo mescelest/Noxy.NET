@@ -26,6 +26,10 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
     {
         TablePlaylist? table = await context.Playlist.AsNoTracking()
             .Include(x => x.EntryList.OrderBy(e => e.Position)).ThenInclude(e => e.MediaFile!.Metadata)
+            .Include(x => x.EntryList.OrderBy(e => e.Position)).ThenInclude(e => e.MediaFile!).ThenInclude(f => f.ArtistLinkList.OrderBy(l => l.Position)).ThenInclude(l => l.Artist)
+            .Include(x => x.EntryList.OrderBy(e => e.Position)).ThenInclude(e => e.MediaFile!).ThenInclude(f => f.GenreLinkList.OrderBy(l => l.Position)).ThenInclude(l => l.Genre)
+            .Include(x => x.EntryList.OrderBy(e => e.Position)).ThenInclude(e => e.MediaFile!).ThenInclude(f => f.Album).ThenInclude(a => a!.ArtistLinkList.OrderBy(l => l.Position)).ThenInclude(l => l.Artist)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.ID == id && x.UserID == userID, cancellationToken);
 
         return table is null ? null : mapperT2E.Map(table);

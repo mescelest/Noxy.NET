@@ -1,9 +1,14 @@
 using Microsoft.Extensions.Logging;
-using Noxy.NET.MediaPlayer.API.Handlers;
+using Noxy.NET.MediaPlayer.API.Handlers.Media;
+using Noxy.NET.MediaPlayer.API.Handlers.Metadata;
+using Noxy.NET.MediaPlayer.API.Handlers.Playlist;
+using Noxy.NET.MediaPlayer.API.Handlers.Setting;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Handlers;
@@ -156,6 +161,16 @@ public class HandlerNotificationTest
             [(nameof(MediaHubEvent.ArtistDeleted), artistID), (nameof(MediaHubEvent.GenreDeleted), genreID), (nameof(MediaHubEvent.AlbumDeleted), albumID)],
             _hub.SendList.Select(x => (x.Method, (Guid)Assert.Single(x.ArgumentList)!)).ToList());
         Assert.All(_hub.SendList, x => Assert.Equal(UserID.ToString(), x.UserID));
+    }
+
+    [Fact]
+    public async Task SettingUpdated_PushesTheEventWithThePayloadToThatUserOnly()
+    {
+        ResponseSetting setting = new() { Key = SettingKey.Volume, ValueType = SettingValueType.Integer, Value = 40, TimeModified = DateTime.UtcNow };
+
+        await new HandlerNotificationSettingUpdated(_hub, new FakeLogger<HandlerNotificationSettingUpdated>()).Handle(new(UserID, setting), Token);
+
+        AssertPushed(nameof(MediaHubEvent.SettingUpdated), setting);
     }
 
     [Fact]

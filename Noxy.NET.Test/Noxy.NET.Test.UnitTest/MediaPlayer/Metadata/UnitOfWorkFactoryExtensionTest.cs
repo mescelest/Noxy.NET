@@ -72,7 +72,7 @@ public class UnitOfWorkFactoryExtensionTest
     [Fact]
     public async Task RunWithKeyConflictRetry_ACancellation_StopsTheRetries()
     {
-        using CancellationTokenSource source = new();
+        CancellationTokenSource source = new();
         int runs = 0;
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => new FakeUnitOfWorkFactory(_store).RunWithKeyConflictRetry<int>(_ =>

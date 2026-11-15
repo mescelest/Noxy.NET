@@ -10,17 +10,19 @@ public sealed class FakeUnitOfWork(FakeStore store) : IUnitOfWork
     private readonly FakeMediaRepository _media = new(store);
     private readonly FakePlaylistRepository _playlist = new(store);
     private readonly FakeMetadataRepository _metadata = new(store);
-    private readonly FakeSettingsRepository _settings = new(store);
+    private readonly FakeSettingRepository _setting = new(store);
 
     public IAuthenticationRepository Authentication => _repository;
     public IMediaRepository Media => _media;
     public IPlaylistRepository Playlist => _playlist;
     public IMetadataRepository Metadata => _metadata;
-    public ISettingsRepository Settings => _settings;
+    public ISettingRepository Setting => _setting;
 
     public Task Commit(CancellationToken cancellationToken = default)
     {
         if (store.FailCommit) throw new InvalidOperationException("The commit failed.");
+
+        store.OnCommit?.Invoke();
 
         if (store.KeyConflictCommitCount > 0)
         {
@@ -38,7 +40,7 @@ public sealed class FakeUnitOfWork(FakeStore store) : IUnitOfWork
         _media.Flush();
         _playlist.Flush();
         _metadata.Flush();
-        _settings.Flush();
+        _setting.Flush();
         store.CommitCount++;
         return Task.CompletedTask;
     }

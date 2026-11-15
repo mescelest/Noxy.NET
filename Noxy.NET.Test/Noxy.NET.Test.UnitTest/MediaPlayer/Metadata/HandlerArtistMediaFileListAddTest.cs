@@ -1,5 +1,5 @@
 using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
-using Noxy.NET.MediaPlayer.Application.Handlers.Metadata;
+using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Artist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;

@@ -57,8 +57,8 @@ public static class MediaFileFixture
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
         writer.Write("fLaC"u8);
-        writer.Write([(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x22]);
-        writer.Write([(byte)0x10, (byte)0x00, (byte)0x10, (byte)0x00]);
+        writer.Write([0x80, 0x00, 0x00, 0x22]);
+        writer.Write([0x10, 0x00, 0x10, 0x00]);
         writer.Write(new byte[6]);
 
         ulong packed = (sampleRate << 44) | (1UL << 41) | (15UL << 36) | totalSamples;

@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Persistence.Abstractions.Tables;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Metadata;
 
 namespace Noxy.NET.MediaPlayer.Persistence.Tables.Media;
 
@@ -36,4 +37,12 @@ public class TableMediaFile : BaseTable
     public TableUser? User { get; set; }
 
     public TableMediaFileMetadata? Metadata { get; set; }
+
+    public Guid? AlbumID { get; set; }
+
+    [ForeignKey(nameof(AlbumID))]
+    public TableAlbum? Album { get; set; }
+
+    public List<TableMediaFileArtist> ArtistLinkList { get; set; } = [];
+    public List<TableMediaFileGenre> GenreLinkList { get; set; } = [];
 }

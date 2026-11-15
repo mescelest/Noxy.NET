@@ -110,3 +110,7 @@ The exact command and query members, the names of the mapping methods, the notif
 ## Metadata use cases (added with `2026-11-15-metadata-entities-design.md`)
 
 The artist, genre and album use cases follow the same shape. Artist and genre share generic command records and generic abstract handlers (`HandlerNamedItem…`, over `INamedItemService<TItem, TResponse>`) with thin concrete classes per kind, as `HandlerPlaylistChange` does for playlists. All change handlers derive from `HandlerMetadataChange`, which owns "touch the files whose response changed in the same commit" and "publish after the commit". The album side of an artist change lives in `MetadataChangeService`.
+
+## Settings use cases (added with `2026-11-15-user-settings-design.md`)
+
+The settings area has one query (`QuerySettingList`), one command (`CommandSettingUpdate`), their two handlers and one notification. Declarations in `Domain` own the validation, parsing and entity creation of each setting, so no service is injected; code reads a setting through the typed `IUnitOfWork` extensions `GetBoolean`, `GetInteger` and `GetEnum`.

@@ -27,6 +27,9 @@ public class TableMediaUploadJob : BaseTable
     public required string Title { get; set; }
 
     [Required]
+    public bool TitleWasSent { get; set; }
+
+    [Required]
     [MaxLength(127)]
     public required string ContentType { get; set; }
 

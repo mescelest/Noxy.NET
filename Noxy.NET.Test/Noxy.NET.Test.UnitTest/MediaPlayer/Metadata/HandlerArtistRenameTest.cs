@@ -1,9 +1,10 @@
 using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Media;
-using Noxy.NET.MediaPlayer.Application.Handlers.Metadata;
+using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Artist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -55,7 +56,7 @@ public class HandlerArtistRenameTest
 
     private void SetAutoMerge(bool value)
     {
-        _store.UserSettingsList.Add(new() { UserID = UserID, AutoMergeOnRename = value });
+        _store.UserSettingList.Add(new EntityUserSettingBoolean { UserID = UserID, Key = SettingKey.MergeOnRename, Value = value });
     }
 
     private EntityMediaFile Stored(EntityMediaFile file)

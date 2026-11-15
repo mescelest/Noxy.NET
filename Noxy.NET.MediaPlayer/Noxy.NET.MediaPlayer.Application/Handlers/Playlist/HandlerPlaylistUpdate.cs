@@ -1,6 +1,7 @@
 using Mediator;
 using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
 using Noxy.NET.MediaPlayer.Application.Extensions;
+using Noxy.NET.MediaPlayer.Application.Handlers.Abstractions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
@@ -9,7 +10,7 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Playlist;
 
-public class HandlerPlaylistUpdate(IUnitOfWorkFactory factoryUnitOfWork, IPublisher publisher, TimeProvider time) : HandlerPlaylistChange<CommandPlaylistUpdate, ResponsePlaylist>(factoryUnitOfWork, publisher, time)
+public class HandlerPlaylistUpdate(IUnitOfWorkFactory factoryUnitOfWork, IPublisher publisher, TimeProvider time) : BaseHandlerPlaylistChange<CommandPlaylistUpdate, ResponsePlaylist>(factoryUnitOfWork, publisher, time)
 {
     public override async ValueTask<ResponsePlaylist> Handle(CommandPlaylistUpdate command, CancellationToken cancellationToken)
     {

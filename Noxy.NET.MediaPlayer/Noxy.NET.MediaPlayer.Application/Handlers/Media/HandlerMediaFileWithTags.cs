@@ -22,7 +22,7 @@ public class HandlerMediaFileWithTags(IUnitOfWorkFactory factoryUnitOfWork, IFil
         string path = CopyToTemporary(mediaFile);
         try
         {
-            if (mediaFile.Metadata is null || TryWriteTags(path, mediaFile.Metadata))
+            if (mediaFile.Metadata is null || TryWriteTags(path, mediaFile))
             {
                 return new(serviceFileStorage.OpenTemporary(path), mediaFile.ContentType, mediaFile.GetDownloadFileName(), mediaFile.ContentHash);
             }
@@ -53,16 +53,16 @@ public class HandlerMediaFileWithTags(IUnitOfWorkFactory factoryUnitOfWork, IFil
     }
 
     // A file the tagger cannot read is still a media file the user is entitled to, so the failure is logged and the untagged copy is served.
-    private bool TryWriteTags(string path, EntityMediaFileMetadata metadata)
+    private bool TryWriteTags(string path, EntityMediaFile mediaFile)
     {
         try
         {
-            serviceMediaTagWriting.Write(path, metadata);
+            serviceMediaTagWriting.Write(path, mediaFile);
             return true;
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Could not write the tags of media file {MediaFileID}; serving it untagged", metadata.MediaFileID);
+            logger.LogWarning(ex, "Could not write the tags of media file {MediaFileID}; serving it untagged", mediaFile.ID);
             return false;
         }
     }

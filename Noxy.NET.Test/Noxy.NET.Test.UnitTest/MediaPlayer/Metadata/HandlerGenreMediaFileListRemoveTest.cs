@@ -1,5 +1,5 @@
 using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
-using Noxy.NET.MediaPlayer.Application.Handlers.Metadata;
+using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Genre;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;

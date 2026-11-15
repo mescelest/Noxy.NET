@@ -2,7 +2,9 @@ using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Persistence.Interfaces.Mappers;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Media;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Metadata;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Playlist;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Setting;
 
 namespace Noxy.NET.MediaPlayer.Persistence.Mappers;
 
@@ -64,6 +66,7 @@ public class EntityToTableMapper : IEntityToTableMapper
             ContentHash = entity.ContentHash,
             TimeModified = entity.TimeModified,
             UserID = entity.UserID,
+            AlbumID = entity.AlbumID,
             Metadata = entity.Metadata is null ? null : Map(entity.Metadata)
         };
     }
@@ -98,6 +101,7 @@ public class EntityToTableMapper : IEntityToTableMapper
             UserID = entity.UserID,
             StagedFileName = entity.StagedFileName,
             Title = entity.Title,
+            TitleWasSent = entity.TitleWasSent,
             ContentType = entity.ContentType,
             SizeBytes = entity.SizeBytes,
             ContentHash = entity.ContentHash,
@@ -136,4 +140,96 @@ public class EntityToTableMapper : IEntityToTableMapper
     }
 
     #endregion -- Playlist --
+
+    #region -- Metadata --
+
+    public TableArtist Map(EntityArtist entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            TimeCreated = entity.TimeCreated,
+            UserID = entity.UserID,
+            Name = entity.Name,
+            NameKey = entity.NameKey,
+            TimeModified = entity.TimeModified
+        };
+    }
+
+    public TableGenre Map(EntityGenre entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            TimeCreated = entity.TimeCreated,
+            UserID = entity.UserID,
+            Name = entity.Name,
+            NameKey = entity.NameKey,
+            TimeModified = entity.TimeModified
+        };
+    }
+
+    public TableAlbum Map(EntityAlbum entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            TimeCreated = entity.TimeCreated,
+            UserID = entity.UserID,
+            Title = entity.Title,
+            TitleKey = entity.TitleKey,
+            IdentityKey = entity.IdentityKey,
+            TimeModified = entity.TimeModified,
+            ArtistLinkList = [.. entity.ArtistLinkList.Select(Map)]
+        };
+    }
+
+    public TableAlbumArtist Map(EntityAlbumArtist entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            TimeCreated = entity.TimeCreated,
+            AlbumID = entity.AlbumID,
+            ArtistID = entity.ArtistID,
+            Position = entity.Position
+        };
+    }
+
+    public TableMediaFileArtist Map(EntityMediaFileArtist entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            TimeCreated = entity.TimeCreated,
+            MediaFileID = entity.MediaFileID,
+            ArtistID = entity.ArtistID,
+            Position = entity.Position
+        };
+    }
+
+    public TableMediaFileGenre Map(EntityMediaFileGenre entity)
+    {
+        return new()
+        {
+            ID = entity.ID,
+            TimeCreated = entity.TimeCreated,
+            MediaFileID = entity.MediaFileID,
+            GenreID = entity.GenreID,
+            Position = entity.Position
+        };
+    }
+
+    public TableUserSetting Map(EntityUserSetting entity)
+    {
+        return entity switch
+        {
+            EntityUserSettingBoolean boolean => new TableUserSettingBoolean { ID = boolean.ID, TimeCreated = boolean.TimeCreated, UserID = boolean.UserID, Key = boolean.Key, TimeModified = boolean.TimeModified, Value = boolean.Value },
+            EntityUserSettingInteger integer => new TableUserSettingInteger { ID = integer.ID, TimeCreated = integer.TimeCreated, UserID = integer.UserID, Key = integer.Key, TimeModified = integer.TimeModified, Value = integer.Value },
+            EntityUserSettingEnum member => new TableUserSettingEnum { ID = member.ID, TimeCreated = member.TimeCreated, UserID = member.UserID, Key = member.Key, TimeModified = member.TimeModified, Value = member.Value },
+            _ => throw new NotSupportedException($"There is no table for {entity.GetType().Name}.")
+        };
+    }
+
+    #endregion -- Metadata --
 }

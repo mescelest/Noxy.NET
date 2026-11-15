@@ -1,8 +1,10 @@
 using System.Net;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.API;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 
@@ -120,14 +122,15 @@ public class MetadataFlowTest
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 
         HttpResponseMessage conflict = await api.SendJson(user.Token, HttpMethod.Patch, $"/Artist/{guest.ID}", """{"name":"main"}""");
-        await Send<ResponseSettings>(api, user, HttpMethod.Patch, "/Settings", """{"autoMergeOnRename":true}""");
-        ResponseSettings pushedSettings = await hub.NextSettingsUpdated();
+        await Send<ResponseSetting>(api, user, HttpMethod.Patch, $"/Settings/{SettingKey.MergeOnRename}", """{"value":true}""");
+        ResponseSetting pushedSetting = await hub.NextSettingUpdated();
         ResponseArtist merged = await Send<ResponseArtist>(api, user, HttpMethod.Patch, $"/Artist/{guest.ID}", """{"name":"main"}""");
         Guid deleted = await hub.NextArtistDeleted();
 
         Assert.Equal(HttpStatusCode.Conflict, conflict.StatusCode);
         Assert.Equal(main.ID, (await conflict.ReadJson<JsonElement>()).GetProperty(ApiExceptionHandler.ExistingIDKey).GetGuid());
-        Assert.True(pushedSettings.AutoMergeOnRename);
+        Assert.Equal(SettingKey.MergeOnRename, pushedSetting.Key);
+        Assert.True(JsonSerializer.SerializeToElement(pushedSetting.Value).GetBoolean());
         Assert.Equal(main.ID, merged.ID);
         Assert.Equal("Main", merged.Name);
         Assert.Equal(guest.ID, deleted);

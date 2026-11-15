@@ -1,6 +1,6 @@
 # Metadata entities: artists, albums and genres, filled in on upload
 
-Status: implemented (backend only), checked against the code on 2026-11-15; see the plan `docs/superpowers/plans/2026-11-15-metadata-entities.md` for the build and the rulings it records. It takes the data layer out of `2026-11-15-library-organizer-design.md` (which stays the description of the later panel and drag-and-drop UI). Where the build differs from the draft the text says so. Lines marked *(my call)* are decisions made without asking.
+Status: implemented (backend only), checked against the code on 2026-11-15. The build was done from an implementation plan that has since been deleted; the calls made during it are in the "How it ended up" section below. It takes the data layer out of `2026-11-15-library-organizer-design.md` (which stays the description of the later panel and drag-and-drop UI). Where the build differs from the draft the text says so. Lines marked *(my call)* are decisions made without asking.
 
 ## Intent
 
@@ -71,20 +71,15 @@ A media file's artist, album, album artist and genre are free text today, and an
 ### Endpoints (each kind follows the playlist pattern)
 
 - `GET /Artist`, `/Album`, `/Genre`: the user's items with their file counts; strong ETag; `304`.
-- `POST` to create, `PATCH /{id}` to rename (and for an album, to set its artists), `DELETE /{id}` (clears that link from its files; files are never deleted). A rename that collides with another item depends on the user's `autoMergeOnRename` setting (see "User settings"): off (the default), it is a `409` that names the other item so a client can offer a merge; on, the renamed item is merged into the existing one and the existing one keeps its name. The user chose this.
+- `POST` to create, `PATCH /{id}` to rename (and for an album, to set its artists), `DELETE /{id}` (clears that link from its files; files are never deleted). A rename that collides with another item depends on the user setting `MergeOnRename` (see "User settings"): off (the default), it is a `409` that names the other item so a client can offer a merge; on, the renamed item is merged into the existing one and the existing one keeps its name. The user chose this.
 - `POST /{kind}/{id}/MediaFileList` and `.../Remove`: assign or clear the item on a list of files. For an album, assigning replaces the file's album.
 - `POST /{kind}/{id}/Merge` (into another item) and, for artists and genres, `POST /{kind}/{id}/Split` with the names to split into (existing items are reused, new ones created).
 - `ResponseMediaFile` gains `artistIDList`, `albumID`, `albumArtistIDList`, `genreIDList` next to the existing text fields. `PATCH /Media/{id}` accepts the same ID fields.
 - Hub: one pair of events per kind, an updated one with the item and a deleted one with the ID; files changed by an assignment, rename, merge, split or delete are pushed with the existing `MediaUpdated`.
 
-### User settings (a placeholder with one setting)
+### User settings
 
-The user expects more settings over time but has not thought them through, so this adds only the minimum and keeps it extensible:
-
-- A per-user settings record (`EntityUserSettings`, one per user) holding typed values. The first is `autoMergeOnRename`, a boolean, default `false`. `GET /Settings` returns the defaults when the user has no row, and the row is created by the first `PATCH` that changes a setting (this replaces "created on first read"): a `PATCH` that leaves the settings as they are, including one that sends the default to a user with no row, saves and pushes nothing.
-- `GET /Settings` (strong ETag, `304`) and `PATCH /Settings` with the usual left-out-field-is-untouched semantics; a push `SettingsUpdated` so every device sees a change. Another user's settings are never reachable: the user comes from the token.
-- A new setting later is a new field, a new line in the PATCH request and a new test; no new endpoint.
-- The frontend gives it a place on the Settings page; the rest of that page is separate.
+Replaced by `2026-11-15-user-settings-design.md`: typed settings, one value per setting, declared in code. Merge on rename is its `MergeOnRename` setting (a boolean, default `false`); the rename handlers read it from there.
 
 ### Migration
 
@@ -100,11 +95,11 @@ Table and class shapes, the exact normalisation (including which Unicode form), 
 
 ## Questions that could still change the design
 
-None open. Decided by the user: a rename that collides is controlled by the synced `autoMergeOnRename` setting (default off); deleting an artist, album or genre clears the link from its files and keeps the files; labels are left for later; credits are split only where it is unambiguous.
+None open. Decided by the user: a rename that collides is controlled by the synced `MergeOnRename` setting (default off); deleting an artist, album or genre clears the link from its files and keeps the files; labels are left for later; credits are split only where it is unambiguous.
 
 ## How it ended up
 
-Calls made while building, beyond the design above (the plan's ledger lists them with their cost if wrong):
+Calls made while building, beyond the design above :
 
 - **ETag of the item lists** covers each item's file count as well as its ID and modified time, because an upload or a delete changes a count without touching any item row.
 - **A unique-key conflict is detected at commit** (`MetadataKeyConflictException`), and the whole use case runs again in a fresh unit of work, which finds the winner's item. Find-by-key also sees an item added earlier in the same unit of work, so one batch never adds the same item twice.

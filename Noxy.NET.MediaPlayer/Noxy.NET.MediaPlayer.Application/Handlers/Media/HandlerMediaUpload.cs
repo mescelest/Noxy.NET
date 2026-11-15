@@ -41,6 +41,7 @@ public class HandlerMediaUpload(
             UserID = command.UserID,
             StagedFileName = staged.FileName,
             Title = command.ResolveTitle(),
+            TitleWasSent = !string.IsNullOrWhiteSpace(command.Title),
             ContentType = file.ContentType,
             SizeBytes = staged.SizeBytes,
             ContentHash = staged.ContentHash

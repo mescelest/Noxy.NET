@@ -14,12 +14,13 @@ public sealed class FakeStore
     public List<EntityArtist> ArtistList { get; } = [];
     public List<EntityGenre> GenreList { get; } = [];
     public List<EntityAlbum> AlbumList { get; } = [];
-    public List<EntityUserSettings> UserSettingsList { get; } = [];
+    public List<EntityUserSetting> UserSettingList { get; } = [];
 
     public int CommitCount { get; set; }
     public bool FailCommit { get; set; }
     public int FailCommitCount { get; set; }
     public int KeyConflictCommitCount { get; set; }
+    public Action? OnCommit { get; set; }
     public bool LoseJobClaim { get; set; }
     public int RevokeAllCount { get; set; }
     public bool LoseRevokeRace { get; set; }

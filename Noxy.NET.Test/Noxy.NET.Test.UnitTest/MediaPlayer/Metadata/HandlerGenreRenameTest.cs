@@ -1,8 +1,9 @@
 using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
-using Noxy.NET.MediaPlayer.Application.Handlers.Metadata;
+using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Genre;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -91,7 +92,7 @@ public class HandlerGenreRenameTest
     [Fact]
     public async Task Rename_ToTheNameOfAnotherGenre_MergesWhenAutoMergeIsOn()
     {
-        _store.UserSettingsList.Add(new() { UserID = UserID, AutoMergeOnRename = true });
+        _store.UserSettingList.Add(new EntityUserSettingBoolean { UserID = UserID, Key = SettingKey.MergeOnRename, Value = true });
         EntityGenre genre = SeedGenre("A");
         EntityGenre other = SeedGenre("B");
         EntityMediaFile file = SeedFile("One", genre);

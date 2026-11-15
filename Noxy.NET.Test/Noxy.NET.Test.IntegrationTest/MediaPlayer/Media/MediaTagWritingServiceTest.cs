@@ -128,7 +128,7 @@ public class MediaTagWritingServiceTest : IDisposable
     [Fact]
     public void Write_AFileWithoutLinksOrLegacyText_ClearsTheKinds()
     {
-        string path = WriteFile(MediaFileFixture.CreateWav(), "media.wav");
+        string path = WriteFile(MediaFileFixture.CreateWav());
         _writer.Write(path, Full());
 
         _writer.Write(path, TitleOnly());
