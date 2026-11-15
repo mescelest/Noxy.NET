@@ -39,7 +39,7 @@ The app is a sync-and-play music player. This design is the part the user sees: 
 
 ## Constraints
 
-- Blazor WebAssembly. The screens are built on the shared `Noxy.NET.UI` libraries (the left-sidebar layout, table, button, dialog, collapsible, icons, the theme toggle, WebForm and the input groups) with Fluxor holding state that reflects the services in `Presentation` (see the foundation and downloads plans). New components (the glass panel, player bar, header) are added in `Presentation` or the UI libraries as fits.
+- MAUI Blazor Hybrid (Windows and Android), see `2026-11-15-frontend-maui-design.md`. The screens are built on the shared `Noxy.NET.UI` libraries (the left-sidebar layout, table, button, dialog, collapsible, icons, the theme toggle, WebForm and the input groups) with Fluxor holding state that reflects the services in `Presentation` (see the foundation and downloads plans). New components (the glass panel, player bar, header) are added in `Presentation` or the UI libraries as fits.
 - The library has at most 5000 files, all held locally, so sort, search and selection are done on the device with no server call per interaction.
 - The sidebar's playlist list and the home page read only from the local store, so they work offline.
 - Repository conventions apply (one class per file, interfaces in `Interfaces`, no helper classes, and so on).

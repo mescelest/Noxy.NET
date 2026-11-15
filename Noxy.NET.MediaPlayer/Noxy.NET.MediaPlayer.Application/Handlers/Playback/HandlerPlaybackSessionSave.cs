@@ -14,6 +14,8 @@ namespace Noxy.NET.MediaPlayer.Application.Handlers.Playback;
 
 public class HandlerPlaybackSessionSave(IUnitOfWorkFactory factoryUnitOfWork, IOptions<ConfigPlayback> configPlayback, IPublisher publisher, TimeProvider time) : ICommandHandler<CommandPlaybackSessionSave, ResponsePlaybackSession>
 {
+    public const double PositionToleranceSeconds = 0.5;
+
     // The last save wins: a save replaces the whole session. A save that leaves the session as it is neither commits nor publishes. Throws InvalidPlaybackSessionException for a queue that is too long, an index outside the queue or a position that is negative or not a number, MediaNotFoundException for a media file the user does not own and PlaylistNotFoundException for a playlist the user does not own.
     public async ValueTask<ResponsePlaybackSession> Handle(CommandPlaybackSessionSave command, CancellationToken cancellationToken)
     {
@@ -67,7 +69,13 @@ public class HandlerPlaybackSessionSave(IUnitOfWorkFactory factoryUnitOfWork, IO
 
     private static bool IsSame(EntityPlaybackSession session, CommandPlaybackSessionSave command)
     {
-        return session.QueueMediaFileIDList.SequenceEqual(command.QueueMediaFileIDList) && session.CurrentIndex == command.CurrentIndex && session.PositionSeconds == command.PositionSeconds && session.PlaylistID == command.PlaylistID;
+        return session.QueueMediaFileIDList.SequenceEqual(command.QueueMediaFileIDList) && session.CurrentIndex == command.CurrentIndex && IsSamePosition(session.PositionSeconds, command.PositionSeconds) && session.PlaylistID == command.PlaylistID;
+    }
+
+    // A position is a floating point number from a player, so two saves of the same moment differ by a fraction. A move smaller than the tolerance is not worth saving or pushing.
+    private static bool IsSamePosition(double stored, double saved)
+    {
+        return Math.Abs(stored - saved) <= PositionToleranceSeconds;
     }
 
     private static void Fill(EntityPlaybackSession session, CommandPlaybackSessionSave command)

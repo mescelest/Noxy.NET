@@ -139,6 +139,41 @@ public class HandlerPlaybackSessionSaveTest
         Assert.Equal(first.ID, again.ID);
     }
 
+    [Theory]
+    [InlineData(0.1)]
+    [InlineData(-0.1)]
+    [InlineData(HandlerPlaybackSessionSave.PositionToleranceSeconds)]
+    [InlineData(-HandlerPlaybackSessionSave.PositionToleranceSeconds)]
+    public async Task Save_APositionWithinTheToleranceOfTheStoredOne_IsTheSameState_AndSavesAndPushesNothing(double difference)
+    {
+        List<Guid> queue = MediaFileList(1);
+        ResponsePlaybackSession first = await Save(queue, 0, 20);
+        int commits = _store.CommitCount;
+
+        ResponsePlaybackSession again = await Save(queue, 0, 20 + difference);
+
+        Assert.Equal(commits, _store.CommitCount);
+        Assert.Single(_publisher.GetList<NotificationPlaybackSessionUpdated>());
+        Assert.Equal(first.PositionSeconds, again.PositionSeconds);
+        Assert.Equal(first.TimeModified, again.TimeModified);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(-1)]
+    [InlineData(HandlerPlaybackSessionSave.PositionToleranceSeconds + 0.01)]
+    public async Task Save_APositionBeyondTheTolerance_IsAChange(double difference)
+    {
+        List<Guid> queue = MediaFileList(1);
+        await Save(queue, 0, 20);
+        Advance();
+
+        ResponsePlaybackSession changed = await Save(queue, 0, 20 + difference);
+
+        Assert.Equal(20 + difference, changed.PositionSeconds);
+        Assert.Equal(2, _publisher.GetList<NotificationPlaybackSessionUpdated>().Count);
+    }
+
     [Fact]
     public async Task Save_AChangeAtTheSameClockTime_StillGetsALaterModifiedTime_SoTheETagMoves()
     {

@@ -1,6 +1,6 @@
 # Frontend: sync and player foundation: design
 
-Status: not started (design only; no plan yet). Checked against the code on 2026-11-15: the backend contracts below match the API, `Frontend` is still the blank shell described under "Starting point", and the one backend prerequisite, the CORS exposed headers, is now done (see "Backend prerequisites").
+Status: platform changed on 2026-11-15 from Blazor WebAssembly to a MAUI Blazor Hybrid app for Windows and Android: read `2026-11-15-frontend-maui-design.md` first, it wins wherever the two differ (storage, hashing, playback, the project layout, Google sign-in, the server address). The sync, diff, push and player designs below stand. Statements about the browser in this document are kept as history where the MAUI design replaces them. The backend contracts below match the API as of 2026-11-15.
 
 ## Intent
 
@@ -43,7 +43,7 @@ The media player is a sync-and-play app, not a streaming service. A user's media
 - Follow the repository conventions: one class per file, no summary comment above a class, `List` suffix for lists, no `yield`, no magic strings (constants or `nameof`; hub event names are the members of `MediaHubEvent`), interfaces in an `Interfaces` folder, `is null`, no `!` (handle the null or comment why it is safe), extension blocks and primary constructors.
 - The app is hosted on a different origin from the API, so reading `ETag` (and `Content-Range`) from responses requires the API's CORS policy to expose them. This is a backend prerequisite, listed below.
 - The solution already uses Fluxor for state (`Noxy.NET.UI.Shared.Fluxor`) and has shared UI libraries under `Noxy.NET.UI`; build on them where they fit.
-- Browser storage: `localStorage` (Blazored.LocalStorage is already referenced) is too small for metadata and unsuitable for files. Metadata and files go in IndexedDB or the Origin Private File System.
+- Storage: no browser storage any more. The platform is a MAUI app (see `2026-11-15-frontend-maui-design.md`): metadata in SQLite, files on disk, the refresh token in `SecureStorage`.
 - Library caps from the backend: 5000 media files per user, 100 playlists, 1000 entries per playlist.
 - `Noxy.NET.MediaPlayer.Presentation` references `Application`, which now carries server-only dependencies (TagLibSharp, Google.Apis.Auth). The WebAssembly bundle must not grow because of that; if it does, the shared contracts (requests and responses) are what belongs in a lighter shared place.
 
@@ -53,7 +53,7 @@ The media player is a sync-and-play app, not a streaming service. A user's media
 
 **What a device holds.** (A) everything, always; (B) only what the user has opened, played or asked for; (C) metadata for everything plus files on demand, with opt-in bulk downloads ("download all" for a playlist or the whole library). Chosen: **C**, the user's call: the full library is browsable and playlists can be built offline, the user can always see what is not downloaded, and anyone who wants everything on the device presses "download all".
 
-**Where files live in the browser.** (A) IndexedDB blobs; (B) the Origin Private File System; (C) the Cache API. Chosen: **A** for both metadata and files as my call, because it works in every browser the app targets, stores blobs, and is reachable through JavaScript interop; OPFS can replace it behind the store interface for large libraries. The store also reports free space (`navigator.storage.estimate`) and asks for persistent storage (`navigator.storage.persist`) once the user starts downloading.
+**Where files live.** Superseded by `2026-11-15-frontend-maui-design.md`: metadata in one SQLite file and files as one file per media file in the app's data folder (not a cache folder). The first design chose IndexedDB blobs for the browser; a browser cannot hold a library of this size reliably, which is why the platform changed. The store still reports free space.
 
 **Where state lives.** (A) a Fluxor store fed by services; (B) plain services with events. Chosen: **A**, my call, to match the shared UI libraries; the services own the work (sync, downloads, playback) and the store only reflects it for the components.
 
@@ -63,10 +63,10 @@ The media player is a sync-and-play app, not a streaming service. A user's media
 
 - **API client**: typed calls for every endpoint the app uses (sign-in, sign-up, refresh, library, playlists, file download), attaching the bearer token and handling a 401 by refreshing once and retrying. Sends `If-None-Match` and reads `ETag`.
 - **Session service**: signs in and out, keeps the tokens (refresh token in storage, access token in memory), signs in again silently on load, and refreshes before expiry.
-- **`IMetadataStore`** and **`IFileStore`** (the replaceable seam, in an `Interfaces` folder): metadata (media files, playlists, playlist entries, the two list ETags, per-media file file state) and files (save a stream under a media file ID, open it for playback as a playable URL, delete, list which media file IDs are held, free space, request persistence). The browser implementation sits on IndexedDB through interop.
+- **`IMetadataStore`** and **`IFileStore`** (the replaceable seam, in an `Interfaces` folder): metadata (media files, playlists, playlist entries, the two list ETags, per-media file file state) and files (a held file by media file ID with its path, a partial area for downloads in progress, delete, list which media file IDs are held, free space). The implementations are a SQLite store and a disk store in `Presentation.Local`.
 - **Sync service**: start-up diff of library and playlists (send the stored ETag; on 304 do nothing; on 200 replace the local list and remove local media files and files that are gone); hub connection that applies each pushed change as it arrives; a reconnect always re-runs the diff because pushes sent while offline are lost.
 - **Download service**: a queue with a small number of parallel downloads, resume with `Range` and `If-Range` after an interruption, hash verification before a file is marked on the device, retry with backoff, and state per media file. Callers: opening a playlist, play or queue of a missing media file, and force download.
-- **Player service**: the queue, the current media file, position, volume, and prefetching of the next few media files; plays through an `<audio>` element fed with the playable URL from `IFileStore`; waits on the download service when the media file is missing; and is the only part that knows about the audio element.
+- **Player service**: the queue, the current media file, position, volume, and prefetching of the next few media files; plays through an `IAudioPlayer` (native, one per platform) given the file path from `IFileStore`; waits on the download service when the media file is missing; and is the only part that knows about the audio player.
 - **Search**: a pure function over the local library list.
 
 ### Screens (what exists, not how it looks; the look is designed separately with the user)
@@ -97,13 +97,13 @@ Sign in and sign up; library tab (all media files from the local store, searchab
 
 ### Starting point
 
-`Frontend` is a blank Blazor WebAssembly shell (an `App.razor`, a placeholder `IndexPage.razor`, `Program.cs` calling `AddPresentation(Backend:URL)`). `Presentation` holds the `APIHttpClient` wrapper (base address and bearer header only) and references Blazored.LocalStorage. There are no auth pages, no Fluxor setup and no screens yet, so the plan includes the scaffolding. `Noxy.NET.UI` has shared components and Fluxor helpers to reuse where they fit.
+The first version of this design started from a blank Blazor WebAssembly shell. The platform is now a MAUI Blazor Hybrid app (see `2026-11-15-frontend-maui-design.md`): `Frontend` is replaced by `App`, `Presentation` becomes a plain class library and a new `Presentation.Local` holds the disk-only store implementations. There are no auth pages, no Fluxor setup and no screens yet, so the plans include the scaffolding. `Noxy.NET.UI` has shared components and Fluxor helpers to reuse where they fit.
 
 ### Calls made while writing this (mine, to be checked)
 
-- **Hash verification:** `SubtleCrypto.digest` over the whole downloaded file in memory. Files are capped at 100 MB by the API (`Storage:MaxSizeBytes`), so buffering one is acceptable for v1; an incremental hash can replace it later.
+- **Hash verification:** the SHA-256 of the file on disk, computed from a stream, so the file is never held whole in memory. (Platform changed to MAUI, see `2026-11-15-frontend-maui-design.md`.)
 - **Resume:** within a session, the partial bytes stay in memory and the download continues with `Range` and `If-Range`; across a reload, a partial download simply starts again. A partial file is never stored as a media file on the device.
-- **Playback:** the audio element plays an object URL created from the stored blob, revoked when the media file changes. OPFS is the answer if blobs in IndexedDB prove too heavy on phones.
+- **Playback:** the native audio player of each platform plays the file at the path the file store reports, and releases it before the file can be deleted. (Platform changed to MAUI, see `2026-11-15-frontend-maui-design.md`.)
 - **Refresh token storage:** `localStorage` through Blazored.LocalStorage, because the API returns the refresh token in the response body (there is no cookie flow). The access token stays in memory only. A cookie flow would be a backend change for later.
 - **A media file whose `contentHash` changes while it plays or downloads:** the current play finishes, the running download is cancelled, and the state returns to not downloaded.
 - **`Presentation` referencing `Application`:** measure the published bundle size first; move the request and response contracts to a lighter shared project only if the server-only packages end up in the bundle. This is a separate task, not part of the first plan.
@@ -114,4 +114,4 @@ Unit tests with fakes for the stores and the API client: the diff (304, changes,
 
 ## Left to the builder
 
-Project layout inside Presentation and Frontend, Fluxor action and reducer naming, the IndexedDB schema and interop shape, the number of parallel downloads and prefetched media files, the retry policy, how a bulk download is scheduled, and the audio element wrapper. The look of every screen is a separate design with the user.
+Folder and class names inside `Presentation`, `Presentation.Local` and `App`, Fluxor action and reducer naming, the SQLite schema, the number of parallel downloads and prefetched media files, the retry policy, how a bulk download is scheduled, and the native audio players. The look of every screen is a separate design with the user.
