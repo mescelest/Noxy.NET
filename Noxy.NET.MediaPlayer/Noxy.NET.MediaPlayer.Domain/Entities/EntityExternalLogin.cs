@@ -9,7 +9,7 @@ namespace Noxy.NET.MediaPlayer.Domain.Entities;
 /// </summary>
 public class EntityExternalLogin : BaseEntity
 {
-    public required ExternalLoginProvider Provider { get; set; }
+    public required ExternalLoginProviderEnum Provider { get; set; }
     public required string ProviderKey { get; set; }
 
     public required Guid UserID { get; set; }

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 
@@ -374,7 +375,7 @@ public abstract class MetadataStoreContract
 
     private static FileState OnDevice(Guid id, string hash = "abc")
     {
-        return new(id, FileSyncState.OnDevice, hash, null);
+        return new(id, FileSyncStateEnum.OnDevice, hash, null);
     }
 
     [Fact]
@@ -392,12 +393,12 @@ public abstract class MetadataStoreContract
         Guid id = Guid.CreateVersion7();
         Guid other = Guid.CreateVersion7();
 
-        await store.SaveFileState(new(id, FileSyncState.Failed, null, "The hash did not match."));
+        await store.SaveFileState(new(id, FileSyncStateEnum.Failed, null, "The hash did not match."));
         await store.SaveFileState(OnDevice(other, "def"));
 
         List<FileState> list = await store.GetFileStateList();
         Assert.Equal(2, list.Count);
-        Assert.Equal(new FileState(id, FileSyncState.Failed, null, "The hash did not match."), list.Single(x => x.MediaFileID == id));
+        Assert.Equal(new FileState(id, FileSyncStateEnum.Failed, null, "The hash did not match."), list.Single(x => x.MediaFileID == id));
         Assert.Equal(OnDevice(other, "def"), list.Single(x => x.MediaFileID == other));
 
         await store.SaveFileState(OnDevice(id, "ghi"));

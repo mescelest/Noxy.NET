@@ -33,16 +33,16 @@ public class SettingCatalogTest
     [Fact]
     public void TheDeclaredTypesAndDefaults_AreTheOnesOfTheDesign()
     {
-        Assert.Equal(SettingValueType.Enum, SettingCatalog.Shuffle.ValueType);
-        Assert.Equal(nameof(ShuffleMode.Off), SettingCatalog.Shuffle.DefaultValue);
-        Assert.Equal([nameof(ShuffleMode.Off), nameof(ShuffleMode.Random), nameof(ShuffleMode.SpreadArtists)], SettingCatalog.Shuffle.MemberNameList);
-        Assert.Equal(SettingValueType.Enum, SettingCatalog.Repeat.ValueType);
-        Assert.Equal(nameof(RepeatMode.No), SettingCatalog.Repeat.DefaultValue);
-        Assert.Equal([nameof(RepeatMode.No), nameof(RepeatMode.Once), nameof(RepeatMode.Forever)], SettingCatalog.Repeat.MemberNameList);
-        Assert.Equal(SettingValueType.Integer, SettingCatalog.Volume.ValueType);
+        Assert.Equal(SettingValueTypeEnum.Enum, SettingCatalog.Shuffle.ValueType);
+        Assert.Equal(nameof(ShuffleModeEnum.Off), SettingCatalog.Shuffle.DefaultValue);
+        Assert.Equal([nameof(ShuffleModeEnum.Off), nameof(ShuffleModeEnum.Random), nameof(ShuffleModeEnum.SpreadArtists)], SettingCatalog.Shuffle.MemberNameList);
+        Assert.Equal(SettingValueTypeEnum.Enum, SettingCatalog.Repeat.ValueType);
+        Assert.Equal(nameof(RepeatModeEnum.No), SettingCatalog.Repeat.DefaultValue);
+        Assert.Equal([nameof(RepeatModeEnum.No), nameof(RepeatModeEnum.Once), nameof(RepeatModeEnum.Forever)], SettingCatalog.Repeat.MemberNameList);
+        Assert.Equal(SettingValueTypeEnum.Integer, SettingCatalog.Volume.ValueType);
         Assert.Equal(100, SettingCatalog.Volume.DefaultValue);
         Assert.Equal((0, 100), (SettingCatalog.Volume.Minimum, SettingCatalog.Volume.Maximum));
-        Assert.Equal(SettingValueType.Boolean, SettingCatalog.MergeOnRename.ValueType);
+        Assert.Equal(SettingValueTypeEnum.Boolean, SettingCatalog.MergeOnRename.ValueType);
         Assert.Equal(false, SettingCatalog.MergeOnRename.DefaultValue);
     }
 

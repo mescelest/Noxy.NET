@@ -10,6 +10,6 @@ public class HandlerNotificationUploadFailed(IHubContext<MediaHub> hub, ILogger<
 {
     protected override Task Push(IHubContext<MediaHub> hub, NotificationUploadFailed notification, CancellationToken cancellationToken)
     {
-        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEvent.UploadFailed), notification.Result, cancellationToken);
+        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEventEnum.UploadFailed), notification.Result, cancellationToken);
     }
 }

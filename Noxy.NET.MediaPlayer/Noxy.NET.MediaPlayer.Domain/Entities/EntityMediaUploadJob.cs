@@ -17,5 +17,5 @@ public class EntityMediaUploadJob : BaseEntity
     public required long SizeBytes { get; set; }
     public required string ContentHash { get; set; }
 
-    public MediaUploadJobStatus Status { get; set; } = MediaUploadJobStatus.Pending;
+    public MediaUploadJobStatusEnum Status { get; set; } = MediaUploadJobStatusEnum.Pending;
 }

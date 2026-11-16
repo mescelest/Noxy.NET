@@ -151,7 +151,7 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
     public Task<EntityMediaUploadJob?> FindNextPendingMediaUploadJob(CancellationToken cancellationToken = default)
     {
         EntityMediaUploadJob? next = store.MediaUploadJobList
-            .Where(x => x.Status == MediaUploadJobStatus.Pending)
+            .Where(x => x.Status == MediaUploadJobStatusEnum.Pending)
             .OrderBy(x => x.TimeCreated)
             .ThenBy(x => x.ID)
             .FirstOrDefault();
@@ -164,19 +164,19 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
     {
         if (store.LoseJobClaim) return Task.FromResult(false);
 
-        EntityMediaUploadJob? job = store.MediaUploadJobList.FirstOrDefault(x => x.ID == id && x.Status == MediaUploadJobStatus.Pending);
+        EntityMediaUploadJob? job = store.MediaUploadJobList.FirstOrDefault(x => x.ID == id && x.Status == MediaUploadJobStatusEnum.Pending);
         if (job is null) return Task.FromResult(false);
 
-        job.Status = MediaUploadJobStatus.Processing;
+        job.Status = MediaUploadJobStatusEnum.Processing;
         return Task.FromResult(true);
     }
 
     public Task<int> ResetProcessingMediaUploadJobs(CancellationToken cancellationToken = default)
     {
-        List<EntityMediaUploadJob> processing = store.MediaUploadJobList.Where(x => x.Status == MediaUploadJobStatus.Processing).ToList();
+        List<EntityMediaUploadJob> processing = store.MediaUploadJobList.Where(x => x.Status == MediaUploadJobStatusEnum.Processing).ToList();
         foreach (EntityMediaUploadJob job in processing)
         {
-            job.Status = MediaUploadJobStatus.Pending;
+            job.Status = MediaUploadJobStatusEnum.Pending;
         }
 
         return Task.FromResult(processing.Count);

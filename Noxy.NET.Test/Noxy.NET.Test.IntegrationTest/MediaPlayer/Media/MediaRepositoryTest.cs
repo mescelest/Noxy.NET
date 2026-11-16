@@ -313,7 +313,7 @@ public class MediaRepositoryTest : IDisposable
         Assert.Equal(older.ID, next?.ID);
         Assert.Equal(older.StagedFileName, next?.StagedFileName);
         Assert.Equal("Media", next?.Title);
-        Assert.Equal(MediaUploadJobStatus.Pending, next?.Status);
+        Assert.Equal(MediaUploadJobStatusEnum.Pending, next?.Status);
     }
 
     [Fact]

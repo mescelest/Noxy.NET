@@ -493,7 +493,7 @@ public class MediaChangeFlowTest
         await api.Upload(user.Token, MediaApiClient.Mp3(), "media.mp3", "One");
 
         (string name, ResponseUploadResult result) = await hub.Next();
-        Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), name);
+        Assert.Equal(nameof(MediaHubEventEnum.UploadSucceeded), name);
         Assert.Equal("One", result.Media?.Title);
     }
 

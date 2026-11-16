@@ -54,7 +54,7 @@ Replace the use-case services (`IMediaService`, `IPlaylistService`, `IAuthentica
 - **Media** (`IMediaService`): upload (stage and enqueue), update (tags), delete, library (with ETag), list (paged), file (stream for sync), file with tags (temporary tagged copy). Commands: upload, update, delete. Queries: library, list, file, file with tags.
 - **Playlist** (`IPlaylistService`): library (list with ETag), one playlist (with entries, ETag), create, update, delete, add entries, remove entries, move an entry. Commands: create, update, delete, add entries, remove entries, move entry. Queries: library, one playlist.
 - **Authentication** (`IAuthenticationService`): sign up, sign in, Google sign in, refresh. All commands (they change state or issue tokens).
-- **Notifications** replacing `IMediaNotifier`, `IPlaylistNotifier`, `IUploadNotifier`: media updated, media deleted, playlist updated, playlist deleted, upload succeeded, upload failed. The hub event names (`MediaHubEvent`) and payloads stay exactly as they are.
+- **Notifications** replacing `IMediaNotifier`, `IPlaylistNotifier`, `IUploadNotifier`: media updated, media deleted, playlist updated, playlist deleted, upload succeeded, upload failed. The hub event names (`MediaHubEventEnum`) and payloads stay exactly as they are.
 
 ### Shape of a use case
 

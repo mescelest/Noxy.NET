@@ -130,7 +130,7 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
     public async Task<EntityMediaUploadJob?> FindNextPendingMediaUploadJob(CancellationToken cancellationToken = default)
     {
         TableMediaUploadJob? table = await context.MediaUploadJob.AsNoTracking()
-            .Where(x => x.Status == MediaUploadJobStatus.Pending)
+            .Where(x => x.Status == MediaUploadJobStatusEnum.Pending)
             .OrderBy(x => x.TimeCreated)
             .ThenBy(x => x.ID)
             .FirstOrDefaultAsync(cancellationToken);
@@ -141,8 +141,8 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
     public async Task<bool> MarkMediaUploadJobProcessing(Guid id, CancellationToken cancellationToken = default)
     {
         int updated = await context.MediaUploadJob
-            .Where(x => x.ID == id && x.Status == MediaUploadJobStatus.Pending)
-            .ExecuteUpdateAsync(x => x.SetProperty(e => e.Status, MediaUploadJobStatus.Processing), cancellationToken);
+            .Where(x => x.ID == id && x.Status == MediaUploadJobStatusEnum.Pending)
+            .ExecuteUpdateAsync(x => x.SetProperty(e => e.Status, MediaUploadJobStatusEnum.Processing), cancellationToken);
 
         return updated == 1;
     }
@@ -150,8 +150,8 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
     public async Task<int> ResetProcessingMediaUploadJobs(CancellationToken cancellationToken = default)
     {
         return await context.MediaUploadJob
-            .Where(x => x.Status == MediaUploadJobStatus.Processing)
-            .ExecuteUpdateAsync(x => x.SetProperty(e => e.Status, MediaUploadJobStatus.Pending), cancellationToken);
+            .Where(x => x.Status == MediaUploadJobStatusEnum.Processing)
+            .ExecuteUpdateAsync(x => x.SetProperty(e => e.Status, MediaUploadJobStatusEnum.Pending), cancellationToken);
     }
 
     public async Task<List<string>> GetMediaUploadJobFileNameList(CancellationToken cancellationToken = default)

@@ -33,7 +33,7 @@ A user can group their library media files into named, ordered playlists. Playli
 
 ## Constraints
 
-- Follow the existing layering and conventions: API controller, a command or query and a handler per use case (originally a single `IPlaylistService`), repository on the unit of work, fakes in unit tests, EF in integration tests, `WebApplicationFactory` end to end. One class per file; no comment above a class; collections and list-returning methods use the `List` style (`EntryList`, `GetPlaylistList`); no `yield`; no magic strings (constants or `nameof`; hub events are members of `MediaHubEvent`); interfaces in an `Interfaces` folder; `is null`; no `Where(... == null)` in EF is the only exception.
+- Follow the existing layering and conventions: API controller, a command or query and a handler per use case (originally a single `IPlaylistService`), repository on the unit of work, fakes in unit tests, EF in integration tests, `WebApplicationFactory` end to end. One class per file; no comment above a class; collections and list-returning methods use the `List` style (`EntryList`, `GetPlaylistList`); no `yield`; no magic strings (constants or `nameof`; hub events are members of `MediaHubEventEnum`); interfaces in an `Interfaces` folder; `is null`; no `Where(... == null)` in EF is the only exception.
 - The `AddMediaFile` migration had not been applied anywhere, so the new tables were added by regenerating it (there is no separate playlist migration).
 - The library cap is 5000 media files per user, so a playlist can never need to reference more media files than that.
 
@@ -72,7 +72,7 @@ The paths below are the original ones. They are now `/Playlist`, `/Playlist/{id}
 - Every change that alters a playlist or its entries sets the playlist's `TimeModified` (from the injectable `TimeProvider`) in the same commit as the change. This is what makes the ETags correct.
 - **MediaFile delete.** In the same commit that removes the media file, remove its entries from every playlist, renumber those playlists, and bump their modified time. After the commit, push `PlaylistUpdated` for each affected playlist.
 - **Push.** After the commit, send `PlaylistUpdated` (the playlist object, no entries) for any change to a playlist or its entries, and `PlaylistDeleted` (the ID) for a delete, to every connection of that user, through a notification published after the commit and handled by a SignalR hub handler (originally an `IPlaylistNotifier`; replaced by notifications in `2026-11-15-backend-cqrs-design.md`). A device that holds that playlist's entries compares the pushed modified time with its own and refetches `GET /Playlists/{id}` if it is newer. A failed notification is logged and never changes the response.
-- `MediaHubEvent` gains `PlaylistUpdated` and `PlaylistDeleted`.
+- `MediaHubEventEnum` gains `PlaylistUpdated` and `PlaylistDeleted`.
 
 ### Tests
 

@@ -4,7 +4,7 @@ using Noxy.NET.MediaPlayer.Domain.Enums;
 
 namespace Noxy.NET.MediaPlayer.Domain.Declarations;
 
-public record SettingDeclarationInteger(string Key, int Default, int Minimum, int Maximum) : SettingDeclaration(Key, SettingValueType.Integer)
+public record SettingDeclarationInteger(string Key, int Default, int Minimum, int Maximum) : SettingDeclaration(Key, SettingValueTypeEnum.Integer)
 {
     public override object DefaultValue => Default;
 

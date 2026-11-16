@@ -31,7 +31,7 @@ public class AuthenticationRepository(DataContext context, IEntityToTableMapper 
         context.User.Add(mapperE2T.Map(user));
     }
 
-    public async Task<EntityExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default)
+    public async Task<EntityExternalLogin?> FindExternalLogin(ExternalLoginProviderEnum provider, string providerKey, CancellationToken cancellationToken = default)
     {
         TableExternalLogin? table = await context.ExternalLogin.AsNoTracking().FirstOrDefaultAsync(x => x.Provider == provider && x.ProviderKey == providerKey, cancellationToken);
         return table is null ? null : mapperT2E.Map(table);

@@ -4,8 +4,8 @@ namespace Noxy.NET.MediaPlayer.Domain.Declarations;
 
 public static class SettingCatalog
 {
-    public static readonly SettingDeclarationEnumOf<ShuffleMode> Shuffle = new(SettingKey.Shuffle, ShuffleMode.Off);
-    public static readonly SettingDeclarationEnumOf<RepeatMode> Repeat = new(SettingKey.Repeat, RepeatMode.No);
+    public static readonly SettingDeclarationEnumOf<ShuffleModeEnum> Shuffle = new(SettingKey.Shuffle, ShuffleModeEnum.Off);
+    public static readonly SettingDeclarationEnumOf<RepeatModeEnum> Repeat = new(SettingKey.Repeat, RepeatModeEnum.No);
     public static readonly SettingDeclarationInteger Volume = new(SettingKey.Volume, 100, 0, 100);
     public static readonly SettingDeclarationBoolean MergeOnRename = new(SettingKey.MergeOnRename, false);
 

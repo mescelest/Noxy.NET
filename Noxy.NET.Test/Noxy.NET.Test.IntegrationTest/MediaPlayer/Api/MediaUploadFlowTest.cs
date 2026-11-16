@@ -49,7 +49,7 @@ public class MediaUploadFlowTest
         ResponseUploadAccepted accepted = await ReadAccepted(await api.Upload(user.Token, content, "media.test.mp3", "My Media"));
         (string name, ResponseUploadResult result) = await hub.Next();
 
-        Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), name);
+        Assert.Equal(nameof(MediaHubEventEnum.UploadSucceeded), name);
         Assert.Equal(accepted.JobID, result.JobID);
         Assert.True(result.Succeeded);
         Assert.Equal("My Media", result.Title);
@@ -246,7 +246,7 @@ public class MediaUploadFlowTest
 
         await api.Upload(user.Token, MediaApiClient.Mp3());
 
-        Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), (await hub.Next()).Event);
+        Assert.Equal(nameof(MediaHubEventEnum.UploadSucceeded), (await hub.Next()).Event);
     }
 
     [Fact]
@@ -302,7 +302,7 @@ public class MediaUploadFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         // Marked as in progress, so the worker leaves it alone and it keeps the queue full.
-        await new ApiSeeder(factory).SeedJob(user.UserID, MediaUploadJobStatus.Processing, withStagedFile: false);
+        await new ApiSeeder(factory).SeedJob(user.UserID, MediaUploadJobStatusEnum.Processing, withStagedFile: false);
 
         HttpResponseMessage response = await api.Upload(user.Token, MediaApiClient.Mp3());
 
@@ -319,16 +319,16 @@ public class MediaUploadFlowTest
         ApiAccount user = await api.SignUp("a@example.com");
         ApiSeeder seeder = new(factory);
         await seeder.SeedMediaFile(user.UserID);
-        var job = await seeder.SeedJob(user.UserID, MediaUploadJobStatus.Pending, withStagedFile: true);
+        var job = await seeder.SeedJob(user.UserID, MediaUploadJobStatusEnum.Pending, withStagedFile: true);
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 
         seeder.WakeTheWorker();
         (string name, ResponseUploadResult result) = await hub.Next();
 
-        Assert.Equal(nameof(MediaHubEvent.UploadFailed), name);
+        Assert.Equal(nameof(MediaHubEventEnum.UploadFailed), name);
         Assert.Equal(job.ID, result.JobID);
         Assert.False(result.Succeeded);
-        Assert.Equal(UploadFailureReason.LibraryFull, result.Reason);
+        Assert.Equal(UploadFailureReasonEnum.LibraryFull, result.Reason);
         Assert.Single(await api.GetMediaFileList(user.Token));
         Assert.Empty(Directory.GetFiles(factory.StagingFolder));
     }
@@ -346,7 +346,7 @@ public class MediaUploadFlowTest
         await api.Upload(owner.Token, MediaApiClient.Mp3());
         (string name, _) = await ownerHub.Next();
 
-        Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), name);
+        Assert.Equal(nameof(MediaHubEventEnum.UploadSucceeded), name);
         Assert.True(await otherHub.ReceivesNothingWithin(TimeSpan.FromSeconds(1)));
     }
 

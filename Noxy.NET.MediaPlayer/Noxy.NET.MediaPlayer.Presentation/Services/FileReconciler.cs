@@ -1,4 +1,5 @@
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Presentation.Models;
@@ -32,15 +33,15 @@ public class FileReconciler(IFileStore storeFile, IMetadataStore storeMetadata, 
 
         foreach (FileState state in stateMap.Values)
         {
-            bool leftOver = state.State == FileSyncState.Downloading;
-            bool claimsAFileThatIsGone = state.State == FileSyncState.OnDevice && !heldSet.Contains(state.MediaFileID);
+            bool leftOver = state.State == FileSyncStateEnum.Downloading;
+            bool claimsAFileThatIsGone = state.State == FileSyncStateEnum.OnDevice && !heldSet.Contains(state.MediaFileID);
             if (leftOver || claimsAFileThatIsGone) await storeMetadata.DeleteFileState(state.MediaFileID);
         }
     }
 
     private static bool IsVerified(FileState state, ResponseMediaFile media)
     {
-        return state.State == FileSyncState.OnDevice && string.Equals(state.VerifiedHash, media.ContentHash, StringComparison.OrdinalIgnoreCase);
+        return state.State == FileSyncStateEnum.OnDevice && string.Equals(state.VerifiedHash, media.ContentHash, StringComparison.OrdinalIgnoreCase);
     }
 
     // The media file is gone or has other bytes now: stop its download, drop what is on the disk for it, and let it be NotDownloaded.

@@ -49,16 +49,16 @@ public class HandlerSettingUpdateTest
         Assert.Equal(SettingKey.Volume, row.Key);
         Assert.Equal(40, row.Value);
         Assert.Equal(_time.Now.UtcDateTime, row.TimeModified);
-        Assert.Equal((SettingKey.Volume, SettingValueType.Integer, (object)40, _time.Now.UtcDateTime), (response.Key, response.ValueType, response.Value, response.TimeModified));
+        Assert.Equal((SettingKey.Volume, SettingValueTypeEnum.Integer, (object)40, _time.Now.UtcDateTime), (response.Key, response.ValueType, response.Value, response.TimeModified));
         Assert.Equal(1, _store.CommitCount);
     }
 
     [Theory]
-    [InlineData(SettingKey.MergeOnRename, "true", true, SettingValueType.Boolean)]
-    [InlineData(SettingKey.Volume, "0", 0, SettingValueType.Integer)]
-    [InlineData(SettingKey.Repeat, "\"Forever\"", "Forever", SettingValueType.Enum)]
-    [InlineData(SettingKey.Shuffle, "\"SpreadArtists\"", "SpreadArtists", SettingValueType.Enum)]
-    public async Task Update_EachType_SavesAndReturnsTheRightResponse(string key, string json, object expected, SettingValueType type)
+    [InlineData(SettingKey.MergeOnRename, "true", true, SettingValueTypeEnum.Boolean)]
+    [InlineData(SettingKey.Volume, "0", 0, SettingValueTypeEnum.Integer)]
+    [InlineData(SettingKey.Repeat, "\"Forever\"", "Forever", SettingValueTypeEnum.Enum)]
+    [InlineData(SettingKey.Shuffle, "\"SpreadArtists\"", "SpreadArtists", SettingValueTypeEnum.Enum)]
+    public async Task Update_EachType_SavesAndReturnsTheRightResponse(string key, string json, object expected, SettingValueTypeEnum type)
     {
         ResponseSetting response = await Update(key, json);
 

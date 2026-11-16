@@ -10,6 +10,6 @@ public class HandlerNotificationUploadSucceeded(IHubContext<MediaHub> hub, ILogg
 {
     protected override Task Push(IHubContext<MediaHub> hub, NotificationUploadSucceeded notification, CancellationToken cancellationToken)
     {
-        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEvent.UploadSucceeded), notification.Result, cancellationToken);
+        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEventEnum.UploadSucceeded), notification.Result, cancellationToken);
     }
 }

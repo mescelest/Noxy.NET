@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Presentation.Models;
@@ -12,7 +13,7 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
     // The state below is guarded by _lock; nothing awaits while holding it. Every change to what should play bumps _version, so a play that was overtaken (by a Next, a Clear, another Play) notices after each await and gives up.
     private readonly List<(Guid ID, bool Failed)> _queue = [];
     private readonly HashSet<Guid> _goneSet = [];
-    private readonly Dictionary<Guid, FileSyncState> _stateMap = [];
+    private readonly Dictionary<Guid, FileSyncStateEnum> _stateMap = [];
     private int _index = -1;
     private int _version;
     private bool _wired;
@@ -270,7 +271,7 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
 
         (Guid id, bool failed) = _queue[index];
 
-        return new(id, failed ? FileSyncState.Failed : _stateMap.GetValueOrDefault(id, FileSyncState.NotDownloaded));
+        return new(id, failed ? FileSyncStateEnum.Failed : _stateMap.GetValueOrDefault(id, FileSyncStateEnum.NotDownloaded));
     }
 
     // Under _lock. Entries for deleted media files are dropped on the way; failed entries are stepped over. -1 when nothing after (and including) start can play.

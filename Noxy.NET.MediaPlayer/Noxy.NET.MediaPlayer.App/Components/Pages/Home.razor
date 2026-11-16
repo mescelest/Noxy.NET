@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using System.Globalization
 @using Noxy.NET.MediaPlayer.Domain.Responses.Media
+@using Noxy.NET.MediaPlayer.Presentation.Enums
 @using Noxy.NET.MediaPlayer.Presentation.Models
 @implements IDisposable
 @inject ISessionService ServiceSession
@@ -153,7 +154,7 @@
 
     private string StateOf(Guid id)
     {
-        return (_stateList.FirstOrDefault(x => x.MediaFileID == id)?.State ?? FileSyncState.NotDownloaded).ToString();
+        return (_stateList.FirstOrDefault(x => x.MediaFileID == id)?.State ?? FileSyncStateEnum.NotDownloaded).ToString();
     }
 
     private async Task SaveAddress()

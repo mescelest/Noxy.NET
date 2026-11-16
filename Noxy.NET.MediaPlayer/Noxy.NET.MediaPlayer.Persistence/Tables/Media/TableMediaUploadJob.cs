@@ -41,5 +41,5 @@ public class TableMediaUploadJob : BaseTable
     public required string ContentHash { get; set; }
 
     [Required]
-    public MediaUploadJobStatus Status { get; set; }
+    public MediaUploadJobStatusEnum Status { get; set; }
 }

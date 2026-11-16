@@ -10,6 +10,6 @@ public class HandlerNotificationGenreUpdated(IHubContext<MediaHub> hub, ILogger<
 {
     protected override Task Push(IHubContext<MediaHub> hub, NotificationGenreUpdated notification, CancellationToken cancellationToken)
     {
-        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEvent.GenreUpdated), notification.Genre, cancellationToken);
+        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEventEnum.GenreUpdated), notification.Genre, cancellationToken);
     }
 }

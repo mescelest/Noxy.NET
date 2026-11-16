@@ -36,21 +36,21 @@ public sealed class LibraryHubListener : IAsyncDisposable
     private LibraryHubListener(HubConnection connection)
     {
         _connection = connection;
-        connection.On<ResponseUploadResult>(nameof(MediaHubEvent.UploadSucceeded), result => Receive(nameof(MediaHubEvent.UploadSucceeded), () => _messages.Writer.TryWrite((nameof(MediaHubEvent.UploadSucceeded), result))));
-        connection.On<ResponseUploadResult>(nameof(MediaHubEvent.UploadFailed), result => Receive(nameof(MediaHubEvent.UploadFailed), () => _messages.Writer.TryWrite((nameof(MediaHubEvent.UploadFailed), result))));
-        connection.On<ResponseMediaFile>(nameof(MediaHubEvent.MediaUpdated), mediaFile => Receive(nameof(MediaHubEvent.MediaUpdated), () => _updatedMessages.Writer.TryWrite(mediaFile)));
-        connection.On<Guid>(nameof(MediaHubEvent.MediaDeleted), id => Receive(nameof(MediaHubEvent.MediaDeleted), () => _deletedMessages.Writer.TryWrite(id)));
-        connection.On<ResponsePlaylist>(nameof(MediaHubEvent.PlaylistUpdated), playlist => Receive(nameof(MediaHubEvent.PlaylistUpdated), () => _playlistUpdatedMessages.Writer.TryWrite(playlist)));
-        connection.On<Guid>(nameof(MediaHubEvent.PlaylistDeleted), id => Receive(nameof(MediaHubEvent.PlaylistDeleted), () => _playlistDeletedMessages.Writer.TryWrite(id)));
-        connection.On<ResponseArtist>(nameof(MediaHubEvent.ArtistUpdated), artist => Receive(nameof(MediaHubEvent.ArtistUpdated), () => _artistUpdatedMessages.Writer.TryWrite(artist)));
-        connection.On<Guid>(nameof(MediaHubEvent.ArtistDeleted), id => Receive(nameof(MediaHubEvent.ArtistDeleted), () => _artistDeletedMessages.Writer.TryWrite(id)));
-        connection.On<ResponseAlbum>(nameof(MediaHubEvent.AlbumUpdated), album => Receive(nameof(MediaHubEvent.AlbumUpdated), () => _albumUpdatedMessages.Writer.TryWrite(album)));
-        connection.On<Guid>(nameof(MediaHubEvent.AlbumDeleted), id => Receive(nameof(MediaHubEvent.AlbumDeleted), () => _albumDeletedMessages.Writer.TryWrite(id)));
-        connection.On<ResponseGenre>(nameof(MediaHubEvent.GenreUpdated), genre => Receive(nameof(MediaHubEvent.GenreUpdated), () => _genreUpdatedMessages.Writer.TryWrite(genre)));
-        connection.On<Guid>(nameof(MediaHubEvent.GenreDeleted), id => Receive(nameof(MediaHubEvent.GenreDeleted), () => _genreDeletedMessages.Writer.TryWrite(id)));
-        connection.On<ResponseSetting>(nameof(MediaHubEvent.SettingUpdated), setting => Receive(nameof(MediaHubEvent.SettingUpdated), () => _settingUpdatedMessages.Writer.TryWrite(setting)));
-        connection.On<ResponsePlaybackSession>(nameof(MediaHubEvent.PlaybackSessionUpdated), session => Receive(nameof(MediaHubEvent.PlaybackSessionUpdated), () => _playbackSessionUpdatedMessages.Writer.TryWrite(session)));
-        connection.On(nameof(MediaHubEvent.PlaybackSessionCleared), () => Receive(nameof(MediaHubEvent.PlaybackSessionCleared), () => _playbackSessionClearedMessages.Writer.TryWrite(true)));
+        connection.On<ResponseUploadResult>(nameof(MediaHubEventEnum.UploadSucceeded), result => Receive(nameof(MediaHubEventEnum.UploadSucceeded), () => _messages.Writer.TryWrite((nameof(MediaHubEventEnum.UploadSucceeded), result))));
+        connection.On<ResponseUploadResult>(nameof(MediaHubEventEnum.UploadFailed), result => Receive(nameof(MediaHubEventEnum.UploadFailed), () => _messages.Writer.TryWrite((nameof(MediaHubEventEnum.UploadFailed), result))));
+        connection.On<ResponseMediaFile>(nameof(MediaHubEventEnum.MediaUpdated), mediaFile => Receive(nameof(MediaHubEventEnum.MediaUpdated), () => _updatedMessages.Writer.TryWrite(mediaFile)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.MediaDeleted), id => Receive(nameof(MediaHubEventEnum.MediaDeleted), () => _deletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponsePlaylist>(nameof(MediaHubEventEnum.PlaylistUpdated), playlist => Receive(nameof(MediaHubEventEnum.PlaylistUpdated), () => _playlistUpdatedMessages.Writer.TryWrite(playlist)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.PlaylistDeleted), id => Receive(nameof(MediaHubEventEnum.PlaylistDeleted), () => _playlistDeletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponseArtist>(nameof(MediaHubEventEnum.ArtistUpdated), artist => Receive(nameof(MediaHubEventEnum.ArtistUpdated), () => _artistUpdatedMessages.Writer.TryWrite(artist)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.ArtistDeleted), id => Receive(nameof(MediaHubEventEnum.ArtistDeleted), () => _artistDeletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponseAlbum>(nameof(MediaHubEventEnum.AlbumUpdated), album => Receive(nameof(MediaHubEventEnum.AlbumUpdated), () => _albumUpdatedMessages.Writer.TryWrite(album)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.AlbumDeleted), id => Receive(nameof(MediaHubEventEnum.AlbumDeleted), () => _albumDeletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponseGenre>(nameof(MediaHubEventEnum.GenreUpdated), genre => Receive(nameof(MediaHubEventEnum.GenreUpdated), () => _genreUpdatedMessages.Writer.TryWrite(genre)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.GenreDeleted), id => Receive(nameof(MediaHubEventEnum.GenreDeleted), () => _genreDeletedMessages.Writer.TryWrite(id)));
+        connection.On<ResponseSetting>(nameof(MediaHubEventEnum.SettingUpdated), setting => Receive(nameof(MediaHubEventEnum.SettingUpdated), () => _settingUpdatedMessages.Writer.TryWrite(setting)));
+        connection.On<ResponsePlaybackSession>(nameof(MediaHubEventEnum.PlaybackSessionUpdated), session => Receive(nameof(MediaHubEventEnum.PlaybackSessionUpdated), () => _playbackSessionUpdatedMessages.Writer.TryWrite(session)));
+        connection.On(nameof(MediaHubEventEnum.PlaybackSessionCleared), () => Receive(nameof(MediaHubEventEnum.PlaybackSessionCleared), () => _playbackSessionClearedMessages.Writer.TryWrite(true)));
     }
 
     // Connects over WebSockets. A .NET client sends the token as a header; a browser client puts it in the query string.

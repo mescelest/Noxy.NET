@@ -1,6 +1,6 @@
 namespace Noxy.NET.MediaPlayer.Domain.Enums;
 
-public enum UploadFailureReason
+public enum UploadFailureReasonEnum
 {
     LibraryFull,
     FileMissing,

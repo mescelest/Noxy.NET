@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
@@ -29,7 +30,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
     private int _bulkFinished;
     private int _bulkFailed;
     private long _bulkBytesDone;
-    private DownloadStopReason? _bulkStoppedReason;
+    private DownloadStopReasonEnum? _bulkStoppedReason;
 
     public event Action? Changed;
 
@@ -169,7 +170,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
     {
         lock (_lock)
         {
-            _bulkStoppedReason = DownloadStopReason.StorageLow;
+            _bulkStoppedReason = DownloadStopReasonEnum.StorageLow;
             _bulkActiveSet.Remove(current);
             foreach (Guid id in _bulkQueue) _bulkActiveSet.Remove(id);
 
@@ -182,7 +183,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
     // A media file that ended not on the device counts as failed when its state says Failed; a cancelled or vanished one leaves the bulk instead.
     private async Task EndInBulk(Guid id, ResponseMediaFile? media, bool onDevice)
     {
-        bool failed = !onDevice && media is not null && (await storeMetadata.GetFileStateList()).Any(x => x.MediaFileID == id && x.State == FileSyncState.Failed);
+        bool failed = !onDevice && media is not null && (await storeMetadata.GetFileStateList()).Any(x => x.MediaFileID == id && x.State == FileSyncStateEnum.Failed);
 
         lock (_lock)
         {
@@ -252,7 +253,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
     {
         FileState? state = (await storeMetadata.GetFileStateList()).FirstOrDefault(x => x.MediaFileID == media.ID);
 
-        return state is { State: FileSyncState.OnDevice }
+        return state is { State: FileSyncStateEnum.OnDevice }
                && string.Equals(state.VerifiedHash, media.ContentHash, StringComparison.OrdinalIgnoreCase)
                && await storeFile.GetPath(media.ID) is not null;
     }
@@ -260,7 +261,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
     private async Task<bool> Download(ResponseMediaFile media, CancellationToken token)
     {
         Guid id = media.ID;
-        await SetState(new(id, FileSyncState.Downloading, null, null));
+        await SetState(new(id, FileSyncStateEnum.Downloading, null, null));
 
         // The ETag of the bytes in the partial file, set as soon as a response arrives so that a download cut off mid-stream can still resume with If-Range.
         StrongBox<string?> eTag = new();
@@ -346,7 +347,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
         }
 
         await storeFile.Commit(id, media.ContentType);
-        await SetState(new(id, FileSyncState.OnDevice, hash, null));
+        await SetState(new(id, FileSyncStateEnum.OnDevice, hash, null));
 
         return true;
     }
@@ -354,7 +355,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
     private async Task<bool> Fail(Guid id, string error)
     {
         await storeFile.DiscardPartial(id);
-        await SetState(new(id, FileSyncState.Failed, null, error));
+        await SetState(new(id, FileSyncStateEnum.Failed, null, error));
 
         return false;
     }

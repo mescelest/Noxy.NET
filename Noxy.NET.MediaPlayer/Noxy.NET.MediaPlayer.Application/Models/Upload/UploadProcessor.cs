@@ -190,14 +190,14 @@ public class UploadProcessor(
 
     private async Task<ResponseUploadResult?> Fail(EntityMediaUploadJob job, Exception exception, CancellationToken cancellationToken)
     {
-        UploadFailureReason reason = exception switch
+        UploadFailureReasonEnum reason = exception switch
         {
-            LibraryFullException => UploadFailureReason.LibraryFull,
-            FileNotFoundException => UploadFailureReason.FileMissing,
-            _ => UploadFailureReason.Unknown
+            LibraryFullException => UploadFailureReasonEnum.LibraryFull,
+            FileNotFoundException => UploadFailureReasonEnum.FileMissing,
+            _ => UploadFailureReasonEnum.Unknown
         };
 
-        if (reason == UploadFailureReason.Unknown) logger.LogError(exception, "Upload job {JobID} failed", job.ID);
+        if (reason == UploadFailureReasonEnum.Unknown) logger.LogError(exception, "Upload job {JobID} failed", job.ID);
         else logger.LogInformation("Upload job {JobID} was rejected: {Reason}", job.ID, reason);
 
         // The job goes first. If that fails it stays queued with its files, so the next start tries it again.

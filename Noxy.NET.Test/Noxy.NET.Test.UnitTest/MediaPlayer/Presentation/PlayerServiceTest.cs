@@ -1,6 +1,6 @@
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Presentation;
-using Noxy.NET.MediaPlayer.Presentation.Models;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -129,7 +129,7 @@ public class PlayerServiceTest
 
         Assert.Equal(good, _player.Current?.MediaFileID);
         Assert.Equal([$"Load {await PathOf(good)}"], LoadList);
-        Assert.Equal(FileSyncState.Failed, _player.QueueList[0].State);
+        Assert.Equal(FileSyncStateEnum.Failed, _player.QueueList[0].State);
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public class PlayerServiceTest
 
         Assert.Empty(LoadList);
         Assert.False(_player.IsPlaying);
-        Assert.All(_player.QueueList, x => Assert.Equal(FileSyncState.Failed, x.State));
+        Assert.All(_player.QueueList, x => Assert.Equal(FileSyncStateEnum.Failed, x.State));
     }
 
     [Fact]
@@ -390,7 +390,7 @@ public class PlayerServiceTest
         _audio.RaiseFailed("The file could not be played.");
         await WaitUntil(() => _player.Current?.MediaFileID == idList[1]);
 
-        Assert.Equal(FileSyncState.Failed, _player.QueueList[0].State);
+        Assert.Equal(FileSyncStateEnum.Failed, _player.QueueList[0].State);
         Assert.NotNull(await _storeFile.GetPath(idList[0]));
         Assert.DoesNotContain(_audio.CallList, x => x.StartsWith("Delete"));
     }
@@ -402,7 +402,7 @@ public class PlayerServiceTest
         await _player.Play(id);
 
         _audio.RaiseFailed("The file could not be played.");
-        await WaitUntil(() => _player.QueueList[0].State == FileSyncState.Failed);
+        await WaitUntil(() => _player.QueueList[0].State == FileSyncStateEnum.Failed);
 
         Assert.False(_player.IsPlaying);
         Assert.NotNull(await _storeFile.GetPath(id));
@@ -415,7 +415,7 @@ public class PlayerServiceTest
         _audio.LoadFailure = "The file could not be played.";
 
         await _player.PlayList(idList, 0);
-        await WaitUntil(() => _player.QueueList.All(x => x.State == FileSyncState.Failed));
+        await WaitUntil(() => _player.QueueList.All(x => x.State == FileSyncStateEnum.Failed));
 
         Assert.DoesNotContain("Play", _audio.CallList);
         Assert.False(_player.IsPlaying);
@@ -525,15 +525,15 @@ public class PlayerServiceTest
     {
         Guid id = await AddMedia();
         await _player.Enqueue(id);
-        Assert.Equal(FileSyncState.NotDownloaded, _player.QueueList.Single().State);
+        Assert.Equal(FileSyncStateEnum.NotDownloaded, _player.QueueList.Single().State);
 
-        await _storeMetadata.SaveFileState(new(id, FileSyncState.Downloading, null, null));
+        await _storeMetadata.SaveFileState(new(id, FileSyncStateEnum.Downloading, null, null));
         _download.RaiseChanged();
-        await WaitUntil(() => _player.QueueList.Single().State == FileSyncState.Downloading);
+        await WaitUntil(() => _player.QueueList.Single().State == FileSyncStateEnum.Downloading);
 
-        await _storeMetadata.SaveFileState(new(id, FileSyncState.OnDevice, new string('a', 64), null));
+        await _storeMetadata.SaveFileState(new(id, FileSyncStateEnum.OnDevice, new string('a', 64), null));
         _download.RaiseChanged();
-        await WaitUntil(() => _player.QueueList.Single().State == FileSyncState.OnDevice);
+        await WaitUntil(() => _player.QueueList.Single().State == FileSyncStateEnum.OnDevice);
     }
 
     #endregion -- Library changes --

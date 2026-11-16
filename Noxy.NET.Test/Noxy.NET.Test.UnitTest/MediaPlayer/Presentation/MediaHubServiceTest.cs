@@ -12,11 +12,11 @@ public class MediaHubServiceTest
     {
         List<string> expected =
         [
-            nameof(MediaHubEvent.UploadSucceeded),
-            nameof(MediaHubEvent.MediaUpdated),
-            nameof(MediaHubEvent.MediaDeleted),
-            nameof(MediaHubEvent.PlaylistUpdated),
-            nameof(MediaHubEvent.PlaylistDeleted)
+            nameof(MediaHubEventEnum.UploadSucceeded),
+            nameof(MediaHubEventEnum.MediaUpdated),
+            nameof(MediaHubEventEnum.MediaDeleted),
+            nameof(MediaHubEventEnum.PlaylistUpdated),
+            nameof(MediaHubEventEnum.PlaylistDeleted)
         ];
 
         Assert.Equal(expected, MediaHubService.HandledEventNameList);

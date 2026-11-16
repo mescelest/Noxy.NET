@@ -43,7 +43,7 @@ public class HandlerSettingListTest
         Assert.NotNull(library.SettingList);
         Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename], library.SettingList.Select(x => x.Key).ToList());
         Assert.Equal(["Off", "No", 100, false], library.SettingList.Select(x => x.Value).ToList());
-        Assert.Equal([SettingValueType.Enum, SettingValueType.Enum, SettingValueType.Integer, SettingValueType.Boolean], library.SettingList.Select(x => x.ValueType).ToList());
+        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Integer, SettingValueTypeEnum.Boolean], library.SettingList.Select(x => x.ValueType).ToList());
         Assert.All(library.SettingList, x => Assert.Equal(DateTime.UnixEpoch, x.TimeModified));
         Assert.All(library.SettingList, x => Assert.Equal(DateTimeKind.Utc, x.TimeModified.Kind));
         Assert.Equal(0, _store.CommitCount);

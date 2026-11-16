@@ -1,6 +1,6 @@
 namespace Noxy.NET.MediaPlayer.Domain.Enums;
 
-public enum ExternalLoginProvider
+public enum ExternalLoginProviderEnum
 {
     Google = 1
 }

@@ -4,7 +4,7 @@ using Noxy.NET.MediaPlayer.Domain.Enums;
 
 namespace Noxy.NET.MediaPlayer.Domain.Declarations;
 
-public abstract record SettingDeclarationEnum(string Key, IReadOnlyList<string> MemberNameList, string DefaultName) : SettingDeclaration(Key, SettingValueType.Enum)
+public abstract record SettingDeclarationEnum(string Key, IReadOnlyList<string> MemberNameList, string DefaultName) : SettingDeclaration(Key, SettingValueTypeEnum.Enum)
 {
     public override object DefaultValue => DefaultName;
 

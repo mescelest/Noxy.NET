@@ -1,5 +1,5 @@
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using Noxy.NET.MediaPlayer.Presentation.Models;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Extensions;
 
@@ -17,15 +17,15 @@ public static class ResponseMediaFileListExtension
         }
 
         // Stable: equal keys keep their order, in both directions. A media file with no key (no artist, album or year) always comes last. Always a new list.
-        public List<ResponseMediaFile> Sort(LibrarySort sort, bool descending)
+        public List<ResponseMediaFile> Sort(LibrarySortEnum sort, bool descending)
         {
             return sort switch
             {
-                LibrarySort.Title => SortByText(mediaFileList, x => x.Title, descending),
-                LibrarySort.Artist => SortByText(mediaFileList, x => x.Artist, descending),
-                LibrarySort.Album => SortByText(mediaFileList, x => x.Album, descending),
-                LibrarySort.Year => SortByNumber(mediaFileList, x => x.Year, descending),
-                LibrarySort.TimeCreated => SortByNumber(mediaFileList, x => x.TimeCreated.Ticks, descending),
+                LibrarySortEnum.Title => SortByText(mediaFileList, x => x.Title, descending),
+                LibrarySortEnum.Artist => SortByText(mediaFileList, x => x.Artist, descending),
+                LibrarySortEnum.Album => SortByText(mediaFileList, x => x.Album, descending),
+                LibrarySortEnum.Year => SortByNumber(mediaFileList, x => x.Year, descending),
+                LibrarySortEnum.TimeCreated => SortByNumber(mediaFileList, x => x.TimeCreated.Ticks, descending),
                 _ => throw new ArgumentOutOfRangeException(nameof(sort), sort, "Unknown sort.")
             };
         }

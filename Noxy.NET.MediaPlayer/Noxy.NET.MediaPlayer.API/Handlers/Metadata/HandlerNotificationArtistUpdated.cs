@@ -10,6 +10,6 @@ public class HandlerNotificationArtistUpdated(IHubContext<MediaHub> hub, ILogger
 {
     protected override Task Push(IHubContext<MediaHub> hub, NotificationArtistUpdated notification, CancellationToken cancellationToken)
     {
-        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEvent.ArtistUpdated), notification.Artist, cancellationToken);
+        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEventEnum.ArtistUpdated), notification.Artist, cancellationToken);
     }
 }

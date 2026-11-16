@@ -40,7 +40,7 @@ The media player is a sync-and-play app, not a streaming service. A user's media
 
 ## Constraints
 
-- Follow the repository conventions: one class per file, no summary comment above a class, `List` suffix for lists, no `yield`, no magic strings (constants or `nameof`; hub event names are the members of `MediaHubEvent`), interfaces in an `Interfaces` folder, `is null`, no `!` (handle the null or comment why it is safe), extension blocks and primary constructors.
+- Follow the repository conventions: one class per file, no summary comment above a class, `List` suffix for lists, no `yield`, no magic strings (constants or `nameof`; hub event names are the members of `MediaHubEventEnum`), interfaces in an `Interfaces` folder, `is null`, no `!` (handle the null or comment why it is safe), extension blocks and primary constructors.
 - The app is hosted on a different origin from the API, so reading `ETag` (and `Content-Range`) from responses requires the API's CORS policy to expose them. This is a backend prerequisite, listed below.
 - The solution already uses Fluxor for state (`Noxy.NET.UI.Shared.Fluxor`) and has shared UI libraries under `Noxy.NET.UI`; build on them where they fit.
 - Storage: no browser storage any more. The platform is a MAUI app (see `2026-11-15-frontend-maui-design.md`): metadata in SQLite, files on disk, the refresh token in `SecureStorage`.
@@ -88,7 +88,7 @@ Sign in and sign up; library tab (all media files from the local store, searchab
 - `GET /Media/Library` and `GET /Playlist` return the whole list on a 200 with the ETag in the `ETag` header, and a 304 with no body when `If-None-Match` matches. There are no deltas: the client diffs against what it holds.
 - `GET /Media/{id}/File` is the sync download: strong ETag equal to the quoted `contentHash`, range requests, and `If-Range`. `GET /Media/{id}/Download` is a tagged copy for saving to disk, not for sync.
 - `GET /Playlist/{id}` returns the playlist with its entries, each carrying the media file's full response. Its ETag also changes when a contained media file's metadata changes.
-- The hub is at `/hubs/media`. Events are the members of `MediaHubEvent`: `MediaUpdated` (the full media file response), `MediaDeleted` (the media file ID), `PlaylistUpdated` (the playlist response without entries), `PlaylistDeleted` (the playlist ID), plus `UploadSucceeded` and `UploadFailed`. A device holding a playlist's entries refetches it when the pushed `timeModified` is newer than its own.
+- The hub is at `/hubs/media`. Events are the members of `MediaHubEventEnum`: `MediaUpdated` (the full media file response), `MediaDeleted` (the media file ID), `PlaylistUpdated` (the playlist response without entries), `PlaylistDeleted` (the playlist ID), plus `UploadSucceeded` and `UploadFailed`. A device holding a playlist's entries refetches it when the pushed `timeModified` is newer than its own.
 
 ### Backend prerequisites
 

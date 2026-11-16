@@ -1,6 +1,6 @@
-namespace Noxy.NET.MediaPlayer.Presentation.Models;
+namespace Noxy.NET.MediaPlayer.Presentation.Enums;
 
-public enum DownloadStopReason
+public enum DownloadStopReasonEnum
 {
     // The free space on the device would not hold the next file and the reserve.
     StorageLow

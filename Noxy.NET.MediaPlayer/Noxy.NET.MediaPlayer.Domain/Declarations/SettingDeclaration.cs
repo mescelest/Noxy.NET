@@ -5,7 +5,7 @@ using Noxy.NET.MediaPlayer.Domain.Exceptions;
 
 namespace Noxy.NET.MediaPlayer.Domain.Declarations;
 
-public abstract record SettingDeclaration(string Key, SettingValueType ValueType)
+public abstract record SettingDeclaration(string Key, SettingValueTypeEnum ValueType)
 {
     public abstract object DefaultValue { get; }
 

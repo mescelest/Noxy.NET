@@ -10,6 +10,6 @@ public class HandlerNotificationMediaDeleted(IHubContext<MediaHub> hub, ILogger<
 {
     protected override Task Push(IHubContext<MediaHub> hub, NotificationMediaDeleted notification, CancellationToken cancellationToken)
     {
-        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEvent.MediaDeleted), notification.ID, cancellationToken);
+        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEventEnum.MediaDeleted), notification.ID, cancellationToken);
     }
 }

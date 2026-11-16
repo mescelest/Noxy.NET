@@ -78,7 +78,7 @@ public class HandlerNotificationTest
 
         await new HandlerNotificationMediaUpdated(_hub, new FakeLogger<HandlerNotificationMediaUpdated>()).Handle(new(UserID, mediaFile), Token);
 
-        AssertPushed(nameof(MediaHubEvent.MediaUpdated), mediaFile);
+        AssertPushed(nameof(MediaHubEventEnum.MediaUpdated), mediaFile);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class HandlerNotificationTest
 
         (string userID, string method, object?[] argumentList, CancellationToken token) = Assert.Single(_hub.SendList);
         Assert.Equal(UserID.ToString(), userID);
-        Assert.Equal(nameof(MediaHubEvent.MediaDeleted), method);
+        Assert.Equal(nameof(MediaHubEventEnum.MediaDeleted), method);
         Assert.Equal(id, Assert.Single(argumentList));
         Assert.Equal(Token, token);
     }
@@ -102,7 +102,7 @@ public class HandlerNotificationTest
 
         await new HandlerNotificationPlaylistUpdated(_hub, new FakeLogger<HandlerNotificationPlaylistUpdated>()).Handle(new(UserID, playlist), Token);
 
-        AssertPushed(nameof(MediaHubEvent.PlaylistUpdated), playlist);
+        AssertPushed(nameof(MediaHubEventEnum.PlaylistUpdated), playlist);
     }
 
     [Fact]
@@ -114,7 +114,7 @@ public class HandlerNotificationTest
 
         (string userID, string method, object?[] argumentList, CancellationToken token) = Assert.Single(_hub.SendList);
         Assert.Equal(UserID.ToString(), userID);
-        Assert.Equal(nameof(MediaHubEvent.PlaylistDeleted), method);
+        Assert.Equal(nameof(MediaHubEventEnum.PlaylistDeleted), method);
         Assert.Equal(id, Assert.Single(argumentList));
         Assert.Equal(Token, token);
     }
@@ -126,7 +126,7 @@ public class HandlerNotificationTest
 
         await new HandlerNotificationArtistUpdated(_hub, new FakeLogger<HandlerNotificationArtistUpdated>()).Handle(new(UserID, artist), Token);
 
-        AssertPushed(nameof(MediaHubEvent.ArtistUpdated), artist);
+        AssertPushed(nameof(MediaHubEventEnum.ArtistUpdated), artist);
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class HandlerNotificationTest
 
         await new HandlerNotificationGenreUpdated(_hub, new FakeLogger<HandlerNotificationGenreUpdated>()).Handle(new(UserID, genre), Token);
 
-        AssertPushed(nameof(MediaHubEvent.GenreUpdated), genre);
+        AssertPushed(nameof(MediaHubEventEnum.GenreUpdated), genre);
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class HandlerNotificationTest
 
         await new HandlerNotificationAlbumUpdated(_hub, new FakeLogger<HandlerNotificationAlbumUpdated>()).Handle(new(UserID, album), Token);
 
-        AssertPushed(nameof(MediaHubEvent.AlbumUpdated), album);
+        AssertPushed(nameof(MediaHubEventEnum.AlbumUpdated), album);
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public class HandlerNotificationTest
         await new HandlerNotificationAlbumDeleted(_hub, new FakeLogger<HandlerNotificationAlbumDeleted>()).Handle(new(UserID, albumID), Token);
 
         Assert.Equal(
-            [(nameof(MediaHubEvent.ArtistDeleted), artistID), (nameof(MediaHubEvent.GenreDeleted), genreID), (nameof(MediaHubEvent.AlbumDeleted), albumID)],
+            [(nameof(MediaHubEventEnum.ArtistDeleted), artistID), (nameof(MediaHubEventEnum.GenreDeleted), genreID), (nameof(MediaHubEventEnum.AlbumDeleted), albumID)],
             _hub.SendList.Select(x => (x.Method, (Guid)Assert.Single(x.ArgumentList)!)).ToList());
         Assert.All(_hub.SendList, x => Assert.Equal(UserID.ToString(), x.UserID));
     }
@@ -169,11 +169,11 @@ public class HandlerNotificationTest
     [Fact]
     public async Task SettingUpdated_PushesTheEventWithThePayloadToThatUserOnly()
     {
-        ResponseSetting setting = new() { Key = SettingKey.Volume, ValueType = SettingValueType.Integer, Value = 40, TimeModified = DateTime.UtcNow };
+        ResponseSetting setting = new() { Key = SettingKey.Volume, ValueType = SettingValueTypeEnum.Integer, Value = 40, TimeModified = DateTime.UtcNow };
 
         await new HandlerNotificationSettingUpdated(_hub, new FakeLogger<HandlerNotificationSettingUpdated>()).Handle(new(UserID, setting), Token);
 
-        AssertPushed(nameof(MediaHubEvent.SettingUpdated), setting);
+        AssertPushed(nameof(MediaHubEventEnum.SettingUpdated), setting);
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public class HandlerNotificationTest
 
         await new HandlerNotificationPlaybackSessionUpdated(_hub, new FakeLogger<HandlerNotificationPlaybackSessionUpdated>()).Handle(new(UserID, session), Token);
 
-        AssertPushed(nameof(MediaHubEvent.PlaybackSessionUpdated), session);
+        AssertPushed(nameof(MediaHubEventEnum.PlaybackSessionUpdated), session);
     }
 
     [Fact]
@@ -193,7 +193,7 @@ public class HandlerNotificationTest
 
         (string userID, string method, object?[] argumentList, CancellationToken token) = Assert.Single(_hub.SendList);
         Assert.Equal(UserID.ToString(), userID);
-        Assert.Equal(nameof(MediaHubEvent.PlaybackSessionCleared), method);
+        Assert.Equal(nameof(MediaHubEventEnum.PlaybackSessionCleared), method);
         Assert.Empty(argumentList);
         Assert.Equal(Token, token);
     }
@@ -205,7 +205,7 @@ public class HandlerNotificationTest
 
         await new HandlerNotificationUploadSucceeded(_hub, new FakeLogger<HandlerNotificationUploadSucceeded>()).Handle(new(UserID, result), Token);
 
-        AssertPushed(nameof(MediaHubEvent.UploadSucceeded), result);
+        AssertPushed(nameof(MediaHubEventEnum.UploadSucceeded), result);
     }
 
     [Fact]
@@ -215,7 +215,7 @@ public class HandlerNotificationTest
 
         await new HandlerNotificationUploadFailed(_hub, new FakeLogger<HandlerNotificationUploadFailed>()).Handle(new(UserID, result), Token);
 
-        AssertPushed(nameof(MediaHubEvent.UploadFailed), result);
+        AssertPushed(nameof(MediaHubEventEnum.UploadFailed), result);
     }
 
     [Fact]

@@ -19,7 +19,7 @@ public class HandlerAuthenticationSignInGoogle(IUnitOfWorkFactory factoryUnitOfW
         await using IUnitOfWork uow = FactoryUnitOfWork.Create();
 
         // Google's user ID is the identity, not the email: emails can change, and can be reused by someone else.
-        EntityExternalLogin? login = await uow.Authentication.FindExternalLogin(ExternalLoginProvider.Google, identity.Subject, cancellationToken);
+        EntityExternalLogin? login = await uow.Authentication.FindExternalLogin(ExternalLoginProviderEnum.Google, identity.Subject, cancellationToken);
 
         EntityUser user;
         if (login is not null)
@@ -41,14 +41,14 @@ public class HandlerAuthenticationSignInGoogle(IUnitOfWorkFactory factoryUnitOfW
             if (existing is null)
             {
                 user = new() { Email = email, IsEmailVerified = true };
-                user.ExternalLoginList.Add(new() { Provider = ExternalLoginProvider.Google, ProviderKey = identity.Subject, UserID = user.ID });
+                user.ExternalLoginList.Add(new() { Provider = ExternalLoginProviderEnum.Google, ProviderKey = identity.Subject, UserID = user.ID });
                 uow.Authentication.AddUser(user);
             }
             else if (existing.IsEmailVerified)
             {
                 // Both sides have proven they own the address, so it's safe to attach Google to the existing account.
                 user = existing;
-                uow.Authentication.AddExternalLogin(new() { Provider = ExternalLoginProvider.Google, ProviderKey = identity.Subject, UserID = user.ID });
+                uow.Authentication.AddExternalLogin(new() { Provider = ExternalLoginProviderEnum.Google, ProviderKey = identity.Subject, UserID = user.ID });
             }
             else
             {

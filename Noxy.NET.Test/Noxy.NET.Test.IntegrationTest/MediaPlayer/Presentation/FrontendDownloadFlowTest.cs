@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
@@ -60,7 +61,7 @@ public class FrontendDownloadFlowTest
 
         Assert.True(onDevice);
         FileState? state = await State(frontend, media.ID);
-        Assert.Equal(FileSyncState.OnDevice, state?.State);
+        Assert.Equal(FileSyncStateEnum.OnDevice, state?.State);
         Assert.Equal(media.ContentHash, state?.VerifiedHash);
         string? path = await frontend.FileStore.GetPath(media.ID);
         Assert.NotNull(path);
@@ -115,7 +116,7 @@ public class FrontendDownloadFlowTest
 
         await frontend.Player.Play(media.ID);
 
-        Assert.Equal(FileSyncState.OnDevice, (await State(frontend, media.ID))?.State);
+        Assert.Equal(FileSyncStateEnum.OnDevice, (await State(frontend, media.ID))?.State);
         Assert.Equal(await frontend.FileStore.GetPath(media.ID), frontend.Audio.LoadedPath);
         Assert.True(frontend.Audio.IsPlaying);
     }
@@ -135,7 +136,7 @@ public class FrontendDownloadFlowTest
         await FrontendClient.WaitFor(async () => (await frontend.Store.GetMediaFile(media.ID))?.Title == "After", "the edit push");
 
         Assert.Equal(1, FileRequestCount(frontend, media.ID));
-        Assert.Equal(FileSyncState.OnDevice, (await State(frontend, media.ID))?.State);
+        Assert.Equal(FileSyncStateEnum.OnDevice, (await State(frontend, media.ID))?.State);
         Assert.NotNull(await frontend.FileStore.GetPath(media.ID));
     }
 
@@ -238,7 +239,7 @@ public class FrontendDownloadFlowTest
         await frontend.Player.PlayList([first.ID, second.ID, third.ID], 0);
 
         Assert.Equal(await frontend.FileStore.GetPath(first.ID), frontend.Audio.LoadedPath);
-        await FrontendClient.WaitFor(async () => (await frontend.Store.GetFileStateList()).Count(x => x.State == FileSyncState.OnDevice) == 3, "the next media files to be prefetched");
+        await FrontendClient.WaitFor(async () => (await frontend.Store.GetFileStateList()).Count(x => x.State == FileSyncStateEnum.OnDevice) == 3, "the next media files to be prefetched");
 
         int requestsBefore = frontend.Network.RequestList.Count(x => x.Path.EndsWith(FileSuffix, StringComparison.Ordinal));
         frontend.Audio.RaiseEnded();

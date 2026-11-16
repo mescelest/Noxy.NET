@@ -99,7 +99,7 @@ public class HandlerMediaUploadTest
         Assert.Equal("audio/mpeg", job.ContentType);
         Assert.Equal(100, job.SizeBytes);
         Assert.Equal(Convert.ToHexStringLower(SHA256.HashData(content)), job.ContentHash);
-        Assert.Equal(MediaUploadJobStatus.Pending, job.Status);
+        Assert.Equal(MediaUploadJobStatusEnum.Pending, job.Status);
         Assert.Equal(1, _store.CommitCount);
     }
 

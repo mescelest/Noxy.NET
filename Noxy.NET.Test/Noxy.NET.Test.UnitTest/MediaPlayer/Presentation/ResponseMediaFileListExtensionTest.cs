@@ -1,6 +1,6 @@
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
-using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.Test.MediaPlayer.Presentation;
 
@@ -114,8 +114,8 @@ public class ResponseMediaFileListExtensionTest
     {
         List<ResponseMediaFile> list = [Media("b"), Media("A"), Media("c")];
 
-        Assert.Equal(["A", "b", "c"], Titles(list.Sort(LibrarySort.Title, false)));
-        Assert.Equal(["c", "b", "A"], Titles(list.Sort(LibrarySort.Title, true)));
+        Assert.Equal(["A", "b", "c"], Titles(list.Sort(LibrarySortEnum.Title, false)));
+        Assert.Equal(["c", "b", "A"], Titles(list.Sort(LibrarySortEnum.Title, true)));
     }
 
     [Fact]
@@ -123,8 +123,8 @@ public class ResponseMediaFileListExtensionTest
     {
         List<ResponseMediaFile> list = [Media("none"), Media("b", artist: "Beta"), Media("a", artist: "Alpha")];
 
-        Assert.Equal(["a", "b", "none"], Titles(list.Sort(LibrarySort.Artist, false)));
-        Assert.Equal(["b", "a", "none"], Titles(list.Sort(LibrarySort.Artist, true)));
+        Assert.Equal(["a", "b", "none"], Titles(list.Sort(LibrarySortEnum.Artist, false)));
+        Assert.Equal(["b", "a", "none"], Titles(list.Sort(LibrarySortEnum.Artist, true)));
     }
 
     [Fact]
@@ -132,8 +132,8 @@ public class ResponseMediaFileListExtensionTest
     {
         List<ResponseMediaFile> list = [Media("none"), Media("b", album: "Beta"), Media("a", album: "Alpha")];
 
-        Assert.Equal(["a", "b", "none"], Titles(list.Sort(LibrarySort.Album, false)));
-        Assert.Equal(["b", "a", "none"], Titles(list.Sort(LibrarySort.Album, true)));
+        Assert.Equal(["a", "b", "none"], Titles(list.Sort(LibrarySortEnum.Album, false)));
+        Assert.Equal(["b", "a", "none"], Titles(list.Sort(LibrarySortEnum.Album, true)));
     }
 
     [Fact]
@@ -141,8 +141,8 @@ public class ResponseMediaFileListExtensionTest
     {
         List<ResponseMediaFile> list = [Media("none"), Media("new", year: 2020), Media("old", year: 1990)];
 
-        Assert.Equal(["old", "new", "none"], Titles(list.Sort(LibrarySort.Year, false)));
-        Assert.Equal(["new", "old", "none"], Titles(list.Sort(LibrarySort.Year, true)));
+        Assert.Equal(["old", "new", "none"], Titles(list.Sort(LibrarySortEnum.Year, false)));
+        Assert.Equal(["new", "old", "none"], Titles(list.Sort(LibrarySortEnum.Year, true)));
     }
 
     [Fact]
@@ -150,8 +150,8 @@ public class ResponseMediaFileListExtensionTest
     {
         List<ResponseMediaFile> list = [Media("middle", hoursOld: 5), Media("newest", hoursOld: 1), Media("oldest", hoursOld: 9)];
 
-        Assert.Equal(["oldest", "middle", "newest"], Titles(list.Sort(LibrarySort.TimeCreated, false)));
-        Assert.Equal(["newest", "middle", "oldest"], Titles(list.Sort(LibrarySort.TimeCreated, true)));
+        Assert.Equal(["oldest", "middle", "newest"], Titles(list.Sort(LibrarySortEnum.TimeCreated, false)));
+        Assert.Equal(["newest", "middle", "oldest"], Titles(list.Sort(LibrarySortEnum.TimeCreated, true)));
     }
 
     [Theory]
@@ -161,7 +161,7 @@ public class ResponseMediaFileListExtensionTest
     {
         List<ResponseMediaFile> list = [Media("first", artist: "Same"), Media("second", artist: "same"), Media("third", artist: "Same")];
 
-        Assert.Equal(["first", "second", "third"], Titles(list.Sort(LibrarySort.Artist, descending)));
+        Assert.Equal(["first", "second", "third"], Titles(list.Sort(LibrarySortEnum.Artist, descending)));
     }
 
     [Fact]
@@ -169,8 +169,8 @@ public class ResponseMediaFileListExtensionTest
     {
         List<ResponseMediaFile> list = [Media("n1"), Media("n2"), Media("a", artist: "A"), Media("n3")];
 
-        Assert.Equal(["a", "n1", "n2", "n3"], Titles(list.Sort(LibrarySort.Artist, false)));
-        Assert.Equal(["a", "n1", "n2", "n3"], Titles(list.Sort(LibrarySort.Artist, true)));
+        Assert.Equal(["a", "n1", "n2", "n3"], Titles(list.Sort(LibrarySortEnum.Artist, false)));
+        Assert.Equal(["a", "n1", "n2", "n3"], Titles(list.Sort(LibrarySortEnum.Artist, true)));
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class ResponseMediaFileListExtensionTest
     {
         List<ResponseMediaFile> list = [Media("b"), Media("a")];
 
-        list.Sort(LibrarySort.Title, false);
+        list.Sort(LibrarySortEnum.Title, false);
 
         Assert.Equal(["b", "a"], Titles(list));
     }

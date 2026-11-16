@@ -39,7 +39,7 @@ public class HubNotificationFlowTest
         await factory.Services.GetRequiredService<IPublisher>().Publish(new NotificationUploadSucceeded(user.UserID, result), TestContext.Current.CancellationToken);
 
         (string eventName, ResponseUploadResult received) = await listener.Next();
-        Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), eventName);
+        Assert.Equal(nameof(MediaHubEventEnum.UploadSucceeded), eventName);
         Assert.Equal(result.JobID, received.JobID);
         Assert.True(await stranger.ReceivesNothingWithin(TimeSpan.FromSeconds(1)));
     }
@@ -86,8 +86,8 @@ public class HubNotificationFlowTest
         Assert.Equal(deletedID, await listener.NextMediaDeleted());
         Assert.Equal(playlist.ID, (await listener.NextPlaylistUpdated()).ID);
         Assert.Equal(deletedID, await listener.NextPlaylistDeleted());
-        Assert.Equal(nameof(MediaHubEvent.UploadSucceeded), (await listener.Next()).Event);
-        Assert.Equal(nameof(MediaHubEvent.UploadFailed), (await listener.Next()).Event);
+        Assert.Equal(nameof(MediaHubEventEnum.UploadSucceeded), (await listener.Next()).Event);
+        Assert.Equal(nameof(MediaHubEventEnum.UploadFailed), (await listener.Next()).Event);
         Assert.Equal(6, await listener.CountReceivedAfter(TimeSpan.FromMilliseconds(500)));
     }
 

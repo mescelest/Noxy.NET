@@ -10,6 +10,6 @@ public class HandlerNotificationSettingUpdated(IHubContext<MediaHub> hub, ILogge
 {
     protected override Task Push(IHubContext<MediaHub> hub, NotificationSettingUpdated notification, CancellationToken cancellationToken)
     {
-        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEvent.SettingUpdated), notification.Setting, cancellationToken);
+        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEventEnum.SettingUpdated), notification.Setting, cancellationToken);
     }
 }

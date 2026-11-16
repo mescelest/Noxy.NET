@@ -1,4 +1,5 @@
 ﻿using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -40,7 +41,7 @@ public class FileReconcilerTest
         ResponseMediaFile media = Media(hash);
         await _storeMetadata.SaveMediaFile(media);
         _storeFile.Hold(media.ID, [1, 2, 3]);
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncState.OnDevice, hash, null));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, hash, null));
 
         return media;
     }
@@ -89,7 +90,7 @@ public class FileReconcilerTest
     {
         ResponseMediaFile media = Media(HashB);
         await _storeMetadata.SaveMediaFile(media);
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncState.Failed, null, "The download failed."));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.Failed, null, "The download failed."));
 
         await _reconciler.Apply(new([], [media], []));
 
@@ -106,7 +107,7 @@ public class FileReconcilerTest
 
         Assert.Empty(_serviceDownload.CancelList);
         Assert.NotNull(await _storeFile.GetPath(other.ID));
-        Assert.Equal(FileSyncState.OnDevice, (await State(other.ID))?.State);
+        Assert.Equal(FileSyncStateEnum.OnDevice, (await State(other.ID))?.State);
         Assert.Null(await State(added.ID));
     }
 
@@ -119,7 +120,7 @@ public class FileReconcilerTest
         await _reconciler.Apply(new([], [], [removed.ID]));
 
         Assert.NotNull(await _storeFile.GetPath(kept.ID));
-        Assert.Equal(FileSyncState.OnDevice, (await State(kept.ID))?.State);
+        Assert.Equal(FileSyncStateEnum.OnDevice, (await State(kept.ID))?.State);
     }
 
     [Fact]
@@ -127,7 +128,7 @@ public class FileReconcilerTest
     {
         ResponseMediaFile media = Media();
         await _storeMetadata.SaveMediaFile(media);
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncState.OnDevice, HashA, null));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, HashA, null));
 
         await _reconciler.Repair();
 
@@ -152,7 +153,7 @@ public class FileReconcilerTest
     {
         Guid id = Guid.CreateVersion7();
         _storeFile.Hold(id, [1, 2, 3]);
-        await _storeMetadata.SaveFileState(new(id, FileSyncState.OnDevice, HashA, null));
+        await _storeMetadata.SaveFileState(new(id, FileSyncStateEnum.OnDevice, HashA, null));
 
         await _reconciler.Repair();
 
@@ -168,7 +169,7 @@ public class FileReconcilerTest
         await _reconciler.Repair();
 
         Assert.NotNull(await _storeFile.GetPath(media.ID));
-        Assert.Equal(new FileState(media.ID, FileSyncState.OnDevice, HashA, null), await State(media.ID));
+        Assert.Equal(new FileState(media.ID, FileSyncStateEnum.OnDevice, HashA, null), await State(media.ID));
     }
 
     [Fact]
@@ -177,7 +178,7 @@ public class FileReconcilerTest
         ResponseMediaFile media = Media(HashB);
         await _storeMetadata.SaveMediaFile(media);
         _storeFile.Hold(media.ID, [1, 2, 3]);
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncState.OnDevice, HashA, null));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, HashA, null));
 
         await _reconciler.Repair();
 
@@ -192,7 +193,7 @@ public class FileReconcilerTest
         await _storeMetadata.SaveMediaFile(media);
         await AddPartial(media.ID);
         await AddPartial(Guid.CreateVersion7());
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncState.Downloading, null, null));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.Downloading, null, null));
 
         await _reconciler.Repair();
 
@@ -205,7 +206,7 @@ public class FileReconcilerTest
     {
         ResponseMediaFile media = Media();
         await _storeMetadata.SaveMediaFile(media);
-        FileState failed = new(media.ID, FileSyncState.Failed, null, "The server no longer has this media file.");
+        FileState failed = new(media.ID, FileSyncStateEnum.Failed, null, "The server no longer has this media file.");
         await _storeMetadata.SaveFileState(failed);
 
         await _reconciler.Repair();

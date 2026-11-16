@@ -48,14 +48,14 @@ public class UnitOfWorkSettingExtensionTest
     [Fact]
     public async Task GetEnum_GivesTheMemberAsItsRealType_OrTheDefaultForNoRowAndForAMemberThatWasRemoved()
     {
-        Assert.Equal(RepeatMode.No, await Uow().GetEnum(UserID, SettingCatalog.Repeat, Token));
+        Assert.Equal(RepeatModeEnum.No, await Uow().GetEnum(UserID, SettingCatalog.Repeat, Token));
 
         _store.UserSettingList.Add(new EntityUserSettingEnum { UserID = UserID, Key = SettingKey.Repeat, Value = "Removed" });
-        Assert.Equal(RepeatMode.No, await Uow().GetEnum(UserID, SettingCatalog.Repeat, Token));
+        Assert.Equal(RepeatModeEnum.No, await Uow().GetEnum(UserID, SettingCatalog.Repeat, Token));
 
         _store.UserSettingList.Clear();
         _store.UserSettingList.Add(new EntityUserSettingEnum { UserID = UserID, Key = SettingKey.Repeat, Value = "Forever" });
-        Assert.Equal(RepeatMode.Forever, await Uow().GetEnum(UserID, SettingCatalog.Repeat, Token));
+        Assert.Equal(RepeatModeEnum.Forever, await Uow().GetEnum(UserID, SettingCatalog.Repeat, Token));
     }
 
     [Fact]

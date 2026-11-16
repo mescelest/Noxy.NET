@@ -9,7 +9,7 @@ namespace Noxy.NET.Test.MediaPlayer.Metadata;
 public class SettingDeclarationEnumTest
 {
     private static readonly Guid UserID = Guid.CreateVersion7();
-    private readonly SettingDeclarationEnumOf<RepeatMode> _declaration = SettingCatalog.Repeat;
+    private readonly SettingDeclarationEnumOf<RepeatModeEnum> _declaration = SettingCatalog.Repeat;
 
     private static JsonElement Json(string text)
     {
@@ -48,8 +48,8 @@ public class SettingDeclarationEnumTest
     {
         Assert.Equal(["No", "Once", "Forever"], _declaration.MemberNameList);
         Assert.Equal("No", _declaration.DefaultValue);
-        Assert.Equal(SettingValueType.Enum, _declaration.ValueType);
-        Assert.Equal(RepeatMode.No, _declaration.Default);
+        Assert.Equal(SettingValueTypeEnum.Enum, _declaration.ValueType);
+        Assert.Equal(RepeatModeEnum.No, _declaration.Default);
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 namespace Noxy.NET.MediaPlayer.Domain.Enums;
 
-public enum MediaHubEvent
+public enum MediaHubEventEnum
 {
     UploadSucceeded,
     UploadFailed,

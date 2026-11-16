@@ -11,7 +11,7 @@ namespace Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 public class TableExternalLogin : BaseTable
 {
     [Required]
-    public required ExternalLoginProvider Provider { get; set; }
+    public required ExternalLoginProviderEnum Provider { get; set; }
 
     [Required]
     [MaxLength(128)]

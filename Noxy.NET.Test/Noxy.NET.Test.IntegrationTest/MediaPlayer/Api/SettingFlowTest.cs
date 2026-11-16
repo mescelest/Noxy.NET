@@ -42,7 +42,7 @@ public class SettingFlowTest
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Matches("^\"[0-9a-f]{64}\"$", response.GetETag());
         Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename], list.Select(x => x.Key).ToList());
-        Assert.Equal([SettingValueType.Enum, SettingValueType.Enum, SettingValueType.Integer, SettingValueType.Boolean], list.Select(x => x.ValueType).ToList());
+        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Integer, SettingValueTypeEnum.Boolean], list.Select(x => x.ValueType).ToList());
         Assert.Equal(["Off", "No", "100", "False"], list.Select(x => Value(x).ToString()).ToList());
         Assert.Contains("\"valueType\":\"Enum\"", body);
         Assert.All(list, x => Assert.Equal(DateTime.UnixEpoch, x.TimeModified));

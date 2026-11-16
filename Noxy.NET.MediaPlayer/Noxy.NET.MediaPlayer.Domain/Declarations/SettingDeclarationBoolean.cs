@@ -4,7 +4,7 @@ using Noxy.NET.MediaPlayer.Domain.Enums;
 
 namespace Noxy.NET.MediaPlayer.Domain.Declarations;
 
-public record SettingDeclarationBoolean(string Key, bool Default) : SettingDeclaration(Key, SettingValueType.Boolean)
+public record SettingDeclarationBoolean(string Key, bool Default) : SettingDeclaration(Key, SettingValueTypeEnum.Boolean)
 {
     public override object DefaultValue => Default;
 

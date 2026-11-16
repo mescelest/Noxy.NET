@@ -14,11 +14,11 @@ public class MediaHubService(ISyncService serviceSync, ISessionService serviceSe
 {
     public static IReadOnlyList<string> HandledEventNameList { get; } =
     [
-        nameof(MediaHubEvent.UploadSucceeded),
-        nameof(MediaHubEvent.MediaUpdated),
-        nameof(MediaHubEvent.MediaDeleted),
-        nameof(MediaHubEvent.PlaylistUpdated),
-        nameof(MediaHubEvent.PlaylistDeleted)
+        nameof(MediaHubEventEnum.UploadSucceeded),
+        nameof(MediaHubEventEnum.MediaUpdated),
+        nameof(MediaHubEventEnum.MediaDeleted),
+        nameof(MediaHubEventEnum.PlaylistUpdated),
+        nameof(MediaHubEventEnum.PlaylistDeleted)
     ];
 
     private readonly SemaphoreSlim _lock = new(1, 1);
@@ -100,11 +100,11 @@ public class MediaHubService(ISyncService serviceSync, ISessionService serviceSe
             .WithAutomaticReconnect()
             .Build();
 
-        connection.On<ResponseUploadResult>(nameof(MediaHubEvent.UploadSucceeded), x => Run(nameof(MediaHubEvent.UploadSucceeded), () => serviceSync.ApplyUploadSucceeded(x)));
-        connection.On<ResponseMediaFile>(nameof(MediaHubEvent.MediaUpdated), x => Run(nameof(MediaHubEvent.MediaUpdated), () => serviceSync.ApplyMediaUpdated(x)));
-        connection.On<Guid>(nameof(MediaHubEvent.MediaDeleted), x => Run(nameof(MediaHubEvent.MediaDeleted), () => serviceSync.ApplyMediaDeleted(x)));
-        connection.On<ResponsePlaylist>(nameof(MediaHubEvent.PlaylistUpdated), x => Run(nameof(MediaHubEvent.PlaylistUpdated), () => serviceSync.ApplyPlaylistUpdated(x)));
-        connection.On<Guid>(nameof(MediaHubEvent.PlaylistDeleted), x => Run(nameof(MediaHubEvent.PlaylistDeleted), () => serviceSync.ApplyPlaylistDeleted(x)));
+        connection.On<ResponseUploadResult>(nameof(MediaHubEventEnum.UploadSucceeded), x => Run(nameof(MediaHubEventEnum.UploadSucceeded), () => serviceSync.ApplyUploadSucceeded(x)));
+        connection.On<ResponseMediaFile>(nameof(MediaHubEventEnum.MediaUpdated), x => Run(nameof(MediaHubEventEnum.MediaUpdated), () => serviceSync.ApplyMediaUpdated(x)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.MediaDeleted), x => Run(nameof(MediaHubEventEnum.MediaDeleted), () => serviceSync.ApplyMediaDeleted(x)));
+        connection.On<ResponsePlaylist>(nameof(MediaHubEventEnum.PlaylistUpdated), x => Run(nameof(MediaHubEventEnum.PlaylistUpdated), () => serviceSync.ApplyPlaylistUpdated(x)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.PlaylistDeleted), x => Run(nameof(MediaHubEventEnum.PlaylistDeleted), () => serviceSync.ApplyPlaylistDeleted(x)));
         connection.Reconnected += _ => Run(nameof(HubConnection.Reconnected), async () =>
         {
             await serviceSync.SyncLibrary();

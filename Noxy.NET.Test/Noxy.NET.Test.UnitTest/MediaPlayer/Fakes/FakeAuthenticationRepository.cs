@@ -42,7 +42,7 @@ public sealed class FakeAuthenticationRepository(FakeStore store) : IAuthenticat
         _pendingUsers.Add(user);
     }
 
-    public Task<EntityExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default)
+    public Task<EntityExternalLogin?> FindExternalLogin(ExternalLoginProviderEnum provider, string providerKey, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(store.ExternalLoginList.FirstOrDefault(x => x.Provider == provider && x.ProviderKey == providerKey));
     }

@@ -35,7 +35,7 @@ New files (relative to the project named; tests to the test projects' `MediaPlay
 - `Presentation/Interfaces/Services/`: `IDownloadService.cs`, `IHashService.cs`, `IPlayerService.cs`, `IFileReconciler.cs`, `IAudioPlayer.cs`
 - `Presentation/Interfaces/Stores/`: `IFileStore.cs`
 - `Presentation/Services/`: `DownloadService.cs`, `HashService.cs`, `PlayerService.cs`, `FileReconciler.cs`
-- `Presentation/Models/`: `FileState.cs`, `FileSyncState.cs` (enum), `StorageEstimate.cs`, `DownloadProgress.cs`, `LibraryDiff.cs`, `PlayerQueueEntry.cs`, `ApiFileResponse.cs`; `Exceptions/StorageFullException.cs`; `Extensions/ContentTypeExtension.cs` (file extension for a content type)
+- `Presentation/Models/`: `FileState.cs`, `FileSyncStateEnum.cs` (enum), `StorageEstimate.cs`, `DownloadProgress.cs`, `LibraryDiff.cs`, `PlayerQueueEntry.cs`, `ApiFileResponse.cs`; `Exceptions/StorageFullException.cs`; `Extensions/ContentTypeExtension.cs` (file extension for a content type)
 - `Storage/Stores/`: `DiskFileStore.cs`
 - `App/Services/`: `AudioPlayer.cs` with the per-platform parts under `App/Platforms/Windows` and `App/Platforms/Android`
 - Tests: unit `Fakes/FakeFileStore.cs`, `Fakes/FakeAudioPlayer.cs`, `Fakes/FakeDelay.cs`, `Fixtures/FileStoreContract.cs`; test classes per class; integration `DiskFileStoreTest.cs`, `FrontendDownloadFlowTest.cs`
@@ -43,7 +43,7 @@ New files (relative to the project named; tests to the test projects' `MediaPlay
 Modified: `IMetadataStore`, `FakeMetadataStore` and `SqliteMetadataStore` (file state), `IApiClient` and `ApiClient` (`GetFile`), `SyncService` (raises `LibraryDiffApplied`), `ISyncService`, `Constants.cs`, `ServiceCollectionExtensions.cs` (both), `App/MauiProgram.cs` (registrations), the start-up service (repair), the design docs (status).
 
 Contracts every task shares:
-- `enum FileSyncState { NotDownloaded, Downloading, OnDevice, Failed }`; `record FileState(Guid MediaFileID, FileSyncState State, string? VerifiedHash, string? Error)`; `record StorageEstimate(long UsedBytes, long FreeBytes)` (the bytes the store holds and the free space on the volume the store is on).
+- `enum FileSyncStateEnum { NotDownloaded, Downloading, OnDevice, Failed }`; `record FileState(Guid MediaFileID, FileSyncStateEnum State, string? VerifiedHash, string? Error)`; `record StorageEstimate(long UsedBytes, long FreeBytes)` (the bytes the store holds and the free space on the volume the store is on).
 - `IMetadataStore` gains `Task<List<FileState>> GetFileStateList()`, `Task SaveFileState(FileState)`, `Task DeleteFileState(Guid mediaFileID)`; a missing state means `NotDownloaded`.
 - `IFileStore`: the held files: `Task<string?> GetPath(Guid mediaFileID)` (the full path of a held file, null when not held), `Task<Stream?> Open(Guid mediaFileID)`, `Task Delete(Guid mediaFileID)`, `Task<List<Guid>> GetHeldIDList()`, `Task<StorageEstimate> GetEstimate()`; and the partial area: `Task<long> GetPartialLength(Guid mediaFileID)` (0 when none), `Task AppendPartial(Guid mediaFileID, Stream content)`, `Task<Stream> OpenPartial(Guid mediaFileID)`, `Task DiscardPartial(Guid mediaFileID)`, `Task<List<Guid>> GetPartialIDList()`, and `Task Commit(Guid mediaFileID, string contentType)` (moves the partial file into the store, replacing a held file, and removes the partial). A disk that is full throws `StorageFullException` and leaves the held files untouched.
 - `IHashService`: `Task<string> Sha256Hex(Stream content)` (lower-case hex, the format of `contentHash`; reads the stream from its current position to the end).
@@ -57,7 +57,7 @@ Contracts every task shares:
 ### Task 1: File state in the metadata store
 
 **Files:**
-- Create: `Models/FileSyncState.cs`, `Models/FileState.cs`; tests added to `Fixtures/MetadataStoreContract.cs`
+- Create: `Models/FileSyncStateEnum.cs`, `Models/FileState.cs`; tests added to `Fixtures/MetadataStoreContract.cs`
 - Modify: `IMetadataStore.cs`, `Fakes/FakeMetadataStore.cs`, `Storage/Stores/SqliteMetadataStore.cs`
 
 **Interfaces:** Produces the `FileState` members above.
@@ -175,7 +175,7 @@ Contracts every task shares:
 - Modify: `Constants.cs` (`PrefetchCount`), both `ServiceCollectionExtensions.cs`
 
 **Interfaces:**
-- Consumes: `IAudioPlayer`, `IDownloadService`, `IFileStore`, `IMetadataStore`, `ISyncService.LibraryDiffApplied`. Produces `IPlayerService`: `Task Play(Guid mediaFileID)` (clears the queue and plays that media file), `Task PlayList(List<Guid> mediaFileIDList, int startIndex)`, `Task Enqueue(Guid mediaFileID)`, `Task Remove(int index)`, `Task Pause()`, `Task Resume()`, `Task Seek(TimeSpan)`, `Task Next()`, `Task Previous()`, `Task SetVolume(double)`, `Task Clear()`, `PlayerQueueEntry? Current`, `List<PlayerQueueEntry> QueueList`, `bool IsPlaying`, `TimeSpan Position`, `TimeSpan Duration`, `double Volume`, `bool IsWaitingForDownload`, `event Action? Changed`; `record PlayerQueueEntry(Guid MediaFileID, FileSyncState State)`.
+- Consumes: `IAudioPlayer`, `IDownloadService`, `IFileStore`, `IMetadataStore`, `ISyncService.LibraryDiffApplied`. Produces `IPlayerService`: `Task Play(Guid mediaFileID)` (clears the queue and plays that media file), `Task PlayList(List<Guid> mediaFileIDList, int startIndex)`, `Task Enqueue(Guid mediaFileID)`, `Task Remove(int index)`, `Task Pause()`, `Task Resume()`, `Task Seek(TimeSpan)`, `Task Next()`, `Task Previous()`, `Task SetVolume(double)`, `Task Clear()`, `PlayerQueueEntry? Current`, `List<PlayerQueueEntry> QueueList`, `bool IsPlaying`, `TimeSpan Position`, `TimeSpan Duration`, `double Volume`, `bool IsWaitingForDownload`, `event Action? Changed`; `record PlayerQueueEntry(Guid MediaFileID, FileSyncStateEnum State)`.
 
 - [ ] **Step 1: Write the failing tests** (fakes for everything): `Play_WhenOnDevice_LoadsTheStoredPath_AndPlays_WithNoDownload`; `Play_WhenMissing_DownloadsFirst_ThenPlays_AndIsWaitingForDownloadInBetween`; `Play_WhenTheDownloadFails_DoesNotPlay_AndSkipsToTheNextPlayableEntry`; `Failed_FromTheAudioPlayer_MarksTheEntryFailed_AndMovesOn_WithoutDeletingTheVerifiedFile`; `Ended_AdvancesToTheNextEntry`; `Ended_AtTheEndOfTheQueue_Stops`; `Next_AtTheEnd_DoesNothing`; `Previous_AtTheStart_RestartsTheCurrentMediaFile`; `Enqueue_ThenPlay_TheSameMediaFileTwice_PlaysItTwice`; `Remove_TheCurrentEntry_PlaysTheNextOne`; `Clear_StopsAndEmptiesTheQueue`; `Prefetch_RequestsTheNextThreeMissingMediaFiles_NotMore`; `Prefetch_NeverStartsDownloadsForEntriesBeyondTheWindow`; `SetVolume_IsClampedToZeroAndOne`; `ADeletedMediaFile_InTheQueue_IsSkipped_AfterTheCurrentOneFinishes`; `ADeletedCurrentMediaFile_FinishesPlaying_ThenIsSkipped`; `AChangedHash_ForTheCurrentMediaFile_FinishesPlaying_ThenIsReDownloadedOnNextPlay`; the audio player is stopped before the next file loads, so the previous file is never held open; an empty queue and `Resume()` with nothing loaded do nothing.
 - [ ] **Step 2:** Run `*PlayerServiceTest`; expected: compile failure. Implement. The player asks `IMetadataStore` for the media file's data and `IFileStore.GetPath`, never the network directly.

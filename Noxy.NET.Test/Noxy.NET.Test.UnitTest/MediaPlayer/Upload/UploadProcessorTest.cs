@@ -111,7 +111,7 @@ public class UploadProcessorTest
         await ProcessNext();
 
         Assert.Single(_publisher.GetList<NotificationUploadSucceeded>());
-        Assert.Equal(UploadFailureReason.LibraryFull, Assert.Single(_publisher.GetList<NotificationUploadFailed>()).Result.Reason);
+        Assert.Equal(UploadFailureReasonEnum.LibraryFull, Assert.Single(_publisher.GetList<NotificationUploadFailed>()).Result.Reason);
     }
 
     [Fact]
@@ -349,7 +349,7 @@ public class UploadProcessorTest
 
         await ProcessNext();
 
-        Assert.Equal(UploadFailureReason.FileMissing, Assert.Single(_publisher.GetList<NotificationUploadFailed>()).Result.Reason);
+        Assert.Equal(UploadFailureReasonEnum.FileMissing, Assert.Single(_publisher.GetList<NotificationUploadFailed>()).Result.Reason);
         Assert.Empty(_store.MediaFileList);
     }
 
@@ -382,7 +382,7 @@ public class UploadProcessorTest
         (Guid userID, ResponseUploadResult result) = Assert.Single(NotificationList);
         Assert.Equal(UserID, userID);
         Assert.False(result.Succeeded);
-        Assert.Equal(UploadFailureReason.LibraryFull, result.Reason);
+        Assert.Equal(UploadFailureReasonEnum.LibraryFull, result.Reason);
         Assert.Equal(job.ID, result.JobID);
         Assert.Null(result.Media);
     }
@@ -423,7 +423,7 @@ public class UploadProcessorTest
 
         ResponseUploadResult result = Assert.Single(NotificationList).Result;
         Assert.False(result.Succeeded);
-        Assert.Equal(UploadFailureReason.FileMissing, result.Reason);
+        Assert.Equal(UploadFailureReasonEnum.FileMissing, result.Reason);
         Assert.Empty(_store.MediaFileList);
         Assert.Empty(_store.MediaUploadJobList);
     }
@@ -456,7 +456,7 @@ public class UploadProcessorTest
         Assert.Contains(job.StagedFileName, _storage.DeletedList);
         ResponseUploadResult result = Assert.Single(NotificationList).Result;
         Assert.False(result.Succeeded);
-        Assert.Equal(UploadFailureReason.Unknown, result.Reason);
+        Assert.Equal(UploadFailureReasonEnum.Unknown, result.Reason);
     }
 
     [Fact]
@@ -467,7 +467,7 @@ public class UploadProcessorTest
 
         await ProcessNext();
 
-        Assert.Equal(UploadFailureReason.Unknown, Assert.Single(NotificationList).Result.Reason);
+        Assert.Equal(UploadFailureReasonEnum.Unknown, Assert.Single(NotificationList).Result.Reason);
         Assert.Empty(_store.MediaUploadJobList);
         Assert.Contains(job.StagedFileName, _storage.DeletedStagedList);
     }
@@ -482,7 +482,7 @@ public class UploadProcessorTest
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ProcessNext(cts.Token));
 
-        Assert.Equal(MediaUploadJobStatus.Processing, Assert.Single(_store.MediaUploadJobList).Status);
+        Assert.Equal(MediaUploadJobStatusEnum.Processing, Assert.Single(_store.MediaUploadJobList).Status);
         Assert.Contains(job.StagedFileName, _storage.Staged.Keys);
         Assert.Empty(NotificationList);
     }
@@ -500,7 +500,7 @@ public class UploadProcessorTest
 
         Assert.Equal("first", Assert.Single(_store.MediaFileList).Metadata?.Title);
         Assert.Equal([true, false], NotificationList.Select(x => x.Result.Succeeded));
-        Assert.Equal(UploadFailureReason.LibraryFull, NotificationList[1].Result.Reason);
+        Assert.Equal(UploadFailureReasonEnum.LibraryFull, NotificationList[1].Result.Reason);
         Assert.Empty(_store.MediaUploadJobList);
     }
 

@@ -10,5 +10,5 @@ public class ResponseUploadResult : BaseResponse
     public required bool Succeeded { get; init; }
 
     public ResponseMediaFile? Media { get; init; }
-    public UploadFailureReason? Reason { get; init; }
+    public UploadFailureReasonEnum? Reason { get; init; }
 }

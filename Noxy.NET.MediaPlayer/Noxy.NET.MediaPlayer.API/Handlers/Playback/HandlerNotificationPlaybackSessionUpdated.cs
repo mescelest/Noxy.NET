@@ -10,6 +10,6 @@ public class HandlerNotificationPlaybackSessionUpdated(IHubContext<MediaHub> hub
 {
     protected override Task Push(IHubContext<MediaHub> hub, NotificationPlaybackSessionUpdated notification, CancellationToken cancellationToken)
     {
-        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEvent.PlaybackSessionUpdated), notification.Session, cancellationToken);
+        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEventEnum.PlaybackSessionUpdated), notification.Session, cancellationToken);
     }
 }

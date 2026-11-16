@@ -10,7 +10,7 @@ public interface IAuthenticationRepository
     Task<EntityUser?> FindUserByEmail(string email, CancellationToken cancellationToken = default);
     void AddUser(EntityUser user);
 
-    Task<EntityExternalLogin?> FindExternalLogin(ExternalLoginProvider provider, string providerKey, CancellationToken cancellationToken = default);
+    Task<EntityExternalLogin?> FindExternalLogin(ExternalLoginProviderEnum provider, string providerKey, CancellationToken cancellationToken = default);
     void AddExternalLogin(EntityExternalLogin externalLogin);
 
     Task<EntityRefreshToken?> FindRefreshToken(string tokenHash, CancellationToken cancellationToken = default);

@@ -50,7 +50,7 @@ public class HandlerAuthenticationSignInGoogleTest
         Assert.Null(user.PasswordHash);
 
         EntityExternalLogin login = Assert.Single(_store.ExternalLoginList);
-        Assert.Equal(ExternalLoginProvider.Google, login.Provider);
+        Assert.Equal(ExternalLoginProviderEnum.Google, login.Provider);
         Assert.Equal("sub-1", login.ProviderKey);
         Assert.Equal(user.ID, login.UserID);
     }

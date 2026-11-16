@@ -10,6 +10,6 @@ public class HandlerNotificationPlaylistUpdated(IHubContext<MediaHub> hub, ILogg
 {
     protected override Task Push(IHubContext<MediaHub> hub, NotificationPlaylistUpdated notification, CancellationToken cancellationToken)
     {
-        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEvent.PlaylistUpdated), notification.Playlist, cancellationToken);
+        return hub.Clients.User(notification.UserID.ToString()).SendAsync(nameof(MediaHubEventEnum.PlaylistUpdated), notification.Playlist, cancellationToken);
     }
 }
