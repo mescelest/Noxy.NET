@@ -15,7 +15,6 @@ public sealed class FakeStore
     public List<EntityGenre> GenreList { get; } = [];
     public List<EntityAlbum> AlbumList { get; } = [];
     public List<EntityUserSetting> UserSettingList { get; } = [];
-    public List<EntityPlaybackSession> PlaybackSessionList { get; } = [];
 
     public int CommitCount { get; set; }
     public bool FailCommit { get; set; }

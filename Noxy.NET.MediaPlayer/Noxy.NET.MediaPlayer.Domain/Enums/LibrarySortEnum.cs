@@ -1,4 +1,4 @@
-namespace Noxy.NET.MediaPlayer.Presentation.Enums;
+namespace Noxy.NET.MediaPlayer.Domain.Enums;
 
 public enum LibrarySortEnum
 {

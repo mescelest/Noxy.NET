@@ -1,5 +1,6 @@
 using Mediator;
 using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Application.Commands.Playlist;
@@ -9,4 +10,6 @@ public record CommandPlaylistUpdate(
     Guid UserID,
     Guid ID,
     Optional<string?> Name = default,
-    Optional<bool> AllowDuplicates = default) : ICommand<ResponsePlaylist>;
+    Optional<bool> AllowDuplicates = default,
+    Optional<ShuffleModeEnum?> Shuffle = default,
+    Optional<RepeatModeEnum?> Repeat = default) : ICommand<ResponsePlaylist>;

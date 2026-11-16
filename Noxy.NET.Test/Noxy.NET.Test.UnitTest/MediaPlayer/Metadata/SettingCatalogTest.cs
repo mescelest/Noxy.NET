@@ -7,10 +7,10 @@ namespace Noxy.NET.Test.MediaPlayer.Metadata;
 public class SettingCatalogTest
 {
     [Fact]
-    public void TheFourSettingsAreDeclaredInOrder_WithTheirKeys()
+    public void TheFiveSettingsAreDeclaredInOrder_WithTheirKeys()
     {
-        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
-        Assert.Equal(["Shuffle", "Repeat", "Volume", "MergeOnRename"], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
+        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
+        Assert.Equal(["Shuffle", "Repeat", "Volume", "MergeOnRename", "KeepQueuedItems"], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
     }
 
     [Fact]
@@ -44,6 +44,23 @@ public class SettingCatalogTest
         Assert.Equal((0, 100), (SettingCatalog.Volume.Minimum, SettingCatalog.Volume.Maximum));
         Assert.Equal(SettingValueTypeEnum.Boolean, SettingCatalog.MergeOnRename.ValueType);
         Assert.Equal(false, SettingCatalog.MergeOnRename.DefaultValue);
+    }
+
+    [Fact]
+    public void Catalog_ContainsKeepQueuedItems_DefaultFalse()
+    {
+        Assert.Contains(SettingCatalog.KeepQueuedItems, SettingCatalog.DeclarationList);
+        Assert.Equal(SettingValueTypeEnum.Boolean, SettingCatalog.KeepQueuedItems.ValueType);
+        Assert.Equal(false, SettingCatalog.KeepQueuedItems.DefaultValue);
+        Assert.Equal("KeepQueuedItems", SettingKey.KeepQueuedItems);
+    }
+
+    [Fact]
+    public void Find_IsCaseExact_ForKeepQueuedItems()
+    {
+        Assert.Same(SettingCatalog.KeepQueuedItems, SettingCatalog.Find("KeepQueuedItems"));
+        Assert.Null(SettingCatalog.Find("keepQueuedItems"));
+        Assert.Null(SettingCatalog.Find("KEEPQUEUEDITEMS"));
     }
 
     [Fact]

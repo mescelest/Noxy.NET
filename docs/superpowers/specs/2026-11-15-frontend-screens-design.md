@@ -20,7 +20,7 @@ The app is a sync-and-play music player. This design is the part the user sees: 
 - **Actions menu items:** download to this device, save as file, add to playlist, remove from this device, delete from library (last, in red) *(the items are my proposal)*. The list is built from one place so items can be added.
 - **Sign-in screen:** no shell while signed out. One card with the logo, then the sign-in providers as a list of buttons (Google first), a divider, then tabs for *Sign in* and *Create account* with email and password. A failed attempt shows the server's message in the form. More providers later are one more button in the list.
 - **Forms use the existing WebForm components** (`WebForm`, `WebFormContext`, the input groups), which validate with the request classes' data annotations and place labels and errors. Styling is done on top of them for this app.
-- **Everything the user changes syncs** across their devices: playlists and their order, media files, the last-played time of a playlist, and the saved listening session.
+- **Everything the user changes syncs** across their devices: playlists and their order, media files, the last-played time of a playlist. The listening queue is not synced as a record: each device keeps its own local copy (see "Listening session and queue").
 
 ## Non-goals
 
@@ -50,7 +50,9 @@ The app is a sync-and-play music player. This design is the part the user sees: 
 
 **Where "last played" is stored.** (A) a `timeLastPlayed` on the playlist, set by a dedicated endpoint and pushed like other playlist changes; (B) a separate play-history record; (C) on the device only. Chosen: **A**, the user's call, for simplicity; B is the natural next step if "recently played songs" is ever wanted; C was ruled out because the user wants it synced.
 
-**Saved listening session.** Not a play history: the queue, the current media file and the position. Kept as one record per account on the server so any device can continue it. Chosen: **synced**, the user's call.
+**Shuffle and repeat buttons.** A playlist has its own optional shuffle and repeat mode (null means the user's global setting). The player bar's buttons write to the playing playlist's own mode through `PATCH /Playlist/{id}`; when the source is not a playlist (the library, a search, an album) they write the global `Shuffle` and `Repeat` settings.
+
+**Listening session and queue.** Not a saved record: a *live session* held in server memory while someone is listening (the queue as a real list, the active device and the playback state), torn down after about 10 minutes of inactivity; every device keeps a local copy of the last queue it saw to resume from. Decided 2026-11-16 in `2026-11-16-remote-playback-design.md`, which replaces the earlier "synced saved session".
 
 ## Design
 
@@ -83,7 +85,7 @@ The app is a sync-and-play music player. This design is the part the user sees: 
 
 ### Pages
 
-- **Home:** "Recently played" (up to 6 playlist cards, newest first; a card plays the playlist on click and opens it from a menu) and "Continue" (one card with the saved queue's current media file and position, shown only when the session is newer than what this device last played). Nothing played yet: the section lists the user's playlists, and with none, a prompt to create one.
+- **Home:** "Recently played" (up to 6 playlist cards, newest first; a card plays the playlist on click and opens it from a menu) and "Continue" (one card with this device's local copy of the queue's current media file and position, shown only when no device is active and nothing is playing). Nothing played yet: the section lists the user's playlists, and with none, a prompt to create one.
 - **Library:** as in the goals. The select-all tick covers the rows that match the current search *(my proposal)*; "3 selected" always shows the real count.
 - **Playlist:** the name, a play button, "download all", "refresh", the duplicates setting, and the entries as a list with drag-to-reorder (the shared sortable list), a tick box per entry and the same Actions menu *(my proposal)*. Opening it downloads its media files, as the sync design says.
 - **New playlist:** the button at the top of the Playlists section opens a small dialog with a name field (WebForm), then opens the new playlist.
@@ -104,12 +106,12 @@ The user approved the outline on 2026-11-16 but is not sure about the colours, g
 ### Backend additions (needed before the Home page is complete)
 
 - **Last played.** `EntityPlaylist` gains a nullable `TimeLastPlayed`; `ResponsePlaylist` carries it; `POST /Playlist/{id}/Played` sets it to now and returns `204`. It is **not** the modified time: a play must not change the playlist's detail ETag or make devices refetch its entries. The playlist list ETag includes it, and the change is pushed as `PlaylistUpdated`. Another user's playlist is a `404`. The client calls it when playback starts from a playlist. *Built:* a second call within `Playback:PlayedWindowSeconds` (default 10) of the stored time changes and pushes nothing, so a double click or two devices count as one play; the pushed `PlaylistUpdated` carries the new stamp with the unchanged `timeModified`.
-- **Saved listening session.** A new record per user holding the queue (a list of media file IDs), the current index, the position in seconds, the playlist it came from if any, and a modified time. `GET /PlaybackSession` (strong ETag, `304`) and `PUT /PlaybackSession`; a push `PlaybackSessionUpdated`. The last write wins. The client saves when playback starts, pauses or changes media file, and every 30 seconds while playing, not on every progress tick. A device only offers "Continue" for a session newer than what it last played; it never takes over a device that is playing. *Built:* `GET` answers `204` when the user has no session; `DELETE /PlaybackSession` removes it (`204`, also when there is none) and pushes `PlaybackSessionCleared` with no payload. A save is checked: every media file in the queue must be the user's (`404` otherwise), the queue may repeat a media file, is at most `Playback:MaxQueueLength` long (default 1000), the index must be inside the queue or null, the position must not be negative, and a playlist must be the user's (`400` for the first three rules, `404` for the rest); a save that changes nothing is not stored or pushed. Deleting a media file takes it out of the saved queue in the same commit: the index follows the media file that was playing, and is cleared (position back to 0) when that media file itself is deleted. The session is removed when its queue becomes empty, and the change is pushed as `PlaybackSessionUpdated` or `PlaybackSessionCleared`. The session's playlist is a hint only: a deleted playlist leaves it pointing at nothing, and the client must check that the playlist still exists before it shows or resumes it.
+- **Live session instead of a saved session.** The earlier `GET`/`PUT`/`DELETE /PlaybackSession` endpoints, the ETag and the `PlaybackSessionUpdated` and `PlaybackSessionCleared` pushes are **removed** (nothing was deployed). The live queue, the device registry, queue edits and commands go through the hub as described in `2026-11-16-remote-playback-design.md`; the "Continue" card resumes the device's own local copy of the queue.
 - **Sign-in with Google** needs only the existing endpoint plus the client IDs in the API's `Google:ClientIdList` setting (one per app: Android, Windows), which the user must create in Google Cloud Console.
 
 ### Changes to the earlier frontend design
 
-Google sign-in moves from non-goal to goal; the metadata sync gains the playback session and the last-played time; the screens follow this design. The foundation and downloads plans cover everything below the screens; a backend plan for the two additions and a screens plan follow once this design is approved.
+Google sign-in moves from non-goal to goal; the metadata sync gains the last-played time (the playback session was dropped again: the live session of the remote playback design replaces it); the screens follow this design. The foundation and downloads plans cover everything below the screens; a backend plan for the two additions and a screens plan follow once this design is approved.
 
 ### Existing components to reuse (from `Noxy.NET.UI`)
 

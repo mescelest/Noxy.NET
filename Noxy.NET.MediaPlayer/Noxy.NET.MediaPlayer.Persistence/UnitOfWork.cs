@@ -6,7 +6,6 @@ using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Persistence.Interfaces.Mappers;
 using Noxy.NET.MediaPlayer.Persistence.Repositories;
-using Noxy.NET.MediaPlayer.Persistence.Tables.Playback;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Setting;
 
 namespace Noxy.NET.MediaPlayer.Persistence;
@@ -20,7 +19,6 @@ public sealed class UnitOfWork(DataContext context, IEntityToTableMapper mapperE
     public IPlaylistRepository Playlist { get; } = new PlaylistRepository(context, mapperE2T, mapperT2E);
     public IMetadataRepository Metadata { get; } = new MetadataRepository(context, mapperE2T, mapperT2E);
     public ISettingRepository Setting { get; } = new SettingRepository(context, mapperE2T, mapperT2E);
-    public IPlaybackRepository Playback { get; } = new PlaybackRepository(context, mapperE2T, mapperT2E);
 
     public async Task Commit(CancellationToken cancellationToken = default)
     {
@@ -45,7 +43,6 @@ public sealed class UnitOfWork(DataContext context, IEntityToTableMapper mapperE
         if (exception.InnerException is not SqliteException { SqliteErrorCode: SqliteConstraintErrorCode } inner) return false;
 
         return inner.Message.Contains(nameof(EntityArtist.NameKey), StringComparison.Ordinal) || inner.Message.Contains(nameof(EntityAlbum.IdentityKey), StringComparison.Ordinal) ||
-               inner.Message.Contains($"{TableUserSetting.TableName}.{nameof(TableUserSetting.Key)}", StringComparison.Ordinal) ||
-               inner.Message.Contains($"{TablePlaybackSession.TableName}.{nameof(TablePlaybackSession.UserID)}", StringComparison.Ordinal);
+               inner.Message.Contains($"{TableUserSetting.TableName}.{nameof(TableUserSetting.Key)}", StringComparison.Ordinal);
     }
 }

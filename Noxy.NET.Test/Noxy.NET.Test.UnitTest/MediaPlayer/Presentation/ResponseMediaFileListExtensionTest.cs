@@ -1,5 +1,5 @@
+using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
 
 namespace Noxy.NET.Test.MediaPlayer.Presentation;

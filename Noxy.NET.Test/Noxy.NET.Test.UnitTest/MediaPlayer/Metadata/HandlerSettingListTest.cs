@@ -36,14 +36,14 @@ public class HandlerSettingListTest
     }
 
     [Fact]
-    public async Task Handle_WithNoRows_ReturnsTheFourDefaultsInCatalogOrderDatedAtTheEpoch()
+    public async Task Handle_WithNoRows_ReturnsTheFiveDefaultsInCatalogOrderDatedAtTheEpoch()
     {
         SettingLibrary library = await List();
 
         Assert.NotNull(library.SettingList);
-        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename], library.SettingList.Select(x => x.Key).ToList());
-        Assert.Equal(["Off", "No", 100, false], library.SettingList.Select(x => x.Value).ToList());
-        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Integer, SettingValueTypeEnum.Boolean], library.SettingList.Select(x => x.ValueType).ToList());
+        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems], library.SettingList.Select(x => x.Key).ToList());
+        Assert.Equal(["Off", "No", 100, false, false], library.SettingList.Select(x => x.Value).ToList());
+        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Integer, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Boolean], library.SettingList.Select(x => x.ValueType).ToList());
         Assert.All(library.SettingList, x => Assert.Equal(DateTime.UnixEpoch, x.TimeModified));
         Assert.All(library.SettingList, x => Assert.Equal(DateTimeKind.Utc, x.TimeModified.Kind));
         Assert.Equal(0, _store.CommitCount);
@@ -59,7 +59,7 @@ public class HandlerSettingListTest
         SettingLibrary library = await List();
 
         Assert.NotNull(library.SettingList);
-        Assert.Equal(["Off", "Forever", 40, true], library.SettingList.Select(x => x.Value).ToList());
+        Assert.Equal(["Off", "Forever", 40, true, false], library.SettingList.Select(x => x.Value).ToList());
         Assert.Equal(DateTime.UnixEpoch, library.SettingList.Single(x => x.Key == SettingKey.Shuffle).TimeModified);
         Assert.Equal(Saved, library.SettingList.Single(x => x.Key == SettingKey.Volume).TimeModified);
         Assert.Equal(DateTimeKind.Utc, library.SettingList.Single(x => x.Key == SettingKey.Volume).TimeModified.Kind);
@@ -73,7 +73,7 @@ public class HandlerSettingListTest
         SettingLibrary library = await List();
 
         Assert.NotNull(library.SettingList);
-        Assert.Equal(4, library.SettingList.Count);
+        Assert.Equal(5, library.SettingList.Count);
         Assert.DoesNotContain(library.SettingList, x => x.Key == "Removed");
     }
 
@@ -87,7 +87,7 @@ public class HandlerSettingListTest
         SettingLibrary library = await List();
 
         Assert.NotNull(library.SettingList);
-        Assert.Equal(["Off", "No", 100, false], library.SettingList.Select(x => x.Value).ToList());
+        Assert.Equal(["Off", "No", 100, false, false], library.SettingList.Select(x => x.Value).ToList());
     }
 
     [Fact]

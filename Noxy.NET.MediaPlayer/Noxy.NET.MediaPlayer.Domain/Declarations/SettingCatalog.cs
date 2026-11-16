@@ -8,8 +8,9 @@ public static class SettingCatalog
     public static readonly SettingDeclarationEnumOf<RepeatModeEnum> Repeat = new(SettingKey.Repeat, RepeatModeEnum.No);
     public static readonly SettingDeclarationInteger Volume = new(SettingKey.Volume, 100, 0, 100);
     public static readonly SettingDeclarationBoolean MergeOnRename = new(SettingKey.MergeOnRename, false);
+    public static readonly SettingDeclarationBoolean KeepQueuedItems = new(SettingKey.KeepQueuedItems, false);
 
-    public static readonly IReadOnlyList<SettingDeclaration> DeclarationList = [Shuffle, Repeat, Volume, MergeOnRename];
+    public static readonly IReadOnlyList<SettingDeclaration> DeclarationList = [Shuffle, Repeat, Volume, MergeOnRename, KeepQueuedItems];
 
     // The key is exact: "volume" is not "Volume".
     public static SettingDeclaration? Find(string key)

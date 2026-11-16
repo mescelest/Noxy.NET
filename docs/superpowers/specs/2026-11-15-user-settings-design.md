@@ -8,7 +8,7 @@ Users need a few settings that follow them from device to device. Today there is
 
 ## Goals
 
-- **Four settings to ship with:** `Shuffle` (enum: `Off`, `Random`, `SpreadArtists`), `Repeat` (enum: `No`, `Once`, `Forever`), `Volume` (integer 0 to 100) and `MergeOnRename` (boolean). The user wants several ways to shuffle: completely random, or something smarter such as avoiding media from the same artist in a row. The server only stores which mode was chosen; the shuffling itself is done on the device, so a new mode is one new enum member with no migration. *(My call: the member names, and shipping the two modes the user named. A mode that adds media the user did not choose is deliberately not included.)*
+- **Five settings to ship with:** `Shuffle` (enum: `Off`, `Random`, `SpreadArtists`), `Repeat` (enum: `No`, `Once`, `Forever`), `Volume` (integer 0 to 100), `MergeOnRename` (boolean) and `KeepQueuedItems` (boolean, default false: keep the user queue when a different source starts, see `2026-11-16-remote-playback-design.md`). The user wants several ways to shuffle: completely random, or something smarter such as avoiding media from the same artist in a row. The server only stores which mode was chosen; the shuffling itself is done on the device, so a new mode is one new enum member with no migration. *(My call: the member names, and shipping the two modes the user named. A mode that adds media the user did not choose is deliberately not included.)*
 - **Strongly typed storage:** an abstract user-setting base (user, key, modified time) with a derived table per value type, each holding one non-null `Value`: boolean, integer, decimal, string and enum. The enum table stores the enum member's name, so reordering an enum later cannot change saved values.
 - **Every setting declared once in code:** key, value type, default, and its limits (a range for a number, the member list for an enum). The server only accepts a value that matches the declaration, and code reads a setting as its real type, not as a key lookup.
 - **Defaults are not stored.** A user with no saved row for a setting gets the declared default. The row is created the first time the setting is changed. Nothing is created when a user is created.
@@ -17,7 +17,7 @@ Users need a few settings that follow them from device to device. Today there is
 
 ## Non-goals
 
-- Shuffle and repeat **per playlist** (two nullable columns on the playlist, null meaning "use the global setting"). That is a change to the playlist, planned separately; this design only provides the global values.
+- Shuffle and repeat **per playlist**: built. Two nullable columns on the playlist (`Shuffle`, `Repeat`), null meaning "use the global setting"; `PATCH /Playlist/{id}` sets them (a left-out field is untouched, an explicit `null` clears the mode, the same value changes nothing). A real change moves the playlist's modified time, so the list and detail ETags change and other devices download the entries again: accepted, mode changes are rare.
 - The shuffle algorithms themselves (frontend work), and any mode that picks media for the user.
 - Equalizer, crossfade, shortcuts and any structured value: left for later. The design leaves room (a new derived type) but builds none.
 - Device-local settings (storage path, watched folders, theme): they never reach the server.
@@ -48,12 +48,12 @@ Users need a few settings that follow them from device to device. Today there is
 
 ### Declarations
 
-A setting declaration names the key, the value type, the default and the limits. The four above are declared in one place; the server validates against it and returns it with the value. An unknown key is a `404`; a value of the wrong type, out of range, or an enum name that is not a member is a `400`.
+A setting declaration names the key, the value type, the default and the limits. The five above are declared in one place; the server validates against it and returns it with the value. An unknown key is a `404`; a value of the wrong type, out of range, or an enum name that is not a member is a `400`.
 
 ### Data
 
 - `EntityUserSetting` (abstract): ID, user, key, modified time. A unique index on (user, key).
-- Derived: `EntityUserSettingBoolean`, `…Integer`, `…Decimal`, `…String`, `…Enum`, each with one `Value`. Only the types the four settings need are built now (boolean, integer, enum); decimal and string are added when a setting needs them *(my call, to avoid tables nothing uses)*.
+- Derived: `EntityUserSettingBoolean`, `…Integer`, `…Decimal`, `…String`, `…Enum`, each with one `Value`. Only the types the five settings need are built now (boolean, integer, enum); decimal and string are added when a setting needs them *(my call, to avoid tables nothing uses)*.
 
 ### Endpoints
 

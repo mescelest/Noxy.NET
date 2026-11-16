@@ -35,6 +35,8 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
             existing.AllowDuplicates = updated.AllowDuplicates;
             existing.TimeModified = updated.TimeModified;
             existing.TimeLastPlayed = updated.TimeLastPlayed;
+            existing.Shuffle = updated.Shuffle;
+            existing.Repeat = updated.Repeat;
         }
 
         _pendingPlaylistUpdateList.Clear();
@@ -175,6 +177,8 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
             AllowDuplicates = playlist.AllowDuplicates,
             TimeModified = playlist.TimeModified,
             TimeLastPlayed = playlist.TimeLastPlayed,
+            Shuffle = playlist.Shuffle,
+            Repeat = playlist.Repeat,
             EntryList = withEntries ? [.. playlist.EntryList.OrderBy(x => x.Position).Select(Copy)] : []
         };
     }

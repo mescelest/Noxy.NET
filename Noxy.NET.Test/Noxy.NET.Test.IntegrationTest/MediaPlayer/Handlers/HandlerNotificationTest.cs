@@ -1,14 +1,12 @@
 using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.API.Handlers.Media;
 using Noxy.NET.MediaPlayer.API.Handlers.Metadata;
-using Noxy.NET.MediaPlayer.API.Handlers.Playback;
 using Noxy.NET.MediaPlayer.API.Handlers.Playlist;
 using Noxy.NET.MediaPlayer.API.Handlers.Setting;
 using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
-using Noxy.NET.MediaPlayer.Domain.Responses.Playback;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -177,28 +175,6 @@ public class HandlerNotificationTest
     }
 
     [Fact]
-    public async Task PlaybackSessionUpdated_PushesTheEventWithThePayloadToThatUserOnly()
-    {
-        ResponsePlaybackSession session = new() { ID = Guid.CreateVersion7(), QueueMediaFileIDList = [Guid.CreateVersion7()], CurrentIndex = 0, PositionSeconds = 2, PlaylistID = null, TimeModified = DateTime.UtcNow };
-
-        await new HandlerNotificationPlaybackSessionUpdated(_hub, new FakeLogger<HandlerNotificationPlaybackSessionUpdated>()).Handle(new(UserID, session), Token);
-
-        AssertPushed(nameof(MediaHubEventEnum.PlaybackSessionUpdated), session);
-    }
-
-    [Fact]
-    public async Task PlaybackSessionCleared_PushesTheEventWithNoPayloadToThatUserOnly()
-    {
-        await new HandlerNotificationPlaybackSessionCleared(_hub, new FakeLogger<HandlerNotificationPlaybackSessionCleared>()).Handle(new(UserID), Token);
-
-        (string userID, string method, object?[] argumentList, CancellationToken token) = Assert.Single(_hub.SendList);
-        Assert.Equal(UserID.ToString(), userID);
-        Assert.Equal(nameof(MediaHubEventEnum.PlaybackSessionCleared), method);
-        Assert.Empty(argumentList);
-        Assert.Equal(Token, token);
-    }
-
-    [Fact]
     public async Task UploadSucceeded_PushesTheEventWithThePayloadToThatUserOnly()
     {
         ResponseUploadResult result = UploadResult(true);
@@ -228,8 +204,6 @@ public class HandlerNotificationTest
         FakeLogger<HandlerNotificationPlaylistDeleted> playlistDeleted = new();
         FakeLogger<HandlerNotificationUploadSucceeded> uploadSucceeded = new();
         FakeLogger<HandlerNotificationUploadFailed> uploadFailed = new();
-        FakeLogger<HandlerNotificationPlaybackSessionUpdated> sessionUpdated = new();
-        FakeLogger<HandlerNotificationPlaybackSessionCleared> sessionCleared = new();
 
         await new HandlerNotificationMediaUpdated(_hub, mediaUpdated).Handle(new(UserID, MediaFile()), Token);
         await new HandlerNotificationMediaDeleted(_hub, mediaDeleted).Handle(new(UserID, Guid.CreateVersion7()), Token);
@@ -237,9 +211,6 @@ public class HandlerNotificationTest
         await new HandlerNotificationPlaylistDeleted(_hub, playlistDeleted).Handle(new(UserID, Guid.CreateVersion7()), Token);
         await new HandlerNotificationUploadSucceeded(_hub, uploadSucceeded).Handle(new(UserID, UploadResult(true)), Token);
         await new HandlerNotificationUploadFailed(_hub, uploadFailed).Handle(new(UserID, UploadResult(false)), Token);
-        await new HandlerNotificationPlaybackSessionUpdated(_hub, sessionUpdated).Handle(new(UserID, new() { ID = Guid.CreateVersion7(), QueueMediaFileIDList = [], CurrentIndex = null, PositionSeconds = 0, PlaylistID = null, TimeModified = DateTime.UtcNow }),
-            Token);
-        await new HandlerNotificationPlaybackSessionCleared(_hub, sessionCleared).Handle(new(UserID), Token);
 
         Assert.Empty(_hub.SendList);
         Assert.Contains(mediaUpdated.EntryList, x => x.Level == LogLevel.Warning);
@@ -248,8 +219,6 @@ public class HandlerNotificationTest
         Assert.Contains(playlistDeleted.EntryList, x => x.Level == LogLevel.Warning);
         Assert.Contains(uploadSucceeded.EntryList, x => x.Level == LogLevel.Warning);
         Assert.Contains(uploadFailed.EntryList, x => x.Level == LogLevel.Warning);
-        Assert.Contains(sessionUpdated.EntryList, x => x.Level == LogLevel.Warning);
-        Assert.Contains(sessionCleared.EntryList, x => x.Level == LogLevel.Warning);
     }
 
     [Fact]

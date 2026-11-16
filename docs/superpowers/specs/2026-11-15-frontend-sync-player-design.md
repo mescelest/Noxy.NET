@@ -77,7 +77,7 @@ Sign in and sign up; library tab (all media files from the local store, searchab
 
 - **Start-up:** read local state first so the library shows instantly, even offline; then sign in silently; then run the diff and connect the hub. A failed diff because the device is offline leaves local state as it is and shows an offline indicator.
 - **File state** is stored per media file with the `contentHash` the file was verified against. If the library's `contentHash` for a media file differs from the stored one, the file is stale and the state returns to not downloaded.
-- **A media file deleted on the server** removes its metadata, its file and its queue entries; a media file in the current queue that is playing finishes its current play first, then is skipped.
+- **A media file deleted on the server** removes its metadata and its file; a media file in the current queue that is playing finishes its current play first (it is held outside the regenerated queue), then the queue goes on without it, and Previous from the next media file goes to the one before the deleted one.
 - **Playlist entries** carry the media file data, so a playlist can be shown and its files queued without another call.
 - **Storage low or cleared:** a bulk download stops and says why; on start-up the app compares the held file IDs with the file states and repairs any that disagree.
 - **Offline:** playing a media file on the device, browsing, searching and viewing playlists all work. Actions that need the server (create or edit a playlist, download) are disabled with a reason, not silently queued, in this first version.
@@ -89,6 +89,7 @@ Sign in and sign up; library tab (all media files from the local store, searchab
 - `GET /Media/{id}/File` is the sync download: strong ETag equal to the quoted `contentHash`, range requests, and `If-Range`. `GET /Media/{id}/Download` is a tagged copy for saving to disk, not for sync.
 - `GET /Playlist/{id}` returns the playlist with its entries, each carrying the media file's full response. Its ETag also changes when a contained media file's metadata changes.
 - The hub is at `/hubs/media`. Events are the members of `MediaHubEventEnum`: `MediaUpdated` (the full media file response), `MediaDeleted` (the media file ID), `PlaylistUpdated` (the playlist response without entries), `PlaylistDeleted` (the playlist ID), plus `UploadSucceeded` and `UploadFailed`. A device holding a playlist's entries refetches it when the pushed `timeModified` is newer than its own.
+- There is no saved playback session on the server (the earlier `/PlaybackSession` endpoints and their two hub events are gone). The live queue, the device registry and the commands are in `2026-11-16-remote-playback-design.md`; each device keeps a local copy of its last queue.
 
 ### Backend prerequisites
 

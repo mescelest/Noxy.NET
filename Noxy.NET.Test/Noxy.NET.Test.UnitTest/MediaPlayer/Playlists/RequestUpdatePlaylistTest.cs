@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Enums;
 
 namespace Noxy.NET.Test.MediaPlayer.Playlists;
 
@@ -80,5 +81,46 @@ public class RequestUpdatePlaylistTest
     public void AFlagThatIsNotABoolean_IsRejectedWhileReading(string json)
     {
         Assert.Throws<JsonException>(() => Read(json));
+    }
+
+    [Fact]
+    public void Modes_AreLeftOutWhenNotSent_ValuesWhenSent_AndNullWhenExplicitlyNull()
+    {
+        Assert.Equal("{}", JsonSerializer.Serialize(new RequestUpdatePlaylist(), JsonSerializerOptions.Web));
+        Assert.Equal("""{"shuffle":"Random"}""", JsonSerializer.Serialize(new RequestUpdatePlaylist { Shuffle = new(ShuffleModeEnum.Random) }, JsonSerializerOptions.Web));
+        Assert.Equal("""{"repeat":null}""", JsonSerializer.Serialize(new RequestUpdatePlaylist { Repeat = new(null) }, JsonSerializerOptions.Web));
+
+        RequestUpdatePlaylist named = Read("""{"name":"x"}""");
+        Assert.False(named.Shuffle.HasValue);
+        Assert.False(named.Repeat.HasValue);
+
+        RequestUpdatePlaylist sent = Read("""{"shuffle":"SpreadArtists","repeat":null}""");
+        Assert.Equal(ShuffleModeEnum.SpreadArtists, sent.Shuffle.Value);
+        Assert.True(sent.Repeat.HasValue);
+        Assert.Null(sent.Repeat.Value);
+    }
+
+    [Fact]
+    public void ANameThatIsNotAMode_FailsToRead()
+    {
+        Assert.ThrowsAny<JsonException>(() => Read("""{"shuffle":"Sometimes"}"""));
+        Assert.ThrowsAny<JsonException>(() => Read("""{"repeat":"Never"}"""));
+    }
+
+    [Theory]
+    [InlineData("""{"shuffle":1}""")]
+    [InlineData("""{"shuffle":99}""")]
+    [InlineData("""{"shuffle":"1"}""")]
+    [InlineData("""{"repeat":2}""")]
+    [InlineData("""{"repeat":"99"}""")]
+    public void AModeGivenAsANumber_FailsToRead(string json)
+    {
+        Assert.ThrowsAny<JsonException>(() => Read(json));
+    }
+
+    [Fact]
+    public void AModeIsWrittenByName()
+    {
+        Assert.Equal("""{"shuffle":"SpreadArtists","repeat":"Forever"}""", JsonSerializer.Serialize(new RequestUpdatePlaylist { Shuffle = new(ShuffleModeEnum.SpreadArtists), Repeat = new(RepeatModeEnum.Forever) }, JsonSerializerOptions.Web));
     }
 }

@@ -1,4 +1,5 @@
 using Noxy.NET.MediaPlayer.Domain.Abstractions.Entities;
+using Noxy.NET.MediaPlayer.Domain.Enums;
 
 namespace Noxy.NET.MediaPlayer.Domain.Entities;
 
@@ -11,6 +12,10 @@ public class EntityPlaylist : BaseEntity
 
     public DateTime TimeModified { get; set; } = DateTime.UtcNow;
     public DateTime? TimeLastPlayed { get; set; }
+
+    // Null means the user's global setting applies.
+    public ShuffleModeEnum? Shuffle { get; set; }
+    public RepeatModeEnum? Repeat { get; set; }
 
     public List<EntityPlaylistEntry> EntryList { get; set; } = [];
 

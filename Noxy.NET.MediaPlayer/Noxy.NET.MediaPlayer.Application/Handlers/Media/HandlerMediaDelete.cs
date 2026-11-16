@@ -4,7 +4,6 @@ using Noxy.NET.MediaPlayer.Application.Commands.Media;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
-using Noxy.NET.MediaPlayer.Application.Notifications.Playback;
 using Noxy.NET.MediaPlayer.Application.Notifications.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
@@ -23,9 +22,8 @@ public class HandlerMediaDelete(IUnitOfWorkFactory factoryUnitOfWork, IFileStora
         EntityMediaFile file = await uow.Media.FindMediaFile(command.ID, command.UserID, cancellationToken) ?? throw new MediaNotFoundException();
         DateTime now = time.GetUtcNow().UtcDateTime;
 
-        // The media file leaves every playlist and the saved playback session in the same commit, so nothing is ever left pointing at it.
+        // The media file leaves every playlist in the same commit, so nothing is ever left pointing at it.
         List<ResponsePlaylist> playlistUpdatedList = await RemoveFromPlaylists(uow, command, now, cancellationToken);
-        INotification? sessionNotification = await RemoveFromSession(uow, command, now, cancellationToken);
 
         // The row goes first: a failure after it leaves an orphaned file, never a media file that points at nothing.
         uow.Media.RemoveMediaFile(file);
@@ -39,8 +37,6 @@ public class HandlerMediaDelete(IUnitOfWorkFactory factoryUnitOfWork, IFileStora
         {
             await publisher.Publish(new NotificationPlaylistUpdated(command.UserID, updated), cancellationToken);
         }
-
-        if (sessionNotification is not null) await publisher.Publish(sessionNotification, cancellationToken);
 
         return Unit.Value;
     }
@@ -68,23 +64,6 @@ public class HandlerMediaDelete(IUnitOfWorkFactory factoryUnitOfWork, IFileStora
         }
 
         return updatedList;
-    }
-
-    // Takes the media file out of the saved playback session, which goes away when nothing is left in its queue. Returns what to push: the updated session, the cleared session, or null when the session did not hold the media file.
-    private static async Task<INotification?> RemoveFromSession(IUnitOfWork uow, CommandMediaDelete command, DateTime now, CancellationToken cancellationToken)
-    {
-        EntityPlaybackSession? session = await uow.Playback.FindSession(command.UserID, cancellationToken);
-        if (session is null || !session.RemoveMediaFile(command.ID)) return null;
-
-        if (session.QueueMediaFileIDList.Count == 0)
-        {
-            uow.Playback.RemoveSession(session);
-            return new NotificationPlaybackSessionCleared(command.UserID);
-        }
-
-        session.SetModified(now);
-        uow.Playback.UpdateSession(session);
-        return new NotificationPlaybackSessionUpdated(command.UserID, session.ToResponse());
     }
 
     // A file that cannot be deleted is logged and left behind: the media file is already gone, so the delete still counts as done.

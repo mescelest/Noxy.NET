@@ -40,6 +40,19 @@ public class HandlerPlaylistUpdate(IUnitOfWorkFactory factoryUnitOfWork, IPublis
             changed = true;
         }
 
+        // A mode left out is not touched, an explicit null clears it, and one equal to the stored mode is not a change.
+        if (command.Shuffle.HasValue && command.Shuffle.Value != playlist.Shuffle)
+        {
+            playlist.Shuffle = command.Shuffle.Value;
+            changed = true;
+        }
+
+        if (command.Repeat.HasValue && command.Repeat.Value != playlist.Repeat)
+        {
+            playlist.Repeat = command.Repeat.Value;
+            changed = true;
+        }
+
         // An edit that changes nothing leaves the modified time alone, so it can't change the ETag or push anything.
         if (!changed) return playlist.ToResponse(playlist.EntryList.Count);
 

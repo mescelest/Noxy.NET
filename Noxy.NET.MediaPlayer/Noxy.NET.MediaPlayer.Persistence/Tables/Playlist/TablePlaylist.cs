@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Persistence.Abstractions.Tables;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 
@@ -27,6 +28,10 @@ public class TablePlaylist : BaseTable
     public DateTime TimeModified { get; set; }
 
     public DateTime? TimeLastPlayed { get; set; }
+
+    public ShuffleModeEnum? Shuffle { get; set; }
+
+    public RepeatModeEnum? Repeat { get; set; }
 
     public List<TablePlaylistEntry> EntryList { get; set; } = [];
 }

@@ -141,30 +141,6 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlaybackSession",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UserID = table.Column<Guid>(type: "TEXT", nullable: false),
-                    QueueMediaFileIDList = table.Column<string>(type: "TEXT", nullable: false),
-                    CurrentIndex = table.Column<int>(type: "INTEGER", nullable: true),
-                    PositionSeconds = table.Column<double>(type: "REAL", nullable: false),
-                    PlaylistID = table.Column<Guid>(type: "TEXT", nullable: true),
-                    TimeModified = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlaybackSession", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_PlaybackSession_User_UserID",
-                        column: x => x.UserID,
-                        principalTable: "User",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Playlist",
                 columns: table => new
                 {
@@ -174,6 +150,8 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     AllowDuplicates = table.Column<bool>(type: "INTEGER", nullable: false),
                     TimeModified = table.Column<DateTime>(type: "TEXT", nullable: false),
                     TimeLastPlayed = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Shuffle = table.Column<int>(type: "INTEGER", nullable: true),
+                    Repeat = table.Column<int>(type: "INTEGER", nullable: true),
                     TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -595,17 +573,6 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaybackSession_TimeCreated",
-                table: "PlaybackSession",
-                column: "TimeCreated");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlaybackSession_UserID",
-                table: "PlaybackSession",
-                column: "UserID",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Playlist_TimeCreated",
                 table: "Playlist",
                 column: "TimeCreated");
@@ -689,9 +656,6 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "MediaUploadJob");
-
-            migrationBuilder.DropTable(
-                name: "PlaybackSession");
 
             migrationBuilder.DropTable(
                 name: "PlaylistEntry");

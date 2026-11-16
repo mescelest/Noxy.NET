@@ -29,7 +29,7 @@ public class SettingFlowTest
     }
 
     [Fact]
-    public async Task Get_ForANewUser_ReturnsTheFourDefaultsInOrderWithTheirTypes_AStrongETag_AndNothingIsSaved()
+    public async Task Get_ForANewUser_ReturnsTheFiveDefaultsInOrderWithTheirTypes_AStrongETag_AndNothingIsSaved()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
@@ -41,9 +41,9 @@ public class SettingFlowTest
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Matches("^\"[0-9a-f]{64}\"$", response.GetETag());
-        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename], list.Select(x => x.Key).ToList());
-        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Integer, SettingValueTypeEnum.Boolean], list.Select(x => x.ValueType).ToList());
-        Assert.Equal(["Off", "No", "100", "False"], list.Select(x => Value(x).ToString()).ToList());
+        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems], list.Select(x => x.Key).ToList());
+        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Integer, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Boolean], list.Select(x => x.ValueType).ToList());
+        Assert.Equal(["Off", "No", "100", "False", "False"], list.Select(x => Value(x).ToString()).ToList());
         Assert.Contains("\"valueType\":\"Enum\"", body);
         Assert.All(list, x => Assert.Equal(DateTime.UnixEpoch, x.TimeModified));
     }
@@ -60,10 +60,11 @@ public class SettingFlowTest
         HttpResponseMessage repeat = await Patch(api, user, SettingKey.Repeat, """{"value":"Forever"}""");
         HttpResponseMessage shuffle = await Patch(api, user, SettingKey.Shuffle, """{"value":"SpreadArtists"}""");
         HttpResponseMessage merge = await Patch(api, user, SettingKey.MergeOnRename, """{"value":true}""");
+        HttpResponseMessage keep = await Patch(api, user, SettingKey.KeepQueuedItems, """{"value":true}""");
         HttpResponseMessage listResponse = await api.GetPath(user.Token, "/Settings");
         List<ResponseSetting> list = await listResponse.ReadJson<List<ResponseSetting>>();
 
-        Assert.All([volume, repeat, shuffle, merge], x => Assert.Equal(HttpStatusCode.OK, x.StatusCode));
+        Assert.All([volume, repeat, shuffle, merge, keep], x => Assert.Equal(HttpStatusCode.OK, x.StatusCode));
         Assert.Equal(40, Value(await volume.ReadJson<ResponseSetting>()).GetInt32());
         Assert.Equal("SpreadArtists", Value(list.Single(x => x.Key == SettingKey.Shuffle)).GetString());
         Assert.Equal("Forever", Value(list.Single(x => x.Key == SettingKey.Repeat)).GetString());
@@ -121,6 +122,8 @@ public class SettingFlowTest
     [InlineData(SettingKey.Shuffle, """{"value":true}""")]
     [InlineData(SettingKey.MergeOnRename, """{"value":"true"}""")]
     [InlineData(SettingKey.MergeOnRename, """{"value":1}""")]
+    [InlineData(SettingKey.KeepQueuedItems, """{"value":"yes"}""")]
+    [InlineData(SettingKey.KeepQueuedItems, """{"value":1}""")]
     [InlineData(SettingKey.Volume, "{}")]
     [InlineData(SettingKey.Volume, "[]")]
     [InlineData(SettingKey.Volume, "40")]
@@ -149,6 +152,23 @@ public class SettingFlowTest
         ApiAccount user = await api.SignUp("a@example.com");
 
         Assert.Equal(HttpStatusCode.NotFound, (await Patch(api, user, key, """{"value":40}""")).StatusCode);
+    }
+
+    [Fact]
+    public async Task KeepQueuedItems_StoresPushesAndReadsBack_AndTheSameValueAgainPushesNothing()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
+        HttpResponseMessage first = await Patch(api, user, SettingKey.KeepQueuedItems, """{"value":true}""");
+        await Patch(api, user, SettingKey.KeepQueuedItems, """{"value":true}""");
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        ResponseSetting pushed = await hub.NextSettingUpdated();
+        Assert.Equal(SettingKey.KeepQueuedItems, pushed.Key);
+        Assert.True(Value(pushed).GetBoolean());
+        Assert.Equal(1, await hub.CountReceivedAfter(TimeSpan.FromMilliseconds(500)));
+        Assert.True(Value((await GetList(api, user)).Single(x => x.Key == SettingKey.KeepQueuedItems)).GetBoolean());
     }
 
     [Fact]

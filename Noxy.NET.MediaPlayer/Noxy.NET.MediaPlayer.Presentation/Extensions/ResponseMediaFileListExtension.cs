@@ -1,5 +1,5 @@
+using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using Noxy.NET.MediaPlayer.Presentation.Enums;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Extensions;
 
@@ -11,9 +11,9 @@ public static class ResponseMediaFileListExtension
         public List<ResponseMediaFile> Filter(string? query)
         {
             string[] wordList = (query ?? string.Empty).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-            if (wordList.Length == 0) return [.. mediaFileList];
-
-            return mediaFileList.Where(mediaFile => wordList.All(word => Matches(mediaFile, word))).ToList();
+            return wordList.Length == 0
+                ? [.. mediaFileList]
+                : mediaFileList.Where(mediaFile => wordList.All(word => Matches(mediaFile, word))).ToList();
         }
 
         // Stable: equal keys keep their order, in both directions. A media file with no key (no artist, album or year) always comes last. Always a new list.

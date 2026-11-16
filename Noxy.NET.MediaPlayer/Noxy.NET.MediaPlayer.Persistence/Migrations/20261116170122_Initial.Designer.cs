@@ -11,7 +11,7 @@ using Noxy.NET.MediaPlayer.Persistence;
 namespace Noxy.NET.MediaPlayer.Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261116112252_Initial")]
+    [Migration("20261116170122_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -470,43 +470,6 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.ToTable("MediaFileGenre");
                 });
 
-            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playback.TablePlaybackSession", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("CurrentIndex")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid?>("PlaylistID")
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("PositionSeconds")
-                        .HasColumnType("REAL");
-
-                    b.Property<string>("QueueMediaFileIDList")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("TimeCreated")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("TimeModified")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("TimeCreated");
-
-                    b.HasIndex("UserID")
-                        .IsUnique();
-
-                    b.ToTable("PlaybackSession");
-                });
-
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylist", b =>
                 {
                     b.Property<Guid>("ID")
@@ -519,6 +482,12 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("Repeat")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Shuffle")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("TimeCreated")
                         .HasColumnType("TEXT");
@@ -782,17 +751,6 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.Navigation("Genre");
 
                     b.Navigation("MediaFile");
-                });
-
-            modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playback.TablePlaybackSession", b =>
-                {
-                    b.HasOne("Noxy.NET.MediaPlayer.Persistence.Tables.Authentication.TableUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Noxy.NET.MediaPlayer.Persistence.Tables.Playlist.TablePlaylist", b =>

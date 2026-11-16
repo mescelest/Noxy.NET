@@ -173,14 +173,6 @@ public sealed class MediaApiClient(ApiFactory factory)
         return await _client.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
-    public async Task<HttpResponseMessage> GetPlaybackSession(string? token, string? ifNoneMatch = null)
-    {
-        using HttpRequestMessage request = new(HttpMethod.Get, "/PlaybackSession");
-        Authorize(request, token);
-        if (ifNoneMatch is not null) request.Headers.TryAddWithoutValidation(HeaderNames.IfNoneMatch, ifNoneMatch);
-        return await _client.SendAsync(request, TestContext.Current.CancellationToken);
-    }
-
     public Task<HttpResponseMessage> CreatePlaylist(string? token, string json)
     {
         return SendJson(HttpMethod.Post, PlaylistPath, token, json);
