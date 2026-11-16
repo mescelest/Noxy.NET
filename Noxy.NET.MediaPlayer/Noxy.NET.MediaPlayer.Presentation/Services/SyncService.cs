@@ -2,6 +2,7 @@ using System.Net;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
+using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Presentation.Models;
@@ -144,7 +145,7 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
             SetOffline(false);
             return response;
         }
-        catch (Exception exception) when (exception is HttpRequestException or ServerAddressMissingException or TaskCanceledException)
+        catch (Exception exception) when (exception.IsOfflineFailure)
         {
             SetOffline(true);
             return null;

@@ -1,13 +1,15 @@
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Storage.Stores;
 
-public class SqliteMetadataStore(string databasePath) : IMetadataStore
+public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISettingStore, IMetadataListStore
 {
     // SQLite's result codes for a file that is not a database and for a damaged one.
     private const int SqliteCorrupt = 11;
@@ -19,6 +21,14 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
     private const string FileStateTable = "FileState";
     private const string LibraryETagKey = "LibraryETag";
     private const string PlaylistListETagKey = "PlaylistListETag";
+    private const string UserSettingTable = "UserSetting";
+    private const string ArtistTable = "Artist";
+    private const string AlbumTable = "Album";
+    private const string GenreTable = "Genre";
+    private const string SettingListETagKey = "SettingListETag";
+    private const string ArtistListETagKey = "ArtistListETag";
+    private const string AlbumListETagKey = "AlbumListETag";
+    private const string GenreListETagKey = "GenreListETag";
 
     private readonly SemaphoreSlim _readyLock = new(1, 1);
     private readonly string _connectionString = new SqliteConnectionStringBuilder { DataSource = databasePath, Mode = SqliteOpenMode.ReadWriteCreate, Pooling = true }.ToString();
@@ -165,6 +175,129 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
         await Delete(FileStateTable, mediaFileID);
     }
 
+    #region -- Settings --
+
+    public async Task<List<ResponseSetting>> GetSettingList()
+    {
+        return await ReadList<ResponseSetting>(UserSettingTable);
+    }
+
+    public async Task ReplaceSettingList(List<ResponseSetting> settingList)
+    {
+        await ReplaceTable(UserSettingTable, settingList, x => x.Key);
+    }
+
+    public async Task SaveSetting(ResponseSetting setting)
+    {
+        await Upsert(UserSettingTable, setting.Key, setting);
+    }
+
+    public async Task<string?> GetSettingListETag()
+    {
+        return await GetSetting(SettingListETagKey);
+    }
+
+    public async Task SetSettingListETag(string? eTag)
+    {
+        await SetSetting(SettingListETagKey, eTag);
+    }
+
+    #endregion -- Settings --
+
+    #region -- Artists, albums and genres --
+
+    public async Task<List<ResponseArtist>> GetArtistList()
+    {
+        return await ReadList<ResponseArtist>(ArtistTable);
+    }
+
+    public async Task ReplaceArtistList(List<ResponseArtist> artistList)
+    {
+        await ReplaceTable(ArtistTable, artistList, x => x.ID.ToString());
+    }
+
+    public async Task SaveArtist(ResponseArtist artist)
+    {
+        await Upsert(ArtistTable, artist.ID.ToString(), artist);
+    }
+
+    public async Task DeleteArtist(Guid id)
+    {
+        await Delete(ArtistTable, id);
+    }
+
+    public async Task<string?> GetArtistListETag()
+    {
+        return await GetSetting(ArtistListETagKey);
+    }
+
+    public async Task SetArtistListETag(string? eTag)
+    {
+        await SetSetting(ArtistListETagKey, eTag);
+    }
+
+    public async Task<List<ResponseAlbum>> GetAlbumList()
+    {
+        return await ReadList<ResponseAlbum>(AlbumTable);
+    }
+
+    public async Task ReplaceAlbumList(List<ResponseAlbum> albumList)
+    {
+        await ReplaceTable(AlbumTable, albumList, x => x.ID.ToString());
+    }
+
+    public async Task SaveAlbum(ResponseAlbum album)
+    {
+        await Upsert(AlbumTable, album.ID.ToString(), album);
+    }
+
+    public async Task DeleteAlbum(Guid id)
+    {
+        await Delete(AlbumTable, id);
+    }
+
+    public async Task<string?> GetAlbumListETag()
+    {
+        return await GetSetting(AlbumListETagKey);
+    }
+
+    public async Task SetAlbumListETag(string? eTag)
+    {
+        await SetSetting(AlbumListETagKey, eTag);
+    }
+
+    public async Task<List<ResponseGenre>> GetGenreList()
+    {
+        return await ReadList<ResponseGenre>(GenreTable);
+    }
+
+    public async Task ReplaceGenreList(List<ResponseGenre> genreList)
+    {
+        await ReplaceTable(GenreTable, genreList, x => x.ID.ToString());
+    }
+
+    public async Task SaveGenre(ResponseGenre genre)
+    {
+        await Upsert(GenreTable, genre.ID.ToString(), genre);
+    }
+
+    public async Task DeleteGenre(Guid id)
+    {
+        await Delete(GenreTable, id);
+    }
+
+    public async Task<string?> GetGenreListETag()
+    {
+        return await GetSetting(GenreListETagKey);
+    }
+
+    public async Task SetGenreListETag(string? eTag)
+    {
+        await SetSetting(GenreListETagKey, eTag);
+    }
+
+    #endregion -- Artists, albums and genres --
+
     private async Task<List<T>> ReadList<T>(string table)
     {
         await using SqliteConnection connection = await Open();
@@ -181,10 +314,15 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
     // An existing row keeps its place in the order: only a new ID goes last.
     private async Task Upsert<T>(string table, Guid id, T value)
     {
+        await Upsert(table, id.ToString(), value);
+    }
+
+    private async Task Upsert<T>(string table, string id, T value)
+    {
         await using SqliteConnection connection = await Open();
         await using SqliteCommand command = connection.CreateCommand();
         command.CommandText = $"INSERT INTO {table} (ID, Json) VALUES ($id, $json) ON CONFLICT(ID) DO UPDATE SET Json = excluded.Json";
-        command.Parameters.AddWithValue("$id", id.ToString());
+        command.Parameters.AddWithValue("$id", id);
         command.Parameters.AddWithValue("$json", JsonSerializer.Serialize(value, JsonSerializerOptions.Web));
 
         await command.ExecuteNonQueryAsync();
@@ -194,6 +332,17 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
     {
         await using SqliteConnection connection = await Open();
         await Execute(connection, null, $"DELETE FROM {table} WHERE ID = $id", ("$id", id.ToString()));
+    }
+
+    private async Task ReplaceTable<T>(string table, List<T> valueList, Func<T, string> idOf)
+    {
+        await using SqliteConnection connection = await Open();
+        await using SqliteTransaction transaction = (SqliteTransaction)await connection.BeginTransactionAsync();
+
+        await Execute(connection, transaction, $"DELETE FROM {table}");
+        foreach (T value in valueList) await Insert(connection, transaction, table, idOf(value), value);
+
+        await transaction.CommitAsync();
     }
 
     private async Task<string?> GetSetting(string key)
@@ -220,7 +369,12 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
 
     private static async Task Insert<T>(SqliteConnection connection, SqliteTransaction transaction, string table, Guid id, T value)
     {
-        await Execute(connection, transaction, $"INSERT INTO {table} (ID, Json) VALUES ($id, $json)", ("$id", id.ToString()), ("$json", JsonSerializer.Serialize(value, JsonSerializerOptions.Web)));
+        await Insert(connection, transaction, table, id.ToString(), value);
+    }
+
+    private static async Task Insert<T>(SqliteConnection connection, SqliteTransaction transaction, string table, string id, T value)
+    {
+        await Execute(connection, transaction, $"INSERT INTO {table} (ID, Json) VALUES ($id, $json)", ("$id", id),("$json", JsonSerializer.Serialize(value, JsonSerializerOptions.Web)));
     }
 
     private static async Task Execute(SqliteConnection connection, SqliteTransaction? transaction, string sql, params (string Name, string Value)[] parameterList)
@@ -286,7 +440,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
         // Write-ahead logging lets a read go on while a write happens.
         await Execute(connection, null, "PRAGMA journal_mode = WAL");
 
-        foreach (string table in (string[])[MediaFileTable, PlaylistTable, PlaylistDetailTable, FileStateTable])
+        foreach (string table in (string[])[MediaFileTable, PlaylistTable, PlaylistDetailTable, FileStateTable, UserSettingTable, ArtistTable, AlbumTable, GenreTable])
         {
             await Execute(connection, null, $"CREATE TABLE IF NOT EXISTS {table} (RowID INTEGER PRIMARY KEY AUTOINCREMENT, ID TEXT NOT NULL UNIQUE, Json TEXT NOT NULL)");
         }

@@ -1,8 +1,12 @@
 using System.Net;
 using System.Text.Json;
+using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
+using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -554,4 +558,173 @@ public class ApiClientTest
     }
 
     #endregion -- File --
+
+    #region -- Settings and metadata lists --
+
+    private static ResponseSetting Setting(string key, object value, SettingValueTypeEnum valueType)
+    {
+        return new() { Key = key, ValueType = valueType, Value = JsonSerializer.SerializeToElement(value), TimeModified = DateTime.UtcNow };
+    }
+
+    private static ResponseArtist Artist(string name = "Artist")
+    {
+        return new() { ID = Guid.CreateVersion7(), Name = name, MediaFileCount = 1, TimeModified = DateTime.UtcNow };
+    }
+
+    public static TheoryData<string, string> TheNewReads => new()
+    {
+        { "Settings", nameof(IApiClient.GetSettingList) },
+        { "Artist", nameof(IApiClient.GetArtistList) },
+        { "Album", nameof(IApiClient.GetAlbumList) },
+        { "Genre", nameof(IApiClient.GetGenreList) }
+    };
+
+    private Task Read(string call, string? eTag)
+    {
+        return call switch
+        {
+            nameof(IApiClient.GetSettingList) => _client.GetSettingList(eTag),
+            nameof(IApiClient.GetArtistList) => _client.GetArtistList(eTag),
+            nameof(IApiClient.GetAlbumList) => _client.GetAlbumList(eTag),
+            nameof(IApiClient.GetGenreList) => _client.GetGenreList(eTag),
+            _ => throw new InvalidOperationException(call)
+        };
+    }
+
+    [Theory]
+    [MemberData(nameof(TheNewReads))]
+    public async Task TheNewReads_SendTheBearerTokenAndTheETag_ToTheirPath(string path, string call)
+    {
+        _handler.Respond = _ => Ok(new List<object>());
+
+        await Read(call, "\"abc\"");
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Get, request.Method);
+        Assert.Equal($"https://server.example/{path}", request.Uri?.ToString());
+        Assert.Equal("Bearer token-1", request.Authorization);
+        Assert.Equal("\"abc\"", request.IfNoneMatch);
+    }
+
+    [Fact]
+    public async Task GetSettingList_On200_ReturnsTheListAndTheETag_AndOn304NotModified()
+    {
+        _handler.Respond = _ => Ok(new List<ResponseSetting> { Setting("Volume", 40, SettingValueTypeEnum.Integer) }, "\"s1\"");
+
+        ApiResponse<List<ResponseSetting>> response = await _client.GetSettingList(null);
+
+        Assert.Equal("\"s1\"", response.ETag);
+        ResponseSetting setting = Assert.Single(response.Value ?? []);
+        Assert.Equal("Volume", setting.Key);
+        Assert.Equal(40, Assert.IsType<JsonElement>(setting.Value).GetInt32());
+
+        _handler.Respond = _ => new(HttpStatusCode.NotModified);
+        ApiResponse<List<ResponseSetting>> notModified = await _client.GetSettingList("\"s1\"");
+        Assert.True(notModified.IsNotModified);
+        Assert.Null(notModified.Value);
+    }
+
+    [Fact]
+    public async Task GetArtistListGetAlbumListAndGetGenreList_On200_ReturnTheirListAndETag_AndOn304NotModified()
+    {
+        _handler.Respond = _ => Ok(new List<ResponseArtist> { Artist("A") }, "\"a1\"");
+        ApiResponse<List<ResponseArtist>> artist = await _client.GetArtistList(null);
+        _handler.Respond = _ => Ok(new List<ResponseAlbum> { new() { ID = Guid.CreateVersion7(), Title = "B", ArtistIDList = [], MediaFileCount = 1, TimeModified = DateTime.UtcNow } }, "\"b1\"");
+        ApiResponse<List<ResponseAlbum>> album = await _client.GetAlbumList(null);
+        _handler.Respond = _ => Ok(new List<ResponseGenre> { new() { ID = Guid.CreateVersion7(), Name = "G", MediaFileCount = 1, TimeModified = DateTime.UtcNow } }, "\"g1\"");
+        ApiResponse<List<ResponseGenre>> genre = await _client.GetGenreList(null);
+
+        Assert.Equal(("A", "\"a1\""), (Assert.Single(artist.Value ?? []).Name, artist.ETag));
+        Assert.Equal(("B", "\"b1\""), (Assert.Single(album.Value ?? []).Title, album.ETag));
+        Assert.Equal(("G", "\"g1\""), (Assert.Single(genre.Value ?? []).Name, genre.ETag));
+
+        _handler.Respond = _ => new(HttpStatusCode.NotModified);
+        Assert.True((await _client.GetArtistList("\"a1\"")).IsNotModified);
+        Assert.True((await _client.GetAlbumList("\"b1\"")).IsNotModified);
+        Assert.True((await _client.GetGenreList("\"g1\"")).IsNotModified);
+    }
+
+    [Theory]
+    [InlineData("Shuffle", "true", "{\"value\":true}")]
+    [InlineData("Volume", "40", "{\"value\":40}")]
+    [InlineData("Repeat", "\"Forever\"", "{\"value\":\"Forever\"}")]
+    public async Task UpdateSetting_PatchesTheKeyWithTheValueAsJson_AndReturnsTheSetting(string key, string valueJson, string expectedBody)
+    {
+        JsonElement value = JsonDocument.Parse(valueJson).RootElement.Clone();
+        _handler.Respond = _ => Ok(new { key, valueType = "Integer", value, timeModified = DateTime.UtcNow });
+
+        ResponseSetting setting = await _client.UpdateSetting(key, value);
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Patch, request.Method);
+        Assert.Equal($"https://server.example/Settings/{key}", request.Uri?.ToString());
+        Assert.Equal(expectedBody, request.Body);
+        Assert.Equal("Bearer token-1", request.Authorization);
+        Assert.Equal(key, setting.Key);
+    }
+
+    [Fact]
+    public async Task MarkPlaylistPlayed_PostsToThePlayedPath_AndAccepts204()
+    {
+        _handler.Respond = _ => new(HttpStatusCode.NoContent);
+
+        await _client.MarkPlaylistPlayed(PlaylistID);
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Post, request.Method);
+        Assert.Equal($"https://server.example/Playlist/{PlaylistID}/Played", request.Uri?.ToString());
+    }
+
+    [Fact]
+    public async Task UpdatePlaylist_WithAShuffleAndRepeatMode_SendsThemByName_AndWithNullSendsNull_AndWithNeitherSendsNeither()
+    {
+        _handler.Respond = _ => Ok(Playlist());
+
+        await _client.UpdatePlaylist(PlaylistID, new() { Shuffle = new(ShuffleModeEnum.Random), Repeat = new(RepeatModeEnum.Forever) });
+        await _client.UpdatePlaylist(PlaylistID, new() { Shuffle = new(null) });
+        await _client.UpdatePlaylist(PlaylistID, new() { Name = new("Renamed") });
+
+        Assert.Equal(["{\"shuffle\":\"Random\",\"repeat\":\"Forever\"}", "{\"shuffle\":null}", "{\"name\":\"Renamed\"}"], _handler.RequestList.Select(x => x.Body));
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.NotFound, "The setting was not found.")]
+    [InlineData(HttpStatusCode.Conflict, "Conflict.")]
+    public async Task AWriteRefusedWithAProblem_ThrowsApiExceptionWithItsStatusAndTitle(HttpStatusCode status, string title)
+    {
+        _handler.Respond = _ => FakeHttpMessageHandler.Problem(status, title);
+
+        ApiException setting = await Assert.ThrowsAsync<ApiException>(() => _client.UpdateSetting("Volume", JsonSerializer.SerializeToElement(1)));
+        ApiException played = await Assert.ThrowsAsync<ApiException>(() => _client.MarkPlaylistPlayed(PlaylistID));
+
+        Assert.Equal((status, title), (setting.Status, setting.Message));
+        Assert.Equal(status, played.Status);
+    }
+
+    [Theory]
+    [MemberData(nameof(TheNewReads))]
+    public async Task TheNewReads_WithNoSavedAddress_ThrowServerAddressMissingException_AndSendNothing(string path, string call)
+    {
+        Assert.NotEmpty(path);
+        _address.Address = null;
+
+        await Assert.ThrowsAsync<ServerAddressMissingException>(() => Read(call, null));
+        await Assert.ThrowsAsync<ServerAddressMissingException>(() => _client.UpdateSetting("Volume", JsonSerializer.SerializeToElement(1)));
+        await Assert.ThrowsAsync<ServerAddressMissingException>(() => _client.MarkPlaylistPlayed(PlaylistID));
+
+        Assert.Empty(_handler.RequestList);
+    }
+
+    [Fact]
+    public async Task TheNewCalls_AnUnauthorizedAnswer_RefreshesOnceAndRetriesOnce_WithTheNewToken()
+    {
+        _handler.Respond = request => request.Authorization == "Bearer token-2" ? new(HttpStatusCode.NoContent) : FakeHttpMessageHandler.Problem(HttpStatusCode.Unauthorized, "Unauthorized.");
+
+        await _client.MarkPlaylistPlayed(PlaylistID);
+
+        Assert.Equal(1, _session.RefreshCount);
+        Assert.Equal(2, _handler.RequestList.Count);
+    }
+
+    #endregion -- Settings and metadata lists --
 }

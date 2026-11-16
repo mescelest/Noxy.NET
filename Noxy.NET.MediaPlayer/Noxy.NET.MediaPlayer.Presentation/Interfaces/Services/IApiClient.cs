@@ -1,6 +1,9 @@
+using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
@@ -17,6 +20,21 @@ public interface IApiClient
 
     // The media file's bytes, streamed: the body is not read until the caller reads Content. With rangeStart the server is asked for the bytes from there on, and with ifRange (the ETag of the bytes already held) it answers 206 only when the file is still that one, else 200 with the whole file. The caller disposes the response.
     Task<ApiFileResponse> GetFile(Guid id, long? rangeStart, string? ifRange);
+
+    // The user's settings, each with its value as the JSON the server sent. Same ETag rules as the library.
+    Task<ApiResponse<List<ResponseSetting>>> GetSettingList(string? eTag);
+
+    // Writes one setting and returns it as the server stored it. The value is the JSON of a boolean, an integer or an enum member name.
+    Task<ResponseSetting> UpdateSetting(string key, JsonElement value);
+
+    Task<ApiResponse<List<ResponseArtist>>> GetArtistList(string? eTag);
+
+    Task<ApiResponse<List<ResponseAlbum>>> GetAlbumList(string? eTag);
+
+    Task<ApiResponse<List<ResponseGenre>>> GetGenreList(string? eTag);
+
+    // Tells the server a playlist started playing. The server answers 204.
+    Task MarkPlaylistPlayed(Guid id);
 
     Task<ResponsePlaylist> CreatePlaylist(RequestCreatePlaylist request);
 

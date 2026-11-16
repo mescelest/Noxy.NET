@@ -1,9 +1,12 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
@@ -20,6 +23,12 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     private const string FileSegment = "File";
     private const string LibraryPath = "/Media/Library";
     private const string PlaylistPath = "/Playlist";
+    private const string SettingPath = "/Settings";
+    private const string ArtistPath = "/Artist";
+    private const string AlbumPath = "/Album";
+    private const string GenrePath = "/Genre";
+    private const string PlayedSegment = "Played";
+    private const string ValueProperty = "value";
 
     public async Task<ApiResponse<List<ResponseMediaFile>>> GetLibrary(string? eTag)
     {
@@ -87,10 +96,42 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
         return await Write<ResponsePlaylistDetail>(HttpMethod.Put, $"{PlaylistPath}/{id}/Entry/{entryID}/Position", request);
     }
 
+    public async Task<ApiResponse<List<ResponseSetting>>> GetSettingList(string? eTag)
+    {
+        return await Get<List<ResponseSetting>>(SettingPath, eTag);
+    }
+
+    public async Task<ResponseSetting> UpdateSetting(string key, JsonElement value)
+    {
+        return await Write<ResponseSetting>(HttpMethod.Patch, $"{SettingPath}/{key}", new Dictionary<string, JsonElement> { [ValueProperty] = value });
+    }
+
+    public async Task<ApiResponse<List<ResponseArtist>>> GetArtistList(string? eTag)
+    {
+        return await Get<List<ResponseArtist>>(ArtistPath, eTag);
+    }
+
+    public async Task<ApiResponse<List<ResponseAlbum>>> GetAlbumList(string? eTag)
+    {
+        return await Get<List<ResponseAlbum>>(AlbumPath, eTag);
+    }
+
+    public async Task<ApiResponse<List<ResponseGenre>>> GetGenreList(string? eTag)
+    {
+        return await Get<List<ResponseGenre>>(GenrePath, eTag);
+    }
+
+    public async Task MarkPlaylistPlayed(Guid id)
+    {
+        using HttpResponseMessage response = await Send(HttpMethod.Post, $"{PlaylistPath}/{id}/{PlayedSegment}", null, null);
+        await EnsureSuccess(response);
+    }
+
     private async Task<ApiResponse<T>> Get<T>(string path, string? eTag)
     {
         using HttpResponseMessage response = await Send(HttpMethod.Get, path, null, eTag);
         if (response.StatusCode == HttpStatusCode.NotModified) return new(HttpStatusCode.NotModified, default, response.Headers.ETag?.Tag);
+        if (response.StatusCode == HttpStatusCode.NoContent) return new(HttpStatusCode.NoContent, default, null);
 
         await EnsureSuccess(response);
         T value = await ReadBody<T>(response);

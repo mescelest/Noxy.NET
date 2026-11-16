@@ -13,7 +13,10 @@ public static class ServiceCollectionExtensions
         // The folder is the app's own data folder; the database file inside it is created on first use.
         public IServiceCollection AddStorage(string dataFolder)
         {
-            services.AddSingleton<IMetadataStore>(_ => new SqliteMetadataStore(Path.Combine(dataFolder, Constants.MetadataDatabaseFileName)));
+            services.AddSingleton(_ => new SqliteMetadataStore(Path.Combine(dataFolder, Constants.MetadataDatabaseFileName)));
+            services.AddSingleton<IMetadataStore>(provider => provider.GetRequiredService<SqliteMetadataStore>());
+            services.AddSingleton<ISettingStore>(provider => provider.GetRequiredService<SqliteMetadataStore>());
+            services.AddSingleton<IMetadataListStore>(provider => provider.GetRequiredService<SqliteMetadataStore>());
             services.AddSingleton<IFileStore>(_ => new DiskFileStore(dataFolder));
 
             return services;

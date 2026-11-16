@@ -4,13 +4,15 @@ using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.Application;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class MediaHubService(ISyncService serviceSync, ISessionService serviceSession, IServerAddressStorage storageServerAddress, ILogger<MediaHubService> logger) : IMediaHubService
+public class MediaHubService(ISyncService serviceSync, ISettingService serviceSetting, IMetadataSyncService serviceMetadataSync, ISessionService serviceSession, IServerAddressStorage storageServerAddress, ILogger<MediaHubService> logger) : IMediaHubService
 {
     public static IReadOnlyList<string> HandledEventNameList { get; } =
     [
@@ -18,7 +20,14 @@ public class MediaHubService(ISyncService serviceSync, ISessionService serviceSe
         nameof(MediaHubEventEnum.MediaUpdated),
         nameof(MediaHubEventEnum.MediaDeleted),
         nameof(MediaHubEventEnum.PlaylistUpdated),
-        nameof(MediaHubEventEnum.PlaylistDeleted)
+        nameof(MediaHubEventEnum.PlaylistDeleted),
+        nameof(MediaHubEventEnum.SettingUpdated),
+        nameof(MediaHubEventEnum.ArtistUpdated),
+        nameof(MediaHubEventEnum.ArtistDeleted),
+        nameof(MediaHubEventEnum.AlbumUpdated),
+        nameof(MediaHubEventEnum.AlbumDeleted),
+        nameof(MediaHubEventEnum.GenreUpdated),
+        nameof(MediaHubEventEnum.GenreDeleted)
     ];
 
     private readonly SemaphoreSlim _lock = new(1, 1);
@@ -86,6 +95,17 @@ public class MediaHubService(ISyncService serviceSync, ISessionService serviceSe
         if (!serviceSession.IsSignedIn) _ = Run(nameof(ISessionService.Changed), Stop);
     }
 
+    // What the connection missed while it was down. Each sync has its own try, so one that fails does not skip the others.
+    public async Task SyncAfterReconnect()
+    {
+        await Run(nameof(ISyncService.SyncLibrary), () => serviceSync.SyncLibrary());
+        await Run(nameof(ISyncService.SyncPlaylistList), () => serviceSync.SyncPlaylistList());
+        await Run(nameof(ISettingService.SyncSettingList), () => serviceSetting.SyncSettingList());
+        await Run(nameof(IMetadataSyncService.SyncArtistList), () => serviceMetadataSync.SyncArtistList());
+        await Run(nameof(IMetadataSyncService.SyncAlbumList), () => serviceMetadataSync.SyncAlbumList());
+        await Run(nameof(IMetadataSyncService.SyncGenreList), () => serviceMetadataSync.SyncGenreList());
+    }
+
     // A place for tests to swap the transport (for example to reach an in-memory test server). The app leaves the defaults.
     protected virtual void ConfigureConnection(HttpConnectionOptions options) { }
 
@@ -105,11 +125,14 @@ public class MediaHubService(ISyncService serviceSync, ISessionService serviceSe
         connection.On<Guid>(nameof(MediaHubEventEnum.MediaDeleted), x => Run(nameof(MediaHubEventEnum.MediaDeleted), () => serviceSync.ApplyMediaDeleted(x)));
         connection.On<ResponsePlaylist>(nameof(MediaHubEventEnum.PlaylistUpdated), x => Run(nameof(MediaHubEventEnum.PlaylistUpdated), () => serviceSync.ApplyPlaylistUpdated(x)));
         connection.On<Guid>(nameof(MediaHubEventEnum.PlaylistDeleted), x => Run(nameof(MediaHubEventEnum.PlaylistDeleted), () => serviceSync.ApplyPlaylistDeleted(x)));
-        connection.Reconnected += _ => Run(nameof(HubConnection.Reconnected), async () =>
-        {
-            await serviceSync.SyncLibrary();
-            await serviceSync.SyncPlaylistList();
-        });
+        connection.On<ResponseSetting>(nameof(MediaHubEventEnum.SettingUpdated), x => Run(nameof(MediaHubEventEnum.SettingUpdated), () => serviceSetting.ApplySettingUpdated(x)));
+        connection.On<ResponseArtist>(nameof(MediaHubEventEnum.ArtistUpdated), x => Run(nameof(MediaHubEventEnum.ArtistUpdated), () => serviceMetadataSync.ApplyArtistUpdated(x)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.ArtistDeleted), x => Run(nameof(MediaHubEventEnum.ArtistDeleted), () => serviceMetadataSync.ApplyArtistDeleted(x)));
+        connection.On<ResponseAlbum>(nameof(MediaHubEventEnum.AlbumUpdated), x => Run(nameof(MediaHubEventEnum.AlbumUpdated), () => serviceMetadataSync.ApplyAlbumUpdated(x)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.AlbumDeleted), x => Run(nameof(MediaHubEventEnum.AlbumDeleted), () => serviceMetadataSync.ApplyAlbumDeleted(x)));
+        connection.On<ResponseGenre>(nameof(MediaHubEventEnum.GenreUpdated), x => Run(nameof(MediaHubEventEnum.GenreUpdated), () => serviceMetadataSync.ApplyGenreUpdated(x)));
+        connection.On<Guid>(nameof(MediaHubEventEnum.GenreDeleted), x => Run(nameof(MediaHubEventEnum.GenreDeleted), () => serviceMetadataSync.ApplyGenreDeleted(x)));
+        connection.Reconnected += _ => Run(nameof(HubConnection.Reconnected), SyncAfterReconnect);
 
         // Automatic reconnect gave up: forget the connection so the next Start builds a new one.
         connection.Closed += _ =>

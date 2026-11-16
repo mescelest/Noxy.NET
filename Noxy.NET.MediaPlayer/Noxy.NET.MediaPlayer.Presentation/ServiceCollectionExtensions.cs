@@ -18,6 +18,8 @@ public static class ServiceCollectionExtensions
             services.AddHttpClient<IApiClient, ApiClient>();
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<ISyncService, SyncService>();
+            services.AddSingleton<ISettingService, SettingService>();
+            services.AddSingleton<IMetadataSyncService, MetadataSyncService>();
             services.AddSingleton<IDelay, Delay>();
             services.AddSingleton<IHashService, HashService>();
             services.AddSingleton<IDownloadService, DownloadService>();

@@ -1,13 +1,15 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-public sealed class FakeMetadataStore : IMetadataStore
+public sealed class FakeMetadataStore : IMetadataStore, ISettingStore, IMetadataListStore
 {
     private readonly List<ResponseMediaFile> _mediaFileList = [];
     private readonly List<ResponsePlaylist> _playlistList = [];
@@ -15,6 +17,14 @@ public sealed class FakeMetadataStore : IMetadataStore
     private readonly ConcurrentDictionary<Guid, FileState> _fileStateMap = [];
     private string? _libraryETag;
     private string? _playlistListETag;
+    private readonly List<ResponseSetting> _settingList = [];
+    private readonly List<ResponseArtist> _artistList = [];
+    private readonly List<ResponseAlbum> _albumList = [];
+    private readonly List<ResponseGenre> _genreList = [];
+    private string? _settingListETag;
+    private string? _artistListETag;
+    private string? _albumListETag;
+    private string? _genreListETag;
 
     // Everything goes in and out as a copy through JSON, as it does with a real store, so a test can never change what is stored by changing what it got back.
     private static T Copy<T>(T value)
@@ -165,9 +175,170 @@ public sealed class FakeMetadataStore : IMetadataStore
         return Task.CompletedTask;
     }
 
-    private static void Upsert<T>(List<T> list, T value, Func<T, Guid> idOf)
+    #region -- Settings --
+
+    public Task<List<ResponseSetting>> GetSettingList()
     {
-        int index = list.FindIndex(x => idOf(x) == idOf(value));
+        return Task.FromResult(Copy(_settingList));
+    }
+
+    public Task ReplaceSettingList(List<ResponseSetting> settingList)
+    {
+        List<ResponseSetting> copy = Copy(settingList);
+        _settingList.Clear();
+        _settingList.AddRange(copy);
+
+        return Task.CompletedTask;
+    }
+
+    public Task SaveSetting(ResponseSetting setting)
+    {
+        Upsert(_settingList, Copy(setting), x => x.Key);
+
+        return Task.CompletedTask;
+    }
+
+    public Task<string?> GetSettingListETag()
+    {
+        return Task.FromResult(_settingListETag);
+    }
+
+    public Task SetSettingListETag(string? eTag)
+    {
+        _settingListETag = eTag;
+
+        return Task.CompletedTask;
+    }
+
+    #endregion -- Settings --
+
+    #region -- Artists, albums and genres --
+
+    public Task<List<ResponseArtist>> GetArtistList()
+    {
+        return Task.FromResult(Copy(_artistList));
+    }
+
+    public Task ReplaceArtistList(List<ResponseArtist> artistList)
+    {
+        List<ResponseArtist> copy = Copy(artistList);
+        _artistList.Clear();
+        _artistList.AddRange(copy);
+
+        return Task.CompletedTask;
+    }
+
+    public Task SaveArtist(ResponseArtist artist)
+    {
+        Upsert(_artistList, Copy(artist), x => x.ID);
+
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteArtist(Guid id)
+    {
+        _artistList.RemoveAll(x => x.ID == id);
+
+        return Task.CompletedTask;
+    }
+
+    public Task<string?> GetArtistListETag()
+    {
+        return Task.FromResult(_artistListETag);
+    }
+
+    public Task SetArtistListETag(string? eTag)
+    {
+        _artistListETag = eTag;
+
+        return Task.CompletedTask;
+    }
+
+    public Task<List<ResponseAlbum>> GetAlbumList()
+    {
+        return Task.FromResult(Copy(_albumList));
+    }
+
+    public Task ReplaceAlbumList(List<ResponseAlbum> albumList)
+    {
+        List<ResponseAlbum> copy = Copy(albumList);
+        _albumList.Clear();
+        _albumList.AddRange(copy);
+
+        return Task.CompletedTask;
+    }
+
+    public Task SaveAlbum(ResponseAlbum album)
+    {
+        Upsert(_albumList, Copy(album), x => x.ID);
+
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAlbum(Guid id)
+    {
+        _albumList.RemoveAll(x => x.ID == id);
+
+        return Task.CompletedTask;
+    }
+
+    public Task<string?> GetAlbumListETag()
+    {
+        return Task.FromResult(_albumListETag);
+    }
+
+    public Task SetAlbumListETag(string? eTag)
+    {
+        _albumListETag = eTag;
+
+        return Task.CompletedTask;
+    }
+
+    public Task<List<ResponseGenre>> GetGenreList()
+    {
+        return Task.FromResult(Copy(_genreList));
+    }
+
+    public Task ReplaceGenreList(List<ResponseGenre> genreList)
+    {
+        List<ResponseGenre> copy = Copy(genreList);
+        _genreList.Clear();
+        _genreList.AddRange(copy);
+
+        return Task.CompletedTask;
+    }
+
+    public Task SaveGenre(ResponseGenre genre)
+    {
+        Upsert(_genreList, Copy(genre), x => x.ID);
+
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteGenre(Guid id)
+    {
+        _genreList.RemoveAll(x => x.ID == id);
+
+        return Task.CompletedTask;
+    }
+
+    public Task<string?> GetGenreListETag()
+    {
+        return Task.FromResult(_genreListETag);
+    }
+
+    public Task SetGenreListETag(string? eTag)
+    {
+        _genreListETag = eTag;
+
+        return Task.CompletedTask;
+    }
+
+    #endregion -- Artists, albums and genres --
+
+    private static void Upsert<T, TKey>(List<T> list, T value, Func<T, TKey> idOf) where TKey : notnull
+    {
+        int index = list.FindIndex(x => idOf(x).Equals(idOf(value)));
         if (index >= 0) list[index] = value;
         else list.Add(value);
     }

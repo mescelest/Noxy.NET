@@ -16,7 +16,14 @@ public class MediaHubServiceTest
             nameof(MediaHubEventEnum.MediaUpdated),
             nameof(MediaHubEventEnum.MediaDeleted),
             nameof(MediaHubEventEnum.PlaylistUpdated),
-            nameof(MediaHubEventEnum.PlaylistDeleted)
+            nameof(MediaHubEventEnum.PlaylistDeleted),
+            nameof(MediaHubEventEnum.SettingUpdated),
+            nameof(MediaHubEventEnum.ArtistUpdated),
+            nameof(MediaHubEventEnum.ArtistDeleted),
+            nameof(MediaHubEventEnum.AlbumUpdated),
+            nameof(MediaHubEventEnum.AlbumDeleted),
+            nameof(MediaHubEventEnum.GenreUpdated),
+            nameof(MediaHubEventEnum.GenreDeleted)
         ];
 
         Assert.Equal(expected, MediaHubService.HandledEventNameList);
@@ -26,7 +33,7 @@ public class MediaHubServiceTest
     public async Task Start_WithNoSavedAddress_DoesNothing_AndDoesNotThrow()
     {
         FakeSyncService serviceSync = new();
-        MediaHubService serviceHub = new(serviceSync, new FakeSessionService(), new FakeServerAddressStorage(null), new FakeLogger<MediaHubService>());
+        MediaHubService serviceHub = new(serviceSync, new FakeSettingService(), new FakeMetadataSyncService(), new FakeSessionService(), new FakeServerAddressStorage(null), new FakeLogger<MediaHubService>());
 
         await serviceHub.Start();
         await serviceHub.Stop();
@@ -39,7 +46,7 @@ public class MediaHubServiceTest
     public async Task Start_WhenSignedOut_DoesNothing()
     {
         FakeSessionService serviceSession = new() { AccessToken = null };
-        MediaHubService serviceHub = new(new FakeSyncService(), serviceSession, new FakeServerAddressStorage(), new FakeLogger<MediaHubService>());
+        MediaHubService serviceHub = new(new FakeSyncService(), new FakeSettingService(), new FakeMetadataSyncService(), serviceSession, new FakeServerAddressStorage(), new FakeLogger<MediaHubService>());
 
         await serviceHub.Start();
 
@@ -50,7 +57,7 @@ public class MediaHubServiceTest
     public async Task Start_WhenTheServerCannotBeReached_DoesNotThrow_LogsAWarning_AndCanBeStartedAgain()
     {
         FakeLogger<MediaHubService> logger = new();
-        MediaHubService serviceHub = new(new FakeSyncService(), new FakeSessionService(), new FakeServerAddressStorage("http://127.0.0.1:1"), logger);
+        MediaHubService serviceHub = new(new FakeSyncService(), new FakeSettingService(), new FakeMetadataSyncService(), new FakeSessionService(), new FakeServerAddressStorage("http://127.0.0.1:1"), logger);
 
         await serviceHub.Start();
         await serviceHub.Start();
@@ -63,8 +70,25 @@ public class MediaHubServiceTest
     [Fact]
     public async Task Stop_BeforeStart_DoesNotThrow()
     {
-        MediaHubService serviceHub = new(new FakeSyncService(), new FakeSessionService(), new FakeServerAddressStorage(), new FakeLogger<MediaHubService>());
+        MediaHubService serviceHub = new(new FakeSyncService(), new FakeSettingService(), new FakeMetadataSyncService(), new FakeSessionService(), new FakeServerAddressStorage(), new FakeLogger<MediaHubService>());
 
         await serviceHub.Stop();
+    }
+
+    [Fact]
+    public async Task TheReconnectSyncs_EachRunInTheirOwnTry_SoOneFailureDoesNotSkipTheRest()
+    {
+        FakeSyncService serviceSync = new();
+        FakeSettingService serviceSetting = new() { SyncSettingListException = new Noxy.NET.MediaPlayer.Presentation.Exceptions.ApiException(System.Net.HttpStatusCode.InternalServerError, "Broken.") };
+        FakeMetadataSyncService serviceMetadataSync = new() { SyncArtistListException = new Noxy.NET.MediaPlayer.Presentation.Exceptions.ApiException(System.Net.HttpStatusCode.InternalServerError, "Broken.") };
+        FakeLogger<MediaHubService> logger = new();
+        MediaHubService serviceHub = new(serviceSync, serviceSetting, serviceMetadataSync, new FakeSessionService(), new FakeServerAddressStorage(), logger);
+
+        await serviceHub.SyncAfterReconnect();
+
+        Assert.Equal(["SyncLibrary", "SyncPlaylistList"], serviceSync.CallList);
+        Assert.Equal([false], serviceSetting.SyncRequestList);
+        Assert.Equal(["SyncArtistList", "SyncAlbumList", "SyncGenreList"], serviceMetadataSync.CallList);
+        Assert.Equal(2, logger.EntryList.Count(x => x.Level == LogLevel.Error));
     }
 }

@@ -11,6 +11,8 @@ public class AppStartupServiceTest
 {
     private readonly FakeSessionService _serviceSession = new();
     private readonly FakeSyncService _serviceSync = new();
+    private readonly FakeSettingService _serviceSetting = new();
+    private readonly FakeMetadataSyncService _serviceMetadataSync = new();
     private readonly FakeMediaHubService _serviceHub = new();
     private readonly FakeFileReconciler _serviceFileReconciler = new();
     private readonly FakeLogger<AppStartupService> _logger = new();
@@ -18,7 +20,7 @@ public class AppStartupServiceTest
 
     public AppStartupServiceTest()
     {
-        _serviceStartup = new(_serviceSession, _serviceSync, _serviceHub, _serviceFileReconciler, _logger);
+        _serviceStartup = new(_serviceSession, _serviceSync, _serviceSetting, _serviceMetadataSync, _serviceHub, _serviceFileReconciler, _logger);
     }
 
     [Fact]
@@ -142,4 +144,54 @@ public class AppStartupServiceTest
         Assert.Empty(_serviceSync.CallList);
         Assert.Contains(_logger.EntryList, x => x.Level == LogLevel.Error);
     }
+
+    #region -- The settings and the metadata lists --
+
+    [Fact]
+    public async Task Start_SyncsTheNewSubjectsAfterTheLibraryAndPlaylists_ThenConnectsTheHub()
+    {
+        List<string> orderList = [];
+        List<string> syncedWhenSettingsSynced = [];
+        _serviceSetting.OnSyncSettingList = () =>
+        {
+            syncedWhenSettingsSynced.AddRange(_serviceSync.CallList);
+            orderList.Add("settings");
+        };
+        List<string> syncedWhenTheHubStarted = [];
+        _serviceHub.OnStart = () => syncedWhenTheHubStarted.AddRange(_serviceMetadataSync.CallList);
+
+        await _serviceStartup.Start();
+
+        Assert.Equal(["SyncLibrary", "SyncPlaylistList"], syncedWhenSettingsSynced);
+        Assert.Equal(["SyncArtistList", "SyncAlbumList", "SyncGenreList"], _serviceMetadataSync.CallList);
+        Assert.Equal(["SyncArtistList", "SyncAlbumList", "SyncGenreList"], syncedWhenTheHubStarted);
+        Assert.Equal([false], _serviceSetting.SyncRequestList);
+        Assert.Equal(1, _serviceHub.StartCount);
+    }
+
+    [Fact]
+    public async Task Start_WhenOneNewSyncFails_StillRunsTheRest_AndConnectsTheHub()
+    {
+        _serviceSetting.SyncSettingListException = new ApiException(HttpStatusCode.InternalServerError, "Broken.");
+        _serviceMetadataSync.SyncArtistListException = new ApiException(HttpStatusCode.InternalServerError, "Broken.");
+
+        await _serviceStartup.Start();
+
+        Assert.Equal(["SyncArtistList", "SyncAlbumList", "SyncGenreList"], _serviceMetadataSync.CallList);
+        Assert.Equal(1, _serviceHub.StartCount);
+        Assert.Equal(2, _logger.EntryList.Count(x => x.Level == LogLevel.Error));
+    }
+
+    [Fact]
+    public async Task Start_WhenTheSessionCannotBeRestored_SyncsNoneOfTheNewSubjects()
+    {
+        _serviceSession.RestoreSucceeds = false;
+
+        await _serviceStartup.Start();
+
+        Assert.Empty(_serviceSetting.SyncRequestList);
+        Assert.Empty(_serviceMetadataSync.CallList);
+    }
+
+    #endregion -- The settings and the metadata lists --
 }

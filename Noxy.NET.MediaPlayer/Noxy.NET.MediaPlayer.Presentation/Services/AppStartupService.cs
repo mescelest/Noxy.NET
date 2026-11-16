@@ -1,11 +1,13 @@
 using Microsoft.Extensions.Logging;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class AppStartupService(ISessionService serviceSession, ISyncService serviceSync, IMediaHubService serviceHub, IFileReconciler serviceFileReconciler, ILogger<AppStartupService> logger) : IAppStartupService
+public class AppStartupService(ISessionService serviceSession, ISyncService serviceSync, ISettingService serviceSetting, IMetadataSyncService serviceMetadataSync, IMediaHubService serviceHub, IFileReconciler serviceFileReconciler, ILogger<AppStartupService> logger) : IAppStartupService
 {
     private bool _subscribed;
 
@@ -20,6 +22,9 @@ public class AppStartupService(ISessionService serviceSession, ISyncService serv
 
             await serviceSync.SyncLibrary();
             await serviceSync.SyncPlaylistList();
+            // Independent of each other, so they wait on the network together and the hub starts after the slowest, not the sum.
+            await Task.WhenAll(SyncSubject(nameof(ResponseSetting), serviceSetting.SyncSettingList), SyncSubject(nameof(ResponseArtist), serviceMetadataSync.SyncArtistList), SyncSubject(nameof(ResponseAlbum), serviceMetadataSync.SyncAlbumList),
+                SyncSubject(nameof(ResponseGenre), serviceMetadataSync.SyncGenreList));
             await serviceHub.Start();
         }
         catch (ServerAddressMissingException)
@@ -29,6 +34,19 @@ public class AppStartupService(ISessionService serviceSession, ISyncService serv
         catch (Exception exception)
         {
             logger.LogError(exception, "Starting the app's connection to the server failed.");
+        }
+    }
+
+    // Each of these has its own try, so one that fails does not skip the others. What failed is named, never a value.
+    private async Task SyncSubject(string subject, Func<bool, Task> sync)
+    {
+        try
+        {
+            await sync(false);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Syncing {Subject} failed.", subject);
         }
     }
 

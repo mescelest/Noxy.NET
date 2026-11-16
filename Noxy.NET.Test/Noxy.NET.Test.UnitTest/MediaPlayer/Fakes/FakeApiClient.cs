@@ -1,7 +1,10 @@
 ﻿using System.Net;
+using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Models;
@@ -52,6 +55,64 @@ public sealed class FakeApiClient : IApiClient
     {
         PlaylistDetailRequestList.Add((id, eTag));
         return Task.FromResult(PlaylistDetailHandler(id, eTag));
+    }
+
+    public Func<string?, ApiResponse<List<ResponseSetting>>> SettingListHandler { get; set; } = _ => new(HttpStatusCode.OK, [], null);
+
+    public Func<string, JsonElement, ResponseSetting> UpdateSettingHandler { get; set; } = (key, _) => throw new ApiException(HttpStatusCode.NotFound, $"The setting {key} was not found.");
+
+    public Func<string?, ApiResponse<List<ResponseArtist>>> ArtistListHandler { get; set; } = _ => new(HttpStatusCode.OK, [], null);
+
+    public Func<string?, ApiResponse<List<ResponseAlbum>>> AlbumListHandler { get; set; } = _ => new(HttpStatusCode.OK, [], null);
+
+    public Func<string?, ApiResponse<List<ResponseGenre>>> GenreListHandler { get; set; } = _ => new(HttpStatusCode.OK, [], null);
+
+    public List<string?> SettingListETagList { get; } = [];
+
+    public List<(string Key, JsonElement Value)> UpdateSettingRequestList { get; } = [];
+
+    public List<string?> ArtistListETagList { get; } = [];
+
+    public List<string?> AlbumListETagList { get; } = [];
+
+    public List<string?> GenreListETagList { get; } = [];
+
+    public List<Guid> PlayedRequestList { get; } = [];
+
+    public Task<ApiResponse<List<ResponseSetting>>> GetSettingList(string? eTag)
+    {
+        SettingListETagList.Add(eTag);
+        return Task.FromResult(SettingListHandler(eTag));
+    }
+
+    public Task<ResponseSetting> UpdateSetting(string key, JsonElement value)
+    {
+        UpdateSettingRequestList.Add((key, value));
+        return Task.FromResult(UpdateSettingHandler(key, value));
+    }
+
+    public Task<ApiResponse<List<ResponseArtist>>> GetArtistList(string? eTag)
+    {
+        ArtistListETagList.Add(eTag);
+        return Task.FromResult(ArtistListHandler(eTag));
+    }
+
+    public Task<ApiResponse<List<ResponseAlbum>>> GetAlbumList(string? eTag)
+    {
+        AlbumListETagList.Add(eTag);
+        return Task.FromResult(AlbumListHandler(eTag));
+    }
+
+    public Task<ApiResponse<List<ResponseGenre>>> GetGenreList(string? eTag)
+    {
+        GenreListETagList.Add(eTag);
+        return Task.FromResult(GenreListHandler(eTag));
+    }
+
+    public Task MarkPlaylistPlayed(Guid id)
+    {
+        PlayedRequestList.Add(id);
+        return Task.CompletedTask;
     }
 
     public Task<ResponsePlaylist> CreatePlaylist(RequestCreatePlaylist request)

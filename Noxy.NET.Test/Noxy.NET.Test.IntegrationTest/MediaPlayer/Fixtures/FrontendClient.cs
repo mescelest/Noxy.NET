@@ -26,13 +26,15 @@ public sealed class FrontendClient : IAsyncDisposable
         Session = new(new AuthApiClient(httpClient, storageServerAddress), new FakeGoogleSignInService(), sessionStorage, Time);
         Api = new(httpClient, Session, storageServerAddress);
         Sync = new(Api, Store);
-        Hub = new(Sync, Session, storageServerAddress, NullLogger<MediaHubService>.Instance, Network);
+        SettingService = new(Api, Store);
+        MetadataSync = new(Api, Store);
+        Hub = new(Sync, SettingService, MetadataSync, Session, storageServerAddress, NullLogger<MediaHubService>.Instance, Network);
 
         FileStore = new(folder);
         Download = new(Api, FileStore, new HashService(), Store, new Delay(), NullLogger<DownloadService>.Instance);
         Reconciler = new(FileStore, Store, Download);
-        Startup = new(Session, Sync, Hub, Reconciler, NullLogger<AppStartupService>.Instance);
-        Player = new(Audio, Download, FileStore, Store, Sync, NullLogger<PlayerService>.Instance);
+        Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, NullLogger<AppStartupService>.Instance);
+        Player = new(Audio, Download, FileStore, Store, Sync, SettingService, NullLogger<PlayerService>.Instance);
     }
 
     public FakeTimeProvider Time { get; } = new();
@@ -48,6 +50,10 @@ public sealed class FrontendClient : IAsyncDisposable
     public SessionService Session { get; }
 
     public SyncService Sync { get; }
+
+    public SettingService SettingService { get; }
+
+    public MetadataSyncService MetadataSync { get; }
 
     public FakeServerMediaHubService Hub { get; }
 
