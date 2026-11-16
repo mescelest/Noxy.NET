@@ -12,11 +12,14 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
 {
     public event Action? Changed;
 
+    public event Action<LibraryDiff>? LibraryDiffApplied;
+
     public bool IsOffline { get; private set; }
 
     public async Task SyncLibrary(bool force = false)
     {
-        string? eTag = force || (await storeMetadata.GetMediaFileList()).Count == 0 ? null : await storeMetadata.GetLibraryETag();
+        List<ResponseMediaFile> local = await storeMetadata.GetMediaFileList();
+        string? eTag = force || local.Count == 0 ? null : await storeMetadata.GetLibraryETag();
 
         ApiResponse<List<ResponseMediaFile>>? response = await Fetch(() => clientApi.GetLibrary(eTag));
         if (response?.Value is null) return;
@@ -24,6 +27,8 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
         await storeMetadata.ReplaceMediaFileList(response.Value);
         await storeMetadata.SetLibraryETag(response.ETag);
         Changed?.Invoke();
+
+        RaiseLibraryDiff(Diff(local, response.Value));
     }
 
     public async Task SyncPlaylistList(bool force = false)
@@ -62,14 +67,22 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
 
     public async Task ApplyMediaUpdated(ResponseMediaFile mediaFile)
     {
+        ResponseMediaFile? before = await storeMetadata.GetMediaFile(mediaFile.ID);
+
         await storeMetadata.SaveMediaFile(mediaFile);
         Changed?.Invoke();
+
+        RaiseLibraryDiff(Diff(before is null ? [] : [before], [mediaFile]));
     }
 
     public async Task ApplyMediaDeleted(Guid id)
     {
+        ResponseMediaFile? before = await storeMetadata.GetMediaFile(id);
+
         await storeMetadata.DeleteMediaFile(id);
         Changed?.Invoke();
+
+        if (before is not null) RaiseLibraryDiff(new([], [], [id]));
     }
 
     public async Task ApplyPlaylistUpdated(ResponsePlaylist playlist)
@@ -95,6 +108,24 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
         if (result.Media is null) return;
 
         await ApplyMediaUpdated(result.Media);
+    }
+
+    // Compares by ID and by ContentHash: a change that only touches metadata leaves the bytes on the device right, so it is not a change here.
+    private static LibraryDiff Diff(List<ResponseMediaFile> before, List<ResponseMediaFile> after)
+    {
+        Dictionary<Guid, ResponseMediaFile> beforeMap = before.ToDictionary(x => x.ID);
+        HashSet<Guid> afterSet = [.. after.Select(x => x.ID)];
+
+        List<ResponseMediaFile> addedList = after.Where(x => !beforeMap.ContainsKey(x.ID)).ToList();
+        List<ResponseMediaFile> changedList = after.Where(x => beforeMap.TryGetValue(x.ID, out ResponseMediaFile? old) && !string.Equals(old.ContentHash, x.ContentHash, StringComparison.OrdinalIgnoreCase)).ToList();
+        List<Guid> removedIDList = before.Where(x => !afterSet.Contains(x.ID)).Select(x => x.ID).ToList();
+
+        return new(addedList, changedList, removedIDList);
+    }
+
+    private void RaiseLibraryDiff(LibraryDiff diff)
+    {
+        if (!diff.IsEmpty) LibraryDiffApplied?.Invoke(diff);
     }
 
     private static bool IsNewer(ResponsePlaylist pushed, ResponsePlaylist local)

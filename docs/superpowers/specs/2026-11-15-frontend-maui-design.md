@@ -2,6 +2,8 @@
 
 Status: approved by the user on 2026-11-15 ("for now"), written from the conversation. It changes the platform of `2026-11-15-frontend-sync-player-design.md` and `2026-11-15-frontend-screens-design.md` from Blazor WebAssembly to a MAUI Blazor Hybrid app. Lines marked *(my call)* are decisions I made without asking.
 
+Build status (2026-11-16, Windows only; Android is deferred): the foundation (sign in with Google and email, session, API client, SQLite metadata store, metadata sync, hub push, search and sort) and the downloads and player logic (file store, hash-verified resumable downloads, reconciliation and start-up repair, bulk downloads, player service with queue and prefetch, Windows audio player) are built and tested. What still waits for the screens plan: every page, Fluxor state, the settings, artist/album/genre and playback-session sync on the frontend, and a "signed in, offline" state with a retry for an offline start-up.
+
 ## Intent
 
 The app has to keep a library of up to 5000 media files on the device, play them offline, and feel like a normal desktop and phone app. A browser cannot do that well: its storage can be dropped and has a quota, and it has no real file system, media keys or background playback. A MAUI app on Windows and Android stores plain files on disk and can use the platform's own audio, secure storage and system browser. Everything below the screens stays as designed; only the platform pieces under it change.

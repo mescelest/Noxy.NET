@@ -1,6 +1,7 @@
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -16,9 +17,16 @@ public sealed class FakeSyncService : ISyncService
 
     public event Action? Changed;
 
+    public event Action<LibraryDiff>? LibraryDiffApplied;
+
     public void RaiseChanged()
     {
         Changed?.Invoke();
+    }
+
+    public void RaiseLibraryDiff(LibraryDiff diff)
+    {
+        LibraryDiffApplied?.Invoke(diff);
     }
 
     public Task SyncLibrary(bool force = false)

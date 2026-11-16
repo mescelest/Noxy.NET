@@ -28,7 +28,12 @@ public sealed class FrontendClient : IAsyncDisposable
         Api = new(httpClient, Session, storageServerAddress);
         Sync = new(Api, Store);
         Hub = new(Sync, Session, storageServerAddress, NullLogger<MediaHubService>.Instance, Network);
-        Startup = new(Session, Sync, Hub, NullLogger<AppStartupService>.Instance);
+
+        FileStore = new(folder);
+        Download = new(Api, FileStore, new HashService(), Store, new Delay(), NullLogger<DownloadService>.Instance);
+        Reconciler = new(FileStore, Store, Download);
+        Startup = new(Session, Sync, Hub, Reconciler, NullLogger<AppStartupService>.Instance);
+        Player = new(Audio, Download, FileStore, Store, Sync, NullLogger<PlayerService>.Instance);
     }
 
     public FakeTimeProvider Time { get; } = new();
@@ -50,6 +55,17 @@ public sealed class FrontendClient : IAsyncDisposable
     public AppStartupService Startup { get; }
 
     public ApiClient Api { get; }
+
+    public DiskFileStore FileStore { get; }
+
+    public DownloadService Download { get; }
+
+    public FileReconciler Reconciler { get; }
+
+    // No sound device in a test: the player is driven against a fake that records what it was asked.
+    public FakeAudioPlayer Audio { get; } = new();
+
+    public PlayerService Player { get; }
 
     // A folder that is new unless one is given (to stand for the same device after a restart).
     public static FrontendClient Create(ApiFactory factory, FakeSessionStorage? sessionStorage = null, string? folder = null)

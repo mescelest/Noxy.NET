@@ -9,7 +9,20 @@ public sealed class FakeNetworkHandler(HttpMessageHandler inner) : DelegatingHan
     private CancellationTokenSource _drop = new();
     private bool _down;
 
+    private const string FileSegment = "/File";
+
+    private int? _cutNextFileAfterBytes;
+
     public List<(HttpMethod Method, string Path, string? IfNoneMatch, HttpStatusCode? Status)> RequestList { get; } = [];
+
+    // The Range header (null when there was none) of every request for a media file's bytes, in order.
+    public List<string?> FileRangeList { get; } = [];
+
+    // The next file response delivers only this many bytes and then fails, once.
+    public void CutNextFileResponseAfter(int bytes)
+    {
+        lock (_lock) _cutNextFileAfterBytes = bytes;
+    }
 
     // Cuts every request in flight (a waiting long poll too) and fails the ones that follow, until Restore.
     public void Drop()
@@ -46,9 +59,21 @@ public sealed class FakeNetworkHandler(HttpMessageHandler inner) : DelegatingHan
         try
         {
             HttpResponseMessage response = await base.SendAsync(request, linked.Token);
+            string path = request.RequestUri?.AbsolutePath ?? string.Empty;
             lock (_lock)
             {
-                RequestList.Add((request.Method, request.RequestUri?.AbsolutePath ?? string.Empty, request.Headers.IfNoneMatch.FirstOrDefault()?.Tag, response.StatusCode));
+                RequestList.Add((request.Method, path, request.Headers.IfNoneMatch.FirstOrDefault()?.Tag, response.StatusCode));
+
+                if (path.EndsWith(FileSegment, StringComparison.Ordinal))
+                {
+                    FileRangeList.Add(request.Headers.Range?.ToString());
+
+                    if (_cutNextFileAfterBytes is { } bytes && response.IsSuccessStatusCode)
+                    {
+                        response.Content = new FakeCuttingContent(response.Content, bytes);
+                        _cutNextFileAfterBytes = null;
+                    }
+                }
             }
 
             return response;

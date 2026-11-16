@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
+using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -11,12 +12,68 @@ public class AppStartupServiceTest
     private readonly FakeSessionService _serviceSession = new();
     private readonly FakeSyncService _serviceSync = new();
     private readonly FakeMediaHubService _serviceHub = new();
+    private readonly FakeFileReconciler _serviceFileReconciler = new();
     private readonly FakeLogger<AppStartupService> _logger = new();
     private readonly AppStartupService _serviceStartup;
 
     public AppStartupServiceTest()
     {
-        _serviceStartup = new(_serviceSession, _serviceSync, _serviceHub, _logger);
+        _serviceStartup = new(_serviceSession, _serviceSync, _serviceHub, _serviceFileReconciler, _logger);
+    }
+
+    [Fact]
+    public async Task Start_RepairsTheFilesFirst_BeforeAnythingIsSynced()
+    {
+        List<string> calledWhenRepairing = ["not run"];
+        _serviceFileReconciler.OnRepair = () => calledWhenRepairing = [.. _serviceSync.CallList];
+
+        await _serviceStartup.Start();
+
+        Assert.Equal(1, _serviceFileReconciler.RepairCount);
+        Assert.Empty(calledWhenRepairing);
+    }
+
+    [Fact]
+    public async Task Start_RepairsEvenWhenTheSessionCannotBeRestored()
+    {
+        _serviceSession.RestoreSucceeds = false;
+
+        await _serviceStartup.Start();
+
+        Assert.Equal(1, _serviceFileReconciler.RepairCount);
+    }
+
+    [Fact]
+    public async Task Start_WhenTheRepairFails_LogsIt_AndStillSyncs()
+    {
+        _serviceFileReconciler.OnRepair = () => throw new IOException("The disk is not readable.");
+
+        await _serviceStartup.Start();
+
+        Assert.Contains(_logger.EntryList, x => x.Level == LogLevel.Error);
+        Assert.Equal(["SyncLibrary", "SyncPlaylistList"], _serviceSync.CallList);
+    }
+
+    [Fact]
+    public async Task Start_ForwardsEveryLibraryDiffToTheReconciler()
+    {
+        await _serviceStartup.Start();
+        LibraryDiff diff = new([], [], [Guid.CreateVersion7()]);
+
+        _serviceSync.RaiseLibraryDiff(diff);
+
+        Assert.Equal([diff], _serviceFileReconciler.ApplyList);
+    }
+
+    [Fact]
+    public async Task Start_CalledTwice_ForwardsEachLibraryDiffOnlyOnce()
+    {
+        await _serviceStartup.Start();
+        await _serviceStartup.Start();
+
+        _serviceSync.RaiseLibraryDiff(new([], [], [Guid.CreateVersion7()]));
+
+        Assert.Single(_serviceFileReconciler.ApplyList);
     }
 
     [Fact]

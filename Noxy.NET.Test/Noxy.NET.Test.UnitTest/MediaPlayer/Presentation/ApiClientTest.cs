@@ -400,4 +400,158 @@ public class ApiClientTest
     }
 
     #endregion -- Writes --
+
+    #region -- File --
+
+    private static async Task<byte[]> ReadAll(Stream stream)
+    {
+        using MemoryStream copy = new();
+        await stream.CopyToAsync(copy, TestContext.Current.CancellationToken);
+
+        return copy.ToArray();
+    }
+
+    private static HttpResponseMessage File(HttpStatusCode status, FakeTrackedContent content, string? eTag = null, long? rangeFrom = null, long? total = null)
+    {
+        HttpResponseMessage response = new(status) { Content = content };
+        if (eTag is not null) response.Headers.TryAddWithoutValidation("ETag", eTag);
+        if (rangeFrom is not null) response.Content.Headers.ContentRange = new(rangeFrom.Value, (total ?? 0) - 1, total ?? 0);
+
+        return response;
+    }
+
+    [Fact]
+    public async Task GetFile_WithNoRange_GetsTheFilePath_AndReturns200WithTheBytesAndTheETag()
+    {
+        Guid id = Guid.CreateVersion7();
+        byte[] bytes = [1, 2, 3, 4, 5];
+        _handler.Respond = _ => File(HttpStatusCode.OK, new(bytes), "\"file-etag\"");
+
+        using ApiFileResponse response = await _client.GetFile(id, null, null);
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Get, request.Method);
+        Assert.Equal($"https://server.example/Media/{id}/File", request.Uri?.ToString());
+        Assert.Equal("Bearer token-1", request.Authorization);
+        Assert.Null(request.Range);
+        Assert.Null(request.IfRange);
+        Assert.Equal(HttpStatusCode.OK, response.Status);
+        Assert.Equal("\"file-etag\"", response.ETag);
+        Assert.Equal(5, response.TotalBytes);
+        Assert.Equal(bytes, await ReadAll(response.Content));
+    }
+
+    [Fact]
+    public async Task GetFile_DoesNotBufferTheBody_TheCallerReadsItFromTheStream()
+    {
+        FakeTrackedContent content = new([1, 2, 3]);
+        _handler.Respond = _ => File(HttpStatusCode.OK, content);
+
+        using ApiFileResponse response = await _client.GetFile(Guid.CreateVersion7(), null, null);
+
+        Assert.False(content.Buffered);
+        Assert.False(content.WasRead);
+        await ReadAll(response.Content);
+        Assert.True(content.WasRead);
+    }
+
+    [Fact]
+    public async Task GetFile_WithARange_SendsRangeAndIfRange_AndReturns206WithTheTotalFromContentRange()
+    {
+        byte[] rest = [7, 8, 9];
+        _handler.Respond = _ => File(HttpStatusCode.PartialContent, new(rest), "\"file-etag\"", 997, 1000);
+
+        using ApiFileResponse response = await _client.GetFile(Guid.CreateVersion7(), 997, "\"file-etag\"");
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal("bytes=997-", request.Range);
+        Assert.Equal("\"file-etag\"", request.IfRange);
+        Assert.Equal(HttpStatusCode.PartialContent, response.Status);
+        Assert.Equal(1000, response.TotalBytes);
+        Assert.Equal(rest, await ReadAll(response.Content));
+    }
+
+    [Fact]
+    public async Task GetFile_WhenTheServerAnswers200ToARangedRequest_ReturnsOKWithTheWholeFile()
+    {
+        byte[] whole = [1, 2, 3, 4];
+        _handler.Respond = _ => File(HttpStatusCode.OK, new(whole), "\"changed\"");
+
+        using ApiFileResponse response = await _client.GetFile(Guid.CreateVersion7(), 2, "\"old\"");
+
+        Assert.Equal(HttpStatusCode.OK, response.Status);
+        Assert.Equal("\"changed\"", response.ETag);
+        Assert.Equal(4, response.TotalBytes);
+        Assert.Equal(whole, await ReadAll(response.Content));
+    }
+
+    [Fact]
+    public async Task GetFile_WithARangeAndNoETag_SendsNoIfRange()
+    {
+        _handler.Respond = _ => File(HttpStatusCode.PartialContent, new([1]), null, 5, 6);
+
+        using ApiFileResponse response = await _client.GetFile(Guid.CreateVersion7(), 5, null);
+
+        Assert.Equal("bytes=5-", Single().Range);
+        Assert.Null(Single().IfRange);
+    }
+
+    [Fact]
+    public async Task GetFile_AnUnauthorizedResponse_RefreshesOnceAndRetriesOnce_WithTheNewToken()
+    {
+        _handler.Respond = request => request.Authorization == "Bearer token-2" ? File(HttpStatusCode.OK, new([1, 2])) : FakeHttpMessageHandler.Problem(HttpStatusCode.Unauthorized, "Unauthorized.");
+
+        using ApiFileResponse response = await _client.GetFile(Guid.CreateVersion7(), null, null);
+
+        Assert.Equal(HttpStatusCode.OK, response.Status);
+        Assert.Equal(1, _session.RefreshCount);
+        Assert.Equal(["Bearer token-1", "Bearer token-2"], _handler.RequestList.Select(x => x.Authorization));
+    }
+
+    [Fact]
+    public async Task GetFile_UsesTheSavedAddress_AndWithNoneSavedThrowsAndSendsNothing()
+    {
+        _address.Address = null;
+
+        await Assert.ThrowsAsync<ServerAddressMissingException>(() => _client.GetFile(Guid.CreateVersion7(), null, null));
+
+        Assert.Empty(_handler.RequestList);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.NotFound, "The media file was not found.")]
+    [InlineData(HttpStatusCode.RequestedRangeNotSatisfiable, "The range is outside the file.")]
+    public async Task GetFile_AProblemResponse_ThrowsApiExceptionWithItsStatusAndTitle(HttpStatusCode status, string title)
+    {
+        _handler.Respond = _ => FakeHttpMessageHandler.Problem(status, title);
+
+        ApiException exception = await Assert.ThrowsAsync<ApiException>(() => _client.GetFile(Guid.CreateVersion7(), null, null));
+
+        Assert.Equal(status, exception.Status);
+        Assert.Equal(title, exception.Title);
+    }
+
+    [Fact]
+    public async Task GetFile_ANetworkFailure_PropagatesAsHttpRequestException()
+    {
+        _handler.Failure = new HttpRequestException("The network is down.");
+
+        await Assert.ThrowsAsync<HttpRequestException>(() => _client.GetFile(Guid.CreateVersion7(), null, null));
+    }
+
+    [Fact]
+    public async Task DisposingTheFileResponse_DisposesTheStreamAndTheUnderlyingResponse()
+    {
+        FakeTrackedContent content = new([1, 2, 3]);
+        _handler.Respond = _ => File(HttpStatusCode.OK, content);
+        ApiFileResponse response = await _client.GetFile(Guid.CreateVersion7(), null, null);
+        Assert.False(content.StreamDisposed);
+
+        response.Dispose();
+
+        Assert.True(content.StreamDisposed);
+        Assert.False(response.Content.CanRead);
+    }
+
+    #endregion -- File --
 }

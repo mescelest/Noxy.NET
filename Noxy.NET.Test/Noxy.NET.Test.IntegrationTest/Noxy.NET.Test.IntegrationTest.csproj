@@ -33,9 +33,11 @@
 
     <ItemGroup>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fixtures\MetadataStoreContract.cs" Link="MediaPlayer\Fixtures\MetadataStoreContract.cs"/>
+        <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fixtures\FileStoreContract.cs" Link="MediaPlayer\Fixtures\FileStoreContract.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeSessionStorage.cs" Link="MediaPlayer\Fakes\FakeSessionStorage.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeServerAddressStorage.cs" Link="MediaPlayer\Fakes\FakeServerAddressStorage.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeGoogleSignInService.cs" Link="MediaPlayer\Fakes\FakeGoogleSignInService.cs"/>
+        <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeAudioPlayer.cs" Link="MediaPlayer\Fakes\FakeAudioPlayer.cs"/>
     </ItemGroup>
 
 </Project>

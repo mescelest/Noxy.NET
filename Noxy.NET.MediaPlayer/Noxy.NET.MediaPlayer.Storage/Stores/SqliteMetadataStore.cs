@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
+using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Storage.Stores;
 
@@ -15,6 +16,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
     private const string MediaFileTable = "MediaFile";
     private const string PlaylistTable = "Playlist";
     private const string PlaylistDetailTable = "PlaylistDetail";
+    private const string FileStateTable = "FileState";
     private const string LibraryETagKey = "LibraryETag";
     private const string PlaylistListETagKey = "PlaylistListETag";
 
@@ -27,6 +29,16 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
         return await ReadList<ResponseMediaFile>(MediaFileTable);
     }
 
+    public async Task<ResponseMediaFile?> GetMediaFile(Guid id)
+    {
+        await using SqliteConnection connection = await Open();
+        await using SqliteCommand command = connection.CreateCommand();
+        command.CommandText = $"SELECT Json FROM {MediaFileTable} WHERE ID = $id";
+        command.Parameters.AddWithValue("$id", id.ToString());
+
+        return await command.ExecuteScalarAsync() is string json ? Deserialize<ResponseMediaFile>(json) : null;
+    }
+
     public async Task ReplaceMediaFileList(List<ResponseMediaFile> mediaFileList)
     {
         await using SqliteConnection connection = await Open();
@@ -34,6 +46,8 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
 
         await Execute(connection, transaction, $"DELETE FROM {MediaFileTable}");
         foreach (ResponseMediaFile mediaFile in mediaFileList) await Insert(connection, transaction, MediaFileTable, mediaFile.ID, mediaFile);
+
+        await Execute(connection, transaction, $"DELETE FROM {FileStateTable} WHERE ID NOT IN (SELECT ID FROM {MediaFileTable})");
 
         await transaction.CommitAsync();
     }
@@ -45,7 +59,13 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
 
     public async Task DeleteMediaFile(Guid id)
     {
-        await Delete(MediaFileTable, id);
+        await using SqliteConnection connection = await Open();
+        await using SqliteTransaction transaction = (SqliteTransaction)await connection.BeginTransactionAsync();
+
+        await Execute(connection, transaction, $"DELETE FROM {MediaFileTable} WHERE ID = $id", ("$id", id.ToString()));
+        await Execute(connection, transaction, $"DELETE FROM {FileStateTable} WHERE ID = $id", ("$id", id.ToString()));
+
+        await transaction.CommitAsync();
     }
 
     public async Task<List<ResponsePlaylist>> GetPlaylistList()
@@ -128,6 +148,21 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
     public async Task SetPlaylistListETag(string? eTag)
     {
         await SetSetting(PlaylistListETagKey, eTag);
+    }
+
+    public async Task<List<FileState>> GetFileStateList()
+    {
+        return await ReadList<FileState>(FileStateTable);
+    }
+
+    public async Task SaveFileState(FileState fileState)
+    {
+        await Upsert(FileStateTable, fileState.MediaFileID, fileState);
+    }
+
+    public async Task DeleteFileState(Guid mediaFileID)
+    {
+        await Delete(FileStateTable, mediaFileID);
     }
 
     private async Task<List<T>> ReadList<T>(string table)
@@ -251,7 +286,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore
         // Write-ahead logging lets a read go on while a write happens.
         await Execute(connection, null, "PRAGMA journal_mode = WAL");
 
-        foreach (string table in (string[])[MediaFileTable, PlaylistTable, PlaylistDetailTable])
+        foreach (string table in (string[])[MediaFileTable, PlaylistTable, PlaylistDetailTable, FileStateTable])
         {
             await Execute(connection, null, $"CREATE TABLE IF NOT EXISTS {table} (RowID INTEGER PRIMARY KEY AUTOINCREMENT, ID TEXT NOT NULL UNIQUE, Json TEXT NOT NULL)");
         }

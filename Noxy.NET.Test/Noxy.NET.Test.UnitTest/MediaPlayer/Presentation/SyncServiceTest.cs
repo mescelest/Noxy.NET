@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
@@ -21,7 +21,7 @@ public class SyncServiceTest
         _serviceSync = new(_clientApi, _storeMetadata);
     }
 
-    private static ResponseMediaFile MediaFile(string title, Guid? id = null)
+    private static ResponseMediaFile MediaFile(string title, Guid? id = null, string? hash = null)
     {
         return new()
         {
@@ -29,7 +29,7 @@ public class SyncServiceTest
             Title = title,
             ContentType = "audio/mpeg",
             SizeBytes = 1234,
-            ContentHash = new string('a', 64),
+            ContentHash = hash ?? new string('a', 64),
             TimeCreated = Start,
             TimeModified = Start
         };
@@ -648,4 +648,157 @@ public class SyncServiceTest
 
         Assert.Equal(4, changed);
     }
+
+    #region -- Library diffs --
+
+    private const string HashOne = "1111111111111111111111111111111111111111111111111111111111111111";
+    private const string HashTwo = "2222222222222222222222222222222222222222222222222222222222222222";
+
+    private List<LibraryDiff> CollectDiffList()
+    {
+        List<LibraryDiff> diffList = [];
+        _serviceSync.LibraryDiffApplied += diffList.Add;
+
+        return diffList;
+    }
+
+    [Fact]
+    public async Task SyncLibrary_FirstRun_ListsEveryMediaFileAsAdded()
+    {
+        List<LibraryDiff> diffList = CollectDiffList();
+        ResponseMediaFile one = MediaFile("One");
+        ResponseMediaFile two = MediaFile("Two");
+        _clientApi.LibraryHandler = _ => Ok(new List<ResponseMediaFile> { one, two }, "\"v1\"");
+
+        await _serviceSync.SyncLibrary();
+
+        LibraryDiff diff = Assert.Single(diffList);
+        Assert.Equal([one.ID, two.ID], diff.AddedList.Select(x => x.ID));
+        Assert.Empty(diff.ChangedList);
+        Assert.Empty(diff.RemovedIDList);
+    }
+
+    [Fact]
+    public async Task SyncLibrary_On200_RaisesOneDiff_ListingAddedChangedAndRemoved()
+    {
+        ResponseMediaFile kept = MediaFile("Kept", null, HashOne);
+        ResponseMediaFile changedBefore = MediaFile("Changed", null, HashOne);
+        ResponseMediaFile gone = MediaFile("Gone", null, HashOne);
+        await _storeMetadata.ReplaceMediaFileList([kept, changedBefore, gone]);
+        await _storeMetadata.SetLibraryETag("\"v1\"");
+        ResponseMediaFile changedAfter = MediaFile("Changed", changedBefore.ID, HashTwo);
+        ResponseMediaFile added = MediaFile("Added", null, HashOne);
+        List<LibraryDiff> diffList = CollectDiffList();
+        _clientApi.LibraryHandler = _ => Ok(new List<ResponseMediaFile> { kept, changedAfter, added }, "\"v2\"");
+
+        await _serviceSync.SyncLibrary();
+
+        LibraryDiff diff = Assert.Single(diffList);
+        Assert.Equal([added.ID], diff.AddedList.Select(x => x.ID));
+        Assert.Equal([changedAfter.ID], diff.ChangedList.Select(x => x.ID));
+        Assert.Equal(HashTwo, diff.ChangedList.Single().ContentHash);
+        Assert.Equal([gone.ID], diff.RemovedIDList);
+    }
+
+    [Fact]
+    public async Task SyncLibrary_AMetadataOnlyChange_RaisesNoDiff()
+    {
+        ResponseMediaFile before = MediaFile("Before", null, HashOne);
+        await _storeMetadata.ReplaceMediaFileList([before]);
+        await _storeMetadata.SetLibraryETag("\"v1\"");
+        List<LibraryDiff> diffList = CollectDiffList();
+        _clientApi.LibraryHandler = _ => Ok(new List<ResponseMediaFile> { MediaFile("After", before.ID, HashOne) }, "\"v2\"");
+
+        await _serviceSync.SyncLibrary();
+
+        Assert.Empty(diffList);
+        Assert.Equal("After", (await _storeMetadata.GetMediaFileList()).Single().Title);
+    }
+
+    [Fact]
+    public async Task SyncLibrary_On304_RaisesNoDiff()
+    {
+        await _storeMetadata.ReplaceMediaFileList([MediaFile("One")]);
+        await _storeMetadata.SetLibraryETag("\"v1\"");
+        List<LibraryDiff> diffList = CollectDiffList();
+        _clientApi.LibraryHandler = _ => NotModified<List<ResponseMediaFile>>();
+
+        await _serviceSync.SyncLibrary();
+
+        Assert.Empty(diffList);
+    }
+
+    [Fact]
+    public async Task ApplyMediaUpdated_ForANewMediaFile_RaisesAnAddedDiff()
+    {
+        List<LibraryDiff> diffList = CollectDiffList();
+        ResponseMediaFile media = MediaFile("New");
+
+        await _serviceSync.ApplyMediaUpdated(media);
+
+        LibraryDiff diff = Assert.Single(diffList);
+        Assert.Equal([media.ID], diff.AddedList.Select(x => x.ID));
+    }
+
+    [Fact]
+    public async Task ApplyMediaUpdated_WithADifferentHash_RaisesAChangedDiff()
+    {
+        ResponseMediaFile before = MediaFile("Media", null, HashOne);
+        await _storeMetadata.SaveMediaFile(before);
+        List<LibraryDiff> diffList = CollectDiffList();
+
+        await _serviceSync.ApplyMediaUpdated(MediaFile("Media", before.ID, HashTwo));
+
+        LibraryDiff diff = Assert.Single(diffList);
+        Assert.Equal([before.ID], diff.ChangedList.Select(x => x.ID));
+        Assert.Empty(diff.AddedList);
+    }
+
+    [Fact]
+    public async Task ApplyMediaUpdated_WithTheSameHash_RaisesNoDiff()
+    {
+        ResponseMediaFile before = MediaFile("Before", null, HashOne);
+        await _storeMetadata.SaveMediaFile(before);
+        List<LibraryDiff> diffList = CollectDiffList();
+
+        await _serviceSync.ApplyMediaUpdated(MediaFile("After", before.ID, HashOne));
+
+        Assert.Empty(diffList);
+    }
+
+    [Fact]
+    public async Task ApplyMediaDeleted_OfAMediaFileInTheLibrary_RaisesARemovedDiff()
+    {
+        ResponseMediaFile media = MediaFile("One");
+        await _storeMetadata.SaveMediaFile(media);
+        List<LibraryDiff> diffList = CollectDiffList();
+
+        await _serviceSync.ApplyMediaDeleted(media.ID);
+
+        LibraryDiff diff = Assert.Single(diffList);
+        Assert.Equal([media.ID], diff.RemovedIDList);
+    }
+
+    [Fact]
+    public async Task ApplyMediaDeleted_OfAnUnknownID_RaisesNoDiff()
+    {
+        List<LibraryDiff> diffList = CollectDiffList();
+
+        await _serviceSync.ApplyMediaDeleted(Guid.CreateVersion7());
+
+        Assert.Empty(diffList);
+    }
+
+    [Fact]
+    public async Task ApplyUploadSucceeded_WithAMedia_RaisesAnAddedDiff()
+    {
+        List<LibraryDiff> diffList = CollectDiffList();
+        ResponseMediaFile media = MediaFile("Up");
+
+        await _serviceSync.ApplyUploadSucceeded(new() { JobID = Guid.CreateVersion7(), Title = "Up", Succeeded = true, Media = media });
+
+        Assert.Equal([media.ID], Assert.Single(diffList).AddedList.Select(x => x.ID));
+    }
+
+    #endregion -- Library diffs --
 }

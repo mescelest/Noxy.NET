@@ -5,7 +5,7 @@ namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
 public sealed class FakeHttpMessageHandler : HttpMessageHandler
 {
-    public sealed record RecordedRequest(HttpMethod Method, Uri? Uri, string? Authorization, string? IfNoneMatch, string? Body);
+    public sealed record RecordedRequest(HttpMethod Method, Uri? Uri, string? Authorization, string? IfNoneMatch, string? Body, string? Range = null, string? IfRange = null);
 
     public List<RecordedRequest> RequestList { get; } = [];
 
@@ -28,7 +28,8 @@ public sealed class FakeHttpMessageHandler : HttpMessageHandler
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         string? body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
-        RecordedRequest recorded = new(request.Method, request.RequestUri, request.Headers.Authorization?.ToString(), request.Headers.IfNoneMatch.ToString() is { Length: > 0 } ifNoneMatch ? ifNoneMatch : null, body);
+        RecordedRequest recorded = new(request.Method, request.RequestUri, request.Headers.Authorization?.ToString(), request.Headers.IfNoneMatch.ToString() is { Length: > 0 } ifNoneMatch ? ifNoneMatch : null, body, request.Headers.Range?.ToString(),
+            request.Headers.IfRange?.ToString());
         RequestList.Add(recorded);
 
         if (Failure is not null) throw Failure;

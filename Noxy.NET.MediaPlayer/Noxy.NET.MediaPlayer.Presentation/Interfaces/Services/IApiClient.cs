@@ -15,6 +15,9 @@ public interface IApiClient
 
     Task<ApiResponse<ResponsePlaylistDetail>> GetPlaylistDetail(Guid id, string? eTag);
 
+    // The media file's bytes, streamed: the body is not read until the caller reads Content. With rangeStart the server is asked for the bytes from there on, and with ifRange (the ETag of the bytes already held) it answers 206 only when the file is still that one, else 200 with the whole file. The caller disposes the response.
+    Task<ApiFileResponse> GetFile(Guid id, long? rangeStart, string? ifRange);
+
     Task<ResponsePlaylist> CreatePlaylist(RequestCreatePlaylist request);
 
     Task<ResponsePlaylist> UpdatePlaylist(Guid id, RequestUpdatePlaylist request);

@@ -1,5 +1,6 @@
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 
@@ -7,6 +8,9 @@ namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 public interface IMetadataStore
 {
     Task<List<ResponseMediaFile>> GetMediaFileList();
+
+    // Null when that media file is not in the library.
+    Task<ResponseMediaFile?> GetMediaFile(Guid id);
 
     Task ReplaceMediaFileList(List<ResponseMediaFile> mediaFileList);
 
@@ -42,4 +46,12 @@ public interface IMetadataStore
     Task<string?> GetPlaylistListETag();
 
     Task SetPlaylistListETag(string? eTag);
+
+    // A media file with no state is NotDownloaded. The state of a media file that leaves the library goes with it (DeleteMediaFile, and ReplaceMediaFileList for the ones no longer in the list).
+    Task<List<FileState>> GetFileStateList();
+
+    Task SaveFileState(FileState fileState);
+
+    // An ID that is not held is harmless.
+    Task DeleteFileState(Guid mediaFileID);
 }

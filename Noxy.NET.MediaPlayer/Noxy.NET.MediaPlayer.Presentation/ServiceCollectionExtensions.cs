@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        // The app still has to register ISessionStorage, IServerAddressStorage, IGoogleSignInService and IMetadataStore.
+        // The app still has to register ISessionStorage, IServerAddressStorage, IGoogleSignInService, IMetadataStore, IFileStore and IAudioPlayer.
         public IServiceCollection AddPresentation()
         {
             services.TryAddSingleton(TimeProvider.System);
@@ -18,6 +18,11 @@ public static class ServiceCollectionExtensions
             services.AddHttpClient<IApiClient, ApiClient>();
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<ISyncService, SyncService>();
+            services.AddSingleton<IDelay, Delay>();
+            services.AddSingleton<IHashService, HashService>();
+            services.AddSingleton<IDownloadService, DownloadService>();
+            services.AddSingleton<IFileReconciler, FileReconciler>();
+            services.AddSingleton<IPlayerService, PlayerService>();
             services.AddSingleton<IMediaHubService, MediaHubService>();
             services.AddSingleton<IAppStartupService, AppStartupService>();
 

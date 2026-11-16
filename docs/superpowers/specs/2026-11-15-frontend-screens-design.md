@@ -1,6 +1,6 @@
 # Frontend screens: shell, library, home, playlists and login: design
 
-Status: draft for the user's approval, written 2026-11-15 from the brainstorming conversation. It sits on top of `2026-11-15-frontend-sync-player-design.md` (sync, stores, downloads, player) and changes it in two places: Google sign-in is now in scope, and two backend additions are needed (see "Backend additions"). Lines marked *(my proposal)* are my suggestions, not decisions. The mockups the user reacted to are in `.superpowers/brainstorm/` (`shell-layout-v2.html`, `library-view-v2.html`, `login-screen-v2.html`).
+Status: the outline (shell, header, sidebar sections, pages, sign-in) is approved by the user as of 2026-11-16; the look (colours, gaps, fonts and so on) is explicitly **not decided**, see "Styling through variables". Written 2026-11-15 from the brainstorming conversation. It sits on top of `2026-11-15-frontend-sync-player-design.md` (sync, stores, downloads, player) and changes it in two places: Google sign-in is now in scope, and two backend additions are needed (see "Backend additions"). Lines marked *(my proposal)* are my suggestions, not decisions. The mockups the user reacted to are in `.superpowers/brainstorm/` (`shell-layout-v2.html`, `library-view-v2.html`, `login-screen-v2.html`).
 
 ## Intent
 
@@ -91,6 +91,15 @@ The app is a sync-and-play music player. This design is the part the user sees: 
 - **Settings** *(my proposal)*: the theme toggle, "refresh library", "request persistent storage", what is stored on this device, and the user settings that sync with the server (the first one is "merge instead of refusing when a rename matches an existing name"; more will come, so the page lists settings in one place and is easy to extend).
 - **YouTube / Bandcamp:** an empty page with a short "coming later" text.
 - **Login:** as in the goals. The Google button loads Google's script and sends the ID token to the existing endpoint.
+
+### Styling through variables
+
+The user approved the outline on 2026-11-16 but is not sure about the colours, gaps and fonts, and wants them easy to change. So **no look is decided here**, and every visual value is a CSS custom property:
+
+- **One file.** The App's `wwwroot/css/variables.css` defines every value once, in `:root`. Its names and groups follow `Noxy.NET.EntityManagement.Administration/wwwroot/css/variables.css`, which the shared `Noxy.NET.UI` components already read (for example `SortableTable` uses `--size-gap-*` and `--color-offset-*`): text sizes (`--size-text-*`), gaps (`--size-gap-*`), border widths and radii (`--size-border-*`), control and icon sizes (`--size-control-*`, `--size-icon-*`), page and column widths, animation lengths (`--animation-length-*`), fonts (`--font-family-primary` and one shorthand per role: label, body, button), the semantic colours (`--color-muted`, `-highlight`, `-info`, `-success`, `-warning`, `-notice`, `-error`, `-disabled`) and the light/dark pair `--color-primary` and `--color-complementary` with their `color-mix` offsets. Using the same names is what lets the shared components look right with no extra work.
+- **App tokens in the same style.** What this app adds is also a variable, in the same file: the sidebar width, header height and player-bar height, the glass panel (blur, opacity, border colour), the library row height, the card sizes of the Home page, the queue panel width, and so on.
+- **The rule.** Component CSS (`*.razor.css` and any page style) contains no literal colour, font family, duration or size: only `var(...)`. A literal belongs in `variables.css` and nowhere else (0 and `100%` aside). A test scans the App's style files for colour literals, `font-family` values and durations outside `variables.css`, so the rule cannot erode.
+- **Changing the look** means editing that one file (or adding a theme block under `:root[theme="..."]`, as the `ThemeToggle` already switches). The defaults are the entity management project's values until the user chooses: they are placeholders, as are the mockups' colours.
 
 ### Backend additions (needed before the Home page is complete)
 

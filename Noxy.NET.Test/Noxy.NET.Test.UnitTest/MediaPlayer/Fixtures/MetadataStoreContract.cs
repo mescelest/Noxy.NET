@@ -2,6 +2,7 @@ using System.Text.Json;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
+using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
@@ -163,6 +164,22 @@ public abstract class MetadataStoreContract
         await store.DeleteMediaFile(Guid.CreateVersion7());
 
         Assert.Equal([kept.ID], (await store.GetMediaFileList()).Select(x => x.ID));
+    }
+
+    [Fact]
+    public async Task GetMediaFile_ReturnsThatMediaFile_AndNullForAnUnknownID()
+    {
+        IMetadataStore store = CreateStore();
+        ResponseMediaFile first = MediaFile("First");
+        ResponseMediaFile second = MediaFile("Second");
+        await store.ReplaceMediaFileList([first, second]);
+
+        AssertSame(second, await store.GetMediaFile(second.ID));
+        Assert.Null(await store.GetMediaFile(Guid.CreateVersion7()));
+
+        await store.DeleteMediaFile(second.ID);
+
+        Assert.Null(await store.GetMediaFile(second.ID));
     }
 
     [Fact]
@@ -352,4 +369,88 @@ public abstract class MetadataStoreContract
     }
 
     #endregion -- ETags --
+
+    #region -- File states --
+
+    private static FileState OnDevice(Guid id, string hash = "abc")
+    {
+        return new(id, FileSyncState.OnDevice, hash, null);
+    }
+
+    [Fact]
+    public async Task AnEmptyStore_HasNoFileStates()
+    {
+        IMetadataStore store = CreateStore();
+
+        Assert.Empty(await store.GetFileStateList());
+    }
+
+    [Fact]
+    public async Task SaveFileState_InsertsOrReplacesByMediaFileID_AndReturnsEveryField()
+    {
+        IMetadataStore store = CreateStore();
+        Guid id = Guid.CreateVersion7();
+        Guid other = Guid.CreateVersion7();
+
+        await store.SaveFileState(new(id, FileSyncState.Failed, null, "The hash did not match."));
+        await store.SaveFileState(OnDevice(other, "def"));
+
+        List<FileState> list = await store.GetFileStateList();
+        Assert.Equal(2, list.Count);
+        Assert.Equal(new FileState(id, FileSyncState.Failed, null, "The hash did not match."), list.Single(x => x.MediaFileID == id));
+        Assert.Equal(OnDevice(other, "def"), list.Single(x => x.MediaFileID == other));
+
+        await store.SaveFileState(OnDevice(id, "ghi"));
+
+        list = await store.GetFileStateList();
+        Assert.Equal(2, list.Count);
+        Assert.Equal(OnDevice(id, "ghi"), list.Single(x => x.MediaFileID == id));
+    }
+
+    [Fact]
+    public async Task DeleteFileState_RemovesIt_AndAnUnknownIDIsHarmless()
+    {
+        IMetadataStore store = CreateStore();
+        Guid kept = Guid.CreateVersion7();
+        Guid gone = Guid.CreateVersion7();
+        await store.SaveFileState(OnDevice(kept));
+        await store.SaveFileState(OnDevice(gone));
+
+        await store.DeleteFileState(gone);
+        await store.DeleteFileState(Guid.CreateVersion7());
+
+        Assert.Equal([kept], (await store.GetFileStateList()).Select(x => x.MediaFileID));
+    }
+
+    [Fact]
+    public async Task DeleteMediaFile_AlsoDeletesThatMediaFilesState()
+    {
+        IMetadataStore store = CreateStore();
+        ResponseMediaFile gone = MediaFile("Gone");
+        ResponseMediaFile kept = MediaFile("Kept");
+        await store.ReplaceMediaFileList([gone, kept]);
+        await store.SaveFileState(OnDevice(gone.ID));
+        await store.SaveFileState(OnDevice(kept.ID));
+
+        await store.DeleteMediaFile(gone.ID);
+
+        Assert.Equal([kept.ID], (await store.GetFileStateList()).Select(x => x.MediaFileID));
+    }
+
+    [Fact]
+    public async Task ReplaceMediaFileList_RemovesTheStateOfMediaFilesNoLongerInTheList()
+    {
+        IMetadataStore store = CreateStore();
+        ResponseMediaFile kept = MediaFile("Kept");
+        ResponseMediaFile gone = MediaFile("Gone");
+        await store.ReplaceMediaFileList([kept, gone]);
+        await store.SaveFileState(OnDevice(kept.ID));
+        await store.SaveFileState(OnDevice(gone.ID));
+
+        await store.ReplaceMediaFileList([kept]);
+
+        Assert.Equal([kept.ID], (await store.GetFileStateList()).Select(x => x.MediaFileID));
+    }
+
+    #endregion -- File states --
 }

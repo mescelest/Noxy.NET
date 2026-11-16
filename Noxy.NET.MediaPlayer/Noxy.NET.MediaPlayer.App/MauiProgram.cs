@@ -23,6 +23,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IServerAddressStorage, PreferencesServerAddressStorage>();
 #if WINDOWS
         builder.Services.AddSingleton<IGoogleSignInService, GoogleSignInService>();
+        builder.Services.AddSingleton<IAudioPlayer, AudioPlayer>();
 #else
         builder.Services.AddSingleton<IGoogleSignInService, UnavailableGoogleSignInService>();
 #endif

@@ -1,5 +1,6 @@
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 
@@ -8,6 +9,9 @@ public interface ISyncService
 {
     // Raised after the local copy changed, and when IsOffline changed.
     event Action? Changed;
+
+    // Raised after the library changed, when at least one media file was added, removed or got other bytes (a new ContentHash). Not raised for a change that only touches metadata.
+    event Action<LibraryDiff>? LibraryDiffApplied;
 
     // True when the last call could not reach the server (no address saved, network down or timed out).
     bool IsOffline { get; }

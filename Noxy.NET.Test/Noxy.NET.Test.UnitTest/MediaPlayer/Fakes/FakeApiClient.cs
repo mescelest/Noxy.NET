@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
@@ -17,11 +17,24 @@ public sealed class FakeApiClient : IApiClient
 
     public Func<Guid, string?, ApiResponse<ResponsePlaylistDetail>> PlaylistDetailHandler { get; set; } = (_, _) => throw new ApiException(HttpStatusCode.NotFound, "Not found.");
 
+    // Answers each GetFile call, and may wait on a gate or throw to script a failure. The default is a 404.
+    public Func<Guid, long?, string?, Task<ApiFileResponse>> FileHandler { get; set; } = (_, _, _) => throw new ApiException(HttpStatusCode.NotFound, "Not found.");
+
+    public List<(Guid ID, long? RangeStart, string? IfRange)> FileRequestList { get; } = [];
+
+    private readonly Lock _fileRequestLock = new();
+
     public List<string?> LibraryETagList { get; } = [];
 
     public List<string?> PlaylistListETagList { get; } = [];
 
     public List<(Guid ID, string? ETag)> PlaylistDetailRequestList { get; } = [];
+
+    public Task<ApiFileResponse> GetFile(Guid id, long? rangeStart, string? ifRange)
+    {
+        lock (_fileRequestLock) FileRequestList.Add((id, rangeStart, ifRange));
+        return FileHandler(id, rangeStart, ifRange);
+    }
 
     public Task<ApiResponse<List<ResponseMediaFile>>> GetLibrary(string? eTag)
     {

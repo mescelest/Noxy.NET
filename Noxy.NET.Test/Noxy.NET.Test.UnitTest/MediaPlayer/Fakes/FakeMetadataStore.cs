@@ -1,7 +1,9 @@
+﻿using System.Collections.Concurrent;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
+using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -10,6 +12,7 @@ public sealed class FakeMetadataStore : IMetadataStore
     private readonly List<ResponseMediaFile> _mediaFileList = [];
     private readonly List<ResponsePlaylist> _playlistList = [];
     private readonly Dictionary<Guid, ResponsePlaylistDetail> _detailMap = [];
+    private readonly ConcurrentDictionary<Guid, FileState> _fileStateMap = [];
     private string? _libraryETag;
     private string? _playlistListETag;
 
@@ -24,11 +27,24 @@ public sealed class FakeMetadataStore : IMetadataStore
         return Task.FromResult(Copy(_mediaFileList));
     }
 
+    public Task<ResponseMediaFile?> GetMediaFile(Guid id)
+    {
+        ResponseMediaFile? mediaFile = _mediaFileList.FirstOrDefault(x => x.ID == id);
+
+        return Task.FromResult(mediaFile is null ? null : Copy(mediaFile));
+    }
+
     public Task ReplaceMediaFileList(List<ResponseMediaFile> mediaFileList)
     {
         List<ResponseMediaFile> copy = Copy(mediaFileList);
         _mediaFileList.Clear();
         _mediaFileList.AddRange(copy);
+
+        HashSet<Guid> idSet = [.. copy.Select(x => x.ID)];
+        foreach (Guid id in _fileStateMap.Keys.Where(x => !idSet.Contains(x)).ToList())
+        {
+            _fileStateMap.TryRemove(id, out _);
+        }
 
         return Task.CompletedTask;
     }
@@ -43,6 +59,7 @@ public sealed class FakeMetadataStore : IMetadataStore
     public Task DeleteMediaFile(Guid id)
     {
         _mediaFileList.RemoveAll(x => x.ID == id);
+        _fileStateMap.TryRemove(id, out _);
 
         return Task.CompletedTask;
     }
@@ -119,6 +136,31 @@ public sealed class FakeMetadataStore : IMetadataStore
     public Task SetPlaylistListETag(string? eTag)
     {
         _playlistListETag = eTag;
+
+        return Task.CompletedTask;
+    }
+
+    public Task<List<FileState>> GetFileStateList()
+    {
+        return Task.FromResult(_fileStateMap.Values.ToList());
+    }
+
+    // Every state saved, in order, so a test can check the sequence a download went through.
+    public List<FileState> FileStateHistoryList { get; } = [];
+
+    private readonly Lock _historyLock = new();
+
+    public Task SaveFileState(FileState fileState)
+    {
+        _fileStateMap[fileState.MediaFileID] = fileState;
+        lock (_historyLock) FileStateHistoryList.Add(fileState);
+
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteFileState(Guid mediaFileID)
+    {
+        _fileStateMap.TryRemove(mediaFileID, out _);
 
         return Task.CompletedTask;
     }

@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddStorage(string dataFolder)
         {
             services.AddSingleton<IMetadataStore>(_ => new SqliteMetadataStore(Path.Combine(dataFolder, Constants.MetadataDatabaseFileName)));
+            services.AddSingleton<IFileStore>(_ => new DiskFileStore(dataFolder));
 
             return services;
         }
