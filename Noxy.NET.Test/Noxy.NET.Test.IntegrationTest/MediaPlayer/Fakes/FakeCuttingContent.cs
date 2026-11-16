@@ -2,7 +2,6 @@ using System.Net;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-// A response body that delivers only the first bytes and then fails, like a connection that drops half way through a download. The headers (length, type) stay those of the real response.
 public sealed class FakeCuttingContent : HttpContent
 {
     private readonly HttpContent _inner;

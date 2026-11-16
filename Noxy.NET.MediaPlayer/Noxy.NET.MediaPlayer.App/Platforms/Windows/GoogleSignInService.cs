@@ -1,6 +1,7 @@
 using System.Buffers.Text;
 using System.Collections.Specialized;
 using System.Net;
+using System.Net.Mime;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,7 +12,6 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 // ReSharper disable once CheckNamespace
 namespace Noxy.NET.MediaPlayer.App.Services;
 
-// The system browser signs the user in at Google and sends the browser back to a listener on a free port of this machine; the code in that redirect is exchanged for the ID token. Nothing from the exchange is logged or stored.
 public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogleSignInService
 {
     private const int StateByteCount = 32;
@@ -22,11 +22,13 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
     private const string StateKey = "state";
     private const string GrantTypeAuthorizationCode = "authorization_code";
     private const string IdTokenProperty = "id_token";
-    private const string ClosePage = "<html><body><p>You can close this tab and go back to the app.</p></body></html>";
+    private const string CompletePageAsset = "sign-in-complete.html";
+    private const string HtmlContentType = $"{MediaTypeNames.Text.Html}; charset=utf-8";
 
     public async Task<string?> GetIdToken(CancellationToken cancellationToken)
     {
         string clientSecret = await ReadClientSecret(cancellationToken);
+        byte[] completePage = await ReadCompletePage(cancellationToken);
         PkceChallenge pkce = PkceChallenge.Create();
         string state = Base64Url.EncodeToString(RandomNumberGenerator.GetBytes(StateByteCount));
 
@@ -39,7 +41,7 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
         {
             if (!await Launcher.Default.OpenAsync(BuildAuthorizationUri(pkce, state, redirectUri))) return null;
 
-            string? code = await WaitForCode(listener, state, timeout.Token);
+            string? code = await WaitForCode(listener, state, completePage, timeout.Token);
             if (code is null) return null;
 
             return await ExchangeCode(code, pkce.Verifier, redirectUri, clientSecret, timeout.Token);
@@ -64,6 +66,16 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
         }
 
         throw new InvalidOperationException($"The Google client secret file {GoogleConstants.SecretFileName} has no {GoogleConstants.SecretFileProperty}.");
+    }
+
+    // The page the browser lands on after Google sends it back: a real file in Resources/Raw, read before the browser opens so a missing file fails the sign-in early.
+    private static async Task<byte[]> ReadCompletePage(CancellationToken cancellationToken)
+    {
+        await using Stream stream = await FileSystem.OpenAppPackageFileAsync(CompletePageAsset);
+        using MemoryStream copy = new();
+        await stream.CopyToAsync(copy, cancellationToken);
+
+        return copy.ToArray();
     }
 
     // A free port is found first, since a listener cannot take port 0.
@@ -98,7 +110,7 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
     }
 
     // Requests with no code and no error (a favicon, say) are answered and skipped. A denied request returns null; a response that does not carry our state is not trusted.
-    private static async Task<string?> WaitForCode(HttpListener listener, string state, CancellationToken cancellationToken)
+    private static async Task<string?> WaitForCode(HttpListener listener, string state, byte[] completePage, CancellationToken cancellationToken)
     {
         while (true)
         {
@@ -109,11 +121,11 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
 
             if (error is null && code is null)
             {
-                await Respond(context, HttpStatusCode.NotFound, string.Empty);
+                await Respond(context, HttpStatusCode.NotFound, []);
                 continue;
             }
 
-            await Respond(context, HttpStatusCode.OK, ClosePage);
+            await Respond(context, HttpStatusCode.OK, completePage);
             if (error is not null) return null;
 
             string returnedState = query[StateKey] ?? string.Empty;
@@ -126,13 +138,12 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
         }
     }
 
-    private static async Task Respond(HttpListenerContext context, HttpStatusCode status, string body)
+    private static async Task Respond(HttpListenerContext context, HttpStatusCode status, byte[] body)
     {
-        byte[] bytes = Encoding.UTF8.GetBytes(body);
         context.Response.StatusCode = (int)status;
-        context.Response.ContentType = "text/html; charset=utf-8";
-        context.Response.ContentLength64 = bytes.Length;
-        await context.Response.OutputStream.WriteAsync(bytes);
+        context.Response.ContentType = HtmlContentType;
+        context.Response.ContentLength64 = body.Length;
+        await context.Response.OutputStream.WriteAsync(body);
         context.Response.Close();
     }
 

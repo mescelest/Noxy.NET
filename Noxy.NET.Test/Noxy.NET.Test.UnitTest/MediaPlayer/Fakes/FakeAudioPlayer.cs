@@ -2,7 +2,6 @@ using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-// Records what it was asked to do and lets a test raise what a real player would: the end of a file, a change, a failure.
 public sealed class FakeAudioPlayer : IAudioPlayer
 {
     // Every call in order, as the method name, with the path or value where there is one.

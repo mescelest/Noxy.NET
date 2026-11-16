@@ -7,7 +7,6 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
-// The tests every metadata store must pass. A store's test class inherits this and says how to make one.
 public abstract class MetadataStoreContract
 {
     private static readonly DateTime Start = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);

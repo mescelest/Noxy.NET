@@ -7,7 +7,6 @@ using Noxy.NET.MediaPlayer.Presentation.Services;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-// The real hub service, reaching the in-memory test server through long polling over the given handler.
 public sealed class FakeServerMediaHubService(ISyncService serviceSync, ISessionService serviceSession, IServerAddressStorage storageServerAddress, ILogger<MediaHubService> logger, HttpMessageHandler handler)
     : MediaHubService(serviceSync, serviceSession, storageServerAddress, logger)
 {

@@ -2,7 +2,6 @@ using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
-// The tests every file store must pass. A store's test class inherits this and says how to make one and how to read a path it returned.
 public abstract class FileStoreContract
 {
     private const string Mp3 = "audio/mpeg";

@@ -2,7 +2,6 @@ using System.Net;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-// A response body that notes whether anything buffered it or read it, and whether its stream was disposed.
 public sealed class FakeTrackedContent : HttpContent
 {
     private readonly byte[] _bytes;

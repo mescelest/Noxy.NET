@@ -2,7 +2,6 @@ using System.Net;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-// Stands between the app's HTTP clients and the in-memory test server: it records every request, and can cut the network.
 public sealed class FakeNetworkHandler(HttpMessageHandler inner) : DelegatingHandler(inner)
 {
     private readonly Lock _lock = new();

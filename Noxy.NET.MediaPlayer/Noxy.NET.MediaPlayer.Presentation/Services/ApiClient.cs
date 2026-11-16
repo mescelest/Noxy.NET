@@ -144,7 +144,6 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
         return await client.SendAsync(request, completion);
     }
 
-    // Where a ranged download starts, and the ETag the bytes already held came with.
     private sealed record FileRange(long Start, string? IfRange);
 
     private static async Task<ApiException> ToExceptionAndDispose(HttpResponseMessage response)

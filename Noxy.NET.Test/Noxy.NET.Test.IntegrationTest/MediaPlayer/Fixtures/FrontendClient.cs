@@ -7,7 +7,6 @@ using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
-// The app's whole stack below the screens, wired the way the app wires it, talking to the real API through the in-memory test server.
 public sealed class FrontendClient : IAsyncDisposable
 {
     private readonly bool _ownsFolder;

@@ -8,7 +8,6 @@ public class HashServiceTest
 {
     private readonly HashService _serviceHash = new();
 
-    // Readable once and forward only, like a network stream: a seek or a length would throw.
     private sealed class ForwardOnlyStream(Stream inner) : Stream
     {
         public override bool CanRead => true;

@@ -11,8 +11,8 @@ using Noxy.NET.MediaPlayer.Persistence;
 namespace Noxy.NET.MediaPlayer.Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261115201751_AddPlaybackSession")]
-    partial class AddPlaybackSession
+    [Migration("20261116112252_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

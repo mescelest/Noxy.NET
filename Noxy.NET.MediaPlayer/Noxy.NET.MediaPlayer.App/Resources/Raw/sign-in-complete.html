@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"/>
+    <title>Noxy.NET.MediaPlayer</title>
+    <style>
+        /* Every value of this page is in this block, with the names of the app's variables.css, so the look is one edit and the block can later be replaced by a link to the shared file. */
+        :root {
+            color-scheme: light dark;
+
+            --font-family-primary: system-ui, "Segoe UI", Roboto, sans-serif;
+            --size-text-body: 1.6rem;
+            --size-text-h2: 2.8rem;
+            --size-gap-xxs: 8px;
+            --size-gap-sm: 16px;
+            --size-gap-xxl: 32px;
+            --size-icon-xxl: 40px;
+            --size-border-width-sm: 1px;
+            --size-border-radius-lg: 8px;
+            --size-page-sm: 360px;
+            --animation-length-long: 500ms;
+
+            --color-primary: light-dark(#FFFFFF, #121212);
+            --color-complementary: light-dark(#000000, #FFFFFF);
+            --color-highlight: #0073EC;
+            --color-muted: #767676;
+            --color-card: color-mix(in srgb, var(--color-primary), var(--color-complementary) 4%);
+            --color-card-border: color-mix(in srgb, transparent 88%, var(--color-complementary));
+        }
+
+        html {
+            font-size: 62.5%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: var(--color-primary);
+            color: var(--color-complementary);
+            font-family: var(--font-family-primary);
+            font-size: var(--size-text-body);
+        }
+
+        main {
+            box-sizing: border-box;
+            width: min(var(--size-page-sm), 100% - 2 * var(--size-gap-sm));
+            padding: var(--size-gap-xxl);
+            display: grid;
+            justify-items: center;
+            gap: var(--size-gap-sm);
+            text-align: center;
+            background: var(--color-card);
+            border: var(--size-border-width-sm) solid var(--color-card-border);
+            border-radius: var(--size-border-radius-lg);
+            animation: appear var(--animation-length-long) ease-out;
+        }
+
+        svg {
+            width: var(--size-icon-xxl);
+            height: var(--size-icon-xxl);
+            color: var(--color-highlight);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: var(--size-text-h2);
+            font-weight: 500;
+        }
+
+        p {
+            margin: 0;
+            color: var(--color-muted);
+            line-height: 1.5;
+        }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(var(--size-gap-xxs));
+            }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <svg viewBox="0 0 100 100" fill="currentColor" aria-hidden="true">
+        <path d="M38 18v46.6A15 15 0 1 0 48 78V34l30-8v26.6A15 15 0 1 0 88 66V10z"/>
+    </svg>
+    <h1>Back to the app</h1>
+    <p>You can close this tab and return to Noxy.NET.MediaPlayer.</p>
+</main>
+</body>
+</html>

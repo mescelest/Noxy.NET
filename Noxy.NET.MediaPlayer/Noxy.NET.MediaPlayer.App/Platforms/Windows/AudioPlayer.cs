@@ -1,3 +1,5 @@
+using Windows.Media.Playback;
+using Windows.Storage;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using WindowsMediaPlayer = Windows.Media.Playback.MediaPlayer;
 using WindowsMediaSource = Windows.Media.Core.MediaSource;
@@ -5,7 +7,6 @@ using WindowsMediaSource = Windows.Media.Core.MediaSource;
 // ReSharper disable once CheckNamespace
 namespace Noxy.NET.MediaPlayer.App.Services;
 
-// Windows' own media player behind IAudioPlayer. The alias names are there because the namespace Noxy.NET.MediaPlayer would otherwise hide the type MediaPlayer.
 public class AudioPlayer : IAudioPlayer
 {
     private const int ChangedIntervalMilliseconds = 1000;
@@ -32,7 +33,7 @@ public class AudioPlayer : IAudioPlayer
 
     public TimeSpan Duration => _player?.PlaybackSession.NaturalDuration ?? TimeSpan.Zero;
 
-    public bool IsPlaying => _player?.PlaybackSession.PlaybackState == Windows.Media.Playback.MediaPlaybackState.Playing;
+    public bool IsPlaying => _player?.PlaybackSession.PlaybackState == MediaPlaybackState.Playing;
 
     public async Task Load(string path)
     {
@@ -40,9 +41,9 @@ public class AudioPlayer : IAudioPlayer
 
         try
         {
-            global::Windows.Storage.StorageFile file = await Windows.Storage.StorageFile.GetFileFromPathAsync(path);
+            StorageFile file = await StorageFile.GetFileFromPathAsync(path);
             WindowsMediaSource source = WindowsMediaSource.CreateFromStorageFile(file);
-            WindowsMediaPlayer player = new() { Source = new Windows.Media.Playback.MediaPlaybackItem(source), AutoPlay = false, Volume = _volume };
+            WindowsMediaPlayer player = new() { Source = new MediaPlaybackItem(source), AutoPlay = false, Volume = _volume };
             player.MediaEnded += (_, _) => OnEnded();
             player.MediaFailed += (_, _) => OnFailed();
             player.MediaOpened += (_, _) => Changed?.Invoke();

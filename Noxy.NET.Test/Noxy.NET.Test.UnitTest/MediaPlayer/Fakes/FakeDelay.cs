@@ -2,7 +2,6 @@
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-// Completes at once and remembers how long it was asked to wait.
 public sealed class FakeDelay : IDelay
 {
     private readonly Lock _lock = new();

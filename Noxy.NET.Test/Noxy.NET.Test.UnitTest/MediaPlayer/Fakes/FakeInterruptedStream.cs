@@ -1,6 +1,5 @@
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-// A response body that delivers some bytes and then either fails, stalls until it is disposed, or ends.
 public sealed class FakeInterruptedStream(byte[] head, Exception? failure = null, bool stall = false) : Stream
 {
     private readonly CancellationTokenSource _disposed = new();
