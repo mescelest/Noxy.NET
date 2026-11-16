@@ -24,6 +24,8 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Noxy.NET.Shared\Noxy.NET.Shared.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Application\Noxy.NET.MediaPlayer.Application.csproj"/>
+        <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Presentation\Noxy.NET.MediaPlayer.Presentation.csproj"/>
+        <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Storage\Noxy.NET.MediaPlayer.Storage.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

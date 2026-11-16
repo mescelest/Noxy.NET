@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Noxy.NET.MediaPlayer.Application.Attributes;
 using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Models;
@@ -9,8 +10,10 @@ public class RequestUpdateAlbum : IValidatableObject
 {
     [OptionalNotBlank]
     [OptionalMaxLength(255)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<string?> Title { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<List<Guid>?> ArtistIDList { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

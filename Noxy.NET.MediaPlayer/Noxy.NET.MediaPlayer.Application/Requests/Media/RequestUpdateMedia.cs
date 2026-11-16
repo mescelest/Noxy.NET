@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Noxy.NET.MediaPlayer.Application.Attributes;
 using Noxy.NET.MediaPlayer.Application.Commands.Media;
 using Noxy.NET.MediaPlayer.Application.Models;
@@ -11,38 +12,52 @@ public class RequestUpdateMedia : IValidatableObject
 
     [OptionalNotBlank]
     [OptionalMaxLength(255)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<string?> Title { get; set; }
 
     [OptionalMaxLength(256)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<string?> Artist { get; set; }
 
     [OptionalMaxLength(256)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<string?> Album { get; set; }
 
     [OptionalMaxLength(256)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<string?> AlbumArtist { get; set; }
 
     [OptionalMaxLength(256)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<string?> Subtitle { get; set; }
 
     [OptionalMaxLength(2048)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<string?> Comment { get; set; }
 
     [OptionalMaxLength(128)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<string?> Genre { get; set; }
 
     [OptionalRange(0, 9999)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<int?> TrackNumber { get; set; }
 
     [OptionalRange(0, 9999)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<int?> DiscNumber { get; set; }
 
     [OptionalRange(0, 9999)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<int?> Year { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<List<Guid>?> ArtistIDList { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<Guid?> AlbumID { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<List<Guid>?> AlbumArtistIDList { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<List<Guid>?> GenreIDList { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

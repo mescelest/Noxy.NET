@@ -9,7 +9,7 @@ A person has one account, made with an email and password or with a Google accou
 ## Goals
 
 - **Sign up and sign in with email and password.** `POST /Auth/SignUp` and `POST /Auth/SignIn` return `ResponseAuthentication` (`AccessToken`, `RefreshToken`).
-- **Sign in with Google.** `POST /Auth/Google` takes the Google ID token, checks it against Google's published keys, issuer, expiry and this app's client ID (`Google:ClientId`; empty switches Google off with a `503`), and then signs in, creates the account, or links to an existing one.
+- **Sign in with Google.** `POST /Auth/Google` takes the Google ID token, checks it against Google's published keys, issuer, expiry and one of this app's client IDs (`Google:ClientIdList`, one per app that signs in; empty switches Google off with a `503`), and then signs in, creates the account, or links to an existing one.
 - **Refresh.** `POST /Auth/Refresh` swaps a refresh token for a new access token and a new refresh token. Refresh tokens are single use.
 - **Short access tokens, long refresh tokens.** The access token is a JWT (signed with HMAC SHA-256) valid for `Authentication:AccessTokenMinutes` (15); the refresh token lives `RefreshTokenDays` (30).
 - **The same token works for the API and the hub.** The hub takes the access token as the `access_token` query parameter, for paths under `/hubs` only.

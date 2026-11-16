@@ -1,6 +1,6 @@
 # Frontend as a MAUI Blazor Hybrid app (Windows and Android)
 
-Status: draft for the user's approval, written 2026-11-15 from the conversation. It changes the platform of `2026-11-15-frontend-sync-player-design.md` and `2026-11-15-frontend-screens-design.md` from Blazor WebAssembly to a MAUI Blazor Hybrid app. Lines marked *(my call)* are decisions I made without asking.
+Status: approved by the user on 2026-11-15 ("for now"), written from the conversation. It changes the platform of `2026-11-15-frontend-sync-player-design.md` and `2026-11-15-frontend-screens-design.md` from Blazor WebAssembly to a MAUI Blazor Hybrid app. Lines marked *(my call)* are decisions I made without asking.
 
 ## Intent
 
@@ -36,7 +36,7 @@ The app has to keep a library of up to 5000 media files on the device, play them
 
 **Project layout.**
 - `Noxy.NET.MediaPlayer.Presentation`: becomes a plain class library (`Microsoft.NET.Sdk`, no Blazor, no browser package). Contains the services and the contracts: `IApiClient`, `ISessionService`, `ISyncService`, `IDownloadService`, `IPlayerService`, `IMetadataStore`, `IFileStore`, `ISessionStorage`, `IAudioPlayer`, `IGoogleSignInService`, `IServerAddressStorage`, and the models.
-- `Noxy.NET.MediaPlayer.Presentation.Local` *(my call)*: a plain library with the implementations that need only a disk, not a platform: a SQLite metadata store and a file store that keeps one file per media file under a base folder the host passes in. It is separate so the normal test projects can test it (a MAUI project targeting Windows or Android cannot be referenced from them).
+- `Noxy.NET.MediaPlayer.Storage` *(my call)*: a plain library with the implementations that need only a disk, not a platform: a SQLite metadata store and a file store that keeps one file per media file under a base folder the host passes in. It is separate so the normal test projects can test it (a MAUI project targeting Windows or Android cannot be referenced from them).
 - `Noxy.NET.MediaPlayer.App`: **replaces** `Noxy.NET.MediaPlayer.Frontend`. The MAUI Blazor Hybrid app for `net10.0-windows10.0.19041.0` and `net10.0-android`. Holds the Blazor components and pages, the Fluxor state, the sign-in, server-address and library screens, and the platform implementations: secure storage for the refresh token, the audio player, and the Google sign-in flow.
 
 **Metadata and files.** Metadata in one SQLite file, files as `{base}/files/{mediaFileID}`, both in the app's data folder (not a cache folder, which the OS may clear). Cleared app data is handled like the browser dropping storage was: a stored ETag with an empty library sends no `If-None-Match`, and start-up repair marks every media file whose file is missing as not downloaded.

@@ -116,7 +116,7 @@ public class MediaTagWritingServiceTest : IDisposable
     public void Write_AnItemRenamedAfterTheUpload_WritesTheNewName()
     {
         EntityMediaFile mediaFile = Linked("Title", ["Old"], null, [], []);
-        string path = WriteFile(MediaFileFixture.CreateWav(), "media.wav");
+        string path = WriteFile(MediaFileFixture.CreateWav());
         (mediaFile.ArtistLinkList[0].Artist ?? throw new InvalidOperationException("The link has no artist.")).Name = "New";
 
         _writer.Write(path, mediaFile);

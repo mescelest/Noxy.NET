@@ -19,6 +19,27 @@ public class RequestUpdatePlaylistTest
     }
 
     [Fact]
+    public void Write_OmitsAFieldThatWasLeftOut_AndKeepsOneThatWasSent_EvenWhenItIsNullOrFalse()
+    {
+        Assert.Equal("{}", JsonSerializer.Serialize(new RequestUpdatePlaylist(), JsonSerializerOptions.Web));
+        Assert.Equal("""{"name":"Mix"}""", JsonSerializer.Serialize(new RequestUpdatePlaylist { Name = new("Mix") }, JsonSerializerOptions.Web));
+        Assert.Equal("""{"name":null}""", JsonSerializer.Serialize(new RequestUpdatePlaylist { Name = new(null) }, JsonSerializerOptions.Web));
+        Assert.Equal("""{"allowDuplicates":false}""", JsonSerializer.Serialize(new RequestUpdatePlaylist { AllowDuplicates = new(false) }, JsonSerializerOptions.Web));
+    }
+
+    [Fact]
+    public void Write_ThenRead_GivesTheSameRequest()
+    {
+        RequestUpdatePlaylist sent = new() { AllowDuplicates = new(false) };
+
+        RequestUpdatePlaylist received = Read(JsonSerializer.Serialize(sent, JsonSerializerOptions.Web));
+
+        Assert.False(received.Name.HasValue);
+        Assert.True(received.AllowDuplicates.HasValue);
+        Assert.False(received.AllowDuplicates.Value);
+    }
+
+    [Fact]
     public void Empty_IsValid_AndNothingIsPresent()
     {
         RequestUpdatePlaylist request = Read("{}");

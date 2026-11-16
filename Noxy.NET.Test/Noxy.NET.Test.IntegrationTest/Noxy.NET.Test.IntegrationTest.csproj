@@ -27,6 +27,12 @@
         <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Application\Noxy.NET.MediaPlayer.Application.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Persistence\Noxy.NET.MediaPlayer.Persistence.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.API\Noxy.NET.MediaPlayer.API.csproj"/>
+        <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Presentation\Noxy.NET.MediaPlayer.Presentation.csproj"/>
+        <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Storage\Noxy.NET.MediaPlayer.Storage.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fixtures\MetadataStoreContract.cs" Link="MediaPlayer\Fixtures\MetadataStoreContract.cs"/>
     </ItemGroup>
 
 </Project>

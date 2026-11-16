@@ -11,7 +11,8 @@ public class GoogleTokenService(IOptions<ConfigGoogle> configGoogle) : IGoogleTo
 {
     public async Task<GoogleIdentity> Validate(string idToken)
     {
-        if (string.IsNullOrWhiteSpace(configGoogle.Value.ClientId))
+        List<string> clientIdList = configGoogle.Value.ConfiguredClientIdList;
+        if (clientIdList.Count == 0)
         {
             throw new GoogleLoginNotConfiguredException();
         }
@@ -23,8 +24,8 @@ public class GoogleTokenService(IOptions<ConfigGoogle> configGoogle) : IGoogleTo
 
         try
         {
-            // Checks the signature against Google's published keys, the issuer, the expiry, and that the token was issued for our client ID.
-            GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new() { Audience = [configGoogle.Value.ClientId] });
+            // Checks the signature against Google's published keys, the issuer, the expiry, and that the token was issued for one of our client IDs.
+            GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new() { Audience = clientIdList });
 
             if (string.IsNullOrEmpty(payload.Subject) || string.IsNullOrEmpty(payload.Email))
             {

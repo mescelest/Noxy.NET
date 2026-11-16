@@ -1,10 +1,10 @@
 # Frontend Downloads and Player Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans (the user wants this done natively, in the main session, not through subagents). Steps use checkbox (`- [ ]`) syntax for tracking. **Do not start before `2026-11-15-frontend-foundation.md` is done**: this plan builds on its `IMetadataStore`, `IApiClient`, `ISyncService` and `ISessionService`, on the SQLite store, and on the `Presentation`, `Presentation.Local` and `App` projects it creates.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans (the user wants this done natively, in the main session, not through subagents). Steps use checkbox (`- [ ]`) syntax for tracking. **Do not start before `2026-11-15-frontend-foundation.md` is done**: this plan builds on its `IMetadataStore`, `IApiClient`, `ISyncService` and `ISessionService`, on the SQLite store, and on the `Presentation`, `Storage` and `App` projects it creates.
 
 **Goal:** Add everything between the metadata and the sound: a replaceable file store (one file per media file on disk), per-media-file file state, a download service that verifies every file against its `contentHash`, reconciliation when the library changes, opt-in bulk downloads, and a player that only ever plays from the device store with a queue and prefetch.
 
-**Architecture:** The logic lives in `Noxy.NET.MediaPlayer.Presentation` behind interfaces, tested in the unit test project with fakes (file store, audio player, API client) and end to end in the integration project against the real API. The disk file store lives in `Presentation.Local` and is tested against a temporary folder, so it needs no manual check. Only the audio players, one per platform, live in `Noxy.NET.MediaPlayer.App` and are verified by hand. Fluxor state and every page are the screens plan, which waits for the user's visual design.
+**Architecture:** The logic lives in `Noxy.NET.MediaPlayer.Presentation` behind interfaces, tested in the unit test project with fakes (file store, audio player, API client) and end to end in the integration project against the real API. The disk file store lives in `Storage` and is tested against a temporary folder, so it needs no manual check. Only the audio players, one per platform, live in `Noxy.NET.MediaPlayer.App` and are verified by hand. Fluxor state and every page are the screens plan, which waits for the user's visual design.
 
 **Tech Stack:** .NET 10, .NET MAUI (Windows and Android), `System.Security.Cryptography` for SHA-256, xunit v3.
 
@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Work in `Presentation`, `Presentation.Local` and `App` (only for the audio players), plus the two test projects. Target `net10.0`. The backend is not changed. **No MAUI, Blazor or platform type in `Presentation` or `Presentation.Local`.**
+- Work in `Presentation`, `Storage` and `App` (only for the audio players), plus the two test projects. Target `net10.0`. The backend is not changed. **No MAUI, Blazor or platform type in `Presentation` or `Storage`.**
 - All conventions of the foundation plan apply: one class per file, no summary comment above a class, interfaces in `Interfaces/<same folder as the implementation>`, extensions in `Extensions`, `List` suffix, no `yield`, no magic strings, `is null`, no `!`, method-syntax LINQ, kind-first dependency names (`storeFile`, `serviceHash`, `playerAudio`, `clientApi`, `serviceDownload`), `time` keeps its name, no commits, `git add -N` new files by name, no machine-level commands, zero warnings, unit tests in `Noxy.NET.Test.UnitTest/MediaPlayer/Presentation/`, store and end-to-end tests in the integration project, fakes in `Fakes`, helpers in `Fixtures`, and a test folder contains only tests.
 - A media file is "on this device" only when its bytes are in the file store **and** their SHA-256 equals the `contentHash` of the library entry they were downloaded for. A partial download is never written to the file store: it lives in a separate partial area and is only moved into the store after the hash matches.
 - Only these start a download: opening a playlist, playing or queueing a media file that is missing, and an explicit download (one media file, a playlist, the whole library). Nothing starts because a list scrolled or a screen opened.
@@ -36,7 +36,7 @@ New files (relative to the project named; tests to the test projects' `MediaPlay
 - `Presentation/Interfaces/Stores/`: `IFileStore.cs`
 - `Presentation/Services/`: `DownloadService.cs`, `HashService.cs`, `PlayerService.cs`, `FileReconciler.cs`
 - `Presentation/Models/`: `FileState.cs`, `FileSyncState.cs` (enum), `StorageEstimate.cs`, `DownloadProgress.cs`, `LibraryDiff.cs`, `PlayerQueueEntry.cs`, `ApiFileResponse.cs`; `Exceptions/StorageFullException.cs`; `Extensions/ContentTypeExtension.cs` (file extension for a content type)
-- `Presentation.Local/Stores/`: `DiskFileStore.cs`
+- `Storage/Stores/`: `DiskFileStore.cs`
 - `App/Services/`: `AudioPlayer.cs` with the per-platform parts under `App/Platforms/Windows` and `App/Platforms/Android`
 - Tests: unit `Fakes/FakeFileStore.cs`, `Fakes/FakeAudioPlayer.cs`, `Fakes/FakeDelay.cs`, `Fixtures/FileStoreContract.cs`; test classes per class; integration `DiskFileStoreTest.cs`, `FrontendDownloadFlowTest.cs`
 
@@ -58,7 +58,7 @@ Contracts every task shares:
 
 **Files:**
 - Create: `Models/FileSyncState.cs`, `Models/FileState.cs`; tests added to `Fixtures/MetadataStoreContract.cs`
-- Modify: `IMetadataStore.cs`, `Fakes/FakeMetadataStore.cs`, `Presentation.Local/Stores/SqliteMetadataStore.cs`
+- Modify: `IMetadataStore.cs`, `Fakes/FakeMetadataStore.cs`, `Storage/Stores/SqliteMetadataStore.cs`
 
 **Interfaces:** Produces the `FileState` members above.
 
@@ -71,7 +71,7 @@ Contracts every task shares:
 ### Task 2: File store
 
 **Files:**
-- Create: `Interfaces/Stores/IFileStore.cs`, `Models/StorageEstimate.cs`, `Exceptions/StorageFullException.cs`, `Extensions/ContentTypeExtension.cs`, `Presentation.Local/Stores/DiskFileStore.cs`; tests `Fakes/FakeFileStore.cs`, `Fixtures/FileStoreContract.cs`, `FakeFileStoreTest.cs` (unit), `DiskFileStoreTest.cs` (integration, links the contract)
+- Create: `Interfaces/Stores/IFileStore.cs`, `Models/StorageEstimate.cs`, `Exceptions/StorageFullException.cs`, `Extensions/ContentTypeExtension.cs`, `Storage/Stores/DiskFileStore.cs`; tests `Fakes/FakeFileStore.cs`, `Fixtures/FileStoreContract.cs`, `FakeFileStoreTest.cs` (unit), `DiskFileStoreTest.cs` (integration, links the contract)
 
 **Interfaces:** Produces `IFileStore`, `StorageEstimate` and `DiskFileStore(string baseFolder)`: held files at `{base}/files/{mediaFileID}{extension}` and partial files at `{base}/partial/{mediaFileID}`. The extension comes from `ContentTypeExtension` (`audio/mpeg` to `.mp3`, `audio/mp4` and `audio/x-m4a` to `.m4a`, `audio/flac` to `.flac`, `audio/ogg` to `.ogg`, `audio/wav` and `audio/x-wav` to `.wav`, anything else to `.bin`), because the platform players decide a decoder partly by extension.
 

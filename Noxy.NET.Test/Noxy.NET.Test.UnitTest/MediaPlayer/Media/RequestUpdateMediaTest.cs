@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Requests.Media;
 
@@ -17,6 +18,13 @@ public class RequestUpdateMediaTest
     private static Optional<string?> Text(int length)
     {
         return new(new string('a', length));
+    }
+
+    [Fact]
+    public void Write_OmitsEveryFieldThatWasLeftOut_AndKeepsOnesThatWereSent_EvenWhenNull()
+    {
+        Assert.Equal("{}", JsonSerializer.Serialize(new RequestUpdateMedia(), JsonSerializerOptions.Web));
+        Assert.Equal("""{"title":"New","year":null}""", JsonSerializer.Serialize(new RequestUpdateMedia { Title = new("New"), Year = new(null) }, JsonSerializerOptions.Web));
     }
 
     [Fact]

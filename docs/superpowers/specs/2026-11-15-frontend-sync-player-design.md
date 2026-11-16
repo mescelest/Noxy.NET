@@ -63,7 +63,7 @@ The media player is a sync-and-play app, not a streaming service. A user's media
 
 - **API client**: typed calls for every endpoint the app uses (sign-in, sign-up, refresh, library, playlists, file download), attaching the bearer token and handling a 401 by refreshing once and retrying. Sends `If-None-Match` and reads `ETag`.
 - **Session service**: signs in and out, keeps the tokens (refresh token in storage, access token in memory), signs in again silently on load, and refreshes before expiry.
-- **`IMetadataStore`** and **`IFileStore`** (the replaceable seam, in an `Interfaces` folder): metadata (media files, playlists, playlist entries, the two list ETags, per-media file file state) and files (a held file by media file ID with its path, a partial area for downloads in progress, delete, list which media file IDs are held, free space). The implementations are a SQLite store and a disk store in `Presentation.Local`.
+- **`IMetadataStore`** and **`IFileStore`** (the replaceable seam, in an `Interfaces` folder): metadata (media files, playlists, playlist entries, the two list ETags, per-media file file state) and files (a held file by media file ID with its path, a partial area for downloads in progress, delete, list which media file IDs are held, free space). The implementations are a SQLite store and a disk store in `Storage`.
 - **Sync service**: start-up diff of library and playlists (send the stored ETag; on 304 do nothing; on 200 replace the local list and remove local media files and files that are gone); hub connection that applies each pushed change as it arrives; a reconnect always re-runs the diff because pushes sent while offline are lost.
 - **Download service**: a queue with a small number of parallel downloads, resume with `Range` and `If-Range` after an interruption, hash verification before a file is marked on the device, retry with backoff, and state per media file. Callers: opening a playlist, play or queue of a missing media file, and force download.
 - **Player service**: the queue, the current media file, position, volume, and prefetching of the next few media files; plays through an `IAudioPlayer` (native, one per platform) given the file path from `IFileStore`; waits on the download service when the media file is missing; and is the only part that knows about the audio player.
@@ -97,7 +97,7 @@ Sign in and sign up; library tab (all media files from the local store, searchab
 
 ### Starting point
 
-The first version of this design started from a blank Blazor WebAssembly shell. The platform is now a MAUI Blazor Hybrid app (see `2026-11-15-frontend-maui-design.md`): `Frontend` is replaced by `App`, `Presentation` becomes a plain class library and a new `Presentation.Local` holds the disk-only store implementations. There are no auth pages, no Fluxor setup and no screens yet, so the plans include the scaffolding. `Noxy.NET.UI` has shared components and Fluxor helpers to reuse where they fit.
+The first version of this design started from a blank Blazor WebAssembly shell. The platform is now a MAUI Blazor Hybrid app (see `2026-11-15-frontend-maui-design.md`): `Frontend` is replaced by `App`, `Presentation` becomes a plain class library and a new `Storage` holds the disk-only store implementations. There are no auth pages, no Fluxor setup and no screens yet, so the plans include the scaffolding. `Noxy.NET.UI` has shared components and Fluxor helpers to reuse where they fit.
 
 ### Calls made while writing this (mine, to be checked)
 
@@ -114,4 +114,4 @@ Unit tests with fakes for the stores and the API client: the diff (304, changes,
 
 ## Left to the builder
 
-Folder and class names inside `Presentation`, `Presentation.Local` and `App`, Fluxor action and reducer naming, the SQLite schema, the number of parallel downloads and prefetched media files, the retry policy, how a bulk download is scheduled, and the native audio players. The look of every screen is a separate design with the user.
+Folder and class names inside `Presentation`, `Storage` and `App`, Fluxor action and reducer naming, the SQLite schema, the number of parallel downloads and prefetched media files, the retry policy, how a bulk download is scheduled, and the native audio players. The look of every screen is a separate design with the user.

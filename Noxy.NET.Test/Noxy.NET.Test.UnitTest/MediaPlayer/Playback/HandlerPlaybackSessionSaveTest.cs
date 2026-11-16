@@ -198,7 +198,7 @@ public class HandlerPlaybackSessionSaveTest
     [Fact]
     public async Task Save_AnEmptyQueueWithNoCurrentIndex_IsAllowed()
     {
-        ResponsePlaybackSession response = await Save([], null, 0);
+        ResponsePlaybackSession response = await Save([]);
 
         Assert.Empty(response.QueueMediaFileIDList);
         Assert.Null(response.CurrentIndex);

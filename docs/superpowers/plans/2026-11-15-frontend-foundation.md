@@ -4,7 +4,7 @@
 
 **Goal:** Replace the blank Blazor WebAssembly shell with a MAUI Blazor Hybrid app for Windows and Android, and give it everything below the screens that metadata needs: sign in (email and password, and Google) with silent refresh, typed API calls with ETags, a replaceable metadata store (SQLite on disk), and a sync service that keeps the media file and playlist lists current from the start-up diff and the hub, with a search function over the local library.
 
-**Architecture:** Three projects. `Noxy.NET.MediaPlayer.Presentation` is a plain class library with only what any frontend could use: services, models and the contracts for everything platform-specific. `Noxy.NET.MediaPlayer.Presentation.Local` is a plain library with the implementations that need only a disk (the SQLite metadata store, later the file store). `Noxy.NET.MediaPlayer.App` replaces `Noxy.NET.MediaPlayer.Frontend`: the MAUI shell, the Blazor screens (the screens plan) and the platform implementations. Services are tested in the unit test project with fakes, the stores in the integration test project, and end to end against the real API (`ApiFactory`).
+**Architecture:** Three projects. `Noxy.NET.MediaPlayer.Presentation` is a plain class library with only what any frontend could use: services, models and the contracts for everything platform-specific. `Noxy.NET.MediaPlayer.Storage` is a plain library with the implementations that need only a disk (the SQLite metadata store, later the file store). `Noxy.NET.MediaPlayer.App` replaces `Noxy.NET.MediaPlayer.Frontend`: the MAUI shell, the Blazor screens (the screens plan) and the platform implementations. Services are tested in the unit test project with fakes, the stores in the integration test project, and end to end against the real API (`ApiFactory`).
 
 **Tech Stack:** .NET 10, .NET MAUI Blazor Hybrid (`net10.0-windows10.0.19041.0` and `net10.0-android`), `Microsoft.AspNetCore.SignalR.Client` 10.0.15, SQLite (`Microsoft.Data.Sqlite` or EF Core SQLite, as the builder prefers), `SecureStorage` and `Preferences` from MAUI, xunit v3.
 
@@ -12,12 +12,12 @@
 
 ## Global Constraints
 
-- Work in `Noxy.NET.MediaPlayer.Presentation`, `Presentation.Local`, `App` and the two test projects, plus the one backend change in Task 1. Target `net10.0` (the App adds the two platform targets). **No MAUI, Blazor, browser or Android type in `Presentation` or `Presentation.Local`.**
+- Work in `Noxy.NET.MediaPlayer.Presentation`, `Storage`, `App` and the two test projects, plus the one backend change in Task 1. Target `net10.0` (the App adds the two platform targets). **No MAUI, Blazor, browser or Android type in `Presentation` or `Storage`.**
 - One class per file, the file named after it. No summary comment above a class. Interfaces in an `Interfaces` folder, in a subfolder matching the implementation's folder (`Interfaces/Services` for `Services`, `Interfaces/Stores` for `Stores`); namespaces mirror folders. Extensions in an `Extensions` folder. Lists end in `List`. No `yield`. No magic strings (constants, `nameof`, or `nameof(MediaHubEvent.X)` for hub events). `is null`. No `!` (handle the null with a descriptive throw). Method-syntax LINQ. Media, never "song". Injected dependencies named kind first (`serviceSession`, `storeMetadata`, `clientApi`, `storageSession`); `time` keeps its name.
 - Requests are in `Noxy.NET.MediaPlayer.Application.Requests`, responses in `Noxy.NET.MediaPlayer.Domain.Responses`; the app sends and reads exactly those classes. Hub event names come from `MediaHubEvent`.
 - The access token lives in memory only; the refresh token is the only credential written to disk, and only in `SecureStorage`. No Google token or password is stored. Neither token, nor a password, appears in a log or an exception message.
 - A stored ETag is only ever one that arrived with a full `200` response the device downloaded. A push never writes an ETag.
-- Tests: xunit v3, unit tests in `Noxy.NET.Test.UnitTest/MediaPlayer/Presentation/`, store and end-to-end tests in `Noxy.NET.Test.IntegrationTest/MediaPlayer/Presentation/`. Build the test project, then run its exe, for example `Noxy.NET.Test/Noxy.NET.Test.UnitTest/bin/Debug/net10.0/Noxy.NET.Test.UnitTest.exe -class "*SyncServiceTest"`; `dotnet test` finds nothing. Pass `TestContext.Current.CancellationToken` to every call that takes a token. Zero warnings. A test folder contains only tests: fakes go in `Fakes`, helpers in `Fixtures` (extensions in `Fixtures/Extensions`). `ValueTask` or `Task` results are wrapped with `.AsTask()` where needed inside `Assert.ThrowsAsync`. A MAUI project cannot be referenced from the test projects, so everything testable lives in `Presentation` or `Presentation.Local`.
+- Tests: xunit v3, unit tests in `Noxy.NET.Test.UnitTest/MediaPlayer/Presentation/`, store and end-to-end tests in `Noxy.NET.Test.IntegrationTest/MediaPlayer/Presentation/`. Build the test project, then run its exe, for example `Noxy.NET.Test/Noxy.NET.Test.UnitTest/bin/Debug/net10.0/Noxy.NET.Test.UnitTest.exe -class "*SyncServiceTest"`; `dotnet test` finds nothing. Pass `TestContext.Current.CancellationToken` to every call that takes a token. Zero warnings. A test folder contains only tests: fakes go in `Fakes`, helpers in `Fixtures` (extensions in `Fixtures/Extensions`). `ValueTask` or `Task` results are wrapped with `.AsTask()` where needed inside `Assert.ThrowsAsync`. A MAUI project cannot be referenced from the test projects, so everything testable lives in `Presentation` or `Storage`.
 - Do not commit. The user reviews the diff in the IDE; `git add -N` files you create, by name. Do not run machine-level commands (installing workloads, the Android SDK or tools): give the user the command instead. Write files with the editor tool when they contain quotes, apostrophes, backslashes or `$`. If a file seems to have lost an edit, re-read it before editing.
 
 ## Review Focus
@@ -36,12 +36,12 @@ New files (relative to the project named; tests relative to the test projects' `
 - `Presentation/Interfaces/Services/`: `IAuthApiClient.cs`, `IApiClient.cs`, `ISessionService.cs`, `ISyncService.cs`, `IMediaHubService.cs`, `IGoogleSignInService.cs`, `IAppStartupService.cs`
 - `Presentation/Interfaces/Stores/`: `IMetadataStore.cs`, `ISessionStorage.cs`, `IServerAddressStorage.cs`
 - `Presentation/Services/`: `AuthApiClient.cs`, `ApiClient.cs`, `SessionService.cs`, `SyncService.cs`, `MediaHubService.cs`, `AppStartupService.cs`; the existing `APIHttpClient.cs` is replaced by `ApiClient`
-- `Presentation/Models/`: `ApiResponse.cs`, `LibrarySort.cs`; `Exceptions/ApiException.cs`; `Helpers/AccessTokenReader.cs`, `Helpers/LibrarySearch.cs`; `Constants.cs`
-- `Presentation.Local/Stores/`: `SqliteMetadataStore.cs`
+- `Presentation/Models/`: `ApiResponse.cs`, `LibrarySort.cs`; `Exceptions/ApiException.cs`, `Exceptions/ServerAddressMissingException.cs`; `Extensions/StringExtensions.cs` (access token expiry, server address), `Extensions/HttpResponseMessageExtension.cs`, `Extensions/ResponseMediaFileListExtension.cs` (search and sort); `Constants.cs`
+- `Storage/Stores/`: `SqliteMetadataStore.cs`
 - `App/`: the MAUI project (shell page with one `BlazorWebView`, `MauiProgram.cs`, Blazor `_Imports.razor`, `wwwroot`), `Stores/SecureSessionStorage.cs`, `Stores/PreferencesServerAddressStorage.cs`, `Services/GoogleSignInService.cs` (and per-platform parts)
 - Tests: unit `Fakes/FakeHttpMessageHandler.cs`, `Fakes/FakeSessionStorage.cs`, `Fakes/FakeServerAddressStorage.cs`, `Fakes/FakeMetadataStore.cs`, `Fakes/FakeApiClient.cs`, `Fakes/FakeAuthApiClient.cs`, `Fakes/FakeSessionService.cs`, `Fakes/FakeGoogleSignInService.cs`, `Fixtures/MetadataStoreContract.cs`; test classes named after the class they test; integration `SqliteMetadataStoreTest.cs`, `FrontendSyncFlowTest.cs`
 
-Modified: `Presentation.csproj` (plain SDK, SignalR client package), `Test.UnitTest.csproj` and `Test.IntegrationTest.csproj` (reference `Presentation` and `Presentation.Local`; the integration project links `MetadataStoreContract.cs` from the unit project), `Noxy.NET.sln`, backend `ConfigGoogle`/`GoogleTokenService` and the API `appsettings.json`.
+Modified: `Presentation.csproj` (plain SDK, SignalR client package), `Test.UnitTest.csproj` and `Test.IntegrationTest.csproj` (reference `Presentation` and `Storage`; the integration project links `MetadataStoreContract.cs` from the unit project), `Noxy.NET.sln`, backend `ConfigGoogle`/`GoogleTokenService` and the API `appsettings.json`.
 
 Removed: `Noxy.NET.MediaPlayer.Frontend` (project, folder and solution entry), `Presentation/Services/APIHttpClient.cs`.
 
@@ -77,14 +77,14 @@ Contracts every task shares:
 
 **Files:**
 - Modify: `Presentation.csproj` (plain `Microsoft.NET.Sdk`; remove the Blazor, WebAssembly and `Blazored.LocalStorage` packages and the `browser` supported platform; add `Microsoft.AspNetCore.SignalR.Client` 10.0.15 and `Microsoft.Extensions.Http`; delete `_Imports.razor`), `Noxy.NET.sln`, `Test.UnitTest.csproj` and `Test.IntegrationTest.csproj`
-- Create: `Presentation.Local/Noxy.NET.MediaPlayer.Presentation.Local.csproj` (plain library referencing `Presentation`), `App/` (from the .NET MAUI Blazor Hybrid template), `Presentation/Constants.cs` (`RefreshTokenKey`, `RefreshMarginSeconds = 60`), `Presentation/Models/ApiResponse.cs`, `Presentation/Exceptions/ApiException.cs`, `Presentation/Exceptions/ServerAddressMissingException.cs`
+- Create: `Storage/Noxy.NET.MediaPlayer.Storage.csproj` (plain library referencing `Presentation`), `App/` (from the .NET MAUI Blazor Hybrid template), `Presentation/Constants.cs` (`RefreshTokenKey`, `RefreshMarginSeconds = 60`), `Presentation/Models/ApiResponse.cs`, `Presentation/Exceptions/ApiException.cs`, `Presentation/Exceptions/ServerAddressMissingException.cs`
 - Delete: `Noxy.NET.MediaPlayer.Frontend` (folder and solution entry), `Presentation/Services/APIHttpClient.cs`
 
 **Interfaces:**
-- Produces: the three types and the constant above; an `App` that builds for Windows and starts to a placeholder Blazor page; the project references `Presentation` and `Presentation.Local`.
+- Produces: the three types and the constant above; an `App` that builds for Windows and starts to a placeholder Blazor page; the project references `Presentation` and `Storage`.
 
 - [ ] **Step 1:** Check the MAUI workload is installed with `dotnet workload list`. If `maui` (or `maui-windows`) is missing, **stop and give the user the command** (`dotnet workload install maui`, plus the Android SDK from Visual Studio's installer) and wait. Do not install it yourself.
-- [ ] **Step 2:** Create the App with `dotnet new maui-blazor -n Noxy.NET.MediaPlayer.App` in `Noxy.NET.MediaPlayer/`, keep only the Windows and Android targets, set `WindowsPackageType` to `None` (unpackaged, simplest to run), remove the template's sample pages and data, and keep one root component with a placeholder page that shows the app name. Reference `Presentation` and `Presentation.Local`; reference `Noxy.NET.Shared` as the old Frontend did. Delete the Frontend project and replace its solution entry with the three new projects; make the Presentation changes above.
+- [ ] **Step 2:** Create the App with `dotnet new maui-blazor -n Noxy.NET.MediaPlayer.App` in `Noxy.NET.MediaPlayer/`, keep only the Windows and Android targets, set `WindowsPackageType` to `None` (unpackaged, simplest to run), remove the template's sample pages and data, and keep one root component with a placeholder page that shows the app name. Reference `Presentation` and `Storage`; reference `Noxy.NET.Shared` as the old Frontend did. Delete the Frontend project and replace its solution entry with the three new projects; make the Presentation changes above.
 - [ ] **Step 3:** Add the three small types and the constant. Build the whole solution for both platform targets (0 warnings) and run both test projects; expected: everything that passed before still passes (the unit and integration test projects reference only the plain libraries).
 - [ ] **Step 4:** Run the App on Windows (`dotnet run -f net10.0-windows10.0.19041.0` from its folder, or the IDE) and check the placeholder page appears. Record what was done and the Android build result in the report; if Android cannot build because its SDK is missing, say so and carry on, since the SDK is the user's install.
 - [ ] **Leave uncommitted.**
@@ -94,15 +94,15 @@ Contracts every task shares:
 ### Task 3: Session service
 
 **Files:**
-- Create: `Interfaces/Services/IAuthApiClient.cs`, `Interfaces/Services/ISessionService.cs`, `Interfaces/Services/IGoogleSignInService.cs`, `Interfaces/Stores/ISessionStorage.cs`, `Services/AuthApiClient.cs`, `Services/SessionService.cs`, `Helpers/AccessTokenReader.cs`; tests `Fakes/FakeAuthApiClient.cs`, `Fakes/FakeSessionStorage.cs`, `Fakes/FakeGoogleSignInService.cs`, `Fakes/FakeHttpMessageHandler.cs`, `AuthApiClientTest.cs`, `SessionServiceTest.cs`, `AccessTokenReaderTest.cs`
+- Create: `Interfaces/Services/IAuthApiClient.cs`, `Interfaces/Services/ISessionService.cs`, `Interfaces/Services/IGoogleSignInService.cs`, `Interfaces/Stores/ISessionStorage.cs`, `Services/AuthApiClient.cs`, `Services/SessionService.cs`, `Extensions/StringExtensions.cs`, `Extensions/HttpResponseMessageExtension.cs`; tests `Fakes/FakeAuthApiClient.cs`, `Fakes/FakeSessionStorage.cs`, `Fakes/FakeGoogleSignInService.cs`, `Fakes/FakeHttpMessageHandler.cs`, `AuthApiClientTest.cs`, `SessionServiceTest.cs`, `StringExtentionsTest.cs`, `HttpResponseMessageExtensionTest.cs`
 
 **Interfaces:**
 - Consumes: the contracts above.
-- Produces: `static class AccessTokenReader` with `DateTime? GetExpires(string accessToken)` (the `exp` claim of the unvalidated payload, UTC; null when it cannot be read); `SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService serviceGoogleSignIn, ISessionStorage storageSession, TimeProvider time)`; `AuthApiClient(HttpClient)` posting `RequestSignUp`, `RequestSignIn`, `RequestSignInGoogle`, `RequestRefresh` to `/Auth/SignUp`, `/Auth/SignIn`, `/Auth/Google`, `/Auth/Refresh`. The `HttpClient` has its base address set per request from the saved server address (see Task 4's note; here the client takes the address through an `IServerAddressStorage` so it can be faked).
+- Produces: an extension `string.GetAccessTokenExpires() : DateTime?` (the `exp` claim of the unvalidated payload, UTC; null when it cannot be read); `SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService serviceGoogleSignIn, ISessionStorage storageSession, TimeProvider time)`; `AuthApiClient(HttpClient)` posting `RequestSignUp`, `RequestSignIn`, `RequestSignInGoogle`, `RequestRefresh` to `/Auth/SignUp`, `/Auth/SignIn`, `/Auth/Google`, `/Auth/Refresh`. The `HttpClient` has its base address set per request from the saved server address (see Task 4's note; here the client takes the address through an `IServerAddressStorage` so it can be faked).
 
-- [ ] **Step 1: Write the failing tests.** `AccessTokenReaderTest`: a token built by hand with a known `exp` returns it; garbage, a token with two segments, and a payload without `exp` return null. `AuthApiClientTest` (with `FakeHttpMessageHandler` and `FakeServerAddressStorage`): each call sends the right method, path under the saved address and JSON body, no `Authorization` header, and returns the parsed tokens; a 401 problem details response throws `ApiException` with status 401 and its title, and a 409 the same; with no saved address it throws `ServerAddressMissingException` and sends nothing. `SessionServiceTest`: `SignIn_StoresTheRefreshTokenAndKeepsTheAccessTokenInMemoryOnly` (the fake storage holds the refresh token, nothing else); `SignInWithGoogle_SendsTheIdTokenAndSignsIn_AndStoresOnlyOurRefreshToken`; `SignInWithGoogle_WhenTheUserCancels_ReturnsFalse_AndStaysSignedOut_WithNoServerCall`; `SignInWithGoogle_WhenTheServerRejectsTheToken_ThrowsApiException_AndStaysSignedOut`; `TryRestore_WithAStoredRefreshToken_SignsIn_AndRotatesTheStoredToken`; `TryRestore_WithNoStoredToken_ReturnsFalse`; `TryRestore_WhenTheRefreshIsRejected_ClearsTheStoredToken_AndReturnsFalse`; `TryRestore_WhenTheNetworkIsDown_KeepsTheStoredToken_AndStaysSignedOut` (an `HttpRequestException` is not a rejection); `GetAccessToken_WhenItExpiresWithinTheMargin_RefreshesFirst`; `GetAccessToken_WhenSignedOut_ReturnsNull`; `ConcurrentRefresh_CallsTheServerOnce` (ten parallel `Refresh()` calls, the fake counts one request); `Refresh_WhenRejected_SignsOut_AndRaisesChanged`; `SignOut_ClearsEverything`; `Changed_IsRaisedOnSignInAndSignOut`.
+- [ ] **Step 1: Write the failing tests.** `StringExtentionsTest`: a token built by hand with a known `exp` returns it; garbage, a token with two segments, and a payload without `exp` return null. `AuthApiClientTest` (with `FakeHttpMessageHandler` and `FakeServerAddressStorage`): each call sends the right method, path under the saved address and JSON body, no `Authorization` header, and returns the parsed tokens; a 401 problem details response throws `ApiException` with status 401 and its title, and a 409 the same; with no saved address it throws `ServerAddressMissingException` and sends nothing. `SessionServiceTest`: `SignIn_StoresTheRefreshTokenAndKeepsTheAccessTokenInMemoryOnly` (the fake storage holds the refresh token, nothing else); `SignInWithGoogle_SendsTheIdTokenAndSignsIn_AndStoresOnlyOurRefreshToken`; `SignInWithGoogle_WhenTheUserCancels_ReturnsFalse_AndStaysSignedOut_WithNoServerCall`; `SignInWithGoogle_WhenTheServerRejectsTheToken_ThrowsApiException_AndStaysSignedOut`; `TryRestore_WithAStoredRefreshToken_SignsIn_AndRotatesTheStoredToken`; `TryRestore_WithNoStoredToken_ReturnsFalse`; `TryRestore_WhenTheRefreshIsRejected_ClearsTheStoredToken_AndReturnsFalse`; `TryRestore_WhenTheNetworkIsDown_KeepsTheStoredToken_AndStaysSignedOut` (an `HttpRequestException` is not a rejection); `GetAccessToken_WhenItExpiresWithinTheMargin_RefreshesFirst`; `GetAccessToken_WhenSignedOut_ReturnsNull`; `ConcurrentRefresh_CallsTheServerOnce` (ten parallel `Refresh()` calls, the fake counts one request); `Refresh_WhenRejected_SignsOut_AndRaisesChanged`; `SignOut_ClearsEverything`; `Changed_IsRaisedOnSignInAndSignOut`.
 - [ ] **Step 2:** Run the classes; expected: compile failure.
-- [ ] **Step 3:** Implement. `SessionService` serialises refreshes with a `SemaphoreSlim`; a caller that gets the lock after another refresh succeeded returns its result without calling the server. A rejection means an `ApiException` with status 401 (or 400); any other exception propagates and leaves the stored token alone. Expiry comes from `AccessTokenReader` and `time`.
+- [ ] **Step 3:** Implement. `SessionService` serialises refreshes with a `SemaphoreSlim`; a caller that gets the lock after another refresh succeeded returns its result without calling the server. A rejection means an `ApiException` with status 401 (or 400); any other exception propagates and leaves the stored token alone. Expiry comes from `GetAccessTokenExpires` and `time`.
 - [ ] **Step 4:** Run the unit project; expected: all pass.
 - [ ] **Leave uncommitted.**
 
@@ -142,7 +142,7 @@ Contracts every task shares:
 ### Task 6: SQLite metadata store
 
 **Files:**
-- Create: `Presentation.Local/Stores/SqliteMetadataStore.cs`; integration test `SqliteMetadataStoreTest.cs` (inherits `MetadataStoreContract`)
+- Create: `Storage/Stores/SqliteMetadataStore.cs`; integration test `SqliteMetadataStoreTest.cs` (inherits `MetadataStoreContract`)
 - Modify: `Test.IntegrationTest.csproj` (link `MetadataStoreContract.cs`)
 
 **Interfaces:**
@@ -191,13 +191,13 @@ Contracts every task shares:
 ### Task 9: Search and sort
 
 **Files:**
-- Create: `Helpers/LibrarySearch.cs`, `Models/LibrarySort.cs`; test `LibrarySearchTest.cs`
+- Create: `Extensions/ResponseMediaFileListExtension.cs`, `Models/LibrarySort.cs`; test `ResponseMediaFileListExtensionTest.cs`
 
 **Interfaces:**
-- Produces: `static class LibrarySearch` with `List<ResponseMediaFile> Filter(List<ResponseMediaFile> list, string? query)` and `List<ResponseMediaFile> Sort(List<ResponseMediaFile> list, LibrarySort sort, bool descending)`, and `enum LibrarySort { Title, Artist, Album, Year, TimeCreated }`.
+- Produces: extensions on `List<ResponseMediaFile>`: `Filter(string? query) : List<ResponseMediaFile>` and `Sort(LibrarySort sort, bool descending) : List<ResponseMediaFile>`, and `enum LibrarySort { Title, Artist, Album, Year, TimeCreated }`.
 
 - [ ] **Step 1: Write the failing tests:** a blank or null query returns everything in the given order; a query matches title, artist, album, album artist and genre, case-insensitively and by substring (the media file's artist, album and genre text as the API returns it); several words must all match (in any of the fields); a null field never throws; accents are matched as typed (no folding); sort is stable (equal keys keep the input order) and null keys sort last in both directions.
-- [ ] **Step 2:** Run `*LibrarySearchTest`; expected: compile failure. Implement; run; expected: pass.
+- [ ] **Step 2:** Run `*ResponseMediaFileListExtensionTest`; expected: compile failure. Implement; run; expected: pass.
 - [ ] **Leave uncommitted.**
 
 ---
@@ -205,7 +205,7 @@ Contracts every task shares:
 ### Task 10: Wiring, start-up and the end-to-end test
 
 **Files:**
-- Create: `Services/AppStartupService.cs` and its interface `IAppStartupService` (`Task Start()`), `App/Stores/SecureSessionStorage.cs`, `App/Stores/PreferencesServerAddressStorage.cs`, integration test `FrontendSyncFlowTest.cs` and fixtures it needs under `Fixtures/`; a `ServiceCollectionExtensions.cs` in `Presentation` (`AddPresentation`) and one in `Presentation.Local` (`AddPresentationLocal(string dataFolder)`)
+- Create: `Services/AppStartupService.cs` and its interface `IAppStartupService` (`Task Start()`), `App/Stores/SecureSessionStorage.cs`, `App/Stores/PreferencesServerAddressStorage.cs`, integration test `FrontendSyncFlowTest.cs` and fixtures it needs under `Fixtures/`; a `ServiceCollectionExtensions.cs` in `Presentation` (`AddPresentation`) and one in `Storage` (`AddPresentationLocal(string dataFolder)`)
 - Modify: `App/MauiProgram.cs` (register `AddPresentation`, `AddPresentationLocal` with `FileSystem.AppDataDirectory`, the two App stores and the Google service, and start `IAppStartupService` after the app is built)
 
 **Interfaces:**
@@ -223,7 +223,7 @@ Contracts every task shares:
 ### Task 11: Google sign-in on the device
 
 **Files:**
-- Create: `App/Services/GoogleSignInService.cs` (implementing `IGoogleSignInService`) with the per-platform parts under `App/Platforms/Windows` and `App/Platforms/Android`; a small PKCE helper in `Presentation` if it is platform-neutral (`Helpers/PkceChallenge.cs` with tests `PkceChallengeTest.cs`: the verifier is 43 to 128 characters of the allowed set, the challenge is the base64url SHA-256 of it, and two verifiers differ)
+- Create: `App/Services/GoogleSignInService.cs` (implementing `IGoogleSignInService`) with the per-platform parts under `App/Platforms/Windows` and `App/Platforms/Android`; a small PKCE helper in `Presentation` if it is platform-neutral (`Models/PkceChallenge.cs`, a record with a static `Create()` with tests `PkceChallengeTest.cs`: the verifier is 43 to 128 characters of the allowed set, the challenge is the base64url SHA-256 of it, and two verifiers differ)
 - Modify: `App/MauiProgram.cs`, the Android manifest (the redirect scheme), the design doc (record the redirect set-up that worked)
 
 **Interfaces:**

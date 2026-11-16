@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Requests.Metadata;
 
@@ -14,6 +15,13 @@ public class RequestUpdateAlbumTest
         List<ValidationResult> results = [];
         Validator.TryValidateObject(request, new(request), results, true);
         return results;
+    }
+
+    [Fact]
+    public void Write_OmitsEveryFieldThatWasLeftOut_AndKeepsOnesThatWereSent()
+    {
+        Assert.Equal("{}", JsonSerializer.Serialize(new RequestUpdateAlbum(), JsonSerializerOptions.Web));
+        Assert.Equal("""{"title":"Album"}""", JsonSerializer.Serialize(new RequestUpdateAlbum { Title = new("Album") }, JsonSerializerOptions.Web));
     }
 
     [Fact]

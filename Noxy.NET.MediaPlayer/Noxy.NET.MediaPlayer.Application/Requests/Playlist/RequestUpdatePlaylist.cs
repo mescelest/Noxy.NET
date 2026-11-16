@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Noxy.NET.MediaPlayer.Application.Attributes;
 using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
 using Noxy.NET.MediaPlayer.Application.Models;
@@ -8,8 +9,10 @@ public class RequestUpdatePlaylist
 {
     [OptionalNotBlank]
     [OptionalMaxLength(255)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<string?> Name { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<bool> AllowDuplicates { get; set; }
 
     public CommandPlaylistUpdate ToCommand(Guid userID, Guid id)
