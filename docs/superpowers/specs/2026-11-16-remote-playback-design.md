@@ -98,7 +98,7 @@ Every device stores, as it receives them, the queue, the current item, the posit
 
 ### Volume
 
-A volume change on a controller is sent to the server and forwarded to the active device; the active device applies it and writes it through the existing setting update (so devices follow), and controllers show it from the next report.
+Volume belongs to the device, not to the account: each device stores its own volume locally (it survives a restart) and the active device shares it with the session in its state reports. A volume change on a controller is sent to the server and forwarded to the active device, which applies it to its own player, keeps it as its own volume and reports it; controllers show it from the next report. It is not a synced setting: another device that becomes active plays at its own volume (decided by the user, 2026-11-16).
 
 ## Left to the builder
 
