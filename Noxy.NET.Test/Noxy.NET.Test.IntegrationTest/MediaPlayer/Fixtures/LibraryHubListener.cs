@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using Noxy.NET.MediaPlayer.API;
+using Noxy.NET.MediaPlayer.Application;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -56,7 +57,7 @@ public sealed class LibraryHubListener : IAsyncDisposable
     public static async Task<LibraryHubListener> Connect(ApiFactory factory, string? token, bool tokenInQueryString = false)
     {
         HubConnection connection = new HubConnectionBuilder()
-            .WithUrl(new Uri(factory.Server.BaseAddress, Constants.MediaHubPath), options =>
+            .WithUrl(new Uri(factory.Server.BaseAddress, HubConstants.MediaHubPath), options =>
             {
                 options.Transports = HttpTransportType.WebSockets;
                 options.AccessTokenProvider = () => Task.FromResult(token);

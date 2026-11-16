@@ -60,6 +60,50 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
         Changed?.Invoke();
     }
 
+    public async Task ApplyMediaUpdated(ResponseMediaFile mediaFile)
+    {
+        await storeMetadata.SaveMediaFile(mediaFile);
+        Changed?.Invoke();
+    }
+
+    public async Task ApplyMediaDeleted(Guid id)
+    {
+        await storeMetadata.DeleteMediaFile(id);
+        Changed?.Invoke();
+    }
+
+    public async Task ApplyPlaylistUpdated(ResponsePlaylist playlist)
+    {
+        ResponsePlaylist? local = (await storeMetadata.GetPlaylistList()).FirstOrDefault(x => x.ID == playlist.ID);
+        if (local is not null && !IsNewer(playlist, local)) return;
+
+        await storeMetadata.SavePlaylist(playlist);
+        Changed?.Invoke();
+
+        ResponsePlaylistDetail? detail = await storeMetadata.GetPlaylistDetail(playlist.ID);
+        if (detail is not null && playlist.TimeModified > detail.TimeModified) await SyncPlaylistDetail(playlist.ID);
+    }
+
+    public async Task ApplyPlaylistDeleted(Guid id)
+    {
+        await storeMetadata.DeletePlaylist(id);
+        Changed?.Invoke();
+    }
+
+    public async Task ApplyUploadSucceeded(ResponseUploadResult result)
+    {
+        if (result.Media is null) return;
+
+        await ApplyMediaUpdated(result.Media);
+    }
+
+    private static bool IsNewer(ResponsePlaylist pushed, ResponsePlaylist local)
+    {
+        if (pushed.TimeModified != local.TimeModified) return pushed.TimeModified > local.TimeModified;
+
+        return (pushed.TimeLastPlayed ?? DateTime.MinValue) > (local.TimeLastPlayed ?? DateTime.MinValue);
+    }
+
     // Null when the server could not be reached or answered 304 (nothing to apply). Any other failure propagates.
     private async Task<ApiResponse<T>?> Fetch<T>(Func<Task<ApiResponse<T>>> call)
     {

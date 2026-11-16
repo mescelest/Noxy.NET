@@ -1,5 +1,105 @@
 ﻿@page "/"
+@implements IDisposable
+@inject ISessionService ServiceSession
+@inject ISyncService ServiceSync
+@inject IAppStartupService ServiceStartup
+@inject IServerAddressStorage StorageServerAddress
+@inject IMetadataStore StoreMetadata
 
 <h1>Noxy.NET.MediaPlayer</h1>
 
-<p>The app shell is running. The screens come with the screens plan.</p>
+<p>Temporary test page for the sign-in plumbing. The screens plan replaces it.</p>
+
+<p>
+    Server address:
+    <input @bind="_address" size="40"/>
+    <button @onclick="SaveAddress">Save</button>
+</p>
+
+<p>
+    <button @onclick="SignInWithGoogle">Sign in with Google</button>
+    <button @onclick="SignOut">Sign out</button>
+</p>
+
+<p>Signed in: @ServiceSession.IsSignedIn. Offline: @ServiceSync.IsOffline.</p>
+<p>Media files: @_mediaCount. Playlists: @_playlistCount.</p>
+<p>@_message</p>
+
+@code {
+    private string _address = "http://localhost:5182";
+    private string _message = string.Empty;
+    private int _mediaCount;
+    private int _playlistCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _address = await StorageServerAddress.GetAddress() ?? _address;
+        ServiceSession.Changed += OnChanged;
+        ServiceSync.Changed += OnChanged;
+        await Refresh();
+    }
+
+    public void Dispose()
+    {
+        ServiceSession.Changed -= OnChanged;
+        ServiceSync.Changed -= OnChanged;
+    }
+
+    private void OnChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await Refresh();
+            StateHasChanged();
+        });
+    }
+
+    private async Task Refresh()
+    {
+        _mediaCount = (await StoreMetadata.GetMediaFileList()).Count;
+        _playlistCount = (await StoreMetadata.GetPlaylistList()).Count;
+    }
+
+    private async Task SaveAddress()
+    {
+        await Run(async () =>
+        {
+            await StorageServerAddress.SetAddress(_address);
+            _message = "Address saved.";
+        });
+    }
+
+    private async Task SignInWithGoogle()
+    {
+        await Run(async () =>
+        {
+            _message = "Waiting for Google in the browser...";
+            StateHasChanged();
+            bool signedIn = await ServiceSession.SignInWithGoogle();
+            _message = signedIn ? "Signed in with Google." : "Cancelled.";
+            if (signedIn) await ServiceStartup.Start();
+        });
+    }
+
+    private async Task SignOut()
+    {
+        await Run(async () =>
+        {
+            await ServiceSession.SignOut();
+            _message = "Signed out.";
+        });
+    }
+
+    private async Task Run(Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch (Exception exception)
+        {
+            _message = $"{exception.GetType().Name}: {exception.Message}";
+        }
+    }
+
+}

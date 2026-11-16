@@ -15,7 +15,7 @@ public sealed class FakeApiClient : IApiClient
 
     public Func<string?, ApiResponse<List<ResponsePlaylist>>> PlaylistListHandler { get; set; } = _ => new(HttpStatusCode.OK, [], null);
 
-    public Func<Guid, string?, ApiResponse<ResponsePlaylistDetail>> PlaylistDetailHandler { get; set; } = (id, _) => throw new ApiException(HttpStatusCode.NotFound, "Not found.");
+    public Func<Guid, string?, ApiResponse<ResponsePlaylistDetail>> PlaylistDetailHandler { get; set; } = (_, _) => throw new ApiException(HttpStatusCode.NotFound, "Not found.");
 
     public List<string?> LibraryETagList { get; } = [];
 

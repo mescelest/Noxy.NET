@@ -391,7 +391,7 @@ public class SyncServiceTest
 
         await _serviceSync.SyncPlaylistDetail(id);
 
-        Assert.Equal([(id, (string?)null)], _clientApi.PlaylistDetailRequestList);
+        Assert.Equal([(id, null)], _clientApi.PlaylistDetailRequestList);
         Assert.Equal(Start.AddHours(2), (await _storeMetadata.GetPlaylistDetail(id))?.TimeModified);
     }
 
@@ -454,6 +454,198 @@ public class SyncServiceTest
         Assert.Equal(4, changed);
 
         await _serviceSync.SyncLibrary(force: true);
+        Assert.Equal(4, changed);
+    }
+
+    private static ResponsePlaylist PlayedPlaylist(Guid id, DateTime modified, DateTime? lastPlayed)
+    {
+        return new()
+        {
+            ID = id,
+            Name = "Mix",
+            AllowDuplicates = true,
+            EntryCount = 1,
+            TimeCreated = Start,
+            TimeModified = modified,
+            TimeLastPlayed = lastPlayed
+        };
+    }
+
+    [Fact]
+    public async Task ApplyMediaUpdated_SavesIt_AndKeepsTheStoredETag()
+    {
+        await _storeMetadata.SetLibraryETag("\"v1\"");
+        ResponseMediaFile media = MediaFile("Pushed");
+
+        await _serviceSync.ApplyMediaUpdated(media);
+
+        Assert.Equal(["Pushed"], (await _storeMetadata.GetMediaFileList()).Select(x => x.Title).ToList());
+        Assert.Equal("\"v1\"", await _storeMetadata.GetLibraryETag());
+    }
+
+    [Fact]
+    public async Task ApplyMediaUpdated_ReplacesTheLocalCopyInPlace()
+    {
+        ResponseMediaFile media = MediaFile("Old");
+        await _storeMetadata.ReplaceMediaFileList([media, MediaFile("Other")]);
+
+        await _serviceSync.ApplyMediaUpdated(MediaFile("New", media.ID));
+
+        Assert.Equal(["New", "Other"], (await _storeMetadata.GetMediaFileList()).Select(x => x.Title).ToList());
+    }
+
+    [Fact]
+    public async Task ApplyMediaDeleted_RemovesIt_AndAnUnknownIDIsHarmless()
+    {
+        ResponseMediaFile media = MediaFile("One");
+        await _storeMetadata.ReplaceMediaFileList([media]);
+
+        await _serviceSync.ApplyMediaDeleted(Guid.CreateVersion7());
+        Assert.Single(await _storeMetadata.GetMediaFileList());
+
+        await _serviceSync.ApplyMediaDeleted(media.ID);
+        Assert.Empty(await _storeMetadata.GetMediaFileList());
+    }
+
+    [Fact]
+    public async Task ApplyUploadSucceeded_WithAMedia_SavesIt()
+    {
+        await _serviceSync.ApplyUploadSucceeded(new() { JobID = Guid.CreateVersion7(), Title = "Up", Succeeded = true, Media = MediaFile("Up") });
+
+        Assert.Equal(["Up"], (await _storeMetadata.GetMediaFileList()).Select(x => x.Title).ToList());
+    }
+
+    [Fact]
+    public async Task ApplyUploadSucceeded_WithNoMedia_ChangesNothing()
+    {
+        int changed = 0;
+        _serviceSync.Changed += () => changed++;
+
+        await _serviceSync.ApplyUploadSucceeded(new() { JobID = Guid.CreateVersion7(), Title = "Up", Succeeded = true });
+
+        Assert.Empty(await _storeMetadata.GetMediaFileList());
+        Assert.Equal(0, changed);
+    }
+
+    [Fact]
+    public async Task ApplyPlaylistUpdated_SavesTheSummary()
+    {
+        ResponsePlaylist playlist = Playlist("Pushed");
+
+        await _serviceSync.ApplyPlaylistUpdated(playlist);
+
+        Assert.Equal(["Pushed"], (await _storeMetadata.GetPlaylistList()).Select(x => x.Name).ToList());
+    }
+
+    [Fact]
+    public async Task ApplyPlaylistUpdated_WithANewerTimeThanAHeldDetail_RefetchesThatDetail()
+    {
+        Guid id = Guid.CreateVersion7();
+        await _storeMetadata.SavePlaylistDetail(Detail(id, Start));
+        await _storeMetadata.SavePlaylist(Playlist("Mix", id, Start));
+        _clientApi.PlaylistDetailHandler = (_, _) => Ok(Detail(id, Start.AddHours(1)));
+
+        await _serviceSync.ApplyPlaylistUpdated(Playlist("Mix", id, Start.AddHours(1)));
+
+        Assert.Equal([id], _clientApi.PlaylistDetailRequestList.Select(x => x.ID).ToList());
+        Assert.Equal(Start.AddHours(1), (await _storeMetadata.GetPlaylistDetail(id))?.TimeModified);
+    }
+
+    [Fact]
+    public async Task ApplyPlaylistUpdated_WithAnOlderTimeThanTheLocalSummary_IsIgnored()
+    {
+        Guid id = Guid.CreateVersion7();
+        await _storeMetadata.SavePlaylist(Playlist("Newer", id, Start.AddHours(2)));
+        int changed = 0;
+        _serviceSync.Changed += () => changed++;
+
+        await _serviceSync.ApplyPlaylistUpdated(Playlist("Older", id, Start.AddHours(1)));
+
+        Assert.Equal(["Newer"], (await _storeMetadata.GetPlaylistList()).Select(x => x.Name).ToList());
+        Assert.Equal(0, changed);
+    }
+
+    [Fact]
+    public async Task ApplyPlaylistUpdated_WithTheSameModifiedTimeButANewerLastPlayedTime_IsApplied_AndDoesNotRefetchTheDetail()
+    {
+        Guid id = Guid.CreateVersion7();
+        await _storeMetadata.SavePlaylistDetail(Detail(id, Start));
+        await _storeMetadata.SavePlaylist(PlayedPlaylist(id, Start, null));
+
+        await _serviceSync.ApplyPlaylistUpdated(PlayedPlaylist(id, Start, Start.AddMinutes(5)));
+
+        Assert.Equal(Start.AddMinutes(5), (await _storeMetadata.GetPlaylistList()).Single().TimeLastPlayed);
+        Assert.Empty(_clientApi.PlaylistDetailRequestList);
+    }
+
+    [Fact]
+    public async Task ApplyPlaylistUpdated_WithTheSameTimesAsTheLocalSummary_IsIgnored()
+    {
+        Guid id = Guid.CreateVersion7();
+        await _storeMetadata.SavePlaylist(PlayedPlaylist(id, Start, Start.AddMinutes(5)));
+        int changed = 0;
+        _serviceSync.Changed += () => changed++;
+
+        await _serviceSync.ApplyPlaylistUpdated(PlayedPlaylist(id, Start, Start.AddMinutes(5)));
+
+        Assert.Equal(0, changed);
+    }
+
+    [Fact]
+    public async Task ApplyPlaylistUpdated_ForAPlaylistWhoseDetailIsNotHeld_FetchesNothing()
+    {
+        await _serviceSync.ApplyPlaylistUpdated(Playlist("Mix"));
+
+        Assert.Empty(_clientApi.PlaylistDetailRequestList);
+    }
+
+    [Fact]
+    public async Task ApplyPlaylistDeleted_RemovesPlaylistAndDetail_AndAnUnknownIDIsHarmless()
+    {
+        Guid id = Guid.CreateVersion7();
+        await _storeMetadata.SavePlaylist(Playlist("Mix", id));
+        await _storeMetadata.SavePlaylistDetail(Detail(id));
+
+        await _serviceSync.ApplyPlaylistDeleted(Guid.CreateVersion7());
+        Assert.Single(await _storeMetadata.GetPlaylistList());
+
+        await _serviceSync.ApplyPlaylistDeleted(id);
+
+        Assert.Empty(await _storeMetadata.GetPlaylistList());
+        Assert.Null(await _storeMetadata.GetPlaylistDetail(id));
+    }
+
+    [Fact]
+    public async Task APush_NeverWritesAnETag()
+    {
+        await _storeMetadata.SetLibraryETag("\"v1\"");
+        await _storeMetadata.SetPlaylistListETag("\"p1\"");
+        Guid id = Guid.CreateVersion7();
+        ResponseMediaFile media = MediaFile("One");
+
+        await _serviceSync.ApplyMediaUpdated(media);
+        await _serviceSync.ApplyMediaDeleted(media.ID);
+        await _serviceSync.ApplyUploadSucceeded(new() { JobID = id, Title = "Up", Succeeded = true, Media = MediaFile("Up") });
+        await _serviceSync.ApplyPlaylistUpdated(Playlist("Mix", id));
+        await _serviceSync.ApplyPlaylistDeleted(id);
+
+        Assert.Equal("\"v1\"", await _storeMetadata.GetLibraryETag());
+        Assert.Equal("\"p1\"", await _storeMetadata.GetPlaylistListETag());
+    }
+
+    [Fact]
+    public async Task EveryApplyThatChangesTheStore_RaisesChanged()
+    {
+        int changed = 0;
+        _serviceSync.Changed += () => changed++;
+        Guid id = Guid.CreateVersion7();
+        ResponseMediaFile media = MediaFile("One");
+
+        await _serviceSync.ApplyMediaUpdated(media);
+        await _serviceSync.ApplyMediaDeleted(media.ID);
+        await _serviceSync.ApplyPlaylistUpdated(Playlist("Mix", id));
+        await _serviceSync.ApplyPlaylistDeleted(id);
+
         Assert.Equal(4, changed);
     }
 }

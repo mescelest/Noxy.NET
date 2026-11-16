@@ -1,4 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using Noxy.NET.MediaPlayer.App.Services;
+using Noxy.NET.MediaPlayer.App.Stores;
+using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 
 namespace Noxy.NET.MediaPlayer.App;
 
@@ -13,11 +17,26 @@ public static class MauiProgram
 
         builder.Services.AddMauiBlazorWebView();
 
+        builder.Services.AddPresentation();
+        builder.Services.AddStorage(FileSystem.AppDataDirectory);
+        builder.Services.AddSingleton<ISessionStorage, SecureSessionStorage>();
+        builder.Services.AddSingleton<IServerAddressStorage, PreferencesServerAddressStorage>();
+#if WINDOWS
+        builder.Services.AddSingleton<IGoogleSignInService, GoogleSignInService>();
+#else
+        builder.Services.AddSingleton<IGoogleSignInService, UnavailableGoogleSignInService>();
+#endif
+
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();
 #endif
 
-        return builder.Build();
+        MauiApp app = builder.Build();
+
+        // Not awaited: it never throws, and the app must show its first screen without waiting for the network.
+        _ = app.Services.GetRequiredService<IAppStartupService>().Start();
+
+        return app;
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.API.Configurations;
 using Noxy.NET.MediaPlayer.API.Hubs;
+using Noxy.NET.MediaPlayer.Application;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +52,7 @@ else
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<MediaHub>(Constants.MediaHubPath);
+app.MapHub<MediaHub>(HubConstants.MediaHubPath);
 
 await app.RunAsync();
 

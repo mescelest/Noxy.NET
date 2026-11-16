@@ -111,7 +111,8 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
 
     private async Task<HttpResponseMessage> SendOnce(string address, HttpMethod method, string path, object? body, string? eTag)
     {
-        using HttpRequestMessage request = new(method, $"{address}{path}") { Content = body is null ? null : JsonContent.Create(body) };
+        using HttpRequestMessage request = new(method, $"{address}{path}");
+        request.Content = body is null ? null : JsonContent.Create(body);
         if (await serviceSession.GetAccessToken() is { } token) request.Headers.Authorization = new(BearerScheme, token);
         if (eTag is not null) request.Headers.TryAddWithoutValidation(IfNoneMatchHeader, eTag);
 

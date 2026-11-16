@@ -1,3 +1,6 @@
+using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+
 namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 
 // Keeps the device's copy of the library and the playlists current. A failed network call never changes the local lists or ETags: it only sets IsOffline.
@@ -17,4 +20,18 @@ public interface ISyncService
 
     // Always a full download. A 404 deletes the playlist locally.
     Task SyncPlaylistDetail(Guid id);
+
+    // The push handlers. A push never writes an ETag.
+    Task ApplyMediaUpdated(ResponseMediaFile mediaFile);
+
+    // An ID that is not held is harmless.
+    Task ApplyMediaDeleted(Guid id);
+
+    // An older TimeModified never overwrites a newer local copy; an equal one applies only with a later TimeLastPlayed. A held detail is downloaded again only when TimeModified is later than the detail's.
+    Task ApplyPlaylistUpdated(ResponsePlaylist playlist);
+
+    Task ApplyPlaylistDeleted(Guid id);
+
+    // A failed upload carries no media: nothing changes.
+    Task ApplyUploadSucceeded(ResponseUploadResult result);
 }

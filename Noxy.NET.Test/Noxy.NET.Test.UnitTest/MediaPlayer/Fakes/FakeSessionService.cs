@@ -11,6 +11,11 @@ public sealed class FakeSessionService : ISessionService
 
     public bool RefreshSucceeds { get; set; } = true;
 
+    public bool RestoreSucceeds { get; set; } = true;
+
+    // Thrown by TryRestore when set.
+    public Exception? RestoreException { get; set; }
+
     public int RefreshCount { get; private set; }
 
     public bool IsSignedIn => AccessToken is not null;
@@ -52,7 +57,9 @@ public sealed class FakeSessionService : ISessionService
 
     public Task<bool> TryRestore()
     {
-        throw new NotSupportedException();
+        if (RestoreException is not null) throw RestoreException;
+
+        return Task.FromResult(RestoreSucceeds);
     }
 
     public Task SignOut()

@@ -16,7 +16,7 @@ public class ApiClientTest
 
     private readonly FakeHttpMessageHandler _handler = new();
     private readonly FakeSessionService _session = new();
-    private readonly FakeServerAddressStorage _address = new("https://server.example");
+    private readonly FakeServerAddressStorage _address = new();
     private readonly ApiClient _client;
 
     public ApiClientTest()

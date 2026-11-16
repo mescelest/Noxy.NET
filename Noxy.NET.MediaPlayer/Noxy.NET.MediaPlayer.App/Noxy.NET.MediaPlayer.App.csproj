@@ -40,6 +40,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- The git-ignored Google client secret, copied next to the app when it exists -->
+        <None Include="google.local.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('google.local.json')"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0"/>
