@@ -98,7 +98,7 @@ Every device stores, as it receives them, the queue, the current item, the posit
 
 ### Volume
 
-Volume belongs to the device, not to the account: each device stores its own volume locally (it survives a restart) and the active device shares it with the session in its state reports. A volume change on a controller is sent to the server and forwarded to the active device, which applies it to its own player, keeps it as its own volume and reports it; controllers show it from the next report. It is not a synced setting: another device that becomes active plays at its own volume (decided by the user, 2026-11-16).
+Each device keeps its own volume locally (it survives a restart), but while a session is live the volume is **shared by the session**, and the session's value is the one that counts. The active device reports its volume in every state report, and the server pushes it to every device. Rules (decided by the user, 2026-11-16): a device that connects or reconnects must never change the sound of something already playing, so it sends no volume of its own unless it becomes the active device; it adopts the session's volume instead (from the state the server sends on register, and from every later state push). A volume change on a controller is sent to the server and forwarded to the active device, which applies it and reports it; the report reaches every connected device, and each one applies it to its own player and stores it locally, so all devices follow. A device that becomes active through a transfer plays at the session's volume (the start request carries the state). With no live session a device just uses its own stored volume. It is not a synced account setting.
 
 ## Left to the builder
 
