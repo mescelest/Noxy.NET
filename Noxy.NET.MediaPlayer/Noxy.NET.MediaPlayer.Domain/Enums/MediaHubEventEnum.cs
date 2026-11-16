@@ -14,5 +14,14 @@ public enum MediaHubEventEnum
     AlbumDeleted,
     GenreUpdated,
     GenreDeleted,
-    SettingUpdated
+    SettingUpdated,
+    DeviceListChanged,
+    PlayerStateChanged,
+    QueueChanged,
+    QueueSnapshot,
+    SessionEnded,
+    TransferFailed,
+    PlayerCommandReceived,
+    PlayerTransferRequested,
+    PlayerStartRequested
 }

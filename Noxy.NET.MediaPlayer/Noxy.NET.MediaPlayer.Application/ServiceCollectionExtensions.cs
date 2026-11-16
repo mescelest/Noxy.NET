@@ -48,6 +48,11 @@ public static class ServiceCollectionExtensions
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            services.AddOptions<ConfigRemote>()
+                .BindConfiguration(ConfigRemote.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             services.AddOptions<ConfigGoogle>()
                 .BindConfiguration(ConfigGoogle.SectionName);
 
@@ -66,6 +71,8 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IMetadataChangeService, MetadataChangeService>();
             services.AddSingleton<INamedItemService<EntityArtist, ResponseArtist>, ArtistItemService>();
             services.AddSingleton<INamedItemService<EntityGenre, ResponseGenre>, GenreItemService>();
+            services.AddSingleton<IDeviceRegistryService, DeviceRegistryService>();
+            services.AddSingleton<ILiveSessionService, LiveSessionService>();
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
             services.AddHostedService<CleanupService>();

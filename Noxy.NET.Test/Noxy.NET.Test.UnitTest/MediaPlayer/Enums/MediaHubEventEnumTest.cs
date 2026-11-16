@@ -21,7 +21,16 @@ public class MediaHubEventEnumTest
             nameof(MediaHubEventEnum.AlbumDeleted),
             nameof(MediaHubEventEnum.GenreUpdated),
             nameof(MediaHubEventEnum.GenreDeleted),
-            nameof(MediaHubEventEnum.SettingUpdated)
+            nameof(MediaHubEventEnum.SettingUpdated),
+            nameof(MediaHubEventEnum.DeviceListChanged),
+            nameof(MediaHubEventEnum.PlayerStateChanged),
+            nameof(MediaHubEventEnum.QueueChanged),
+            nameof(MediaHubEventEnum.QueueSnapshot),
+            nameof(MediaHubEventEnum.SessionEnded),
+            nameof(MediaHubEventEnum.TransferFailed),
+            nameof(MediaHubEventEnum.PlayerCommandReceived),
+            nameof(MediaHubEventEnum.PlayerTransferRequested),
+            nameof(MediaHubEventEnum.PlayerStartRequested)
         ];
 
         Assert.Equal(expectedList.Order(), Enum.GetNames<MediaHubEventEnum>().Order());

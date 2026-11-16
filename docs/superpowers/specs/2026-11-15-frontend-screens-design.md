@@ -2,6 +2,8 @@
 
 Status: the outline (shell, header, sidebar sections, pages, sign-in) is approved by the user as of 2026-11-16; the look (colours, gaps, fonts and so on) is explicitly **not decided**, see "Styling through variables". Written 2026-11-15 from the brainstorming conversation. It sits on top of `2026-11-15-frontend-sync-player-design.md` (sync, stores, downloads, player) and changes it in two places: Google sign-in is now in scope, and two backend additions are needed (see "Backend additions"). Lines marked *(my proposal)* are my suggestions, not decisions. The mockups the user reacted to are in `.superpowers/brainstorm/` (`shell-layout-v2.html`, `library-view-v2.html`, `login-screen-v2.html`).
 
+Backend status (2026-11-16): the saved session is gone, per-playlist shuffle and repeat and the `KeepQueuedItems` setting exist, and the live session, device registry and remote commands are built on the hub (see `2026-11-16-remote-playback-design.md`).
+
 ## Intent
 
 The app is a sync-and-play music player. This design is the part the user sees: one window with a header, a sidebar of sections, a centre that shows the current screen, and a player bar. It has to make the library easy to browse and act on in bulk, make playlists and "what I was just listening to" one click away, and leave room for integrations (a YouTube finder later) and for ways of organising the library that are not built yet.

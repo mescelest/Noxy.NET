@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
 
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddApiCors()
+        public void AddApiCors()
         {
             services.AddOptions<ConfigCors>().BindConfiguration(ConfigCors.SectionName).ValidateDataAnnotations().ValidateOnStart();
 
@@ -40,11 +40,9 @@ public static class ServiceCollectionExtensions
                     .WithExposedHeaders(HeaderNames.ETag, HeaderNames.ContentRange, HeaderNames.AcceptRanges, HeaderNames.ContentDisposition)
                 )
             );
-
-            return services;
         }
 
-        public IServiceCollection AddApiRateLimiting()
+        public void AddApiRateLimiting()
         {
             services.AddOptions<ConfigRateLimitAuth>().BindConfiguration(ConfigRateLimitAuth.SectionName).ValidateDataAnnotations().ValidateOnStart();
             services.AddOptions<ConfigRateLimitUpload>().BindConfiguration(ConfigRateLimitUpload.SectionName).ValidateDataAnnotations().ValidateOnStart();
@@ -75,27 +73,24 @@ public static class ServiceCollectionExtensions
                     await response.WriteAsJsonAsync(new ProblemDetails { Status = response.StatusCode, Title = "Too many requests." }, cancellationToken);
                 };
             });
-
-            return services;
         }
 
-        public IServiceCollection AddApiSignalR()
+        public void AddApiSignalR()
         {
             services.AddSignalR();
             services.AddSingleton<IUserIdProvider, SubUserIdProvider>();
 
-            return services;
+            // A queue of thousands of items is one message, well over SignalR's 32 KB default.
+            services.AddOptions<HubOptions>().Configure<IOptions<ConfigRemote>>((hubOptions, configRemote) => hubOptions.MaximumReceiveMessageSize = configRemote.Value.MaxHubMessageBytes);
         }
 
-        public IServiceCollection AddApiResponseCompression()
+        public void AddApiResponseCompression()
         {
             // The library list holds no secrets and does not echo anything the caller sent, so compressing it over HTTPS is safe.
             services.AddResponseCompression(options => options.EnableForHttps = true);
-
-            return services;
         }
 
-        public IServiceCollection AddApiAuthentication()
+        public void AddApiAuthentication()
         {
             // Validation uses the same ConfigJwt that TokenService signs with, so the two can't drift apart.
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
@@ -146,8 +141,6 @@ public static class ServiceCollectionExtensions
             // Secure by default: any endpoint without its own authorization metadata requires a signed-in user, and a user is a sub claim that holds a user ID. The bearer validation already rejects a token without one; this keeps it true for any other way a principal could be built.
             services.AddAuthorizationBuilder()
                 .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().RequireAssertion(context => Guid.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out _)).Build());
-
-            return services;
         }
     }
 

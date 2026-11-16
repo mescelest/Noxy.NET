@@ -30,6 +30,8 @@ public class ApiExceptionHandler(IProblemDetailsService serviceProblemDetails) :
             InvalidMetadataOperationException invalid => new(StatusCodes.Status400BadRequest, invalid.Message),
             SettingNotFoundException => new(StatusCodes.Status404NotFound, "The setting was not found."),
             InvalidSettingValueException invalidSetting => new(StatusCodes.Status400BadRequest, invalidSetting.Message),
+            InvalidQueueEditException invalidEdit => new(StatusCodes.Status400BadRequest, invalidEdit.Message),
+            TooManyDevicesException => new(StatusCodes.Status400BadRequest, "The account has too many devices."),
             PlaylistEntryNotFoundException => new(StatusCodes.Status404NotFound, "The playlist entry was not found."),
             PlaylistLimitReachedException => new(StatusCodes.Status409Conflict, "The playlist limit has been reached."),
             PlaylistEntryLimitReachedException => new(StatusCodes.Status409Conflict, "The playlist is full."),

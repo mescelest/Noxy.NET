@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
@@ -26,7 +27,7 @@ public static class ResponseMediaFileListExtension
                 LibrarySortEnum.Album => SortByText(mediaFileList, x => x.Album, descending),
                 LibrarySortEnum.Year => SortByNumber(mediaFileList, x => x.Year, descending),
                 LibrarySortEnum.TimeCreated => SortByNumber(mediaFileList, x => x.TimeCreated.Ticks, descending),
-                _ => throw new ArgumentOutOfRangeException(nameof(sort), sort, "Unknown sort.")
+                _ => throw new InvalidEnumArgumentException(nameof(sort), (int)sort, typeof(LibrarySortEnum))
             };
         }
     }
