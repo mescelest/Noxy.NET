@@ -169,7 +169,7 @@ public class LiveSessionService : ILiveSessionService
         List<Guid> neededList = [];
         if (edit.MediaFileID is { } mediaFileID) neededList.Add(mediaFileID);
         if (edit.Item is { } item) neededList.Add(item.MediaFileID);
-        if (edit.ItemList is { } itemList) neededList.AddRange(itemList.Select(x => x.MediaFileID));
+        if (edit.ItemList is { } itemList) neededList.AddRange(itemList.OfType<QueueItem>().Select(x => x.MediaFileID));
 
         neededList = [.. neededList.Where(x => !knownMediaFileIDSet.Contains(x)).Distinct()];
         if (neededList.Count == 0) return;

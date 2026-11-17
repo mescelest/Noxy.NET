@@ -32,11 +32,14 @@ public class RequestRegisterDeviceTest
     }
 
     [Fact]
+    public void ANullName_IsInvalid_InsteadOfFailingWithANullReference()
+    {
+        Assert.NotEmpty(Validate(new RequestRegisterDevice { DeviceID = Guid.CreateVersion7(), Name = null }));
+    }
+
+    [Fact]
     public void TheNameIsTrimmed_BeforeItIsMeasured()
     {
-        RequestRegisterDevice request = new() { DeviceID = Guid.CreateVersion7(), Name = "  Laptop  " };
-
-        Assert.Equal("Laptop", request.Name);
         Assert.Empty(Validate(new RequestRegisterDevice { DeviceID = Guid.CreateVersion7(), Name = $" {new string('a', new ConfigRemote().MaxDeviceNameLength)} " }));
     }
 
@@ -59,7 +62,8 @@ public class RequestRegisterDeviceTest
     {
         ConfigRemote config = new();
 
-        Assert.Equal([10, 5, 10, 10, 50, 50, 20000, 4194304], [config.ActiveGraceSeconds, config.TransferTimeoutSeconds, (int)config.IdleTeardownMinutes, config.MaxDeviceCount, config.MaxDeviceNameLength, config.HistoryLimit, config.MaxQueueLength, config.MaxHubMessageBytes]);
+        Assert.Equal([10, 5, 10, 10, 50, 50, 20000, 4194304],
+            [config.ActiveGraceSeconds, config.TransferTimeoutSeconds, (int)config.IdleTeardownMinutes, config.MaxDeviceCount, config.MaxDeviceNameLength, config.HistoryLimit, config.MaxQueueLength, config.MaxHubMessageBytes]);
         Assert.Empty(Validate(config));
         Assert.Equal("Remote", ConfigRemote.SectionName);
     }

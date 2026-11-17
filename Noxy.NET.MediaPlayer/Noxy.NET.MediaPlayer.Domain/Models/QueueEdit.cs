@@ -12,7 +12,7 @@ public class QueueEdit : IValidatableObject
     public Guid? MediaFileID { get; init; }
     public Guid? AfterItemID { get; init; }
     public QueueItem? Item { get; init; }
-    public List<QueueItem>? ItemList { get; init; }
+    public List<QueueItem?>? ItemList { get; init; }
     public ResponseQueueSource? Source { get; init; }
     public Guid? CurrentItemID { get; init; }
     public bool KeepUserQueue { get; init; }

@@ -43,6 +43,24 @@ public class DeviceRegistryServiceTest
     }
 
     [Fact]
+    public async Task Register_StoresTheNameTrimmed()
+    {
+        List<ResponseDevice> list = await _service.Register(UserID, Request(name: "  Laptop  "), "c1");
+
+        Assert.Equal("Laptop", Assert.Single(list).Name);
+    }
+
+    [Fact]
+    public async Task Register_WithoutAName_Throws_AndAddsNoDevice()
+    {
+        RequestRegisterDevice request = new() { DeviceID = Guid.CreateVersion7(), Name = null };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.Register(UserID, request, "c1"));
+
+        Assert.Empty(_service.GetDeviceList(UserID, null));
+    }
+
+    [Fact]
     public async Task Register_TheSameDeviceAgain_ReplacesTheConnection_AndKeepsOneEntry()
     {
         RequestRegisterDevice request = Request();

@@ -71,7 +71,7 @@ public class LiveQueueTest
     {
         Edit = QueueEditEnum.ReplaceSource,
         Source = Source,
-        ItemList = L(list),
+        ItemList = [.. L(list)],
         CurrentItemID = current.Length == 0 ? null : I(current).ItemID,
         KeepUserQueue = keepUserQueue
     };
@@ -270,7 +270,7 @@ public class LiveQueueTest
     public void ReplaceSource_WithACurrentItemThatIsNotInTheList_Throws_AndChangesNothing()
     {
         LiveQueue queue = Queue(current: "c", source: "s1");
-        QueueEdit edit = new() { Edit = QueueEditEnum.ReplaceSource, Source = Source, ItemList = L("a b"), CurrentItemID = Guid.CreateVersion7() };
+        QueueEdit edit = new() { Edit = QueueEditEnum.ReplaceSource, Source = Source, ItemList = [.. L("a b")], CurrentItemID = Guid.CreateVersion7() };
 
         Assert.Throws<InvalidQueueEditException>(() => Apply(queue, edit));
 
@@ -290,7 +290,7 @@ public class LiveQueueTest
     {
         LiveQueue queue = Queue(history: "h1", current: "c", user: "u1", source: "s1 s2");
 
-        Apply(queue, new() { Edit = QueueEditEnum.RegenerateSource, ItemList = L("s2 s1 s3") });
+        Apply(queue, new() { Edit = QueueEditEnum.RegenerateSource, ItemList = [.. L("s2 s1 s3")] });
 
         Assert.Equal("h1|c|u1|s2 s1 s3", Layout(queue));
     }
@@ -300,7 +300,7 @@ public class LiveQueueTest
     {
         LiveQueue queue = Queue(current: "c", source: "s1");
 
-        Assert.Throws<InvalidQueueEditException>(() => Apply(queue, new() { Edit = QueueEditEnum.RegenerateSource, ItemList = L("c s1") }));
+        Assert.Throws<InvalidQueueEditException>(() => Apply(queue, new() { Edit = QueueEditEnum.RegenerateSource, ItemList = [.. L("c s1")] }));
     }
 
     [Fact]
@@ -727,7 +727,7 @@ public class LiveQueueTest
     [Fact]
     public void ANullItemInAList_Throws_InsteadOfFailingWithANullReference()
     {
-        QueueEdit edit = new() { Edit = QueueEditEnum.RegenerateSource, ItemList = [I("a"), null!] };
+        QueueEdit edit = new() { Edit = QueueEditEnum.RegenerateSource, ItemList = [I("a"), null] };
         LiveQueue queue = Queue(current: "c");
 
         Assert.Throws<InvalidQueueEditException>(() => Apply(queue, edit));

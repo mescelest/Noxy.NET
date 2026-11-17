@@ -35,10 +35,10 @@ public class LiveQueue
     // The queue a device sends when it claims to be the active one. An item ID may appear only once in the whole queue.
     public static LiveQueue From(ResponseQueue queue, int historyLimit)
     {
-        List<QueueItem> allList = [.. queue.HistoryList, .. queue.UserQueueList, .. queue.SourceList];
+        List<QueueItem?> allList = [.. queue.HistoryList, .. queue.UserQueueList, .. queue.SourceList];
         if (queue.Current is not null) allList.Add(queue.Current);
 
-        EnsureDistinct(allList);
+        EnsureDistinct(RequireItemList(allList));
 
         List<QueueItem> historyList = [.. queue.HistoryList];
         if (historyList.Count > historyLimit) historyList.RemoveRange(0, historyList.Count - historyLimit);
@@ -84,7 +84,7 @@ public class LiveQueue
             MediaFileID = edit.MediaFileID,
             AfterItemID = edit.AfterItemID,
             Item = edit.Item,
-            ItemList = edit.ItemList,
+            ItemList = edit.ItemList?.OfType<QueueItem>().ToList(),
             Source = edit.Source,
             CurrentItemID = edit.CurrentItemID,
             KeepUserQueue = edit.KeepUserQueue,
@@ -154,7 +154,7 @@ public class LiveQueue
     private bool ReplaceSource(QueueEdit edit)
     {
         ResponseQueueSource source = edit.Source ?? throw new InvalidQueueEditException("A new source needs the source.");
-        List<QueueItem> itemList = edit.ItemList ?? throw new InvalidQueueEditException("A new source needs the items.");
+        List<QueueItem> itemList = RequireItemList(edit.ItemList);
         EnsureDistinct(itemList);
 
         QueueItem? current = null;
@@ -181,7 +181,9 @@ public class LiveQueue
 
     private bool RegenerateSource(QueueEdit edit)
     {
-        List<QueueItem> itemList = edit.ItemList ?? throw new InvalidQueueEditException("A regenerated source needs the items.");
+        List<QueueItem> itemList = RequireItemList(edit.ItemList);
+        EnsureDistinct(itemList);
+
         List<QueueItem> others = [.. _historyList, .. _userQueueList];
         if (_current is not null) others.Add(_current);
 
@@ -314,9 +316,17 @@ public class LiveQueue
         }
     }
 
+    private static List<QueueItem> RequireItemList(List<QueueItem?>? list)
+    {
+        if (list is null) throw new InvalidQueueEditException("The queue edit is missing a list.");
+
+        List<QueueItem> itemList = [.. list.OfType<QueueItem>()];
+
+        return itemList.Count == list.Count ? itemList : throw new InvalidQueueEditException("A list holds an item that is not there.");
+    }
+
     private static void EnsureDistinct(List<QueueItem> itemList)
     {
-        if (itemList.Any(x => x is null)) throw new InvalidQueueEditException("A list holds an item that is not there.");
         if (itemList.Select(x => x.ItemID).Distinct().Count() != itemList.Count) throw new InvalidQueueEditException("An item ID may appear only once in the queue.");
     }
 

@@ -1,14 +1,14 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
-using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
+using Noxy.NET.MediaPlayer.Application;
 using Noxy.NET.MediaPlayer.Application.Requests.Remote;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Remote;
-using Noxy.NET.MediaPlayer.Application;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
@@ -38,7 +38,6 @@ public sealed class HubClient : IAsyncDisposable
 
     public Guid DeviceID { get; }
     public string Name { get; }
-    public string ConnectionID => _connection.ConnectionId ?? string.Empty;
 
     // Connects over WebSockets as the given account, and registers the device unless told not to.
     public static async Task<HubClient> Connect(ApiFactory factory, string? token, string name = "Device", Guid? deviceID = null, bool register = true)
@@ -156,9 +155,7 @@ public sealed class HubClient : IAsyncDisposable
     {
         foreach (Channel<object?> channel in _channelMap.Values)
         {
-            while (channel.Reader.TryRead(out _))
-            {
-            }
+            while (channel.Reader.TryRead(out _)) { }
         }
     }
 
