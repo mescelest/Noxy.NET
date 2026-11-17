@@ -21,6 +21,9 @@ public class QueueService : IQueueService
     }
 
     private readonly SemaphoreSlim _lock = new(1, 1);
+
+    // Guards the queue object itself: what reads it from outside (GetSnapshot) never sees it half-changed.
+    private readonly Lock _stateLock = new();
     private readonly IQueueSourceService _serviceSource;
     private readonly ISettingService _serviceSetting;
     private readonly ILocalQueueStore _storeLocalQueue;
@@ -61,15 +64,16 @@ public class QueueService : IQueueService
 
     public bool OwnsPlayback { get; set; }
 
+    public ResponseQueue GetSnapshot()
+    {
+        lock (_stateLock) return _queue.ToResponse();
+    }
+
     #region -- Operations --
 
     public async Task<bool> Apply(QueueEdit edit)
     {
-        Outcome done = await Locked(async outcome =>
-        {
-            ApplyLocked(edit, outcome);
-            await SaveIfChanged(outcome);
-        });
+        Outcome done = await Locked(async outcome => { ApplyLocked(edit, outcome); });
 
         Publish(done);
         return done.AppliedList.Count > 0;
@@ -90,7 +94,7 @@ public class QueueService : IQueueService
             QueueItem? before = _queue.Current;
             try
             {
-                _queue.Apply(edit, Constants.QueueHistoryLimit);
+                lock (_stateLock) _queue.Apply(edit, Constants.QueueHistoryLimit);
             }
             catch (InvalidQueueEditException)
             {
@@ -99,10 +103,9 @@ public class QueueService : IQueueService
             }
 
             // The server's number wins, also when the edit changed nothing here.
-            _queue.QueueRevision = delta.QueueRevision;
+            lock (_stateLock) _queue.QueueRevision = delta.QueueRevision;
             outcome.Changed = true;
             AfterChange(before, edit, outcome);
-            await SaveLocked();
         });
 
         Publish(done);
@@ -117,17 +120,17 @@ public class QueueService : IQueueService
             if (keepLocalPointer && local.Current is { } current)
             {
                 // A snapshot with no current item is what a Remove of the playing item leaves. One that merely lacks this device's current item is older than the edits this device made since (the queue it was made from came before them): the pointer stays.
-                if (Contains(snapshot, current.ItemID) || snapshot.Current is not null) target = KeepLocalPointer(local, current, snapshot);
+                if (Contains(snapshot, current.ItemID) || snapshot.Current is not null) target = local.QueueRevision >= snapshot.QueueRevision ? WithRevision(local, snapshot.QueueRevision) : KeepLocalPointer(local, current, snapshot);
                 else outcome.CurrentRemoved = OwnsPlayback;
             }
 
-            _queue = LiveQueue.From(target, Constants.QueueHistoryLimit);
+            LiveQueue replaced = LiveQueue.From(target, Constants.QueueHistoryLimit);
+            lock (_stateLock) _queue = replaced;
             _ghostItemID = null;
             _knownEntryIDSet = null;
             if (local.Current?.ItemID != target.Current?.ItemID) _positionSeconds = 0;
 
             outcome.Changed = true;
-            await SaveLocked();
         });
 
         Publish(done);
@@ -147,7 +150,6 @@ public class QueueService : IQueueService
             _ghostItemID = null;
             ApplyLocked(edit, outcome);
             _knownEntryIDSet = baseList?.Select(x => x.ItemID).ToHashSet();
-            await SaveIfChanged(outcome);
         });
 
         Publish(done);
@@ -165,7 +167,6 @@ public class QueueService : IQueueService
             if (itemList is null) return;
 
             ApplyLocked(new() { Edit = QueueEditEnum.RegenerateSource, ItemList = [.. itemList] }, outcome);
-            await SaveIfChanged(outcome);
         });
 
         Publish(done);
@@ -181,7 +182,8 @@ public class QueueService : IQueueService
         {
             try
             {
-                _queue = LiveQueue.From(snapshot.Queue, Constants.QueueHistoryLimit);
+                LiveQueue loaded = LiveQueue.From(snapshot.Queue, Constants.QueueHistoryLimit);
+                lock (_stateLock) _queue = loaded;
             }
             catch (InvalidQueueEditException)
             {
@@ -214,7 +216,7 @@ public class QueueService : IQueueService
     {
         Outcome done = await Locked(async outcome =>
         {
-            _queue = new();
+            lock (_stateLock) _queue = new();
             _ghostItemID = null;
             _knownEntryIDSet = null;
             _positionSeconds = 0;
@@ -262,8 +264,6 @@ public class QueueService : IQueueService
                     if (placement is not null) ApplyLocked(new() { Edit = QueueEditEnum.InsertSourceItem, Item = placement.Item, AfterItemID = placement.AfterItemID }, outcome);
                 }
             }
-
-            await SaveIfChanged(outcome);
         });
 
         Publish(done);
@@ -283,7 +283,6 @@ public class QueueService : IQueueService
             {
                 _knownEntryIDSet = null;
                 if (queue.SourceList.Count > 0) ApplyLocked(new() { Edit = QueueEditEnum.RegenerateSource, ItemList = [] }, outcome);
-                await SaveIfChanged(outcome);
                 return;
             }
 
@@ -293,7 +292,15 @@ public class QueueService : IQueueService
             HashSet<Guid> entryIDSet = detail.EntryList.Select(x => x.ID).ToHashSet();
             HashSet<Guid>? known = _knownEntryIDSet;
             _knownEntryIDSet = entryIDSet;
-            if (known is null) return;
+            if (known is null)
+            {
+                // The first look since the queue was loaded: what the playlist no longer holds leaves the queue. Nothing is added, for it is not known what the user took out of the queue before. Only the source part is looked at: the playing item may be one the user queued, which is no entry of the playlist. A repeated pass has entries of its own IDs, so it is the media file that is looked for.
+                HashSet<Guid> mediaFileIDSet = detail.EntryList.Select(x => x.MediaFileID).ToHashSet();
+                HashSet<Guid> leftSet = queue.SourceList.Where(x => !entryIDSet.Contains(x.ItemID) && !mediaFileIDSet.Contains(x.MediaFileID)).Select(x => x.ItemID).ToHashSet();
+                foreach (QueueEdit edit in RemovalEditList(leftSet, x => x.ItemID)) ApplyLocked(edit, outcome);
+
+                return;
+            }
 
             HashSet<Guid> goneSet = known.Where(x => !entryIDSet.Contains(x)).ToHashSet();
             foreach (QueueEdit edit in RemovalEditList(goneSet, x => x.ItemID)) ApplyLocked(edit, outcome);
@@ -304,8 +311,6 @@ public class QueueService : IQueueService
                 QueuePlacement? placement = await _serviceSource.PlaceNew(source, shuffle, _queue, entry.MediaFileID, entry.ID);
                 if (placement is not null) ApplyLocked(new() { Edit = QueueEditEnum.InsertSourceItem, Item = placement.Item, AfterItemID = placement.AfterItemID }, outcome);
             }
-
-            await SaveIfChanged(outcome);
         });
 
         Publish(done);
@@ -358,7 +363,9 @@ public class QueueService : IQueueService
     private void ApplyLocked(QueueEdit edit, Outcome outcome)
     {
         QueueItem? before = _queue.Current;
-        if (_queue.Apply(edit, Constants.QueueHistoryLimit) is null) return;
+        ResponseQueueDelta? applied;
+        lock (_stateLock) applied = _queue.Apply(edit, Constants.QueueHistoryLimit);
+        if (applied is null) return;
 
         outcome.AppliedList.Add(edit);
         outcome.Changed = true;
@@ -376,12 +383,9 @@ public class QueueService : IQueueService
 
         _ghostItemID = null;
         QueueEdit drop = new() { Edit = QueueEditEnum.Remove, ItemID = ghost };
-        if (_queue.Apply(drop, Constants.QueueHistoryLimit) is not null) outcome.AppliedList.Add(drop);
-    }
-
-    private async Task SaveIfChanged(Outcome outcome)
-    {
-        if (outcome.Changed) await SaveLocked();
+        ResponseQueueDelta? dropped;
+        lock (_stateLock) dropped = _queue.Apply(drop, Constants.QueueHistoryLimit);
+        if (dropped is not null) outcome.AppliedList.Add(drop);
     }
 
     private async Task SaveLocked()
@@ -409,6 +413,12 @@ public class QueueService : IQueueService
     private static bool Contains(ResponseQueue queue, Guid itemID)
     {
         return queue.Current?.ItemID == itemID || queue.HistoryList.Any(x => x.ItemID == itemID) || queue.UserQueueList.Any(x => x.ItemID == itemID) || queue.SourceList.Any(x => x.ItemID == itemID);
+    }
+
+    // This device is at least as far on as the snapshot (it is the echo of the claim this device made, and edits came after it): its own queue stays whole, and it takes the server's number. The echoes of the edits it already applied then come back as deltas that no longer fit, which asks for a snapshot and settles.
+    private static ResponseQueue WithRevision(ResponseQueue local, long revision)
+    {
+        return new() { QueueRevision = revision, Source = local.Source, HistoryList = local.HistoryList, Current = local.Current, UserQueueList = local.UserQueueList, SourceList = local.SourceList };
     }
 
     // The snapshot's upcoming items, minus what this device already played or is playing; its own current item and history stay.

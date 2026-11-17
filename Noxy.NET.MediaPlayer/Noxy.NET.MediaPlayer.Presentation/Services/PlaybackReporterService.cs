@@ -4,13 +4,14 @@ using Noxy.NET.MediaPlayer.Application.Requests.Remote;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Remote;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class PlaybackReporterService(IPlayerService servicePlayer, IQueueService serviceQueue, IRemotePlaybackService serviceRemote, IMediaHubService serviceMediaHub, IMetadataStore storeMetadata, IDelay delay, ILogger<PlaybackReporterService> logger)
+public class PlaybackReporterService(IPlayerService servicePlayer, IQueueService serviceQueue, IRemotePlaybackService serviceRemote, IMediaHubService serviceMediaHub, IMetadataStore storeMetadata, ILogger<PlaybackReporterService> logger)
     : IPlaybackReporterService
 {
     // What a report is sent for: when any of it changes. The position is not here, so a position that only moves on does not report.
@@ -27,7 +28,7 @@ public class PlaybackReporterService(IPlayerService servicePlayer, IQueueService
     private bool _claimInFlight;
     private long _stateRevision;
     private Signature? _last;
-    private CancellationTokenSource? _saveSource;
+    private bool _wasPlaying;
 
     // Edits applied while a claim is on its way: they follow the claim when it is accepted, and are dropped when it is refused.
     private readonly List<QueueEdit> _heldEditList = [];
@@ -81,7 +82,7 @@ public class PlaybackReporterService(IPlayerService servicePlayer, IQueueService
 
     private void OnPlayerChanged()
     {
-        UpdateSaveLoop(servicePlayer.IsPlaying);
+        SaveWhenPlayingStops(servicePlayer.IsPlaying);
 
         PlaybackRoleEnum role = serviceRemote.Role;
         switch (role)
@@ -93,8 +94,8 @@ public class PlaybackReporterService(IPlayerService servicePlayer, IQueueService
                 if (changed) QueueReport();
                 break;
             }
-            case PlaybackRoleEnum.Local when serviceRemote.IsOnline && servicePlayer.IsPlaying && servicePlayer.Current is not null:
-                QueueClaim(false);
+            case PlaybackRoleEnum.Local:
+                if (serviceRemote.IsOnline && servicePlayer.IsPlaying && servicePlayer.Current is not null) QueueClaim(false);
                 break;
             case PlaybackRoleEnum.Controller:
                 break;
@@ -191,13 +192,19 @@ public class PlaybackReporterService(IPlayerService servicePlayer, IQueueService
 
     private async Task<bool?> Claim()
     {
+        // The queue is taken first and the held edits cleared with it, so an edit made while the state is read is held once, not also in the queue.
+        ResponseQueue queue;
+        long revision;
         lock (_lock)
         {
-            // What was applied up to now is in the queue that is sent.
+            queue = serviceQueue.GetSnapshot();
             _heldEditList.Clear();
+
+            // A device that is the active one already goes on counting: controllers drop a report older than the last one they hold for it. Any other starts at 1.
+            revision = serviceRemote.Role == PlaybackRoleEnum.Active ? _stateRevision + 1 : 1;
         }
 
-        RequestClaimActive request = new() { State = await BuildState(1), Queue = serviceQueue.Queue.ToResponse() };
+        RequestClaimActive request = new() { State = await BuildState(revision), Queue = queue };
         bool? accepted = await serviceMediaHub.Invoke<bool?>(MediaHubMethodEnum.ClaimActive, request);
 
         if (accepted is true)
@@ -205,7 +212,7 @@ public class PlaybackReporterService(IPlayerService servicePlayer, IQueueService
             List<QueueEdit> heldList;
             lock (_lock)
             {
-                _stateRevision = 1;
+                _stateRevision = request.State.StateRevision;
                 heldList = [.. _heldEditList];
                 _heldEditList.Clear();
             }
@@ -276,56 +283,9 @@ public class PlaybackReporterService(IPlayerService servicePlayer, IQueueService
 
     #endregion -- Sending --
 
-    #region -- The saved position --
+    #region -- The saved queue --
 
-    // While playing, the position of the local copy is saved now and then, and once more when playing stops.
-    private void UpdateSaveLoop(bool isPlaying)
-    {
-        CancellationTokenSource? stopped = null;
-        CancellationTokenSource? started = null;
-        lock (_lock)
-        {
-            if (isPlaying && _saveSource is null)
-            {
-                started = _saveSource = new();
-            }
-            else if (!isPlaying && _saveSource is not null)
-            {
-                stopped = _saveSource;
-                _saveSource = null;
-            }
-        }
-
-        if (started is not null) _ = SaveLoop(started.Token);
-
-        if (stopped is null) return;
-
-        stopped.Cancel();
-        stopped.Dispose();
-        _ = SaveNow();
-    }
-
-    private async Task SaveLoop(CancellationToken cancellationToken)
-    {
-        try
-        {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                await delay.Wait(TimeSpan.FromSeconds(Constants.LocalQueueSaveSeconds), cancellationToken);
-                await serviceQueue.SaveLocalCopy(servicePlayer.Position.TotalSeconds);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Playing stopped.
-        }
-        catch (Exception exception)
-        {
-            logger.LogWarning("The local copy of the queue could not be saved ({ExceptionType}).", exception.GetType().Name);
-        }
-    }
-
-    private async Task SaveNow()
+    public async Task SaveNow()
     {
         try
         {
@@ -337,5 +297,18 @@ public class PlaybackReporterService(IPlayerService servicePlayer, IQueueService
         }
     }
 
-    #endregion -- The saved position --
+    // The queue is written when playing stops (a pause, the end of the queue, a failure), not while it plays.
+    private void SaveWhenPlayingStops(bool isPlaying)
+    {
+        bool stopped;
+        lock (_lock)
+        {
+            stopped = _wasPlaying && !isPlaying;
+            _wasPlaying = isPlaying;
+        }
+
+        if (stopped) _ = SaveNow();
+    }
+
+    #endregion -- The saved queue --
 }

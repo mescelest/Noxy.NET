@@ -29,14 +29,17 @@ public static class Constants
     // A seek or a volume change made on a controller is sent this long after the last change of a burst.
     public const int RemoteDeferMilliseconds = 300;
 
-    // While playing, the local copy of the queue saves its position at most this often.
-    public const int LocalQueueSaveSeconds = 10;
+    // The most items a source puts into the queue: the same as the most media files a library may hold (the server default), so a whole library fits. It keeps the saved queue and what is sent to the server small.
+    public const int QueueMaxItemCount = 5000;
 
     // The most items the played history of the local queue holds.
     public const int QueueHistoryLimit = 50;
 
     // A controller shows the active device's position as the last report plus the time since; a new report that is behind that by no more than this is a delay, not a seek back, and the shown position stays.
     public const double RemotePositionToleranceSeconds = 2;
+
+    // The name of a device whose machine has none.
+    public const string DefaultDeviceName = "This device";
 
     // The longest a device name may be.
     public const int DeviceNameMaxLength = 50;

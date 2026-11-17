@@ -3,7 +3,6 @@ using Noxy.NET.MediaPlayer.Application.Requests.Remote;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -18,13 +17,12 @@ public class PlaybackReporterServiceTest
     private readonly FakeRemotePlaybackService _remote = new();
     private readonly FakeMediaHubService _hub = new() { IsConnected = true };
     private readonly FakeMetadataStore _storeMetadata = new();
-    private readonly FakeDelay _delay = new() { IsManual = true };
     private readonly FakeLogger<PlaybackReporterService> _logger = new();
     private readonly PlaybackReporterService _reporter;
 
     public PlaybackReporterServiceTest()
     {
-        _reporter = new(_player, _queue, _remote, _hub, _storeMetadata, _delay, _logger);
+        _reporter = new(_player, _queue, _remote, _hub, _storeMetadata, _logger);
         _reporter.Start();
     }
 
@@ -289,6 +287,36 @@ public class PlaybackReporterServiceTest
     }
 
     [Fact]
+    public async Task TheActiveDeviceThatClaimsAgain_ContinuesItsRevisions_SoControllersDoNotDropTheNewReportsAsLate()
+    {
+        _hub.InvokeHandler = (_, _) => true;
+        Active();
+        await Playing();
+        _player.RaiseChanged();
+        _player.Volume = 0.3;
+        _player.RaiseChanged();
+        long lastReported = ReportList().Max(x => x.StateRevision);
+
+        _remote.RaiseRegistered();
+
+        Assert.True(ClaimList().Single().State.StateRevision > lastReported);
+        _player.Volume = 0.6;
+        _player.RaiseChanged();
+        Assert.True(ReportList().Last().StateRevision > ClaimList().Single().State.StateRevision);
+    }
+
+    [Fact]
+    public async Task ADeviceThatClaimsForTheFirstTime_StartsItsRevisionsAtOne()
+    {
+        _hub.InvokeHandler = (_, _) => true;
+        await Playing();
+
+        _remote.RaiseRegistered();
+
+        Assert.Equal(1, ClaimList().Single().State.StateRevision);
+    }
+
+    [Fact]
     public async Task Local_ConnectedAndPaused_RegistersOnly_NoClaim()
     {
         await Playing();
@@ -470,47 +498,50 @@ public class PlaybackReporterServiceTest
 
     #endregion -- Sending in order --
 
-    #region -- The saved position --
+    #region -- The saved queue --
 
     [Fact]
-    public async Task WhilePlaying_TheLocalCopyPositionIsSavedEveryTenSeconds_AndOnPause()
+    public async Task WhilePlaying_NothingIsSaved_AndWhenPlayingStops_TheQueueIsSavedWithThePosition()
     {
         await Playing();
         _remote.IsOnline = false;
-        _player.Position = TimeSpan.FromSeconds(4);
-        _player.RaiseChanged();
+        for (int tick = 1; tick <= 5; tick++)
+        {
+            _player.Position = TimeSpan.FromSeconds(tick);
+            _player.RaiseChanged();
+        }
 
-        Assert.Equal([TimeSpan.FromSeconds(Constants.LocalQueueSaveSeconds)], _delay.DelayList);
         Assert.Empty(_queue.SavedPositionList);
-
-        _player.Position = TimeSpan.FromSeconds(10);
-        _delay.ReleaseAll();
-        await WaitUntil(() => _queue.SavedPositionList.Count == 1);
-        Assert.Equal([10.0], _queue.SavedPositionList);
 
         _player.Position = TimeSpan.FromSeconds(17);
         _player.IsPlaying = false;
         _player.RaiseChanged();
-        await WaitUntil(() => _queue.SavedPositionList.Count == 2);
+        await WaitUntil(() => _queue.SavedPositionList.Count == 1);
 
-        Assert.Equal([10.0, 17.0], _queue.SavedPositionList);
-        _delay.ReleaseAll();
+        Assert.Equal([17.0], _queue.SavedPositionList);
+
+        _player.RaiseChanged();
         await Task.Delay(50, TestContext.Current.CancellationToken);
-        Assert.Equal(2, _queue.SavedPositionList.Count);
+        Assert.Single(_queue.SavedPositionList);
     }
 
     [Fact]
-    public async Task OnlyOneSaveLoopRuns_HoweverOftenThePlayerChanges()
+    public async Task SaveNow_SavesTheQueueWithThePosition_AndAFailureIsLoggedByTypeOnly()
     {
-        await Playing();
-        _remote.IsOnline = false;
+        _player.Position = TimeSpan.FromSeconds(41);
 
-        for (int tick = 0; tick < 5; tick++) _player.RaiseChanged();
+        await _reporter.SaveNow();
 
-        Assert.Single(_delay.DelayList);
+        Assert.Equal([41.0], _queue.SavedPositionList);
+        _queue.SaveFailure = new IOException("secret-path");
+
+        await _reporter.SaveNow();
+
+        Assert.Contains(_logger.EntryList, x => x.Level == LogLevel.Warning && x.Message.Contains(nameof(IOException)));
+        Assert.DoesNotContain(_logger.EntryList, x => x.Message.Contains("secret"));
     }
 
-    #endregion -- The saved position --
+    #endregion -- The saved queue --
 
     [Fact]
     public async Task TheQueueOwnsPlayback_ExceptOnAController()

@@ -4,6 +4,7 @@ using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Remote;
+using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -329,8 +330,36 @@ public class QueueSourceServiceTest
         Assert.Equal(RepeatModeEnum.Forever, await _service.GetRepeat(null));
     }
 
+    [Theory]
+    [InlineData(ShuffleModeEnum.Off)]
+    [InlineData(ShuffleModeEnum.Random)]
+    public async Task Build_OfALibraryBiggerThanTheQueueLimit_IsCutToTheLimit_WithTheStartItemFirst(ShuffleModeEnum shuffle)
+    {
+        List<ResponseMediaFile> mediaList = Enumerable.Range(0, Constants.QueueMaxItemCount + 200).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
+        await _storeMetadata.ReplaceMediaFileList(mediaList);
+
+        List<QueueItem> built = Have(await _service.Build(Library(), shuffle, mediaList[10].ID));
+
+        Assert.Equal(Constants.QueueMaxItemCount, built.Count);
+        Assert.Equal(mediaList[10].ID, built[0].MediaFileID);
+        Assert.Equal(built.Count, built.Select(x => x.MediaFileID).Distinct().Count());
+        if (shuffle == ShuffleModeEnum.Off) Assert.Equal(mediaList[Constants.QueueMaxItemCount + 9].ID, built[^1].MediaFileID);
+    }
+
     [Fact]
-    public async Task Build_Of20000Items_CompletesInASinglePass()
+    public async Task Regenerate_OfALibraryBiggerThanTheQueueLimit_KeepsTheWholeQueueWithinTheLimit()
+    {
+        List<ResponseMediaFile> mediaList = Enumerable.Range(0, Constants.QueueMaxItemCount + 200).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
+        await _storeMetadata.ReplaceMediaFileList(mediaList);
+        List<QueueItem> excluded = mediaList.Take(40).Select(x => new QueueItem(Guid.NewGuid(), x.ID)).ToList();
+
+        List<QueueItem> built = Have(await _service.Regenerate(Library(), ShuffleModeEnum.Random, new(Guid.NewGuid(), mediaList[50].ID), excluded));
+
+        Assert.Equal(Constants.QueueMaxItemCount - excluded.Count - 1, built.Count);
+    }
+
+    [Fact]
+    public async Task Build_OfALibraryOf20000_CompletesInASinglePass_AndIsCutToTheQueueLimit()
     {
         List<ResponseMediaFile> mediaList = Enumerable.Range(0, 20000).Select(index => MediaFileFactory.Create($"Media {index}", $"Artist {index % 500}")).ToList();
         await _storeMetadata.ReplaceMediaFileList(mediaList);
@@ -341,8 +370,8 @@ public class QueueSourceServiceTest
         List<QueueItem> spread = Have(await _service.Build(Library(), ShuffleModeEnum.SpreadArtists, mediaList[0].ID));
         stopwatch.Stop();
 
-        Assert.Equal(20000, random.Count);
-        Assert.Equal(20000, spread.Count);
+        Assert.Equal(Constants.QueueMaxItemCount, random.Count);
+        Assert.Equal(Constants.QueueMaxItemCount, spread.Count);
         Assert.NotEmpty(off);
         Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(10), $"Took {stopwatch.Elapsed}.");
     }

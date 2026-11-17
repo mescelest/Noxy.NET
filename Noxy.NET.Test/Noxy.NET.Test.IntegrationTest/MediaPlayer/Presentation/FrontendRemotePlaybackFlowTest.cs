@@ -6,6 +6,7 @@ using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Remote;
+using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
@@ -166,9 +167,9 @@ public class FrontendRemotePlaybackFlowTest
         await Until(() => laptop.Audio.Position == TimeSpan.FromSeconds(30), "the laptop to seek");
         await Until(() => Percent(laptop.Audio.Volume) == 40, "the laptop to take the volume");
         await Until(() => Percent(phone.Audio.Volume) == 40, "the phone to adopt the volume");
-        Assert.Equal(40, await laptop.Store.GetVolume());
+        Assert.Equal(40, await laptop.DeviceFile.GetVolume());
         await Until(() => Percent(phone.Audio.Volume) == 40 && phone.Remote.Remote?.State.Volume == 40, "the phone to see the volume");
-        Assert.Equal(40, await phone.Store.GetVolume());
+        Assert.Equal(40, await phone.DeviceFile.GetVolume());
         Assert.False(phone.Audio.IsPlaying);
     }
 
@@ -296,7 +297,8 @@ public class FrontendRemotePlaybackFlowTest
 
         Assert.Equal(mediaList[0].ID, QueueOf(phone).Current?.MediaFileID);
         Assert.Equal(mediaList[0].ID, QueueOf(laptop).Current?.MediaFileID);
-        Assert.NotNull(await phone.Store.Get());
+        await phone.Reporter.SaveNow();
+        Assert.NotNull(await phone.QueueFile.Get());
         Assert.True(phone.Control.CanContinue);
         Assert.True(await phone.Control.Continue());
         Assert.True(phone.Audio.IsPlaying);
@@ -324,7 +326,7 @@ public class FrontendRemotePlaybackFlowTest
     }
 
     [Fact]
-    public async Task A20000ItemLibraryQueue_StartsAndSyncsToTheOtherDevice()
+    public async Task ALibraryBiggerThanTheQueueLimit_StartsAsAFullQueue_AndSyncsToTheOtherDevice()
     {
         await using ApiFactory factory = Factory();
         MediaApiClient api = new(factory);
@@ -336,11 +338,11 @@ public class FrontendRemotePlaybackFlowTest
         Assert.Equal(20000, library.Count);
 
         Assert.True(await laptop.Queue.StartSource(new() { Kind = QueueSourceKindEnum.Library, PlaylistID = null, Sort = LibrarySortEnum.Title, Descending = false, Search = string.Empty }, library.OrderBy(x => x.Title).First().ID, ShuffleModeEnum.Random));
-        Assert.Equal(20000, laptop.Queue.Queue.ItemCount);
+        Assert.Equal(Constants.QueueMaxItemCount, laptop.Queue.Queue.ItemCount);
         bool? accepted = await laptop.Reporter.ClaimNow();
 
         Assert.True(accepted);
-        await Until(() => phone.Queue.Queue.ItemCount == 20000 && phone.Remote.Role == PlaybackRoleEnum.Controller, "the phone to hold the 20000 items", 60);
+        await Until(() => phone.Queue.Queue.ItemCount == Constants.QueueMaxItemCount && phone.Remote.Role == PlaybackRoleEnum.Controller, "the phone to hold the full queue", 60);
         Assert.Equal(QueueOf(laptop).Current, QueueOf(phone).Current);
     }
 }

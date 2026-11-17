@@ -3,6 +3,7 @@ using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Remote;
+using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -106,7 +107,7 @@ public class QueueServiceTest
     #region -- Apply --
 
     [Fact]
-    public async Task Apply_PlayNext_PutsItAtTheFrontOfTheUserQueue_AndSavesTheLocalCopy()
+    public async Task Apply_PlayNext_PutsItAtTheFrontOfTheUserQueue_AndWritesNothingUntilTheCopyIsSaved()
     {
         List<ResponseMediaFile> mediaList = await AddMedia("A", "B", "C");
         await Start(mediaList[0].ID);
@@ -118,7 +119,8 @@ public class QueueServiceTest
 
         Assert.Equal([mediaList[2].ID], MediaOf(Snapshot().UserQueueList));
         Assert.Equal([edit], _editList);
-        Assert.Equal(saved + 1, _storeLocalQueue.SaveCount);
+        Assert.Equal(saved, _storeLocalQueue.SaveCount);
+        await _service.SaveLocalCopy(12);
         LocalQueueSnapshot? local = await _storeLocalQueue.Get();
         Assert.Equal(Snapshot().QueueRevision, local?.Queue.QueueRevision);
         Assert.Equal([mediaList[2].ID], MediaOf(local?.Queue.UserQueueList ?? []));
@@ -371,6 +373,7 @@ public class QueueServiceTest
         Assert.Equal(current, queue.Current);
         Assert.Equal([next], queue.SourceList);
         Assert.Equal(1, _changedCount);
+        await _service.SaveLocalCopy(0);
         Assert.Equal(9, (await _storeLocalQueue.Get())?.Queue.QueueRevision);
     }
 
@@ -416,6 +419,24 @@ public class QueueServiceTest
         Assert.Equal([a, b], queue.HistoryList);
         Assert.Equal(0, removedCount);
         Assert.Equal(2, queue.QueueRevision);
+    }
+
+    [Fact]
+    public async Task ReplaceWithSnapshot_OnTheActiveDevice_WhenItIsAheadOfTheSnapshot_KeepsItsWholeQueue_AndTakesTheRevision()
+    {
+        _service.OwnsPlayback = true;
+        QueueItem current = Item();
+        QueueItem queued = Item();
+        QueueItem next = Item();
+        await _service.ReplaceWithSnapshot(Pushed(4, current, [], [queued], [next]), false);
+
+        // The echo of this device's own claim: made before it queued something.
+        await _service.ReplaceWithSnapshot(Pushed(3, current, [], [], [next]), true);
+
+        ResponseQueue queue = Snapshot();
+        Assert.Equal([queued], queue.UserQueueList);
+        Assert.Equal([next], queue.SourceList);
+        Assert.Equal(3, queue.QueueRevision);
     }
 
     [Fact]
@@ -613,6 +634,47 @@ public class QueueServiceTest
     }
 
     [Fact]
+    public async Task AnEntryThatLeftThePlaylist_WhileTheDeviceWasAway_LeavesTheQueueAtTheFirstLookAfterALoad()
+    {
+        List<ResponseMediaFile> mediaList = await AddMedia("A", "B", "C");
+        (Guid playlistID, List<ResponsePlaylistEntry> entryList) = await AddPlaylist(mediaList);
+        _service.OwnsPlayback = true;
+        Assert.True(await _service.StartSource(Playlist(playlistID), entryList[0].ID, ShuffleModeEnum.Off));
+        await _service.SaveLocalCopy(0);
+
+        FakeSyncService sync = new();
+        QueueService restored = new(new QueueSourceService(_storeMetadata, _serviceSetting, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _storeLocalQueue, sync, _storeMetadata, new FakeTimeProvider(), new FakeLogger<QueueService>())
+            { OwnsPlayback = true };
+        await restored.LoadLocalCopy();
+        await SavePlaylist(playlistID, [entryList[0], entryList[2]]);
+        await _storeMetadata.DeleteMediaFile(mediaList[1].ID);
+
+        sync.RaiseChanged();
+
+        Assert.Equal([entryList[2].ID], restored.Queue.ToResponse().SourceList.Select(x => x.ItemID));
+    }
+
+    [Fact]
+    public async Task TheFirstLookAfterALoad_NeverTreatsAQueuedPlayingItemAsGone_SoItStillEntersHistory()
+    {
+        List<ResponseMediaFile> mediaList = await AddMedia("A", "B", "C");
+        ResponseMediaFile queued = await AddMedia("Queued");
+        (Guid playlistID, List<ResponsePlaylistEntry> entryList) = await AddPlaylist(mediaList);
+        _service.OwnsPlayback = true;
+        Assert.True(await _service.StartSource(Playlist(playlistID), entryList[0].ID, ShuffleModeEnum.Off));
+        await _service.Apply(PlayNextEdit(queued.ID));
+        // A snapshot forgets what is known of the playlist, as the echo of a claim does.
+        await _service.ReplaceWithSnapshot(Snapshot(), true);
+        await _service.Apply(AdvanceEdit(Snapshot().UserQueueList[0]));
+
+        _serviceSync.RaiseChanged();
+        await _service.Apply(AdvanceEdit(Snapshot().SourceList[0]));
+
+        Assert.Equal([entryList[0].ID, Snapshot().HistoryList[1].ItemID], Snapshot().HistoryList.Select(x => x.ItemID));
+        Assert.Equal(queued.ID, Snapshot().HistoryList[1].MediaFileID);
+    }
+
+    [Fact]
     public async Task AnEntryTheUserRemovedFromTheQueue_IsNotPutBackBySyncing()
     {
         List<ResponseMediaFile> mediaList = await AddMedia("A", "B", "C");
@@ -670,18 +732,6 @@ public class QueueServiceTest
     }
 
     [Fact]
-    public async Task TheSavedPosition_ResetsWhenTheCurrentItemChanges()
-    {
-        List<ResponseMediaFile> mediaList = await AddMedia("A", "B");
-        await Start(mediaList[0].ID);
-        await _service.SaveLocalCopy(30);
-
-        await _service.Apply(AdvanceEdit(Snapshot().SourceList[0]));
-
-        Assert.Equal(0, (await _storeLocalQueue.Get())?.PositionSeconds);
-    }
-
-    [Fact]
     public async Task Clear_EmptiesTheQueue_AndTheLocalCopy()
     {
         List<ResponseMediaFile> mediaList = await AddMedia("A", "B");
@@ -695,17 +745,21 @@ public class QueueServiceTest
     }
 
     [Fact]
-    public async Task ACopyOf20000Items_SavesInOneWrite()
+    public async Task AnEditOfAFullQueue_WritesNothing_AndTheCopyIsWrittenOnceWhenSaved()
     {
-        List<ResponseMediaFile> mediaList = Enumerable.Range(0, 20000).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
+        List<ResponseMediaFile> mediaList = Enumerable.Range(0, Constants.QueueMaxItemCount).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
         await _storeMetadata.ReplaceMediaFileList(mediaList);
         await Start(mediaList[0].ID);
         int saved = _storeLocalQueue.SaveCount;
 
         await _service.Apply(PlayNextEdit(mediaList[5].ID));
 
+        Assert.Equal(saved, _storeLocalQueue.SaveCount);
+
+        await _service.SaveLocalCopy(0);
+
         Assert.Equal(saved + 1, _storeLocalQueue.SaveCount);
-        Assert.Equal(19999, Snapshot().SourceList.Count);
+        Assert.Equal(Constants.QueueMaxItemCount - 1, Snapshot().SourceList.Count);
     }
 
     #endregion -- The local copy --

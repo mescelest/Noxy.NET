@@ -25,17 +25,17 @@ public class QueueSourceService(IMetadataStore storeMetadata, ISettingService se
         BuiltSource? built = await Load(source);
         if (built is null) return null;
 
-        if (startID is null) return serviceShuffle.Order(built.ItemList, shuffle, ArtistOf(built));
+        if (startID is null) return serviceShuffle.Order(built.ItemList, shuffle, ArtistOf(built)).Take(Constants.QueueMaxItemCount).ToList();
 
         int index = built.ItemList.FindIndex(x => Key(source, x) == startID);
         if (index < 0) return null;
 
-        if (shuffle == ShuffleModeEnum.Off) return built.ItemList.GetRange(index, built.ItemList.Count - index);
+        if (shuffle == ShuffleModeEnum.Off) return built.ItemList.GetRange(index, Math.Min(built.ItemList.Count - index, Constants.QueueMaxItemCount));
 
         List<QueueItem> rest = [.. built.ItemList];
         rest.RemoveAt(index);
 
-        return [built.ItemList[index], .. serviceShuffle.Order(rest, shuffle, ArtistOf(built))];
+        return [built.ItemList[index], .. serviceShuffle.Order(rest, shuffle, ArtistOf(built)).Take(Constants.QueueMaxItemCount - 1)];
     }
 
     public async Task<List<QueueItem>?> Regenerate(ResponseQueueSource source, ShuffleModeEnum shuffle, QueueItem current, List<QueueItem> excludeItemList)
@@ -56,7 +56,7 @@ public class QueueSourceService(IMetadataStore storeMetadata, ISettingService se
 
         List<QueueItem> remaining = candidateList.Where(x => !excludeKeySet.Contains(Key(source, x))).ToList();
 
-        return serviceShuffle.Order(remaining, shuffle, ArtistOf(built));
+        return serviceShuffle.Order(remaining, shuffle, ArtistOf(built)).Take(Math.Max(0, Constants.QueueMaxItemCount - excludeItemList.Count - 1)).ToList();
     }
 
     public async Task<QueuePlacement?> PlaceNew(ResponseQueueSource source, ShuffleModeEnum shuffle, LiveQueue queue, Guid mediaFileID, Guid? entryID = null)

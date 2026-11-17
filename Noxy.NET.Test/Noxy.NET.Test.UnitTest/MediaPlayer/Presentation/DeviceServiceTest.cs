@@ -25,6 +25,23 @@ public class DeviceServiceTest
         Assert.Equal(Environment.MachineName, await new DeviceService(_storeDevice).GetName());
     }
 
+    [Theory]
+    [InlineData("", "This device")]
+    [InlineData("   ", "This device")]
+    [InlineData("  Desk  ", "Desk")]
+    public async Task GetName_ForTheMachineName_IsTrimmed_AndAnEmptyOneIsNamed(string machine, string expected)
+    {
+        Assert.Equal(expected, await new DeviceService(_storeDevice, () => machine).GetName());
+    }
+
+    [Fact]
+    public async Task GetName_ForAMachineNameOver50Characters_IsCutSoTheServerAcceptsIt()
+    {
+        string name = await new DeviceService(_storeDevice, () => new string('m', 80)).GetName();
+
+        Assert.Equal(50, name.Length);
+    }
+
     [Fact]
     public async Task SetName_TrimsAndPersists()
     {

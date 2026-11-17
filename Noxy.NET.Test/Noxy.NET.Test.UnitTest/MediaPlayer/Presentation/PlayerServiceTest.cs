@@ -1029,6 +1029,7 @@ public class PlayerServiceTest
     {
         Guid id = await AddMedia();
         await Start(id);
+        await _queue.SaveLocalCopy(0);
         Assert.NotNull(await _storeLocalQueue.Get());
 
         await _player.Clear();
@@ -1125,6 +1126,17 @@ public class PlayerServiceTest
 
         Assert.Equal(TimeSpan.FromSeconds(12), _player.Position);
         Assert.Equal(TimeSpan.FromSeconds(200), _player.Duration);
+    }
+
+    [Fact]
+    public async Task APlayerThatNeverPlayed_StillRaisesChanged_WhenTheQueueChanges()
+    {
+        int changed = 0;
+        _player.Changed += () => Interlocked.Increment(ref changed);
+
+        await _queue.ReplaceWithSnapshot(new() { QueueRevision = 1, Source = null, HistoryList = [], Current = new(Guid.NewGuid(), Guid.NewGuid()), UserQueueList = [], SourceList = [] }, false);
+
+        Assert.True(changed > 0);
     }
 
     [Fact]

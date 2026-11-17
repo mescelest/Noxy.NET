@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -10,7 +9,7 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Storage.Stores;
 
-public class SqliteMetadataStore : IMetadataStore, IMetadataListStore, IVolumeStore, IDeviceStore, ILocalQueueStore
+public class SqliteMetadataStore : IMetadataStore, IMetadataListStore
 {
     // SQLite's result codes for a file that is not a database and for a damaged one.
     private const int SqliteCorrupt = 11;
@@ -30,12 +29,6 @@ public class SqliteMetadataStore : IMetadataStore, IMetadataListStore, IVolumeSt
     private const string ArtistListETagKey = "ArtistListETag";
     private const string AlbumListETagKey = "AlbumListETag";
     private const string GenreListETagKey = "GenreListETag";
-    private const string VolumeKey = "Volume";
-    private const int DefaultVolume = 100;
-    private const string DeviceIDKey = "DeviceID";
-    private const string DeviceNameKey = "DeviceName";
-    private const string LocalQueueTable = "LocalQueue";
-    private const string LocalQueueRowID = "queue";
     private readonly SemaphoreSlim _readyLock = new(1, 1);
     private readonly string _databasePath;
     private readonly string _connectionString;
@@ -201,68 +194,6 @@ public class SqliteMetadataStore : IMetadataStore, IMetadataListStore, IVolumeSt
         await Delete(FileStateTable, mediaFileID.ToString());
     }
 
-    #region -- Volume --
-
-    public async Task<int> GetVolume()
-    {
-        return int.TryParse(await GetSetting(VolumeKey), NumberStyles.Integer, CultureInfo.InvariantCulture, out int volume) ? volume : DefaultVolume;
-    }
-
-    public async Task SetVolume(int volume)
-    {
-        await SetSetting(VolumeKey, volume.ToString(CultureInfo.InvariantCulture));
-    }
-
-    #endregion -- Volume --
-
-    #region -- Device --
-
-    public async Task<Guid?> GetDeviceID()
-    {
-        return Guid.TryParse(await GetSetting(DeviceIDKey), out Guid id) ? id : null;
-    }
-
-    public async Task SetDeviceID(Guid id)
-    {
-        await SetSetting(DeviceIDKey, id.ToString());
-    }
-
-    public async Task<string?> GetDeviceName()
-    {
-        return await GetSetting(DeviceNameKey);
-    }
-
-    public async Task SetDeviceName(string name)
-    {
-        await SetSetting(DeviceNameKey, name);
-    }
-
-    #endregion -- Device --
-
-    #region -- Local queue --
-
-    public async Task<LocalQueueSnapshot?> Get()
-    {
-        await using SqliteConnection connection = await Open();
-        await using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = $"SELECT Json FROM {LocalQueueTable} WHERE ID = $id";
-        command.Parameters.AddWithValue("$id", LocalQueueRowID);
-
-        return await command.ExecuteScalarAsync() is string json ? Deserialize<LocalQueueSnapshot>(json) : null;
-    }
-
-    public async Task Save(LocalQueueSnapshot snapshot)
-    {
-        await Upsert(LocalQueueTable, LocalQueueRowID, snapshot);
-    }
-
-    public async Task Clear()
-    {
-        await Delete(LocalQueueTable, LocalQueueRowID);
-    }
-
-    #endregion -- Local queue --
-
     internal async Task<List<T>> ReadList<T>(string table)
     {
         await using SqliteConnection connection = await Open();
@@ -405,7 +336,7 @@ public class SqliteMetadataStore : IMetadataStore, IMetadataListStore, IVolumeSt
         // Write-ahead logging lets a read go on while a write happens.
         await Execute(connection, null, "PRAGMA journal_mode = WAL");
 
-        foreach (string table in (string[])[MediaFileTable, PlaylistTable, PlaylistDetailTable, FileStateTable, UserSettingTable, ArtistTable, AlbumTable, GenreTable, LocalQueueTable])
+        foreach (string table in (string[])[MediaFileTable, PlaylistTable, PlaylistDetailTable, FileStateTable, UserSettingTable, ArtistTable, AlbumTable, GenreTable])
         {
             await Execute(connection, null, $"CREATE TABLE IF NOT EXISTS {table} (RowID INTEGER PRIMARY KEY AUTOINCREMENT, ID TEXT NOT NULL UNIQUE, Json TEXT NOT NULL)");
         }

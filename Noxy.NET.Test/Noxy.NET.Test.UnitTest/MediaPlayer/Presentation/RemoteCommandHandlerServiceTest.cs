@@ -318,6 +318,19 @@ public class RemoteCommandHandlerServiceTest
     }
 
     [Fact]
+    public void StartRequested_ThatDidNotGetToPlay_CanBeTriedAgainWithTheSameState()
+    {
+        ResponseQueue queue = Queue(8, Item());
+        _player.Current = null;
+
+        _hub.RaisePlayerStartRequested(State(3), queue);
+        _hub.RaisePlayerStartRequested(State(3), queue);
+
+        Assert.Equal(2, _player.CallList.Count(x => x == "PlayCurrent"));
+        Assert.Equal(0, _reporter.ClaimNowCount);
+    }
+
+    [Fact]
     public void StartRequested_ForALaterTransfer_StartsAgain()
     {
         _player.Current = Item();

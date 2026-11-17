@@ -10,6 +10,8 @@ public sealed class FakePlaybackReporterService : IPlaybackReporterService
 
     public int ClaimNowCount { get; private set; }
 
+    public int SaveNowCount { get; private set; }
+
     // What ClaimNow answers.
     public bool? ClaimResult { get; set; } = true;
 
@@ -21,6 +23,12 @@ public sealed class FakePlaybackReporterService : IPlaybackReporterService
     public void Start()
     {
         StartCount++;
+    }
+
+    public Task SaveNow()
+    {
+        SaveNowCount++;
+        return Task.CompletedTask;
     }
 
     public Task ReportNow()

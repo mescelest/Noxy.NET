@@ -35,11 +35,13 @@ public sealed class FrontendClient : IAsyncDisposable
         Reconciler = new(FileStore, Store, Download);
 
         QueueSource = new(Store, SettingService, new ShuffleService(Random.Shared), Random.Shared);
-        Queue = new(QueueSource, SettingService, Store, Sync, Store, Time, NullLogger<QueueService>.Instance);
-        Device = new(Store);
-        Player = new(Audio, Download, FileStore, Store, Sync, Store, Queue, QueueSource, SettingService, Api, NullLogger<PlayerService>.Instance);
+        QueueFile = new(Path.Combine(folder, Constants.LocalQueueFileName));
+        Queue = new(QueueSource, SettingService, QueueFile, Sync, Store, Time, NullLogger<QueueService>.Instance);
+        DeviceFile = new(Path.Combine(folder, Constants.DeviceFileName));
+        Device = new(DeviceFile);
+        Player = new(Audio, Download, FileStore, Store, Sync, DeviceFile, Queue, QueueSource, SettingService, Api, NullLogger<PlayerService>.Instance);
         Remote = new(Hub, Device, Queue, Time, NullLogger<RemotePlaybackService>.Instance);
-        Reporter = new(Player, Queue, Remote, Hub, Store, new Delay(), NullLogger<PlaybackReporterService>.Instance);
+        Reporter = new(Player, Queue, Remote, Hub, Store, NullLogger<PlaybackReporterService>.Instance);
         CommandHandler = new(Hub, Remote, Player, Queue, Reporter, NullLogger<RemoteCommandHandlerService>.Instance);
         Control = new(Player, Queue, Remote, Hub, Reporter, Device, new Delay(), NullLogger<PlaybackControlService>.Instance);
         Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, Queue, Reporter, CommandHandler, NullLogger<AppStartupService>.Instance);
@@ -80,9 +82,13 @@ public sealed class FrontendClient : IAsyncDisposable
 
     public QueueSourceService QueueSource { get; }
 
+    public FileLocalQueueStore QueueFile { get; }
+
     public QueueService Queue { get; }
 
     public PlayerService Player { get; }
+
+    public FileDeviceStore DeviceFile { get; }
 
     public DeviceService Device { get; }
 

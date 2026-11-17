@@ -47,7 +47,18 @@ public class PlayerService(
     private ShuffleModeEnum _shuffle = ShuffleModeEnum.Off;
     private RepeatModeEnum _repeat = RepeatModeEnum.No;
 
-    public event Action? Changed;
+    private Action? _changed;
+
+    // Subscribing wires the player to the queue, the downloads and the settings, so a device that only watches (a controller) still hears of changes before it ever plays.
+    public event Action? Changed
+    {
+        add
+        {
+            _changed += value;
+            EnsureWired();
+        }
+        remove => _changed -= value;
+    }
 
     public QueueItem? Current => serviceQueue.Queue.Current;
 
@@ -181,7 +192,7 @@ public class PlayerService(
         if (!IsLoaded) return;
 
         await playerAudio.Pause();
-        Changed?.Invoke();
+        _changed?.Invoke();
     }
 
     public async Task Resume()
@@ -189,7 +200,7 @@ public class PlayerService(
         if (!IsLoaded) return;
 
         await playerAudio.Play();
-        Changed?.Invoke();
+        _changed?.Invoke();
     }
 
     public async Task Seek(TimeSpan position)
@@ -198,7 +209,7 @@ public class PlayerService(
 
         await playerAudio.Seek(position);
         lock (_lock) _positionJumped = true;
-        Changed?.Invoke();
+        _changed?.Invoke();
     }
 
     public async Task Next()
@@ -220,7 +231,7 @@ public class PlayerService(
     {
         EnsureWired();
 
-        ResponseQueue queue = serviceQueue.Queue.ToResponse();
+        ResponseQueue queue = serviceQueue.GetSnapshot();
         QueueItem? ahead = queue.UserQueueList.Concat(queue.SourceList).FirstOrDefault(x => x.ItemID == itemID);
         QueueItem? behind = queue.HistoryList.FirstOrDefault(x => x.ItemID == itemID);
         QueueEdit? edit = ahead is not null
@@ -259,13 +270,13 @@ public class PlayerService(
         await playerAudio.Seek(TimeSpan.Zero);
         await playerAudio.Play();
         lock (_lock) _positionJumped = true;
-        Changed?.Invoke();
+        _changed?.Invoke();
     }
 
     // The last item of the history that did not fail; null when there is none.
     private QueueItem? LastPlayed()
     {
-        List<QueueItem> historyList = serviceQueue.Queue.ToResponse().HistoryList;
+        List<QueueItem> historyList = serviceQueue.GetSnapshot().HistoryList;
         lock (_lock) return historyList.LastOrDefault(x => !_failedSet.Contains(x.ItemID));
     }
 
@@ -333,7 +344,7 @@ public class PlayerService(
         }
 
         await playerAudio.SetVolume(clamped);
-        Changed?.Invoke();
+        _changed?.Invoke();
 
         try
         {
@@ -350,7 +361,7 @@ public class PlayerService(
     public async Task LoadVolume()
     {
         await ResolveVolume();
-        Changed?.Invoke();
+        _changed?.Invoke();
     }
 
     // The volume is cosmetic: a stored value that cannot be read must never stop a media file from playing.
@@ -411,7 +422,7 @@ public class PlayerService(
 
     private QueueItem? FirstPlayable()
     {
-        ResponseQueue queue = serviceQueue.Queue.ToResponse();
+        ResponseQueue queue = serviceQueue.GetSnapshot();
         lock (_lock) return queue.UserQueueList.Concat(queue.SourceList).FirstOrDefault(x => !_failedSet.Contains(x.ItemID));
     }
 
@@ -457,7 +468,7 @@ public class PlayerService(
 
             await playerAudio.Stop();
             lock (_lock) _loaded = false;
-            Changed?.Invoke();
+            _changed?.Invoke();
 
             string? path = null;
             if (await storeMetadata.GetMediaFile(item.MediaFileID) is not null)
@@ -475,7 +486,7 @@ public class PlayerService(
                 next = FirstPlayable();
                 if (next is null)
                 {
-                    Changed?.Invoke();
+                    _changed?.Invoke();
                     return;
                 }
 
@@ -496,7 +507,7 @@ public class PlayerService(
 
             await playerAudio.SetVolume(await ResolveVolume());
             await playerAudio.Play();
-            Changed?.Invoke();
+            _changed?.Invoke();
 
             await Prefetch();
             return;
@@ -506,7 +517,7 @@ public class PlayerService(
     private async Task<string?> Download(Guid mediaFileID, int version)
     {
         lock (_lock) _waiting = true;
-        Changed?.Invoke();
+        _changed?.Invoke();
 
         bool onDevice = await serviceDownload.EnsureOnDevice(mediaFileID);
 
@@ -515,7 +526,7 @@ public class PlayerService(
             if (version == _version) _waiting = false;
         }
 
-        Changed?.Invoke();
+        _changed?.Invoke();
 
         return onDevice && version == _version ? await storeFile.GetPath(mediaFileID) : null;
     }
@@ -523,7 +534,7 @@ public class PlayerService(
     // The files of the next PrefetchCount items that are not on the device yet are asked for. Nothing beyond that window is started.
     private async Task Prefetch()
     {
-        ResponseQueue queue = serviceQueue.Queue.ToResponse();
+        ResponseQueue queue = serviceQueue.GetSnapshot();
         List<Guid> windowList;
         lock (_lock) windowList = queue.UserQueueList.Concat(queue.SourceList).Where(x => !_failedSet.Contains(x.ItemID)).Select(x => x.MediaFileID).Distinct().Take(Constants.PrefetchCount).ToList();
 
@@ -540,7 +551,7 @@ public class PlayerService(
     {
         await playerAudio.Stop();
         lock (_lock) _loaded = false;
-        Changed?.Invoke();
+        _changed?.Invoke();
     }
 
     private async Task RefreshStates()
@@ -552,7 +563,7 @@ public class PlayerService(
             foreach (FileState state in stateList) _stateMap[state.MediaFileID] = state.State;
         }
 
-        Changed?.Invoke();
+        _changed?.Invoke();
     }
 
     private async Task RefreshModes()
@@ -569,7 +580,7 @@ public class PlayerService(
             _repeat = repeat;
         }
 
-        if (changed) Changed?.Invoke();
+        if (changed) _changed?.Invoke();
     }
 
     #endregion -- Playing the current item --
@@ -662,14 +673,14 @@ public class PlayerService(
             logger.LogWarning("The audio player could not play a file.");
             Fire(OnFailed);
         };
-        playerAudio.Changed += () => Changed?.Invoke();
+        playerAudio.Changed += () => _changed?.Invoke();
         serviceDownload.Changed += () => Fire(RefreshStates);
         serviceSync.LibraryDiffApplied += _ => Fire(RefreshStates);
         serviceSync.Changed += () => Fire(RefreshModes);
         serviceSetting.Changed += () => Fire(RefreshModes);
         serviceQueue.Changed += () =>
         {
-            Changed?.Invoke();
+            _changed?.Invoke();
             Fire(RefreshModes);
         };
         serviceQueue.CurrentRemoved += () => Fire(OnCurrentRemoved);

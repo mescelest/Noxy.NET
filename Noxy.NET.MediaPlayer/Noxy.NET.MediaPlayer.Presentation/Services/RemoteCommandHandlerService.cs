@@ -19,7 +19,6 @@ public class RemoteCommandHandlerService(IMediaHubService serviceMediaHub, IRemo
     // Commands, transfers and starts are carried out one at a time, in the order they came.
     private Task _tail = Task.CompletedTask;
     private bool _started;
-    private bool _startingTransfer;
     private bool _pausedForTransfer;
     private bool _wasActive;
     private StartKey? _lastStartKey;
@@ -137,30 +136,24 @@ public class RemoteCommandHandlerService(IMediaHubService serviceMediaHub, IRemo
         lock (_lock)
         {
             if (_lastStartKey == key) return;
-
-            _lastStartKey = key;
-            _startingTransfer = true;
         }
 
-        try
-        {
-            // An empty queue has nothing to play: nothing starts and nothing is claimed.
-            if (queue.Current is null) return;
+        // An empty queue has nothing to play: nothing starts and nothing is claimed.
+        if (queue.Current is null) return;
 
-            await serviceQueue.ReplaceWithSnapshot(queue, false);
-            await servicePlayer.SetVolume(Math.Clamp(state.Volume, 0, 100) / 100.0);
-            await servicePlayer.PlayCurrent();
-            if (!servicePlayer.IsPlaying) return;
+        await serviceQueue.ReplaceWithSnapshot(queue, false);
+        await servicePlayer.SetVolume(Math.Clamp(state.Volume, 0, 100) / 100.0);
+        await servicePlayer.PlayCurrent();
 
-            if (state.PositionSeconds > 0) await servicePlayer.Seek(TimeSpan.FromSeconds(state.PositionSeconds));
+        // A start that did not get to play (a file that would not load) is not remembered: the same request may be tried again.
+        if (!servicePlayer.IsPlaying) return;
 
-            // The reporter stops the player when the server refuses; the target of a transfer makes sure of it too, so two devices never play together.
-            if (await serviceReporter.ClaimNow() is false) await servicePlayer.Pause();
-        }
-        finally
-        {
-            lock (_lock) _startingTransfer = false;
-        }
+        lock (_lock) _lastStartKey = key;
+
+        if (state.PositionSeconds > 0) await servicePlayer.Seek(TimeSpan.FromSeconds(state.PositionSeconds));
+
+        // The reporter stops the player when the server refuses; the target of a transfer makes sure of it too, so two devices never play together.
+        if (await serviceReporter.ClaimNow() is false) await servicePlayer.Pause();
     }
 
     #endregion -- Transfer --
@@ -174,8 +167,6 @@ public class RemoteCommandHandlerService(IMediaHubService serviceMediaHub, IRemo
         bool lostTheRole;
         lock (_lock)
         {
-            if (_startingTransfer) return;
-
             lostTheRole = _wasActive && role == PlaybackRoleEnum.Controller;
             _wasActive = role == PlaybackRoleEnum.Active;
             if (role != PlaybackRoleEnum.Active) _pausedForTransfer = false;

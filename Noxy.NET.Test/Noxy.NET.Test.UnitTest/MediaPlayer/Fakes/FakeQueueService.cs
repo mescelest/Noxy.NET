@@ -19,6 +19,11 @@ public sealed class FakeQueueService : IQueueService
 
     public bool OwnsPlayback { get; set; }
 
+    public ResponseQueue GetSnapshot()
+    {
+        return Queue.ToResponse();
+    }
+
     // What Apply answers.
     public bool ApplyResult { get; set; } = true;
 
@@ -41,6 +46,9 @@ public sealed class FakeQueueService : IQueueService
     public List<double> SavedPositionList { get; } = [];
 
     public int LoadLocalCopyCount { get; private set; }
+
+    // Thrown by SaveLocalCopy when set.
+    public Exception? SaveFailure { get; set; }
 
     // Thrown by LoadLocalCopy when set.
     public Exception? LocalCopyFailure { get; set; }
@@ -109,6 +117,8 @@ public sealed class FakeQueueService : IQueueService
 
     public Task SaveLocalCopy(double positionSeconds)
     {
+        if (SaveFailure is not null) throw SaveFailure;
+
         SavedPositionList.Add(positionSeconds);
         return Task.CompletedTask;
     }

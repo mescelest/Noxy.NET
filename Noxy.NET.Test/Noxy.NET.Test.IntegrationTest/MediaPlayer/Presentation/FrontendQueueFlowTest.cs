@@ -44,7 +44,7 @@ public class FrontendQueueFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         (ApiAccount account, string email) = await api.CreateAccount();
-        ResponseMediaFile a = await api.UploadAndWait(account, "A");
+        await api.UploadAndWait(account, "A");
         ResponseMediaFile b = await api.UploadAndWait(account, "B");
         ResponseMediaFile c = await api.UploadAndWait(account, "C");
         await using FrontendClient frontend = await FrontendClient.CreateSignedIn(factory, email);
@@ -56,7 +56,6 @@ public class FrontendQueueFlowTest
         Assert.Equal([c.ID], MediaOf(queue.SourceList));
         Assert.Equal(await frontend.FileStore.GetPath(b.ID), frontend.Audio.LoadedPath);
         Assert.True(frontend.Audio.IsPlaying);
-        Assert.NotNull(a);
     }
 
     [Fact]
@@ -88,7 +87,7 @@ public class FrontendQueueFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         (ApiAccount account, string email) = await api.CreateAccount();
-        ResponseMediaFile a = await api.UploadAndWait(account, "A");
+        await api.UploadAndWait(account, "A");
         ResponseMediaFile c = await api.UploadAndWait(account, "C");
         ResponseMediaFile e = await api.UploadAndWait(account, "E");
         await using FrontendClient frontend = await FrontendClient.CreateSignedIn(factory, email);
@@ -101,7 +100,6 @@ public class FrontendQueueFlowTest
         await FrontendClient.WaitFor(() => Task.FromResult(MediaOf(QueueOf(frontend).SourceList).SequenceEqual([d.ID, e.ID])), "the uploaded media file to join the queue");
         Assert.Equal(c.ID, QueueOf(frontend).Current?.MediaFileID);
         Assert.DoesNotContain(b.ID, MediaOf(QueueOf(frontend).SourceList));
-        Assert.NotNull(a);
     }
 
     [Fact]

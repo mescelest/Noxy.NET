@@ -3,7 +3,7 @@ using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class DeviceService(IDeviceStore storeDevice) : IDeviceService
+public class DeviceService(IDeviceStore storeDevice, Func<string>? machineName = null) : IDeviceService
 {
     private readonly SemaphoreSlim _idLock = new(1, 1);
 
@@ -27,7 +27,16 @@ public class DeviceService(IDeviceStore storeDevice) : IDeviceService
 
     public async Task<string> GetName()
     {
-        return await storeDevice.GetDeviceName() ?? Environment.MachineName;
+        return await storeDevice.GetDeviceName() ?? DefaultName();
+    }
+
+    // The machine's name as a device name: trimmed and cut to the length a name may have, so the server accepts it. A machine with no name is "This device".
+    private string DefaultName()
+    {
+        string name = (machineName?.Invoke() ?? Environment.MachineName).Trim();
+        if (name.Length == 0) return Constants.DefaultDeviceName;
+
+        return name.Length > Constants.DeviceNameMaxLength ? name[..Constants.DeviceNameMaxLength].TrimEnd() : name;
     }
 
     public async Task SetName(string name)

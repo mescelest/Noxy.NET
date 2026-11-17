@@ -4,7 +4,7 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Remote;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 
-// This device's copy of the queue. Every change is saved to the local copy.
+// This device's copy of the queue. It is kept in memory and written to the local copy only by SaveLocalCopy.
 public interface IQueueService
 {
     // Raised after the queue changed, once per operation.
@@ -19,13 +19,16 @@ public interface IQueueService
     // Raised, on a device that owns playback, when the item it is playing was removed from the queue by a Remove: the player skips at once.
     event Action? CurrentRemoved;
 
-    // The current queue. A snapshot or a loaded copy replaces the instance, so read it again after Changed.
+    // A copy of the queue as it is now, taken while no edit is half done. Use this, not Queue.ToResponse(), from outside the service.
+    ResponseQueue GetSnapshot();
+
+    // The current queue. A snapshot or a loaded copy replaces the instance, so read it again after Changed. Its Current, Source and counts are safe to read; to copy the lists use GetSnapshot.
     LiveQueue Queue { get; }
 
     // True while this device is the active one or plays alone: only then does a change of the library or a playlist reach the queue, and only then does a removed current item raise CurrentRemoved. Set by the reporter.
     bool OwnsPlayback { get; set; }
 
-    // Applies an edit to the local queue and saves the local copy. False when it changed nothing (an item that is gone is not an error); throws InvalidQueueEditException for an edit that is not valid.
+    // Applies an edit to the local queue. The local copy is not written for it: it is written by SaveLocalCopy. False when it changed nothing (an item that is gone is not an error); throws InvalidQueueEditException for an edit that is not valid.
     Task<bool> Apply(QueueEdit edit);
 
     // The pushed form of an edit: exactly the local revision + 1 is applied, a lower or equal one is ignored (this device applied it already), a higher one raises GapDetected.
@@ -43,7 +46,7 @@ public interface IQueueService
     // Loads the saved copy; returns its position, or null when nothing (usable) was saved.
     Task<TimeSpan?> LoadLocalCopy();
 
-    // Saves the copy with the position of the current item.
+    // Writes the queue and the position of the current item to the local copy now. Changes are otherwise only kept in memory, so this is called when playback pauses or stops and when the app leaves the foreground.
     Task SaveLocalCopy(double positionSeconds);
 
     // Empties the queue and the local copy (an account switch).

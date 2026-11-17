@@ -1,23 +1,21 @@
-using Microsoft.Data.Sqlite;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Storage.Stores;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Presentation;
 
-public class SqliteVolumeStoreTest : VolumeStoreContract, IDisposable
+public class FileVolumeStoreTest : VolumeStoreContract, IDisposable
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), $"Volume-store-{Guid.CreateVersion7()}");
+    private readonly string _folder = Path.Combine(Path.GetTempPath(), $"Volume-file-{Guid.CreateVersion7()}");
 
     public void Dispose()
     {
-        SqliteConnection.ClearAllPools();
         if (Directory.Exists(_folder)) Directory.Delete(_folder, true);
     }
 
     protected override IVolumeStore CreateStore()
     {
-        return new SqliteMetadataStore(Path.Combine(_folder, "metadata.db"));
+        return new FileDeviceStore(Path.Combine(_folder, "device.json"));
     }
 
     [Fact]
