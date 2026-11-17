@@ -16,6 +16,8 @@ public interface ISettingService
 
     Task<RepeatModeEnum> GetRepeat();
 
+    Task<bool> GetKeepQueuedItems();
+
     // Sends the stored ETag unless force is set or the local list is empty. A failed network call changes nothing.
     Task SyncSettingList(bool force = false);
 

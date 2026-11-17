@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Models;
@@ -96,13 +97,13 @@ public class FrontendDownloadFlowTest
         ResponseMediaFile media = await Upload(api, account, "One", MediaApiClient.Mp3(3000));
         await using FrontendClient frontend = await SignedIn(factory, email);
         await frontend.Download.EnsureOnDevice(media.ID);
-        int requestsBefore = frontend.Network.RequestList.Count;
+        int requestsBefore = frontend.Network.RequestList.Count(x => x.Path.EndsWith(FileSuffix, StringComparison.Ordinal));
 
-        await frontend.Player.Play(media.ID);
+        await frontend.Player.StartLibrary(media.ID, LibrarySortEnum.Title, false, string.Empty);
 
         Assert.Equal(await frontend.FileStore.GetPath(media.ID), frontend.Audio.LoadedPath);
         Assert.True(frontend.Audio.IsPlaying);
-        Assert.Equal(requestsBefore, frontend.Network.RequestList.Count);
+        Assert.Equal(requestsBefore, frontend.Network.RequestList.Count(x => x.Path.EndsWith(FileSuffix, StringComparison.Ordinal)));
     }
 
     [Fact]
@@ -114,7 +115,7 @@ public class FrontendDownloadFlowTest
         ResponseMediaFile media = await Upload(api, account, "One", MediaApiClient.Mp3(4000));
         await using FrontendClient frontend = await SignedIn(factory, email);
 
-        await frontend.Player.Play(media.ID);
+        await frontend.Player.StartLibrary(media.ID, LibrarySortEnum.Title, false, string.Empty);
 
         Assert.Equal(FileSyncStateEnum.OnDevice, (await State(frontend, media.ID))?.State);
         Assert.Equal(await frontend.FileStore.GetPath(media.ID), frontend.Audio.LoadedPath);
@@ -233,17 +234,19 @@ public class FrontendDownloadFlowTest
         (ApiAccount account, string email) = await CreateAccount(api);
         ResponseMediaFile first = await Upload(api, account, "First", MediaApiClient.Mp3(3000));
         ResponseMediaFile second = await Upload(api, account, "Second", MediaApiClient.Mp3(3100));
-        ResponseMediaFile third = await Upload(api, account, "Third", MediaApiClient.Mp3(3200));
+        // Never named again: the library queue after "Second" holds it, and the test waits for it to be prefetched.
+        await Upload(api, account, "Third", MediaApiClient.Mp3(3200));
         await using FrontendClient frontend = await SignedIn(factory, email);
 
-        await frontend.Player.PlayList([first.ID, second.ID, third.ID], 0);
+        await frontend.Player.StartLibrary(first.ID, LibrarySortEnum.Title, false, string.Empty);
 
         Assert.Equal(await frontend.FileStore.GetPath(first.ID), frontend.Audio.LoadedPath);
         await FrontendClient.WaitFor(async () => (await frontend.Store.GetFileStateList()).Count(x => x.State == FileSyncStateEnum.OnDevice) == 3, "the next media files to be prefetched");
 
         int requestsBefore = frontend.Network.RequestList.Count(x => x.Path.EndsWith(FileSuffix, StringComparison.Ordinal));
         frontend.Audio.RaiseEnded();
-        await FrontendClient.WaitFor(() => Task.FromResult(frontend.Player.Current?.MediaFileID == second.ID), "the second media file to play");
+        string? secondPath = await frontend.FileStore.GetPath(second.ID);
+        await FrontendClient.WaitFor(() => Task.FromResult(frontend.Player.Current?.MediaFileID == second.ID && frontend.Audio.LoadedPath == secondPath && frontend.Audio.IsPlaying), "the second media file to play");
 
         Assert.Equal(await frontend.FileStore.GetPath(second.ID), frontend.Audio.LoadedPath);
         Assert.Equal(requestsBefore, frontend.Network.RequestList.Count(x => x.Path.EndsWith(FileSuffix, StringComparison.Ordinal)));

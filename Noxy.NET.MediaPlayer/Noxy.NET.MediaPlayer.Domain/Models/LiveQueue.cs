@@ -7,15 +7,15 @@ namespace Noxy.NET.MediaPlayer.Domain.Models;
 
 public class LiveQueue
 {
-    private ResponseQueueSource? _source;
     private List<QueueItem> _historyList = [];
-    private QueueItem? _current;
     private List<QueueItem> _userQueueList = [];
     private List<QueueItem> _sourceList = [];
 
     public long QueueRevision { get; set; }
+    public QueueItem? Current { get; private set; }
+    public ResponseQueueSource? Source { get; private set; }
 
-    public int ItemCount => _historyList.Count + (_current is null ? 0 : 1) + _userQueueList.Count + _sourceList.Count;
+    public int ItemCount => _historyList.Count + (Current is null ? 0 : 1) + _userQueueList.Count + _sourceList.Count;
     public int UserQueueCount => _userQueueList.Count;
     public int SourceCount => _sourceList.Count;
 
@@ -24,9 +24,9 @@ public class LiveQueue
         return new()
         {
             QueueRevision = QueueRevision,
-            Source = _source,
+            Source = Source,
             HistoryList = [.. _historyList],
-            Current = _current,
+            Current = Current,
             UserQueueList = [.. _userQueueList],
             SourceList = [.. _sourceList]
         };
@@ -46,9 +46,9 @@ public class LiveQueue
         return new()
         {
             QueueRevision = queue.QueueRevision,
-            _source = queue.Source,
+            Source = queue.Source,
             _historyList = historyList,
-            _current = queue.Current,
+            Current = queue.Current,
             _userQueueList = [.. queue.UserQueueList],
             _sourceList = [.. queue.SourceList]
         };
@@ -112,12 +112,12 @@ public class LiveQueue
     private bool Remove(QueueEdit edit)
     {
         Guid itemID = Require(edit.ItemID, nameof(edit.ItemID));
-        if (_current?.ItemID != itemID)
+        if (Current?.ItemID != itemID)
         {
             return _userQueueList.RemoveAll(x => x.ItemID == itemID) + _sourceList.RemoveAll(x => x.ItemID == itemID) + _historyList.RemoveAll(x => x.ItemID == itemID) > 0;
         }
 
-        _current = null;
+        Current = null;
         return true;
     }
 
@@ -129,7 +129,7 @@ public class LiveQueue
         Guid? afterID = edit.AfterItemID;
         if (item is null || afterID == itemID) return false;
 
-        bool toFront = afterID is null || afterID == _current?.ItemID;
+        bool toFront = afterID is null || afterID == Current?.ItemID;
         bool anchorInUserQueue = afterID is { } userAnchor && _userQueueList.Any(x => x.ItemID == userAnchor);
         bool anchorInSource = afterID is { } sourceAnchor && _sourceList.Any(x => x.ItemID == sourceAnchor);
         if (!toFront && !anchorInUserQueue && !anchorInSource) return false;
@@ -171,9 +171,9 @@ public class LiveQueue
         List<QueueItem> userQueueList = edit.KeepUserQueue ? _userQueueList : [];
         EnsureDistinct([.. itemList, .. userQueueList]);
 
-        _source = source;
+        Source = source;
         _historyList = [];
-        _current = current;
+        Current = current;
         _userQueueList = [.. userQueueList];
         _sourceList = [.. rest];
         return true;
@@ -185,7 +185,7 @@ public class LiveQueue
         EnsureDistinct(itemList);
 
         List<QueueItem> others = [.. _historyList, .. _userQueueList];
-        if (_current is not null) others.Add(_current);
+        if (Current is not null) others.Add(Current);
 
         EnsureDistinct([.. itemList, .. others]);
 
@@ -220,14 +220,14 @@ public class LiveQueue
         QueueItem? target = edit.Item;
         if (target is null)
         {
-            if (_current is null) return false;
+            if (Current is null) return false;
 
-            PushHistory([_current], historyLimit);
-            _current = null;
+            PushHistory([Current], historyLimit);
+            Current = null;
             return true;
         }
 
-        if (_current?.ItemID == target.ItemID) return false;
+        if (Current?.ItemID == target.ItemID) return false;
 
         QueueItem named = target;
         List<QueueItem> skippedList = [];
@@ -252,11 +252,11 @@ public class LiveQueue
 
         // Skipped items never enter history unless the user jumped on purpose.
         List<QueueItem> toHistoryList = [];
-        if (_current is not null) toHistoryList.Add(_current);
+        if (Current is not null) toHistoryList.Add(Current);
         if (edit.KeepSkipped) toHistoryList.AddRange(skippedList);
 
         PushHistory(toHistoryList, historyLimit);
-        _current = named;
+        Current = named;
         return true;
     }
 
@@ -264,7 +264,7 @@ public class LiveQueue
     private bool Previous(QueueEdit edit)
     {
         QueueItem target = edit.Item ?? throw new InvalidQueueEditException("A step back needs the item.");
-        if (_current?.ItemID == target.ItemID) return false;
+        if (Current?.ItemID == target.ItemID) return false;
 
         QueueItem named;
         List<QueueItem> afterList = [];
@@ -284,10 +284,10 @@ public class LiveQueue
 
         List<QueueItem> frontList = [];
         if (edit.KeepSkipped) frontList.AddRange(afterList);
-        if (_current is not null) frontList.Add(_current);
+        if (Current is not null) frontList.Add(Current);
 
         _sourceList.InsertRange(0, frontList);
-        _current = named;
+        Current = named;
         return true;
     }
 
@@ -310,7 +310,7 @@ public class LiveQueue
 
     private void EnsureNew(Guid itemID)
     {
-        if (_current?.ItemID == itemID || _historyList.Any(x => x.ItemID == itemID) || _userQueueList.Any(x => x.ItemID == itemID) || _sourceList.Any(x => x.ItemID == itemID))
+        if (Current?.ItemID == itemID || _historyList.Any(x => x.ItemID == itemID) || _userQueueList.Any(x => x.ItemID == itemID) || _sourceList.Any(x => x.ItemID == itemID))
         {
             throw new InvalidQueueEditException("The item ID is already in the queue.");
         }

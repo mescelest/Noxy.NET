@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +20,7 @@ public class RemotePlaybackFlowTest
     {
         Dictionary<string, string?> settings = [];
         if (graceSeconds is { } grace) settings[ConfigurationPath.Combine(ConfigRemote.SectionName, nameof(ConfigRemote.ActiveGraceSeconds))] = grace.ToString();
-        if (idleMinutes is { } idle) settings[ConfigurationPath.Combine(ConfigRemote.SectionName, nameof(ConfigRemote.IdleTeardownMinutes))] = idle.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        if (idleMinutes is { } idle) settings[ConfigurationPath.Combine(ConfigRemote.SectionName, nameof(ConfigRemote.IdleTeardownMinutes))] = idle.ToString(CultureInfo.InvariantCulture);
         if (transferSeconds is { } transfer) settings[ConfigurationPath.Combine(ConfigRemote.SectionName, nameof(ConfigRemote.TransferTimeoutSeconds))] = transfer.ToString();
 
         return new(settings);
@@ -262,6 +263,36 @@ public class RemotePlaybackFlowTest
 
         await winner.Report(Report(2, false));
         Assert.True(await reconnecting.Claim(ClaimRequest()));
+    }
+
+    [Fact]
+    public async Task RegisteringADevice_OrBeingRefusedAClaim_LeavesTheSessionStateAndTheQueueUntouched()
+    {
+        await using ApiFactory factory = Factory();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        await using HubClient winner = await HubClient.Connect(factory, user.Token, "Laptop");
+        QueueItem current = Item();
+        await winner.Claim(ClaimRequest(current));
+        await winner.Settle();
+        string queueBefore = Json(await winner.RequestSnapshot());
+
+        // A device that joins takes the session as it is, and one whose claim is refused changes nothing of it: not the state, not the queue, not who is active, not the volume.
+        await using HubClient joining = await HubClient.Connect(factory, user.Token, "Phone");
+        ResponsePlayerState joined = await joining.Next<ResponsePlayerState>(MediaHubEventEnum.PlayerStateChanged);
+        RequestClaimActive refused = ClaimRequest(Item());
+        Assert.False(await joining.Claim(new() { State = new() { StateRevision = 1, IsPlaying = true, PositionSeconds = 99, Volume = 5, Shuffle = ShuffleModeEnum.Random, Repeat = RepeatModeEnum.Forever }, Queue = refused.Queue }));
+        await winner.Settle();
+
+        Assert.Equal(winner.DeviceID, joined.ActiveDeviceID);
+        Assert.Equal(50, joined.Volume);
+        Assert.Equal(queueBefore, Json(await winner.RequestSnapshot()));
+        Assert.Equal(queueBefore, Json(await joining.RequestSnapshot()));
+        Assert.True(await winner.ReceivesNone(MediaHubEventEnum.PlayerStateChanged, Short));
+        Assert.True(await winner.ReceivesNone(MediaHubEventEnum.QueueChanged, Short));
+        Assert.True(await winner.ReceivesNone(MediaHubEventEnum.QueueSnapshot, Short));
+        ResponseDevice active = Assert.Single(await joining.Register(), x => x.IsActive);
+        Assert.Equal(winner.DeviceID, active.DeviceID);
     }
 
     [Fact]

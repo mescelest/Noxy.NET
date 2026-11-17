@@ -1,18 +1,24 @@
-using Noxy.NET.MediaPlayer.Presentation.Models;
+using Noxy.NET.MediaPlayer.Domain.Enums;
+using Noxy.NET.MediaPlayer.Domain.Models;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 
-// Plays from the file store only: a media file that is on the device is played with no network call, one that is missing is downloaded first. The same media file can be in the queue twice.
+// Plays the current item of the queue (IQueueService) from the file store only: a media file that is on the device is played with no network call, one that is missing is downloaded first. The same media file can be in the queue twice.
 public interface IPlayerService
 {
-    // Raised when the queue, the current entry, the play state or the position changed.
+    // Raised when the queue, the current item, the play state or the position changed.
     event Action? Changed;
 
-    PlayerQueueEntry? Current { get; }
+    // The queue's current item; null when nothing is loaded.
+    QueueItem? Current { get; }
 
-    List<PlayerQueueEntry> QueueList { get; }
+    LiveQueue Queue { get; }
 
     bool IsPlaying { get; }
+
+    // No current item: the player has nothing to play.
+    bool IsDisabled { get; }
 
     TimeSpan Position { get; }
 
@@ -20,20 +26,31 @@ public interface IPlayerService
 
     double Volume { get; }
 
-    // True while the current entry is being downloaded before it can play.
-    bool IsWaitingForDownload { get; }
+    // True while the current item is being downloaded before it can play.
+    bool IsWaiting { get; }
 
-    // Clears the queue and plays that media file.
-    Task Play(Guid mediaFileID);
+    // The modes that apply to the queue: the playing playlist's own when it has one, else the user's setting.
+    ShuffleModeEnum Shuffle { get; }
 
-    // Replaces the queue and plays from the start index (clamped to the list).
-    Task PlayList(List<Guid> mediaFileIDList, int startIndex);
+    RepeatModeEnum Repeat { get; }
 
-    // Adds to the end of the queue. Does not start playing.
-    Task Enqueue(Guid mediaFileID);
+    // The playlist the queue plays, null for the Library or an empty queue.
+    Guid? PlaylistID { get; }
 
-    // The current entry: the next playable one plays. Any other entry just leaves the queue.
-    Task Remove(int index);
+    // Set by Seek so that a seek counts as a change to report; the reporter clears it.
+    bool PositionJumped { get; set; }
+
+    // What the file of an item is like, or Failed when it could not be played.
+    FileSyncStateEnum StateOf(QueueItem item);
+
+    // Builds the queue from the Library (the search and sort as the screen shows them) in the effective shuffle mode, starting at that media file, and plays it.
+    Task StartLibrary(Guid mediaFileID, LibrarySortEnum sort, bool descending, string search);
+
+    // The same for a playlist, from the entry (the first one when null). Reports the playlist as played once it starts; offline that is ignored.
+    Task StartPlaylist(Guid playlistID, Guid? startEntryID = null);
+
+    // Plays the queue's current item from the start (Continue, a transfer, a jump). Does nothing without one.
+    Task PlayCurrent();
 
     Task Pause();
 
@@ -42,10 +59,13 @@ public interface IPlayerService
 
     Task Seek(TimeSpan position);
 
-    // At the end of the queue: nothing happens.
+    // Jumps to an item of the queue and plays it: one ahead (the user queue or the source part) is advanced to, one behind (history) is stepped back to. The items skipped on the way are dropped, or kept in history when keepSkipped is set. An item that is not in the queue does nothing.
+    Task JumpTo(Guid itemID, bool keepSkipped);
+
+    // The next playable item: the user queue first, then the source part. At the end the repeat mode decides; with no repeat nothing happens.
     Task Next();
 
-    // At the start of the queue: the current entry starts again.
+    // Past 3 seconds, or while the current media file is deleted, the current item starts again; otherwise the last played item plays.
     Task Previous();
 
     // Reads the volume stored on this device, once, so Volume is right before anything has played. Does nothing after the user set a volume on this device.
@@ -54,6 +74,11 @@ public interface IPlayerService
     // Clamped to 0 to 1. Applied at once and kept on the device.
     Task SetVolume(double volume);
 
-    // Stops, releases the file and empties the queue.
+    // Writes the playing playlist's own mode (the global setting for the Library) and builds the source part again from the current item. Throws when the server cannot be reached or refuses; the mode is unchanged then.
+    Task SetShuffle(ShuffleModeEnum shuffle);
+
+    Task SetRepeat(RepeatModeEnum repeat);
+
+    // Stops, releases the file and empties the queue and its local copy.
     Task Clear();
 }

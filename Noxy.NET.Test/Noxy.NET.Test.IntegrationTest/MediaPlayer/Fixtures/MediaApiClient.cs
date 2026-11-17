@@ -44,6 +44,24 @@ public sealed class MediaApiClient(ApiFactory factory)
         return new(authentication.AccessToken, ReadSubject(authentication.AccessToken));
     }
 
+    // A new account (its email is unique), with the email back so that a frontend can sign in as it.
+    public async Task<(ApiAccount Account, string Email)> CreateAccount()
+    {
+        string email = $"{Guid.CreateVersion7()}@example.com";
+
+        return (await SignUp(email), email);
+    }
+
+    // Uploads one media file with bytes of its own and waits until the server has it. Returns what the server holds for it.
+    public async Task<ResponseMediaFile> UploadAndWait(ApiAccount account, string title)
+    {
+        int before = (await GetMediaFileList(account.Token)).Count;
+        HttpResponseMessage response = await Upload(account.Token, Mp3(3000 + before), title: title);
+        response.EnsureSuccessStatusCode();
+
+        return (await WaitForMediaFileList(account.Token, before + 1)).Single(x => x.Title == title);
+    }
+
     // The title field goes first, because the server reads the body as a stream.
     public async Task<HttpResponseMessage> Upload(string? token, byte[] content, string fileName = "media.mp3", string? title = null)
     {

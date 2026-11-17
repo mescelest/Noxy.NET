@@ -282,6 +282,18 @@ public class SettingServiceTest
         Assert.Equal(ShuffleModeEnum.Off, await _service.GetShuffle());
     }
 
+    [Fact]
+    public async Task GetKeepQueuedItems_ReturnsTheStoredValueOrTheDefault_AndFallsBackWhenTheKindIsWrong()
+    {
+        Assert.False(await _service.GetKeepQueuedItems());
+
+        await Seed(Setting(SettingKey.KeepQueuedItems, true, SettingValueTypeEnum.Boolean));
+        Assert.True(await _service.GetKeepQueuedItems());
+
+        await Seed(Setting(SettingKey.KeepQueuedItems, "yes", SettingValueTypeEnum.Boolean));
+        Assert.False(await _service.GetKeepQueuedItems());
+    }
+
     #endregion -- Typed getters --
 
     #region -- Review fixes --

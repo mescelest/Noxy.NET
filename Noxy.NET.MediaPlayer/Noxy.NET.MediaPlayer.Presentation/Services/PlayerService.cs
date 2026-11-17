@@ -1,20 +1,40 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
+using Noxy.NET.MediaPlayer.Domain.Enums;
+using Noxy.NET.MediaPlayer.Domain.Models;
+using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Responses.Remote;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
+using Noxy.NET.MediaPlayer.Presentation.Exceptions;
+using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDownload, IFileStore storeFile, IMetadataStore storeMetadata, ISyncService serviceSync, IVolumeStore storeVolume, ILogger<PlayerService> logger) : IPlayerService
+public class PlayerService(
+    IAudioPlayer playerAudio,
+    IDownloadService serviceDownload,
+    IFileStore storeFile,
+    IMetadataStore storeMetadata,
+    ISyncService serviceSync,
+    IVolumeStore storeVolume,
+    IQueueService serviceQueue,
+    IQueueSourceService serviceQueueSource,
+    ISettingService serviceSetting,
+    IApiClient clientApi,
+    ILogger<PlayerService> logger) : IPlayerService
 {
+    // Past this much of the current item, Previous starts it again instead of going back.
+    private static readonly TimeSpan RestartAfter = TimeSpan.FromSeconds(3);
+
     private readonly Lock _lock = new();
 
-    // The state below is guarded by _lock; nothing awaits while holding it. Every change to what should play bumps _version, so a play that was overtaken (by a Next, a Clear, another Play) notices after each await and gives up.
-    private readonly List<(Guid ID, bool Failed)> _queue = [];
-    private readonly HashSet<Guid> _goneSet = [];
+    // The state below is guarded by _lock; nothing awaits while holding it. Every change to what should play bumps _version, so a play that was overtaken (by a Next, a Clear, another start) notices after each await and gives up.
+    private readonly HashSet<Guid> _failedSet = [];
     private readonly Dictionary<Guid, FileSyncStateEnum> _stateMap = [];
-    private int _index = -1;
     private int _version;
     private bool _wired;
     private bool _waiting;
@@ -22,35 +42,20 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
     private bool _loadFailed;
     private double _volume = 1;
     private bool _volumeLoaded;
+    private bool _positionJumped;
+    private int _repeatPassCount;
+    private ShuffleModeEnum _shuffle = ShuffleModeEnum.Off;
+    private RepeatModeEnum _repeat = RepeatModeEnum.No;
 
     public event Action? Changed;
 
-    public PlayerQueueEntry? Current
-    {
-        get
-        {
-            lock (_lock) return EntryAt(_index);
-        }
-    }
+    public QueueItem? Current => serviceQueue.Queue.Current;
 
-    public List<PlayerQueueEntry> QueueList
-    {
-        get
-        {
-            lock (_lock)
-            {
-                List<PlayerQueueEntry> list = [];
-                for (int i = 0; i < _queue.Count; i++)
-                {
-                    if (EntryAt(i) is { } entry) list.Add(entry);
-                }
-
-                return list;
-            }
-        }
-    }
+    public LiveQueue Queue => serviceQueue.Queue;
 
     public bool IsPlaying => playerAudio.IsPlaying;
+
+    public bool IsDisabled => Current is null;
 
     public TimeSpan Position => playerAudio.Position;
 
@@ -64,7 +69,7 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         }
     }
 
-    public bool IsWaitingForDownload
+    public bool IsWaiting
     {
         get
         {
@@ -72,81 +77,104 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         }
     }
 
-    public async Task Play(Guid mediaFileID)
+    public ShuffleModeEnum Shuffle
     {
-        await PlayList([mediaFileID], 0);
+        get
+        {
+            lock (_lock) return _shuffle;
+        }
     }
 
-    public async Task PlayList(List<Guid> mediaFileIDList, int startIndex)
+    public RepeatModeEnum Repeat
+    {
+        get
+        {
+            lock (_lock) return _repeat;
+        }
+    }
+
+    public Guid? PlaylistID => serviceQueue.Queue.Source?.PlaylistID;
+
+    public bool PositionJumped
+    {
+        get
+        {
+            lock (_lock) return _positionJumped;
+        }
+        set
+        {
+            lock (_lock) _positionJumped = value;
+        }
+    }
+
+    public FileSyncStateEnum StateOf(QueueItem item)
+    {
+        lock (_lock) return _failedSet.Contains(item.ItemID) ? FileSyncStateEnum.Failed : _stateMap.GetValueOrDefault(item.MediaFileID, FileSyncStateEnum.NotDownloaded);
+    }
+
+    #region -- Starting --
+
+    public async Task StartLibrary(Guid mediaFileID, LibrarySortEnum sort, bool descending, string search)
+    {
+        await StartSource(new() { Kind = QueueSourceKindEnum.Library, PlaylistID = null, Sort = sort, Descending = descending, Search = search }, mediaFileID);
+    }
+
+    public async Task StartPlaylist(Guid playlistID, Guid? startEntryID = null)
+    {
+        if (await StartSource(new() { Kind = QueueSourceKindEnum.Playlist, PlaylistID = playlistID, Sort = LibrarySortEnum.Title, Descending = false, Search = string.Empty }, startEntryID)) await ReportPlaylistPlayed(playlistID);
+    }
+
+    public async Task PlayCurrent()
+    {
+        EnsureWired();
+        if (Current is null) return;
+
+        int version;
+        lock (_lock) version = BeginNewPlay();
+
+        await RefreshModes();
+        await RefreshStates();
+        await StartCurrent(version);
+    }
+
+    private async Task<bool> StartSource(ResponseQueueSource source, Guid? startID)
     {
         EnsureWired();
 
+        ShuffleModeEnum shuffle = await serviceQueueSource.GetShuffle(source);
+        if (!await serviceQueue.StartSource(source, startID, shuffle)) return false;
+
         int version;
-        int index;
         lock (_lock)
         {
-            _queue.Clear();
-            _queue.AddRange(mediaFileIDList.Select(x => (x, false)));
-            index = _queue.Count == 0 ? -1 : Math.Clamp(startIndex, 0, _queue.Count - 1);
-            _index = index;
+            _failedSet.Clear();
+            _repeatPassCount = 0;
             version = BeginNewPlay();
         }
 
-        if (index < 0)
-        {
-            await StopPlayback();
-            return;
-        }
-
+        await RefreshModes();
         await RefreshStates();
-        await StartAt(index, version);
+        await StartCurrent(version);
+
+        return true;
     }
 
-    public async Task Enqueue(Guid mediaFileID)
+    // The playlist's "last played" is the server's to keep; a device that cannot reach it just plays on.
+    private async Task ReportPlaylistPlayed(Guid playlistID)
     {
-        EnsureWired();
-
-        lock (_lock) _queue.Add((mediaFileID, false));
-
-        Changed?.Invoke();
-        await Prefetch();
+        try
+        {
+            await clientApi.MarkPlaylistPlayed(playlistID);
+        }
+        catch (Exception exception) when (exception.IsOfflineFailure || exception is ApiException)
+        {
+            logger.LogWarning("A playlist could not be reported as played ({ExceptionType}).", exception.GetType().Name);
+        }
     }
 
-    public async Task Remove(int index)
-    {
-        EnsureWired();
+    #endregion -- Starting --
 
-        bool wasCurrent;
-        int next = -1;
-        int version = 0;
-        lock (_lock)
-        {
-            if (index < 0 || index >= _queue.Count) return;
-
-            wasCurrent = index == _index;
-            _queue.RemoveAt(index);
-            if (index < _index) _index--;
-
-            if (wasCurrent)
-            {
-                version = BeginNewPlay();
-                _index = index - 1;
-                next = FirstPlayableFrom(index);
-                if (next < 0) _index = _queue.Count - 1;
-            }
-        }
-
-        Changed?.Invoke();
-
-        if (!wasCurrent)
-        {
-            await Prefetch();
-            return;
-        }
-
-        if (next >= 0) await StartAt(next, version);
-        else await StopPlayback();
-    }
+    #region -- Controls --
 
     public async Task Pause()
     {
@@ -169,62 +197,130 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         if (!IsLoaded) return;
 
         await playerAudio.Seek(position);
+        lock (_lock) _positionJumped = true;
         Changed?.Invoke();
     }
 
     public async Task Next()
     {
         EnsureWired();
+        if (Current is null) return;
 
-        int next;
+        QueueItem? next = await FindNext();
+        if (next is null) return;
+
         int version;
-        lock (_lock)
-        {
-            if (_index < 0) return;
+        lock (_lock) version = BeginNewPlay();
 
-            next = FirstPlayableFrom(_index + 1);
-            if (next < 0) return;
+        await serviceQueue.Apply(new() { Edit = QueueEditEnum.Advance, Item = next });
+        await StartCurrent(version);
+    }
 
-            version = BeginNewPlay();
-        }
+    public async Task JumpTo(Guid itemID, bool keepSkipped)
+    {
+        EnsureWired();
 
-        await StartAt(next, version);
+        ResponseQueue queue = serviceQueue.Queue.ToResponse();
+        QueueItem? ahead = queue.UserQueueList.Concat(queue.SourceList).FirstOrDefault(x => x.ItemID == itemID);
+        QueueItem? behind = queue.HistoryList.FirstOrDefault(x => x.ItemID == itemID);
+        QueueEdit? edit = ahead is not null
+            ? new() { Edit = QueueEditEnum.Advance, Item = ahead, KeepSkipped = keepSkipped }
+            : behind is not null
+                ? new() { Edit = QueueEditEnum.Previous, Item = behind, KeepSkipped = keepSkipped }
+                : null;
+        if (edit is null) return;
+
+        int version;
+        lock (_lock) version = BeginNewPlay();
+
+        await serviceQueue.Apply(edit);
+        await StartCurrent(version);
     }
 
     public async Task Previous()
     {
         EnsureWired();
+        if (Current is not { } current) return;
 
-        int previous = -1;
-        int version = 0;
-        lock (_lock)
+        // A media file that was deleted while it plays only ever restarts: going back would put it into the queue again.
+        bool deleted = await storeMetadata.GetMediaFile(current.MediaFileID) is null;
+        if (!deleted && Position <= RestartAfter && LastPlayed() is { } previous)
         {
-            if (_index < 0) return;
+            int version;
+            lock (_lock) version = BeginNewPlay();
 
-            for (int i = _index - 1; i >= 0; i--)
-            {
-                if (_queue[i].Failed) continue;
-
-                previous = i;
-                break;
-            }
-
-            if (previous >= 0) version = BeginNewPlay();
-        }
-
-        if (previous >= 0)
-        {
-            await StartAt(previous, version);
+            await serviceQueue.Apply(new() { Edit = QueueEditEnum.Previous, Item = previous });
+            await StartCurrent(version);
             return;
         }
 
-        // At the start of the queue: the current media file starts again.
         if (!IsLoaded) return;
 
         await playerAudio.Seek(TimeSpan.Zero);
         await playerAudio.Play();
+        lock (_lock) _positionJumped = true;
         Changed?.Invoke();
     }
+
+    // The last item of the history that did not fail; null when there is none.
+    private QueueItem? LastPlayed()
+    {
+        List<QueueItem> historyList = serviceQueue.Queue.ToResponse().HistoryList;
+        lock (_lock) return historyList.LastOrDefault(x => !_failedSet.Contains(x.ItemID));
+    }
+
+    public async Task SetShuffle(ShuffleModeEnum shuffle)
+    {
+        EnsureWired();
+
+        if (serviceQueue.Queue.Source is { Kind: QueueSourceKindEnum.Playlist, PlaylistID: { } playlistID })
+        {
+            ResponsePlaylist updated = await clientApi.UpdatePlaylist(playlistID, new() { Shuffle = new(shuffle) });
+            await serviceSync.ApplyPlaylistUpdated(updated);
+        }
+        else
+        {
+            await serviceSetting.Update(SettingKey.Shuffle, JsonSerializer.SerializeToElement(shuffle.ToString()));
+        }
+
+        await RefreshModes();
+        await serviceQueue.Regenerate(shuffle);
+    }
+
+    public async Task SetRepeat(RepeatModeEnum repeat)
+    {
+        EnsureWired();
+
+        if (serviceQueue.Queue.Source is { Kind: QueueSourceKindEnum.Playlist, PlaylistID: { } playlistID })
+        {
+            ResponsePlaylist updated = await clientApi.UpdatePlaylist(playlistID, new() { Repeat = new(repeat) });
+            await serviceSync.ApplyPlaylistUpdated(updated);
+        }
+        else
+        {
+            await serviceSetting.Update(SettingKey.Repeat, JsonSerializer.SerializeToElement(repeat.ToString()));
+        }
+
+        await RefreshModes();
+    }
+
+    public async Task Clear()
+    {
+        EnsureWired();
+
+        lock (_lock)
+        {
+            _failedSet.Clear();
+            BeginNewPlay();
+        }
+
+        await serviceQueue.Clear();
+        await StopPlayback();
+    }
+
+    #endregion -- Controls --
+
+    #region -- Volume --
 
     // The volume belongs to the device: applied at once and kept in the device's own store, so it survives a restart. A save that fails does not undo the volume.
     public async Task SetVolume(double volume)
@@ -287,19 +383,9 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         }
     }
 
-    public async Task Clear()
-    {
-        EnsureWired();
+    #endregion -- Volume --
 
-        lock (_lock)
-        {
-            _queue.Clear();
-            _index = -1;
-            BeginNewPlay();
-        }
-
-        await StopPlayback();
-    }
+    #region -- Playing the current item --
 
     private bool IsLoaded
     {
@@ -317,44 +403,56 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         return ++_version;
     }
 
-    // Under _lock. A queue entry's state is what its file is like, or Failed when it could not be played.
-    private PlayerQueueEntry? EntryAt(int index)
+    // The next item that can play: the user queue first, then the source part; a failed item is stepped over. When the queue ran out the repeat mode may append the source again. Null when nothing is left.
+    private async Task<QueueItem?> FindNext()
     {
-        if (index < 0 || index >= _queue.Count) return null;
-
-        (Guid id, bool failed) = _queue[index];
-
-        return new(id, failed ? FileSyncStateEnum.Failed : _stateMap.GetValueOrDefault(id, FileSyncStateEnum.NotDownloaded));
+        return FirstPlayable() ?? await AppendRepeat();
     }
 
-    // Under _lock. Entries for deleted media files are dropped on the way; failed entries are stepped over. -1 when nothing after (and including) start can play.
-    private int FirstPlayableFrom(int start)
+    private QueueItem? FirstPlayable()
     {
-        for (int i = _queue.Count - 1; i >= start && i >= 0; i--)
-        {
-            if (_goneSet.Contains(_queue[i].ID) && i != _index) _queue.RemoveAt(i);
-        }
-
-        for (int i = Math.Max(start, 0); i < _queue.Count; i++)
-        {
-            if (!_queue[i].Failed) return i;
-        }
-
-        return -1;
+        ResponseQueue queue = serviceQueue.Queue.ToResponse();
+        lock (_lock) return queue.UserQueueList.Concat(queue.SourceList).FirstOrDefault(x => !_failedSet.Contains(x.ItemID));
     }
 
-    // Plays the entry at the index: stops what was playing (so its file is released), gets the file onto the device if it is missing, loads it and plays. An entry that cannot play is marked failed and the next one is tried.
-    private async Task StartAt(int index, int version)
+    // Repeat Once appends the source once more, Forever each time it ends; the pass is built again, so a shuffle comes out in a new order. A source that has been emptied ends the queue instead.
+    private async Task<QueueItem?> AppendRepeat()
+    {
+        ResponseQueueSource? source = serviceQueue.Queue.Source;
+        if (source is null) return null;
+
+        RepeatModeEnum repeat = await serviceQueueSource.GetRepeat(source);
+        lock (_lock)
+        {
+            if (repeat == RepeatModeEnum.No || (repeat == RepeatModeEnum.Once && _repeatPassCount >= 1)) return null;
+        }
+
+        List<QueueItem>? pass = await serviceQueueSource.Build(source, await serviceQueueSource.GetShuffle(source), null);
+        if (pass is null || pass.Count == 0) return null;
+
+        // A playlist entry is already in the queue's history under its own ID, and an ID may appear only once: each repeated item is new.
+        List<QueueItem> fresh = pass.Select(x => new QueueItem(Guid.NewGuid(), x.MediaFileID)).ToList();
+        await serviceQueue.Apply(new() { Edit = QueueEditEnum.RegenerateSource, ItemList = [.. fresh] });
+        lock (_lock) _repeatPassCount++;
+
+        return fresh[0];
+    }
+
+    // Plays the queue's current item: stops what was playing (so its file is released), gets the file onto the device if it is missing, loads it and plays. An item that cannot play is marked failed and the next one is tried.
+    private async Task StartCurrent(int version)
     {
         while (true)
         {
-            Guid id;
+            QueueItem? item = serviceQueue.Queue.Current;
             lock (_lock)
             {
-                if (version != _version || index < 0 || index >= _queue.Count) return;
+                if (version != _version) return;
+            }
 
-                _index = index;
-                id = _queue[index].ID;
+            if (item is null)
+            {
+                await StopPlayback();
+                return;
             }
 
             await playerAudio.Stop();
@@ -362,23 +460,26 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
             Changed?.Invoke();
 
             string? path = null;
-            bool exists = !IsGone(id) && await storeMetadata.GetMediaFile(id) is not null;
-            if (exists)
+            if (await storeMetadata.GetMediaFile(item.MediaFileID) is not null)
             {
-                path = await storeFile.GetPath(id);
-                if (path is null) path = await Download(id, version);
+                path = await storeFile.GetPath(item.MediaFileID);
+                if (path is null) path = await Download(item.MediaFileID, version);
                 if (version != _version) return;
             }
 
             if (path is null)
             {
-                index = FailAndFindNext(index);
-                if (index < 0)
+                QueueItem? next;
+                lock (_lock) _failedSet.Add(item.ItemID);
+
+                next = FirstPlayable();
+                if (next is null)
                 {
                     Changed?.Invoke();
                     return;
                 }
 
+                await serviceQueue.Apply(new() { Edit = QueueEditEnum.Advance, Item = next });
                 continue;
             }
 
@@ -402,12 +503,12 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         }
     }
 
-    private async Task<string?> Download(Guid id, int version)
+    private async Task<string?> Download(Guid mediaFileID, int version)
     {
         lock (_lock) _waiting = true;
         Changed?.Invoke();
 
-        bool onDevice = await serviceDownload.EnsureOnDevice(id);
+        bool onDevice = await serviceDownload.EnsureOnDevice(mediaFileID);
 
         lock (_lock)
         {
@@ -416,38 +517,20 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
 
         Changed?.Invoke();
 
-        return onDevice && version == _version ? await storeFile.GetPath(id) : null;
+        return onDevice && version == _version ? await storeFile.GetPath(mediaFileID) : null;
     }
 
-    private bool IsGone(Guid id)
-    {
-        lock (_lock) return _goneSet.Contains(id);
-    }
-
-    // The entry could not be played: mark it, and find the next one that can. -1 when there is none.
-    private int FailAndFindNext(int index)
-    {
-        lock (_lock)
-        {
-            if (index >= 0 && index < _queue.Count) _queue[index] = (_queue[index].ID, true);
-
-            return FirstPlayableFrom(index + 1);
-        }
-    }
-
-    // The files of the next PrefetchCount queue entries that are not on the device yet are asked for. Nothing beyond that window is started.
+    // The files of the next PrefetchCount items that are not on the device yet are asked for. Nothing beyond that window is started.
     private async Task Prefetch()
     {
+        ResponseQueue queue = serviceQueue.Queue.ToResponse();
         List<Guid> windowList;
-        lock (_lock)
-        {
-            windowList = _queue.Skip(_index + 1).Take(Constants.PrefetchCount).Where(x => !x.Failed && !_goneSet.Contains(x.ID)).Select(x => x.ID).Distinct().ToList();
-        }
+        lock (_lock) windowList = queue.UserQueueList.Concat(queue.SourceList).Where(x => !_failedSet.Contains(x.ItemID)).Select(x => x.MediaFileID).Distinct().Take(Constants.PrefetchCount).ToList();
 
         List<Guid> missingList = [];
         foreach (Guid id in windowList)
         {
-            if (await storeFile.GetPath(id) is null) missingList.Add(id);
+            if (await storeMetadata.GetMediaFile(id) is not null && await storeFile.GetPath(id) is null) missingList.Add(id);
         }
 
         if (missingList.Count > 0) await serviceDownload.Enqueue(missingList);
@@ -472,61 +555,94 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         Changed?.Invoke();
     }
 
-    // The audio player says the file played to its end: the next playable entry starts, or at the end of the queue everything stops and the file is released.
+    private async Task RefreshModes()
+    {
+        ResponseQueueSource? source = serviceQueue.Queue.Source;
+        ShuffleModeEnum shuffle = await serviceQueueSource.GetShuffle(source);
+        RepeatModeEnum repeat = await serviceQueueSource.GetRepeat(source);
+
+        bool changed;
+        lock (_lock)
+        {
+            changed = shuffle != _shuffle || repeat != _repeat;
+            _shuffle = shuffle;
+            _repeat = repeat;
+        }
+
+        if (changed) Changed?.Invoke();
+    }
+
+    #endregion -- Playing the current item --
+
+    #region -- Events --
+
+    // The audio player says the file played to its end: the next playable item starts, or at the end of the queue the last one goes to history and everything stops and the file is released.
     private async Task OnEnded()
     {
-        int next;
+        lock (_lock)
+        {
+            if (!_loaded) return;
+        }
+
+        QueueItem? next = await FindNext();
+
         int version;
         lock (_lock)
         {
             if (!_loaded) return;
 
-            next = FirstPlayableFrom(_index + 1);
             version = BeginNewPlay();
         }
 
-        if (next >= 0) await StartAt(next, version);
-        else await StopPlayback();
+        if (next is null)
+        {
+            await serviceQueue.Apply(new() { Edit = QueueEditEnum.Advance });
+            await StopPlayback();
+            return;
+        }
+
+        await serviceQueue.Apply(new() { Edit = QueueEditEnum.Advance, Item = next });
+        await StartCurrent(version);
     }
 
-    // The audio player could not decode the file: the entry is marked failed (its verified file stays) and the next one plays.
+    // The audio player could not decode the file: the item is marked failed (its verified file stays) and the next one plays.
     private async Task OnFailed()
     {
-        int next;
+        if (serviceQueue.Queue.Current is not { } item) return;
+
         int version;
         lock (_lock)
         {
-            if (_index < 0) return;
-
-            next = FailAndFindNext(_index);
+            _failedSet.Add(item.ItemID);
             version = BeginNewPlay();
         }
 
-        if (next >= 0) await StartAt(next, version);
-        else await StopPlayback();
-    }
-
-    private void OnLibraryDiff(LibraryDiff diff)
-    {
-        lock (_lock)
+        QueueItem? next = FirstPlayable();
+        if (next is null)
         {
-            foreach (Guid id in diff.RemovedIDList)
-            {
-                _goneSet.Add(id);
-
-                // The one playing finishes first; any other entry for it leaves the queue now.
-                for (int i = _queue.Count - 1; i >= 0; i--)
-                {
-                    if (_queue[i].ID != id || i == _index) continue;
-
-                    _queue.RemoveAt(i);
-                    if (i < _index) _index--;
-                }
-            }
+            await StopPlayback();
+            return;
         }
 
-        Changed?.Invoke();
-        Fire(RefreshStates);
+        await serviceQueue.Apply(new() { Edit = QueueEditEnum.Advance, Item = next });
+        await StartCurrent(version);
+    }
+
+    // The queue removed the item that was playing (a controller removed it): skip at once. It never enters history.
+    private async Task OnCurrentRemoved()
+    {
+        int version;
+        lock (_lock) version = BeginNewPlay();
+
+        QueueItem? next = await FindNext();
+        if (next is null)
+        {
+            await StopPlayback();
+            return;
+        }
+
+        await serviceQueue.Apply(new() { Edit = QueueEditEnum.Advance, Item = next });
+        await StartCurrent(version);
     }
 
     private void EnsureWired()
@@ -548,7 +664,15 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         };
         playerAudio.Changed += () => Changed?.Invoke();
         serviceDownload.Changed += () => Fire(RefreshStates);
-        serviceSync.LibraryDiffApplied += OnLibraryDiff;
+        serviceSync.LibraryDiffApplied += _ => Fire(RefreshStates);
+        serviceSync.Changed += () => Fire(RefreshModes);
+        serviceSetting.Changed += () => Fire(RefreshModes);
+        serviceQueue.Changed += () =>
+        {
+            Changed?.Invoke();
+            Fire(RefreshModes);
+        };
+        serviceQueue.CurrentRemoved += () => Fire(OnCurrentRemoved);
     }
 
     private void Fire(Func<Task> work)
@@ -567,4 +691,6 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
             logger.LogError(exception, "The player ended a background step with an error.");
         }
     }
+
+    #endregion -- Events --
 }

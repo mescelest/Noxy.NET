@@ -2,6 +2,8 @@
 
 Status: platform changed on 2026-11-15 from Blazor WebAssembly to a MAUI Blazor Hybrid app for Windows and Android: read `2026-11-15-frontend-maui-design.md` first, it wins wherever the two differ (storage, hashing, playback, the project layout, Google sign-in, the server address). The sync, diff, push and player designs below stand. Statements about the browser in this document are kept as history where the MAUI design replaces them. The backend contracts below match the API as of 2026-11-15.
 
+Built (frontend, 2026-11-17): the player now plays the current item of a queue (`IQueueService`) instead of its own list, with shuffle and repeat applied to the source part, a local copy of the queue on the device and the remote playback services; see the "Built (frontend)" paragraph of `2026-11-16-remote-playback-design.md`. `IPlayerService` no longer has `Play`, `PlayList`, `Enqueue` or `Remove`: it has `StartLibrary`, `StartPlaylist`, `PlayCurrent`, `JumpTo`, `Next`, `Previous`, `SetShuffle` and `SetRepeat`.
+
 ## Intent
 
 The media player is a sync-and-play app, not a streaming service. A user's media files live on the server; every device keeps the full list of media files and playlists (metadata) up to date, and keeps the audio files it needs in local storage. The player only ever plays from local storage. A media file that is not on the device yet is downloaded first and then played. The first target is the Blazor WebAssembly app (`Noxy.NET.MediaPlayer.Frontend` with `Noxy.NET.MediaPlayer.Presentation`), with the browser as the file store, but the store must be replaceable so a native one can follow.

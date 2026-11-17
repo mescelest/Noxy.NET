@@ -33,8 +33,16 @@ public sealed class FrontendClient : IAsyncDisposable
         FileStore = new(folder);
         Download = new(Api, FileStore, new HashService(), Store, new Delay(), NullLogger<DownloadService>.Instance);
         Reconciler = new(FileStore, Store, Download);
-        Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, NullLogger<AppStartupService>.Instance);
-        Player = new(Audio, Download, FileStore, Store, Sync, Store, NullLogger<PlayerService>.Instance);
+
+        QueueSource = new(Store, SettingService, new ShuffleService(Random.Shared), Random.Shared);
+        Queue = new(QueueSource, SettingService, Store, Sync, Store, Time, NullLogger<QueueService>.Instance);
+        Device = new(Store);
+        Player = new(Audio, Download, FileStore, Store, Sync, Store, Queue, QueueSource, SettingService, Api, NullLogger<PlayerService>.Instance);
+        Remote = new(Hub, Device, Queue, Time, NullLogger<RemotePlaybackService>.Instance);
+        Reporter = new(Player, Queue, Remote, Hub, Store, new Delay(), NullLogger<PlaybackReporterService>.Instance);
+        CommandHandler = new(Hub, Remote, Player, Queue, Reporter, NullLogger<RemoteCommandHandlerService>.Instance);
+        Control = new(Player, Queue, Remote, Hub, Reporter, Device, new Delay(), NullLogger<PlaybackControlService>.Instance);
+        Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, Queue, Reporter, CommandHandler, NullLogger<AppStartupService>.Instance);
     }
 
     public FakeTimeProvider Time { get; } = new();
@@ -70,7 +78,21 @@ public sealed class FrontendClient : IAsyncDisposable
     // No sound device in a test: the player is driven against a fake that records what it was asked.
     public FakeAudioPlayer Audio { get; } = new();
 
+    public QueueSourceService QueueSource { get; }
+
+    public QueueService Queue { get; }
+
     public PlayerService Player { get; }
+
+    public DeviceService Device { get; }
+
+    public RemotePlaybackService Remote { get; }
+
+    public PlaybackReporterService Reporter { get; }
+
+    public RemoteCommandHandlerService CommandHandler { get; }
+
+    public PlaybackControlService Control { get; }
 
     // A folder that is new unless one is given (to stand for the same device after a restart).
     public static FrontendClient Create(ApiFactory factory, FakeSessionStorage? sessionStorage = null, string? folder = null)
@@ -80,6 +102,17 @@ public sealed class FrontendClient : IAsyncDisposable
         Directory.CreateDirectory(folder);
 
         return new(factory, sessionStorage ?? new(), folder, ownsFolder);
+    }
+
+    // A frontend that signed in and started up: the library synced and the hub connected.
+    public static async Task<FrontendClient> CreateSignedIn(ApiFactory factory, string email, string password = "a-long-enough-password")
+    {
+        FrontendClient frontend = Create(factory);
+        await frontend.Session.SignIn(email, password);
+        await frontend.Startup.Start();
+        await WaitFor(() => Task.FromResult(frontend.Remote.DeviceList.Count > 0), "the device to be registered");
+
+        return frontend;
     }
 
     // Polls until the condition holds, since pushes and the worker are asynchronous.

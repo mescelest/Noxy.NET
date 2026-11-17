@@ -109,9 +109,14 @@ public sealed class FakeApiClient : IApiClient
         return Task.FromResult(GenreListHandler(eTag));
     }
 
+    // Thrown by MarkPlaylistPlayed, after it is recorded, when set.
+    public Exception? MarkPlaylistPlayedException { get; set; }
+
     public Task MarkPlaylistPlayed(Guid id)
     {
         PlayedRequestList.Add(id);
+        if (MarkPlaylistPlayedException is not null) throw MarkPlaylistPlayedException;
+
         return Task.CompletedTask;
     }
 
@@ -120,9 +125,14 @@ public sealed class FakeApiClient : IApiClient
         throw new NotSupportedException();
     }
 
+    public Func<Guid, RequestUpdatePlaylist, ResponsePlaylist> UpdatePlaylistHandler { get; set; } = (_, _) => throw new NotSupportedException();
+
+    public List<(Guid ID, RequestUpdatePlaylist Request)> UpdatePlaylistRequestList { get; } = [];
+
     public Task<ResponsePlaylist> UpdatePlaylist(Guid id, RequestUpdatePlaylist request)
     {
-        throw new NotSupportedException();
+        UpdatePlaylistRequestList.Add((id, request));
+        return Task.FromResult(UpdatePlaylistHandler(id, request));
     }
 
     public Task DeletePlaylist(Guid id)

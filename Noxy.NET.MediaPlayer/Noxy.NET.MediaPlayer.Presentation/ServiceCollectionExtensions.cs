@@ -20,12 +20,21 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<ISyncService, SyncService>();
             services.AddSingleton<ISettingService, SettingService>();
             services.AddSingleton<IMetadataSyncService, MetadataSyncService>();
+            services.AddSingleton<IDeviceService, DeviceService>();
+            services.TryAddSingleton(Random.Shared);
+            services.AddSingleton<IShuffleService, ShuffleService>();
+            services.AddSingleton<IQueueSourceService, QueueSourceService>();
             services.AddSingleton<IDelay, Delay>();
             services.AddSingleton<IHashService, HashService>();
             services.AddSingleton<IDownloadService, DownloadService>();
             services.AddSingleton<IFileReconciler, FileReconciler>();
+            services.AddSingleton<IQueueService, QueueService>();
             services.AddSingleton<IPlayerService, PlayerService>();
             services.AddSingleton<IMediaHubService, MediaHubService>();
+            services.AddSingleton<IRemotePlaybackService, RemotePlaybackService>();
+            services.AddSingleton<IPlaybackReporterService, PlaybackReporterService>();
+            services.AddSingleton<IRemoteCommandHandlerService, RemoteCommandHandlerService>();
+            services.AddSingleton<IPlaybackControlService, PlaybackControlService>();
             services.AddSingleton<IAppStartupService, AppStartupService>();
 
             return services;

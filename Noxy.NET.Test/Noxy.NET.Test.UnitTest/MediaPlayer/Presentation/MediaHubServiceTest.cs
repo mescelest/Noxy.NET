@@ -1,5 +1,7 @@
+using System.Net;
 using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.Domain.Enums;
+using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -8,7 +10,7 @@ namespace Noxy.NET.Test.MediaPlayer.Presentation;
 public class MediaHubServiceTest
 {
     [Fact]
-    public void TheHandledEvents_AreExactlyThoseThisPlanSyncs()
+    public void TheHandledEvents_AreExactlyThoseThisPlanAdds_AfterTheSyncedOnes()
     {
         List<string> expected =
         [
@@ -23,7 +25,16 @@ public class MediaHubServiceTest
             nameof(MediaHubEventEnum.AlbumUpdated),
             nameof(MediaHubEventEnum.AlbumDeleted),
             nameof(MediaHubEventEnum.GenreUpdated),
-            nameof(MediaHubEventEnum.GenreDeleted)
+            nameof(MediaHubEventEnum.GenreDeleted),
+            nameof(MediaHubEventEnum.DeviceListChanged),
+            nameof(MediaHubEventEnum.PlayerStateChanged),
+            nameof(MediaHubEventEnum.QueueChanged),
+            nameof(MediaHubEventEnum.QueueSnapshot),
+            nameof(MediaHubEventEnum.SessionEnded),
+            nameof(MediaHubEventEnum.TransferFailed),
+            nameof(MediaHubEventEnum.PlayerCommandReceived),
+            nameof(MediaHubEventEnum.PlayerTransferRequested),
+            nameof(MediaHubEventEnum.PlayerStartRequested)
         ];
 
         Assert.Equal(expected, MediaHubService.HandledEventNameList);
@@ -68,6 +79,28 @@ public class MediaHubServiceTest
     }
 
     [Fact]
+    public async Task Invoke_AndSend_WhenDisconnected_ReturnNullAndDoNotThrow()
+    {
+        MediaHubService serviceHub = new(new FakeSyncService(), new FakeSettingService(), new FakeMetadataSyncService(), new FakeSessionService(), new FakeServerAddressStorage(), new FakeLogger<MediaHubService>());
+
+        Assert.Null(await serviceHub.Invoke<bool?>(MediaHubMethodEnum.ClaimActive, new object()));
+        Assert.Null(await serviceHub.Invoke<List<string>>(MediaHubMethodEnum.RequestSnapshot, null));
+        await serviceHub.Send(MediaHubMethodEnum.EditQueue, new object());
+    }
+
+    [Fact]
+    public async Task Connected_IsNotRaised_WhenStartDoesNotConnect()
+    {
+        MediaHubService serviceHub = new(new FakeSyncService(), new FakeSettingService(), new FakeMetadataSyncService(), new FakeSessionService(), new FakeServerAddressStorage(null), new FakeLogger<MediaHubService>());
+        int connected = 0;
+        serviceHub.Connected += () => connected++;
+
+        await serviceHub.Start();
+
+        Assert.Equal(0, connected);
+    }
+
+    [Fact]
     public async Task Stop_BeforeStart_DoesNotThrow()
     {
         MediaHubService serviceHub = new(new FakeSyncService(), new FakeSettingService(), new FakeMetadataSyncService(), new FakeSessionService(), new FakeServerAddressStorage(), new FakeLogger<MediaHubService>());
@@ -79,8 +112,8 @@ public class MediaHubServiceTest
     public async Task TheReconnectSyncs_EachRunInTheirOwnTry_SoOneFailureDoesNotSkipTheRest()
     {
         FakeSyncService serviceSync = new();
-        FakeSettingService serviceSetting = new() { SyncSettingListException = new Noxy.NET.MediaPlayer.Presentation.Exceptions.ApiException(System.Net.HttpStatusCode.InternalServerError, "Broken.") };
-        FakeMetadataSyncService serviceMetadataSync = new() { SyncArtistListException = new Noxy.NET.MediaPlayer.Presentation.Exceptions.ApiException(System.Net.HttpStatusCode.InternalServerError, "Broken.") };
+        FakeSettingService serviceSetting = new() { SyncSettingListException = new ApiException(HttpStatusCode.InternalServerError, "Broken.") };
+        FakeMetadataSyncService serviceMetadataSync = new() { SyncArtistListException = new ApiException(HttpStatusCode.InternalServerError, "Broken.") };
         FakeLogger<MediaHubService> logger = new();
         MediaHubService serviceHub = new(serviceSync, serviceSetting, serviceMetadataSync, new FakeSessionService(), new FakeServerAddressStorage(), logger);
 

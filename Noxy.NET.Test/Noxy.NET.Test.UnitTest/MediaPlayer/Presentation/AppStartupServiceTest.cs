@@ -15,12 +15,59 @@ public class AppStartupServiceTest
     private readonly FakeMetadataSyncService _serviceMetadataSync = new();
     private readonly FakeMediaHubService _serviceHub = new();
     private readonly FakeFileReconciler _serviceFileReconciler = new();
+    private readonly FakeQueueService _serviceQueue = new();
+    private readonly FakePlaybackReporterService _serviceReporter = new();
+    private readonly FakeRemoteCommandHandlerService _serviceCommandHandler = new();
     private readonly FakeLogger<AppStartupService> _logger = new();
     private readonly AppStartupService _serviceStartup;
 
     public AppStartupServiceTest()
     {
-        _serviceStartup = new(_serviceSession, _serviceSync, _serviceSetting, _serviceMetadataSync, _serviceHub, _serviceFileReconciler, _logger);
+        _serviceStartup = new(_serviceSession, _serviceSync, _serviceSetting, _serviceMetadataSync, _serviceHub, _serviceFileReconciler, _serviceQueue, _serviceReporter, _serviceCommandHandler, _logger);
+    }
+
+    [Fact]
+    public async Task Start_LoadsTheLocalQueue_StartsTheReporterAndTheCommandHandler_AndNeverStartsPlayback()
+    {
+        List<string> startedBeforeTheHub = [];
+        _serviceHub.OnStart = () =>
+        {
+            if (_serviceReporter.StartCount > 0) startedBeforeTheHub.Add("reporter");
+            if (_serviceCommandHandler.StartCount > 0) startedBeforeTheHub.Add("handler");
+            if (_serviceQueue.LoadLocalCopyCount > 0) startedBeforeTheHub.Add("copy");
+        };
+
+        await _serviceStartup.Start();
+
+        Assert.Equal(1, _serviceQueue.LoadLocalCopyCount);
+        Assert.Equal(1, _serviceReporter.StartCount);
+        Assert.Equal(1, _serviceCommandHandler.StartCount);
+        Assert.Equal(["reporter", "handler", "copy"], startedBeforeTheHub);
+        Assert.Empty(_serviceQueue.ApplyList);
+        Assert.Empty(_serviceQueue.StartSourceList);
+    }
+
+    [Fact]
+    public async Task Start_WhenNotSignedIn_StillLoadsTheLocalQueue_SoPlaybackNeverNeedsTheServer()
+    {
+        _serviceSession.RestoreSucceeds = false;
+
+        await _serviceStartup.Start();
+
+        Assert.Equal(1, _serviceQueue.LoadLocalCopyCount);
+        Assert.Equal(1, _serviceReporter.StartCount);
+        Assert.Equal(0, _serviceHub.StartCount);
+    }
+
+    [Fact]
+    public async Task Start_WhenTheLocalQueueCannotBeLoaded_LogsIt_AndStillSyncs()
+    {
+        _serviceQueue.LocalCopyFailure = new IOException("The store is not readable.");
+
+        await _serviceStartup.Start();
+
+        Assert.Contains(_logger.EntryList, x => x.Level == LogLevel.Error);
+        Assert.Equal(["SyncLibrary", "SyncPlaylistList"], _serviceSync.CallList);
     }
 
     [Fact]

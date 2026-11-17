@@ -7,7 +7,17 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class AppStartupService(ISessionService serviceSession, ISyncService serviceSync, ISettingService serviceSetting, IMetadataSyncService serviceMetadataSync, IMediaHubService serviceHub, IFileReconciler serviceFileReconciler, ILogger<AppStartupService> logger) : IAppStartupService
+public class AppStartupService(
+    ISessionService serviceSession,
+    ISyncService serviceSync,
+    ISettingService serviceSetting,
+    IMetadataSyncService serviceMetadataSync,
+    IMediaHubService serviceHub,
+    IFileReconciler serviceFileReconciler,
+    IQueueService serviceQueue,
+    IPlaybackReporterService serviceReporter,
+    IRemoteCommandHandlerService serviceCommandHandler,
+    ILogger<AppStartupService> logger) : IAppStartupService
 {
     private bool _subscribed;
 
@@ -15,6 +25,11 @@ public class AppStartupService(ISessionService serviceSession, ISyncService serv
     {
         await RepairFiles();
         Subscribe();
+        await LoadLocalQueue();
+
+        // The device registers by itself on every connection the hub makes; these two must be listening before the first one.
+        serviceReporter.Start();
+        serviceCommandHandler.Start();
 
         try
         {
@@ -47,6 +62,19 @@ public class AppStartupService(ISessionService serviceSession, ISyncService serv
         catch (Exception exception)
         {
             logger.LogError(exception, "Syncing {Subject} failed.", subject);
+        }
+    }
+
+    // The queue this device had when it was last used, so "Continue" has something to resume. It never starts playing by itself.
+    private async Task LoadLocalQueue()
+    {
+        try
+        {
+            await serviceQueue.LoadLocalCopy();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Loading the saved queue failed.");
         }
     }
 

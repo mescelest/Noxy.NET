@@ -27,6 +27,27 @@ public sealed class ApiSeeder(ApiFactory factory)
         await uow.Commit(TestContext.Current.CancellationToken);
     }
 
+    // Many media files at once (no bytes behind them), in one commit: for a library that is too big to upload.
+    public async Task SeedMediaFileList(Guid userID, int count)
+    {
+        await using IUnitOfWork uow = factory.Services.GetRequiredService<IUnitOfWorkFactory>().Create();
+        for (int index = 0; index < count; index++)
+        {
+            EntityMediaFile file = new()
+            {
+                FilePath = $"{Guid.CreateVersion7()}.mp3",
+                ContentType = "audio/mpeg",
+                SizeBytes = 10,
+                ContentHash = index.ToString("x64"),
+                UserID = userID
+            };
+            file.Metadata = new() { Title = $"Seeded {index:00000}", MediaFileID = file.ID };
+            uow.Media.AddMediaFile(file);
+        }
+
+        await uow.Commit(TestContext.Current.CancellationToken);
+    }
+
     // A job as an earlier request would have left it, with its file in staging when asked.
     public async Task<EntityMediaUploadJob> SeedJob(Guid userID, MediaUploadJobStatusEnum status, bool withStagedFile)
     {

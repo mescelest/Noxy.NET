@@ -41,6 +41,8 @@
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fixtures\SettingListStoreContract.cs" Link="MediaPlayer\Fixtures\SettingListStoreContract.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fixtures\VolumeStoreContract.cs" Link="MediaPlayer\Fixtures\VolumeStoreContract.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fixtures\MetadataListStoreContract.cs" Link="MediaPlayer\Fixtures\MetadataListStoreContract.cs"/>
+        <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fixtures\DeviceStoreContract.cs" Link="MediaPlayer\Fixtures\DeviceStoreContract.cs"/>
+        <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fixtures\LocalQueueStoreContract.cs" Link="MediaPlayer\Fixtures\LocalQueueStoreContract.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeSessionStorage.cs" Link="MediaPlayer\Fakes\FakeSessionStorage.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeServerAddressStorage.cs" Link="MediaPlayer\Fakes\FakeServerAddressStorage.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeGoogleSignInService.cs" Link="MediaPlayer\Fakes\FakeGoogleSignInService.cs"/>

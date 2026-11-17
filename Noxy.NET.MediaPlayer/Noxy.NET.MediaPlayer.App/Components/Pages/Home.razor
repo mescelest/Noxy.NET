@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using System.Globalization
+@using Noxy.NET.MediaPlayer.Domain.Enums
 @using Noxy.NET.MediaPlayer.Domain.Responses.Media
 @using Noxy.NET.MediaPlayer.Presentation.Enums
 @using Noxy.NET.MediaPlayer.Presentation.Models
@@ -74,9 +75,9 @@
 <h2>Player</h2>
 <p>
     Current: @(ServicePlayer.Current is null ? "nothing" : _mediaList.FirstOrDefault(x => x.ID == ServicePlayer.Current.MediaFileID)?.Title ?? ServicePlayer.Current.MediaFileID.ToString()).
-    @(ServicePlayer.IsWaitingForDownload ? "Waiting for the download." : ServicePlayer.IsPlaying ? "Playing." : "Not playing.")
+    @(ServicePlayer.IsWaiting ? "Waiting for the download." : ServicePlayer.IsPlaying ? "Playing." : "Not playing.")
     @ServicePlayer.Position.ToString(@"m\:ss") of @ServicePlayer.Duration.ToString(@"m\:ss").
-    Queue: @ServicePlayer.QueueList.Count.
+    Queue: @ServicePlayer.Queue.ItemCount.
 </p>
 <p>
     <button @onclick="() => ServicePlayer.Previous()">Previous</button>
@@ -249,14 +250,17 @@
     {
         await Run(async () =>
         {
-            await ServicePlayer.Play(id);
+            await ServicePlayer.StartLibrary(id, LibrarySortEnum.Title, false, string.Empty);
             _message = "Play requested.";
         });
     }
 
     private async Task PlayAll()
     {
-        await Run(async () => await ServicePlayer.PlayList([.. _mediaList.Select(x => x.ID)], 0));
+        await Run(async () =>
+        {
+            if (_mediaList.OrderBy(x => x.Title).FirstOrDefault() is { } first) await ServicePlayer.StartLibrary(first.ID, LibrarySortEnum.Title, false, string.Empty);
+        });
     }
 
     private async Task SetVolume(ChangeEventArgs args)

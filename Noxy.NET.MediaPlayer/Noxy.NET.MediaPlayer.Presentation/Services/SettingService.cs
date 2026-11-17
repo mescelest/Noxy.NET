@@ -37,6 +37,22 @@ public class SettingService : ISettingService
         return await GetEnum<RepeatModeEnum>(SettingKey.Repeat, SettingCatalog.Repeat.DefaultValue);
     }
 
+    // A stored value of the wrong kind counts as no value.
+    public async Task<bool> GetKeepQueuedItems()
+    {
+        ResponseSetting? setting = await _settingList.Find(SettingKey.KeepQueuedItems);
+        try
+        {
+            if (setting is not null) return setting.GetBoolean();
+        }
+        catch (InvalidOperationException)
+        {
+            // Not a boolean: the default below.
+        }
+
+        return (bool)SettingCatalog.KeepQueuedItems.DefaultValue;
+    }
+
     public async Task SyncSettingList(bool force = false)
     {
         await _settingList.Sync(force);

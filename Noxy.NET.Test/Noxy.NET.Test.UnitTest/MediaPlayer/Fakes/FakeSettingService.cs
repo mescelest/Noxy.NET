@@ -16,6 +16,8 @@ public sealed class FakeSettingService : ISettingService
 
     public RepeatModeEnum Repeat { get; set; } = RepeatModeEnum.No;
 
+    public bool KeepQueuedItems { get; set; }
+
     // Answers each Update call, or throws to script a failure. The default accepts it.
     public Func<string, JsonElement, Task> UpdateHandler { get; set; } = (_, _) => Task.CompletedTask;
 
@@ -49,6 +51,11 @@ public sealed class FakeSettingService : ISettingService
     public Task<RepeatModeEnum> GetRepeat()
     {
         return Task.FromResult(Repeat);
+    }
+
+    public Task<bool> GetKeepQueuedItems()
+    {
+        return Task.FromResult(KeepQueuedItems);
     }
 
     public Task SyncSettingList(bool force = false)
