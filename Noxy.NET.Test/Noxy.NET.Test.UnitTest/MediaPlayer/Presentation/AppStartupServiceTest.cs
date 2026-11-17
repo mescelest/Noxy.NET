@@ -150,13 +150,8 @@ public class AppStartupServiceTest
     [Fact]
     public async Task Start_SyncsTheNewSubjectsAfterTheLibraryAndPlaylists_ThenConnectsTheHub()
     {
-        List<string> orderList = [];
         List<string> syncedWhenSettingsSynced = [];
-        _serviceSetting.OnSyncSettingList = () =>
-        {
-            syncedWhenSettingsSynced.AddRange(_serviceSync.CallList);
-            orderList.Add("settings");
-        };
+        _serviceSetting.OnSyncSettingList = () => syncedWhenSettingsSynced.AddRange(_serviceSync.CallList);
         List<string> syncedWhenTheHubStarted = [];
         _serviceHub.OnStart = () => syncedWhenTheHubStarted.AddRange(_serviceMetadataSync.CallList);
 

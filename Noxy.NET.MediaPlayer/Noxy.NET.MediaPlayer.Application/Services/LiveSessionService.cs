@@ -262,7 +262,8 @@ public class LiveSessionService : ILiveSessionService
         return Task.FromResult(true);
     }
 
-    private async Task RunTransfer(Guid userID, Guid activeDeviceID, Guid targetDeviceID, TaskCompletionSource finalStateSource, TaskCompletionSource claimSource, Func<Guid, Task> requestFinalState, Func<Guid, ResponsePlayerState, ResponseQueue, Task> startTarget)
+    private async Task RunTransfer(Guid userID, Guid activeDeviceID, Guid targetDeviceID, TaskCompletionSource finalStateSource, TaskCompletionSource claimSource, Func<Guid, Task> requestFinalState,
+        Func<Guid, ResponsePlayerState, ResponseQueue, Task> startTarget)
     {
         TimeSpan timeout = TimeSpan.FromSeconds(Config.TransferTimeoutSeconds);
         bool claimed = false;
@@ -350,7 +351,7 @@ public class LiveSessionService : ILiveSessionService
             // The device keeps its place for the grace period: a short drop must not lose it.
             CancelGrace(session);
             long version = ++session.GraceVersion;
-            session.GraceTimer = _time.CreateTimer(_ => _ = RunGuarded(() => GraceElapsed(userID, deviceID, version)), null, TimeSpan.FromSeconds(Config.ActiveGraceSeconds), Timeout.InfiniteTimeSpan);
+            session.GraceTimer = _time.CreateTimer(state => _ = RunGuarded(() => GraceElapsed(userID, deviceID, version)), null, TimeSpan.FromSeconds(Config.ActiveGraceSeconds), Timeout.InfiniteTimeSpan);
         }
 
         return Task.CompletedTask;
@@ -407,7 +408,7 @@ public class LiveSessionService : ILiveSessionService
         if (session.ActiveDeviceID is not null && session.IsPlaying) return;
 
         Guid userID = session.UserID;
-        session.IdleTimer = _time.CreateTimer(_ => _ = RunGuarded(() => IdleElapsed(userID, version)), null, TimeSpan.FromMinutes(Config.IdleTeardownMinutes), Timeout.InfiniteTimeSpan);
+        session.IdleTimer = _time.CreateTimer(state => _ = RunGuarded(() => IdleElapsed(userID, version)), null, TimeSpan.FromMinutes(Config.IdleTeardownMinutes), Timeout.InfiniteTimeSpan);
     }
 
     private static void CancelGrace(LiveSession session)

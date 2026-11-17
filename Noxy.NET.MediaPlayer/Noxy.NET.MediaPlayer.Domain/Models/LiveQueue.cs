@@ -112,13 +112,13 @@ public class LiveQueue
     private bool Remove(QueueEdit edit)
     {
         Guid itemID = Require(edit.ItemID, nameof(edit.ItemID));
-        if (_current?.ItemID == itemID)
+        if (_current?.ItemID != itemID)
         {
-            _current = null;
-            return true;
+            return _userQueueList.RemoveAll(x => x.ItemID == itemID) + _sourceList.RemoveAll(x => x.ItemID == itemID) + _historyList.RemoveAll(x => x.ItemID == itemID) > 0;
         }
 
-        return _userQueueList.RemoveAll(x => x.ItemID == itemID) + _sourceList.RemoveAll(x => x.ItemID == itemID) + _historyList.RemoveAll(x => x.ItemID == itemID) > 0;
+        _current = null;
+        return true;
     }
 
     // Reorders inside the upcoming part. The item takes its place after the anchor, in whichever list the anchor is in; no anchor, or the current item as the anchor, means the front of the user queue.

@@ -4,7 +4,7 @@ namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
 public abstract class ListStoreContract<T, TKey> where TKey : notnull
 {
-    protected static readonly DateTime Start = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+    protected readonly DateTime Start = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
     protected abstract IListStore<T, TKey> CreateStore();
 

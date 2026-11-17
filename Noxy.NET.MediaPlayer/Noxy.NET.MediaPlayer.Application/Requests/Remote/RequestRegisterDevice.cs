@@ -10,7 +10,8 @@ public class RequestRegisterDevice : IValidatableObject
 
     public required Guid DeviceID { get; init; }
 
-    public required string? Name { get => _name; init => _name = value?.Trim() ?? string.Empty; }
+    // A missing or null name from the client counts as empty, which Validate refuses.
+    public required string Name { get => _name; init => _name = value.Trim(); }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
