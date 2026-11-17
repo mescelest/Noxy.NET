@@ -13,13 +13,12 @@ public class PlayerServiceTest
     private readonly FakeFileStore _storeFile = new();
     private readonly FakeMetadataStore _storeMetadata = new();
     private readonly FakeSyncService _sync = new();
-    private readonly FakeSettingService _setting = new();
     private readonly FakeLogger<PlayerService> _logger = new();
     private readonly PlayerService _player;
 
     public PlayerServiceTest()
     {
-        _player = new(_audio, _download, _storeFile, _storeMetadata, _sync, _setting, _logger);
+        _player = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _logger);
     }
 
     // A media file in the library; its bytes are on the device unless said otherwise.
@@ -634,29 +633,40 @@ public class PlayerServiceTest
 
     #endregion -- Controls --
 
-    #region -- Synced volume --
+    #region -- Volume on the device --
 
     [Fact]
     public async Task TheStoredVolume_IsAppliedWhenTheFirstMediaFileStarts()
     {
         Guid id = await AddMedia();
-        _setting.Volume = 35;
+        await _storeMetadata.SetVolume(35);
 
         await _player.Play(id);
 
         Assert.Equal(0.35, _audio.Volume);
         Assert.Equal(0.35, _player.Volume);
-        Assert.Empty(_setting.UpdateRequestList);
+        Assert.Empty(_storeMetadata.VolumeWriteList.Skip(1));
+    }
+
+    [Fact]
+    public async Task LoadVolume_ReadsTheStoredVolume_BeforeAnythingPlays()
+    {
+        await _storeMetadata.SetVolume(20);
+
+        await _player.LoadVolume();
+
+        Assert.Equal(0.2, _player.Volume);
+        Assert.Empty(_audio.CallList);
     }
 
     [Fact]
     public async Task TheStoredVolume_IsReadOnlyOnce_SoALaterStartKeepsTheLocalVolume()
     {
         Guid id = await AddMedia();
-        _setting.Volume = 35;
+        await _storeMetadata.SetVolume(35);
         await _player.Play(id);
         await _player.SetVolume(0.8);
-        _setting.Volume = 10;
+        await _storeMetadata.SetVolume(10);
 
         await _player.Play(id);
 
@@ -664,21 +674,22 @@ public class PlayerServiceTest
     }
 
     [Fact]
-    public async Task SetVolume_AppliesAtOnce_AndWritesTheSettingRounded()
+    public async Task SetVolume_AppliesAtOnce_AndStoresItLocallyRounded()
     {
+        int before = _storeMetadata.VolumeWriteList.Count;
+
         await _player.SetVolume(0.456);
 
         Assert.Equal(0.456, _audio.Volume);
-        (string key, System.Text.Json.JsonElement value) = Assert.Single(_setting.UpdateRequestList);
-        Assert.Equal(Noxy.NET.MediaPlayer.Domain.Declarations.SettingKey.Volume, key);
-        Assert.Equal(46, value.GetInt32());
+        Assert.Equal([46], _storeMetadata.VolumeWriteList.Skip(before));
+        Assert.Equal(46, await _storeMetadata.GetVolume());
     }
 
     [Fact]
     public async Task SetVolume_BeforeTheFirstStart_IsNotReplacedByTheStoredVolume()
     {
         Guid id = await AddMedia();
-        _setting.Volume = 35;
+        await _storeMetadata.SetVolume(35);
         await _player.SetVolume(0.6);
 
         await _player.Play(id);
@@ -687,9 +698,9 @@ public class PlayerServiceTest
     }
 
     [Fact]
-    public async Task SetVolume_WhenTheWriteFails_KeepsTheLocalVolume_AndLogsIt()
+    public async Task SetVolume_WhenTheLocalSaveFails_KeepsTheVolume_AndLogsIt()
     {
-        _setting.UpdateHandler = (_, _) => throw new HttpRequestException("The network is down.");
+        _storeMetadata.VolumeWriteFailure = new IOException("The disk is full.");
 
         await _player.SetVolume(0.7);
 
@@ -700,91 +711,28 @@ public class PlayerServiceTest
     }
 
     [Fact]
-    public async Task SetVolume_WhenTheServerRefusesTheWrite_KeepsTheLocalVolume()
+    public async Task TheVolume_SurvivesARestart()
     {
-        _setting.UpdateHandler = (_, _) => throw new Noxy.NET.MediaPlayer.Presentation.Exceptions.ApiException(System.Net.HttpStatusCode.BadRequest, "The value is not valid for the setting Volume.");
+        await _player.SetVolume(0.6);
+        PlayerService restarted = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _logger);
 
-        await _player.SetVolume(0.7);
+        await restarted.LoadVolume();
 
-        Assert.Equal(0.7, _player.Volume);
+        Assert.Equal(0.6, restarted.Volume);
     }
 
     [Fact]
-    public async Task ASettingChangeFromAnotherDevice_ChangesThePlayerVolume_AndIsNotWrittenBack()
+    public async Task AStoredVolumeThatCannotBeRead_DoesNotBlockPlayback()
     {
         Guid id = await AddMedia();
-        await _player.Play(id);
-        int changed = 0;
-        _player.Changed += () => changed++;
-
-        _setting.Volume = 20;
-        _setting.RaiseChanged();
-
-        await WaitUntil(() => _audio.Volume == 0.2);
-        Assert.Equal(0.2, _player.Volume);
-        Assert.Empty(_setting.UpdateRequestList);
-        Assert.True(changed > 0);
-    }
-
-    [Fact]
-    public async Task AnUnchangedSetting_DoesNotTouchThePlayer()
-    {
-        Guid id = await AddMedia();
-        _setting.Volume = 35;
-        await _player.Play(id);
-        int calls = _audio.CallList.Count(x => x.StartsWith("SetVolume"));
-
-        _setting.RaiseChanged();
-        await Task.Delay(100, TestContext.Current.CancellationToken);
-
-        Assert.Equal(calls, _audio.CallList.Count(x => x.StartsWith("SetVolume")));
-    }
-
-    [Fact]
-    public async Task ASettingChange_WhileALocalWriteIsInFlight_DoesNotJumpTheVolumeBack()
-    {
-        TaskCompletionSource gate = new();
-        _setting.UpdateHandler = (_, _) => gate.Task;
-        Task write = _player.SetVolume(0.9);
-
-        _setting.Volume = 40;
-        _setting.RaiseChanged();
-        await Task.Delay(100, TestContext.Current.CancellationToken);
-
-        Assert.Equal(0.9, _player.Volume);
-        gate.SetResult();
-        await write;
-    }
-
-
-    [Fact]
-    public async Task SeveralQuickVolumeChanges_AreWrittenInOrder_AndTheLastValueIsTheLastWrite()
-    {
-        TaskCompletionSource gate = new();
-        _setting.UpdateHandler = (_, _) => gate.Task;
-
-        Task first = _player.SetVolume(0.1);
-        Task second = _player.SetVolume(0.2);
-        Task third = _player.SetVolume(0.3);
-        await Task.WhenAll(second, third);
-        gate.SetResult();
-        await first;
-
-        Assert.Equal(0.3, _player.Volume);
-        Assert.Equal([10, 30], _setting.UpdateRequestList.Select(x => x.Value.GetInt32()));
-    }
-
-    [Fact]
-    public async Task AStoredVolumeOfTheWrongKind_DoesNotBlockPlayback()
-    {
-        Guid id = await AddMedia();
-        _setting.GetVolumeException = new InvalidOperationException("The setting Volume does not hold an integer.");
+        _storeMetadata.VolumeReadFailure = new IOException("The store is not readable.");
 
         await _player.Play(id);
 
         Assert.Contains("Play", _audio.CallList);
         Assert.Equal(1, _player.Volume);
+        Assert.Contains(_logger.EntryList, x => x.Level == Microsoft.Extensions.Logging.LogLevel.Warning);
     }
 
-    #endregion -- Synced volume --
+    #endregion -- Volume on the device --
 }

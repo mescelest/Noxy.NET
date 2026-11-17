@@ -100,7 +100,7 @@ Contracts every task shares:
 
 ---
 
-### Task 10: The synced volume
+### Task 10: The synced volume (reversed on 2026-11-16: the volume is per device and shared by the live session, see `HANDOFF-2026-11-17.md`)
 
 **Files:**
 - Modify: `Services/PlayerService.cs`, `Fakes/FakeSettingService.cs`; tests `PlayerServiceTest.cs`

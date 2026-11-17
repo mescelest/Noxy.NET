@@ -29,7 +29,7 @@ public class SettingFlowTest
     }
 
     [Fact]
-    public async Task Get_ForANewUser_ReturnsTheFiveDefaultsInOrderWithTheirTypes_AStrongETag_AndNothingIsSaved()
+    public async Task Get_ForANewUser_ReturnsTheFourDefaultsInOrderWithTheirTypes_AStrongETag_AndNothingIsSaved()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
@@ -41,9 +41,9 @@ public class SettingFlowTest
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Matches("^\"[0-9a-f]{64}\"$", response.GetETag());
-        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems], list.Select(x => x.Key).ToList());
-        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Integer, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Boolean], list.Select(x => x.ValueType).ToList());
-        Assert.Equal(["Off", "No", "100", "False", "False"], list.Select(x => Value(x).ToString()).ToList());
+        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems], list.Select(x => x.Key).ToList());
+        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Boolean], list.Select(x => x.ValueType).ToList());
+        Assert.Equal(["Off", "No", "False", "False"], list.Select(x => Value(x).ToString()).ToList());
         Assert.Contains("\"valueType\":\"Enum\"", body);
         Assert.All(list, x => Assert.Equal(DateTime.UnixEpoch, x.TimeModified));
     }
@@ -56,7 +56,6 @@ public class SettingFlowTest
         ApiAccount user = await api.SignUp("a@example.com");
         string defaultETag = (await api.GetPath(user.Token, "/Settings")).GetETag();
 
-        HttpResponseMessage volume = await Patch(api, user, SettingKey.Volume, """{"value":40}""");
         HttpResponseMessage repeat = await Patch(api, user, SettingKey.Repeat, """{"value":"Forever"}""");
         HttpResponseMessage shuffle = await Patch(api, user, SettingKey.Shuffle, """{"value":"SpreadArtists"}""");
         HttpResponseMessage merge = await Patch(api, user, SettingKey.MergeOnRename, """{"value":true}""");
@@ -64,11 +63,10 @@ public class SettingFlowTest
         HttpResponseMessage listResponse = await api.GetPath(user.Token, "/Settings");
         List<ResponseSetting> list = await listResponse.ReadJson<List<ResponseSetting>>();
 
-        Assert.All([volume, repeat, shuffle, merge, keep], x => Assert.Equal(HttpStatusCode.OK, x.StatusCode));
-        Assert.Equal(40, Value(await volume.ReadJson<ResponseSetting>()).GetInt32());
+        Assert.All([repeat, shuffle, merge, keep], x => Assert.Equal(HttpStatusCode.OK, x.StatusCode));
         Assert.Equal("SpreadArtists", Value(list.Single(x => x.Key == SettingKey.Shuffle)).GetString());
         Assert.Equal("Forever", Value(list.Single(x => x.Key == SettingKey.Repeat)).GetString());
-        Assert.Equal(40, Value(list.Single(x => x.Key == SettingKey.Volume)).GetInt32());
+        Assert.True(Value(list.Single(x => x.Key == SettingKey.KeepQueuedItems)).GetBoolean());
         Assert.True(Value(list.Single(x => x.Key == SettingKey.MergeOnRename)).GetBoolean());
         Assert.All(list, x => Assert.True(x.TimeModified > DateTime.UnixEpoch));
         Assert.NotEqual(defaultETag, listResponse.GetETag());
@@ -83,7 +81,7 @@ public class SettingFlowTest
         await Patch(api, user, SettingKey.Repeat, """{"value":"Once"}""");
         string before = (await api.GetPath(user.Token, "/Settings")).GetETag();
 
-        await Patch(api, user, SettingKey.Volume, """{"value":10}""");
+        await Patch(api, user, SettingKey.MergeOnRename, """{"value":true}""");
 
         List<ResponseSetting> list = await GetList(api, user);
         Assert.Equal("Once", Value(list.Single(x => x.Key == SettingKey.Repeat)).GetString());
@@ -97,7 +95,7 @@ public class SettingFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        await Patch(api, user, SettingKey.Volume, """{"value":10}""");
+        await Patch(api, user, SettingKey.Shuffle, """{"value":"Random"}""");
         string eTag = (await api.GetPath(user.Token, "/Settings")).GetETag();
         using HttpRequestMessage conditional = new(HttpMethod.Get, "/Settings");
         conditional.Headers.Authorization = new("Bearer", user.Token);
@@ -111,11 +109,6 @@ public class SettingFlowTest
     }
 
     [Theory]
-    [InlineData(SettingKey.Volume, """{"value":"loud"}""")]
-    [InlineData(SettingKey.Volume, """{"value":101}""")]
-    [InlineData(SettingKey.Volume, """{"value":-1}""")]
-    [InlineData(SettingKey.Volume, """{"value":3.5}""")]
-    [InlineData(SettingKey.Volume, """{"value":null}""")]
     [InlineData(SettingKey.Repeat, """{"value":"Sometimes"}""")]
     [InlineData(SettingKey.Repeat, """{"value":"forever"}""")]
     [InlineData(SettingKey.Repeat, """{"value":1}""")]
@@ -124,10 +117,10 @@ public class SettingFlowTest
     [InlineData(SettingKey.MergeOnRename, """{"value":1}""")]
     [InlineData(SettingKey.KeepQueuedItems, """{"value":"yes"}""")]
     [InlineData(SettingKey.KeepQueuedItems, """{"value":1}""")]
-    [InlineData(SettingKey.Volume, "{}")]
-    [InlineData(SettingKey.Volume, "[]")]
-    [InlineData(SettingKey.Volume, "40")]
-    [InlineData(SettingKey.Volume, """{"value":""")]
+    [InlineData(SettingKey.Shuffle, "{}")]
+    [InlineData(SettingKey.Shuffle, "[]")]
+    [InlineData(SettingKey.Shuffle, "40")]
+    [InlineData(SettingKey.Shuffle, """{"value":""")]
     public async Task Patch_ABadValueOrBody_Is400_AndNothingChanges(string key, string json)
     {
         await using ApiFactory factory = new();
@@ -142,8 +135,9 @@ public class SettingFlowTest
     }
 
     [Theory]
-    [InlineData("volume")]
-    [InlineData("VOLUME")]
+    [InlineData("shuffle")]
+    [InlineData("SHUFFLE")]
+    [InlineData("Volume")]
     [InlineData("Nope")]
     public async Task Patch_AnUnknownOrWrongCaseKey_Is404(string key)
     {
@@ -179,12 +173,12 @@ public class SettingFlowTest
         ApiAccount user = await api.SignUp("a@example.com");
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 
-        await Patch(api, user, SettingKey.Volume, """{"value":100}""");
-        await Patch(api, user, SettingKey.Volume, """{"value":40}""");
-        await Patch(api, user, SettingKey.Volume, """{"value":40}""");
+        await Patch(api, user, SettingKey.Shuffle, """{"value":"Off"}""");
+        await Patch(api, user, SettingKey.Shuffle, """{"value":"Random"}""");
+        await Patch(api, user, SettingKey.Shuffle, """{"value":"Random"}""");
 
         ResponseSetting pushed = await hub.NextSettingUpdated();
-        Assert.Equal(40, Value(pushed).GetInt32());
+        Assert.Equal("Random", Value(pushed).GetString());
         Assert.Equal(1, await hub.CountReceivedAfter(TimeSpan.FromMilliseconds(500)));
     }
 
@@ -212,14 +206,14 @@ public class SettingFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ApiAccount other = await api.SignUp("b@example.com");
-        await Patch(api, user, SettingKey.Volume, """{"value":10}""");
+        await Patch(api, user, SettingKey.Shuffle, """{"value":"Random"}""");
 
         List<ResponseSetting> theirs = await GetList(api, other);
 
-        Assert.Equal(100, Value(theirs.Single(x => x.Key == SettingKey.Volume)).GetInt32());
+        Assert.Equal("Off", Value(theirs.Single(x => x.Key == SettingKey.Shuffle)).GetString());
         Assert.Equal(HttpStatusCode.Unauthorized, (await api.GetPath(null, "/Settings")).StatusCode);
-        Assert.Equal(HttpStatusCode.Unauthorized, (await api.SendJson(null, HttpMethod.Patch, $"/Settings/{SettingKey.Volume}", """{"value":1}""")).StatusCode);
-        Assert.Equal(10, Value((await GetList(api, user)).Single(x => x.Key == SettingKey.Volume)).GetInt32());
+        Assert.Equal(HttpStatusCode.Unauthorized, (await api.SendJson(null, HttpMethod.Patch, $"/Settings/{SettingKey.Shuffle}", """{"value":"Random"}""")).StatusCode);
+        Assert.Equal("Random", Value((await GetList(api, user)).Single(x => x.Key == SettingKey.Shuffle)).GetString());
     }
 
     [Fact]

@@ -9,7 +9,7 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-public sealed class FakeMetadataStore : IMetadataStore, ISettingStore, IMetadataListStore
+public sealed class FakeMetadataStore : IMetadataStore, ISettingStore, IMetadataListStore, IVolumeStore
 {
     private readonly List<ResponseMediaFile> _mediaFileList = [];
     private readonly List<ResponsePlaylist> _playlistList = [];
@@ -25,6 +25,7 @@ public sealed class FakeMetadataStore : IMetadataStore, ISettingStore, IMetadata
     private string? _artistListETag;
     private string? _albumListETag;
     private string? _genreListETag;
+    private int _volume = 100;
 
     // Everything goes in and out as a copy through JSON, as it does with a real store, so a test can never change what is stored by changing what it got back.
     private static T Copy<T>(T value)
@@ -335,6 +336,35 @@ public sealed class FakeMetadataStore : IMetadataStore, ISettingStore, IMetadata
     }
 
     #endregion -- Artists, albums and genres --
+
+    #region -- Volume --
+
+    // Thrown by GetVolume or SetVolume when set, as a store that cannot be read or written would.
+    public Exception? VolumeReadFailure { get; set; }
+
+    public Exception? VolumeWriteFailure { get; set; }
+
+    // Every volume saved, in order.
+    public List<int> VolumeWriteList { get; } = [];
+
+    public Task<int> GetVolume()
+    {
+        if (VolumeReadFailure is not null) throw VolumeReadFailure;
+
+        return Task.FromResult(_volume);
+    }
+
+    public Task SetVolume(int volume)
+    {
+        if (VolumeWriteFailure is not null) throw VolumeWriteFailure;
+
+        _volume = volume;
+        VolumeWriteList.Add(volume);
+
+        return Task.CompletedTask;
+    }
+
+    #endregion -- Volume --
 
     private static void Upsert<T, TKey>(List<T> list, T value, Func<T, TKey> idOf) where TKey : notnull
     {

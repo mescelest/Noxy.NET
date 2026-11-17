@@ -1,8 +1,5 @@
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
-using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
@@ -10,7 +7,7 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDownload, IFileStore storeFile, IMetadataStore storeMetadata, ISyncService serviceSync, ISettingService serviceSetting, ILogger<PlayerService> logger) : IPlayerService
+public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDownload, IFileStore storeFile, IMetadataStore storeMetadata, ISyncService serviceSync, IVolumeStore storeVolume, ILogger<PlayerService> logger) : IPlayerService
 {
     private readonly Lock _lock = new();
 
@@ -25,9 +22,7 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
     private bool _loaded;
     private bool _loadFailed;
     private double _volume = 1;
-    private bool _volumeSynced;
-    private bool _writing;
-    private int? _pendingWrite;
+    private bool _volumeLoaded;
 
     public event Action? Changed;
 
@@ -232,108 +227,65 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         Changed?.Invoke();
     }
 
-    // Applies at once, then writes the setting so the other devices follow. A write that fails does not undo the local volume. While a write is in flight a setting change is not applied, so a slider drag is not pulled back by the answer to an earlier write.
+    // The volume belongs to the device: applied at once and kept in the device's own store, so it survives a restart. A save that fails does not undo the volume.
     public async Task SetVolume(double volume)
     {
         double clamped = Math.Clamp(volume, 0, 1);
-        bool startWriter;
         lock (_lock)
         {
             _volume = clamped;
-            _volumeSynced = true;
-            _pendingWrite = (int)Math.Round(clamped * 100);
-            startWriter = !_writing;
-            _writing = true;
+            _volumeLoaded = true;
         }
 
         await playerAudio.SetVolume(clamped);
         Changed?.Invoke();
 
-        // One writer at a time keeps the writes in order. A change made while one is under way only replaces the value waiting to be written, so the last value is always the last write.
-        if (startWriter) await WriteVolumes();
-    }
-
-    private async Task WriteVolumes()
-    {
-        while (true)
+        try
         {
-            int value;
-            lock (_lock)
-            {
-                if (_pendingWrite is not { } pending)
-                {
-                    _writing = false;
-                    return;
-                }
-
-                value = pending;
-                _pendingWrite = null;
-            }
-
-            try
-            {
-                await serviceSetting.Update(SettingKey.Volume, JsonSerializer.SerializeToElement(value));
-            }
-            catch (Exception exception) when (exception.IsOfflineFailure || exception is ApiException)
-            {
-                // The subject only: the value is not ours to log.
-                logger.LogWarning("The volume could not be saved to the server.");
-            }
-            catch
-            {
-                lock (_lock) _writing = false;
-                throw;
-            }
+            await storeVolume.SetVolume((int)Math.Round(clamped * 100));
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            // The subject only: the value is not ours to log.
+            logger.LogWarning(exception, "The volume could not be saved on the device.");
         }
     }
 
-    // The stored volume is applied the first time a media file starts, unless the user already set one on this device.
+    // Reads the stored volume once, so Volume is right before anything has played. A volume the user already set on this device wins.
+    public async Task LoadVolume()
+    {
+        await ResolveVolume();
+        Changed?.Invoke();
+    }
+
+    // The volume is cosmetic: a stored value that cannot be read must never stop a media file from playing.
     private async Task<double> ResolveVolume()
     {
         lock (_lock)
         {
-            if (_volumeSynced) return _volume;
+            if (_volumeLoaded) return _volume;
         }
 
-        // The volume is cosmetic: a stored value that cannot be read must never stop a media file from playing.
         int stored;
         try
         {
-            stored = await serviceSetting.GetVolume();
+            stored = await storeVolume.GetVolume();
         }
-        catch (InvalidOperationException)
+        catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            logger.LogWarning("The stored volume could not be read.");
+            logger.LogWarning(exception, "The stored volume could not be read.");
             lock (_lock) return _volume;
         }
 
         lock (_lock)
         {
-            if (_volumeSynced) return _volume;
+            if (_volumeLoaded) return _volume;
 
-            _volume = stored / 100.0;
-            _volumeSynced = true;
+            _volume = Math.Clamp(stored, 0, 100) / 100.0;
+            _volumeLoaded = true;
 
             return _volume;
         }
-    }
-
-    // Another device changed the volume. A volume applied for that reason is never written back.
-    private async Task OnSettingChanged()
-    {
-        int stored = await serviceSetting.GetVolume();
-        double volume;
-        lock (_lock)
-        {
-            if (_writing || stored == (int)Math.Round(_volume * 100)) return;
-
-            _volume = stored / 100.0;
-            _volumeSynced = true;
-            volume = _volume;
-        }
-
-        await playerAudio.SetVolume(volume);
-        Changed?.Invoke();
     }
 
     public async Task Clear()
@@ -598,7 +550,6 @@ public class PlayerService(IAudioPlayer playerAudio, IDownloadService serviceDow
         playerAudio.Changed += () => Changed?.Invoke();
         serviceDownload.Changed += () => Fire(RefreshStates);
         serviceSync.LibraryDiffApplied += OnLibraryDiff;
-        serviceSetting.Changed += () => Fire(OnSettingChanged);
     }
 
     private void Fire(Func<Task> work)

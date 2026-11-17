@@ -18,21 +18,6 @@ public class SettingService(IApiClient clientApi, ISettingStore storeSetting) : 
         return await storeSetting.GetSettingList();
     }
 
-    public async Task<int> GetVolume()
-    {
-        ResponseSetting? setting = await Find(SettingKey.Volume);
-
-        // A stored value of the wrong kind (a damaged row, a newer server) counts as no value.
-        try
-        {
-            return setting is null ? (int)SettingCatalog.Volume.DefaultValue : setting.GetInteger();
-        }
-        catch (InvalidOperationException)
-        {
-            return (int)SettingCatalog.Volume.DefaultValue;
-        }
-    }
-
     public async Task<ShuffleModeEnum> GetShuffle()
     {
         return await GetEnum<ShuffleModeEnum>(SettingKey.Shuffle, SettingCatalog.Shuffle.DefaultValue);

@@ -48,7 +48,10 @@ public interface IPlayerService
     // At the start of the queue: the current entry starts again.
     Task Previous();
 
-    // Clamped to 0 to 1.
+    // Reads the volume stored on this device, once, so Volume is right before anything has played. Does nothing after the user set a volume on this device.
+    Task LoadVolume();
+
+    // Clamped to 0 to 1. Applied at once and kept on the device.
     Task SetVolume(double volume);
 
     // Stops, releases the file and empties the queue.

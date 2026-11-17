@@ -2,7 +2,7 @@
 
 Status: approved by the user on 2026-11-15 ("for now"), written from the conversation. It changes the platform of `2026-11-15-frontend-sync-player-design.md` and `2026-11-15-frontend-screens-design.md` from Blazor WebAssembly to a MAUI Blazor Hybrid app. Lines marked *(my call)* are decisions I made without asking.
 
-Built (2026-11-16): the user's settings and the artist, album and genre lists are synced on the device (ETag syncs, pushes and offline-safe writes), and the player volume follows the synced `Volume` setting. What is left is the live queue and remote playback on the device, then the screens.
+Built (2026-11-16): the user's settings and the artist, album and genre lists are synced on the device (ETag syncs, pushes and offline-safe writes). The volume is stored on each device and shared with the live session (see the remote playback design); it is no longer a synced setting. What is left is the live queue and remote playback on the device, then the screens.
 
 Build status (2026-11-16, Windows only; Android is deferred): the foundation (sign in with Google and email, session, API client, SQLite metadata store, metadata sync, hub push, search and sort) and the downloads and player logic (file store, hash-verified resumable downloads, reconciliation and start-up repair, bulk downloads, player service with queue and prefetch, Windows audio player) are built and tested. What still waits for the screens plan: every page, Fluxor state, the settings, artist/album/genre and playback-session sync on the frontend, and a "signed in, offline" state with a retry for an offline start-up.
 

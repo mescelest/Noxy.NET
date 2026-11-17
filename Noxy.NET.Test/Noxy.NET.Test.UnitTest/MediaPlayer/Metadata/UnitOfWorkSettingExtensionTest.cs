@@ -9,6 +9,7 @@ namespace Noxy.NET.Test.MediaPlayer.Metadata;
 public class UnitOfWorkSettingExtensionTest
 {
     private static readonly Guid UserID = Guid.CreateVersion7();
+    private static readonly SettingDeclarationInteger Integer = new("SampleInteger", 100, 0, 100);
 
     private readonly FakeStore _store = new();
 
@@ -35,14 +36,14 @@ public class UnitOfWorkSettingExtensionTest
     [Fact]
     public async Task GetInteger_GivesTheSavedValue_OrTheDefaultForNoRowAndForANumberOutsideTheLimits()
     {
-        Assert.Equal(100, await Uow().GetInteger(UserID, SettingCatalog.Volume, Token));
+        Assert.Equal(100, await Uow().GetInteger(UserID, Integer, Token));
 
-        _store.UserSettingList.Add(new EntityUserSettingInteger { UserID = UserID, Key = SettingKey.Volume, Value = 250 });
-        Assert.Equal(100, await Uow().GetInteger(UserID, SettingCatalog.Volume, Token));
+        _store.UserSettingList.Add(new EntityUserSettingInteger { UserID = UserID, Key = Integer.Key, Value = 250 });
+        Assert.Equal(100, await Uow().GetInteger(UserID, Integer, Token));
 
         _store.UserSettingList.Clear();
-        _store.UserSettingList.Add(new EntityUserSettingInteger { UserID = UserID, Key = SettingKey.Volume, Value = 35 });
-        Assert.Equal(35, await Uow().GetInteger(UserID, SettingCatalog.Volume, Token));
+        _store.UserSettingList.Add(new EntityUserSettingInteger { UserID = UserID, Key = Integer.Key, Value = 35 });
+        Assert.Equal(35, await Uow().GetInteger(UserID, Integer, Token));
     }
 
     [Fact]

@@ -42,20 +42,20 @@ public class HandlerSettingUpdateTest
     [Fact]
     public async Task Update_TheFirstChange_CreatesTheRowOfTheUserWithTheClock()
     {
-        ResponseSetting response = await Update(SettingKey.Volume, "40");
+        ResponseSetting response = await Update(SettingKey.Shuffle, "\"Random\"");
 
-        EntityUserSettingInteger row = Assert.IsType<EntityUserSettingInteger>(Assert.Single(_store.UserSettingList));
+        EntityUserSettingEnum row = Assert.IsType<EntityUserSettingEnum>(Assert.Single(_store.UserSettingList));
         Assert.Equal(UserID, row.UserID);
-        Assert.Equal(SettingKey.Volume, row.Key);
-        Assert.Equal(40, row.Value);
+        Assert.Equal(SettingKey.Shuffle, row.Key);
+        Assert.Equal("Random", row.Value);
         Assert.Equal(_time.Now.UtcDateTime, row.TimeModified);
-        Assert.Equal((SettingKey.Volume, SettingValueTypeEnum.Integer, (object)40, _time.Now.UtcDateTime), (response.Key, response.ValueType, response.Value, response.TimeModified));
+        Assert.Equal((SettingKey.Shuffle, SettingValueTypeEnum.Enum, (object)"Random", _time.Now.UtcDateTime), (response.Key, response.ValueType, response.Value, response.TimeModified));
         Assert.Equal(1, _store.CommitCount);
     }
 
     [Theory]
     [InlineData(SettingKey.MergeOnRename, "true", true, SettingValueTypeEnum.Boolean)]
-    [InlineData(SettingKey.Volume, "0", 0, SettingValueTypeEnum.Integer)]
+    [InlineData(SettingKey.KeepQueuedItems, "true", true, SettingValueTypeEnum.Boolean)]
     [InlineData(SettingKey.Repeat, "\"Forever\"", "Forever", SettingValueTypeEnum.Enum)]
     [InlineData(SettingKey.Shuffle, "\"SpreadArtists\"", "SpreadArtists", SettingValueTypeEnum.Enum)]
     public async Task Update_EachType_SavesAndReturnsTheRightResponse(string key, string json, object expected, SettingValueTypeEnum type)
@@ -71,46 +71,46 @@ public class HandlerSettingUpdateTest
     [Fact]
     public async Task Update_AFurtherChange_UpdatesTheSameRowAndBumpsItsModifiedTime()
     {
-        await Update(SettingKey.Volume, "40");
+        await Update(SettingKey.Shuffle, "\"Random\"");
         Guid rowID = Assert.Single(_store.UserSettingList).ID;
         _time.Now = new(2028, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
-        ResponseSetting response = await Update(SettingKey.Volume, "70");
+        ResponseSetting response = await Update(SettingKey.Shuffle, "\"SpreadArtists\"");
 
-        EntityUserSettingInteger row = Assert.IsType<EntityUserSettingInteger>(Assert.Single(_store.UserSettingList));
+        EntityUserSettingEnum row = Assert.IsType<EntityUserSettingEnum>(Assert.Single(_store.UserSettingList));
         Assert.Equal(rowID, row.ID);
-        Assert.Equal(70, row.Value);
+        Assert.Equal("SpreadArtists", row.Value);
         Assert.Equal(_time.Now.UtcDateTime, row.TimeModified);
-        Assert.Equal(70, response.Value);
+        Assert.Equal("SpreadArtists", response.Value);
     }
 
     [Fact]
     public async Task Update_BackToTheDefaultOfASavedSetting_StillSavesTheRow()
     {
-        await Update(SettingKey.Volume, "40");
+        await Update(SettingKey.Shuffle, "\"Random\"");
 
-        await Update(SettingKey.Volume, "100");
+        await Update(SettingKey.Shuffle, "\"Off\"");
 
-        Assert.Equal(100, Assert.IsType<EntityUserSettingInteger>(Assert.Single(_store.UserSettingList)).Value);
+        Assert.Equal("Off", Assert.IsType<EntityUserSettingEnum>(Assert.Single(_store.UserSettingList)).Value);
     }
 
     [Fact]
     public async Task Update_TheSameValueAgain_SavesNothing_PushesNothing_AndKeepsTheModifiedTime()
     {
-        _store.UserSettingList.Add(new EntityUserSettingInteger { UserID = UserID, Key = SettingKey.Volume, Value = 40, TimeModified = Earlier });
+        _store.UserSettingList.Add(new EntityUserSettingEnum { UserID = UserID, Key = SettingKey.Shuffle, Value = "Random", TimeModified = Earlier });
 
-        ResponseSetting response = await Update(SettingKey.Volume, "40");
+        ResponseSetting response = await Update(SettingKey.Shuffle, "\"Random\"");
 
         Assert.Equal(0, _store.CommitCount);
         Assert.Empty(_publisher.PublishedList);
         Assert.Equal(Earlier, Assert.Single(_store.UserSettingList).TimeModified);
-        Assert.Equal(40, response.Value);
+        Assert.Equal("Random", response.Value);
         Assert.Equal(Earlier, response.TimeModified);
     }
 
     [Theory]
-    [InlineData(SettingKey.Volume, "100", 100)]
     [InlineData(SettingKey.MergeOnRename, "false", false)]
+    [InlineData(SettingKey.KeepQueuedItems, "false", false)]
     [InlineData(SettingKey.Repeat, "\"No\"", "No")]
     [InlineData(SettingKey.Shuffle, "\"Off\"", "Off")]
     public async Task Update_TheDefaultForAUserWithNoRow_CreatesNoRowAndPushesNothing(string key, string json, object expected)
@@ -142,13 +142,14 @@ public class HandlerSettingUpdateTest
 
     [Theory]
     [InlineData("Nope")]
-    [InlineData("volume")]
-    [InlineData("VOLUME")]
+    [InlineData("shuffle")]
+    [InlineData("SHUFFLE")]
     [InlineData("")]
-    [InlineData(" Volume")]
+    [InlineData(" Shuffle")]
+    [InlineData("Volume")]
     public async Task Update_AnUnknownOrWrongCaseKey_IsNotFound_AndNothingChanges(string key)
     {
-        await Assert.ThrowsAsync<SettingNotFoundException>(() => Update(key, "40"));
+        await Assert.ThrowsAsync<SettingNotFoundException>(() => Update(key, "\"Off\""));
 
         Assert.Empty(_store.UserSettingList);
         Assert.Equal(0, _store.CommitCount);
@@ -156,19 +157,16 @@ public class HandlerSettingUpdateTest
     }
 
     [Theory]
-    [InlineData(SettingKey.Volume, "\"loud\"")]
-    [InlineData(SettingKey.Volume, "101")]
-    [InlineData(SettingKey.Volume, "-1")]
-    [InlineData(SettingKey.Volume, "3.5")]
-    [InlineData(SettingKey.Volume, "null")]
-    [InlineData(SettingKey.Volume, "true")]
     [InlineData(SettingKey.Repeat, "\"Sometimes\"")]
     [InlineData(SettingKey.Repeat, "\"forever\"")]
     [InlineData(SettingKey.Repeat, "1")]
     [InlineData(SettingKey.Shuffle, "\"Spread\"")]
+    [InlineData(SettingKey.Shuffle, "true")]
+    [InlineData(SettingKey.Shuffle, "null")]
     [InlineData(SettingKey.MergeOnRename, "1")]
     [InlineData(SettingKey.MergeOnRename, "\"true\"")]
     [InlineData(SettingKey.MergeOnRename, "null")]
+    [InlineData(SettingKey.KeepQueuedItems, "\"yes\"")]
     public async Task Update_AValueThatDoesNotMatchTheDeclaration_IsInvalid_AndSavesAndPushesNothing(string key, string json)
     {
         InvalidSettingValueException exception = await Assert.ThrowsAsync<InvalidSettingValueException>(() => Update(key, json));
@@ -182,23 +180,23 @@ public class HandlerSettingUpdateTest
     [Fact]
     public async Task Update_AnInvalidValue_LeavesTheSavedValueAsItWas()
     {
-        await Update(SettingKey.Volume, "40");
+        await Update(SettingKey.Shuffle, "\"Random\"");
 
-        await Assert.ThrowsAsync<InvalidSettingValueException>(() => Update(SettingKey.Volume, "500"));
+        await Assert.ThrowsAsync<InvalidSettingValueException>(() => Update(SettingKey.Shuffle, "\"Nope\""));
 
-        Assert.Equal(40, Assert.IsType<EntityUserSettingInteger>(Assert.Single(_store.UserSettingList)).Value);
+        Assert.Equal("Random", Assert.IsType<EntityUserSettingEnum>(Assert.Single(_store.UserSettingList)).Value);
     }
 
     [Fact]
     public async Task Update_NeverReadsOrChangesAnotherUsersRow()
     {
         Guid otherID = Guid.CreateVersion7();
-        _store.UserSettingList.Add(new EntityUserSettingInteger { UserID = otherID, Key = SettingKey.Volume, Value = 10, TimeModified = Earlier });
+        _store.UserSettingList.Add(new EntityUserSettingEnum { UserID = otherID, Key = SettingKey.Shuffle, Value = "Random", TimeModified = Earlier });
 
-        await Update(SettingKey.Volume, "60");
+        await Update(SettingKey.Shuffle, "\"SpreadArtists\"");
 
-        Assert.Equal(10, Assert.IsType<EntityUserSettingInteger>(_store.UserSettingList.Single(x => x.UserID == otherID)).Value);
-        Assert.Equal(60, Assert.IsType<EntityUserSettingInteger>(_store.UserSettingList.Single(x => x.UserID == UserID)).Value);
+        Assert.Equal("Random", Assert.IsType<EntityUserSettingEnum>(_store.UserSettingList.Single(x => x.UserID == otherID)).Value);
+        Assert.Equal("SpreadArtists", Assert.IsType<EntityUserSettingEnum>(_store.UserSettingList.Single(x => x.UserID == UserID)).Value);
     }
 
     [Fact]
@@ -206,7 +204,7 @@ public class HandlerSettingUpdateTest
     {
         _store.KeyConflictCommitCount = 1;
 
-        await Update(SettingKey.Volume, "40");
+        await Update(SettingKey.Shuffle, "\"Random\"");
 
         Assert.Single(_store.UserSettingList);
         Assert.Single(_publisher.GetList<NotificationSettingUpdated>());
@@ -219,14 +217,14 @@ public class HandlerSettingUpdateTest
         _store.OnCommit = () =>
         {
             _store.OnCommit = null;
-            _store.UserSettingList.Add(new EntityUserSettingInteger { UserID = UserID, Key = SettingKey.Volume, Value = 55, TimeModified = Earlier });
+            _store.UserSettingList.Add(new EntityUserSettingEnum { UserID = UserID, Key = SettingKey.Shuffle, Value = "Random", TimeModified = Earlier });
         };
 
-        ResponseSetting response = await Update(SettingKey.Volume, "70");
+        ResponseSetting response = await Update(SettingKey.Shuffle, "\"SpreadArtists\"");
 
-        Assert.Equal(70, response.Value);
-        EntityUserSettingInteger row = Assert.IsType<EntityUserSettingInteger>(Assert.Single(_store.UserSettingList));
-        Assert.Equal(70, row.Value);
+        Assert.Equal("SpreadArtists", response.Value);
+        EntityUserSettingEnum row = Assert.IsType<EntityUserSettingEnum>(Assert.Single(_store.UserSettingList));
+        Assert.Equal("SpreadArtists", row.Value);
         Assert.Equal(_time.Now.UtcDateTime, row.TimeModified);
         Assert.Single(_publisher.GetList<NotificationSettingUpdated>());
     }
@@ -236,7 +234,7 @@ public class HandlerSettingUpdateTest
     {
         _store.FailCommit = true;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => Update(SettingKey.Volume, "40"));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Update(SettingKey.Shuffle, "\"Random\""));
 
         Assert.Empty(_publisher.PublishedList);
     }

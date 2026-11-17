@@ -12,16 +12,11 @@ public sealed class FakeSettingService : ISettingService
     public List<ResponseSetting> SettingList { get; } = [];
 
     // What the typed getters answer, as the stored value or the default would.
-    public int Volume { get; set; } = 100;
-
     public ShuffleModeEnum Shuffle { get; set; } = ShuffleModeEnum.Off;
 
     public RepeatModeEnum Repeat { get; set; } = RepeatModeEnum.No;
 
     // Answers each Update call, or throws to script a failure. The default accepts it.
-    // Thrown by GetVolume when set, as a stored value of the wrong kind would.
-    public Exception? GetVolumeException { get; set; }
-
     public Func<string, JsonElement, Task> UpdateHandler { get; set; } = (_, _) => Task.CompletedTask;
 
     public List<(string Key, JsonElement Value)> UpdateRequestList { get; } = [];
@@ -44,13 +39,6 @@ public sealed class FakeSettingService : ISettingService
     public Task<List<ResponseSetting>> GetSettingList()
     {
         return Task.FromResult(SettingList.ToList());
-    }
-
-    public Task<int> GetVolume()
-    {
-        if (GetVolumeException is not null) throw GetVolumeException;
-
-        return Task.FromResult(Volume);
     }
 
     public Task<ShuffleModeEnum> GetShuffle()

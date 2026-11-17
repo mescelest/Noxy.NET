@@ -167,7 +167,7 @@ public class HandlerNotificationTest
     [Fact]
     public async Task SettingUpdated_PushesTheEventWithThePayloadToThatUserOnly()
     {
-        ResponseSetting setting = new() { Key = SettingKey.Volume, ValueType = SettingValueTypeEnum.Integer, Value = 40, TimeModified = DateTime.UtcNow };
+        ResponseSetting setting = new() { Key = SettingKey.Shuffle, ValueType = SettingValueTypeEnum.Enum, Value = "Random", TimeModified = DateTime.UtcNow };
 
         await new HandlerNotificationSettingUpdated(_hub, new FakeLogger<HandlerNotificationSettingUpdated>()).Handle(new(UserID, setting), Token);
 

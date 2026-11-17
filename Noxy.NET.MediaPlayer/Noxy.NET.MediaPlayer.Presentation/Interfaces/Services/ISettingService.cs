@@ -12,9 +12,6 @@ public interface ISettingService
     // The stored settings, in the order the server sent them.
     Task<List<ResponseSetting>> GetSettingList();
 
-    // The stored value, or the declared default when none is stored yet.
-    Task<int> GetVolume();
-
     Task<ShuffleModeEnum> GetShuffle();
 
     Task<RepeatModeEnum> GetRepeat();

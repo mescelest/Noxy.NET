@@ -10,6 +10,9 @@ namespace Noxy.NET.Test.MediaPlayer.Metadata;
 
 public class SettingRepositoryTest : IDisposable
 {
+    // The repository keeps any key it is given; this one is no longer a declared setting.
+    private const string SampleKey = "SampleInteger";
+
     private readonly DatabaseFixture _fixture = new();
 
     public void Dispose()
@@ -40,7 +43,7 @@ public class SettingRepositoryTest : IDisposable
     {
         EntityUser user = await CreateUser();
         await Add(new EntityUserSettingBoolean { UserID = user.ID, Key = SettingKey.MergeOnRename, Value = true });
-        await Add(new EntityUserSettingInteger { UserID = user.ID, Key = SettingKey.Volume, Value = 40 });
+        await Add(new EntityUserSettingInteger { UserID = user.ID, Key = SampleKey, Value = 40 });
         await Add(new EntityUserSettingEnum { UserID = user.ID, Key = SettingKey.Repeat, Value = "Forever" });
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
@@ -48,7 +51,7 @@ public class SettingRepositoryTest : IDisposable
 
         Assert.Equal(3, list.Count);
         Assert.True(Assert.IsType<EntityUserSettingBoolean>(list.Single(x => x.Key == SettingKey.MergeOnRename)).Value);
-        Assert.Equal(40, Assert.IsType<EntityUserSettingInteger>(list.Single(x => x.Key == SettingKey.Volume)).Value);
+        Assert.Equal(40, Assert.IsType<EntityUserSettingInteger>(list.Single(x => x.Key == SampleKey)).Value);
         Assert.Equal("Forever", Assert.IsType<EntityUserSettingEnum>(list.Single(x => x.Key == SettingKey.Repeat)).Value);
     }
 
@@ -57,13 +60,13 @@ public class SettingRepositoryTest : IDisposable
     {
         EntityUser owner = await CreateUser("owner@example.com");
         EntityUser other = await CreateUser("other@example.com");
-        await Add(new EntityUserSettingInteger { UserID = owner.ID, Key = SettingKey.Volume, Value = 10 });
+        await Add(new EntityUserSettingInteger { UserID = owner.ID, Key = SampleKey, Value = 10 });
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
 
-        EntityUserSettingInteger found = Assert.IsType<EntityUserSettingInteger>(await uow.Setting.FindSetting(owner.ID, SettingKey.Volume, TestContext.Current.CancellationToken));
+        EntityUserSettingInteger found = Assert.IsType<EntityUserSettingInteger>(await uow.Setting.FindSetting(owner.ID, SampleKey, TestContext.Current.CancellationToken));
         Assert.Equal(10, found.Value);
-        Assert.Null(await uow.Setting.FindSetting(other.ID, SettingKey.Volume, TestContext.Current.CancellationToken));
+        Assert.Null(await uow.Setting.FindSetting(other.ID, SampleKey, TestContext.Current.CancellationToken));
         Assert.Null(await uow.Setting.FindSetting(owner.ID, "Nope", TestContext.Current.CancellationToken));
         Assert.Null(await uow.Setting.FindSetting(owner.ID, "volume", TestContext.Current.CancellationToken));
     }
@@ -73,8 +76,8 @@ public class SettingRepositoryTest : IDisposable
     {
         EntityUser owner = await CreateUser("owner@example.com");
         EntityUser other = await CreateUser("other@example.com");
-        await Add(new EntityUserSettingInteger { UserID = owner.ID, Key = SettingKey.Volume, Value = 10 });
-        await Add(new EntityUserSettingInteger { UserID = other.ID, Key = SettingKey.Volume, Value = 99 });
+        await Add(new EntityUserSettingInteger { UserID = owner.ID, Key = SampleKey, Value = 10 });
+        await Add(new EntityUserSettingInteger { UserID = other.ID, Key = SampleKey, Value = 99 });
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
 
@@ -87,26 +90,26 @@ public class SettingRepositoryTest : IDisposable
     {
         EntityUser first = await CreateUser("first@example.com");
         EntityUser second = await CreateUser("second@example.com");
-        await Add(new EntityUserSettingInteger { UserID = first.ID, Key = SettingKey.Volume, Value = 10 });
-        await Add(new EntityUserSettingInteger { UserID = second.ID, Key = SettingKey.Volume, Value = 20 });
+        await Add(new EntityUserSettingInteger { UserID = first.ID, Key = SampleKey, Value = 10 });
+        await Add(new EntityUserSettingInteger { UserID = second.ID, Key = SampleKey, Value = 20 });
 
-        await Assert.ThrowsAsync<MetadataKeyConflictException>(() => Add(new EntityUserSettingInteger { UserID = first.ID, Key = SettingKey.Volume, Value = 30 }));
+        await Assert.ThrowsAsync<MetadataKeyConflictException>(() => Add(new EntityUserSettingInteger { UserID = first.ID, Key = SampleKey, Value = 30 }));
     }
 
     [Fact]
     public async Task ARowOfAnotherTypeForTheSameKey_IsAlsoAConflict()
     {
         EntityUser user = await CreateUser();
-        await Add(new EntityUserSettingInteger { UserID = user.ID, Key = SettingKey.Volume, Value = 10 });
+        await Add(new EntityUserSettingInteger { UserID = user.ID, Key = SampleKey, Value = 10 });
 
-        await Assert.ThrowsAsync<MetadataKeyConflictException>(() => Add(new EntityUserSettingBoolean { UserID = user.ID, Key = SettingKey.Volume, Value = true }));
+        await Assert.ThrowsAsync<MetadataKeyConflictException>(() => Add(new EntityUserSettingBoolean { UserID = user.ID, Key = SampleKey, Value = true }));
     }
 
     [Fact]
     public async Task UpdateSetting_SavesTheChangedValueAndModifiedTime()
     {
         EntityUser user = await CreateUser();
-        EntityUserSettingInteger setting = new() { UserID = user.ID, Key = SettingKey.Volume, Value = 10, TimeModified = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) };
+        EntityUserSettingInteger setting = new() { UserID = user.ID, Key = SampleKey, Value = 10, TimeModified = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) };
         await Add(setting);
 
         setting.Value = 55;
@@ -118,7 +121,7 @@ public class SettingRepositoryTest : IDisposable
         }
 
         await using IUnitOfWork read = _fixture.UoWFactory.Create();
-        EntityUserSettingInteger found = Assert.IsType<EntityUserSettingInteger>(await read.Setting.FindSetting(user.ID, SettingKey.Volume, TestContext.Current.CancellationToken));
+        EntityUserSettingInteger found = Assert.IsType<EntityUserSettingInteger>(await read.Setting.FindSetting(user.ID, SampleKey, TestContext.Current.CancellationToken));
         Assert.Equal(55, found.Value);
         Assert.Equal(new DateTime(2027, 2, 3, 4, 5, 6), found.TimeModified);
     }

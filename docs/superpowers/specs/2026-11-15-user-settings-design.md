@@ -48,12 +48,12 @@ Users need a few settings that follow them from device to device. Today there is
 
 ### Declarations
 
-A setting declaration names the key, the value type, the default and the limits. The five above are declared in one place; the server validates against it and returns it with the value. An unknown key is a `404`; a value of the wrong type, out of range, or an enum name that is not a member is a `400`.
+A setting declaration names the key, the value type, the default and the limits. The four above are declared in one place; the server validates against it and returns it with the value. An unknown key is a `404`; a value of the wrong type, out of range, or an enum name that is not a member is a `400`.
 
 ### Data
 
 - `EntityUserSetting` (abstract): ID, user, key, modified time. A unique index on (user, key).
-- Derived: `EntityUserSettingBoolean`, `…Integer`, `…Decimal`, `…String`, `…Enum`, each with one `Value`. Only the types the five settings need are built now (boolean, integer, enum); decimal and string are added when a setting needs them *(my call, to avoid tables nothing uses)*.
+- Derived: `EntityUserSettingBoolean`, `…Integer`, `…Decimal`, `…String`, `…Enum`, each with one `Value`. Only the types the four settings need are built now (boolean, integer, enum); decimal and string are added when a setting needs them *(my call, to avoid tables nothing uses)*.
 
 ### Endpoints
 

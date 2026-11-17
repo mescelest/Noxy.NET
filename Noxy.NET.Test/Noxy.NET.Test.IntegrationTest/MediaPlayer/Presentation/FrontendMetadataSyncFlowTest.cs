@@ -34,13 +34,18 @@ public class FrontendMetadataSyncFlowTest
         return await response.ReadJson<ResponseArtist>();
     }
 
+    private static async Task<bool> KeepQueued(FrontendClient frontend)
+    {
+        return (await frontend.SettingService.GetSettingList()).FirstOrDefault(x => x.Key == SettingKey.KeepQueuedItems)?.GetBoolean() ?? false;
+    }
+
     private static async Task<bool> HasArtist(FrontendClient frontend, string name)
     {
         return (await frontend.Store.GetArtistList()).Any(x => x.Name == name);
     }
 
     [Fact]
-    public async Task ASettingChangedThroughTheApi_ArrivesAsAPush_WithNoETagChange_AndTheVolumeFollows()
+    public async Task ASettingChangedThroughTheApi_ArrivesAsAPush_WithNoETagChange_AndTheSettingFollows()
     {
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
@@ -50,12 +55,12 @@ public class FrontendMetadataSyncFlowTest
         string? eTag = await frontend.Store.GetSettingListETag();
         await frontend.Hub.Start();
         Assert.True(frontend.Hub.IsConnected);
-        Assert.Equal(100, await frontend.SettingService.GetVolume());
+        Assert.False(await KeepQueued(frontend));
 
-        HttpResponseMessage response = await api.SendJson(account.Token, HttpMethod.Patch, $"{SettingsPath}/{SettingKey.Volume}", """{"value":30}""");
+        HttpResponseMessage response = await api.SendJson(account.Token, HttpMethod.Patch, $"{SettingsPath}/{SettingKey.KeepQueuedItems}", """{"value":true}""");
         response.EnsureSuccessStatusCode();
 
-        await FrontendClient.WaitFor(async () => await frontend.SettingService.GetVolume() == 30, "the volume push");
+        await FrontendClient.WaitFor(() => KeepQueued(frontend), "the setting push");
         Assert.Equal(eTag, await frontend.Store.GetSettingListETag());
     }
 
@@ -123,12 +128,12 @@ public class FrontendMetadataSyncFlowTest
         await frontend.Startup.Start();
         await frontend.Hub.Stop();
 
-        (await api.SendJson(account.Token, HttpMethod.Patch, $"{SettingsPath}/{SettingKey.Volume}", """{"value":20}""")).EnsureSuccessStatusCode();
+        (await api.SendJson(account.Token, HttpMethod.Patch, $"{SettingsPath}/{SettingKey.KeepQueuedItems}", """{"value":true}""")).EnsureSuccessStatusCode();
         await CreateArtist(api, account, "While Away");
         (await api.SendJson(account.Token, HttpMethod.Post, "/Genre", """{"name":"Missed"}""")).EnsureSuccessStatusCode();
         await frontend.Startup.Start();
 
-        Assert.Equal(20, await frontend.SettingService.GetVolume());
+        Assert.True(await KeepQueued(frontend));
         Assert.True(await HasArtist(frontend, "While Away"));
         Assert.Contains(await frontend.Store.GetGenreList(), x => x.Name == "Missed");
     }

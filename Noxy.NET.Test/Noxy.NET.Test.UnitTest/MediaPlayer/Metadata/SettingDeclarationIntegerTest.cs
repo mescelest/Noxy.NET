@@ -8,7 +8,7 @@ namespace Noxy.NET.Test.MediaPlayer.Metadata;
 public class SettingDeclarationIntegerTest
 {
     private static readonly Guid UserID = Guid.CreateVersion7();
-    private readonly SettingDeclarationInteger _declaration = SettingCatalog.Volume;
+    private readonly SettingDeclarationInteger _declaration = new("SampleInteger", 100, 0, 100);
 
     private static JsonElement Json(string text)
     {
@@ -38,22 +38,22 @@ public class SettingDeclarationIntegerTest
     {
         InvalidSettingValueException exception = Assert.Throws<InvalidSettingValueException>(() => _declaration.ParseValue(Json(json)));
 
-        Assert.Equal(SettingKey.Volume, exception.Key);
+        Assert.Equal(_declaration.Key, exception.Key);
     }
 
     [Fact]
     public void ReadValue_GivesTheDefaultForNothingARowOfAnotherTypeOrANumberOutsideTheLimits()
     {
         Assert.Equal(100, _declaration.ReadValue(null));
-        Assert.Equal(100, _declaration.ReadValue(new EntityUserSettingBoolean { UserID = UserID, Key = SettingKey.Volume, Value = true }));
-        Assert.Equal(100, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = SettingKey.Volume, Value = 200 }));
-        Assert.Equal(100, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = SettingKey.Volume, Value = -5 }));
+        Assert.Equal(100, _declaration.ReadValue(new EntityUserSettingBoolean { UserID = UserID, Key = _declaration.Key, Value = true }));
+        Assert.Equal(100, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = _declaration.Key, Value = 200 }));
+        Assert.Equal(100, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = _declaration.Key, Value = -5 }));
     }
 
     [Fact]
     public void ReadValue_GivesTheSavedValue()
     {
-        Assert.Equal(40, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = SettingKey.Volume, Value = 40 }));
+        Assert.Equal(40, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = _declaration.Key, Value = 40 }));
     }
 
     [Fact]
@@ -62,14 +62,14 @@ public class SettingDeclarationIntegerTest
         EntityUserSettingInteger entity = Assert.IsType<EntityUserSettingInteger>(_declaration.CreateEntity(UserID, 30));
 
         Assert.Equal(UserID, entity.UserID);
-        Assert.Equal(SettingKey.Volume, entity.Key);
+        Assert.Equal(_declaration.Key, entity.Key);
         Assert.Equal(30, entity.Value);
     }
 
     [Fact]
     public void SetValue_ReportsWhetherItChanged()
     {
-        EntityUserSettingInteger entity = new() { UserID = UserID, Key = SettingKey.Volume, Value = 30 };
+        EntityUserSettingInteger entity = new() { UserID = UserID, Key = _declaration.Key, Value = 30 };
 
         Assert.False(_declaration.SetValue(entity, 30));
         Assert.True(_declaration.SetValue(entity, 60));

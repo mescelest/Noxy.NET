@@ -4,7 +4,6 @@ public static class SettingKey
 {
     public const string Shuffle = "Shuffle";
     public const string Repeat = "Repeat";
-    public const string Volume = "Volume";
     public const string MergeOnRename = "MergeOnRename";
     public const string KeepQueuedItems = "KeepQueuedItems";
 }

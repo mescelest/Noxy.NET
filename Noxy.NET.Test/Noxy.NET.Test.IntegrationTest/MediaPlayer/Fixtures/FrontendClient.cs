@@ -34,7 +34,7 @@ public sealed class FrontendClient : IAsyncDisposable
         Download = new(Api, FileStore, new HashService(), Store, new Delay(), NullLogger<DownloadService>.Instance);
         Reconciler = new(FileStore, Store, Download);
         Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, NullLogger<AppStartupService>.Instance);
-        Player = new(Audio, Download, FileStore, Store, Sync, SettingService, NullLogger<PlayerService>.Instance);
+        Player = new(Audio, Download, FileStore, Store, Sync, Store, NullLogger<PlayerService>.Instance);
     }
 
     public FakeTimeProvider Time { get; } = new();

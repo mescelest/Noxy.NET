@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -9,7 +10,7 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Storage.Stores;
 
-public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISettingStore, IMetadataListStore
+public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISettingStore, IMetadataListStore, IVolumeStore
 {
     // SQLite's result codes for a file that is not a database and for a damaged one.
     private const int SqliteCorrupt = 11;
@@ -29,6 +30,8 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
     private const string ArtistListETagKey = "ArtistListETag";
     private const string AlbumListETagKey = "AlbumListETag";
     private const string GenreListETagKey = "GenreListETag";
+    private const string VolumeKey = "Volume";
+    private const int DefaultVolume = 100;
 
     private readonly SemaphoreSlim _readyLock = new(1, 1);
     private readonly string _connectionString = new SqliteConnectionStringBuilder { DataSource = databasePath, Mode = SqliteOpenMode.ReadWriteCreate, Pooling = true }.ToString();
@@ -297,6 +300,20 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
     }
 
     #endregion -- Artists, albums and genres --
+
+    #region -- Volume --
+
+    public async Task<int> GetVolume()
+    {
+        return int.TryParse(await GetSetting(VolumeKey), NumberStyles.Integer, CultureInfo.InvariantCulture, out int volume) ? volume : DefaultVolume;
+    }
+
+    public async Task SetVolume(int volume)
+    {
+        await SetSetting(VolumeKey, volume.ToString(CultureInfo.InvariantCulture));
+    }
+
+    #endregion -- Volume --
 
     private async Task<List<T>> ReadList<T>(string table)
     {

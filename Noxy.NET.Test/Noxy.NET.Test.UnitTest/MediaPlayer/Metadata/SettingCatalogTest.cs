@@ -7,10 +7,10 @@ namespace Noxy.NET.Test.MediaPlayer.Metadata;
 public class SettingCatalogTest
 {
     [Fact]
-    public void TheFiveSettingsAreDeclaredInOrder_WithTheirKeys()
+    public void TheFourSettingsAreDeclaredInOrder_WithTheirKeys()
     {
-        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.Volume, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
-        Assert.Equal(["Shuffle", "Repeat", "Volume", "MergeOnRename", "KeepQueuedItems"], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
+        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
+        Assert.Equal(["Shuffle", "Repeat", "MergeOnRename", "KeepQueuedItems"], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
     }
 
     [Fact]
@@ -39,9 +39,6 @@ public class SettingCatalogTest
         Assert.Equal(SettingValueTypeEnum.Enum, SettingCatalog.Repeat.ValueType);
         Assert.Equal(nameof(RepeatModeEnum.No), SettingCatalog.Repeat.DefaultValue);
         Assert.Equal([nameof(RepeatModeEnum.No), nameof(RepeatModeEnum.Once), nameof(RepeatModeEnum.Forever)], SettingCatalog.Repeat.MemberNameList);
-        Assert.Equal(SettingValueTypeEnum.Integer, SettingCatalog.Volume.ValueType);
-        Assert.Equal(100, SettingCatalog.Volume.DefaultValue);
-        Assert.Equal((0, 100), (SettingCatalog.Volume.Minimum, SettingCatalog.Volume.Maximum));
         Assert.Equal(SettingValueTypeEnum.Boolean, SettingCatalog.MergeOnRename.ValueType);
         Assert.Equal(false, SettingCatalog.MergeOnRename.DefaultValue);
     }
@@ -66,9 +63,10 @@ public class SettingCatalogTest
     [Fact]
     public void Find_ReturnsTheDeclarationOfAKey_AndIsCaseSensitive()
     {
-        Assert.Same(SettingCatalog.Volume, SettingCatalog.Find("Volume"));
+        Assert.Same(SettingCatalog.Shuffle, SettingCatalog.Find("Shuffle"));
         Assert.Same(SettingCatalog.MergeOnRename, SettingCatalog.Find(SettingKey.MergeOnRename));
-        Assert.Null(SettingCatalog.Find("volume"));
+        Assert.Null(SettingCatalog.Find("shuffle"));
+        Assert.Null(SettingCatalog.Find("Volume"));
         Assert.Null(SettingCatalog.Find("Nope"));
         Assert.Null(SettingCatalog.Find(string.Empty));
     }

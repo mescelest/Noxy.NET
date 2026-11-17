@@ -10,6 +10,9 @@ public abstract class SettingStoreContract
 {
     private static readonly DateTime Start = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
+    // Any key will do: the store keeps what it is given.
+    private const string SampleKey = "SampleInteger";
+
     protected abstract ISettingStore CreateStore();
 
     private static ResponseSetting Setting(string key, object value, SettingValueTypeEnum valueType, DateTime? timeModified = null)
@@ -19,7 +22,7 @@ public abstract class SettingStoreContract
 
     private static ResponseSetting Volume(int value, DateTime? timeModified = null)
     {
-        return Setting(SettingKey.Volume, value, SettingValueTypeEnum.Integer, timeModified);
+        return Setting(SampleKey, value, SettingValueTypeEnum.Integer, timeModified);
     }
 
     [Fact]
@@ -40,7 +43,7 @@ public abstract class SettingStoreContract
         await store.ReplaceSettingList([Setting(SettingKey.MergeOnRename, true, SettingValueTypeEnum.Boolean), Setting(SettingKey.Repeat, "Forever", SettingValueTypeEnum.Enum), Volume(55)]);
 
         List<ResponseSetting> list = await store.GetSettingList();
-        Assert.Equal([SettingKey.MergeOnRename, SettingKey.Repeat, SettingKey.Volume], list.Select(x => x.Key));
+        Assert.Equal([SettingKey.MergeOnRename, SettingKey.Repeat, SampleKey], list.Select(x => x.Key));
     }
 
     [Fact]
@@ -64,7 +67,7 @@ public abstract class SettingStoreContract
         await store.SaveSetting(Volume(90, Start.AddMinutes(1)));
 
         List<ResponseSetting> list = await store.GetSettingList();
-        Assert.Equal([SettingKey.Volume, SettingKey.Shuffle, SettingKey.MergeOnRename], list.Select(x => x.Key));
+        Assert.Equal([SampleKey, SettingKey.Shuffle, SettingKey.MergeOnRename], list.Select(x => x.Key));
         Assert.Equal(90, ((JsonElement)list[0].Value).GetInt32());
         Assert.Equal(Start.AddMinutes(1), list[0].TimeModified);
     }

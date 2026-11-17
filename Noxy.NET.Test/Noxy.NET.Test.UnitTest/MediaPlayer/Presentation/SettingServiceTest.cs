@@ -15,6 +15,9 @@ public class SettingServiceTest
 {
     private static readonly DateTime Start = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
+    // An integer setting the server does not declare: the service keeps whatever it is given.
+    private const string SampleKey = "SampleInteger";
+
     private readonly FakeApiClient _api = new();
     private readonly FakeMetadataStore _store = new();
     private readonly SettingService _service;
@@ -29,9 +32,14 @@ public class SettingServiceTest
         return new() { Key = key, ValueType = valueType, Value = JsonSerializer.SerializeToElement(value), TimeModified = timeModified ?? Start };
     }
 
-    private static ResponseSetting Volume(int value, DateTime? timeModified = null)
+    private static ResponseSetting Sample(int value, DateTime? timeModified = null)
     {
-        return Setting(SettingKey.Volume, value, SettingValueTypeEnum.Integer, timeModified);
+        return Setting(SampleKey, value, SettingValueTypeEnum.Integer, timeModified);
+    }
+
+    private async Task<int> StoredSample()
+    {
+        return (await _service.GetSettingList()).Single(x => x.Key == SampleKey).GetInteger();
     }
 
     private async Task Seed(params ResponseSetting[] settingList)
@@ -44,7 +52,7 @@ public class SettingServiceTest
     [Fact]
     public async Task SyncSettingList_FirstRun_SendsNoETag_StoresTheListAndTheETag()
     {
-        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Volume(40)], "\"s1\"");
+        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Sample(40)], "\"s1\"");
 
         await _service.SyncSettingList();
 
@@ -56,7 +64,7 @@ public class SettingServiceTest
     [Fact]
     public async Task SyncSettingList_On304_ChangesNothing()
     {
-        await Seed(Volume(40));
+        await Seed(Sample(40));
         await _store.SetSettingListETag("\"s1\"");
         _api.SettingListHandler = _ => new(HttpStatusCode.NotModified, null, null);
         int changed = 0;
@@ -73,9 +81,9 @@ public class SettingServiceTest
     [Fact]
     public async Task SyncSettingList_On200_ReplacesTheLocalList()
     {
-        await Seed(Volume(40), Setting(SettingKey.Shuffle, "Random", SettingValueTypeEnum.Enum));
+        await Seed(Sample(40), Setting(SettingKey.Shuffle, "Random", SettingValueTypeEnum.Enum));
         await _store.SetSettingListETag("\"old\"");
-        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Volume(70)], "\"new\"");
+        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Sample(70)], "\"new\"");
 
         await _service.SyncSettingList();
 
@@ -88,7 +96,7 @@ public class SettingServiceTest
     public async Task SyncSettingList_WhenTheLocalListIsEmptyButAnETagIsStored_SendsNoETag()
     {
         await _store.SetSettingListETag("\"stale\"");
-        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Volume(40)], "\"fresh\"");
+        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Sample(40)], "\"fresh\"");
 
         await _service.SyncSettingList();
 
@@ -99,9 +107,9 @@ public class SettingServiceTest
     [Fact]
     public async Task SyncSettingList_Force_SendsNoETag()
     {
-        await Seed(Volume(40));
+        await Seed(Sample(40));
         await _store.SetSettingListETag("\"s1\"");
-        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Volume(41)], "\"s2\"");
+        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Sample(41)], "\"s2\"");
 
         await _service.SyncSettingList(true);
 
@@ -115,7 +123,7 @@ public class SettingServiceTest
     [InlineData(typeof(TaskCanceledException))]
     public async Task SyncSettingList_WhenOffline_LeavesListAndETagAlone(Type failure)
     {
-        await Seed(Volume(40));
+        await Seed(Sample(40));
         await _store.SetSettingListETag("\"s1\"");
         _api.SettingListHandler = _ => throw (Exception)(Activator.CreateInstance(failure) ?? throw new InvalidOperationException("No failure."));
 
@@ -128,7 +136,7 @@ public class SettingServiceTest
     [Fact]
     public async Task SyncSettingList_WhenTheServerAnswersWithAnError_Throws_AndLeavesTheListAlone()
     {
-        await Seed(Volume(40));
+        await Seed(Sample(40));
         _api.SettingListHandler = _ => throw new ApiException(HttpStatusCode.InternalServerError, "Broken.");
 
         await Assert.ThrowsAsync<ApiException>(() => _service.SyncSettingList());
@@ -141,12 +149,12 @@ public class SettingServiceTest
     {
         List<int> countList = [];
         _service.Changed += () => countList.Add(_store.GetSettingList().GetAwaiter().GetResult().Count);
-        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Volume(40)], "\"s1\"");
+        _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Sample(40)], "\"s1\"");
         _api.UpdateSettingHandler = (_, _) => Setting(SettingKey.MergeOnRename, true, SettingValueTypeEnum.Boolean);
 
         await _service.SyncSettingList();
         await _service.Update(SettingKey.MergeOnRename, JsonSerializer.SerializeToElement(true));
-        await _service.ApplySettingUpdated(Volume(60, Start.AddMinutes(1)));
+        await _service.ApplySettingUpdated(Sample(60, Start.AddMinutes(1)));
 
         Assert.Equal([1, 2, 2], countList);
     }
@@ -158,15 +166,15 @@ public class SettingServiceTest
     [Fact]
     public async Task Update_SendsTheValue_SavesTheServersAnswer_AndRaisesChanged()
     {
-        await Seed(Volume(40));
-        _api.UpdateSettingHandler = (_, _) => Volume(55, Start.AddMinutes(1));
+        await Seed(Sample(40));
+        _api.UpdateSettingHandler = (_, _) => Sample(55, Start.AddMinutes(1));
         int changed = 0;
         _service.Changed += () => changed++;
 
-        await _service.Update(SettingKey.Volume, JsonSerializer.SerializeToElement(55));
+        await _service.Update(SampleKey, JsonSerializer.SerializeToElement(55));
 
         (string key, JsonElement sent) = Assert.Single(_api.UpdateSettingRequestList);
-        Assert.Equal(SettingKey.Volume, key);
+        Assert.Equal(SampleKey, key);
         Assert.Equal(55, sent.GetInt32());
         ResponseSetting stored = Assert.Single(await _service.GetSettingList());
         Assert.Equal(55, stored.GetInteger());
@@ -177,28 +185,28 @@ public class SettingServiceTest
     [Fact]
     public async Task Update_WhenOffline_Throws_AndTheLocalValueIsUnchanged()
     {
-        await Seed(Volume(40));
+        await Seed(Sample(40));
         _api.UpdateSettingHandler = (_, _) => throw new HttpRequestException("The network is down.");
         int changed = 0;
         _service.Changed += () => changed++;
 
-        await Assert.ThrowsAsync<HttpRequestException>(() => _service.Update(SettingKey.Volume, JsonSerializer.SerializeToElement(55)));
+        await Assert.ThrowsAsync<HttpRequestException>(() => _service.Update(SampleKey, JsonSerializer.SerializeToElement(55)));
 
         Assert.Equal(40, (await _service.GetSettingList()).Single().GetInteger());
-        Assert.Equal(40, await _service.GetVolume());
+        Assert.Equal(40, await StoredSample());
         Assert.Equal(0, changed);
     }
 
     [Fact]
     public async Task Update_WhenTheServerRefuses_ThrowsApiException_AndTheLocalValueIsUnchanged()
     {
-        await Seed(Volume(40));
+        await Seed(Sample(40));
         _api.UpdateSettingHandler = (_, _) => throw new ApiException(HttpStatusCode.BadRequest, "The value is not valid for the setting Volume.");
 
-        ApiException exception = await Assert.ThrowsAsync<ApiException>(() => _service.Update(SettingKey.Volume, JsonSerializer.SerializeToElement(500)));
+        ApiException exception = await Assert.ThrowsAsync<ApiException>(() => _service.Update(SampleKey, JsonSerializer.SerializeToElement(500)));
 
         Assert.Equal(HttpStatusCode.BadRequest, exception.Status);
-        Assert.Equal(40, await _service.GetVolume());
+        Assert.Equal(40, await StoredSample());
     }
 
     [Fact]
@@ -218,10 +226,10 @@ public class SettingServiceTest
     [Fact]
     public async Task ApplySettingUpdated_SavesIt_AndKeepsTheStoredETag()
     {
-        await Seed(Volume(40, Start));
+        await Seed(Sample(40, Start));
         await _store.SetSettingListETag("\"s1\"");
 
-        await _service.ApplySettingUpdated(Volume(80, Start.AddMinutes(1)));
+        await _service.ApplySettingUpdated(Sample(80, Start.AddMinutes(1)));
 
         Assert.Equal(80, (await _service.GetSettingList()).Single().GetInteger());
         Assert.Equal("\"s1\"", await _store.GetSettingListETag());
@@ -230,22 +238,22 @@ public class SettingServiceTest
     [Fact]
     public async Task ApplySettingUpdated_ForANewKey_AddsIt()
     {
-        await Seed(Volume(40));
+        await Seed(Sample(40));
 
         await _service.ApplySettingUpdated(Setting(SettingKey.KeepQueuedItems, true, SettingValueTypeEnum.Boolean, Start.AddMinutes(1)));
 
-        Assert.Equal([SettingKey.Volume, SettingKey.KeepQueuedItems], (await _service.GetSettingList()).Select(x => x.Key));
+        Assert.Equal([SampleKey, SettingKey.KeepQueuedItems], (await _service.GetSettingList()).Select(x => x.Key));
     }
 
     [Fact]
     public async Task ApplySettingUpdated_WithAnOlderOrEqualTimeModified_IsIgnored()
     {
-        await Seed(Volume(40, Start));
+        await Seed(Sample(40, Start));
         int changed = 0;
         _service.Changed += () => changed++;
 
-        await _service.ApplySettingUpdated(Volume(10, Start.AddMinutes(-1)));
-        await _service.ApplySettingUpdated(Volume(20, Start));
+        await _service.ApplySettingUpdated(Sample(10, Start.AddMinutes(-1)));
+        await _service.ApplySettingUpdated(Sample(20, Start));
 
         Assert.Equal(40, (await _service.GetSettingList()).Single().GetInteger());
         Assert.Equal(0, changed);
@@ -256,15 +264,13 @@ public class SettingServiceTest
     #region -- Typed getters --
 
     [Fact]
-    public async Task GetVolume_GetShuffle_GetRepeat_ReturnTheStoredValueOrTheDefault()
+    public async Task GetShuffle_GetRepeat_ReturnTheStoredValueOrTheDefault()
     {
-        Assert.Equal(100, await _service.GetVolume());
         Assert.Equal(ShuffleModeEnum.Off, await _service.GetShuffle());
         Assert.Equal(RepeatModeEnum.No, await _service.GetRepeat());
 
-        await Seed(Volume(35), Setting(SettingKey.Shuffle, "SpreadArtists", SettingValueTypeEnum.Enum), Setting(SettingKey.Repeat, "Forever", SettingValueTypeEnum.Enum));
+        await Seed(Setting(SettingKey.Shuffle, "SpreadArtists", SettingValueTypeEnum.Enum), Setting(SettingKey.Repeat, "Forever", SettingValueTypeEnum.Enum));
 
-        Assert.Equal(35, await _service.GetVolume());
         Assert.Equal(ShuffleModeEnum.SpreadArtists, await _service.GetShuffle());
         Assert.Equal(RepeatModeEnum.Forever, await _service.GetRepeat());
     }
@@ -284,9 +290,9 @@ public class SettingServiceTest
     [Fact]
     public async Task AStoredValueOfTheWrongKind_FallsBackToTheDefault_InsteadOfThrowing()
     {
-        await Seed(Setting(SettingKey.Volume, "loud", SettingValueTypeEnum.Integer), Setting(SettingKey.Shuffle, 3, SettingValueTypeEnum.Enum), Setting(SettingKey.Repeat, true, SettingValueTypeEnum.Enum));
+        await Seed(Setting(SettingKey.Shuffle, 3, SettingValueTypeEnum.Enum), Setting(SettingKey.Repeat, true, SettingValueTypeEnum.Enum));
 
-        Assert.Equal(100, await _service.GetVolume());
+        
         Assert.Equal(ShuffleModeEnum.Off, await _service.GetShuffle());
         Assert.Equal(RepeatModeEnum.No, await _service.GetRepeat());
     }
@@ -294,14 +300,14 @@ public class SettingServiceTest
     [Fact]
     public async Task Update_WhenTheLocalCopyIsNewerThanTheAnswer_KeepsTheNewerOne_AndRaisesNothing()
     {
-        await Seed(Volume(50, Start.AddMinutes(5)));
-        _api.UpdateSettingHandler = (_, _) => Volume(30, Start.AddMinutes(1));
+        await Seed(Sample(50, Start.AddMinutes(5)));
+        _api.UpdateSettingHandler = (_, _) => Sample(30, Start.AddMinutes(1));
         int changed = 0;
         _service.Changed += () => changed++;
 
-        await _service.Update(SettingKey.Volume, JsonSerializer.SerializeToElement(30));
+        await _service.Update(SampleKey, JsonSerializer.SerializeToElement(30));
 
-        Assert.Equal(50, await _service.GetVolume());
+        Assert.Equal(50, await StoredSample());
         Assert.Equal(0, changed);
     }
 

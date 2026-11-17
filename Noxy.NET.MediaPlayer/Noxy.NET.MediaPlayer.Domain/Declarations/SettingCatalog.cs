@@ -6,13 +6,12 @@ public static class SettingCatalog
 {
     public static readonly SettingDeclarationEnumOf<ShuffleModeEnum> Shuffle = new(SettingKey.Shuffle, ShuffleModeEnum.Off);
     public static readonly SettingDeclarationEnumOf<RepeatModeEnum> Repeat = new(SettingKey.Repeat, RepeatModeEnum.No);
-    public static readonly SettingDeclarationInteger Volume = new(SettingKey.Volume, 100, 0, 100);
     public static readonly SettingDeclarationBoolean MergeOnRename = new(SettingKey.MergeOnRename, false);
     public static readonly SettingDeclarationBoolean KeepQueuedItems = new(SettingKey.KeepQueuedItems, false);
 
-    public static readonly IReadOnlyList<SettingDeclaration> DeclarationList = [Shuffle, Repeat, Volume, MergeOnRename, KeepQueuedItems];
+    public static readonly IReadOnlyList<SettingDeclaration> DeclarationList = [Shuffle, Repeat, MergeOnRename, KeepQueuedItems];
 
-    // The key is exact: "volume" is not "Volume".
+    // The key is exact: "shuffle" is not "Shuffle".
     public static SettingDeclaration? Find(string key)
     {
         return DeclarationList.FirstOrDefault(x => x.Key == key);
