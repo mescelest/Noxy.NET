@@ -5,7 +5,6 @@ using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
-using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -24,7 +23,7 @@ public class SettingServiceTest
 
     public SettingServiceTest()
     {
-        _service = new(_api, _store);
+        _service = new(_api, _store.Setting);
     }
 
     private static ResponseSetting Setting(string key, object value, SettingValueTypeEnum valueType, DateTime? timeModified = null)
@@ -44,7 +43,7 @@ public class SettingServiceTest
 
     private async Task Seed(params ResponseSetting[] settingList)
     {
-        await _store.ReplaceSettingList([.. settingList]);
+        await _store.Setting.ReplaceList([.. settingList]);
     }
 
     #region -- Sync --
@@ -58,14 +57,14 @@ public class SettingServiceTest
 
         Assert.Equal([null], _api.SettingListETagList);
         Assert.Equal(40, (await _service.GetSettingList()).Single().GetInteger());
-        Assert.Equal("\"s1\"", await _store.GetSettingListETag());
+        Assert.Equal("\"s1\"", await _store.Setting.GetETag());
     }
 
     [Fact]
     public async Task SyncSettingList_On304_ChangesNothing()
     {
         await Seed(Sample(40));
-        await _store.SetSettingListETag("\"s1\"");
+        await _store.Setting.SetETag("\"s1\"");
         _api.SettingListHandler = _ => new(HttpStatusCode.NotModified, null, null);
         int changed = 0;
         _service.Changed += () => changed++;
@@ -74,7 +73,7 @@ public class SettingServiceTest
 
         Assert.Equal(["\"s1\""], _api.SettingListETagList);
         Assert.Equal(40, (await _service.GetSettingList()).Single().GetInteger());
-        Assert.Equal("\"s1\"", await _store.GetSettingListETag());
+        Assert.Equal("\"s1\"", await _store.Setting.GetETag());
         Assert.Equal(0, changed);
     }
 
@@ -82,33 +81,33 @@ public class SettingServiceTest
     public async Task SyncSettingList_On200_ReplacesTheLocalList()
     {
         await Seed(Sample(40), Setting(SettingKey.Shuffle, "Random", SettingValueTypeEnum.Enum));
-        await _store.SetSettingListETag("\"old\"");
+        await _store.Setting.SetETag("\"old\"");
         _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Sample(70)], "\"new\"");
 
         await _service.SyncSettingList();
 
         ResponseSetting only = Assert.Single(await _service.GetSettingList());
         Assert.Equal(70, only.GetInteger());
-        Assert.Equal("\"new\"", await _store.GetSettingListETag());
+        Assert.Equal("\"new\"", await _store.Setting.GetETag());
     }
 
     [Fact]
     public async Task SyncSettingList_WhenTheLocalListIsEmptyButAnETagIsStored_SendsNoETag()
     {
-        await _store.SetSettingListETag("\"stale\"");
+        await _store.Setting.SetETag("\"stale\"");
         _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Sample(40)], "\"fresh\"");
 
         await _service.SyncSettingList();
 
         Assert.Equal([null], _api.SettingListETagList);
-        Assert.Equal("\"fresh\"", await _store.GetSettingListETag());
+        Assert.Equal("\"fresh\"", await _store.Setting.GetETag());
     }
 
     [Fact]
     public async Task SyncSettingList_Force_SendsNoETag()
     {
         await Seed(Sample(40));
-        await _store.SetSettingListETag("\"s1\"");
+        await _store.Setting.SetETag("\"s1\"");
         _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Sample(41)], "\"s2\"");
 
         await _service.SyncSettingList(true);
@@ -124,13 +123,13 @@ public class SettingServiceTest
     public async Task SyncSettingList_WhenOffline_LeavesListAndETagAlone(Type failure)
     {
         await Seed(Sample(40));
-        await _store.SetSettingListETag("\"s1\"");
+        await _store.Setting.SetETag("\"s1\"");
         _api.SettingListHandler = _ => throw (Exception)(Activator.CreateInstance(failure) ?? throw new InvalidOperationException("No failure."));
 
         await _service.SyncSettingList();
 
         Assert.Equal(40, (await _service.GetSettingList()).Single().GetInteger());
-        Assert.Equal("\"s1\"", await _store.GetSettingListETag());
+        Assert.Equal("\"s1\"", await _store.Setting.GetETag());
     }
 
     [Fact]
@@ -148,7 +147,7 @@ public class SettingServiceTest
     public async Task Changed_IsRaisedAfterEachStoreWrite()
     {
         List<int> countList = [];
-        _service.Changed += () => countList.Add(_store.GetSettingList().GetAwaiter().GetResult().Count);
+        _service.Changed += () => countList.Add(_store.Setting.GetList().GetAwaiter().GetResult().Count);
         _api.SettingListHandler = _ => new(HttpStatusCode.OK, [Sample(40)], "\"s1\"");
         _api.UpdateSettingHandler = (_, _) => Setting(SettingKey.MergeOnRename, true, SettingValueTypeEnum.Boolean);
 
@@ -227,12 +226,12 @@ public class SettingServiceTest
     public async Task ApplySettingUpdated_SavesIt_AndKeepsTheStoredETag()
     {
         await Seed(Sample(40, Start));
-        await _store.SetSettingListETag("\"s1\"");
+        await _store.Setting.SetETag("\"s1\"");
 
         await _service.ApplySettingUpdated(Sample(80, Start.AddMinutes(1)));
 
         Assert.Equal(80, (await _service.GetSettingList()).Single().GetInteger());
-        Assert.Equal("\"s1\"", await _store.GetSettingListETag());
+        Assert.Equal("\"s1\"", await _store.Setting.GetETag());
     }
 
     [Fact]
@@ -292,7 +291,7 @@ public class SettingServiceTest
     {
         await Seed(Setting(SettingKey.Shuffle, 3, SettingValueTypeEnum.Enum), Setting(SettingKey.Repeat, true, SettingValueTypeEnum.Enum));
 
-        
+
         Assert.Equal(ShuffleModeEnum.Off, await _service.GetShuffle());
         Assert.Equal(RepeatModeEnum.No, await _service.GetRepeat());
     }

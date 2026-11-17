@@ -5,17 +5,26 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Setting;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
-using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class SettingService(IApiClient clientApi, ISettingStore storeSetting) : ISettingService
+public class SettingService : ISettingService
 {
+    private readonly IApiClient _clientApi;
+    private readonly SyncedList<ResponseSetting, string> _settingList;
+
+    public SettingService(IApiClient clientApi, IListStore<ResponseSetting, string> storeSetting)
+    {
+        _clientApi = clientApi;
+        _settingList = new(storeSetting, clientApi.GetSettingList, x => x.Key, x => x.TimeModified);
+        _settingList.Changed += RaiseChanged;
+    }
+
     public event Action? Changed;
 
     public async Task<List<ResponseSetting>> GetSettingList()
     {
-        return await storeSetting.GetSettingList();
+        return await _settingList.GetList();
     }
 
     public async Task<ShuffleModeEnum> GetShuffle()
@@ -30,46 +39,26 @@ public class SettingService(IApiClient clientApi, ISettingStore storeSetting) : 
 
     public async Task SyncSettingList(bool force = false)
     {
-        string? eTag = force || (await storeSetting.GetSettingList()).Count == 0 ? null : await storeSetting.GetSettingListETag();
-
-        ApiResponse<List<ResponseSetting>>? response = await Fetch(() => clientApi.GetSettingList(eTag));
-        if (response?.Value is null) return;
-
-        await storeSetting.ReplaceSettingList(response.Value);
-        await storeSetting.SetSettingListETag(response.ETag);
-        Changed?.Invoke();
+        await _settingList.Sync(force);
     }
 
     public async Task Update(string key, JsonElement value)
     {
-        ResponseSetting saved = await clientApi.UpdateSetting(key, value);
+        ResponseSetting saved = await _clientApi.UpdateSetting(key, value);
 
         // A newer value may have arrived by push while the write was on its way: the older answer must not overwrite it.
-        ResponseSetting? local = await Find(key);
-        if (local is not null && saved.TimeModified < local.TimeModified) return;
-
-        await storeSetting.SaveSetting(saved);
-        Changed?.Invoke();
+        await _settingList.ApplyUpdated(saved, true);
     }
 
     public async Task ApplySettingUpdated(ResponseSetting setting)
     {
-        ResponseSetting? local = await Find(setting.Key);
-        if (local is not null && setting.TimeModified <= local.TimeModified) return;
-
-        await storeSetting.SaveSetting(setting);
-        Changed?.Invoke();
-    }
-
-    private async Task<ResponseSetting?> Find(string key)
-    {
-        return (await storeSetting.GetSettingList()).FirstOrDefault(x => x.Key == key);
+        await _settingList.ApplyUpdated(setting);
     }
 
     // A stored name that is not a member of the enum (a newer server) counts as no value.
     private async Task<TEnum> GetEnum<TEnum>(string key, object defaultValue) where TEnum : struct, Enum
     {
-        ResponseSetting? setting = await Find(key);
+        ResponseSetting? setting = await _settingList.Find(key);
         try
         {
             if (setting is not null && Enum.TryParse(setting.GetEnumName(), out TEnum stored) && Enum.IsDefined(stored)) return stored;
@@ -82,16 +71,8 @@ public class SettingService(IApiClient clientApi, ISettingStore storeSetting) : 
         return Enum.Parse<TEnum>((string)defaultValue);
     }
 
-    // Null when the server could not be reached or answered 304. Any other failure propagates.
-    private static async Task<ApiResponse<T>?> Fetch<T>(Func<Task<ApiResponse<T>>> call)
+    private void RaiseChanged()
     {
-        try
-        {
-            return await call();
-        }
-        catch (Exception exception) when (exception.IsOfflineFailure)
-        {
-            return null;
-        }
+        Changed?.Invoke();
     }
 }

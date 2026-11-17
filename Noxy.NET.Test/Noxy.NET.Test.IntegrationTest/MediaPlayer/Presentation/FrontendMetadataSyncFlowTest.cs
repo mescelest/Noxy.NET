@@ -41,7 +41,7 @@ public class FrontendMetadataSyncFlowTest
 
     private static async Task<bool> HasArtist(FrontendClient frontend, string name)
     {
-        return (await frontend.Store.GetArtistList()).Any(x => x.Name == name);
+        return (await frontend.Store.Artist.GetList()).Any(x => x.Name == name);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class FrontendMetadataSyncFlowTest
         (ApiAccount account, string email) = await CreateAccount(api);
         await using FrontendClient frontend = await SignedIn(factory, email);
         await frontend.SettingService.SyncSettingList();
-        string? eTag = await frontend.Store.GetSettingListETag();
+        string? eTag = await frontend.Store.Setting.GetETag();
         await frontend.Hub.Start();
         Assert.True(frontend.Hub.IsConnected);
         Assert.False(await KeepQueued(frontend));
@@ -61,7 +61,7 @@ public class FrontendMetadataSyncFlowTest
         response.EnsureSuccessStatusCode();
 
         await FrontendClient.WaitFor(() => KeepQueued(frontend), "the setting push");
-        Assert.Equal(eTag, await frontend.Store.GetSettingListETag());
+        Assert.Equal(eTag, await frontend.Store.Setting.GetETag());
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public class FrontendMetadataSyncFlowTest
         Assert.False(await HasArtist(frontend, "Artist One"));
 
         (await api.SendJson(account.Token, HttpMethod.Delete, $"/Artist/{artist.ID}")).EnsureSuccessStatusCode();
-        await FrontendClient.WaitFor(async () => (await frontend.Store.GetArtistList()).Count == 0, "the delete push");
+        await FrontendClient.WaitFor(async () => (await frontend.Store.Artist.GetList()).Count == 0, "the delete push");
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public class FrontendMetadataSyncFlowTest
 
         (await api.SendJson(account.Token, HttpMethod.Post, "/Genre", """{"name":"Jazz"}""")).EnsureSuccessStatusCode();
 
-        await FrontendClient.WaitFor(async () => (await frontend.Store.GetGenreList()).Any(x => x.Name == "Jazz"), "the genre push");
+        await FrontendClient.WaitFor(async () => (await frontend.Store.Genre.GetList()).Any(x => x.Name == "Jazz"), "the genre push");
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public class FrontendMetadataSyncFlowTest
 
         Assert.True(await KeepQueued(frontend));
         Assert.True(await HasArtist(frontend, "While Away"));
-        Assert.Contains(await frontend.Store.GetGenreList(), x => x.Name == "Missed");
+        Assert.Contains(await frontend.Store.Genre.GetList(), x => x.Name == "Missed");
     }
 
     [Fact]
@@ -148,15 +148,15 @@ public class FrontendMetadataSyncFlowTest
         await using FrontendClient frontend = await SignedIn(factory, email);
         await frontend.SettingService.SyncSettingList();
         await frontend.MetadataSync.SyncArtistList();
-        Assert.NotNull(await frontend.Store.GetSettingListETag());
-        Assert.NotNull(await frontend.Store.GetArtistListETag());
+        Assert.NotNull(await frontend.Store.Setting.GetETag());
+        Assert.NotNull(await frontend.Store.Artist.GetETag());
 
-        await frontend.Store.ReplaceSettingList([]);
-        await frontend.Store.ReplaceArtistList([]);
+        await frontend.Store.Setting.ReplaceList([]);
+        await frontend.Store.Artist.ReplaceList([]);
         await frontend.SettingService.SyncSettingList();
         await frontend.MetadataSync.SyncArtistList();
 
-        Assert.NotEmpty(await frontend.Store.GetSettingList());
+        Assert.NotEmpty(await frontend.Store.Setting.GetList());
         Assert.True(await HasArtist(frontend, "Kept"));
         Assert.All(frontend.Network.RequestList.Where(x => x.Path is SettingsPath or "/Artist").Skip(2), x => Assert.Null(x.IfNoneMatch));
     }
@@ -174,11 +174,11 @@ public class FrontendMetadataSyncFlowTest
         await frontend.MetadataSync.SyncArtistList();
         await frontend.MetadataSync.SyncAlbumList();
         await frontend.MetadataSync.SyncGenreList();
-        string? settingETag = await frontend.Store.GetSettingListETag();
+        string? settingETag = await frontend.Store.Setting.GetETag();
         await frontend.SettingService.SyncSettingList();
         await frontend.MetadataSync.SyncArtistList();
 
-        Assert.Equal(settingETag, await frontend.Store.GetSettingListETag());
+        Assert.Equal(settingETag, await frontend.Store.Setting.GetETag());
         Assert.Equal(2, frontend.Network.RequestList.Count(x => x.Path == SettingsPath));
         Assert.Equal(settingETag, frontend.Network.RequestList.Last(x => x.Path == SettingsPath).IfNoneMatch);
     }

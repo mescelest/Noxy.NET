@@ -15,8 +15,8 @@ public static class ServiceCollectionExtensions
         {
             services.AddSingleton(_ => new SqliteMetadataStore(Path.Combine(dataFolder, Constants.MetadataDatabaseFileName)));
             services.AddSingleton<IMetadataStore>(provider => provider.GetRequiredService<SqliteMetadataStore>());
-            services.AddSingleton<ISettingStore>(provider => provider.GetRequiredService<SqliteMetadataStore>());
             services.AddSingleton<IMetadataListStore>(provider => provider.GetRequiredService<SqliteMetadataStore>());
+            services.AddSingleton(provider => provider.GetRequiredService<SqliteMetadataStore>().Setting);
             services.AddSingleton<IVolumeStore>(provider => provider.GetRequiredService<SqliteMetadataStore>());
             services.AddSingleton<IFileStore>(_ => new DiskFileStore(dataFolder));
 

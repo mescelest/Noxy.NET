@@ -122,7 +122,7 @@ public class LiveSessionServiceTest
     [Fact]
     public async Task Claim_WhileAnotherOnlineDeviceIsActiveAndPlaying_IsRefused_AndChangesNothing()
     {
-        Guid first = await ActiveSession(true);
+        Guid first = await ActiveSession();
         Guid second = await Device();
         ResponseQueue before = _service.GetQueue(UserID) ?? throw new InvalidOperationException("No queue.");
         _publisher.PublishedList.Clear();
@@ -152,7 +152,7 @@ public class LiveSessionServiceTest
     [Fact]
     public async Task Claim_WhileTheActiveDeviceIsOffline_OrInItsGracePeriod_IsAccepted()
     {
-        Guid first = await ActiveSession(true);
+        Guid first = await ActiveSession();
         await _registry.Disconnect($"c-{first}");
         Guid second = await Device();
 
@@ -196,7 +196,7 @@ public class LiveSessionServiceTest
         await _service.Report(UserID, first, Report(50, false));
         Guid second = await Device();
 
-        await _service.Claim(UserID, second, ClaimRequest(true, 1));
+        await _service.Claim(UserID, second, ClaimRequest());
 
         Assert.True(await _service.Report(UserID, second, Report(2)));
     }
@@ -209,7 +209,7 @@ public class LiveSessionServiceTest
         long before = _service.GetQueue(UserID)?.QueueRevision ?? 0;
         Guid second = await Device();
 
-        await _service.Claim(UserID, second, ClaimRequest(true, 1));
+        await _service.Claim(UserID, second, ClaimRequest());
 
         Assert.True(_service.GetQueue(UserID)?.QueueRevision > before);
     }
@@ -427,7 +427,7 @@ public class LiveSessionServiceTest
     [Fact]
     public async Task TeardownNeverRunsWhileTheActiveDeviceIsOnlineAndPlaying()
     {
-        await ActiveSession(true);
+        await ActiveSession();
 
         _time.Advance(TimeSpan.FromMinutes(45));
 
@@ -438,7 +438,7 @@ public class LiveSessionServiceTest
     [Fact]
     public async Task TeardownStartsWhenPaused_AndFiresAfterTenMinutes_PublishingSessionEnded()
     {
-        Guid active = await ActiveSession(true);
+        Guid active = await ActiveSession();
         _time.Advance(TimeSpan.FromMinutes(30));
         await _service.Report(UserID, active, Report(2, false));
 
@@ -454,7 +454,7 @@ public class LiveSessionServiceTest
     [Fact]
     public async Task TeardownStartsWhenTheActiveDeviceGoesOfflinePastItsGracePeriod()
     {
-        Guid active = await ActiveSession(true);
+        Guid active = await ActiveSession();
         await _registry.Disconnect($"c-{active}");
 
         _time.Advance(TimeSpan.FromMinutes(9));
@@ -534,7 +534,7 @@ public class LiveSessionServiceTest
         Guid second = await Device();
         Guid mediaFileID = SeedMedia();
         QueueItem item = new(Guid.CreateVersion7(), mediaFileID);
-        _factory.OnCreate = () => Assert.True(_service.Claim(UserID, second, ClaimRequest(false, 1)).GetAwaiter().GetResult());
+        _factory.OnCreate = () => Assert.True(_service.Claim(UserID, second, ClaimRequest(false)).GetAwaiter().GetResult());
         QueueEdit edit = new() { Edit = QueueEditEnum.RegenerateSource, ItemList = [item] };
 
         await Assert.ThrowsAsync<InvalidQueueEditException>(() => _service.Edit(UserID, first, edit, Token));
@@ -551,7 +551,10 @@ public class LiveSessionServiceTest
         queue.UserQueueList.AddRange(Enumerable.Range(0, 60).Select(_ => Item()));
         Guid active = await ActiveSession(true, queue);
         QueueItem[] itemList = [.. Enumerable.Range(0, 60).Select(_ => new QueueItem(Guid.CreateVersion7(), mediaFileID))];
-        QueueEdit edit = new() { Edit = QueueEditEnum.ReplaceSource, Source = new() { Kind = QueueSourceKindEnum.Library, PlaylistID = null, Sort = LibrarySortEnum.Title, Descending = false, Search = string.Empty }, ItemList = [.. itemList], KeepUserQueue = true };
+        QueueEdit edit = new()
+        {
+            Edit = QueueEditEnum.ReplaceSource, Source = new() { Kind = QueueSourceKindEnum.Library, PlaylistID = null, Sort = LibrarySortEnum.Title, Descending = false, Search = string.Empty }, ItemList = [.. itemList], KeepUserQueue = true
+        };
 
         await Assert.ThrowsAsync<InvalidQueueEditException>(() => _service.Edit(UserID, active, edit, Token));
     }

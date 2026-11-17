@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
-using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Presentation.Models;

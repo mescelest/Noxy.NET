@@ -9,7 +9,7 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-public sealed class FakeMetadataStore : IMetadataStore, ISettingStore, IMetadataListStore, IVolumeStore
+public sealed class FakeMetadataStore : IMetadataStore, IMetadataListStore, IVolumeStore
 {
     private readonly List<ResponseMediaFile> _mediaFileList = [];
     private readonly List<ResponsePlaylist> _playlistList = [];
@@ -17,14 +17,6 @@ public sealed class FakeMetadataStore : IMetadataStore, ISettingStore, IMetadata
     private readonly ConcurrentDictionary<Guid, FileState> _fileStateMap = [];
     private string? _libraryETag;
     private string? _playlistListETag;
-    private readonly List<ResponseSetting> _settingList = [];
-    private readonly List<ResponseArtist> _artistList = [];
-    private readonly List<ResponseAlbum> _albumList = [];
-    private readonly List<ResponseGenre> _genreList = [];
-    private string? _settingListETag;
-    private string? _artistListETag;
-    private string? _albumListETag;
-    private string? _genreListETag;
     private int _volume = 100;
 
     // Everything goes in and out as a copy through JSON, as it does with a real store, so a test can never change what is stored by changing what it got back.
@@ -176,166 +168,19 @@ public sealed class FakeMetadataStore : IMetadataStore, ISettingStore, IMetadata
         return Task.CompletedTask;
     }
 
-    #region -- Settings --
+    public FakeListStore<ResponseSetting, string> Setting { get; } = new(x => x.Key);
 
-    public Task<List<ResponseSetting>> GetSettingList()
-    {
-        return Task.FromResult(Copy(_settingList));
-    }
+    public FakeListStore<ResponseArtist, Guid> Artist { get; } = new(x => x.ID);
 
-    public Task ReplaceSettingList(List<ResponseSetting> settingList)
-    {
-        List<ResponseSetting> copy = Copy(settingList);
-        _settingList.Clear();
-        _settingList.AddRange(copy);
+    public FakeListStore<ResponseAlbum, Guid> Album { get; } = new(x => x.ID);
 
-        return Task.CompletedTask;
-    }
+    public FakeListStore<ResponseGenre, Guid> Genre { get; } = new(x => x.ID);
 
-    public Task SaveSetting(ResponseSetting setting)
-    {
-        Upsert(_settingList, Copy(setting), x => x.Key);
+    IListStore<ResponseArtist, Guid> IMetadataListStore.Artist => Artist;
 
-        return Task.CompletedTask;
-    }
+    IListStore<ResponseAlbum, Guid> IMetadataListStore.Album => Album;
 
-    public Task<string?> GetSettingListETag()
-    {
-        return Task.FromResult(_settingListETag);
-    }
-
-    public Task SetSettingListETag(string? eTag)
-    {
-        _settingListETag = eTag;
-
-        return Task.CompletedTask;
-    }
-
-    #endregion -- Settings --
-
-    #region -- Artists, albums and genres --
-
-    public Task<List<ResponseArtist>> GetArtistList()
-    {
-        return Task.FromResult(Copy(_artistList));
-    }
-
-    public Task ReplaceArtistList(List<ResponseArtist> artistList)
-    {
-        List<ResponseArtist> copy = Copy(artistList);
-        _artistList.Clear();
-        _artistList.AddRange(copy);
-
-        return Task.CompletedTask;
-    }
-
-    public Task SaveArtist(ResponseArtist artist)
-    {
-        Upsert(_artistList, Copy(artist), x => x.ID);
-
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteArtist(Guid id)
-    {
-        _artistList.RemoveAll(x => x.ID == id);
-
-        return Task.CompletedTask;
-    }
-
-    public Task<string?> GetArtistListETag()
-    {
-        return Task.FromResult(_artistListETag);
-    }
-
-    public Task SetArtistListETag(string? eTag)
-    {
-        _artistListETag = eTag;
-
-        return Task.CompletedTask;
-    }
-
-    public Task<List<ResponseAlbum>> GetAlbumList()
-    {
-        return Task.FromResult(Copy(_albumList));
-    }
-
-    public Task ReplaceAlbumList(List<ResponseAlbum> albumList)
-    {
-        List<ResponseAlbum> copy = Copy(albumList);
-        _albumList.Clear();
-        _albumList.AddRange(copy);
-
-        return Task.CompletedTask;
-    }
-
-    public Task SaveAlbum(ResponseAlbum album)
-    {
-        Upsert(_albumList, Copy(album), x => x.ID);
-
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAlbum(Guid id)
-    {
-        _albumList.RemoveAll(x => x.ID == id);
-
-        return Task.CompletedTask;
-    }
-
-    public Task<string?> GetAlbumListETag()
-    {
-        return Task.FromResult(_albumListETag);
-    }
-
-    public Task SetAlbumListETag(string? eTag)
-    {
-        _albumListETag = eTag;
-
-        return Task.CompletedTask;
-    }
-
-    public Task<List<ResponseGenre>> GetGenreList()
-    {
-        return Task.FromResult(Copy(_genreList));
-    }
-
-    public Task ReplaceGenreList(List<ResponseGenre> genreList)
-    {
-        List<ResponseGenre> copy = Copy(genreList);
-        _genreList.Clear();
-        _genreList.AddRange(copy);
-
-        return Task.CompletedTask;
-    }
-
-    public Task SaveGenre(ResponseGenre genre)
-    {
-        Upsert(_genreList, Copy(genre), x => x.ID);
-
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteGenre(Guid id)
-    {
-        _genreList.RemoveAll(x => x.ID == id);
-
-        return Task.CompletedTask;
-    }
-
-    public Task<string?> GetGenreListETag()
-    {
-        return Task.FromResult(_genreListETag);
-    }
-
-    public Task SetGenreListETag(string? eTag)
-    {
-        _genreListETag = eTag;
-
-        return Task.CompletedTask;
-    }
-
-    #endregion -- Artists, albums and genres --
+    IListStore<ResponseGenre, Guid> IMetadataListStore.Genre => Genre;
 
     #region -- Volume --
 

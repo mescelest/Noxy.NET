@@ -26,7 +26,7 @@ public sealed class FrontendClient : IAsyncDisposable
         Session = new(new AuthApiClient(httpClient, storageServerAddress), new FakeGoogleSignInService(), sessionStorage, Time);
         Api = new(httpClient, Session, storageServerAddress);
         Sync = new(Api, Store);
-        SettingService = new(Api, Store);
+        SettingService = new(Api, Store.Setting);
         MetadataSync = new(Api, Store);
         Hub = new(Sync, SettingService, MetadataSync, Session, storageServerAddress, NullLogger<MediaHubService>.Instance, Network);
 

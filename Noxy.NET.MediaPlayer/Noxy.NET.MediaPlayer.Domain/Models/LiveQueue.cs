@@ -264,7 +264,7 @@ public class LiveQueue
         QueueItem target = edit.Item ?? throw new InvalidQueueEditException("A step back needs the item.");
         if (_current?.ItemID == target.ItemID) return false;
 
-        QueueItem named = target;
+        QueueItem named;
         List<QueueItem> afterList = [];
         int historyIndex = _historyList.FindIndex(x => x.ItemID == target.ItemID);
         if (historyIndex >= 0)

@@ -10,7 +10,7 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Storage.Stores;
 
-public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISettingStore, IMetadataListStore, IVolumeStore
+public class SqliteMetadataStore : IMetadataStore, IMetadataListStore, IVolumeStore
 {
     // SQLite's result codes for a file that is not a database and for a damaged one.
     private const int SqliteCorrupt = 11;
@@ -32,10 +32,29 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
     private const string GenreListETagKey = "GenreListETag";
     private const string VolumeKey = "Volume";
     private const int DefaultVolume = 100;
-
     private readonly SemaphoreSlim _readyLock = new(1, 1);
-    private readonly string _connectionString = new SqliteConnectionStringBuilder { DataSource = databasePath, Mode = SqliteOpenMode.ReadWriteCreate, Pooling = true }.ToString();
+    private readonly string _databasePath;
+    private readonly string _connectionString;
     private bool _ready;
+
+    public SqliteMetadataStore(string databasePath)
+    {
+        _databasePath = databasePath;
+        _connectionString = new SqliteConnectionStringBuilder { DataSource = databasePath, Mode = SqliteOpenMode.ReadWriteCreate, Pooling = true }.ToString();
+
+        Setting = new SqliteListStore<ResponseSetting, string>(this, UserSettingTable, SettingListETagKey, x => x.Key);
+        Artist = new SqliteListStore<ResponseArtist, Guid>(this, ArtistTable, ArtistListETagKey, x => x.ID);
+        Album = new SqliteListStore<ResponseAlbum, Guid>(this, AlbumTable, AlbumListETagKey, x => x.ID);
+        Genre = new SqliteListStore<ResponseGenre, Guid>(this, GenreTable, GenreListETagKey, x => x.ID);
+    }
+
+    public IListStore<ResponseSetting, string> Setting { get; }
+
+    public IListStore<ResponseArtist, Guid> Artist { get; }
+
+    public IListStore<ResponseAlbum, Guid> Album { get; }
+
+    public IListStore<ResponseGenre, Guid> Genre { get; }
 
     public async Task<List<ResponseMediaFile>> GetMediaFileList()
     {
@@ -175,131 +194,8 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
 
     public async Task DeleteFileState(Guid mediaFileID)
     {
-        await Delete(FileStateTable, mediaFileID);
+        await Delete(FileStateTable, mediaFileID.ToString());
     }
-
-    #region -- Settings --
-
-    public async Task<List<ResponseSetting>> GetSettingList()
-    {
-        return await ReadList<ResponseSetting>(UserSettingTable);
-    }
-
-    public async Task ReplaceSettingList(List<ResponseSetting> settingList)
-    {
-        await ReplaceTable(UserSettingTable, settingList, x => x.Key);
-    }
-
-    public async Task SaveSetting(ResponseSetting setting)
-    {
-        await Upsert(UserSettingTable, setting.Key, setting);
-    }
-
-    public async Task<string?> GetSettingListETag()
-    {
-        return await GetSetting(SettingListETagKey);
-    }
-
-    public async Task SetSettingListETag(string? eTag)
-    {
-        await SetSetting(SettingListETagKey, eTag);
-    }
-
-    #endregion -- Settings --
-
-    #region -- Artists, albums and genres --
-
-    public async Task<List<ResponseArtist>> GetArtistList()
-    {
-        return await ReadList<ResponseArtist>(ArtistTable);
-    }
-
-    public async Task ReplaceArtistList(List<ResponseArtist> artistList)
-    {
-        await ReplaceTable(ArtistTable, artistList, x => x.ID.ToString());
-    }
-
-    public async Task SaveArtist(ResponseArtist artist)
-    {
-        await Upsert(ArtistTable, artist.ID.ToString(), artist);
-    }
-
-    public async Task DeleteArtist(Guid id)
-    {
-        await Delete(ArtistTable, id);
-    }
-
-    public async Task<string?> GetArtistListETag()
-    {
-        return await GetSetting(ArtistListETagKey);
-    }
-
-    public async Task SetArtistListETag(string? eTag)
-    {
-        await SetSetting(ArtistListETagKey, eTag);
-    }
-
-    public async Task<List<ResponseAlbum>> GetAlbumList()
-    {
-        return await ReadList<ResponseAlbum>(AlbumTable);
-    }
-
-    public async Task ReplaceAlbumList(List<ResponseAlbum> albumList)
-    {
-        await ReplaceTable(AlbumTable, albumList, x => x.ID.ToString());
-    }
-
-    public async Task SaveAlbum(ResponseAlbum album)
-    {
-        await Upsert(AlbumTable, album.ID.ToString(), album);
-    }
-
-    public async Task DeleteAlbum(Guid id)
-    {
-        await Delete(AlbumTable, id);
-    }
-
-    public async Task<string?> GetAlbumListETag()
-    {
-        return await GetSetting(AlbumListETagKey);
-    }
-
-    public async Task SetAlbumListETag(string? eTag)
-    {
-        await SetSetting(AlbumListETagKey, eTag);
-    }
-
-    public async Task<List<ResponseGenre>> GetGenreList()
-    {
-        return await ReadList<ResponseGenre>(GenreTable);
-    }
-
-    public async Task ReplaceGenreList(List<ResponseGenre> genreList)
-    {
-        await ReplaceTable(GenreTable, genreList, x => x.ID.ToString());
-    }
-
-    public async Task SaveGenre(ResponseGenre genre)
-    {
-        await Upsert(GenreTable, genre.ID.ToString(), genre);
-    }
-
-    public async Task DeleteGenre(Guid id)
-    {
-        await Delete(GenreTable, id);
-    }
-
-    public async Task<string?> GetGenreListETag()
-    {
-        return await GetSetting(GenreListETagKey);
-    }
-
-    public async Task SetGenreListETag(string? eTag)
-    {
-        await SetSetting(GenreListETagKey, eTag);
-    }
-
-    #endregion -- Artists, albums and genres --
 
     #region -- Volume --
 
@@ -315,7 +211,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
 
     #endregion -- Volume --
 
-    private async Task<List<T>> ReadList<T>(string table)
+    internal async Task<List<T>> ReadList<T>(string table)
     {
         await using SqliteConnection connection = await Open();
         await using SqliteCommand command = connection.CreateCommand();
@@ -334,7 +230,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
         await Upsert(table, id.ToString(), value);
     }
 
-    private async Task Upsert<T>(string table, string id, T value)
+    internal async Task Upsert<T>(string table, string id, T value)
     {
         await using SqliteConnection connection = await Open();
         await using SqliteCommand command = connection.CreateCommand();
@@ -345,13 +241,13 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
         await command.ExecuteNonQueryAsync();
     }
 
-    private async Task Delete(string table, Guid id)
+    internal async Task Delete(string table, string id)
     {
         await using SqliteConnection connection = await Open();
-        await Execute(connection, null, $"DELETE FROM {table} WHERE ID = $id", ("$id", id.ToString()));
+        await Execute(connection, null, $"DELETE FROM {table} WHERE ID = $id", ("$id", id));
     }
 
-    private async Task ReplaceTable<T>(string table, List<T> valueList, Func<T, string> idOf)
+    internal async Task ReplaceTable<T>(string table, List<T> valueList, Func<T, string> idOf)
     {
         await using SqliteConnection connection = await Open();
         await using SqliteTransaction transaction = (SqliteTransaction)await connection.BeginTransactionAsync();
@@ -362,7 +258,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
         await transaction.CommitAsync();
     }
 
-    private async Task<string?> GetSetting(string key)
+    internal async Task<string?> GetSetting(string key)
     {
         await using SqliteConnection connection = await Open();
         await using SqliteCommand command = connection.CreateCommand();
@@ -372,7 +268,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
         return await command.ExecuteScalarAsync() as string;
     }
 
-    private async Task SetSetting(string key, string? value)
+    internal async Task SetSetting(string key, string? value)
     {
         await using SqliteConnection connection = await Open();
         if (value is null)
@@ -391,7 +287,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
 
     private static async Task Insert<T>(SqliteConnection connection, SqliteTransaction transaction, string table, string id, T value)
     {
-        await Execute(connection, transaction, $"INSERT INTO {table} (ID, Json) VALUES ($id, $json)", ("$id", id),("$json", JsonSerializer.Serialize(value, JsonSerializerOptions.Web)));
+        await Execute(connection, transaction, $"INSERT INTO {table} (ID, Json) VALUES ($id, $json)", ("$id", id), ("$json", JsonSerializer.Serialize(value, JsonSerializerOptions.Web)));
     }
 
     private static async Task Execute(SqliteConnection connection, SqliteTransaction? transaction, string sql, params (string Name, string Value)[] parameterList)
@@ -428,7 +324,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
         {
             if (_ready) return;
 
-            string? folder = Path.GetDirectoryName(Path.GetFullPath(databasePath));
+            string? folder = Path.GetDirectoryName(Path.GetFullPath(_databasePath));
             if (folder is not null) Directory.CreateDirectory(folder);
 
             try
@@ -469,7 +365,7 @@ public class SqliteMetadataStore(string databasePath) : IMetadataStore, ISetting
     {
         SqliteConnection.ClearAllPools();
 
-        foreach (string path in (string[])[databasePath, $"{databasePath}-wal", $"{databasePath}-shm"])
+        foreach (string path in (string[])[_databasePath, $"{_databasePath}-wal", $"{_databasePath}-shm"])
         {
             if (File.Exists(path)) File.Delete(path);
         }

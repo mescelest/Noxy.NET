@@ -114,7 +114,7 @@ public class LiveSessionServiceTransferTest
     [Fact]
     public async Task Transfer_WhenTheOldDeviceNeverAnswers_UsesTheLastStateAdvancedByTheElapsedTime_WhenPlaying()
     {
-        await ActiveSession(true);
+        await ActiveSession();
         Guid target = await Device();
         FakeTransferDevices devices = new();
 
@@ -239,7 +239,7 @@ public class LiveSessionServiceTransferTest
     [Fact]
     public async Task Transfer_WhenTheOldDeviceCannotBeReached_UsesTheLastState_AndStartsTheTarget()
     {
-        await ActiveSession(true);
+        await ActiveSession();
         Guid target = await Device();
         FakeTransferDevices devices = new() { OnFinalStateRequested = _ => throw new InvalidOperationException("The device is offline.") };
 
