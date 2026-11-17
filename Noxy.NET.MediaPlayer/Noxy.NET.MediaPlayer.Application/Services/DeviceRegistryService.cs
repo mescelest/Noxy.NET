@@ -23,6 +23,7 @@ public class DeviceRegistryService(IPublisher publisher, IOptions<ConfigRemote> 
     // Adds the device or replaces its earlier connection. The list is pushed only when it changed (a new device, a new name, or a device this connection used to be).
     public async Task<List<ResponseDevice>> Register(Guid userID, RequestRegisterDevice request, string connectionID)
     {
+        string name = request.Name?.Trim() ?? throw new ArgumentException("A device needs a name.", nameof(request));
         bool changed;
         Guid? replacedDeviceID = null;
         lock (_lock)
@@ -43,15 +44,15 @@ public class DeviceRegistryService(IPublisher publisher, IOptions<ConfigRemote> 
             if (deviceMap.TryGetValue(request.DeviceID, out RegisteredDevice? existing))
             {
                 _connectionMap.Remove(existing.ConnectionID);
-                changed = existing.Name != request.Name;
-                existing.Name = request.Name;
+                changed = existing.Name != name;
+                existing.Name = name;
                 existing.ConnectionID = connectionID;
             }
             else
             {
                 if (deviceMap.Count >= configRemote.Value.MaxDeviceCount) throw new TooManyDevicesException();
 
-                deviceMap[request.DeviceID] = new() { DeviceID = request.DeviceID, Name = request.Name, ConnectionID = connectionID };
+                deviceMap[request.DeviceID] = new() { DeviceID = request.DeviceID, Name = name, ConnectionID = connectionID };
                 changed = true;
             }
 
