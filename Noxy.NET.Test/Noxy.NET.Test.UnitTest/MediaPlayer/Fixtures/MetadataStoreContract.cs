@@ -341,6 +341,20 @@ public abstract class MetadataStoreContract
     #region -- ETags --
 
     [Fact]
+    public async Task TheOwnerUserID_IsNullOnANewStore_RoundTrips_AndNullClearsIt()
+    {
+        IMetadataStore store = CreateStore();
+        Assert.Null(await store.GetOwnerUserID());
+
+        Guid id = Guid.NewGuid();
+        await store.SetOwnerUserID(id);
+        Assert.Equal(id, await store.GetOwnerUserID());
+
+        await store.SetOwnerUserID(null);
+        Assert.Null(await store.GetOwnerUserID());
+    }
+
+    [Fact]
     public async Task ETags_RoundTripIndependently_AndNullClearsOne()
     {
         IMetadataStore store = CreateStore();

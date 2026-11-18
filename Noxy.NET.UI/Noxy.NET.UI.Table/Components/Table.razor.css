@@ -34,3 +34,39 @@
     align-items: center;
     justify-content: center;
 }
+
+.Table[data-virtualized="True"] {
+    display: flex;
+    flex-flow: column;
+    overflow: hidden;
+    scrollbar-gutter: stable;
+}
+
+.Table[data-virtualized="True"] .header {
+    flex: 0 0 auto;
+    grid-template-columns: var(--table-columns, repeat(auto-fit, minmax(100px, 1fr)));
+    column-gap: var(--size-gap-sm);
+    scrollbar-gutter: stable;
+}
+
+.Table[data-virtualized="True"] ::deep > .loading {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.Table ::deep .items {
+    display: grid;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    align-content: start;
+    grid-template-columns: var(--table-columns, repeat(auto-fit, minmax(100px, 1fr)));
+    column-gap: var(--size-gap-sm);
+}
+
+.Table ::deep .items > :not(.row) {
+    grid-column: 1 / -1;
+}

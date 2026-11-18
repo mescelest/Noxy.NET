@@ -1,0 +1,16 @@
+.FileStatusIcon {
+    display: inline-flex;
+    color: var(--color-muted);
+}
+
+.FileStatusIcon[data-state="OnDevice"] {
+    color: var(--color-success);
+}
+
+.FileStatusIcon[data-state="Downloading"] {
+    color: var(--color-highlight);
+}
+
+.FileStatusIcon[data-state="Failed"] {
+    color: var(--color-error);
+}

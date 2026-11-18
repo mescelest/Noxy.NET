@@ -208,7 +208,10 @@ public class QueueService : IQueueService
         await Locked(async _ =>
         {
             _positionSeconds = positionSeconds;
-            await SaveLocked();
+
+            // A queue with no current item cannot be resumed: nothing is kept of it, and a copy that was saved before goes.
+            if (_queue.Current is null) await _storeLocalQueue.Clear();
+            else await SaveLocked();
         });
     }
 

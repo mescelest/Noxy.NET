@@ -93,6 +93,15 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
         lock (_lock) return new(_bulkTotal, _bulkFinished, _bulkFailed, _bulkBytesDone, _bulkStoppedReason);
     }
 
+    public async Task Remove(Guid mediaFileID)
+    {
+        await Cancel(mediaFileID);
+        await storeFile.DiscardPartial(mediaFileID);
+        await storeFile.Delete(mediaFileID);
+        await storeMetadata.DeleteFileState(mediaFileID);
+        Changed?.Invoke();
+    }
+
     public async Task Cancel(Guid mediaFileID)
     {
         Task<bool>? task = null;

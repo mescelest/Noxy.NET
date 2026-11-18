@@ -2,12 +2,12 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:components="clr-namespace:Noxy.NET.MediaPlayer.App.Components"
+             xmlns:application="clr-namespace:Noxy.NET.MediaPlayer.App.Application"
              x:Class="Noxy.NET.MediaPlayer.App.MainPage">
 
     <BlazorWebView HostPage="wwwroot/index.html">
         <BlazorWebView.RootComponents>
-            <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
+            <RootComponent Selector="#app" ComponentType="{x:Type application:Routes}" />
         </BlazorWebView.RootComponents>
     </BlazorWebView>
 

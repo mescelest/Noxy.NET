@@ -1,0 +1,8 @@
+/* The only place a media query condition is written. */
+@media (max-width: 720px) {
+    :root {
+        --size-layout-sidebar: var(--size-control-xxl);
+        --size-queue-panel: 100%;
+        --layout-narrow: 1;
+    }
+}

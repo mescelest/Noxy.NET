@@ -335,6 +335,19 @@ public class ApiClientTest
     }
 
     [Fact]
+    public async Task DeleteMedia_DeletesTheMediaFile_On204()
+    {
+        _handler.Respond = _ => new(HttpStatusCode.NoContent);
+        Guid media = Guid.CreateVersion7();
+
+        await _client.DeleteMedia(media);
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Delete, request.Method);
+        Assert.Equal($"https://server.example/Media/{media}", request.Uri?.ToString());
+    }
+
+    [Fact]
     public async Task DeletePlaylist_DeletesThePlaylist_On204()
     {
         _handler.Respond = _ => new(HttpStatusCode.NoContent);
@@ -443,6 +456,24 @@ public class ApiClientTest
         Assert.Equal("\"file-etag\"", response.ETag);
         Assert.Equal(5, response.TotalBytes);
         Assert.Equal(bytes, await ReadAll(response.Content));
+    }
+
+    [Fact]
+    public async Task GetTaggedFile_GetsTheDownloadPath_AndStreamsTheBody()
+    {
+        Guid id = Guid.CreateVersion7();
+        FakeTrackedContent content = new([9, 8, 7]);
+        _handler.Respond = _ => File(HttpStatusCode.OK, content);
+
+        using ApiFileResponse response = await _client.GetTaggedFile(id);
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Get, request.Method);
+        Assert.Equal($"https://server.example/Media/{id}/Download", request.Uri?.ToString());
+        Assert.Equal("Bearer token-1", request.Authorization);
+        Assert.Null(request.Range);
+        Assert.False(content.Buffered);
+        Assert.Equal([9, 8, 7], await ReadAll(response.Content));
     }
 
     [Fact]

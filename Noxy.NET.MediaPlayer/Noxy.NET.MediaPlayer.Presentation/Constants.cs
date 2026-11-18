@@ -17,6 +17,40 @@ public static class Constants
     // Tries for one download (a hash mismatch or a transient failure each use one) before it ends Failed.
     public const int MaxDownloadAttempts = 3;
 
+    // With a stored session and no network, start-up tries again after this many seconds, then twice as long each time, up to the maximum.
+    public const int StartupRetryBaseSeconds = 5;
+
+    public const int StartupRetryMaxSeconds = 60;
+
+    // The keys of the small choices kept on this device (IDevicePreferenceStorage).
+    public const string SidebarOpenKey = "sidebarOpen";
+
+    // A call to the server that has not answered after this many seconds counts as not reached (the body of a file being streamed is not covered).
+    public const int HttpTimeoutSeconds = 30;
+
+    // How many playlist cards the Home page shows.
+    public const int HomeRecentCount = 6;
+
+    // What the sign-in form says when the server gave no message of its own.
+    public const string SignInMessageOffline = "The server cannot be reached. Check the server address and your connection.";
+
+    public const string SignInMessageNoAddress = "Enter the server address first.";
+
+    public const string SignInMessageFailed = "Signing in failed. Try again.";
+
+    // What the library actions say when the server gave no message of its own.
+    public const string ActionMessageOffline = "This needs the server, and it cannot be reached right now.";
+
+    public const string ActionMessageRemoveFailed = "Some files could not be removed from this device.";
+
+    public const string ActionMessageDeleteFailed = "Some media files could not be deleted.";
+
+    public const string ActionMessageAddFailed = "The media files could not be added to the playlist.";
+
+    public const string ActionMessageSaveFailed = "The file could not be saved.";
+
+    public const string ActionMessageFailed = "Something went wrong. Try again.";
+
     // The wait before the second try; it doubles for each try after that.
     public const int RetryBaseDelaySeconds = 2;
 

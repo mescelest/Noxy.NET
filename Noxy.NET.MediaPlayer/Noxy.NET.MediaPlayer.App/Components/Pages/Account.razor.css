@@ -1,0 +1,33 @@
+.Account {
+    display: flex;
+    flex-flow: column;
+    gap: var(--size-gap-lg);
+    padding: var(--size-gap-lg);
+}
+
+dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--size-gap-xs) var(--size-gap-lg);
+    margin: 0;
+}
+
+dt {
+    color: var(--color-muted);
+}
+
+dd {
+    margin: 0;
+}
+
+.sign-out {
+    align-self: flex-start;
+    min-height: var(--size-control-md);
+    padding: 0 var(--size-gap-sm);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-error);
+    font: var(--font-button);
+    cursor: pointer;
+}

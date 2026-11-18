@@ -1,0 +1,59 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--color-primary);
+    color: var(--color-complementary);
+    font: var(--font-body);
+    --maui-status-bar-safe-area-background: var(--color-primary);
+}
+
+#app {
+    height: 100%;
+}
+
+a {
+    color: var(--color-highlight);
+}
+
+h1:focus {
+    outline: none;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: var(--size-border-width-sm) solid var(--color-success);
+}
+
+.invalid {
+    outline: var(--size-border-width-sm) solid var(--color-error);
+}
+
+.validation-message {
+    color: var(--color-error);
+}
+
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: var(--size-gap-xxs) var(--size-gap-sm);
+    background: var(--color-warning);
+    color: var(--color-dark);
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    position: absolute;
+    top: var(--size-gap-xxs);
+    right: var(--size-gap-xs);
+    cursor: pointer;
+}

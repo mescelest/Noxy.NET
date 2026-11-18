@@ -6,6 +6,8 @@ namespace Noxy.NET.MediaPlayer.Presentation.Extensions;
 public static class StringExtensions
 {
     private const string ExpiresClaim = "exp";
+    private const string SubjectClaim = "sub";
+    private const string EmailClaim = "email";
 
     extension(string accessToken)
     {
@@ -21,6 +23,44 @@ public static class StringExtensions
                 if (payload.RootElement.ValueKind != JsonValueKind.Object || !payload.RootElement.TryGetProperty(ExpiresClaim, out JsonElement expires) || !expires.TryGetInt64(out long seconds)) return null;
 
                 return DateTimeOffset.FromUnixTimeSeconds(seconds).UtcDateTime;
+            }
+            catch (Exception exception) when (exception is FormatException or JsonException or ArgumentOutOfRangeException)
+            {
+                return null;
+            }
+        }
+
+        // The sub claim (the user ID) of the token's payload, read without validating the token. Null when the token cannot be read or its sub is not a user ID.
+        public Guid? GetAccessTokenSubject()
+        {
+            string[] segmentList = accessToken.Split('.');
+            if (segmentList.Length != 3) return null;
+
+            try
+            {
+                using JsonDocument payload = JsonDocument.Parse(Base64Url.DecodeFromChars(segmentList[1]));
+                if (payload.RootElement.ValueKind != JsonValueKind.Object || !payload.RootElement.TryGetProperty(SubjectClaim, out JsonElement subject) || subject.ValueKind != JsonValueKind.String) return null;
+
+                return Guid.TryParse(subject.GetString(), out Guid userID) ? userID : null;
+            }
+            catch (Exception exception) when (exception is FormatException or JsonException or ArgumentOutOfRangeException)
+            {
+                return null;
+            }
+        }
+
+        // The email claim of the token's payload, read without validating the token. Null when the token cannot be read or has no email claim.
+        public string? GetAccessTokenEmail()
+        {
+            string[] segmentList = accessToken.Split('.');
+            if (segmentList.Length != 3) return null;
+
+            try
+            {
+                using JsonDocument payload = JsonDocument.Parse(Base64Url.DecodeFromChars(segmentList[1]));
+                if (payload.RootElement.ValueKind != JsonValueKind.Object || !payload.RootElement.TryGetProperty(EmailClaim, out JsonElement email) || email.ValueKind != JsonValueKind.String) return null;
+
+                return string.IsNullOrWhiteSpace(email.GetString()) ? null : email.GetString();
             }
             catch (Exception exception) when (exception is FormatException or JsonException or ArgumentOutOfRangeException)
             {

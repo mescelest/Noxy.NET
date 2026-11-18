@@ -1,0 +1,99 @@
+.Playlist {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.row-top, .row-settings {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--size-gap-sm);
+}
+
+.row-settings {
+    margin-top: var(--size-gap-xxs);
+    color: var(--color-muted);
+    font: var(--font-label);
+}
+
+.row-top h1 {
+    margin: 0;
+    font-size: var(--size-text-h4);
+}
+
+.counts {
+    flex: 1 1 auto;
+    color: var(--color-muted);
+    font: var(--font-label);
+}
+
+.plain-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--size-gap-xxs);
+    min-height: var(--size-control-sm);
+    padding: 0 var(--size-gap-xs);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-complementary);
+    font: var(--font-button);
+    cursor: pointer;
+}
+
+.plain-button:disabled {
+    color: var(--color-disabled);
+    cursor: default;
+}
+
+.plain-button.primary {
+    border-color: var(--color-highlight);
+    background: var(--color-highlight);
+    color: var(--color-light);
+}
+
+.plain-button.danger {
+    color: var(--color-error);
+}
+
+.entries {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.entry {
+    display: grid;
+    grid-template-columns: var(--size-control-xs) var(--size-control-xs) minmax(var(--size-card-width), 3fr) minmax(var(--size-card-width), 2fr) minmax(var(--size-card-width), 2fr);
+    align-items: center;
+    min-height: var(--size-library-row);
+    padding: 0 var(--size-gap-sm);
+    border-bottom: var(--size-border-width-sm) solid var(--color-offset-primary-sm);
+    user-select: none;
+}
+
+.entry[data-over="True"] {
+    border-top: var(--size-border-width-md) solid var(--color-highlight);
+}
+
+.grip {
+    display: inline-flex;
+    color: var(--color-muted);
+    cursor: grab;
+}
+
+.cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.loading {
+    padding: var(--size-gap-sm);
+    color: var(--color-muted);
+}

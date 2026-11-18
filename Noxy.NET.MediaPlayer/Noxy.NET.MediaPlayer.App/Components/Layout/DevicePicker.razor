@@ -1,0 +1,114 @@
+@inject IState<FeatureSessionState> StateSession
+@inject IRemotePlaybackService ServiceRemote
+@inject IPlaybackControlService ServiceControl
+@inject IDeviceService ServiceDevice
+@inherits FluxorElementComponent
+@implements IAsyncDisposable
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <button type="button" class="trigger" disabled="@(Reason is not null)" title="@Reason" aria-haspopup="listbox" aria-expanded="@_open" @onclick="Open">
+        @ButtonLabel
+    </button>
+
+    @if (_open)
+    {
+        <div class="backdrop" @onclick="() => _open = false"></div>
+        <ul class="list" role="listbox">
+            @foreach (ResponseDevice device in DeviceList)
+            {
+                ResponseDevice chosen = device;
+                <li role="none">
+                    <button type="button" role="option" class="device" aria-selected="@chosen.IsActive" @onclick="() => Choose(chosen)">
+                        @(chosen.DeviceID == _thisID ? $"{chosen.Name} (this device)" : chosen.Name)
+                        @if (chosen.IsActive)
+                        {
+                            <span class="active">playing</span>
+                        }
+                    </button>
+                </li>
+            }
+            @if (DeviceList.Count == 0)
+            {
+                <li class="none">No devices are online.</li>
+            }
+        </ul>
+    }
+
+    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+</div>
+
+@code {
+
+    private List<string> _messageList = [];
+    private bool _open;
+    private Guid? _thisID;
+    private string? _movingTo;
+
+    // Offline there is no live session to move: the button says why.
+    private string? Reason => StateSession.Value.IsOffline || !ServiceRemote.IsOnline ? "Offline" : null;
+
+    private string ButtonLabel => _movingTo is not null ? $"Moving playback to {_movingTo}…" : ServiceRemote.Role == PlaybackRoleEnum.Controller ? $"Playing on {ActiveName}" : "This device";
+
+    private string ActiveName => ServiceRemote.DeviceList.FirstOrDefault(x => x.DeviceID == ServiceRemote.ActiveDeviceID)?.Name ?? "another device";
+
+    // This device first, then the others in the order the server sent them.
+    private List<ResponseDevice> DeviceList => [.. ServiceRemote.DeviceList.OrderByDescending(x => x.DeviceID == _thisID)];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _thisID = await ServiceDevice.GetDeviceID();
+        ServiceRemote.Changed += OnChanged;
+        ServiceControl.TransferFailed += OnTransferFailed;
+    }
+
+    private void OnChanged()
+    {
+        _movingTo = null;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void OnTransferFailed()
+    {
+        _movingTo = null;
+        _messageList = ["The playback could not be moved."];
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void Open()
+    {
+        _messageList = [];
+        _open = !_open;
+    }
+
+    private async Task Choose(ResponseDevice device)
+    {
+        // Moving to the device that already plays changes nothing and no update follows, so there is nothing to wait for.
+        if (device.IsActive || (device.DeviceID == _thisID && ServiceRemote.Role != PlaybackRoleEnum.Controller))
+        {
+            _open = false;
+            return;
+        }
+
+        _open = false;
+        _messageList = [];
+        _movingTo = device.Name;
+        try
+        {
+            await ServiceControl.Transfer(device.DeviceID);
+        }
+        catch (Exception exception)
+        {
+            _movingTo = null;
+            _messageList = [exception is InvalidOperationException ? exception.Message : exception.ToActionMessage()];
+        }
+    }
+
+    public new async ValueTask DisposeAsync()
+    {
+        ServiceRemote.Changed -= OnChanged;
+        ServiceControl.TransferFailed -= OnTransferFailed;
+        await base.DisposeAsync();
+    }
+
+}

@@ -1,0 +1,146 @@
+@inject ISessionService ServiceSession
+@inject IAppStartupService ServiceStartup
+@inject IServerAddressStorage StorageServerAddress
+@inject NavigationManager Navigation
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @if (_showAddress)
+    {
+        <form class="address" @onsubmit="SaveAddress" @onsubmit:preventDefault>
+            <label for="server-address">Server address</label>
+            <div class="address-row">
+                <input id="server-address" type="url" placeholder="https://" @bind="_address" @bind:event="oninput" autocomplete="off"/>
+                <button type="submit" class="plain-button">Save</button>
+            </div>
+            <MessageBox MessageList="_addressMessageList" Status="StatusEnum.Error"/>
+        </form>
+    }
+    else
+    {
+        <button type="button" class="link-button" @onclick="() => _showAddress = true">Server: @_savedAddress (change)</button>
+    }
+
+    <div class="card">
+        <h1 class="logo">Noxy Player</h1>
+
+        <div class="providers">
+            @foreach (Provider provider in _providerList)
+            {
+                <button type="button" class="plain-button provider" disabled="@_busy" @onclick="provider.SignIn">@provider.Name</button>
+            }
+        </div>
+
+        <MessageBox MessageList="_providerMessageList" Status="StatusEnum.Error"/>
+
+        <div class="divider" role="separator"><span>or</span></div>
+
+        <TabSet>
+            <TabPage Title="Sign in">
+                <WebForm T="ModelSignIn" Context="_contextSignIn" OnSubmit="SubmitSignIn">
+                    <InputGroupText @bind-Value="_contextSignIn.Model.Email"/>
+                    <InputGroupPassword @bind-Value="_contextSignIn.Model.Password"/>
+                    <button type="submit" class="plain-button primary" disabled="@_busy">Sign in</button>
+                </WebForm>
+            </TabPage>
+            <TabPage Title="Create account">
+                <WebForm T="ModelSignUp" Context="_contextSignUp" OnSubmit="SubmitSignUp">
+                    <InputGroupText @bind-Value="_contextSignUp.Model.Email"/>
+                    <InputGroupPassword @bind-Value="_contextSignUp.Model.Password"/>
+                    <button type="submit" class="plain-button primary" disabled="@_busy">Create account</button>
+                </WebForm>
+            </TabPage>
+        </TabSet>
+    </div>
+</div>
+
+@code {
+
+    private sealed record Provider(string Name, Func<Task> SignIn);
+
+    private readonly WebFormContext<ModelSignIn> _contextSignIn = new(new());
+    private readonly WebFormContext<ModelSignUp> _contextSignUp = new(new());
+    private readonly List<Provider> _providerList = [];
+    private List<string> _addressMessageList = [];
+    private List<string> _providerMessageList = [];
+    private string _address = string.Empty;
+    private string? _savedAddress;
+    private bool _showAddress;
+    private bool _busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Another provider is one more entry here.
+        _providerList.Add(new("Sign in with Google", SignInWithGoogle));
+
+        _savedAddress = await StorageServerAddress.GetAddress();
+        _address = _savedAddress ?? string.Empty;
+        _showAddress = _savedAddress is null;
+    }
+
+    private async Task SaveAddress()
+    {
+        _addressMessageList = [];
+        try
+        {
+            await StorageServerAddress.SetAddress(_address);
+            _savedAddress = await StorageServerAddress.GetAddress();
+            _address = _savedAddress ?? string.Empty;
+            _showAddress = false;
+        }
+        catch (ArgumentException)
+        {
+            _addressMessageList = ["Enter an http or https address, for example https://music.example.com."];
+        }
+    }
+
+    private Task SubmitSignIn(WebFormContext<ModelSignIn> context)
+    {
+        return Run(async () =>
+        {
+            await ServiceSession.SignIn(context.Model.Email, context.Model.Password);
+            return true;
+        }, message => context.HandleException(message));
+    }
+
+    private Task SubmitSignUp(WebFormContext<ModelSignUp> context)
+    {
+        return Run(async () =>
+        {
+            await ServiceSession.SignUp(context.Model.Email, context.Model.Password);
+            return true;
+        }, message => context.HandleException(message));
+    }
+
+    private Task SignInWithGoogle()
+    {
+        _providerMessageList = [];
+        return Run(() => ServiceSession.SignInWithGoogle(), message => _providerMessageList = [message]);
+    }
+
+    // The sign-in returns false when the user cancelled it: nothing is shown and the page stays as it was.
+    private async Task Run(Func<Task<bool>> signIn, Action<string> showMessage)
+    {
+        if (_busy) return;
+
+        _busy = true;
+        try
+        {
+            if (!await signIn()) return;
+        }
+        catch (Exception exception)
+        {
+            showMessage(exception.ToSignInMessage());
+            return;
+        }
+        finally
+        {
+            _busy = false;
+        }
+
+        // The rest of start-up (the owner check, the syncs, the hub), without restoring the session again, and then Home: the layout swaps to the shell once the session says so.
+        await ServiceStartup.Connect();
+        Navigation.NavigateTo("");
+    }
+
+}

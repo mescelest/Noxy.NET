@@ -1,0 +1,100 @@
+@page "/library"
+@inject IState<FeatureLibraryState> StateLibrary
+@inject IState<FeatureSessionState> StateSession
+@inject IDispatcher Dispatcher
+@inject IPlaybackControlService ServicePlaybackControl
+@inherits FluxorPageComponent
+
+<div class="@CssClass">
+    <GlassPanel>
+        <div class="row-top">
+            <h1>Library</h1>
+            <span class="counts">
+                @Current.VisibleList.Count of @Current.MediaList.Count files · @Current.SelectedCount selected
+                @if (Current.HiddenSelectedCount > 0)
+                {
+                    <span class="hidden-note">(@Current.HiddenSelectedCount hidden by the search)</span>
+                }
+            </span>
+
+            <ActionsMenu/>
+
+            <input type="search" class="search" placeholder="Search the library" aria-label="Search the library" value="@Current.Search" @oninput="OnSearchInput"/>
+        </div>
+    </GlassPanel>
+
+    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+
+    @if (Current.MediaList.Count == 0)
+    {
+        <MessageBox MessageList="@([EmptyMessage])" Status="StatusEnum.Info"/>
+    }
+    else
+    {
+        <Table T="ResponseMediaFile" List="Current.VisibleList" Virtualize="true" ItemSize="48" KeySelector="x => x.ID" class="table">
+            <TableHeader>
+                <input type="checkbox" aria-label="Select all shown" checked="@Current.AllVisibleSelected" @onchange="() => Dispatcher.Dispatch(new ActionLibraryVisibleSelected())"/>
+                <span></span>
+                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.Title)" OnClick="() => Sort(LibrarySortEnum.Title)">Title</TableSortHeaderCell>
+                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.Artist)" OnClick="() => Sort(LibrarySortEnum.Artist)">Artist</TableSortHeaderCell>
+                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.Album)" OnClick="() => Sort(LibrarySortEnum.Album)">Album</TableSortHeaderCell>
+                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.Year)" OnClick="() => Sort(LibrarySortEnum.Year)">Year</TableSortHeaderCell>
+                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.TimeCreated)" OnClick="() => Sort(LibrarySortEnum.TimeCreated)">Added</TableSortHeaderCell>
+            </TableHeader>
+            <TableRow Context="entry">
+                <div class="media-row" @ondblclick="() => Play(entry.Row)">
+                    <input type="checkbox" aria-label="Select @entry.Row.Title" checked="@Current.SelectedSet.Contains(entry.Row.ID)" @onchange="() => Dispatcher.Dispatch(new ActionLibrarySelectionToggled(entry.Row.ID))"/>
+                    <FileStatusIcon State="StateOf(entry.Row.ID)"/>
+                    <span class="cell">@entry.Row.Title</span>
+                    <span class="cell">@entry.Row.Artist</span>
+                    <span class="cell">@entry.Row.Album</span>
+                    <span class="cell">@entry.Row.Year</span>
+                    <span class="cell">@entry.Row.TimeCreated.ToLocalTime().ToString("d")</span>
+                </div>
+            </TableRow>
+        </Table>
+    }
+</div>
+
+@code {
+
+    private List<string> _messageList = [];
+
+    private FeatureLibraryState Current => StateLibrary.Value;
+
+    private string EmptyMessage => StateSession.Value.IsOffline ? "You are offline, so the library cannot be loaded from the server." : "Your library is empty. Upload media on the server.";
+
+    private FileSyncStateEnum StateOf(Guid id) => Current.StateMap.GetValueOrDefault(id, FileSyncStateEnum.NotDownloaded);
+
+    private SortDirectionEnum DirectionOf(LibrarySortEnum sort)
+    {
+        if (Current.Sort != sort) return SortDirectionEnum.None;
+
+        return Current.Descending ? SortDirectionEnum.Descending : SortDirectionEnum.Ascending;
+    }
+
+    private void Sort(LibrarySortEnum sort)
+    {
+        Dispatcher.Dispatch(new ActionLibrarySortChanged(sort));
+    }
+
+    private void OnSearchInput(ChangeEventArgs args)
+    {
+        Dispatcher.Dispatch(new ActionLibrarySearchChanged(args.Value?.ToString() ?? string.Empty));
+    }
+
+    // The played list is exactly what the page shows: the same sort and search.
+    private async Task Play(ResponseMediaFile media)
+    {
+        _messageList = [];
+        try
+        {
+            await ServicePlaybackControl.StartLibrary(media.ID, Current.Sort, Current.Descending, Current.Search);
+        }
+        catch (Exception exception)
+        {
+            _messageList = [exception.ToActionMessage()];
+        }
+    }
+
+}

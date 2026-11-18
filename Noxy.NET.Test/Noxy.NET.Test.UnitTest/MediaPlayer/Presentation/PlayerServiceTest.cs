@@ -862,7 +862,8 @@ public class PlayerServiceTest
         _audio.LoadFailure = "The file could not be played.";
 
         await Start(idList[0]);
-        await WaitUntil(() => _player.Current is { } current && _player.StateOf(current) == FileSyncStateEnum.Failed && Snapshot().HistoryList.Count == 1);
+        // Both items were tried (the load of each fails) and the last one is the one left, failed.
+        await WaitUntil(() => LoadList.Count == 2 && _player.Current is { } current && _player.StateOf(current) == FileSyncStateEnum.Failed && Snapshot().HistoryList.Count == 1);
 
         Assert.DoesNotContain("Play", _audio.CallList);
         Assert.False(_player.IsPlaying);

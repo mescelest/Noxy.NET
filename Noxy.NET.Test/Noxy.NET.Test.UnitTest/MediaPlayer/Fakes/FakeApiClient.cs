@@ -33,6 +33,17 @@ public sealed class FakeApiClient : IApiClient
 
     public List<(Guid ID, string? ETag)> PlaylistDetailRequestList { get; } = [];
 
+    public List<Guid> TaggedFileRequestList { get; } = [];
+
+    // Answers each GetTaggedFile call. The default is a 404.
+    public Func<Guid, Task<ApiFileResponse>> TaggedFileHandler { get; set; } = _ => throw new ApiException(HttpStatusCode.NotFound, "Not found.");
+
+    public Task<ApiFileResponse> GetTaggedFile(Guid id)
+    {
+        TaggedFileRequestList.Add(id);
+        return TaggedFileHandler(id);
+    }
+
     public Task<ApiFileResponse> GetFile(Guid id, long? rangeStart, string? ifRange)
     {
         lock (_fileRequestLock) FileRequestList.Add((id, rangeStart, ifRange));
@@ -120,38 +131,87 @@ public sealed class FakeApiClient : IApiClient
         return Task.CompletedTask;
     }
 
+    public List<RequestCreatePlaylist> CreatePlaylistRequestList { get; } = [];
+
     public Task<ResponsePlaylist> CreatePlaylist(RequestCreatePlaylist request)
     {
-        throw new NotSupportedException();
+        CreatePlaylistRequestList.Add(request);
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult<ResponsePlaylist>(PlaylistFor(Guid.CreateVersion7(), request.Name));
     }
 
-    public Func<Guid, RequestUpdatePlaylist, ResponsePlaylist> UpdatePlaylistHandler { get; set; } = (_, _) => throw new NotSupportedException();
+    // Thrown by every playlist write, after it is recorded, when set.
+    public Exception? WriteFailure { get; set; }
+
+    public static ResponsePlaylist PlaylistFor(Guid id, string name) => new() { ID = id, Name = name, AllowDuplicates = true, EntryCount = 0, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null };
+
+    public static ResponsePlaylistDetail DetailFor(Guid id) => new() { ID = id, Name = "Playlist", AllowDuplicates = true, EntryCount = 0, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null, EntryList = [] };
+
+    public Func<Guid, RequestUpdatePlaylist, ResponsePlaylist> UpdatePlaylistHandler { get; set; } = (id, _) => PlaylistFor(id, "Playlist");
 
     public List<(Guid ID, RequestUpdatePlaylist Request)> UpdatePlaylistRequestList { get; } = [];
 
     public Task<ResponsePlaylist> UpdatePlaylist(Guid id, RequestUpdatePlaylist request)
     {
         UpdatePlaylistRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
         return Task.FromResult(UpdatePlaylistHandler(id, request));
     }
 
+    public List<Guid> DeleteMediaList { get; } = [];
+
+    // Returns the exception DeleteMedia throws for an ID, or null for success.
+    public Func<Guid, Exception?>? DeleteMediaFailure { get; set; }
+
+    public Task DeleteMedia(Guid id)
+    {
+        DeleteMediaList.Add(id);
+        if (DeleteMediaFailure?.Invoke(id) is { } failure) throw failure;
+
+        return Task.CompletedTask;
+    }
+
+    public List<(Guid PlaylistID, RequestAddPlaylistEntry Request)> AddEntryCallList { get; } = [];
+
+    // Thrown by AddPlaylistEntryList, after it is recorded, when set.
+    public Exception? AddEntryFailure { get; set; }
+
+    public List<Guid> DeletePlaylistList { get; } = [];
+
     public Task DeletePlaylist(Guid id)
     {
-        throw new NotSupportedException();
+        DeletePlaylistList.Add(id);
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.CompletedTask;
     }
 
     public Task<ResponsePlaylistDetail> AddPlaylistEntryList(Guid id, RequestAddPlaylistEntry request)
     {
-        throw new NotSupportedException();
+        AddEntryCallList.Add((id, request));
+        if (AddEntryFailure is not null) throw AddEntryFailure;
+
+        return Task.FromResult(new ResponsePlaylistDetail { ID = id, Name = "Playlist", AllowDuplicates = true, EntryCount = request.MediaFileIDList.Count, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null, EntryList = [] });
     }
+
+    public List<(Guid ID, RequestRemovePlaylistEntry Request)> RemoveEntryCallList { get; } = [];
 
     public Task<ResponsePlaylistDetail> RemovePlaylistEntryList(Guid id, RequestRemovePlaylistEntry request)
     {
-        throw new NotSupportedException();
+        RemoveEntryCallList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(DetailFor(id));
     }
+
+    public List<(Guid ID, Guid EntryID, RequestMovePlaylistEntry Request)> MoveEntryCallList { get; } = [];
 
     public Task<ResponsePlaylistDetail> MovePlaylistEntry(Guid id, Guid entryID, RequestMovePlaylistEntry request)
     {
-        throw new NotSupportedException();
+        MoveEntryCallList.Add((id, entryID, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(DetailFor(id));
     }
 }

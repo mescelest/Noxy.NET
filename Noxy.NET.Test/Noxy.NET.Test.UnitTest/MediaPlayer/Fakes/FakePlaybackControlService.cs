@@ -83,9 +83,13 @@ public sealed class FakePlaybackControlService : IPlaybackControlService
         return Task.CompletedTask;
     }
 
+    // Runs inside RemoveFromQueue, so a test can record the order of calls.
+    public Action<Guid>? RemoveFromQueueHandler { get; set; }
+
     public Task RemoveFromQueue(Guid itemID)
     {
         CallList.Add($"RemoveFromQueue {itemID}");
+        RemoveFromQueueHandler?.Invoke(itemID);
         return Task.CompletedTask;
     }
 

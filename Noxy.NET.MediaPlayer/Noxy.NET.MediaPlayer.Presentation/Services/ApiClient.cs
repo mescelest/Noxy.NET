@@ -21,6 +21,7 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     private const string IfNoneMatchHeader = "If-None-Match";
     private const string MediaPath = "/Media";
     private const string FileSegment = "File";
+    private const string DownloadSegment = "Download";
     private const string LibraryPath = "/Media/Library";
     private const string PlaylistPath = "/Playlist";
     private const string SettingPath = "/Settings";
@@ -65,6 +66,23 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
         }
     }
 
+    public async Task<ApiFileResponse> GetTaggedFile(Guid id)
+    {
+        HttpResponseMessage response = await Send(HttpMethod.Get, $"{MediaPath}/{id}/{DownloadSegment}", null, null, null, HttpCompletionOption.ResponseHeadersRead);
+
+        try
+        {
+            await EnsureSuccess(response);
+
+            return new(response.StatusCode, await response.Content.ReadAsStreamAsync(), response.Headers.ETag?.Tag, response.Content.Headers.ContentLength, response);
+        }
+        catch
+        {
+            response.Dispose();
+            throw;
+        }
+    }
+
     public async Task<ResponsePlaylist> CreatePlaylist(RequestCreatePlaylist request)
     {
         return await Write<ResponsePlaylist>(HttpMethod.Post, PlaylistPath, request);
@@ -73,6 +91,12 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     public async Task<ResponsePlaylist> UpdatePlaylist(Guid id, RequestUpdatePlaylist request)
     {
         return await Write<ResponsePlaylist>(HttpMethod.Patch, $"{PlaylistPath}/{id}", request);
+    }
+
+    public async Task DeleteMedia(Guid id)
+    {
+        using HttpResponseMessage response = await Send(HttpMethod.Delete, $"{MediaPath}/{id}", null, null);
+        await EnsureSuccess(response);
     }
 
     public async Task DeletePlaylist(Guid id)

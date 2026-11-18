@@ -17,6 +17,9 @@ public interface IDownloadService
     // Stops a running or waiting download, discards its partial file and leaves the media file NotDownloaded. Returns when it has stopped. A media file waiting in the bulk queue leaves it.
     Task Cancel(Guid mediaFileID);
 
+    // Takes the media file off the device: stops its download, deletes the file and its state, and raises Changed. The library entry is not touched. A media file that is not on the device is harmless.
+    Task Remove(Guid mediaFileID);
+
     // The bulk download: queues the media files in the list that are not already on the device (and not already in the bulk) and returns at once. Before each file it checks that the free space holds the file and Constants.StorageReserveBytes; if not, the bulk stops, says why in the progress, and the rest stay NotDownloaded. Only the list passed in is queued: media files added to the library later are not.
     Task QueueMissing(List<Guid> mediaFileIDList);
 

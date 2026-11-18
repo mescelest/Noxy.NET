@@ -1,0 +1,31 @@
+.ContinueCard {
+    display: flex;
+    align-items: center;
+    gap: var(--size-gap-sm);
+    padding: var(--size-gap-sm) var(--size-gap-lg);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-lg);
+    background: var(--color-offset-primary-sm);
+    color: var(--color-complementary);
+    font: var(--font-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.ContinueCard:hover {
+    background: var(--color-offset-primary-md);
+}
+
+.text {
+    display: flex;
+    flex-flow: column;
+}
+
+.title {
+    font: var(--font-button);
+}
+
+.detail {
+    color: var(--color-muted);
+    font: var(--font-label);
+}

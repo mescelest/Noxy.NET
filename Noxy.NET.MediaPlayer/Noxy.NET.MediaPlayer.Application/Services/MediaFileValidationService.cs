@@ -30,7 +30,7 @@ public class MediaFileValidationService(IOptions<ConfigStorage> configStorage) :
         // Only the last extension counts, so "media.test.mp3" is mp3 and "media.mp3.exe" is exe.
         string extension = Path.GetExtension(fileName).TrimStart('.').ToLowerInvariant();
 
-        if (!_allowed.Contains(extension) || !Formats.TryGetValue(extension, out var format) || !format.Matches(header))
+        if (!_allowed.Contains(extension) || !Formats.TryGetValue(extension, out (string ContentType, HeaderMatcher Matches) format) || !format.Matches(header))
         {
             throw new UnsupportedMediaTypeException();
         }

@@ -1,0 +1,162 @@
+@inject IState<FeatureLibraryState> StateLibrary
+@inject IQueueService ServiceQueue
+@inject IPlayerService ServicePlayer
+@inject IPlaybackControlService ServiceControl
+@inherits FluxorElementComponent
+@implements IAsyncDisposable
+
+<aside @attributes="AdditionalAttributes" class="@CssClass" aria-label="Queue">
+    <header>
+        <h2>Queue</h2>
+        <button type="button" class="text" @onclick="Clear">Clear</button>
+        <button type="button" class="text" @onclick="OnClose" aria-label="Close the queue">
+            <IconSaltire/>
+        </button>
+    </header>
+
+    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+
+    @if (_historyCount > 0)
+    {
+        <button type="button" class="fold" aria-expanded="@_showHistory" @onclick="ToggleHistory">Previously played (@_historyCount)</button>
+    }
+
+    <div class="rows">
+        <Virtualize Items="_rowList" ItemSize="48" Context="row">
+            @if (row.Label is not null)
+            {
+                <div class="label">@row.Label</div>
+            }
+            else if (row.Item is { } item)
+            {
+                <div class="item" data-current="@row.IsCurrent" data-over="@(_overID == item.ItemID)" draggable="@row.IsUpcoming"
+                     @ondragstart="() => _dragID = item.ItemID" @ondragover="() => _overID = item.ItemID" @ondragover:preventDefault @ondrop="() => Drop(item)" @ondrop:preventDefault
+                     @onclick="() => Run(() => ServiceControl.JumpTo(item.ItemID, true))">
+                    <span class="grip">
+                        @if (row.IsUpcoming)
+                        {
+                            <IconDraggable/>
+                        }
+                    </span>
+                    <FileStatusIcon State="ServicePlayer.StateOf(item)"/>
+                    <span class="cell">@TitleOf(item)</span>
+                    <button type="button" class="remove" aria-label="Remove from the queue" @onclick="() => Run(() => ServiceControl.RemoveFromQueue(item.ItemID))" @onclick:stopPropagation>
+                        <IconTrash/>
+                    </button>
+                </div>
+            }
+        </Virtualize>
+    </div>
+</aside>
+
+@code {
+
+    private sealed record QueueRow(string? Label, QueueItem? Item, bool IsCurrent, bool IsUpcoming);
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private List<QueueRow> _rowList = [];
+    private List<string> _messageList = [];
+    private bool _showHistory;
+    private int _historyCount;
+    private Guid? _dragID;
+    private Guid? _overID;
+    private Dictionary<Guid, ResponseMediaFile>? _mediaMap;
+    private List<ResponseMediaFile>? _mediaMapSource;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        ServiceQueue.Changed += OnQueueChanged;
+        Build();
+    }
+
+    private void OnQueueChanged()
+    {
+        _ = InvokeAsync(() =>
+        {
+            Build();
+            StateHasChanged();
+        });
+    }
+
+    private void ToggleHistory()
+    {
+        _showHistory = !_showHistory;
+        Build();
+    }
+
+    // History is behind the fold; then the current entry, the user queue and the source part, as one list a virtualized view can slice.
+    private void Build()
+    {
+        ResponseQueue queue = ServiceQueue.GetSnapshot();
+        _historyCount = queue.HistoryList.Count;
+        List<QueueRow> list = [];
+        if (_showHistory) list.AddRange(queue.HistoryList.Select(x => new QueueRow(null, x, false, false)));
+
+        if (queue.Current is { } current) list.Add(new(null, current, true, false));
+
+        if (queue.UserQueueList.Count > 0)
+        {
+            list.Add(new("Next in queue", null, false, false));
+            list.AddRange(queue.UserQueueList.Select(x => new QueueRow(null, x, false, true)));
+        }
+
+        if (queue.SourceList.Count > 0)
+        {
+            list.Add(new(queue.Source is null ? "Next" : "Next from the list", null, false, false));
+            list.AddRange(queue.SourceList.Select(x => new QueueRow(null, x, false, true)));
+        }
+
+        _rowList = list;
+    }
+
+    private string TitleOf(QueueItem item)
+    {
+        return GetMediaMap().TryGetValue(item.MediaFileID, out ResponseMediaFile? media) ? media.Title : "Unknown media file";
+    }
+
+    // Rebuilt only when the library list is another one.
+    private Dictionary<Guid, ResponseMediaFile> GetMediaMap()
+    {
+        if (_mediaMap is { } map && ReferenceEquals(_mediaMapSource, StateLibrary.Value.MediaList)) return map;
+
+        _mediaMapSource = StateLibrary.Value.MediaList;
+
+        return _mediaMap = _mediaMapSource.ToDictionary(x => x.ID);
+    }
+
+    private async Task Run(Func<Task> action)
+    {
+        _messageList = [];
+        try
+        {
+            await action();
+        }
+        catch (Exception exception)
+        {
+            _messageList = [exception.ToActionMessage()];
+        }
+    }
+
+    private Task Clear() => Run(ServicePlayer.Clear);
+
+    // The dragged entry takes its place after the one it is dropped on; synced to every device through the live session.
+    private async Task Drop(QueueItem target)
+    {
+        Guid? dragged = _dragID;
+        _dragID = null;
+        _overID = null;
+        if (dragged is null || dragged == target.ItemID) return;
+
+        await Run(() => ServiceControl.MoveInQueue(dragged.Value, target.ItemID));
+    }
+
+    public new async ValueTask DisposeAsync()
+    {
+        ServiceQueue.Changed -= OnQueueChanged;
+        await base.DisposeAsync();
+    }
+
+}

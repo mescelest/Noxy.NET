@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Noxy.NET.MediaPlayer.API;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
+using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Persistence;
@@ -319,7 +320,7 @@ public class MediaUploadFlowTest
         ApiAccount user = await api.SignUp("a@example.com");
         ApiSeeder seeder = new(factory);
         await seeder.SeedMediaFile(user.UserID);
-        var job = await seeder.SeedJob(user.UserID, MediaUploadJobStatusEnum.Pending, withStagedFile: true);
+        EntityMediaUploadJob job = await seeder.SeedJob(user.UserID, MediaUploadJobStatusEnum.Pending, withStagedFile: true);
         await using LibraryHubListener hub = await LibraryHubListener.Connect(factory, user.Token);
 
         seeder.WakeTheWorker();

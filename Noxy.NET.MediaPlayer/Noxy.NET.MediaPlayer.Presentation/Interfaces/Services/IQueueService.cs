@@ -46,7 +46,7 @@ public interface IQueueService
     // Loads the saved copy; returns its position, or null when nothing (usable) was saved.
     Task<TimeSpan?> LoadLocalCopy();
 
-    // Writes the queue and the position of the current item to the local copy now. Changes are otherwise only kept in memory, so this is called when playback pauses or stops and when the app leaves the foreground.
+    // Writes the queue and the position of the current item to the local copy now; a queue with no current item is not kept (a saved copy is removed). Changes are otherwise only kept in memory, so this is called when playback pauses or stops and when the app leaves the foreground.
     Task SaveLocalCopy(double positionSeconds);
 
     // Empties the queue and the local copy (an account switch).

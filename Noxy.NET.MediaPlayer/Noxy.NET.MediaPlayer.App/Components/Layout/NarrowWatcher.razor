@@ -1,0 +1,50 @@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+@code {
+
+    [Parameter]
+    public EventCallback<bool> OnChanged { get; set; }
+
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _watch;
+    private DotNetObjectReference<NarrowWatcher>? _reference;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Layout/NarrowWatcher.razor.js");
+        _reference = DotNetObjectReference.Create(this);
+        _watch = await _module.InvokeAsync<IJSObjectReference>("WatchNarrow", _reference, nameof(Changed));
+        await OnChanged.InvokeAsync(await _module.InvokeAsync<bool>("IsNarrow"));
+    }
+
+    [JSInvokable]
+    public Task Changed(bool narrow)
+    {
+        return InvokeAsync(() => OnChanged.InvokeAsync(narrow));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_watch is not null)
+            {
+                await _watch.InvokeVoidAsync("dispose");
+                await _watch.DisposeAsync();
+            }
+
+            if (_module is not null) await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The window is closing.
+        }
+
+        _reference?.Dispose();
+    }
+
+}

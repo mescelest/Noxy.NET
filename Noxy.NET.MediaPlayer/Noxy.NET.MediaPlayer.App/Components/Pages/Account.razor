@@ -1,0 +1,57 @@
+@page "/account"
+@inject ISessionService ServiceSession
+@inject IFileStore StoreFile
+@inherits PageComponent
+
+<div class="@CssClass">
+    <h1>Account</h1>
+
+    <dl>
+        <dt>Signed in as</dt>
+        <dd>@(_email ?? "Unknown")</dd>
+
+        <dt>Stored on this device</dt>
+        <dd>@(_estimate is null ? "Unknown" : Format(_estimate.UsedBytes))</dd>
+
+        <dt>Free space on this device</dt>
+        <dd>@(_estimate is null ? "Unknown" : Format(_estimate.FreeBytes))</dd>
+    </dl>
+
+    <button type="button" class="sign-out" @onclick="ServiceSession.SignOut">Sign out</button>
+</div>
+
+@code {
+
+    private string? _email;
+    private StorageEstimate? _estimate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        string? token = await ServiceSession.GetAccessToken();
+        _email = token?.GetAccessTokenEmail();
+
+        try
+        {
+            _estimate = await StoreFile.GetEstimate();
+        }
+        catch (IOException)
+        {
+            _estimate = null;
+        }
+    }
+
+    private static string Format(long bytes)
+    {
+        string[] unitList = ["B", "KB", "MB", "GB", "TB"];
+        double value = bytes;
+        int unit = 0;
+        while (value >= 1024 && unit < unitList.Length - 1)
+        {
+            value /= 1024;
+            unit++;
+        }
+
+        return $"{value:0.#} {unitList[unit]}";
+    }
+
+}

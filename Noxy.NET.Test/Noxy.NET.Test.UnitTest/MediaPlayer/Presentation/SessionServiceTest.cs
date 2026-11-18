@@ -1,4 +1,5 @@
 using System.Net;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -101,58 +102,119 @@ public class SessionServiceTest
     {
         _storageSession.RefreshToken = "stored-refresh";
 
-        bool restored = await _service.TryRestore();
+        RestoreResultEnum restored = await _service.TryRestore();
 
-        Assert.True(restored);
+        Assert.Equal(RestoreResultEnum.SignedIn, restored);
         Assert.Equal(["Refresh:stored-refresh"], _clientAuthApi.CallList);
         Assert.Equal("refresh-1", _storageSession.RefreshToken);
         Assert.True(_service.IsSignedIn);
+        Assert.True(_service.HasSession);
     }
 
     [Fact]
-    public async Task TryRestore_WithNoStoredToken_ReturnsFalse_WithNoServerCall()
+    public async Task TryRestore_WithNoStoredToken_ReturnsNoSession_WithNoServerCall_AndHasSessionIsFalse()
     {
-        Assert.False(await _service.TryRestore());
+        Assert.Equal(RestoreResultEnum.NoSession, await _service.TryRestore());
 
         Assert.Empty(_clientAuthApi.CallList);
         Assert.False(_service.IsSignedIn);
+        Assert.False(_service.HasSession);
     }
 
     [Theory]
     [InlineData(HttpStatusCode.Unauthorized)]
     [InlineData(HttpStatusCode.BadRequest)]
-    public async Task TryRestore_WhenTheRefreshIsRejected_ClearsTheStoredToken_AndReturnsFalse(HttpStatusCode status)
+    public async Task TryRestore_WhenTheRefreshIsRejected_ReturnsRejected_ClearsTheStoredToken_AndHasSessionIsFalse(HttpStatusCode status)
     {
         _storageSession.RefreshToken = "stored-refresh";
         _clientAuthApi.Failure = FakeAuthApiClient.Rejected(status);
 
-        Assert.False(await _service.TryRestore());
+        Assert.Equal(RestoreResultEnum.Rejected, await _service.TryRestore());
 
         Assert.Null(_storageSession.RefreshToken);
         Assert.False(_service.IsSignedIn);
+        Assert.False(_service.HasSession);
     }
 
     [Fact]
-    public async Task TryRestore_WhenTheNetworkIsDown_KeepsTheStoredToken_AndStaysSignedOut()
+    public async Task TryRestore_WhenTheNetworkIsDown_ReturnsOffline_KeepsTheStoredToken_AndHasSessionIsTrue()
     {
         _storageSession.RefreshToken = "stored-refresh";
         _clientAuthApi.Failure = new HttpRequestException("The network is down.");
+        int changed = 0;
+        _service.Changed += () => changed++;
 
-        Assert.False(await _service.TryRestore());
+        Assert.Equal(RestoreResultEnum.Offline, await _service.TryRestore());
 
         Assert.Equal("stored-refresh", _storageSession.RefreshToken);
         Assert.False(_service.IsSignedIn);
+        Assert.True(_service.HasSession);
+        Assert.Equal(1, changed);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.BadGateway)]
+    [InlineData(HttpStatusCode.ServiceUnavailable)]
+    [InlineData(HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.RequestTimeout)]
+    [InlineData(HttpStatusCode.TooManyRequests)]
+    public async Task TryRestore_WhenTheServerAnswersWithAServerError_ReturnsOffline_AndKeepsTheStoredToken(HttpStatusCode status)
+    {
+        _storageSession.RefreshToken = "stored-refresh";
+        _clientAuthApi.Failure = new ApiException(status, "The server is having trouble.");
+
+        Assert.Equal(RestoreResultEnum.Offline, await _service.TryRestore());
+
+        Assert.Equal("stored-refresh", _storageSession.RefreshToken);
+        Assert.True(_service.HasSession);
     }
 
     [Fact]
-    public async Task TryRestore_WhenNoServerAddressIsSaved_KeepsTheStoredToken_AndStaysSignedOut()
+    public async Task TryRestore_WhenTheRequestTimesOut_ReturnsOffline_AndKeepsTheStoredToken()
+    {
+        _storageSession.RefreshToken = "stored-refresh";
+        _clientAuthApi.Failure = new TaskCanceledException("The request timed out.");
+
+        Assert.Equal(RestoreResultEnum.Offline, await _service.TryRestore());
+
+        Assert.Equal("stored-refresh", _storageSession.RefreshToken);
+        Assert.True(_service.HasSession);
+    }
+
+
+    [Fact]
+    public async Task TryRestore_WhenNoServerAddressIsSaved_ReturnsOffline_AndKeepsTheStoredToken()
     {
         _storageSession.RefreshToken = "stored-refresh";
         _clientAuthApi.Failure = new ServerAddressMissingException();
 
-        Assert.False(await _service.TryRestore());
+        Assert.Equal(RestoreResultEnum.Offline, await _service.TryRestore());
 
         Assert.Equal("stored-refresh", _storageSession.RefreshToken);
+        Assert.True(_service.HasSession);
+    }
+
+    [Fact]
+    public async Task AnOfflineSession_BecomesSignedIn_WhenALaterRestoreReachesTheServer_AndEndsWithSignOut()
+    {
+        _storageSession.RefreshToken = "stored-refresh";
+        _clientAuthApi.Failure = new HttpRequestException("The network is down.");
+        await _service.TryRestore();
+
+        _clientAuthApi.Failure = null;
+        Assert.Equal(RestoreResultEnum.SignedIn, await _service.TryRestore());
+        Assert.True(_service.IsSignedIn);
+
+        await _service.SignOut();
+        Assert.False(_service.HasSession);
+
+        _storageSession.RefreshToken = "stored-refresh";
+        _clientAuthApi.Failure = new HttpRequestException("The network is down.");
+        await _service.TryRestore();
+        Assert.True(_service.HasSession);
+
+        await _service.SignOut();
+        Assert.False(_service.HasSession);
     }
 
     [Fact]

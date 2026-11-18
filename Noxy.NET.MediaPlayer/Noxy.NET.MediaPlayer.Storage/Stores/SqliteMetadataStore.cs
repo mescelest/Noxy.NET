@@ -20,6 +20,7 @@ public class SqliteMetadataStore : IMetadataStore, IMetadataListStore
     private const string PlaylistDetailTable = "PlaylistDetail";
     private const string FileStateTable = "FileState";
     private const string LibraryETagKey = "LibraryETag";
+    private const string OwnerUserIDKey = "OwnerUserID";
     private const string PlaylistListETagKey = "PlaylistListETag";
     private const string UserSettingTable = "UserSetting";
     private const string ArtistTable = "Artist";
@@ -177,6 +178,16 @@ public class SqliteMetadataStore : IMetadataStore, IMetadataListStore
     public async Task SetPlaylistListETag(string? eTag)
     {
         await SetSetting(PlaylistListETagKey, eTag);
+    }
+
+    public async Task<Guid?> GetOwnerUserID()
+    {
+        return Guid.TryParse(await GetSetting(OwnerUserIDKey), out Guid id) ? id : null;
+    }
+
+    public async Task SetOwnerUserID(Guid? id)
+    {
+        await SetSetting(OwnerUserIDKey, id?.ToString());
     }
 
     public async Task<List<FileState>> GetFileStateList()

@@ -1,0 +1,46 @@
+@inject IDeviceService ServiceDevice
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <label for="device-name">Name of this device</label>
+    <div class="row">
+        <input id="device-name" type="text" maxlength="50" @bind="_name" @bind:event="oninput"/>
+        <button type="button" disabled="@(_busy || string.IsNullOrWhiteSpace(_name))" @onclick="Save">Save</button>
+    </div>
+    <MessageBox MessageList="_messageList" Status="_status"/>
+</div>
+
+@code {
+
+    private string _name = string.Empty;
+    private List<string> _messageList = [];
+    private StatusEnum _status = StatusEnum.Error;
+    private bool _busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _name = await ServiceDevice.GetName();
+    }
+
+    private async Task Save()
+    {
+        _busy = true;
+        try
+        {
+            await ServiceDevice.SetName(_name);
+            _name = await ServiceDevice.GetName();
+            _status = StatusEnum.Success;
+            _messageList = ["Saved."];
+        }
+        catch (ArgumentException)
+        {
+            _status = StatusEnum.Error;
+            _messageList = ["Enter a name of 1 to 50 characters."];
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+}

@@ -1,0 +1,35 @@
+@using System.ComponentModel
+@inherits ElementComponent
+
+<button @attributes="AdditionalAttributes" class="@CssClass" type="button" role="columnheader" aria-sort="@AriaSort" @onclick="OnClick">
+    <span class="title">@ChildContent</span>
+    @if (Direction == SortDirectionEnum.Ascending)
+    {
+        <IconChevronUp Size="IconSizeEnum.Small"/>
+    }
+    else if (Direction == SortDirectionEnum.Descending)
+    {
+        <IconChevronDown Size="IconSizeEnum.Small"/>
+    }
+</button>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public SortDirectionEnum Direction { get; set; }
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    private string AriaSort => Direction switch
+    {
+            SortDirectionEnum.Ascending => "ascending",
+            SortDirectionEnum.Descending => "descending",
+            SortDirectionEnum.None => "none",
+            _ => throw new InvalidEnumArgumentException(nameof(Direction), (int)Direction, typeof(SortDirectionEnum))
+    };
+
+}

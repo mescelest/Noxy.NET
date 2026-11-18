@@ -1,0 +1,19 @@
+@inject IStateBridgeService StateBridge
+
+<Fluxor.Blazor.Web.StoreInitializer/>
+<Router AppAssembly="typeof(MauiProgram).Assembly" NotFoundPage="typeof(NotFound)">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)"/>
+        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
+    </Found>
+</Router>
+
+@code {
+
+    // The store is ready when the components render: the bridge starts here, in the scope the components share with the store.
+    protected override void OnInitialized()
+    {
+        StateBridge.Start();
+    }
+
+}

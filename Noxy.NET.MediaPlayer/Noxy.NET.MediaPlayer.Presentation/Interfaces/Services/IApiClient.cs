@@ -21,6 +21,9 @@ public interface IApiClient
     // The media file's bytes, streamed: the body is not read until the caller reads Content. With rangeStart the server is asked for the bytes from there on, and with ifRange (the ETag of the bytes already held) it answers 206 only when the file is still that one, else 200 with the whole file. The caller disposes the response.
     Task<ApiFileResponse> GetFile(Guid id, long? rangeStart, string? ifRange);
 
+    // The tagged copy the server builds (GET /Media/{id}/Download), streamed like GetFile and without a range. The caller disposes the response.
+    Task<ApiFileResponse> GetTaggedFile(Guid id);
+
     // The user's settings, each with its value as the JSON the server sent. Same ETag rules as the library.
     Task<ApiResponse<List<ResponseSetting>>> GetSettingList(string? eTag);
 
@@ -41,6 +44,9 @@ public interface IApiClient
     Task<ResponsePlaylist> UpdatePlaylist(Guid id, RequestUpdatePlaylist request);
 
     Task DeletePlaylist(Guid id);
+
+    // Deletes the media file from the library (DELETE /Media/{id}, 204). The server pushes the change to every device.
+    Task DeleteMedia(Guid id);
 
     Task<ResponsePlaylistDetail> AddPlaylistEntryList(Guid id, RequestAddPlaylistEntry request);
 

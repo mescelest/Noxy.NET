@@ -1,5 +1,6 @@
 using System.Net;
 using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
@@ -15,7 +16,12 @@ public class SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService s
     private string? _accessToken;
     private DateTime? _accessTokenExpires;
 
+    // A refresh token is stored and the last restore could not reach the server.
+    private bool _hasOfflineSession;
+
     public bool IsSignedIn => _accessToken is not null;
+
+    public bool HasSession => IsSignedIn || _hasOfflineSession;
 
     public event Action? Changed;
 
@@ -38,19 +44,40 @@ public class SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService s
         return true;
     }
 
-    public async Task<bool> TryRestore()
+    public async Task<RestoreResultEnum> TryRestore()
     {
-        if (await storageSession.GetRefreshToken() is null) return false;
+        if (await storageSession.GetRefreshToken() is null) return RestoreResultEnum.NoSession;
 
         try
         {
-            return await Refresh();
+            if (await Refresh())
+            {
+                SetOfflineSession(false);
+                return RestoreResultEnum.SignedIn;
+            }
+
+            return RestoreResultEnum.Rejected;
         }
-        catch (Exception exception) when (exception is HttpRequestException or ServerAddressMissingException)
+        catch (Exception exception) when (exception is HttpRequestException or ServerAddressMissingException or TaskCanceledException || IsServerTrouble(exception))
         {
-            // The server could not be reached: the stored token is still good, so it stays, and the user stays signed out until a later start.
-            return false;
+            // The server could not be reached: the stored token is still good, so it stays. The user is not signed in yet, but has a session: the app shows what is on the device and tries again.
+            SetOfflineSession(true);
+            return RestoreResultEnum.Offline;
         }
+    }
+
+    // A server that answers with an error of its own (5xx, too many requests, a timeout) has not rejected the token: the session is kept and the app tries again.
+    private static bool IsServerTrouble(Exception exception)
+    {
+        return exception is ApiException { Status: >= HttpStatusCode.InternalServerError or HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests };
+    }
+
+    private void SetOfflineSession(bool value)
+    {
+        if (_hasOfflineSession == value) return;
+
+        _hasOfflineSession = value;
+        Changed?.Invoke();
     }
 
     public async Task SignOut()
@@ -58,9 +85,11 @@ public class SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService s
         bool wasSignedIn = IsSignedIn;
         _accessToken = null;
         _accessTokenExpires = null;
+        bool hadOfflineSession = _hasOfflineSession;
+        _hasOfflineSession = false;
         await storageSession.ClearRefreshToken();
 
-        if (wasSignedIn) Changed?.Invoke();
+        if (wasSignedIn || hadOfflineSession) Changed?.Invoke();
     }
 
     public async Task<string?> GetAccessToken()
@@ -113,6 +142,7 @@ public class SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService s
     {
         _accessToken = tokens.AccessToken;
         _accessTokenExpires = tokens.AccessToken.GetAccessTokenExpires();
+        _hasOfflineSession = false;
         await storageSession.SetRefreshToken(tokens.RefreshToken);
 
         if (raiseChanged) Changed?.Invoke();

@@ -54,4 +54,9 @@ public interface IMetadataStore
 
     // An ID that is not held is harmless.
     Task DeleteFileState(Guid mediaFileID);
+
+    // The account the copy of the library on this device belongs to (the user ID of the access token); null until one signed in.
+    Task<Guid?> GetOwnerUserID();
+
+    Task SetOwnerUserID(Guid? id);
 }

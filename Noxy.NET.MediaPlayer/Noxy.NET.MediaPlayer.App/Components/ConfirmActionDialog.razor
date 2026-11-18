@@ -1,0 +1,31 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <BooleanDialog Title="@Title" AcceptText="@AcceptText" DeclineText="Cancel" OnSubmit="OnSubmit">
+        <p>@Message</p>
+        @if (!string.IsNullOrEmpty(Detail))
+        {
+            <p class="detail">@Detail</p>
+        }
+    </BooleanDialog>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Message { get; set; }
+
+    // The second sentence, for example how many of the rows are hidden by the search.
+    [Parameter]
+    public string? Detail { get; set; }
+
+    [Parameter]
+    public string? AcceptText { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnSubmit { get; set; }
+
+}

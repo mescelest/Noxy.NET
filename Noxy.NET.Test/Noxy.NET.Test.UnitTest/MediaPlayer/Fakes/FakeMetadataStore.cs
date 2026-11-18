@@ -25,9 +25,19 @@ public sealed class FakeMetadataStore : IMetadataStore, IMetadataListStore, IVol
         return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value, JsonSerializerOptions.Web), JsonSerializerOptions.Web) ?? throw new InvalidOperationException($"A {typeof(T).Name} did not survive a copy.");
     }
 
-    public Task<List<ResponseMediaFile>> GetMediaFileList()
+    // When set, GetMediaFileList waits for it, so a test can hold a read of the library in flight.
+    public Task? MediaFileListGate { get; set; }
+
+    public int MediaFileListReadCount { get; private set; }
+
+    public int FileStateListReadCount { get; private set; }
+
+    public async Task<List<ResponseMediaFile>> GetMediaFileList()
     {
-        return Task.FromResult(Copy(_mediaFileList));
+        MediaFileListReadCount++;
+        if (MediaFileListGate is not null) await MediaFileListGate;
+
+        return Copy(_mediaFileList);
     }
 
     public Task<ResponseMediaFile?> GetMediaFile(Guid id)
@@ -143,8 +153,22 @@ public sealed class FakeMetadataStore : IMetadataStore, IMetadataListStore, IVol
         return Task.CompletedTask;
     }
 
+    private Guid? _ownerUserID;
+
+    public Task<Guid?> GetOwnerUserID()
+    {
+        return Task.FromResult(_ownerUserID);
+    }
+
+    public Task SetOwnerUserID(Guid? id)
+    {
+        _ownerUserID = id;
+        return Task.CompletedTask;
+    }
+
     public Task<List<FileState>> GetFileStateList()
     {
+        FileStateListReadCount++;
         return Task.FromResult(_fileStateMap.Values.ToList());
     }
 

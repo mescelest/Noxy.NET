@@ -1,0 +1,230 @@
+@inject IState<FeaturePlayerState> StatePlayer
+@inject IState<FeatureLibraryState> StateLibrary
+@inject IState<FeatureSessionState> StateSession
+@inject IPlaybackControlService ServiceControl
+@inject IRemotePlaybackService ServiceRemote
+@inherits FluxorElementComponent
+@using System.Globalization
+@implements IAsyncDisposable
+
+@if (StatePlayer.Value.Snapshot.IsDisabled && !IsController)
+{
+    <div @attributes="AdditionalAttributes" class="@CssClass" data-disabled="true">
+        <span class="idle">@(ServiceRemote.HasSession && ServiceRemote.ActiveDeviceID is null ? "Nothing active" : "Nothing playing")</span>
+        @if (ServiceControl.CanContinue)
+        {
+            <button type="button" class="mode" @onclick="() => Run(async () => { await ServiceControl.Continue(); })">Play here</button>
+        }
+        <DevicePicker/>
+    </div>
+}
+else
+{
+    <div @attributes="AdditionalAttributes" class="@CssClass">
+        <div class="transport">
+            <button type="button" class="icon" aria-label="Previous" @onclick="() => Run(ServiceControl.Previous)">
+                <IconBackwards/>
+            </button>
+            <button type="button" class="icon primary" aria-label="@(IsPlaying ? "Pause" : "Play")" @onclick="() => Run(IsPlaying ? ServiceControl.Pause : ServiceControl.Play)">
+                @if (IsPlaying)
+                {
+                    <IconPause/>
+                }
+                else
+                {
+                    <IconPlay/>
+                }
+            </button>
+            <button type="button" class="icon" aria-label="Next" @onclick="() => Run(ServiceControl.Next)">
+                <IconForward/>
+            </button>
+        </div>
+
+        <div class="middle">
+            <button type="button" class="title" @onclick="() => _queueOpen = !_queueOpen" aria-expanded="@_queueOpen">
+                <span class="name">@Title</span>
+                <span class="artist">@Artist</span>
+            </button>
+            <div class="seek">
+                <span class="time">@Format(_dragPosition ?? CurrentPosition)</span>
+                <input type="range" min="0" max="@DurationSeconds" step="1" value="@((int)(_dragPosition ?? CurrentPosition).TotalSeconds)" aria-label="Position"
+                       @oninput="args => _dragPosition = TimeSpan.FromSeconds(ParseDouble(args.Value))" @onchange="SeekEnd"/>
+                <span class="time">@Format(Duration)</span>
+            </div>
+            <span class="status">@Status</span>
+        </div>
+
+        <div class="modes">
+            <button type="button" class="mode" aria-label="Shuffle: @Shuffle" data-on="@(Shuffle != ShuffleModeEnum.Off)" @onclick="CycleShuffle">
+                <IconRadio/> @Shuffle</button>
+            <button type="button" class="mode" aria-label="Repeat: @Repeat" data-on="@(Repeat != RepeatModeEnum.No)" @onclick="CycleRepeat">Repeat: @Repeat</button>
+            <span class="volume">
+                <IconVolume/>
+                <input type="range" min="0" max="100" step="1" value="@(_dragVolume ?? VolumePercent)" aria-label="Volume"
+                       @oninput="args => _dragVolume = (int)ParseDouble(args.Value)" @onchange="VolumeEnd"/>
+            </span>
+            <DevicePicker/>
+        </div>
+    </div>
+
+    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+
+    @if (_queueOpen)
+    {
+        <QueuePanel OnClose="() => _queueOpen = false"/>
+    }
+}
+
+@code {
+
+    private List<string> _messageList = [];
+    private bool _queueOpen;
+    private TimeSpan? _dragPosition;
+    private int? _dragVolume;
+    private CancellationTokenSource? _tickSource;
+
+    private PlayerSnapshot Snapshot => StatePlayer.Value.Snapshot;
+
+    // A controller shows what the active device reports; any other device shows its own player.
+    private ResponsePlayerState? RemoteState => ServiceRemote.Role == PlaybackRoleEnum.Controller ? ServiceRemote.Remote?.State : null;
+
+    private bool IsController => RemoteState is not null;
+
+    private bool IsPlaying => RemoteState is { } remote ? remote.IsPlaying : Snapshot.IsPlaying;
+
+    private TimeSpan CurrentPosition => IsController ? ServiceRemote.GetPosition() : Snapshot.Position;
+
+    private TimeSpan Duration => RemoteState is { } remote ? MediaOf(remote.CurrentItemID)?.Duration ?? TimeSpan.Zero : Snapshot.Duration;
+
+    private double DurationSeconds => Math.Max(1, Duration.TotalSeconds);
+
+    private int VolumePercent => RemoteState is { } remote ? remote.Volume : (int)Math.Round(Snapshot.Volume * 100);
+
+    private ShuffleModeEnum Shuffle => RemoteState is { } remote ? remote.Shuffle : Snapshot.Shuffle;
+
+    private RepeatModeEnum Repeat => RemoteState is { } remote ? remote.Repeat : Snapshot.Repeat;
+
+    private string Title => RemoteState is { } remote ? remote.Title ?? string.Empty : MediaOf(Snapshot.Current?.MediaFileID)?.Title ?? string.Empty;
+
+    private string Artist => RemoteState is { } remote ? remote.Artist ?? string.Empty : MediaOf(Snapshot.Current?.MediaFileID)?.Artist ?? string.Empty;
+
+    private string Status
+    {
+        get
+        {
+            if (IsController) return $"Playing on {ActiveDeviceName}";
+            if (Snapshot.IsWaiting) return "Waiting for a download";
+            return StateSession.Value.IsOffline ? "Offline" : string.Empty;
+        }
+    }
+
+    private string ActiveDeviceName => ServiceRemote.DeviceList.FirstOrDefault(x => x.DeviceID == ServiceRemote.ActiveDeviceID)?.Name ?? "another device";
+
+    private Dictionary<Guid, ResponseMediaFile>? _mediaMap;
+    private List<ResponseMediaFile>? _mediaMapSource;
+
+    private ResponseMediaFile? MediaOf(Guid? id)
+    {
+        if (id is null) return null;
+
+        return GetMediaMap().GetValueOrDefault(id.Value);
+    }
+
+    // Rebuilt only when the library list is another one.
+    private Dictionary<Guid, ResponseMediaFile> GetMediaMap()
+    {
+        if (_mediaMap is { } map && ReferenceEquals(_mediaMapSource, StateLibrary.Value.MediaList)) return map;
+
+        _mediaMapSource = StateLibrary.Value.MediaList;
+
+        return _mediaMap = _mediaMapSource.ToDictionary(x => x.ID);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        ServiceRemote.Changed += OnRemoteChanged;
+        _tickSource = new();
+        _ = Tick(_tickSource.Token);
+    }
+
+    // A controller's position moves between the active device's reports: redraw twice a second while it plays.
+    private async Task Tick(CancellationToken token)
+    {
+        using PeriodicTimer timer = new(TimeSpan.FromMilliseconds(500));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                if (IsController && IsPlaying && _dragPosition is null) await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // The bar is gone.
+        }
+    }
+
+    private void OnRemoteChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Run(Func<Task> action)
+    {
+        _messageList = [];
+        try
+        {
+            await action();
+        }
+        catch (Exception exception)
+        {
+            _messageList = [exception.ToActionMessage()];
+        }
+    }
+
+    private Task SeekEnd()
+    {
+        TimeSpan? position = _dragPosition;
+        _dragPosition = null;
+
+        return position is null ? Task.CompletedTask : Run(() => ServiceControl.Seek(position.Value));
+    }
+
+    private Task VolumeEnd()
+    {
+        int? volume = _dragVolume;
+        _dragVolume = null;
+
+        return volume is null ? Task.CompletedTask : Run(() => ServiceControl.SetVolume(volume.Value));
+    }
+
+    private Task CycleShuffle() => Run(() => ServiceControl.SetShuffle(Shuffle switch
+    {
+            ShuffleModeEnum.Off => ShuffleModeEnum.Random,
+            ShuffleModeEnum.Random => ShuffleModeEnum.SpreadArtists,
+            ShuffleModeEnum.SpreadArtists => ShuffleModeEnum.Off,
+            _ => throw new InvalidEnumArgumentException(nameof(Shuffle), (int)Shuffle, typeof(ShuffleModeEnum))
+    }));
+
+    private Task CycleRepeat() => Run(() => ServiceControl.SetRepeat(Repeat switch
+    {
+            RepeatModeEnum.No => RepeatModeEnum.Once,
+            RepeatModeEnum.Once => RepeatModeEnum.Forever,
+            RepeatModeEnum.Forever => RepeatModeEnum.No,
+            _ => throw new InvalidEnumArgumentException(nameof(Repeat), (int)Repeat, typeof(RepeatModeEnum))
+    }));
+
+    private static double ParseDouble(object? value) => double.TryParse(value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double result) ? result : 0;
+
+    private static string Format(TimeSpan time) => $"{(int)time.TotalMinutes}:{time.Seconds:00}";
+
+    public new async ValueTask DisposeAsync()
+    {
+        ServiceRemote.Changed -= OnRemoteChanged;
+        _tickSource?.Cancel();
+        _tickSource?.Dispose();
+        await base.DisposeAsync();
+    }
+
+}

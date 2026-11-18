@@ -318,6 +318,46 @@ public class DownloadServiceTest
     }
 
     [Fact]
+    public async Task Remove_OfAHeldFile_DeletesTheFileAndItsState_AndRaisesChanged()
+    {
+        byte[] bytes = Bytes(1000);
+        ResponseMediaFile media = await AddMedia(bytes);
+        _clientApi.FileHandler = (_, _, _) => Whole(bytes);
+        Assert.True(await _serviceDownload.EnsureOnDevice(media.ID));
+        int changed = 0;
+        _serviceDownload.Changed += () => changed++;
+
+        await _serviceDownload.Remove(media.ID);
+
+        Assert.Empty(await _storeFile.GetHeldIDList());
+        Assert.Null(await State(media.ID));
+        Assert.True(changed >= 1);
+    }
+
+    [Fact]
+    public async Task Remove_OfARunningDownload_StopsItFirst_AndLeavesNothingBehind()
+    {
+        byte[] bytes = Bytes(10_000);
+        ResponseMediaFile media = await AddMedia(bytes);
+        _clientApi.FileHandler = (_, _, _) => Task.FromResult(new ApiFileResponse(HttpStatusCode.OK, new FakeInterruptedStream(bytes[..2000], null, true), ETag, bytes.Length));
+        Task<bool> download = _serviceDownload.EnsureOnDevice(media.ID);
+        await WaitUntil(async () => await _storeFile.GetPartialLength(media.ID) > 0);
+
+        await _serviceDownload.Remove(media.ID);
+
+        Assert.False(await download);
+        Assert.Empty(await _storeFile.GetPartialIDList());
+        Assert.Empty(await _storeFile.GetHeldIDList());
+        Assert.Null(await State(media.ID));
+    }
+
+    [Fact]
+    public async Task Remove_OfAMediaFileThatIsNotOnTheDevice_IsHarmless()
+    {
+        await _serviceDownload.Remove(Guid.NewGuid());
+    }
+
+    [Fact]
     public async Task Cancel_StopsARunningDownload_DiscardsThePartial_AndLeavesNotDownloaded()
     {
         byte[] bytes = Bytes(10_000);

@@ -1,0 +1,77 @@
+@inject IState<FeaturePlaylistListState> StatePlaylistList
+@inject IDialogService DialogService
+@inherits FluxorElementComponent
+
+<nav @attributes="AdditionalAttributes" class="@CssClass" aria-label="Main">
+    <Collapsible Collapsed="false" ToggleLabel="Your music">
+        <Header>
+            <span class="section-title">Your music</span>
+        </Header>
+        <Content>
+            <NavLink class="link" href="" Match="NavLinkMatch.All" @onclick="OnNavigate">
+                <IconHome/>
+                Home
+            </NavLink>
+            <NavLink class="link" href="library" @onclick="OnNavigate">
+                <IconLibrary/>
+                Library
+            </NavLink>
+            <NavLink class="link" href="account" @onclick="OnNavigate">
+                <IconAccount/>
+                Account
+            </NavLink>
+            <NavLink class="link" href="settings" @onclick="OnNavigate">
+                <IconSettings/>
+                Settings
+            </NavLink>
+        </Content>
+    </Collapsible>
+
+    <Collapsible Collapsed="false" ToggleLabel="Integrations">
+        <Header>
+            <span class="section-title">Integrations</span>
+        </Header>
+        <Content>
+            <NavLink class="link" href="youtube" @onclick="OnNavigate">
+                <IconRadio/>
+                YouTube
+            </NavLink>
+            <NavLink class="link" href="bandcamp" @onclick="OnNavigate">
+                <IconMusic/>
+                Bandcamp
+            </NavLink>
+        </Content>
+    </Collapsible>
+
+    <Collapsible Collapsed="false" ToggleLabel="Playlists">
+        <Header>
+            <span class="section-title">Playlists</span>
+        </Header>
+        <Content>
+            <button type="button" class="link new-playlist" @onclick="NewPlaylist">
+                <IconPlus/>
+                New playlist
+            </button>
+            @foreach (ResponsePlaylist playlist in PlaylistList)
+            {
+                <NavLink class="link" href="@($"playlist/{playlist.ID}")" @onclick="OnNavigate">@playlist.Name</NavLink>
+            }
+        </Content>
+    </Collapsible>
+</nav>
+
+@code {
+
+    [Parameter]
+    public EventCallback OnNavigate { get; set; }
+
+    // Most recently played first, then the ones never played, newest modified first.
+    private List<ResponsePlaylist> PlaylistList => StatePlaylistList.Value.PlaylistList.OrderMostRecentlyPlayedFirst();
+
+    private void NewPlaylist()
+    {
+        DialogService.Show(@<NewPlaylistDialog/>);
+        OnNavigate.InvokeAsync();
+    }
+
+}

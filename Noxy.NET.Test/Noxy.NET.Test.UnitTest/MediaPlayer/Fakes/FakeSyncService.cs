@@ -12,6 +12,12 @@ public sealed class FakeSyncService : ISyncService
 
     public bool IsOffline { get; set; }
 
+    public List<Guid> PlaylistDetailSyncList { get; } = [];
+
+    public List<ResponsePlaylist> PlaylistUpdatedList { get; } = [];
+
+    public List<Guid> PlaylistDeletedList { get; } = [];
+
     // Thrown by SyncLibrary, after it is recorded, when set.
     public Exception? SyncLibraryException { get; set; }
 
@@ -46,6 +52,7 @@ public sealed class FakeSyncService : ISyncService
     public Task SyncPlaylistDetail(Guid id)
     {
         CallList.Add(nameof(SyncPlaylistDetail));
+        PlaylistDetailSyncList.Add(id);
         return Task.CompletedTask;
     }
 
@@ -64,12 +71,14 @@ public sealed class FakeSyncService : ISyncService
     public Task ApplyPlaylistUpdated(ResponsePlaylist playlist)
     {
         CallList.Add(nameof(ApplyPlaylistUpdated));
+        PlaylistUpdatedList.Add(playlist);
         return Task.CompletedTask;
     }
 
     public Task ApplyPlaylistDeleted(Guid id)
     {
         CallList.Add(nameof(ApplyPlaylistDeleted));
+        PlaylistDeletedList.Add(id);
         return Task.CompletedTask;
     }
 

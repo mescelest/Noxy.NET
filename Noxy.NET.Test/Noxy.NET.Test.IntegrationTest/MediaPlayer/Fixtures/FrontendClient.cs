@@ -44,7 +44,8 @@ public sealed class FrontendClient : IAsyncDisposable
         Reporter = new(Player, Queue, Remote, Hub, Store, NullLogger<PlaybackReporterService>.Instance);
         CommandHandler = new(Hub, Remote, Player, Queue, Reporter, NullLogger<RemoteCommandHandlerService>.Instance);
         Control = new(Player, Queue, Remote, Hub, Reporter, Device, new Delay(), NullLogger<PlaybackControlService>.Instance);
-        Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, Queue, Reporter, CommandHandler, NullLogger<AppStartupService>.Instance);
+        LocalDataOwner = new(Session, Store, Store, Store.Setting, FileStore, Download, Player);
+        Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, Queue, Reporter, CommandHandler, LocalDataOwner, Player, new Delay(), NullLogger<AppStartupService>.Instance);
     }
 
     public FakeTimeProvider Time { get; } = new();
@@ -89,6 +90,8 @@ public sealed class FrontendClient : IAsyncDisposable
     public PlayerService Player { get; }
 
     public FileDeviceStore DeviceFile { get; }
+
+    public LocalDataOwnerService LocalDataOwner { get; }
 
     public DeviceService Device { get; }
 

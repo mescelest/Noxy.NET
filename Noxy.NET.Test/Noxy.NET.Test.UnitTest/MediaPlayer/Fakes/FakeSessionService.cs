@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
@@ -55,11 +56,19 @@ public sealed class FakeSessionService : ISessionService
         throw new NotSupportedException();
     }
 
-    public Task<bool> TryRestore()
+    // What TryRestore answers when set; otherwise SignedIn when RestoreSucceeds, else NoSession.
+    public RestoreResultEnum? RestoreResult { get; set; }
+
+    public int RestoreCount { get; private set; }
+
+    public bool HasSession => IsSignedIn || RestoreResult == RestoreResultEnum.Offline;
+
+    public Task<RestoreResultEnum> TryRestore()
     {
         if (RestoreException is not null) throw RestoreException;
 
-        return Task.FromResult(RestoreSucceeds);
+        RestoreCount++;
+        return Task.FromResult(RestoreResult ?? (RestoreSucceeds ? RestoreResultEnum.SignedIn : RestoreResultEnum.NoSession));
     }
 
     public Task SignOut()

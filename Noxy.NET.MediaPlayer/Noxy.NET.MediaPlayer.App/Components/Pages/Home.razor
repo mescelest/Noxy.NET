@@ -1,306 +1,110 @@
-﻿@page "/"
-@using System.Globalization
-@using Noxy.NET.MediaPlayer.Domain.Enums
-@using Noxy.NET.MediaPlayer.Domain.Responses.Media
-@using Noxy.NET.MediaPlayer.Presentation.Enums
-@using Noxy.NET.MediaPlayer.Presentation.Models
-@implements IDisposable
-@inject ISessionService ServiceSession
-@inject ISyncService ServiceSync
-@inject IAppStartupService ServiceStartup
-@inject IServerAddressStorage StorageServerAddress
-@inject IMetadataStore StoreMetadata
-@inject IFileStore StoreFile
-@inject IDownloadService ServiceDownload
+@page "/"
+@inject IHomeService ServiceHome
+@inject IPlaylistService ServicePlaylist
+@inject IPlaybackControlService ServiceControl
 @inject IPlayerService ServicePlayer
-@inject IAudioPlayer PlayerAudio
-@inject IHttpClientFactory HttpClientFactory
+@inject ISyncService ServiceSync
+@inherits PageComponent
+@implements IDisposable
 
-<h1>Noxy.NET.MediaPlayer</h1>
-
-<p>Temporary diagnostic page for the sign-in, sync, download and player plumbing. The screens plan replaces it.</p>
-
-<p>
-    Server address:
-    <input @bind="_address" size="40"/>
-    <button @onclick="SaveAddress">Save</button>
-</p>
-
-<p>
-    <button @onclick="SignInWithGoogle">Sign in with Google</button>
-    <button @onclick="SignOut">Sign out</button>
-    <button @onclick="SyncNow">Sync now</button>
-</p>
-
-<p>Signed in: @ServiceSession.IsSignedIn. Offline: @ServiceSync.IsOffline.</p>
-<p>Media files: @_mediaList.Count. Playlists: @_playlistCount.</p>
-<p>@_message</p>
-
-<h2>Library</h2>
-<p>
-    <button @onclick="UploadFile">Upload an audio file to the server...</button>
-</p>
-<p>
-    <button @onclick="DownloadAll">Download every missing media file</button>
-    Bulk: @_progress.Finished of @_progress.Total finished, @_progress.Failed failed, @_progress.BytesDone bytes@(_progress.StoppedReason is null ? "" : $", stopped: {_progress.StoppedReason}").
-</p>
-<table>
-    <thead>
-    <tr>
-        <th>Title</th>
-        <th>Size</th>
-        <th>State</th>
-        <th>File on disk</th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (ResponseMediaFile media in _mediaList)
+<div class="@CssClass">
+    @if (_model is not null)
     {
-        <tr>
-            <td>@media.Title</td>
-            <td>@media.SizeBytes</td>
-            <td>@StateOf(media.ID)</td>
-            <td>@(_heldSet.Contains(media.ID) ? "yes" : "no")</td>
-            <td>
-                <button @onclick="() => PlayMedia(media.ID)">Play</button>
-                <button @onclick="() => DownloadOne(media.ID)">Download</button>
-                <button @onclick="() => StopThenDelete(media.ID)">Stop, then delete the file</button>
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+        <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
 
-<h2>Player</h2>
-<p>
-    Current: @(ServicePlayer.Current is null ? "nothing" : _mediaList.FirstOrDefault(x => x.ID == ServicePlayer.Current.MediaFileID)?.Title ?? ServicePlayer.Current.MediaFileID.ToString()).
-    @(ServicePlayer.IsWaiting ? "Waiting for the download." : ServicePlayer.IsPlaying ? "Playing." : "Not playing.")
-    @ServicePlayer.Position.ToString(@"m\:ss") of @ServicePlayer.Duration.ToString(@"m\:ss").
-    Queue: @ServicePlayer.Queue.ItemCount.
-</p>
-<p>
-    <button @onclick="() => ServicePlayer.Previous()">Previous</button>
-    <button @onclick="() => ServicePlayer.Pause()">Pause</button>
-    <button @onclick="() => ServicePlayer.Resume()">Resume</button>
-    <button @onclick="() => ServicePlayer.Next()">Next</button>
-    <button @onclick="() => ServicePlayer.Seek(ServicePlayer.Position + TimeSpan.FromSeconds(10))">Seek +10 s</button>
-    <button @onclick="() => ServicePlayer.Clear()">Stop and clear</button>
-    <button @onclick="PlayAll">Play the whole library</button>
-</p>
-<p>
-    Volume:
-    <input type="range" min="0" max="1" step="0.05" value="@ServicePlayer.Volume" @onchange="SetVolume"/>
-    @ServicePlayer.Volume
-</p>
-<p>
-    <button @onclick="PlayCorruptFile">Load a corrupt file (the player should report Failed)</button>
-</p>
+        @if (_model.Continue is not null)
+        {
+            <section>
+                <h2>Continue</h2>
+                <ContinueCard Info="_model.Continue" OnContinue="Continue"/>
+            </section>
+        }
+
+        <section>
+            <h2>Recently played</h2>
+            @if (_model.HasPlaylists)
+            {
+                <div class="cards">
+                    @foreach (ResponsePlaylist playlist in _model.RecentList)
+                    {
+                        Guid id = playlist.ID;
+                        <PlaylistCard Playlist="playlist" OnPlay="() => Run(() => ServicePlaylist.Play(id))"/>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="empty">You have no playlists yet. Use "New playlist" in the sidebar to create one.</p>
+            }
+        </section>
+    }
+</div>
 
 @code {
-    private string _address = "http://localhost:5182";
-    private string _message = string.Empty;
-    private List<ResponseMediaFile> _mediaList = [];
-    private List<FileState> _stateList = [];
-    private HashSet<Guid> _heldSet = [];
-    private int _playlistCount;
-    private DownloadProgress _progress = new(0, 0, 0, 0, null);
+
+    private HomeModel? _model;
+    private List<string> _messageList = [];
 
     protected override async Task OnInitializedAsync()
     {
-        _address = await StorageServerAddress.GetAddress() ?? _address;
-        ServiceSession.Changed += OnChanged;
         ServiceSync.Changed += OnChanged;
-        ServiceDownload.Changed += OnChanged;
-        ServicePlayer.Changed += OnChanged;
-        PlayerAudio.Failed += OnAudioFailed;
-        await Refresh();
+        ServicePlayer.Changed += OnPlayerChanged;
+        await Load();
     }
 
-    public void Dispose()
+    private (Guid? ItemID, bool IsPlaying) _lastPlayer;
+
+    // The player raises Changed for every tick of the position: the page only follows a change of the current item or of playing.
+    private void OnPlayerChanged()
     {
-        ServiceSession.Changed -= OnChanged;
-        ServiceSync.Changed -= OnChanged;
-        ServiceDownload.Changed -= OnChanged;
-        ServicePlayer.Changed -= OnChanged;
-        PlayerAudio.Failed -= OnAudioFailed;
+        (Guid? ItemID, bool IsPlaying) now = (ServicePlayer.Current?.ItemID, ServicePlayer.IsPlaying);
+        if (now == _lastPlayer) return;
+
+        _lastPlayer = now;
+        OnChanged();
     }
 
     private void OnChanged()
     {
         _ = InvokeAsync(async () =>
         {
-            await Refresh();
+            await Load();
             StateHasChanged();
         });
     }
 
-    private void OnAudioFailed(string reason)
+    private async Task Load()
     {
-        _ = InvokeAsync(() =>
+        try
         {
-            _message = $"The audio player reported Failed: {reason}";
-            StateHasChanged();
-        });
-    }
-
-    private async Task Refresh()
-    {
-        _mediaList = await StoreMetadata.GetMediaFileList();
-        _stateList = await StoreMetadata.GetFileStateList();
-        _heldSet = [.. await StoreFile.GetHeldIDList()];
-        _playlistCount = (await StoreMetadata.GetPlaylistList()).Count;
-        _progress = ServiceDownload.GetProgress();
-    }
-
-    private string StateOf(Guid id)
-    {
-        return (_stateList.FirstOrDefault(x => x.MediaFileID == id)?.State ?? FileSyncStateEnum.NotDownloaded).ToString();
-    }
-
-    private async Task SaveAddress()
-    {
-        await Run(async () =>
+            _model = await ServiceHome.Get();
+        }
+        catch (Exception exception)
         {
-            await StorageServerAddress.SetAddress(_address);
-            _message = "Address saved.";
-        });
+            _messageList = [exception.ToActionMessage()];
+        }
     }
 
-    private async Task SignInWithGoogle()
-    {
-        await Run(async () =>
-        {
-            _message = "Waiting for Google in the browser...";
-            StateHasChanged();
-            bool signedIn = await ServiceSession.SignInWithGoogle();
-            _message = signedIn ? "Signed in with Google." : "Cancelled.";
-            if (signedIn) await ServiceStartup.Start();
-        });
-    }
-
-    private async Task SignOut()
-    {
-        await Run(async () =>
-        {
-            await ServiceSession.SignOut();
-            _message = "Signed out.";
-        });
-    }
-
-    private async Task SyncNow()
-    {
-        await Run(async () =>
-        {
-            await ServiceSync.SyncLibrary();
-            await ServiceSync.SyncPlaylistList();
-            _message = ServiceSync.IsOffline ? "Offline." : "Synced.";
-        });
-    }
-
-    // Temporary, so the flow can be tried with real media: the API has no upload in IApiClient (the screens plan decides where upload lives).
-    private async Task UploadFile()
-    {
-        await Run(async () =>
-        {
-            FileResult? file = await FilePicker.Default.PickAsync(new() { PickerTitle = "Pick an audio file" });
-            if (file is null)
-            {
-                _message = "Cancelled.";
-                return;
-            }
-
-            string address = await StorageServerAddress.GetAddress() ?? throw new InvalidOperationException("Save a server address first.");
-            string token = await ServiceSession.GetAccessToken() ?? throw new InvalidOperationException("Sign in first.");
-
-            using HttpClient client = HttpClientFactory.CreateClient();
-            using MultipartFormDataContent form = [];
-            form.Add(new StringContent(Path.GetFileNameWithoutExtension(file.FileName)), "title");
-            await using Stream stream = await file.OpenReadAsync();
-            form.Add(new StreamContent(stream), "file", file.FileName);
-
-            using HttpRequestMessage request = new(HttpMethod.Post, $"{address}/Media");
-            request.Content = form;
-            request.Headers.Authorization = new("Bearer", token);
-            using HttpResponseMessage response = await client.SendAsync(request);
-
-            _message = response.IsSuccessStatusCode ? "Uploaded. The library updates when the server has processed it." : $"The upload failed ({(int)response.StatusCode}).";
-        });
-    }
-
-    private async Task DownloadOne(Guid id)
-    {
-        await Run(async () =>
-        {
-            bool onDevice = await ServiceDownload.EnsureOnDevice(id);
-            _message = onDevice ? "Downloaded and verified." : "The download failed: " + _stateList.FirstOrDefault(x => x.MediaFileID == id)?.Error;
-        });
-    }
-
-    private async Task DownloadAll()
-    {
-        await Run(async () =>
-        {
-            await ServiceDownload.QueueMissing([.. _mediaList.Select(x => x.ID)]);
-            _message = "Bulk download started.";
-        });
-    }
-
-    private async Task PlayMedia(Guid id)
-    {
-        await Run(async () =>
-        {
-            await ServicePlayer.StartLibrary(id, LibrarySortEnum.Title, false, string.Empty);
-            _message = "Play requested.";
-        });
-    }
-
-    private async Task PlayAll()
-    {
-        await Run(async () =>
-        {
-            if (_mediaList.OrderBy(x => x.Title).FirstOrDefault() is { } first) await ServicePlayer.StartLibrary(first.ID, LibrarySortEnum.Title, false, string.Empty);
-        });
-    }
-
-    private async Task SetVolume(ChangeEventArgs args)
-    {
-        if (double.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, out double volume)) await ServicePlayer.SetVolume(volume);
-    }
-
-    // The point of this: a file can be deleted right after the player stopped, which is what the reconciler needs.
-    private async Task StopThenDelete(Guid id)
-    {
-        await Run(async () =>
-        {
-            await ServicePlayer.Clear();
-            await StoreFile.Delete(id);
-            _message = await StoreFile.GetPath(id) is null ? "Stopped, and the file was deleted." : "The file is still there.";
-        });
-    }
-
-    private async Task PlayCorruptFile()
-    {
-        await Run(async () =>
-        {
-            string path = Path.Combine(FileSystem.AppDataDirectory, "corrupt-test.mp3");
-            await File.WriteAllBytesAsync(path, [.. Enumerable.Range(0, 2048).Select(x => (byte)(x * 37))]);
-            await PlayerAudio.Load(path);
-            await PlayerAudio.Play();
-            _message = "Corrupt file loaded; waiting for the player to report Failed.";
-        });
-    }
+    // The page never starts playback by itself: only a click here does.
+    private Task Continue() => Run(() => ServiceControl.Continue());
 
     private async Task Run(Func<Task> action)
     {
+        _messageList = [];
         try
         {
             await action();
         }
         catch (Exception exception)
         {
-            _message = $"{exception.GetType().Name}: {exception.Message}";
+            _messageList = [exception.ToActionMessage()];
         }
+    }
+
+    public void Dispose()
+    {
+        ServiceSync.Changed -= OnChanged;
+        ServicePlayer.Changed -= OnPlayerChanged;
     }
 
 }

@@ -7,6 +7,8 @@ public sealed class FakeDownloadService : IDownloadService
 {
     public List<Guid> CancelList { get; } = [];
 
+    public List<Guid> RemoveList { get; } = [];
+
     public List<Guid> EnsureList { get; } = [];
 
     // What EnsureOnDevice answers.
@@ -38,6 +40,17 @@ public sealed class FakeDownloadService : IDownloadService
 
         return Task.CompletedTask;
     }
+
+    public Task Remove(Guid mediaFileID)
+    {
+        RemoveList.Add(mediaFileID);
+        RemoveHandler?.Invoke(mediaFileID);
+
+        return Task.CompletedTask;
+    }
+
+    // Runs inside Remove, so a test can record the order of calls.
+    public Action<Guid>? RemoveHandler { get; set; }
 
     public Task Cancel(Guid mediaFileID)
     {

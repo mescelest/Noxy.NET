@@ -3,6 +3,7 @@ using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Models.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Persistence;
+using Noxy.NET.MediaPlayer.Persistence.Tables.Playlist;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Playlists;
@@ -397,7 +398,7 @@ public class PlaylistRepositoryTest : IDisposable
         }
 
         await using DataContext context = _fixture.CreateContext();
-        var left = await context.PlaylistEntry.ToListAsync(TestContext.Current.CancellationToken);
+        List<TablePlaylistEntry> left = await context.PlaylistEntry.ToListAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(other.ID, Assert.Single(left).MediaFileID);
     }

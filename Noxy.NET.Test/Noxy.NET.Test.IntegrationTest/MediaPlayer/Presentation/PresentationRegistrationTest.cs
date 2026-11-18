@@ -1,4 +1,6 @@
+using Fluxor;
 using Microsoft.Extensions.DependencyInjection;
+using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -16,10 +18,15 @@ public class PresentationRegistrationTest
         services.AddSingleton<IServerAddressStorage>(new FakeServerAddressStorage());
         services.AddSingleton<IGoogleSignInService>(new FakeGoogleSignInService());
         services.AddSingleton<IAudioPlayer>(new FakeAudioPlayer());
+        services.AddSingleton<IDevicePreferenceStorage>(new FakeDevicePreferenceStorage());
+        services.AddSingleton<IFileSaver>(new FakeFileSaver());
+        services.AddFluxor(options => options.ScanAssemblies(typeof(PresentationAssemblyMarker).Assembly));
         services.AddPresentation();
         services.AddStorage(Path.Combine(Path.GetTempPath(), $"registration-{Guid.CreateVersion7()}"));
 
-        using ServiceProvider provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
+        using ServiceProvider root = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
+        using IServiceScope scope = root.CreateScope();
+        IServiceProvider provider = scope.ServiceProvider;
 
         Assert.NotNull(provider.GetRequiredService<IAppStartupService>());
         Assert.NotNull(provider.GetRequiredService<IPlayerService>());
@@ -29,6 +36,7 @@ public class PresentationRegistrationTest
         Assert.NotNull(provider.GetRequiredService<IRemotePlaybackService>());
         Assert.NotNull(provider.GetRequiredService<IQueueService>());
         Assert.NotNull(provider.GetRequiredService<IDeviceService>());
+        Assert.NotNull(provider.GetRequiredService<IStateBridgeService>());
         Assert.Same(provider.GetRequiredService<IQueueService>(), provider.GetRequiredService<IQueueService>());
         Assert.NotNull(provider.GetRequiredService<IDeviceStore>());
         Assert.NotNull(provider.GetRequiredService<ILocalQueueStore>());

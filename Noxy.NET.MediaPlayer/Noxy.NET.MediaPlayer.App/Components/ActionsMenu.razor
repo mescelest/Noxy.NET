@@ -1,0 +1,136 @@
+@inject IState<FeatureLibraryState> StateLibrary
+@inject IState<FeaturePlaylistListState> StatePlaylistList
+@inject IDispatcher Dispatcher
+@inject ILibraryActionService ServiceLibraryAction
+@inject IDialogService DialogService
+@inherits FluxorElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <button type="button" class="trigger" disabled="@(Library.SelectedCount == 0)" aria-label="Actions" aria-haspopup="menu" aria-expanded="@_open" @onclick="() => _open = !_open">
+        <IconMore/>
+    </button>
+
+    @if (_open)
+    {
+        <div class="backdrop" @onclick="() => _open = false"></div>
+        <ul class="menu" role="menu">
+            @foreach (MenuItem item in ItemList)
+            {
+                string? reason = ServiceLibraryAction.GetDisabledReason(item.Action) ?? item.UnavailableReason;
+                <li>
+                    <button type="button" role="menuitem" class="item" data-destructive="@item.IsDestructive" disabled="@(reason is not null)" title="@reason" @onclick="() => Choose(item)">
+                        @item.Label
+                        @if (reason is not null)
+                        {
+                            <span class="reason">@reason</span>
+                        }
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+
+    <MessageBox MessageList="_messageList" Status="StatusEnum.Warning"/>
+</div>
+
+@code {
+
+    private sealed record MenuItem(LibraryActionEnum Action, string Label, Func<Task> Run, bool IsDestructive = false, string? UnavailableReason = null);
+
+    private List<string> _messageList = [];
+    private bool _open;
+
+    private FeatureLibraryState Library => StateLibrary.Value;
+
+    // The menu in its order: one more entry is one more item.
+    private List<MenuItem> ItemList =>
+    [
+        new(LibraryActionEnum.Download, "Download to this device", Download),
+        new(LibraryActionEnum.PlayNext, "Play next", PlayNext),
+        new(LibraryActionEnum.AddToQueue, "Add to queue", AddToQueue),
+        new(LibraryActionEnum.SaveAsFile, "Save as file", SaveAsFile),
+        new(LibraryActionEnum.AddToPlaylist, "Add to playlist", ChoosePlaylist),
+        new(LibraryActionEnum.RemoveFromDevice, "Remove from this device", () => Confirm("Remove from this device", $"Remove {Count(Library.SelectedCount)} from this device? They stay in your library.", "Remove", RemoveFromDevice)),
+        new(LibraryActionEnum.DeleteFromLibrary, "Delete from library", () => Confirm("Delete from library", $"Delete {Count(Library.SelectedCount)} from your library?", "Delete", DeleteFromLibrary), true)
+    ];
+
+    private static string Count(int count) => count == 1 ? "1 media file" : $"{count} media files";
+
+    private List<Guid> SelectedIDList => Library.SelectedIDList;
+
+    private async Task Choose(MenuItem item)
+    {
+        _open = false;
+        await item.Run();
+    }
+
+    private Task Download() => Show(ServiceLibraryAction.Download(SelectedIDList));
+
+    private Task PlayNext() => Show(ServiceLibraryAction.PlayNext(SelectedIDList));
+
+    private Task AddToQueue() => Show(ServiceLibraryAction.AddToQueue(SelectedIDList));
+
+    private Task SaveAsFile() => Show(ServiceLibraryAction.SaveAsFile(SelectedIDList));
+
+    private Task RemoveFromDevice() => Show(ServiceLibraryAction.RemoveFromDevice(SelectedIDList));
+
+    private async Task DeleteFromLibrary()
+    {
+        await Show(ServiceLibraryAction.DeleteFromLibrary(SelectedIDList));
+        Dispatcher.Dispatch(new ActionLibrarySelectionCleared());
+    }
+
+    private async Task Show(Task<BulkResult> action)
+    {
+        BulkResult result;
+        try
+        {
+            result = await action;
+        }
+        catch (Exception exception)
+        {
+            _messageList = [exception.ToActionMessage()];
+            return;
+        }
+
+        _messageList = result.FailedIDList.Count == 0 ? [] : [$"{result.FailedIDList.Count} failed. {result.Message}".Trim()];
+    }
+
+    // Asks first with the real count, and says how many of the ticked rows the search hides.
+    private Task Confirm(string title, string message, string acceptText, Func<Task> run)
+    {
+        string? detail = Library.HiddenSelectedCount > 0 ? $"{Library.HiddenSelectedCount} of them {(Library.HiddenSelectedCount == 1 ? "is" : "are")} hidden by the current search." : null;
+        DialogService.Show(@<ConfirmActionDialog Title="@title" Message="@message" Detail="@detail" AcceptText="@acceptText" OnSubmit="@(async accepted =>
+                                                                                                                                       {
+                                                                                                                                           if (accepted) await run();
+                                                                                                                                       })"/>);
+
+        return Task.CompletedTask;
+    }
+
+    private Task ChoosePlaylist()
+    {
+        List<Guid> idList = SelectedIDList;
+        DialogContext? context = null;
+        context = DialogService.Show(
+            @<ModalDialog Title="Add to playlist" CloseText="Cancel">
+                @if (StatePlaylistList.Value.PlaylistList.Count == 0)
+                {
+                    <p>You have no playlists yet.</p>
+                }
+                @foreach (ResponsePlaylist playlist in StatePlaylistList.Value.PlaylistList)
+                {
+                    Guid playlistID = playlist.ID;
+                    <button type="button" class="playlist-choice" @onclick="@(async () =>
+                                                                            {
+                                                                                if (context is not null) DialogService.Close(context.ID);
+                                                                                await Show(ServiceLibraryAction.AddToPlaylist(playlistID, idList));
+                                                                            })">@playlist.Name</button>
+                }
+            </ModalDialog>
+        );
+
+        return Task.CompletedTask;
+    }
+
+}

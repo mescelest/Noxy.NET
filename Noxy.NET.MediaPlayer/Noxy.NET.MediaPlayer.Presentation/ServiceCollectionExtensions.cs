@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 
@@ -14,13 +15,14 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddPresentation()
         {
             services.TryAddSingleton(TimeProvider.System);
-            services.AddHttpClient<IAuthApiClient, AuthApiClient>();
-            services.AddHttpClient<IApiClient, ApiClient>();
+            services.AddHttpClient<IAuthApiClient, AuthApiClient>(client => client.Timeout = TimeSpan.FromSeconds(Constants.HttpTimeoutSeconds));
+            services.AddHttpClient<IApiClient, ApiClient>(client => client.Timeout = TimeSpan.FromSeconds(Constants.HttpTimeoutSeconds));
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<ISyncService, SyncService>();
             services.AddSingleton<ISettingService, SettingService>();
             services.AddSingleton<IMetadataSyncService, MetadataSyncService>();
             services.AddSingleton<IDeviceService, DeviceService>();
+            services.AddSingleton<ILocalDataOwnerService, LocalDataOwnerService>();
             services.TryAddSingleton(Random.Shared);
             services.AddSingleton<IShuffleService, ShuffleService>();
             services.AddSingleton<IQueueSourceService, QueueSourceService>();
@@ -35,6 +37,10 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IPlaybackReporterService, PlaybackReporterService>();
             services.AddSingleton<IRemoteCommandHandlerService, RemoteCommandHandlerService>();
             services.AddSingleton<IPlaybackControlService, PlaybackControlService>();
+            services.AddSingleton<ILibraryActionService, LibraryActionService>();
+            services.AddSingleton<IPlaylistService, PlaylistService>();
+            services.AddSingleton<IHomeService, HomeService>();
+            services.AddScoped<IStateBridgeService, StateBridgeService>();
             services.AddSingleton<IAppStartupService, AppStartupService>();
 
             return services;

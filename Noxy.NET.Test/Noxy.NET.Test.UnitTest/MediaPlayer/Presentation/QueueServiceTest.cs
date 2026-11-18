@@ -732,6 +732,20 @@ public class QueueServiceTest
     }
 
     [Fact]
+    public async Task SaveLocalCopy_OfAQueueWithNoCurrentItem_KeepsNothing_AndRemovesACopyThatWasSaved()
+    {
+        ResponseMediaFile media = await AddMedia("A");
+        await Start(media.ID);
+        await _service.SaveLocalCopy(5);
+        Assert.NotNull(await _storeLocalQueue.Get());
+
+        await _service.Clear();
+        await _service.SaveLocalCopy(0);
+
+        Assert.Null(await _storeLocalQueue.Get());
+    }
+
+    [Fact]
     public async Task Clear_EmptiesTheQueue_AndTheLocalCopy()
     {
         List<ResponseMediaFile> mediaList = await AddMedia("A", "B");

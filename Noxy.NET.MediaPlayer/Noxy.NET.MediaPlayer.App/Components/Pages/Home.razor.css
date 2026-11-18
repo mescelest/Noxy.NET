@@ -1,0 +1,21 @@
+.Home {
+    display: flex;
+    flex-flow: column;
+    gap: var(--size-gap-xl);
+    padding: var(--size-gap-lg);
+}
+
+.Home h2 {
+    margin: 0 0 var(--size-gap-sm);
+    font-size: var(--size-text-h5);
+}
+
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--size-gap-sm);
+}
+
+.empty {
+    color: var(--color-muted);
+}

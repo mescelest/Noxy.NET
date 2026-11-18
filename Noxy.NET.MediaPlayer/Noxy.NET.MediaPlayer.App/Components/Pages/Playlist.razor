@@ -1,0 +1,192 @@
+@page "/playlist/{Id:guid}"
+@inject IPlaylistService ServicePlaylist
+@inject ISyncService ServiceSync
+@inject IMetadataStore StoreMetadata
+@inject NavigationManager Navigation
+@inherits PageComponent
+@implements IDisposable
+
+<div class="@CssClass">
+    @if (_gone)
+    {
+        <MessageBox MessageList="@(["This playlist was deleted."])" Status="StatusEnum.Warning"/>
+    }
+    else if (_detail is null)
+    {
+        <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+        <p class="loading">Loading…</p>
+    }
+    else
+    {
+        <GlassPanel>
+            <div class="row-top">
+                <h1>@_detail.Name</h1>
+                <span class="counts">@_detail.EntryList.Count @(_detail.EntryList.Count == 1 ? "file" : "files") · @_selectedSet.Count selected</span>
+                <button type="button" class="plain-button primary" @onclick="() => Run(() => ServicePlaylist.Play(Id))" aria-label="Play">
+                    <IconPlay/>
+                    Play
+                </button>
+                <button type="button" class="plain-button" @onclick="() => Run(() => ServicePlaylist.DownloadAll(Id))">Download all</button>
+                <button type="button" class="plain-button" @onclick="() => Run(() => ServicePlaylist.Refresh(Id))">Refresh</button>
+                <button type="button" class="plain-button" disabled="@(_selectedSet.Count == 0)" @onclick="RemoveSelected">Remove selected</button>
+                <button type="button" class="plain-button danger" @onclick="Delete">Delete playlist</button>
+            </div>
+            <div class="row-settings">
+                <label><input type="checkbox" checked="@_detail.AllowDuplicates" @onchange="args => Run(() => ServicePlaylist.SetAllowDuplicates(Id, args.Value is true))"/> Allow the same media file twice</label>
+                <label>
+                    Shuffle
+                    <select @onchange="args => Run(() => ServicePlaylist.SetShuffle(Id, ParseShuffle(args.Value?.ToString())))">
+                        <option value="" selected="@(_detail.Shuffle is null)">Follow my setting</option>
+                        @foreach (ShuffleModeEnum mode in Enum.GetValues<ShuffleModeEnum>())
+                        {
+                            <option value="@mode" selected="@(_detail.Shuffle == mode)">@mode</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    Repeat
+                    <select @onchange="args => Run(() => ServicePlaylist.SetRepeat(Id, ParseRepeat(args.Value?.ToString())))">
+                        <option value="" selected="@(_detail.Repeat is null)">Follow my setting</option>
+                        @foreach (RepeatModeEnum mode in Enum.GetValues<RepeatModeEnum>())
+                        {
+                            <option value="@mode" selected="@(_detail.Repeat == mode)">@mode</option>
+                        }
+                    </select>
+                </label>
+            </div>
+            <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+        </GlassPanel>
+
+        @if (_detail.EntryList.Count == 0)
+        {
+            <MessageBox MessageList="@(["This playlist is empty. Add media files from the Library."])" Status="StatusEnum.Info"/>
+        }
+        else
+        {
+            <ul class="entries">
+                @foreach (ResponsePlaylistEntry entry in _detail.EntryList.OrderBy(x => x.Position))
+                {
+                    <li @key="entry.ID" class="entry" draggable="true" data-over="@(_overID == entry.ID)"
+                        @ondblclick="() => Run(() => ServicePlaylist.Play(Id, entry.ID))"
+                        @ondragstart="() => _dragID = entry.ID"
+                        @ondragover="() => _overID = entry.ID" @ondragover:preventDefault
+                        @ondrop="() => Drop(entry)" @ondrop:preventDefault>
+                        <span class="grip" aria-hidden="true"><IconDraggable/></span>
+                        <input type="checkbox" aria-label="Select @entry.MediaFile.Title" checked="@_selectedSet.Contains(entry.ID)" @onchange="() => Toggle(entry.ID)"/>
+                        <span class="cell">@entry.MediaFile.Title</span>
+                        <span class="cell">@entry.MediaFile.Artist</span>
+                        <span class="cell">@entry.MediaFile.Album</span>
+                    </li>
+                }
+            </ul>
+        }
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private ResponsePlaylistDetail? _detail;
+    private bool _gone;
+    private List<string> _messageList = [];
+    private readonly HashSet<Guid> _selectedSet = [];
+    private Guid? _dragID;
+    private Guid? _overID;
+    private Guid _loadedID;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedID == Id) return;
+
+        _loadedID = Id;
+        _detail = null;
+        _gone = false;
+        _selectedSet.Clear();
+        ServiceSync.Changed -= OnSyncChanged;
+        ServiceSync.Changed += OnSyncChanged;
+
+        // Opening syncs the detail and starts the downloads of what is missing: nothing else downloads for a playlist.
+        await Run(() => ServicePlaylist.Open(Id));
+        await Load();
+    }
+
+    private void OnSyncChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await Load();
+            StateHasChanged();
+        });
+    }
+
+    // A playlist deleted on another device disappears from the list: the page then says so.
+    private async Task Load()
+    {
+        try
+        {
+            _detail = await StoreMetadata.GetPlaylistDetail(Id);
+            if (_detail is not null) return;
+
+            _gone = !(await StoreMetadata.GetPlaylistList()).Any(x => x.ID == Id);
+        }
+        catch (Exception exception)
+        {
+            _messageList = [exception.ToActionMessage()];
+        }
+    }
+
+    private async Task Run(Func<Task> action)
+    {
+        _messageList = [];
+        try
+        {
+            await action();
+        }
+        catch (Exception exception)
+        {
+            _messageList = [exception.ToActionMessage()];
+        }
+    }
+
+    private void Toggle(Guid entryID)
+    {
+        if (!_selectedSet.Add(entryID)) _selectedSet.Remove(entryID);
+    }
+
+    private async Task RemoveSelected()
+    {
+        List<Guid> entryIDList = [.. _selectedSet];
+        _selectedSet.Clear();
+        await Run(() => ServicePlaylist.RemoveEntryList(Id, entryIDList));
+        await Load();
+    }
+
+    private async Task Drop(ResponsePlaylistEntry target)
+    {
+        Guid? dragged = _dragID;
+        _dragID = null;
+        _overID = null;
+        if (dragged is null || dragged == target.ID) return;
+
+        await Run(() => ServicePlaylist.MoveEntry(Id, dragged.Value, target.Position));
+        await Load();
+    }
+
+    private async Task Delete()
+    {
+        await Run(() => ServicePlaylist.Delete(Id));
+        if (_messageList.Count == 0) Navigation.NavigateTo("");
+    }
+
+    private static ShuffleModeEnum? ParseShuffle(string? value) => Enum.TryParse(value, out ShuffleModeEnum mode) ? mode : null;
+
+    private static RepeatModeEnum? ParseRepeat(string? value) => Enum.TryParse(value, out RepeatModeEnum mode) ? mode : null;
+
+    public void Dispose()
+    {
+        ServiceSync.Changed -= OnSyncChanged;
+    }
+
+}
