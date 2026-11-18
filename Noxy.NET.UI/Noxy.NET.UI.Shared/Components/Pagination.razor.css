@@ -1,0 +1,5 @@
+.Pagination {
+    display: grid;
+    grid-auto-flow: column;
+    column-gap: var(--size-gap-xs);
+}

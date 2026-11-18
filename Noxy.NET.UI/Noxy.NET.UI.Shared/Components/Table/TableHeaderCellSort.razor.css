@@ -1,0 +1,18 @@
+.sort {
+    display: inline-flex;
+    align-items: center;
+    column-gap: var(--size-gap-xxs);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.direction:empty {
+    display: none;
+}

@@ -55,10 +55,7 @@
         <ProjectReference Include="..\..\Noxy.NET.Shared\Noxy.NET.Shared.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Shared\Noxy.NET.UI.Shared.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Shared.Fluxor\Noxy.NET.UI.Shared.Fluxor.csproj"/>
-        <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Elements\Noxy.NET.UI.Elements.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Graphics\Noxy.NET.UI.Graphics.csproj"/>
-        <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Table\Noxy.NET.UI.Table.csproj"/>
-        <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.WebForm\Noxy.NET.UI.WebForm.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Dialog\Noxy.NET.UI.Dialog.csproj"/>
         <ProjectReference Include="..\Noxy.NET.MediaPlayer.Presentation\Noxy.NET.MediaPlayer.Presentation.csproj"/>
         <ProjectReference Include="..\Noxy.NET.MediaPlayer.Storage\Noxy.NET.MediaPlayer.Storage.csproj"/>

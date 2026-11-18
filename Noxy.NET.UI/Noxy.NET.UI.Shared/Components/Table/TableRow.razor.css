@@ -1,0 +1,10 @@
+.TableRow {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+}
+
+.TableRow[data-striped="True"] {
+    background-color: var(--color-offset-primary-sm);
+}

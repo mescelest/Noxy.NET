@@ -1,0 +1,18 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" role="table" aria-rowcount="@AriaRowCount">
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // The number of rows in the body, so that a table which draws only some of them still reports its full size.
+    [Parameter]
+    public int? RowCount { get; set; }
+
+    private int? AriaRowCount => RowCount + 1;
+
+}

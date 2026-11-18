@@ -1,0 +1,12 @@
+.TableBody {
+    display: contents;
+}
+
+.TableBody ::deep > :not(.TableRow) {
+    grid-column: 1 / -1;
+}
+
+.TableBody ::deep > .loading {
+    align-items: center;
+    justify-content: center;
+}

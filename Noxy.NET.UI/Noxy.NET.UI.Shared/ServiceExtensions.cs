@@ -7,14 +7,17 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddNoxyNETUICommonServices(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        return services.AddNoxyNETUIThemeService();
-    }
+        public IServiceCollection AddNoxyNETUICommonServices()
+        {
+            return services.AddNoxyNETUIThemeService();
+        }
 
-    public static IServiceCollection AddNoxyNETUIThemeService(this IServiceCollection services)
-    {
-        services.AddScoped(typeof(IThemeService<>), typeof(ThemeService<>));
-        return services;
+        public IServiceCollection AddNoxyNETUIThemeService()
+        {
+            services.AddScoped(typeof(IThemeService<>), typeof(ThemeService<>));
+            return services;
+        }
     }
 }

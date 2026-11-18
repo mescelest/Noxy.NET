@@ -31,7 +31,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<IDevicePreferenceStorage, PreferencesDevicePreferenceStorage>();
         builder.Services.AddSingleton<IFileSaver, FileSaver>();
         builder.Services.AddNoxyNETUIDialogService();
-        builder.Services.AddNoxyNETUIThemeService();
+        builder.Services.AddNoxyNETUICommonServices();
+        builder.Services.AddNoxyNETCommonServices();
 #if WINDOWS
         builder.Services.AddSingleton<IGoogleSignInService, GoogleSignInService>();
         builder.Services.AddSingleton<IAudioPlayer, AudioPlayer>();

@@ -1,0 +1,39 @@
+@typeparam T
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@inherits ElementComponent
+
+<TableBody @attributes="AdditionalAttributes" Loading="Loading">
+    <Virtualize TItem="(T Row, int Index)" Items="_indexedList" ItemSize="ItemSize" Context="entry">
+        @ChildContent(entry)
+    </Virtualize>
+</TableBody>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<T> List { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<(T Row, int Index)> ChildContent { get; set; }
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+    // An estimate of one row, in pixels; the real height is measured.
+    [Parameter]
+    public float ItemSize { get; set; } = 48;
+
+    private IReadOnlyList<T>? _indexedSource;
+    private List<(T Row, int Index)> _indexedList = [];
+
+    // The row numbers are worked out once per list, not once per row drawn.
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (ReferenceEquals(_indexedSource, List)) return;
+
+        _indexedSource = List;
+        _indexedList = [.. List.Select((row, index) => (row, index))];
+    }
+
+}

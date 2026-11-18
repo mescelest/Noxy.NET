@@ -6,46 +6,53 @@
 @typeparam T where T : EntityDataParameter
 
 <div @attributes="AdditionalAttributes" class="@CssClass" style="@GetStyle()">
-    <Table class="table" List="List" Loading="IsLoading">
+    <Table class="table" RowCount="List.Count">
         <TableHeader>
-            <b></b>
-            <b class="column left">@TextParameterService.Get(ParameterTextConstants.LabelValue, ComponentName)</b>
+            <TableCell/>
+            <TableCell class="column left"><b>@TextParameterService.Get(ParameterTextConstants.LabelValue, ComponentName)</b></TableCell>
             @if (_isTextParameter)
             {
-                <b class="column left">@TextParameterService.Get(ParameterTextConstants.LabelCulture, ComponentName)</b>
+                <TableCell class="column left"><b>@TextParameterService.Get(ParameterTextConstants.LabelCulture, ComponentName)</b></TableCell>
             }
-            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeEffective, ComponentName)</b>
-            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeApproved, ComponentName)</b>
-            <b class="column right">@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, ComponentName)</b>
+            <TableCell class="column right"><b>@TextParameterService.Get(ParameterTextConstants.LabelTimeEffective, ComponentName)</b></TableCell>
+            <TableCell class="column right"><b>@TextParameterService.Get(ParameterTextConstants.LabelTimeApproved, ComponentName)</b></TableCell>
+            <TableCell class="column right"><b>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated, ComponentName)</b></TableCell>
         </TableHeader>
-        <TableRow>
-            @if (Current == context.Row.ID)
+        <TableBody Loading="IsLoading">
+            @foreach (var (index, row) in List.Index())
             {
-                <MaterialIcon Icon="chevron_right" Size="18px"/>
-            }
-            else if (context.Row.TimeApproved == null)
-            {
-                <MaterialIcon Icon="how_to_reg" Size="18px" @onclick="() => ApproveParameter(context.Row)"/>
-            }
-            else if (context.Row.TimeEffective > DateTime.UtcNow)
-            {
-                <MaterialIcon Icon="delete" Size="18px" @onclick="() => DeleteParameter(context.Row)"/>
-            }
-            else
-            {
-                <MaterialIcon Icon="reset_settings" Size="18px" @onclick="() => OnClone.InvokeAsync(context.Row)"/>
-            }
-            <span class="column left">@context.Row.Value</span>
+                <TableRow Index="index">
+                    <TableCell>
+                        @if (Current == row.ID)
+                        {
+                            <MaterialIcon Icon="chevron_right" Size="18px"/>
+                        }
+                        else if (row.TimeApproved == null)
+                        {
+                            <MaterialIcon Icon="how_to_reg" Size="18px" @onclick="() => ApproveParameter(row)"/>
+                        }
+                        else if (row.TimeEffective > DateTime.UtcNow)
+                        {
+                            <MaterialIcon Icon="delete" Size="18px" @onclick="() => DeleteParameter(row)"/>
+                        }
+                        else
+                        {
+                            <MaterialIcon Icon="reset_settings" Size="18px" @onclick="() => OnClone.InvokeAsync(row)"/>
+                        }
+                    </TableCell>
+                    <TableCell class="column left">@row.Value</TableCell>
 
-            @if (_isTextParameter && context.Row is EntityDataParameterText text)
-            {
-                <span class="column left">@text.Culture</span>
-            }
+                    @if (_isTextParameter && row is EntityDataParameterText text)
+                    {
+                        <TableCell class="column left">@text.Culture</TableCell>
+                    }
 
-            <span class="column right">@SystemConstantService.AsDateTime(context.Row.TimeEffective)</span>
-            <span class="column right">@SystemConstantService.AsDateTime(context.Row.TimeApproved)</span>
-            <span class="column right">@SystemConstantService.AsDateTime(context.Row.TimeCreated)</span>
-        </TableRow>
+                    <TableCell class="column right">@SystemConstantService.AsDateTime(row.TimeEffective)</TableCell>
+                    <TableCell class="column right">@SystemConstantService.AsDateTime(row.TimeApproved)</TableCell>
+                    <TableCell class="column right">@SystemConstantService.AsDateTime(row.TimeCreated)</TableCell>
+                </TableRow>
+            }
+        </TableBody>
     </Table>
 </div>
 

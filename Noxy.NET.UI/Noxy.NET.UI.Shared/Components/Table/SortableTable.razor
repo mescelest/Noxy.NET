@@ -1,0 +1,79 @@
+﻿@typeparam T
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" role="table" aria-rowcount="@(List.Count + 1)">
+    <div class="header" role="row" aria-rowindex="1">
+        @TableHeader
+    </div>
+
+    <Loader class="loading" Loading="Loading">
+        @if (List.Count > 0)
+        {
+            <SortableList List="List" OnUpdate="OnUpdate" KeySelector="KeySelector" HandleClass="@HandleClass" DragClass="sortable-row" GhostClass="@GhostClass">
+                <div @key="@GetRowKey(context)" class="sortable-row" role="row" aria-rowindex="@(context.Index + 2)" aria-keyshortcuts="@KeyShortcuts" data-striped="@(context.Index % 2 == 0)" tabindex="0" @onkeydown="args => OnKeyDown(args, context.Index)">
+                    @TableRow((context.Item, context.Index))
+                </div>
+            </SortableList>
+        }
+        else if (Placeholder is not null)
+        {
+            @Placeholder
+        }
+    </Loader>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<T> List { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment<(T Row, int Index)> TableRow { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment TableHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment? Placeholder { get; set; }
+
+    [Parameter]
+    public Func<T, int, object>? KeySelector { get; set; }
+
+    [Parameter]
+    public EventCallback<(int IndexOld, int IndexNew)> OnUpdate { get; set; }
+
+    [Parameter]
+    public string? HandleClass { get; set; }
+
+    [Parameter]
+    public string? GhostClass { get; set; }
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+    private const string KeyUp = "ArrowUp";
+    private const string KeyDown = "ArrowDown";
+    private const string KeyShortcuts = $"Alt+{KeyUp} Alt+{KeyDown}";
+
+    private object? GetRowKey((T Item, int Index) tuple)
+    {
+        return KeySelector is not null ? KeySelector(tuple.Item, tuple.Index) : tuple.Item;
+    }
+
+    // The keyboard alternative to dragging a row: Alt with the up or down arrow moves the focused row one place.
+    private async Task OnKeyDown(KeyboardEventArgs args, int index)
+    {
+        if (!args.AltKey || !OnUpdate.HasDelegate) return;
+
+        int target = args.Key switch
+        {
+                KeyUp => index - 1,
+                KeyDown => index + 1,
+                _ => index
+        };
+        if (target == index || target < 0 || target >= List.Count) return;
+
+        await OnUpdate.InvokeAsync((index, target));
+    }
+
+}

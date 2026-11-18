@@ -19,36 +19,41 @@
     </div>
 
     <div class="tab-panel" role="tabpanel">
-        <Table class="table" List="ColorList" T="FilterColor" KeySelector="row => row.ID">
+        <Table class="table" RowCount="ColorList.Count">
             <TableHeader>
-                <div role="cell"><strong>Name</strong></div>
-                <div role="cell"><strong>Color</strong></div>
-                <div role="cell"></div>
+                <TableCell><strong>Name</strong></TableCell>
+                <TableCell><strong>Color</strong></TableCell>
+                <TableCell/>
             </TableHeader>
-            <TableRow>
-                <div class="table-cell" role="cell">
-                    <InputControlText class="name" Size="12" @bind-Value:get="@context.Row.Name" @bind-Value:set="e => OnInputColorNameChange(e, context.Row)"/>
-                </div>
+            <TableBody>
+                @foreach (var (index, row) in ColorList.Index())
+                {
+                    <TableRow @key="row.ID" Index="index">
+                        <TableCell class="table-cell">
+                            <InputControlText class="name" Size="12" @bind-Value:get="@row.Name" @bind-Value:set="e => OnInputColorNameChange(e, row)"/>
+                        </TableCell>
 
-                <div class="table-cell" role="cell">
-                    <InputControlColor @bind-Value:get="@GetColor(context.Row)" @bind-Value:set="e => OnInputColorValueChange(e, context.Row)"/>
-                </div>
+                        <TableCell class="table-cell">
+                            <InputControlColor @bind-Value:get="@GetColor(row)" @bind-Value:set="e => OnInputColorValueChange(e, row)"/>
+                        </TableCell>
 
-                <div class="table-cell" role="cell">
-                    @if (context.Index == 0)
-                    {
-                        <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonAddRowClick">
-                            <MaterialIcon Icon="add" Size="20px"/>
-                        </Button>
-                    }
-                    else
-                    {
-                        <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => OnButtonDeleteRowClick(context.Row.ID)">
-                            <MaterialIcon Icon="remove" Size="20px"/>
-                        </Button>
-                    }
-                </div>
-            </TableRow>
+                        <TableCell class="table-cell">
+                            @if (index == 0)
+                            {
+                                <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonAddRowClick">
+                                    <MaterialIcon Icon="add" Size="20px"/>
+                                </Button>
+                            }
+                            else
+                            {
+                                <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => OnButtonDeleteRowClick(row.ID)">
+                                    <MaterialIcon Icon="remove" Size="20px"/>
+                                </Button>
+                            }
+                        </TableCell>
+                    </TableRow>
+                }
+            </TableBody>
         </Table>
     </div>
 </div>

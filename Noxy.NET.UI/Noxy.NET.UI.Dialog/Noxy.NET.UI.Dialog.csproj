@@ -27,7 +27,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Noxy.NET.UI.Elements\Noxy.NET.UI.Elements.csproj"/>
         <ProjectReference Include="..\Noxy.NET.UI.Graphics\Noxy.NET.UI.Graphics.csproj"/>
     </ItemGroup>
 

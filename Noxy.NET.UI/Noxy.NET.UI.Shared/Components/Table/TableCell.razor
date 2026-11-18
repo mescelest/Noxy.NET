@@ -1,0 +1,38 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" role="@Role">
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // Overrides what the header or the row around the cell says it is: a header makes its cells column headers, a row makes them cells.
+    [Parameter]
+    public TableCellKindEnum? Kind { get; set; }
+
+    [CascadingParameter]
+    private TableCellKindEnum KindCascaded { get; set; }
+
+    private const string RoleCell = "cell";
+    private const string RoleColumnHeader = "columnheader";
+    private const string RoleRowHeader = "rowheader";
+
+    private string Role
+    {
+        get
+        {
+            TableCellKindEnum kind = Kind ?? KindCascaded;
+            return kind switch
+            {
+                TableCellKindEnum.Cell => RoleCell,
+                TableCellKindEnum.ColumnHeader => RoleColumnHeader,
+                TableCellKindEnum.RowHeader => RoleRowHeader,
+                _ => throw new InvalidEnumArgumentException(nameof(Kind), (int)kind, typeof(TableCellKindEnum))
+            };
+        }
+    }
+
+}

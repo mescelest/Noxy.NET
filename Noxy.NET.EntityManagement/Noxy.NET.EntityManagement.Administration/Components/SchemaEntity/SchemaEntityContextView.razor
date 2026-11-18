@@ -9,19 +9,24 @@
             <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Context list</DynamicHTMLTag>
         </Header>
         <Content>
-            <Table class="grid" List="List">
+            <Table class="grid" RowCount="List.Count">
                 <TableHeader>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelName)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
+                    <TableCell><strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong></TableCell>
+                    <TableCell><strong>@TextParameterService.Get(ParameterTextConstants.LabelName)</strong></TableCell>
+                    <TableCell><strong>@TextParameterService.Get(ParameterTextConstants.LabelNote)</strong></TableCell>
+                    <TableCell><strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated)</strong></TableCell>
                 </TableHeader>
-                <TableRow>
-                    <span>@context.Row.SchemaIdentifier</span>
-                    <span>@context.Row.Name</span>
-                    <span>@context.Row.Note</span>
-                    <span>@context.Row.TimeCreated</span>
-                </TableRow>
+                <TableBody>
+                    @foreach (var (index, row) in List.Index())
+                    {
+                        <TableRow Index="index">
+                            <TableCell>@row.SchemaIdentifier</TableCell>
+                            <TableCell>@row.Name</TableCell>
+                            <TableCell>@row.Note</TableCell>
+                            <TableCell>@row.TimeCreated</TableCell>
+                        </TableRow>
+                    }
+                </TableBody>
             </Table>
         </Content>
     </Collapsible>

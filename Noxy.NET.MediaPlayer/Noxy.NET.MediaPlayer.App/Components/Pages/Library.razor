@@ -31,27 +31,33 @@
     }
     else
     {
-        <Table T="ResponseMediaFile" List="Current.VisibleList" Virtualize="true" ItemSize="48" KeySelector="x => x.ID" class="table">
+        <Table class="table" RowCount="Current.VisibleList.Count">
             <TableHeader>
-                <input type="checkbox" aria-label="Select all shown" checked="@Current.AllVisibleSelected" @onchange="() => Dispatcher.Dispatch(new ActionLibraryVisibleSelected())"/>
-                <span></span>
-                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.Title)" OnClick="() => Sort(LibrarySortEnum.Title)">Title</TableSortHeaderCell>
-                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.Artist)" OnClick="() => Sort(LibrarySortEnum.Artist)">Artist</TableSortHeaderCell>
-                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.Album)" OnClick="() => Sort(LibrarySortEnum.Album)">Album</TableSortHeaderCell>
-                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.Year)" OnClick="() => Sort(LibrarySortEnum.Year)">Year</TableSortHeaderCell>
-                <TableSortHeaderCell Direction="DirectionOf(LibrarySortEnum.TimeCreated)" OnClick="() => Sort(LibrarySortEnum.TimeCreated)">Added</TableSortHeaderCell>
+                <TableCell>
+                    <input type="checkbox" aria-label="Select all shown" checked="@Current.AllVisibleSelected" @onchange="() => Dispatcher.Dispatch(new ActionLibraryVisibleSelected())"/>
+                </TableCell>
+                <TableCell/>
+                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.Title)" OnClick="() => Sort(LibrarySortEnum.Title)"><strong>Title</strong></TableHeaderCellSort>
+                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.Artist)" OnClick="() => Sort(LibrarySortEnum.Artist)"><strong>Artist</strong></TableHeaderCellSort>
+                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.Album)" OnClick="() => Sort(LibrarySortEnum.Album)"><strong>Album</strong></TableHeaderCellSort>
+                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.Year)" OnClick="() => Sort(LibrarySortEnum.Year)"><strong>Year</strong></TableHeaderCellSort>
+                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.TimeCreated)" OnClick="() => Sort(LibrarySortEnum.TimeCreated)"><strong>Added</strong></TableHeaderCellSort>
             </TableHeader>
-            <TableRow Context="entry">
-                <div class="media-row" @ondblclick="() => Play(entry.Row)">
-                    <input type="checkbox" aria-label="Select @entry.Row.Title" checked="@Current.SelectedSet.Contains(entry.Row.ID)" @onchange="() => Dispatcher.Dispatch(new ActionLibrarySelectionToggled(entry.Row.ID))"/>
-                    <FileStatusIcon State="StateOf(entry.Row.ID)"/>
-                    <span class="cell">@entry.Row.Title</span>
-                    <span class="cell">@entry.Row.Artist</span>
-                    <span class="cell">@entry.Row.Album</span>
-                    <span class="cell">@entry.Row.Year</span>
-                    <span class="cell">@entry.Row.TimeCreated.ToLocalTime().ToString("d")</span>
-                </div>
-            </TableRow>
+            <TableBodyVirtualize T="ResponseMediaFile" List="Current.VisibleList" ItemSize="48" Context="entry">
+                <TableRow @key="entry.Row.ID" Index="entry.Index" class="media-row" @ondblclick="() => Play(entry.Row)">
+                    <TableCell>
+                        <input type="checkbox" aria-label="Select @entry.Row.Title" checked="@Current.SelectedSet.Contains(entry.Row.ID)" @onchange="() => Dispatcher.Dispatch(new ActionLibrarySelectionToggled(entry.Row.ID))"/>
+                    </TableCell>
+                    <TableCell>
+                        <FileStatusIcon State="StateOf(entry.Row.ID)"/>
+                    </TableCell>
+                    <TableCell class="cell" Kind="TableCellKindEnum.RowHeader">@entry.Row.Title</TableCell>
+                    <TableCell class="cell">@entry.Row.Artist</TableCell>
+                    <TableCell class="cell">@entry.Row.Album</TableCell>
+                    <TableCell class="cell">@entry.Row.Year</TableCell>
+                    <TableCell class="cell">@entry.Row.TimeCreated.ToLocalTime().ToString("d")</TableCell>
+                </TableRow>
+            </TableBodyVirtualize>
         </Table>
     }
 </div>

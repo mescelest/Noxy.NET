@@ -1,0 +1,49 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" role="columnheader" aria-sort="@AriaSort">
+    <button class="sort" type="button" @onclick="OnClick">
+        <span class="title">@ChildContent</span>
+        <span class="direction" data-direction="@AriaSort" aria-hidden="true">@Symbol</span>
+    </button>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? DirectionContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? AscendingContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? DescendingContent { get; set; }
+
+    [Parameter]
+    public SortDirectionEnum Direction { get; set; }
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    private static readonly RenderFragment DefaultAscending = builder => builder.AddContent(0, "\u25B2");
+    private static readonly RenderFragment DefaultDescending = builder => builder.AddContent(0, "\u25BC");
+
+    private RenderFragment? Symbol => Direction switch
+    {
+        SortDirectionEnum.Ascending => AscendingContent ?? DirectionContent ?? DefaultAscending,
+        SortDirectionEnum.Descending => DescendingContent ?? DirectionContent ?? DefaultDescending,
+        SortDirectionEnum.None => null,
+        _ => throw new InvalidEnumArgumentException(nameof(Direction), (int)Direction, typeof(SortDirectionEnum))
+    };
+
+    private string AriaSort => Direction switch
+    {
+        SortDirectionEnum.Ascending => "ascending",
+        SortDirectionEnum.Descending => "descending",
+        SortDirectionEnum.None => "none",
+        _ => throw new InvalidEnumArgumentException(nameof(Direction), (int)Direction, typeof(SortDirectionEnum))
+    };
+
+}

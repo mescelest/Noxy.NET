@@ -1,0 +1,18 @@
+@inherits ElementComponent
+
+<div @attributes="AdditionalAttributes" class="@CssClass" role="row" aria-rowindex="@(Index + 2)" data-striped="@(Index % 2 == 0)">
+    <CascadingValue Value="TableCellKindEnum.Cell" IsFixed="true">
+        @ChildContent
+    </CascadingValue>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // The position in the list, from zero: it sets the row number the table reports and which rows are striped.
+    [Parameter, EditorRequired]
+    public int Index { get; set; }
+
+}

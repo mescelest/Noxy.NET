@@ -31,8 +31,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Table\Noxy.NET.UI.Table.csproj"/>
-        <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.WebForm\Noxy.NET.UI.WebForm.csproj"/>
+        <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Shared\Noxy.NET.UI.Shared.csproj"/>
         <ProjectReference Include="..\Noxy.NET.EntityManagement.Application\Noxy.NET.EntityManagement.Application.csproj"/>
         <ProjectReference Include="..\Noxy.NET.EntityManagement.Domain\Noxy.NET.EntityManagement.Domain.csproj"/>
     </ItemGroup>

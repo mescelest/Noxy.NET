@@ -64,7 +64,7 @@
     {
         await base.OnAfterFirstRenderAsync();
 
-        await using IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUIWebForm}/Components/InputControls/{ComponentName}.razor.js");
+        await using IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUICommon}/Components/InputControls/{ComponentName}.razor.js");
         _refDotNet = DotNetObjectReference.Create(this);
         _refJs = await module.InvokeAsync<IJSObjectReference>("init", _windowRef, _refDotNet);
 

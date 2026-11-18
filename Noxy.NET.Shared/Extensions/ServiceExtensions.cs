@@ -7,20 +7,23 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddNoxyNETCommonServices(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        return services
-            .AddNoxyNETTaskBundlingService()
-            .AddNoxyNETDebouncerService();
-    }
+        public IServiceCollection AddNoxyNETCommonServices()
+        {
+            return services
+                .AddNoxyNETTaskBundlingService()
+                .AddNoxyNETDebouncerService();
+        }
 
-    public static IServiceCollection AddNoxyNETTaskBundlingService(this IServiceCollection services)
-    {
-        return services.AddScoped<ITaskBundlingService, TaskBundlingService>();
-    }
+        public IServiceCollection AddNoxyNETTaskBundlingService()
+        {
+            return services.AddScoped<ITaskBundlingService, TaskBundlingService>();
+        }
 
-    public static IServiceCollection AddNoxyNETDebouncerService(this IServiceCollection services)
-    {
-        return services.AddScoped<IDebouncerService, DebouncerService>();
+        public IServiceCollection AddNoxyNETDebouncerService()
+        {
+            return services.AddScoped<IDebouncerService, DebouncerService>();
+        }
     }
 }

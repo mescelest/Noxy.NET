@@ -10,23 +10,28 @@
             <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Element list</DynamicHTMLTag>
         </Header>
         <Content>
-            <Table class="grid" List="List">
+            <Table class="grid" RowCount="List.Count">
                 <TableHeader>
-                    <strong></strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelName)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelNote)</strong>
-                    <strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated)</strong>
+                    <TableCell/>
+                    <TableCell><strong>@TextParameterService.Get(ParameterTextConstants.LabelSchemaIdentifier)</strong></TableCell>
+                    <TableCell><strong>@TextParameterService.Get(ParameterTextConstants.LabelName)</strong></TableCell>
+                    <TableCell><strong>@TextParameterService.Get(ParameterTextConstants.LabelNote)</strong></TableCell>
+                    <TableCell><strong>@TextParameterService.Get(ParameterTextConstants.LabelTimeCreated)</strong></TableCell>
                 </TableHeader>
-                <TableRow>
-                    <span>
-                        <InputElementCheckbox Option="true" @bind-Value:get="@IsChecked(context.Row.ID)" @bind-Value:set="x => SetChecked(x, context.Row.ID)"/>
-                    </span>
-                    <span>@context.Row.SchemaIdentifier</span>
-                    <span>@context.Row.Name</span>
-                    <span>@context.Row.Note</span>
-                    <span>@context.Row.TimeCreated</span>
-                </TableRow>
+                <TableBody>
+                    @foreach (var (index, row) in List.Index())
+                    {
+                        <TableRow Index="index">
+                            <TableCell>
+                                <InputElementCheckbox Option="true" @bind-Value:get="@IsChecked(row.ID)" @bind-Value:set="x => SetChecked(x, row.ID)"/>
+                            </TableCell>
+                            <TableCell>@row.SchemaIdentifier</TableCell>
+                            <TableCell>@row.Name</TableCell>
+                            <TableCell>@row.Note</TableCell>
+                            <TableCell>@row.TimeCreated</TableCell>
+                        </TableRow>
+                    }
+                </TableBody>
             </Table>
         </Content>
     </Collapsible>
