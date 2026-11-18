@@ -6,7 +6,7 @@
 
     <MessageBox MessageList="Context.GetFormErrorList()" Status="@StatusEnum.Error"/>
 
-    <CascadingValue Value="@Context" IsFixed="true">
+    <CascadingValue @key="Context" Value="@Context" IsFixed="true">
         @ChildContent
     </CascadingValue>
 
@@ -27,14 +27,22 @@
     [Parameter]
     public EventCallback<WebFormContext<T>> OnSubmit { get; set; }
 
-    protected override void OnInitialized()
+    private WebFormContext<T>? _context;
+
+    // The parent may hand over a different context, so the subscription follows the current one, and the key above rebuilds the fields for it.
+    protected override void OnParametersSet()
     {
-        Context.Changed += ContextChangedHandler;
+        base.OnParametersSet();
+        if (ReferenceEquals(_context, Context)) return;
+
+        if (_context is not null) _context.Changed -= ContextChangedHandler;
+        _context = Context;
+        _context.Changed += ContextChangedHandler;
     }
 
     public void Dispose()
     {
-        Context.Changed -= ContextChangedHandler;
+        if (_context is not null) _context.Changed -= ContextChangedHandler;
     }
 
     private async Task SubmitHandler()

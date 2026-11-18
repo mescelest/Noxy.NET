@@ -35,7 +35,7 @@
     cursor: pointer;
 }
 
-.option[data-selected] {
+.option[data-selected="True"] {
     color: HighlightText;
     background-color: Highlight;
 }

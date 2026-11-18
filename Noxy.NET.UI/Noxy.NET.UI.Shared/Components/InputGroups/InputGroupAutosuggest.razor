@@ -1,8 +1,8 @@
 ﻿@typeparam TOption
-@inherits Noxy.NET.EntityManagement.Presentation.Abstractions.Components.FluxorInputGroupComponent<TOption>
+@inherits BaseInputGroup<TOption>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="@ErrorList">
+    <TemplateInputGroup For="@IDCurrent" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="@ErrorList">
         <InputElementAutosuggest @attributes="InputAttributes" TOption="TOption" OptionSet="OptionList" ID="@IDCurrent" Name="@GetName()" Loading="Loading" Size="Size" DebounceDelay="DebounceDelay"
                                  NoResultText="@NoResultText" MinLengthText="@MinLengthText"
                                  DisplaySelector="DisplaySelector" OnSearch="OnSearch" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
@@ -12,7 +12,7 @@
 @code {
 
     [Parameter, EditorRequired]
-    public HashSet<TOption> OptionList { get; set; }
+    public required HashSet<TOption> OptionList { get; set; }
 
     [Parameter]
     public int? Size { get; set; }
@@ -29,8 +29,8 @@
     [Parameter]
     public string? MinLengthText { get; set; }
 
-    [Parameter, EditorRequired]
-    public required EventCallback<string> OnSearch { get; set; }
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
 
     [Parameter]
     public Func<TOption?, string>? DisplaySelector { get; set; }

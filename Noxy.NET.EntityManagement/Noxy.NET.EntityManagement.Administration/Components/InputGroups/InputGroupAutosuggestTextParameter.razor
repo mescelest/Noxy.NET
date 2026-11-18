@@ -23,8 +23,8 @@
     {
         Dispatcher.Dispatch(new FeatureSchemaParameterReducers.ListAction(RequestContext, new()
         {
-                SchemaID = SchemaID,
-                PageSize = Count,
+            SchemaID = SchemaID,
+            PageSize = Count,
             Search = obj,
             ParameterType = [nameof(EntitySchemaParameterText)],
         }));

@@ -1,13 +1,15 @@
 @typeparam TOption
+@implements IAsyncDisposable
 @inherits BaseInput<TOption>
 @inject IJSRuntime JS
 
 <div @ref="_refComponent" class="@CssClass" @onclick="DropdownOpenClickHandler">
-    <input @ref="_refInput" id="@IDCurrent" class="input" autocomplete="off" name="@GetName()" size="@SizeCurrent" value="@TextCurrent"/>
+    <input @ref="_refInput" id="@IDCurrent" class="input" autocomplete="off" name="@GetName()" size="@SizeCurrent" value="@TextCurrent"
+           role="combobox" aria-autocomplete="list" aria-expanded="@AriaExpanded" aria-controls="@ListID" aria-activedescendant="@ActiveOptionID"/>
 
     @if (_isDropdownOpen)
     {
-        <div class="dropdown" @onmouseleave="() => SetIndexPreview(-1)">
+        <div id="@ListID" class="dropdown" role="listbox" @onmouseleave="() => SetIndexPreview(-1)">
             @if (LoadingCurrent)
             {
                 <div class="loading">Loading...</div>
@@ -16,15 +18,15 @@
             {
                 <div class="min-length">@MinLengthText</div>
             }
-            else if (_cacheOptionList.Count > 0)
+            else if (_viewList.Count > 0)
             {
-                @for (int i = 0; i < _cacheOptionList.Count; i++)
+                @for (int i = 0; i < _viewList.Count; i++)
                 {
                     int index = i;
-                    OptionDisplay item = _cacheOptionList[index];
+                    OptionDisplay item = _viewList[index];
                     bool selected = index == IndexSelected;
 
-                    <span class="option" data-selected="@selected" @onmousedown="() => Select(index)" @onmouseenter="() => SetIndexPreview(index)">
+                    <span id="@GetOptionID(index)" class="option" role="option" aria-selected="@(selected ? "true" : "false")" data-selected="@selected" @onmousedown="() => Select(index)" @onmouseenter="() => SetIndexPreview(index)">
                         @item.Text
                     </span>
                 }
@@ -50,6 +52,9 @@
     private List<OptionDisplay> _cacheOptionList = [];
     private HashSet<TOption> _cacheOptionSet = [];
 
+    // What the dropdown shows: every option when the caller searches for us, otherwise the options that contain what was typed.
+    private List<OptionDisplay> _viewList = [];
+
     private string? _textValue;
     private string? _textSearch;
     private string? _textPreview;
@@ -62,7 +67,7 @@
 
     [Parameter]
     public int? MinLength { get; set; }
-    private int MinLengthCurrent => MinLength ?? 2;
+    private int MinLengthCurrent => MinLength ?? (HasSearchHandler ? 2 : 0);
 
     [Parameter]
     public bool? Loading { get; set; }
@@ -70,14 +75,16 @@
 
     [Parameter]
     public int? DebounceDelay { get; set; }
-    private int DebounceDelayCurrent => DebounceDelay ?? 500;
+    private int DebounceDelayCurrent => DebounceDelay ?? (HasSearchHandler ? 500 : 0);
 
     [Parameter]
     public int? Size { get; set; }
     private int SizeCurrent => Size ?? 40;
 
-    [Parameter, EditorRequired]
-    public required EventCallback<string> OnSearch { get; set; }
+    // When set, the caller supplies the options for what was typed; when not, the options are filtered here.
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+    private bool HasSearchHandler => OnSearch.HasDelegate;
 
     [Parameter]
     public Func<TOption?, string>? DisplaySelector { get; set; }
@@ -92,13 +99,19 @@
     private int IndexSelected => _indexPreview >= 0 ? _indexPreview : _indexCurrent;
     private bool HasMinLength => _textSearch?.Length >= MinLengthCurrent;
     private bool IsSearchingBelowMinLength => _textSearch is not null && !HasMinLength;
-    private bool IsIndexValid => IndexSelected >= 0 && IndexSelected < _cacheOptionList.Count;
-    private bool HasDropdownContent => LoadingCurrent || (IsSearchingBelowMinLength && !string.IsNullOrWhiteSpace(MinLengthText)) || _cacheOptionList.Count > 0;
+    private bool IsIndexValid => IndexSelected >= 0 && IndexSelected < _viewList.Count;
+    private bool HasDropdownContent => LoadingCurrent || (IsSearchingBelowMinLength && !string.IsNullOrWhiteSpace(MinLengthText)) || _viewList.Count > 0;
+
+    private string ListID => $"{IDCurrent}-listbox";
+    private string AriaExpanded => _isDropdownOpen ? "true" : "false";
+    private string? ActiveOptionID => _isDropdownOpen && IsIndexValid ? GetOptionID(IndexSelected) : null;
+
+    private string GetOptionID(int index) => $"{IDCurrent}-option-{index}";
 
     protected override async Task OnAfterFirstRenderAsync()
     {
         _refDotNet = DotNetObjectReference.Create(this);
-        _autosuggestModule = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Noxy.NET.EntityManagement.Presentation/Components/InputElements/InputElementAutosuggest.razor.js");
+        _autosuggestModule = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(InputElementAutosuggest<>)));
         string[] listCallback = [nameof(OnArrowDown), nameof(OnArrowUp), nameof(OnEnterKey), nameof(OnEscapeKey), nameof(OnTabKey), nameof(OnBlur), nameof(OnValueInput)];
         await _autosuggestModule.InvokeVoidAsync("RegisterAutosuggest", DebounceDelayCurrent, _refComponent, _refInput, _refDotNet, listCallback);
     }
@@ -129,6 +142,8 @@
             shouldUpdateIndex = true;
         }
 
+        RefreshView();
+
         if (shouldUpdateIndex)
         {
             UpdateIndexCurrent();
@@ -149,9 +164,10 @@
         }
         else
         {
+            RefreshView();
             UpdateIndexCurrent();
             _isDropdownOpen = true;
-            await OnSearch.InvokeAsync(_textSearch);
+            if (HasSearchHandler) await OnSearch.InvokeAsync(_textSearch);
         }
 
         await InvokeAsync(StateHasChanged);
@@ -162,9 +178,9 @@
     {
         _isDropdownOpen = HasDropdownContent;
 
-        if (!IsSearchingBelowMinLength && _cacheOptionList.Count > 0)
+        if (!IsSearchingBelowMinLength && _viewList.Count > 0)
         {
-            SetIndexPreview(IndexSelected >= _cacheOptionList.Count - 1 ? -1 : IndexSelected + 1);
+            SetIndexPreview(IndexSelected >= _viewList.Count - 1 ? -1 : IndexSelected + 1);
         }
 
         await InvokeAsync(StateHasChanged);
@@ -175,9 +191,9 @@
     {
         _isDropdownOpen = HasDropdownContent;
 
-        if (!IsSearchingBelowMinLength && _cacheOptionList.Count > 0)
+        if (!IsSearchingBelowMinLength && _viewList.Count > 0)
         {
-            SetIndexPreview(IndexSelected < 0 ? _cacheOptionList.Count - 1 : IndexSelected - 1);
+            SetIndexPreview(IndexSelected < 0 ? _viewList.Count - 1 : IndexSelected - 1);
         }
 
         await InvokeAsync(StateHasChanged);
@@ -188,7 +204,7 @@
     {
         if (_isDropdownOpen)
         {
-            Commit(!IsSearchingBelowMinLength && IsIndexValid ? _cacheOptionList[IndexSelected].Option : default);
+            Commit(!IsSearchingBelowMinLength && IsIndexValid ? _viewList[IndexSelected].Option : default);
             _isDropdownOpen = false;
         }
         else
@@ -212,7 +228,7 @@
         if (!IsSearchingBelowMinLength && IsIndexValid)
         {
             _isDropdownOpen = false;
-            Commit(_cacheOptionList[IndexSelected].Option);
+            Commit(_viewList[IndexSelected].Option);
         }
         else
         {
@@ -239,15 +255,22 @@
         return DisplaySelector?.Invoke(item) ?? item?.ToString() ?? string.Empty;
     }
 
+    private void RefreshView()
+    {
+        _viewList = HasSearchHandler || string.IsNullOrEmpty(_textSearch)
+            ? _cacheOptionList
+            : _cacheOptionList.Where(x => x.Text.Contains(_textSearch, StringComparison.CurrentCultureIgnoreCase)).ToList();
+    }
+
     private void UpdateIndexCurrent()
     {
         string text = _textSearch ?? _textValue ?? string.Empty;
-        _indexCurrent = _cacheOptionList.FindIndex(item => StringComparer.CurrentCultureIgnoreCase.Equals(item.Text, text));
+        _indexCurrent = _viewList.FindIndex(item => StringComparer.CurrentCultureIgnoreCase.Equals(item.Text, text));
     }
 
     private void SetIndexPreview(int index)
     {
-        int nextIndex = Math.Clamp(index, -1, _cacheOptionList.Count - 1);
+        int nextIndex = Math.Clamp(index, -1, _viewList.Count - 1);
 
         if (_indexPreview == nextIndex)
         {
@@ -255,7 +278,7 @@
         }
 
         _indexPreview = nextIndex;
-        _textPreview = _indexPreview >= 0 ? _cacheOptionList[_indexPreview].Text : null;
+        _textPreview = _indexPreview >= 0 ? _viewList[_indexPreview].Text : null;
     }
 
     private void Commit(TOption? item)
@@ -266,7 +289,7 @@
     private void Select(int index)
     {
         _isDropdownOpen = false;
-        Commit(_cacheOptionList[index].Option);
+        Commit(_viewList[index].Option);
     }
 
     private void ResetSearchState()
@@ -274,6 +297,7 @@
         _textSearch = null;
         _textPreview = null;
         _indexPreview = -1;
+        RefreshView();
         UpdateIndexCurrent();
         _isDropdownOpen = false;
     }
@@ -282,7 +306,7 @@
     {
         try
         {
-            if (_autosuggestModule != null)
+            if (_autosuggestModule is not null)
             {
                 await _autosuggestModule.InvokeVoidAsync("DeregisterAutosuggest", _refInput);
                 await _autosuggestModule.DisposeAsync();
@@ -290,7 +314,7 @@
         }
         catch (JSDisconnectedException)
         {
-            // Ignore
+            // The window is closing.
         }
 
         _refDotNet?.Dispose();

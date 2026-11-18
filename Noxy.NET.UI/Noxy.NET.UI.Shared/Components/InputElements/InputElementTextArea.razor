@@ -1,8 +1,6 @@
 ﻿@inherits BaseInputTextual<string>
 
-<textarea @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" cols="@SizeCurrent" rows="@RowsCurrent" @onchange="OnValueChange" @oninput="OnValueInput">
-    @ValueInternal
-</textarea>
+<textarea @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" cols="@SizeCurrent" rows="@RowsCurrent" value="@ValueInternal" @onchange="OnValueChange" @oninput="OnValueInput"></textarea>
 
 @code {
 
