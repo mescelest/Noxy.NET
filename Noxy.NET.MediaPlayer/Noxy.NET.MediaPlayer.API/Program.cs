@@ -55,5 +55,3 @@ app.MapControllers();
 app.MapHub<MediaHub>(HubConstants.MediaHubPath);
 
 await app.RunAsync();
-
-public partial class Program;

@@ -136,9 +136,9 @@ public sealed class FakeApiClient : IApiClient
     public Task<ResponsePlaylist> CreatePlaylist(RequestCreatePlaylist request)
     {
         CreatePlaylistRequestList.Add(request);
-        if (WriteFailure is not null) throw WriteFailure;
-
-        return Task.FromResult<ResponsePlaylist>(PlaylistFor(Guid.CreateVersion7(), request.Name));
+        return WriteFailure is null
+            ? Task.FromResult(PlaylistFor(Guid.CreateVersion7(), request.Name))
+            : throw WriteFailure;
     }
 
     // Thrown by every playlist write, after it is recorded, when set.

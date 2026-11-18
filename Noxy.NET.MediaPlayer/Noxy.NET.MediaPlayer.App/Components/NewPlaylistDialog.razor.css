@@ -30,3 +30,9 @@
     background: var(--color-disabled);
     cursor: default;
 }
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--size-gap-xs);
+}

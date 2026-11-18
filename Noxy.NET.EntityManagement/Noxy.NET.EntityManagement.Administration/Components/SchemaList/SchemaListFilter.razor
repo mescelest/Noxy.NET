@@ -1,6 +1,6 @@
 @inject IDispatcher Dispatcher
 @inject TextParameterService TextParameterService
-@inherits ElementComponent
+@inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <DynamicHTMLTag Tag="@HeaderLevelCurrent.ToText()">Search for a schema</DynamicHTMLTag>

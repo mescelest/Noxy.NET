@@ -1,9 +1,9 @@
 ﻿@typeparam T
-@inherits ElementComponent
+@inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass" role="table" aria-rowcount="@(List.Count + 1)">
     <div class="header" role="row" aria-rowindex="1">
-        @TableHeader
+        @Header
     </div>
 
     <Loader class="loading" Loading="Loading">
@@ -11,7 +11,7 @@
         {
             <SortableList List="List" OnUpdate="OnUpdate" KeySelector="KeySelector" HandleClass="@HandleClass" DragClass="sortable-row" GhostClass="@GhostClass">
                 <div @key="@GetRowKey(context)" class="sortable-row" role="row" aria-rowindex="@(context.Index + 2)" aria-keyshortcuts="@KeyShortcuts" data-striped="@(context.Index % 2 == 0)" tabindex="0" @onkeydown="args => OnKeyDown(args, context.Index)">
-                    @TableRow((context.Item, context.Index))
+                    @RowContent((context.Item, context.Index))
                 </div>
             </SortableList>
         }
@@ -28,10 +28,10 @@
     public required IReadOnlyList<T> List { get; set; }
 
     [Parameter, EditorRequired]
-    public required RenderFragment<(T Row, int Index)> TableRow { get; set; }
+    public required RenderFragment<(T Row, int Index)> RowContent { get; set; }
 
     [Parameter, EditorRequired]
-    public required RenderFragment TableHeader { get; set; }
+    public required RenderFragment Header { get; set; }
 
     [Parameter]
     public RenderFragment? Placeholder { get; set; }

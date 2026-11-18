@@ -1,15 +1,15 @@
-@inherits ElementComponent
+@inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <a class="open" href="@($"playlist/{Playlist.ID}")">
-        <span class="art"><IconMusic Size="IconSizeEnum.ExtraLarge"/></span>
+        <span class="art"><MaterialIcon Icon="music_note" Size="var(--size-icon-xl)"/></span>
         <span class="name">@Playlist.Name</span>
         <span class="meta">@Playlist.EntryCount @(Playlist.EntryCount == 1 ? "file" : "files")</span>
     </a>
     @if (OnPlay.HasDelegate)
     {
         <button type="button" class="play" aria-label="Play @Playlist.Name" @onclick="OnPlay">
-            <IconPlay/>
+            <MaterialIcon Icon="play_arrow" Size="var(--size-icon-md)"/>
         </button>
     }
 </div>

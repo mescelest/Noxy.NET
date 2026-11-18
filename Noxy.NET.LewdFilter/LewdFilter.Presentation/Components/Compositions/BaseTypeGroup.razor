@@ -1,6 +1,6 @@
 @inject IDispatcher Dispatcher
 @inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
-@inherits ElementComponent
+@inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <Collapsible class="group" @bind-Collapsed="_collapsed">

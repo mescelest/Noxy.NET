@@ -1,16 +1,25 @@
-@inherits ElementComponent
+@inherits BaseComponentElement
 
-<div @attributes="AdditionalAttributes" class="@CssClass">
-    <BooleanDialog Title="@Title" AcceptText="@AcceptText" DeclineText="Cancel" OnSubmit="OnSubmit">
-        <p>@Message</p>
-        @if (!string.IsNullOrEmpty(Detail))
-        {
-            <p class="detail">@Detail</p>
-        }
-    </BooleanDialog>
-</div>
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="OpenChanged">
+    <h2>@Title</h2>
+    <p>@Message</p>
+    @if (!string.IsNullOrEmpty(Detail))
+    {
+        <p class="detail">@Detail</p>
+    }
+    <div class="actions">
+        <button type="button" class="decline" @onclick="() => Decide(false)">Cancel</button>
+        <button type="button" class="accept" @onclick="() => Decide(true)">@AcceptText</button>
+    </div>
+</Dialog>
 
 @code {
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
 
     [Parameter]
     public string? Title { get; set; }
@@ -27,5 +36,11 @@
 
     [Parameter]
     public EventCallback<bool> OnSubmit { get; set; }
+
+    private async Task Decide(bool accepted)
+    {
+        await OnSubmit.InvokeAsync(accepted);
+        await OpenChanged.InvokeAsync(false);
+    }
 
 }

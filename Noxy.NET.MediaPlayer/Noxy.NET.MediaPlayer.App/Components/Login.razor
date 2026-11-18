@@ -2,7 +2,7 @@
 @inject IAppStartupService ServiceStartup
 @inject IServerAddressStorage StorageServerAddress
 @inject NavigationManager Navigation
-@inherits ElementComponent
+@inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @if (_showAddress)

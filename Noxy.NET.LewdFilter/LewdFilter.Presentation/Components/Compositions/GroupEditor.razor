@@ -4,7 +4,7 @@
 
 <nav class="GroupEditor">
     <SortableTable class="table" List="GroupList" OnUpdate="OnSortableTableUpdate" KeySelector="(g, _) => g.ID" HandleClass="sortable-handle">
-        <TableHeader>
+        <Header>
             <div role="cell"></div>
             <div role="cell">
                 <strong>Name</strong>
@@ -12,8 +12,8 @@
             <div role="cell"></div>
             <div role="cell"></div>
             <div role="cell"></div>
-        </TableHeader>
-        <TableRow>
+        </Header>
+        <RowContent>
             <div class="table-cell sortable-handle" role="cell">
                 <MaterialIcon Icon="drag_handle" Size="20px"/>
             </div>
@@ -56,7 +56,7 @@
                     </Button>
                 </a>
             </div>
-        </TableRow>
+        </RowContent>
     </SortableTable>
 </nav>
 

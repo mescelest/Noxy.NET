@@ -1,0 +1,30 @@
+﻿@inherits BaseComponentElement
+
+<button @attributes="AdditionalAttributes" class="@CssClass" disabled="@Disabled" data-status="@StatusString" data-is-icon="@IsIcon">
+    <Loader Loading="LoadingCurrent">
+        @ChildContent
+    </Loader>
+</button>
+
+@code {
+
+    [Parameter]
+    public StatusEnum? Status { get; set; }
+    private string StatusString => (Status ?? StatusEnum.None).ToText();
+
+    [Parameter]
+    public bool? Loading { get; set; }
+    private bool LoadingCurrent => Loading ?? false;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool? IsIcon { get; set; }
+
+    private string? LoadingClass => LoadingCurrent ? "loading" : null;
+    private bool? Disabled => TryExtractAttribute("disabled", out bool result) ? result : Loading;
+
+    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, LoadingClass);
+
+} 

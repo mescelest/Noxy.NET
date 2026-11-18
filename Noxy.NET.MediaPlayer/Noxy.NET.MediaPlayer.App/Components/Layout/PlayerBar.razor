@@ -23,20 +23,20 @@ else
     <div @attributes="AdditionalAttributes" class="@CssClass">
         <div class="transport">
             <button type="button" class="icon" aria-label="Previous" @onclick="() => Run(ServiceControl.Previous)">
-                <IconBackwards/>
+                <MaterialIcon Icon="skip_previous" Size="var(--size-icon-md)"/>
             </button>
             <button type="button" class="icon primary" aria-label="@(IsPlaying ? "Pause" : "Play")" @onclick="() => Run(IsPlaying ? ServiceControl.Pause : ServiceControl.Play)">
                 @if (IsPlaying)
                 {
-                    <IconPause/>
+                    <MaterialIcon Icon="pause" Size="var(--size-icon-md)"/>
                 }
                 else
                 {
-                    <IconPlay/>
+                    <MaterialIcon Icon="play_arrow" Size="var(--size-icon-md)"/>
                 }
             </button>
             <button type="button" class="icon" aria-label="Next" @onclick="() => Run(ServiceControl.Next)">
-                <IconForward/>
+                <MaterialIcon Icon="skip_next" Size="var(--size-icon-md)"/>
             </button>
         </div>
 
@@ -56,10 +56,10 @@ else
 
         <div class="modes">
             <button type="button" class="mode" aria-label="Shuffle: @Shuffle" data-on="@(Shuffle != ShuffleModeEnum.Off)" @onclick="CycleShuffle">
-                <IconRadio/> @Shuffle</button>
+                <MaterialIcon Icon="shuffle" Size="var(--size-icon-md)"/> @Shuffle</button>
             <button type="button" class="mode" aria-label="Repeat: @Repeat" data-on="@(Repeat != RepeatModeEnum.No)" @onclick="CycleRepeat">Repeat: @Repeat</button>
             <span class="volume">
-                <IconVolume/>
+                <MaterialIcon Icon="volume_up" Size="var(--size-icon-md)"/>
                 <input type="range" min="0" max="100" step="1" value="@(_dragVolume ?? VolumePercent)" aria-label="Volume"
                        @oninput="args => _dragVolume = (int)ParseDouble(args.Value)" @onchange="VolumeEnd"/>
             </span>

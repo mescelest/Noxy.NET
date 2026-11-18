@@ -86,3 +86,9 @@
 .playlist-choice:hover {
     background: var(--color-offset-primary-md);
 }
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--size-gap-xs);
+}

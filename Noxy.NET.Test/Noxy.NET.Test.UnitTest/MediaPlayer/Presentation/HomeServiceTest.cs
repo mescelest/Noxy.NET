@@ -106,6 +106,7 @@ public class HomeServiceTest
     [Fact]
     public void ItNeedsNoApiClient_ItReadsOnlyTheLocalStore()
     {
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         Assert.DoesNotContain(typeof(HomeService).GetConstructors().Single().GetParameters(), x => x.ParameterType.Name.Contains("Api"));
         Assert.Equal(6, Constants.HomeRecentCount);
     }

@@ -1,6 +1,6 @@
 @typeparam T
 @using Microsoft.AspNetCore.Components.Web.Virtualization
-@inherits ElementComponent
+@inherits BaseComponentElement
 
 <TableBody @attributes="AdditionalAttributes" Loading="Loading">
     <Virtualize TItem="(T Row, int Index)" Items="_indexedList" ItemSize="ItemSize" Context="entry">

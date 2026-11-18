@@ -1,10 +1,10 @@
 using System.Reflection;
 using Fluxor;
-using Noxy.NET.UI.Abstractions;
+using Noxy.NET.UI.Components.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 
-public abstract class FluxorElementComponent : ElementComponent, IDisposable
+public abstract class FluxorElementComponent : BaseComponentElement, IDisposable
 {
     private readonly List<IDisposable> _subscriptions = [];
 

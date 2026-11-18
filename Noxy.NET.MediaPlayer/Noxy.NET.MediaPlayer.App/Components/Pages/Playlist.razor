@@ -3,7 +3,7 @@
 @inject ISyncService ServiceSync
 @inject IMetadataStore StoreMetadata
 @inject NavigationManager Navigation
-@inherits PageComponent
+@inherits BaseComponentPage
 @implements IDisposable
 
 <div class="@CssClass">
@@ -23,7 +23,7 @@
                 <h1>@_detail.Name</h1>
                 <span class="counts">@_detail.EntryList.Count @(_detail.EntryList.Count == 1 ? "file" : "files") · @_selectedSet.Count selected</span>
                 <button type="button" class="plain-button primary" @onclick="() => Run(() => ServicePlaylist.Play(Id))" aria-label="Play">
-                    <IconPlay/>
+                    <MaterialIcon Icon="play_arrow" Size="var(--size-icon-md)"/>
                     Play
                 </button>
                 <button type="button" class="plain-button" @onclick="() => Run(() => ServicePlaylist.DownloadAll(Id))">Download all</button>
@@ -71,7 +71,7 @@
                         @ondragstart="() => _dragID = entry.ID"
                         @ondragover="() => _overID = entry.ID" @ondragover:preventDefault
                         @ondrop="() => Drop(entry)" @ondrop:preventDefault>
-                        <span class="grip" aria-hidden="true"><IconDraggable/></span>
+                        <span class="grip" aria-hidden="true"><MaterialIcon Icon="drag_indicator" Size="var(--size-icon-md)"/></span>
                         <input type="checkbox" aria-label="Select @entry.MediaFile.Title" checked="@_selectedSet.Contains(entry.ID)" @onchange="() => Toggle(entry.ID)"/>
                         <span class="cell">@entry.MediaFile.Title</span>
                         <span class="cell">@entry.MediaFile.Artist</span>

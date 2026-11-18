@@ -1,5 +1,4 @@
 @inject IState<FeaturePlaylistListState> StatePlaylistList
-@inject IDialogService DialogService
 @inherits FluxorElementComponent
 
 <nav @attributes="AdditionalAttributes" class="@CssClass" aria-label="Main">
@@ -9,19 +8,19 @@
         </Header>
         <Content>
             <NavLink class="link" href="" Match="NavLinkMatch.All" @onclick="OnNavigate">
-                <IconHome/>
+                <MaterialIcon Icon="home" Size="var(--size-icon-md)"/>
                 Home
             </NavLink>
             <NavLink class="link" href="library" @onclick="OnNavigate">
-                <IconLibrary/>
+                <MaterialIcon Icon="library_music" Size="var(--size-icon-md)"/>
                 Library
             </NavLink>
             <NavLink class="link" href="account" @onclick="OnNavigate">
-                <IconAccount/>
+                <MaterialIcon Icon="account_circle" Size="var(--size-icon-md)"/>
                 Account
             </NavLink>
             <NavLink class="link" href="settings" @onclick="OnNavigate">
-                <IconSettings/>
+                <MaterialIcon Icon="settings" Size="var(--size-icon-md)"/>
                 Settings
             </NavLink>
         </Content>
@@ -33,11 +32,11 @@
         </Header>
         <Content>
             <NavLink class="link" href="youtube" @onclick="OnNavigate">
-                <IconRadio/>
+                <MaterialIcon Icon="radio" Size="var(--size-icon-md)"/>
                 YouTube
             </NavLink>
             <NavLink class="link" href="bandcamp" @onclick="OnNavigate">
-                <IconMusic/>
+                <MaterialIcon Icon="music_note" Size="var(--size-icon-md)"/>
                 Bandcamp
             </NavLink>
         </Content>
@@ -49,7 +48,7 @@
         </Header>
         <Content>
             <button type="button" class="link new-playlist" @onclick="NewPlaylist">
-                <IconPlus/>
+                <MaterialIcon Icon="add" Size="var(--size-icon-md)"/>
                 New playlist
             </button>
             @foreach (ResponsePlaylist playlist in PlaylistList)
@@ -58,6 +57,8 @@
             }
         </Content>
     </Collapsible>
+
+    <NewPlaylistDialog Open="_newPlaylistOpen" OpenChanged="SetNewPlaylistOpen"/>
 </nav>
 
 @code {
@@ -65,13 +66,21 @@
     [Parameter]
     public EventCallback OnNavigate { get; set; }
 
+    private bool _newPlaylistOpen;
+
     // Most recently played first, then the ones never played, newest modified first.
     private List<ResponsePlaylist> PlaylistList => StatePlaylistList.Value.PlaylistList.OrderMostRecentlyPlayedFirst();
 
     private void NewPlaylist()
     {
-        DialogService.Show(@<NewPlaylistDialog/>);
-        OnNavigate.InvokeAsync();
+        _newPlaylistOpen = true;
+    }
+
+    // A narrow window hides the sidebar when it is told to navigate, and a dialog inside a hidden sidebar cannot show, so that waits until the dialog has closed.
+    private async Task SetNewPlaylistOpen(bool open)
+    {
+        _newPlaylistOpen = open;
+        if (!open) await OnNavigate.InvokeAsync();
     }
 
 }

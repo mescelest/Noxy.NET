@@ -8,13 +8,13 @@
 
 <header @attributes="AdditionalAttributes" class="@CssClass">
     <button type="button" class="icon-button" aria-label="Show or hide the sidebar" aria-expanded="@SidebarOpen" @onclick="OnToggleSidebar">
-        <IconMenu/>
+        <MaterialIcon Icon="menu" Size="var(--size-icon-md)"/>
     </button>
 
     <a class="logo" href="">Noxy Player</a>
 
     <form class="search" role="search" @onsubmit="GoToLibrary">
-        <IconSearch/>
+        <MaterialIcon Icon="search" Size="var(--size-icon-md)"/>
         <input type="search" placeholder="Search the library" aria-label="Search the library" value="@StateLibrary.Value.Search" @oninput="OnSearchInput"/>
     </form>
 

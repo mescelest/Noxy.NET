@@ -30,6 +30,35 @@
 
     <ItemGroup>
         <UpToDateCheckInput Remove="Templates\TemplateStatus.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementCheckbox.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementCheckboxSet.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementColor.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementDate.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementDecimal.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementInteger.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementPassword.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementRadio.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementRadioSet.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementRange.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementSelect.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementText.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputElements\InputElementTextArea.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupCheckbox.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupCheckboxSet.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupDate.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupDecimal.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupInteger.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupPassword.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupRadio.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupRadioSet.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupSelect.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupText.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputGroups\InputGroupTextArea.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputVisuals\InputVisualCheckbox.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\InputVisuals\InputVisualRadio.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\Templates\TemplateInputControlSelect.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\Templates\TemplateInputControlTextual.razor"/>
+        <UpToDateCheckInput Remove="Components\Forms\Templates\TemplateInputGroup.razor"/>
     </ItemGroup>
 
     <ItemGroup>

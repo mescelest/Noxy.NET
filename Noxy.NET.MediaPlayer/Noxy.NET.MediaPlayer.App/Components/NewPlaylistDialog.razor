@@ -1,27 +1,43 @@
-@inject IDialogService DialogService
 @inject IPlaylistService ServicePlaylist
 @inject NavigationManager Navigation
-@inherits ElementComponent
+@inherits BaseComponentElement
 
-<div @attributes="AdditionalAttributes" class="@CssClass">
-    <ModalDialog Title="New playlist" CloseText="Cancel">
-        <form class="form" @onsubmit="Create" @onsubmit:preventDefault>
-            <label for="playlist-name">Name</label>
-            <input id="playlist-name" type="text" maxlength="255" autocomplete="off" @bind="_name" @bind:event="oninput"/>
-            <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
+    <h2>New playlist</h2>
+    <form class="form" @onsubmit="Create" @onsubmit:preventDefault>
+        <label for="playlist-name">Name</label>
+        <input id="playlist-name" type="text" maxlength="255" autocomplete="off" @bind="_name" @bind:event="oninput"/>
+        <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+        <div class="actions">
+            <button type="button" class="cancel" @onclick="Close">Cancel</button>
             <button type="submit" class="create" disabled="@(_busy || string.IsNullOrWhiteSpace(_name))">Create</button>
-        </form>
-    </ModalDialog>
-</div>
+        </div>
+    </form>
+</Dialog>
 
 @code {
 
-    [CascadingParameter(Name = "Context")]
-    private DialogContext? Context { get; set; }
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
 
     private List<string> _messageList = [];
     private string _name = string.Empty;
     private bool _busy;
+
+    private Task HandleOpenChanged(bool open)
+    {
+        return open ? Task.CompletedTask : Close();
+    }
+
+    private async Task Close()
+    {
+        _name = string.Empty;
+        _messageList = [];
+        await OpenChanged.InvokeAsync(false);
+    }
 
     private async Task Create()
     {
@@ -31,7 +47,7 @@
         try
         {
             ResponsePlaylist playlist = await ServicePlaylist.Create(_name);
-            if (Context is not null) DialogService.Close(Context.ID);
+            await Close();
             Navigation.NavigateTo($"playlist/{playlist.ID}");
         }
         catch (Exception exception)

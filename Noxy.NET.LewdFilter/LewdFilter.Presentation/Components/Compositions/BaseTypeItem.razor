@@ -1,6 +1,6 @@
 @inject IDispatcher Dispatcher
 @inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
-@inherits ElementComponent
+@inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <InputControlCheckbox class="checkbox" ID="@Id" Name="@Name" Option="true" @bind-Value:get="@IsChecked" @bind-Value:set="OnCheckboxSelectChange">

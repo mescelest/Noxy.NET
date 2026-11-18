@@ -1,0 +1,77 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits BaseComponentElement
+
+<dialog @ref="_element" @attributes="AdditionalAttributes" class="@CssClass">
+    @ChildContent
+</dialog>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    // Raised with false when the dialog closes itself, for example on Escape, so the owner can follow.
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    private const string FunctionShow = "Show";
+    private const string FunctionClose = "Close";
+    private const string FunctionWatch = "Watch";
+
+    private ElementReference _element;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _watch;
+    private DotNetObjectReference<Dialog>? _reference;
+    private bool _shown;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Dialog)));
+            _reference = DotNetObjectReference.Create(this);
+            _watch = await _module.InvokeAsync<IJSObjectReference>(FunctionWatch, _element, _reference, nameof(Closed));
+        }
+
+        if (_module is null || Open == _shown) return;
+
+        _shown = Open;
+        await _module.InvokeVoidAsync(Open ? FunctionShow : FunctionClose, _element);
+    }
+
+    [JSInvokable]
+    public async Task Closed()
+    {
+        if (!_shown) return;
+
+        _shown = false;
+        await OpenChanged.InvokeAsync(false);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_watch is not null)
+            {
+                await _watch.InvokeVoidAsync("dispose");
+                await _watch.DisposeAsync();
+            }
+
+            if (_module is not null) await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The window is closing.
+        }
+
+        _reference?.Dispose();
+    }
+
+}

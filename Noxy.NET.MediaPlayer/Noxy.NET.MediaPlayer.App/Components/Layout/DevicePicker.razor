@@ -17,7 +17,7 @@
             @foreach (ResponseDevice device in DeviceList)
             {
                 ResponseDevice chosen = device;
-                <li role="none">
+                <li>
                     <button type="button" role="option" class="device" aria-selected="@chosen.IsActive" @onclick="() => Choose(chosen)">
                         @(chosen.DeviceID == _thisID ? $"{chosen.Name} (this device)" : chosen.Name)
                         @if (chosen.IsActive)

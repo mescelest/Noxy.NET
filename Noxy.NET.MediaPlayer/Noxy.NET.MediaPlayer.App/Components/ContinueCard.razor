@@ -1,7 +1,7 @@
-@inherits ElementComponent
+@inherits BaseComponentElement
 
 <button type="button" @attributes="AdditionalAttributes" class="@CssClass" @onclick="OnContinue">
-    <IconPlay Size="IconSizeEnum.Large"/>
+    <MaterialIcon Icon="play_arrow" Size="var(--size-icon-lg)"/>
     <span class="text">
         <span class="title">Continue</span>
         <span class="detail">@Detail</span>

@@ -1,0 +1,214 @@
+﻿@inject IJSRuntime JS
+@inherits BaseComponentElement
+@implements IAsyncDisposable
+
+<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" loading="@_isLoading" collapsed="@IsCollapsed" arrow-collapsed="@IsCollapsing">
+    <div class="header-wrapper">
+        @Header
+
+        <button class="arrow" type="button" @onclick="OnButtonArrowClick" aria-expanded="@AriaCollapsed" aria-controls="@_ariaControls" aria-label="@ToggleLabelCurrent">
+
+            @if (LoadingCurrent)
+            {
+                <Loader Width="40" Height="40"/>
+            }
+            else if (Arrow != null)
+            {
+                @Arrow(IsCollapsing)
+            }
+            else
+            {
+                <span class="arrow-icon" aria-hidden="true">▲</span>
+            }
+        </button>
+    </div>
+
+    <div class="content-wrapper" @ref="_refContentWrapper" aria-hidden="@AriaHidden">
+        <div class="content">
+            @if (!UnloadContentCurrent || _renderContent)
+            {
+                @Content
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+
+    [Parameter]
+    public RenderFragment? Content { get; set; }
+
+    [Parameter]
+    public RenderFragment<bool>? Arrow { get; set; }
+
+    [Parameter]
+    public string? ToggleLabel { get; set; }
+    private string ToggleLabelCurrent => ToggleLabel ?? "Toggle";
+
+    [Parameter]
+    public bool? UnloadContent { get; set; }
+    private bool UnloadContentCurrent => UnloadContent ?? true;
+
+    [Parameter]
+    public bool? Loading { get; set; }
+    private bool LoadingCurrent => Loading ?? false;
+
+    [Parameter]
+    public bool? Collapsed { get; set; }
+    private bool CollapsedCurrent => Collapsed ?? true;
+
+    [Parameter]
+    public EventCallback<bool> CollapsedChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<bool>>? CollapsedExpression { get; set; }
+
+    private bool _disposed;
+    private bool _intent;
+    private bool _isLoading;
+    private bool _isCollapsed;
+    private bool _renderContent;
+    private bool _pendingExpand;
+    private bool? _isAnimating;
+
+    private string _ariaControls = string.Empty;
+
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<Collapsible>? _refDotNet;
+    private ElementReference _refContentWrapper;
+
+    private bool IsCollapsed => _isCollapsed && _isAnimating == null;
+    private bool IsCollapsing => _isAnimating ?? _isCollapsed;
+    private string AriaCollapsed => IsCollapsing ? "true" : "false";
+    private string? AriaHidden => IsCollapsed ? "true" : null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _isCollapsed = CollapsedCurrent;
+        _renderContent = !_isCollapsed;
+        _ariaControls = $"{UUIDCode}-content";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (_pendingExpand && _module is not null && !_disposed)
+        {
+            _pendingExpand = false;
+            await _module.InvokeVoidAsync("AnimateExpand", _refContentWrapper);
+        }
+    }
+
+    protected override async Task OnAfterFirstRenderAsync()
+    {
+        await base.OnAfterFirstRenderAsync();
+
+        _refDotNet = DotNetObjectReference.Create(this);
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Collapsible)));
+
+        if (_disposed) return;
+
+        await _module.InvokeVoidAsync("RegisterCollapsible", _isCollapsed, _refContentWrapper, _refDotNet, nameof(OnAnimationComplete));
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        // Loading is ongoing
+        if (LoadingCurrent)
+        {
+            if (_isLoading) return;
+
+            // Loading is starting
+            _intent = CollapsedCurrent;
+            _isCollapsed = true;
+            _isLoading = true;
+            _ = Animate(true);
+            return;
+        }
+
+        // Loading is ending
+        if (_isLoading && !LoadingCurrent)
+        {
+            _isLoading = false;
+            // If intent and state is the same, ignore
+            if (_intent == _isCollapsed) return;
+
+            _isCollapsed = _intent;
+            _ = Animate(_isCollapsed);
+            return;
+        }
+
+        // If nothing has changed or we're already animating towards this state, ignore
+        if (CollapsedCurrent == _isCollapsed || (_isAnimating.HasValue && _isAnimating.Value == CollapsedCurrent)) return;
+        _ = Animate(CollapsedCurrent);
+    }
+
+    [JSInvokable]
+    public async Task OnAnimationComplete(bool collapsed)
+    {
+        if (_disposed) return;
+
+        _isAnimating = null;
+        _isCollapsed = collapsed;
+
+        if (collapsed && UnloadContentCurrent)
+        {
+            _renderContent = false;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnButtonArrowClick()
+    {
+        await Animate(!_isCollapsed);
+        await CollapsedChanged.InvokeAsync(!_isCollapsed);
+    }
+
+    private async Task Animate(bool collapse)
+    {
+        if (_disposed || _module is null) return;
+
+        _isAnimating = collapse;
+
+        if (!collapse && UnloadContentCurrent)
+        {
+            await _module.InvokeVoidAsync("PrepareExpand", _refContentWrapper);
+            _renderContent = true;
+            _pendingExpand = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            await _module.InvokeVoidAsync(collapse ? "AnimateCollapse" : "AnimateExpand", _refContentWrapper);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+
+        try
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Safe to ignore
+        }
+
+        _refDotNet?.Dispose();
+        _refDotNet = null;
+    }
+
+}

@@ -10,7 +10,7 @@
         <h2>Queue</h2>
         <button type="button" class="text" @onclick="Clear">Clear</button>
         <button type="button" class="text" @onclick="OnClose" aria-label="Close the queue">
-            <IconSaltire/>
+            <MaterialIcon Icon="close" Size="var(--size-icon-md)"/>
         </button>
     </header>
 
@@ -35,13 +35,13 @@
                     <span class="grip">
                         @if (row.IsUpcoming)
                         {
-                            <IconDraggable/>
+                            <MaterialIcon Icon="drag_indicator" Size="var(--size-icon-md)"/>
                         }
                     </span>
                     <FileStatusIcon State="ServicePlayer.StateOf(item)"/>
                     <span class="cell">@TitleOf(item)</span>
                     <button type="button" class="remove" aria-label="Remove from the queue" @onclick="() => Run(() => ServiceControl.RemoveFromQueue(item.ItemID))" @onclick:stopPropagation>
-                        <IconTrash/>
+                        <MaterialIcon Icon="delete" Size="var(--size-icon-md)"/>
                     </button>
                 </div>
             }

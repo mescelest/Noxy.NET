@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Noxy.NET.EntityManagement.Domain.Abstractions.Requests;
 using Noxy.NET.EntityManagement.Presentation.Features;
 using Noxy.NET.EntityManagement.Presentation.Services;
-using Noxy.NET.UI.Abstractions;
+using Noxy.NET.UI.Components.Abstractions;
 
 namespace Noxy.NET.EntityManagement.Presentation.Abstractions.Components;
 

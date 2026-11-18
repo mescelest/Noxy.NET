@@ -5,7 +5,6 @@
 
 <div class="@CssClass" data-state="@State" data-narrow="@_narrow" data-sidebar="@SidebarOpen">
     <NarrowWatcher OnChanged="OnNarrowChanged"/>
-    <DialogViewer/>
 
     @if (!StateSession.Value.IsRestored)
     {

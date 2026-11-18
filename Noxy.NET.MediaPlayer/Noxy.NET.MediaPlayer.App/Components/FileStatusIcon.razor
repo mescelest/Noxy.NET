@@ -1,19 +1,19 @@
-@inherits ElementComponent
+@inherits BaseComponentElement
 
 <span @attributes="AdditionalAttributes" class="@CssClass" data-state="@State" title="@Label" role="img" aria-label="@Label">
     @switch (State)
     {
         case FileSyncStateEnum.OnDevice:
-            <IconOnDevice Size="IconSizeEnum.Small"/>
+            <MaterialIcon Icon="smartphone" Size="var(--size-icon-sm)"/>
             break;
         case FileSyncStateEnum.Downloading:
-            <IconDownload Size="IconSizeEnum.Small"/>
+            <MaterialIcon Icon="download" Size="var(--size-icon-sm)"/>
             break;
         case FileSyncStateEnum.Failed:
-            <IconSaltire Size="IconSizeEnum.Small"/>
+            <MaterialIcon Icon="close" Size="var(--size-icon-sm)"/>
             break;
         case FileSyncStateEnum.NotDownloaded:
-            <IconNotDownloaded Size="IconSizeEnum.Small"/>
+            <MaterialIcon Icon="cloud_download" Size="var(--size-icon-sm)"/>
             break;
         default:
             throw new InvalidEnumArgumentException(nameof(State), (int)State, typeof(FileSyncStateEnum));
