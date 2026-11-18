@@ -3,10 +3,10 @@
 }
 
 .TemplateInputControlTextual ::deep input {
-    height: var(--size-control-input, 36px);
-    padding-inline: var(--size-gap-xxs, 8px);
-    border: var(--size-border-width-sm, 1) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-md, 2px);
+    height: var(--size-control-input, var(--size-control-md, 2.625rem));
+    padding-inline: var(--size-gap-xxs, 0.5rem);
+    border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
+    border-radius: var(--size-border-radius-md, 0.25rem);
     font-size: inherit;
     font-family: inherit;
     box-sizing: border-box;
@@ -14,12 +14,18 @@
 }
 
 .TemplateInputControlTextual ::deep input:hover {
-    box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, #00000033) inset;
+    box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000))) inset;
 }
 
 .TemplateInputControlTextual ::deep input:focus {
-    padding-inline: calc(var(--size-gap-xxs, 8px) - 1px);
-    border-color: var(--color-highlight);
-    border-width: var(--size-border-width-md);
-    outline: none;
+    padding-inline: calc(var(--size-gap-xxs, 0.5rem) - 1px);
+    border-color: var(--color-highlight, #0073EC);
+    border-width: var(--size-border-width-md, 2px);
+    outline: var(--size-border-width-md, 2px) solid transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .TemplateInputControlTextual ::deep input {
+        transition: none;
+    }
 }

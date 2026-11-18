@@ -23,22 +23,6 @@ public class PageLoadingService
         return new Operation(this);
     }
 
-    public Task WaitForIdleExcept(IDisposable scope)
-    {
-        TaskCompletionSource tcs = new();
-
-        StateChanged += Handler;
-        if (PendingOperations == 1) tcs.TrySetResult();
-        return tcs.Task;
-
-        void Handler()
-        {
-            if (PendingOperations != 1) return;
-            StateChanged -= Handler;
-            tcs.TrySetResult();
-        }
-    }
-
     private void EndOperation()
     {
         bool wasLoading = IsLoading;

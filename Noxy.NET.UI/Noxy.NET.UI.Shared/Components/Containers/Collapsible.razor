@@ -23,7 +23,7 @@
         </button>
     </div>
 
-    <div class="content-wrapper" @ref="_refContentWrapper" aria-hidden="@AriaHidden">
+    <div class="content-wrapper" id="@_ariaControls" @ref="_refContentWrapper" aria-hidden="@AriaHidden">
         <div class="content">
             @if (!UnloadContentCurrent || _renderContent)
             {

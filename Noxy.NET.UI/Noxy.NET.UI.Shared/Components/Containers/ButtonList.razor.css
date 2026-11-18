@@ -3,8 +3,8 @@
     flex: 0 0 auto;
     flex-flow: row wrap;
     align-items: center;
-    row-gap: var(--size-gap-md);
-    column-gap: var(--size-gap-md);
+    row-gap: var(--size-gap-md, 1.25rem);
+    column-gap: var(--size-gap-md, 1.25rem);
 }
 
 .ButtonList[data-alignment="left"] {
@@ -20,5 +20,5 @@
 }
 
 .ButtonList ::deep > .Button {
-    min-width: 120px;
+    min-width: 7.5rem;
 }

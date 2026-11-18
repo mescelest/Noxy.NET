@@ -8,3 +8,31 @@
 .loading-content {
     display: none;
 }
+
+.spinner-arc {
+    transform-origin: 50% 50%;
+    animation: loader-spin var(--loader-duration, 1000ms) linear infinite;
+}
+
+@keyframes loader-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner-arc {
+        animation-duration: calc(var(--loader-duration, 1000ms) * 4);
+    }
+}

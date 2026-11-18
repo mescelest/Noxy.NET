@@ -1,6 +1,6 @@
 .Table {
     display: grid;
-    grid-template-columns: var(--table-columns, repeat(auto-fit, minmax(100px, 1fr)));
-    column-gap: var(--size-gap-sm);
+    grid-template-columns: var(--table-columns, repeat(auto-fit, minmax(6.25rem, 1fr)));
+    column-gap: var(--size-gap-sm, 1rem);
     overflow: auto;
 }

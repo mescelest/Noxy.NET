@@ -4,7 +4,7 @@
     flex-flow: column;
 }
 
-.InputGroupSelect ::deep > .TemplateInputGroup > .wrapper > .control {
+.InputGroupSelect ::deep .TemplateInputGroup .control {
     display: flex;
     flex: 0 1 auto;
     flex-flow: row;
@@ -13,17 +13,17 @@
     align-self: flex-start;
 }
 
-.InputGroupSelect ::deep > .TemplateInputGroup > .wrapper > .control::after {
-    content: "▼";
+.InputGroupSelect ::deep .TemplateInputGroup .control::after {
+    content: "▼" / "";
     position: absolute;
-    right: var(--size-gap-xxs, 8px);
+    right: var(--size-gap-xxs, 0.5rem);
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
 }
 
-.InputGroupSelect ::deep > .TemplateInputGroup > .wrapper > .control .InputElementSelect {
-    min-width: 160px;
-    padding-right: calc(var(--size-gap-xxs, 8px) + var(--size-gap-sm, 16px) + var(--size-gap-xxs, 8px));
+.InputGroupSelect ::deep .TemplateInputGroup .control .InputElementSelect {
+    min-width: 10rem;
+    padding-right: calc(var(--size-gap-xxs, 0.5rem) + var(--size-gap-sm, 1rem) + var(--size-gap-xxs, 0.5rem));
     appearance: none;
 }

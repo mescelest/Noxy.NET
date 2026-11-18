@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components.Rendering;
 using Noxy.NET.UI.Components.Abstractions;
 
-namespace Noxy.NET.UI.Components.Elements;
+namespace Noxy.NET.UI.Components.Typography;
 
 public class DynamicHTMLTag : BaseComponentElement
 {

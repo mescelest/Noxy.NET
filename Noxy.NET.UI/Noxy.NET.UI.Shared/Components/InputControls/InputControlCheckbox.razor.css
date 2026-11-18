@@ -1,24 +1,24 @@
 .InputControlCheckbox {
     display: flex;
-    column-gap: var(--size-gap-xxs);
+    column-gap: var(--size-gap-xxs, 0.5rem);
     align-items: center;
     cursor: pointer;
     user-select: none;
 }
 
-.InputControlCheckbox[disabled] {
-    color: var(--color-disabled);
+.InputControlCheckbox[data-disabled="True"] {
+    color: var(--color-disabled, #7F7F7F);
     cursor: not-allowed;
 }
 
-.InputControlCheckbox[disabled] .visual {
-    background-color: var(--color-offset-primary-sm);
-    border-color: var(--color-disabled);
+.InputControlCheckbox[data-disabled="True"] .visual {
+    background-color: var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000)));
+    border-color: var(--color-disabled, #7F7F7F);
 }
 
-.InputControlCheckbox:not([disabled]):hover .visual {
-    border-color: var(--color-highlight);
-    box-shadow: 0 0 10px 0 var(--color-offset-primary-lg) inset;
+.InputControlCheckbox:not([data-disabled="True"]):hover .visual {
+    border-color: var(--color-highlight, #0073EC);
+    box-shadow: 0 0 10px 0 var(--color-offset-primary-lg, color-mix(in srgb, transparent 80%, var(--color-complementary, #000000))) inset;
 }
 
 .visual {
@@ -26,31 +26,26 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: var(--size-control-choice);
-    height: var(--size-control-choice);
-    font-size: 12px;
+    width: var(--size-control-choice, var(--size-control-xxs, 1.5rem));
+    height: var(--size-control-choice, var(--size-control-xxs, 1.5rem));
+    font-size: 0.75rem;
     line-height: 100%;
-    color: var(--color-muted);
-    border: var(--size-border-width-md) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-sm);
-    background-color: var(--color-primary);
+    color: var(--color-muted, #767676);
+    border: var(--size-border-width-md, 2px) solid var(--color-border, var(--color-complementary, #000000));
+    border-radius: var(--size-border-radius-sm, 0.125rem);
+    background-color: var(--color-primary, #FFFFFF);
     box-sizing: border-box;
 }
 
-.InputControlCheckbox:not([disabled]) .visual[checked] {
-    border-color: var(--color-highlight);
-    background-color: var(--color-highlight);
-    color: var(--color-primary);
+.InputControlCheckbox:not([data-disabled="True"]) .visual[data-checked="True"] {
+    border-color: var(--color-highlight, #0073EC);
+    background-color: var(--color-highlight, #0073EC);
+    color: var(--color-primary, #FFFFFF);
 }
 
-.InputControlCheckbox:not([disabled]):focus-within .visual {
-    outline: var(--size-border-width-md) solid var(--color-highlight);
-    outline-offset: var(--size-gap-tiny);
-}
-
-.input:disabled ~ .label {
-    color: var(--color-disabled);
-    cursor: not-allowed;
+.InputControlCheckbox:not([data-disabled="True"]):focus-within .visual {
+    outline: var(--size-border-width-md, 2px) solid var(--color-highlight, #0073EC);
+    outline-offset: var(--size-gap-tiny, 2px);
 }
 
 .InputControlCheckbox ::deep > .InputElementCheckbox {

@@ -8,16 +8,16 @@
     display: grid;
     grid-template-columns: 1fr max-content;
     align-items: center;
-    min-height: var(--size-control-input, 36px);
-    column-gap: var(--size-gap-xs, 12px);
+    min-height: var(--size-control-input, var(--size-control-md, 2.625rem));
+    column-gap: var(--size-gap-xs, 0.75rem);
 }
 
 .arrow {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--size-control-input, 36px);
-    height: var(--size-control-input, 36px);
+    width: var(--size-control-input, var(--size-control-md, 2.625rem));
+    height: var(--size-control-input, var(--size-control-md, 2.625rem));
     cursor: pointer;
     user-select: none;
     background: none;
@@ -25,24 +25,24 @@
     padding: 0;
     font: inherit;
     color: inherit;
-    margin-right: var(--size-border-width-md);
+    margin-right: var(--size-border-width-md, 2px);
 }
 
 .arrow:focus-visible {
-    outline: var(--size-border-width-md) solid currentColor;
+    outline: var(--size-border-width-md, 2px) solid currentColor;
     outline-offset: 0;
-    border-radius: var(--size-border-radius-sm);
+    border-radius: var(--size-border-radius-sm, 0.125rem);
 }
 
 .arrow-icon {
-    transition: transform var(--animation-length-medium) ease-in-out;
+    transition: transform var(--animation-length-medium, 250ms) ease-in-out;
 }
 
 .content-wrapper {
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     overflow: hidden;
-    transition: grid-template-rows var(--animation-length-medium) ease-in-out, margin var(--animation-length-medium) ease-in-out;
+    transition: grid-template-rows var(--animation-length-medium, 250ms) ease-in-out, margin var(--animation-length-medium, 250ms) ease-in-out;
 }
 
 .Collapsible[data-collapsed="True"] .content-wrapper {
@@ -51,6 +51,10 @@
 
 .Collapsible[data-collapsed="True"] .content-wrapper .content {
     visibility: hidden;
+}
+
+.Collapsible:not([data-collapsed="True"]) .content-wrapper .content {
+    transition: visibility 0s;
 }
 
 .Collapsible[data-loading="True"] .content-wrapper {
@@ -63,8 +67,17 @@
 
 .content {
     display: flex;
+    visibility: visible;
+    transition: visibility 0s linear var(--animation-length-medium, 250ms);
     flex: 0 0 auto;
     flex-flow: column;
-    row-gap: var(--size-gap-md);
+    row-gap: var(--size-gap-md, 1.25rem);
     border-left: var(--size-border-width-md, 2px) solid color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .arrow-icon,
+    .content-wrapper {
+        transition-duration: 0.01ms;
+    }
 }

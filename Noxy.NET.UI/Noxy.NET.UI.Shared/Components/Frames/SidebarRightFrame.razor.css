@@ -8,9 +8,9 @@
 
 .SidebarRightFrame .grid {
     display: grid;
-    row-gap: var(--size-gap-md);
-    column-gap: var(--size-gap-md);
-    grid-template: "center right" / minmax(360px, var(--center-width)) 360px;
+    row-gap: var(--size-gap-md, 1.25rem);
+    column-gap: var(--size-gap-md, 1.25rem);
+    grid-template: "center right" / minmax(var(--size-page-sm, 22.5rem), var(--center-width)) var(--size-page-sm, 22.5rem);
 }
 
 .SidebarRightFrame .center {
@@ -21,19 +21,19 @@
     grid-area: right;
 }
 
-@container (max-width: 1440px) {
+@container (max-width: 90rem) {
     .SidebarRightFrame .grid {
         grid-template: "center" "right" / 1fr;
     }
 }
 
-@container (max-width: 720px) {
+@container (max-width: 45rem) {
     .SidebarRightFrame .grid {
         grid-template: "center" "right" / 1fr;
     }
 
     .SidebarRightFrame .right {
-        max-width: 360px;
+        max-width: var(--size-page-sm, 22.5rem);
         margin-inline: auto;
     }
 }

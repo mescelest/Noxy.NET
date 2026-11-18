@@ -12,30 +12,30 @@
 .control ::deep .input {
     width: 100%;
     box-sizing: border-box;
-    padding-right: calc((var(--size-control-input) - var(--size-control-choice)) + var(--size-control-choice));
+    padding-right: calc((var(--size-control-input, var(--size-control-md, 2.625rem)) - var(--size-control-choice, var(--size-control-xxs, 1.5rem))) + var(--size-control-choice, var(--size-control-xxs, 1.5rem)));
 }
 
 .control ::deep .input:focus {
-    padding-right: calc((var(--size-control-input) - var(--size-control-choice)) + var(--size-control-choice) - 1px);
+    padding-right: calc((var(--size-control-input, var(--size-control-md, 2.625rem)) - var(--size-control-choice, var(--size-control-xxs, 1.5rem))) + var(--size-control-choice, var(--size-control-xxs, 1.5rem)) - 1px);
 }
 
 .preview {
-    width: var(--size-control-choice);
-    height: var(--size-control-choice);
+    width: var(--size-control-choice, var(--size-control-xxs, 1.5rem));
+    height: var(--size-control-choice, var(--size-control-xxs, 1.5rem));
     position: absolute;
-    right: calc((var(--size-control-input) - var(--size-control-choice)) * 0.5);
+    right: calc((var(--size-control-input, var(--size-control-md, 2.625rem)) - var(--size-control-choice, var(--size-control-xxs, 1.5rem))) * 0.5);
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-sm);
+    border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
+    border-radius: var(--size-border-radius-sm, 0.125rem);
     z-index: 2;
 }
 
 .popover {
     margin: 0;
-    padding: var(--size-gap-xxs);
-    border: var(--size-border-width-sm) solid var(--color-complementary);
+    padding: var(--size-gap-xxs, 0.5rem);
+    border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
     position: absolute;
     top: anchor(bottom);
     left: anchor(left);
@@ -44,8 +44,8 @@
 .content {
     display: grid;
     grid-template: "window hue" "input input" / 1fr max-content;
-    column-gap: var(--size-gap-xxs);
-    row-gap: var(--size-gap-xxs);
+    column-gap: var(--size-gap-xxs, 0.5rem);
+    row-gap: var(--size-gap-xxs, 0.5rem);
 }
 
 .color-window {
@@ -53,10 +53,6 @@
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
-}
-
-.content ::deep .color-scroll-alpha {
-    grid-area: alpha;
 }
 
 .content ::deep .color-scroll-hue {
@@ -73,9 +69,5 @@
     grid-area: input;
     display: flex;
     flex-flow: row;
-    column-gap: var(--size-gap-xxs);
-}
-
-.color-palette {
-    grid-area: palette;
+    column-gap: var(--size-gap-xxs, 0.5rem);
 }

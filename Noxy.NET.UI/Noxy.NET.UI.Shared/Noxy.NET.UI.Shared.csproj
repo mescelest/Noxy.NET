@@ -14,9 +14,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Remove="wwwroot\Scripts\Interop.js"/>
         <None Include="README.md" Pack="true" PackagePath=""/>
-        <None Include="wwwroot\Interop.js"/>
     </ItemGroup>
 
 
@@ -75,6 +73,10 @@
         <Content Update="Components\InputGroups\InputGroupRadio.razor.css">
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Components\Graphics\"/>
     </ItemGroup>
 
 </Project>

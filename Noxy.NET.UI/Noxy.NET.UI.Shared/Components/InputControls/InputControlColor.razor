@@ -5,7 +5,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass" disabled="@Disabled" style="anchor-name: @_anchor; position: relative;">
     <div class="control">
         <InputControlText @attributes="AdditionalAttributes" class="input" ID="@IDCurrent" Name="@GetName()" Size="17" OnInputDelay="500" @bind-Value:get="_cacheInput" @bind-Value:set="SetValue"/>
-        <button class="preview" popovertarget="@_popover" style="background-color: @ValueString;"></button>
+        <button type="button" class="preview" aria-label="@PreviewLabelCurrent" popovertarget="@_popover" style="background-color: @ValueString;"></button>
     </div>
 
     <div id="@_popover" popover class="popover" style="position-anchor: @_anchor;">
@@ -27,6 +27,11 @@
 @code {
     [Parameter]
     public bool? Disabled { get; set; }
+
+    // The name of the colour swatch button for assistive technology.
+    [Parameter]
+    public string? PreviewLabel { get; set; }
+    private string PreviewLabelCurrent => PreviewLabel ?? "Choose a color";
 
     private ElementReference _windowRef;
     private string _anchor = string.Empty;

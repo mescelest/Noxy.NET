@@ -1,8 +1,9 @@
-﻿@inject IThemeService<TType> ThemeService
+﻿@implements IDisposable
+@inject IThemeService<TType> ThemeService
 @inherits BaseComponentElement
 @typeparam TType where TType : struct, Enum
 
-<div @attributes="AdditionalAttributes" class="@CssClass">
+<div @attributes="AdditionalAttributes" class="@CssClass" role="group" aria-label="@Label">
     @if (Template != null)
     {
         @foreach (TType item in Enum.GetValues(typeof(TType)))
@@ -22,7 +23,9 @@
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
-    private TType? ThemeInternal { get; set; }
+    // The name of the group of choices for assistive technology.
+    [Parameter]
+    public string? Label { get; set; }
 
     protected override void OnInitialized()
     {
@@ -31,21 +34,15 @@
         ThemeService.OnThemeChange += OnThemeChangedHandler;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    // Reads the theme the page already wears, or the one the user chose, or the one the system asks for.
+    protected override async Task OnAfterFirstRenderAsync()
     {
-        await base.OnAfterRenderAsync(firstRender);
-        if (!firstRender) return;
-
-        ThemeInternal = await ThemeService.LoadTheme();
-        if (!Equals(ThemeInternal, ThemeService.GetTheme()))
-        {
-            await ThemeService.SetTheme(ThemeInternal);
-        }
+        await base.OnAfterFirstRenderAsync();
+        await ThemeService.LoadTheme();
     }
 
-    private void OnThemeChangedHandler(object? sender, TType? e)
+    private void OnThemeChangedHandler(object? sender, TType? theme)
     {
-        ThemeInternal = e;
         InvokeAsync(StateHasChanged);
     }
 

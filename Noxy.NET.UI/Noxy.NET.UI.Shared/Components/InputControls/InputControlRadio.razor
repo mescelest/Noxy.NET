@@ -1,14 +1,14 @@
 @inherits BaseInput<TOption?>
 @typeparam TOption
 
-<label class="@ComponentName" for="@IDCurrent" disabled="@Disabled">
+<label class="@CssClass" for="@IDCurrent" data-disabled="@Disabled">
     @if (Visual != null)
     {
         @Visual(Checked)
     }
     else
     {
-        <div class="visual" checked="@Checked">
+        <div class="visual" data-checked="@Checked">
             <span class="tick">✔</span>
         </div>
     }

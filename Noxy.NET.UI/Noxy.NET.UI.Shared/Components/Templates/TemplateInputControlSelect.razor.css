@@ -6,30 +6,28 @@
 
 .TemplateInputControlSelect ::deep select {
     width: 100%;
-    height: var(--size-control-input, 36px);
-    padding-left: var(--size-gap-xxs, 8px);
-    padding-right: var(--size-gap-xxl, 32px);
-    border: var(--size-border-width-sm, 1) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-md, 2px);
+    height: var(--size-control-input, var(--size-control-md, 2.625rem));
+    padding-left: var(--size-gap-xxs, 0.5rem);
+    padding-right: var(--size-gap-xxl, 2rem);
+    border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
+    border-radius: var(--size-border-radius-md, 0.25rem);
     font-size: inherit;
     font-family: inherit;
     box-sizing: border-box;
     transition: box-shadow 100ms ease-in-out;
     appearance: none;
-    --moz-appearance: none;
-    --webkit-appearance: none;
 }
 
 .TemplateInputControlSelect ::deep select:hover {
-    box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, #00000033) inset;
+    box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000))) inset;
 }
 
 .TemplateInputControlSelect ::deep select:focus {
-    padding-left: calc(var(--size-gap-xxs, 8px) - 1px);
-    padding-right: calc(var(--size-gap-xxl, 32px) - 1px);
-    border-color: var(--color-highlight);
-    border-width: var(--size-border-width-md);
-    outline: none;
+    padding-left: calc(var(--size-gap-xxs, 0.5rem) - 1px);
+    padding-right: calc(var(--size-gap-xxl, 2rem) - 1px);
+    border-color: var(--color-highlight, #0073EC);
+    border-width: var(--size-border-width-md, 2px);
+    outline: var(--size-border-width-md, 2px) solid transparent;
 }
 
 .TemplateInputControlSelect > .arrow {
@@ -38,10 +36,16 @@
     width: auto;
     height: auto;
     position: absolute;
-    right: 12px;
+    right: 0.75rem;
     top: calc(50% + 0px);
-    font-size: 14px;
+    font-size: 0.875rem;
     font-style: normal;
     transform: translateY(-50%) rotate(90deg);
     pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .TemplateInputControlSelect ::deep select {
+        transition: none;
+    }
 }

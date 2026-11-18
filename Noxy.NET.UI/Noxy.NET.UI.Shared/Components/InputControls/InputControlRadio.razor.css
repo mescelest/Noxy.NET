@@ -1,36 +1,36 @@
 .InputControlRadio {
     display: flex;
-    column-gap: var(--size-gap-xxs);
+    column-gap: var(--size-gap-xxs, 0.5rem);
     align-items: center;
     cursor: pointer;
 }
 
-.InputControlRadio[disabled] {
-    color: var(--color-disabled);
+.InputControlRadio[data-disabled="True"] {
+    color: var(--color-disabled, #7F7F7F);
 }
 
-.InputControlRadio[disabled] .visual {
-    background-color: var(--color-offset-primary-lg);
-    border-color: var(--color-disabled);
+.InputControlRadio[data-disabled="True"] .visual {
+    background-color: var(--color-offset-primary-lg, color-mix(in srgb, transparent 80%, var(--color-complementary, #000000)));
+    border-color: var(--color-disabled, #7F7F7F);
     cursor: not-allowed;
 }
 
-.InputControlRadio:not([disabled]):hover .visual {
-    border-color: var(--color-highlight);
-    box-shadow: 0 0 10px 0 var(--color-offset-primary-lg) inset;
+.InputControlRadio:not([data-disabled="True"]):hover .visual {
+    border-color: var(--color-highlight, #0073EC);
+    box-shadow: 0 0 10px 0 var(--color-offset-primary-lg, color-mix(in srgb, transparent 80%, var(--color-complementary, #000000))) inset;
 }
 
 .visual {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--size-control-choice);
-    height: var(--size-control-choice);
-    font-size: 12px;
-    color: var(--color-muted);
-    border: var(--size-border-width-md) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-sm);
-    background-color: var(--color-primary);
+    width: var(--size-control-choice, var(--size-control-xxs, 1.5rem));
+    height: var(--size-control-choice, var(--size-control-xxs, 1.5rem));
+    font-size: 0.75rem;
+    color: var(--color-muted, #767676);
+    border: var(--size-border-width-md, 2px) solid var(--color-border, var(--color-complementary, #000000));
+    border-radius: var(--size-border-radius-sm, 0.125rem);
+    background-color: var(--color-primary, #FFFFFF);
     box-sizing: border-box;
 }
 
@@ -38,20 +38,15 @@
     transform: rotate(5deg);
 }
 
-.InputControlRadio:not([disabled]) .visual[checked] {
-    border-color: var(--color-highlight);
-    background-color: var(--color-highlight);
-    color: var(--color-primary);
+.InputControlRadio:not([data-disabled="True"]) .visual[data-checked="True"] {
+    border-color: var(--color-highlight, #0073EC);
+    background-color: var(--color-highlight, #0073EC);
+    color: var(--color-primary, #FFFFFF);
 }
 
-.InputControlRadio:not([disabled]):focus-within .visual {
-    outline: var(--size-border-width-md) solid var(--color-highlight);
-    outline-offset: var(--size-gap-tiny);
-}
-
-.input:disabled ~ .label {
-    color: var(--color-disabled);
-    cursor: not-allowed;
+.InputControlRadio:not([data-disabled="True"]):focus-within .visual {
+    outline: var(--size-border-width-md, 2px) solid var(--color-highlight, #0073EC);
+    outline-offset: var(--size-gap-tiny, 2px);
 }
 
 .InputControlRadio ::deep > .InputElementRadio {

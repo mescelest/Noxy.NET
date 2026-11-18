@@ -1,3 +1,4 @@
+@implements IDisposable
 @inherits BaseComponentElement
 
 @code {
@@ -5,13 +6,18 @@
     private TabSet? Parent { get; set; }
 
     [Parameter, EditorRequired]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     [Parameter]
     public string? Link { get; set; }
 
+    // The name of the link for assistive technology; the arrow alone says nothing.
+    [Parameter]
+    public string? LinkLabel { get; set; }
+    public string LinkLabelCurrent => LinkLabel ?? Title;
+
     [Parameter, EditorRequired]
-    public RenderFragment ChildContent { get; set; }
+    public required RenderFragment ChildContent { get; set; }
 
     [Parameter]
     public RenderFragment? LinkContent { get; set; }
@@ -26,6 +32,11 @@
         }
 
         Parent.AddPage(this);
+    }
+
+    public void Dispose()
+    {
+        Parent?.RemovePage(this);
     }
 
 }

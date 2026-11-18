@@ -1,13 +1,21 @@
-﻿using Microsoft.JSInterop;
+using Microsoft.JSInterop;
+using Noxy.NET.UI.Components.Elements;
+using Noxy.NET.UI.Extensions;
 using Noxy.NET.UI.Interfaces;
 
 namespace Noxy.NET.UI.Services;
 
 public class ThemeService<TType>(IJSRuntime runtime) : IThemeService<TType>, IAsyncDisposable where TType : struct, Enum
 {
+    private const string FunctionGet = "GetTheme";
+    private const string FunctionApply = "ApplyTheme";
+    private const string FunctionSet = "SetTheme";
+
     private IJSObjectReference? Module { get; set; }
 
     private TType? CurrentTheme { get; set; }
+
+    public event EventHandler<TType?>? OnThemeChange;
 
     public async ValueTask DisposeAsync()
     {
@@ -21,31 +29,39 @@ public class ThemeService<TType>(IJSRuntime runtime) : IThemeService<TType>, IAs
         }
         catch (JSDisconnectedException)
         {
+            // The window is closing.
         }
     }
 
     public async Task<TType?> LoadTheme()
     {
-        IJSObjectReference module = await GetInterop();
-        string result = await module.InvokeAsync<string>($"{Constants.InteropNameUICommon}.GetTheme");
-        await SetTheme(Enum.TryParse(result, true, out TType value) ? value : null);
-        OnThemeChange?.Invoke(this, CurrentTheme);
-        return CurrentTheme;
+        IJSObjectReference module = await GetModule();
+        string? result = await module.InvokeAsync<string?>(FunctionGet);
+        TType? theme = Enum.TryParse(result, true, out TType value) ? value : null;
+
+        await module.InvokeVoidAsync(FunctionApply, theme?.ToString());
+        Change(theme);
+
+        return theme;
     }
 
     public TType? GetTheme() => CurrentTheme;
 
     public async Task SetTheme(TType? type)
     {
-        IJSObjectReference module = await GetInterop();
-        await module.InvokeVoidAsync($"{Constants.InteropNameUICommon}.SetTheme", type.ToString());
-        OnThemeChange?.Invoke(this, CurrentTheme = type);
+        IJSObjectReference module = await GetModule();
+        await module.InvokeVoidAsync(FunctionSet, type?.ToString());
+        Change(type);
     }
 
-    public event EventHandler<TType?>? OnThemeChange;
-
-    private async Task<IJSObjectReference> GetInterop()
+    private void Change(TType? theme)
     {
-        return Module ??= await runtime.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUICommon}/Interop.js");
+        CurrentTheme = theme;
+        OnThemeChange?.Invoke(this, theme);
+    }
+
+    private async Task<IJSObjectReference> GetModule()
+    {
+        return Module ??= await runtime.InvokeAsync<IJSObjectReference>("import", runtime.GetComponentPath(typeof(ThemeToggle<>)));
     }
 }

@@ -2,7 +2,7 @@
 
 @if (MessageListCurrent.Any())
 {
-    <div @attributes="AdditionalAttributes" class="@CssClass" data-status="@StatusString">
+    <div @attributes="AdditionalAttributes" class="@CssClass" role="@RoleString" data-status="@StatusString">
         @foreach (string message in MessageListCurrent)
         {
             <div class="message">@message</div>
@@ -20,5 +20,10 @@
     public StatusEnum? Status { get; set; }
     private StatusEnum StatusCurrent => Status ?? StatusEnum.None;
     private string StatusString => StatusCurrent.ToText();
+
+    private const string RoleAlert = "alert";
+    private const string RoleStatus = "status";
+
+    private string RoleString => StatusCurrent == StatusEnum.Error ? RoleAlert : RoleStatus;
 
 }

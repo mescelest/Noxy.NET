@@ -1,20 +1,20 @@
 .SortableTable {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    column-gap: var(--size-gap-sm);
+    grid-template-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
+    column-gap: var(--size-gap-sm, 1rem);
     overflow: auto;
 }
 
 .header, .sortable-row {
-    padding: var(--size-gap-xxs) var(--size-gap-xs);
+    padding: var(--size-gap-xxs, 0.5rem) var(--size-gap-xs, 0.75rem);
 }
 
 .header {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: subgrid;
-    border-bottom: var(--size-border-width-md) solid var(--color-offset-primary-lg);
-    background-color: var(--color-offset-primary-sm);
+    border-bottom: var(--size-border-width-md, 2px) solid var(--color-offset-primary-lg, color-mix(in srgb, transparent 80%, var(--color-complementary, #000000)));
+    background-color: var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000)));
 }
 
 .sortable-row {
@@ -24,7 +24,7 @@
 }
 
 .sortable-row[data-striped="True"] {
-    background-color: var(--color-offset-primary-sm);
+    background-color: var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000)));
 }
 
 .SortableTable ::deep > .loading {

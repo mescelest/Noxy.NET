@@ -2,45 +2,45 @@
     display: flex;
     flex: 0 0 auto;
     flex-flow: column;
-    row-gap: var(--size-gap-xs, 12px);
-    padding: var(--size-gap-xs, 12px);
-    font: var(--font-body);
+    row-gap: var(--size-gap-xs, 0.75rem);
+    padding: var(--size-gap-xs, 0.75rem);
+    font: var(--font-body, normal normal 400 normal var(--size-text-body, 1rem) "Segoe UI", "Roboto", sans-serif);
     color: var(--color-complementary, #000000);
     border: var(--size-border-width-md, 2px) solid var(--color-messagebox, #767676);
-    border-radius: var(--size-border-radius-md, 2px);
+    border-radius: var(--size-border-radius-md, 0.25rem);
     background-color: color-mix(in srgb, var(--color-messagebox, #767676) 60%, var(--color-primary, #FFFFFF));
     position: relative;
 }
 
 .message:not(:only-child) {
     display: list-item;
-    margin-left: var(--size-gap-xs, 12px);
+    margin-left: var(--size-gap-xs, 0.75rem);
 }
 
 .MessageBox[data-status="none"] {
-    --color-messagebox: var(--color-none);
+    --color-messagebox: var(--color-none, #4D4AD3);
 }
 
 .MessageBox[data-status="success"] {
-    --color-messagebox: var(--color-success);
+    --color-messagebox: var(--color-success, #23883D);
 }
 
 .MessageBox[data-status="info"] {
-    --color-messagebox: var(--color-info);
+    --color-messagebox: var(--color-info, #289ED9);
 }
 
 .MessageBox[data-status="highlight"] {
-    --color-messagebox: var(--color-highlight);
+    --color-messagebox: var(--color-highlight, #0073EC);
 }
 
 .MessageBox[data-status="warning"] {
-    --color-messagebox: var(--color-warning);
+    --color-messagebox: var(--color-warning, #D97F00);
 }
 
 .MessageBox[data-status="notice"] {
-    --color-messagebox: var(--color-notice);
+    --color-messagebox: var(--color-notice, #A948DD);
 }
 
 .MessageBox[data-status="error"] {
-    --color-messagebox: var(--color-error);
+    --color-messagebox: var(--color-error, #E42B21);
 }

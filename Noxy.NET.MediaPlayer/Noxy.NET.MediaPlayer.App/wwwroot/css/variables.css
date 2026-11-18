@@ -9,57 +9,57 @@
     --size-text-h5: 1.25rem;
     --size-text-h6: 1.125rem;
     --size-gap-tiny: 2px;
-    --size-gap-xxxs: 4px;
-    --size-gap-xxs: 8px;
-    --size-gap-xs: 12px;
-    --size-gap-sm: 16px;
-    --size-gap-md: 20px;
-    --size-gap-lg: 24px;
-    --size-gap-xl: 28px;
-    --size-gap-xxl: 32px;
-    --size-gap-xxxl: 36px;
-    --size-gap-huge: 40px;
+    --size-gap-xxxs: 0.25rem;
+    --size-gap-xxs: 0.5rem;
+    --size-gap-xs: 0.75rem;
+    --size-gap-sm: 1rem;
+    --size-gap-md: 1.25rem;
+    --size-gap-lg: 1.5rem;
+    --size-gap-xl: 1.75rem;
+    --size-gap-xxl: 2rem;
+    --size-gap-xxxl: 2.25rem;
+    --size-gap-huge: 2.5rem;
     --size-border-width-sm: 1px;
     --size-border-width-md: 2px;
     --size-border-width-lg: 3px;
-    --size-border-radius-sm: 2px;
-    --size-border-radius-md: 4px;
-    --size-border-radius-lg: 8px;
+    --size-border-radius-sm: 0.125rem;
+    --size-border-radius-md: 0.25rem;
+    --size-border-radius-lg: 0.5rem;
     --size-box-shadow: 2px;
-    --size-control-xxs: 24px;
-    --size-control-xs: 30px;
-    --size-control-sm: 36px;
-    --size-control-md: 42px;
-    --size-control-lg: 48px;
-    --size-control-xl: 64px;
-    --size-control-xxl: 92px;
-    --size-icon-xxs: 16px;
-    --size-icon-xs: 20px;
-    --size-icon-sm: 24px;
-    --size-icon-md: 28px;
-    --size-icon-lg: 32px;
-    --size-icon-xl: 36px;
-    --size-icon-xxl: 40px;
-    --size-page-xs: 320px;
-    --size-page-sm: 360px;
-    --size-page-md: 720px;
-    --size-page-lg: 1280px;
-    --size-page-xl: 1920px;
-    --size-column: 320px;
+    --size-control-xxs: 1.5rem;
+    --size-control-xs: 1.875rem;
+    --size-control-sm: 2.25rem;
+    --size-control-md: 2.625rem;
+    --size-control-lg: 3rem;
+    --size-control-xl: 4rem;
+    --size-control-xxl: 5.75rem;
+    --size-icon-xxs: 1rem;
+    --size-icon-xs: 1.25rem;
+    --size-icon-sm: 1.5rem;
+    --size-icon-md: 1.75rem;
+    --size-icon-lg: 2rem;
+    --size-icon-xl: 2.25rem;
+    --size-icon-xxl: 2.5rem;
+    --size-page-xs: 20rem;
+    --size-page-sm: 22.5rem;
+    --size-page-md: 45rem;
+    --size-page-lg: 80rem;
+    --size-page-xl: 120rem;
+    --size-column: 20rem;
 }
 
 /* The app's own sizes. */
 :root {
-    --size-layout-sidebar: clamp(var(--size-column), 15%, 400px);
+    --size-layout-sidebar: clamp(var(--size-column), 15%, 25rem);
     --size-layout-header: var(--size-control-xl);
     --size-layout-player-bar: calc(var(--size-control-xxl) + var(--size-gap-sm));
     --size-library-row: var(--size-control-lg);
-    --size-card-width: 200px;
-    --size-card-height: 240px;
-    --size-queue-panel: 380px;
+    --size-card-width: 12.5rem;
+    --size-card-height: 15rem;
+    --size-queue-panel: 23.75rem;
     --layout-narrow: 0;
-    --table-columns: repeat(auto-fit, minmax(100px, 1fr));
-    --table-columns-library: var(--size-control-xs) var(--size-control-xs) minmax(160px, 3fr) minmax(100px, 2fr) minmax(100px, 2fr) 72px 128px;
+    --table-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
+    --table-columns-library: var(--size-control-xs) var(--size-control-xs) minmax(10rem, 3fr) minmax(6.25rem, 2fr) minmax(6.25rem, 2fr) 4.5rem 8rem;
 }
 
 :root {
@@ -70,9 +70,9 @@
 
 :root {
     --font-family-primary: "Segoe UI", "Roboto", sans-serif;
-    --font-label: normal normal 400 normal var(--size-text-label, 13px) var(--font-family-primary, sans-serif);
-    --font-body: normal normal 400 normal var(--size-text-body, 16px) var(--font-family-primary, sans-serif);
-    --font-button: normal normal 500 normal var(--size-text-body, 16px) var(--font-family-primary, sans-serif);
+    --font-label: normal normal 400 normal var(--size-text-label, 0.8125rem) var(--font-family-primary, sans-serif);
+    --font-body: normal normal 400 normal var(--size-text-body, 1rem) var(--font-family-primary, sans-serif);
+    --font-button: normal normal 500 normal var(--size-text-body, 1rem) var(--font-family-primary, sans-serif);
 }
 
 :root {
@@ -105,6 +105,13 @@
     --color-complementary: var(--color-light);
 }
 
+@media (prefers-color-scheme: dark) {
+    :root:not([theme]) {
+        --color-primary: var(--color-dark);
+        --color-complementary: var(--color-light);
+    }
+}
+
 :root {
     --color-offset-primary-sm: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
     --color-offset-primary-md: color-mix(in srgb, transparent 90%, var(--color-complementary, #000000));
@@ -123,6 +130,7 @@
 
 /* What the shared UI libraries read for their controls. */
 :root {
+    --color-border: var(--color-complementary);
     --color-border-focus: var(--color-highlight);
     --color-control: var(--color-complementary);
     --size-border-width: var(--size-border-width-sm);
