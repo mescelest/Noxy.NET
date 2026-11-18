@@ -8,6 +8,7 @@ public class DynamicHTMLTag : BaseComponentElement
 {
     [Parameter]
     public string? Tag { get; set; }
+    private string TagCurrent => !string.IsNullOrWhiteSpace(Tag) ? Tag : "div";
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
@@ -15,9 +16,8 @@ public class DynamicHTMLTag : BaseComponentElement
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        ArgumentException.ThrowIfNullOrWhiteSpace(Tag);
 
-        builder.OpenElement(0, Tag);
+        builder.OpenElement(0, TagCurrent);
 
         if (AdditionalAttributes?.Count > 0)
         {

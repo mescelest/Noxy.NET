@@ -2,7 +2,7 @@
 @inherits BaseComponentElement
 @implements IAsyncDisposable
 
-<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" loading="@_isLoading" collapsed="@IsCollapsed" arrow-collapsed="@IsCollapsing">
+<div @attributes="@AdditionalAttributes" id="@UUIDCode" class="@CssClass" data-loading="@_isLoading" data-collapsed="@IsCollapsed" data-arrow-collapsed="@IsCollapsing">
     <div class="header-wrapper">
         @Header
 

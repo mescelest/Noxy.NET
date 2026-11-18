@@ -1,23 +1,24 @@
 ﻿@inherits BaseInput<DateTime?>
 @implements INotifyInputChanged
 
-<input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="@UseTimeString" value="@ValueCurrent" @onchange="OnInputChange"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="@TypeString" value="@ValueCurrent" @onchange="OnInputChange"/>
 
 @code {
 
     [Parameter]
     public bool? UseTime { get; set; }
     private bool UseTimeCurrent => UseTime ?? false;
-    private string UseTimeString => UseTimeCurrent ? "datetime" : "date";
+    private string TypeString => UseTimeCurrent ? "datetime-local" : "date";
+    private string FormatCurrent => UseTimeCurrent ? "yyyy-MM-dd'T'HH:mm" : "yyyy-MM-dd";
 
     [Parameter]
     public EventCallback<ChangeEventArgs> OnChange { get; set; }
 
-    private string? ValueCurrent => Value?.ToString("yyyy-MM-dd");
+    private string? ValueCurrent => Value?.ToString(FormatCurrent, CultureInfo.InvariantCulture);
 
     private void OnInputChange(ChangeEventArgs args)
     {
-        DateTime? next = DateTime.TryParse(args.Value?.ToString(), out DateTime parsed) ? parsed : null;
+        DateTime? next = DateTime.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsed) ? parsed : null;
 
         OnChange.InvokeAsync(args);
         NotifyChange(next);

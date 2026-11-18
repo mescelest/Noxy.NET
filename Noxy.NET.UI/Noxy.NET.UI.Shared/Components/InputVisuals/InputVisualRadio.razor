@@ -1,11 +1,12 @@
 @inherits BaseComponentElement
 
-<div @attributes="AdditionalAttributes" class="@CssClass" checked="@Checked">
+<div @attributes="AdditionalAttributes" class="@CssClass" checked="@CheckedCurrent">
 </div>
 
 @code {
 
     [Parameter]
-    public bool Checked { get; set; }
+    public bool? Checked { get; set; }
+    private bool CheckedCurrent => Checked ?? false;
 
 }

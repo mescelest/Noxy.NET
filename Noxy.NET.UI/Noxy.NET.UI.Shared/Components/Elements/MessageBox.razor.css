@@ -17,30 +17,30 @@
     margin-left: var(--size-gap-xs, 12px);
 }
 
-.MessageBox[status="none"] {
+.MessageBox[data-status="none"] {
     --color-messagebox: var(--color-none);
 }
 
-.MessageBox[status="success"] {
+.MessageBox[data-status="success"] {
     --color-messagebox: var(--color-success);
 }
 
-.MessageBox[status="info"] {
+.MessageBox[data-status="info"] {
     --color-messagebox: var(--color-info);
 }
 
-.MessageBox[status="highlight"] {
+.MessageBox[data-status="highlight"] {
     --color-messagebox: var(--color-highlight);
 }
 
-.MessageBox[status="warning"] {
+.MessageBox[data-status="warning"] {
     --color-messagebox: var(--color-warning);
 }
 
-.MessageBox[status="notice"] {
+.MessageBox[data-status="notice"] {
     --color-messagebox: var(--color-notice);
 }
 
-.MessageBox[status="error"] {
+.MessageBox[data-status="error"] {
     --color-messagebox: var(--color-error);
 }

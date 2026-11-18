@@ -3,7 +3,7 @@
 @inherits BaseComponentElement
 
 <TableBody @attributes="AdditionalAttributes" Loading="Loading">
-    <Virtualize TItem="(T Row, int Index)" Items="_indexedList" ItemSize="ItemSize" Context="entry">
+    <Virtualize TItem="(T Row, int Index)" Items="_indexedList" ItemSize="ItemSizeCurrent" Context="entry">
         @ChildContent(entry)
     </Virtualize>
 </TableBody>
@@ -17,11 +17,12 @@
     public required RenderFragment<(T Row, int Index)> ChildContent { get; set; }
 
     [Parameter]
-    public bool Loading { get; set; }
+    public bool? Loading { get; set; }
 
     // An estimate of one row, in pixels; the real height is measured.
     [Parameter]
-    public float ItemSize { get; set; } = 48;
+    public float? ItemSize { get; set; }
+    private float ItemSizeCurrent => ItemSize ?? 48;
 
     private IReadOnlyList<T>? _indexedSource;
     private List<(T Row, int Index)> _indexedList = [];

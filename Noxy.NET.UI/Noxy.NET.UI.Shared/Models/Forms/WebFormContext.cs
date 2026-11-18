@@ -306,8 +306,14 @@ public class WebFormContext<TModel> : IWebFormContext<TModel>, IDisposable where
     private void Batch(Action action)
     {
         BeginBatch();
-        action();
-        EndBatch();
+        try
+        {
+            action();
+        }
+        finally
+        {
+            EndBatch();
+        }
     }
 
     private void NotifyChanged()

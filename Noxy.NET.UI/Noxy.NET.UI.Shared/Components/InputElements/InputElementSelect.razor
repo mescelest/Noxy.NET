@@ -38,10 +38,10 @@
 
     private void OnInputChange(ChangeEventArgs args)
     {
-        if (!int.TryParse(args.Value?.ToString(), out int parsed)) return;
+        if (!int.TryParse(args.Value?.ToString(), out int parsed) || parsed < 0 || parsed >= _cacheList.Length) return;
 
         OnChange.InvokeAsync(args);
-        NotifyChange(OptionList.ElementAt(parsed));
+        NotifyChange(_cacheList[parsed]);
     }
 
 }

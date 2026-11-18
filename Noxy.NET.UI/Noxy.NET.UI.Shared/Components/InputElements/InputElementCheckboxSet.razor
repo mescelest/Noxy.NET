@@ -12,7 +12,7 @@
             }
             else
             {
-                <InputElementCheckbox TValue="TOption" ID="@item.ID" Name="@item.Name" Option="item.Option" Checked="@IsChecked(item.Option)" OnChange="x => OnChoiceChange(x, item.Option)"/>
+                <InputElementCheckbox ID="@item.ID" Name="@item.Name" Option="item.Option" Checked="@IsChecked(item.Option)" OnChange="x => OnChoiceChange(x, item.Option)"/>
             }
 
             @ChildContent(item)

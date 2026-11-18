@@ -1,12 +1,17 @@
 ﻿@inherits BaseInputTextual<decimal?>
 
-<input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="tel" size="@SizeCurrent" value="@ValueInternal" inputmode="numeric" @onchange="OnValueChange" @oninput="OnValueInput"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" type="tel" size="@SizeCurrent" value="@ValueInternal" inputmode="decimal" @onchange="OnValueChange" @oninput="OnValueInput"/>
 
 @code {
 
     protected override decimal? GetParsedValue(string value)
     {
-        return decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal parsed) ? parsed : null;
+        const NumberStyles styles = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
+
+        // A comma or a point as the decimal mark, whichever the user's culture uses first; a thousands separator is never read as one.
+        if (decimal.TryParse(value, styles, CultureInfo.CurrentCulture, out decimal parsed) || decimal.TryParse(value, styles, CultureInfo.InvariantCulture, out parsed)) return parsed;
+
+        return null;
     }
 
 }

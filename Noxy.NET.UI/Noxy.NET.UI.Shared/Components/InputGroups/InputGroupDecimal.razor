@@ -1,8 +1,8 @@
 ﻿@inherits BaseInputGroup<decimal?>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementDecimal @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Size="Size" HasChangeEventOnInput="HasChangeEventOnInput"
+    <TemplateInputGroup For="@IDCurrent" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
+        <InputElementDecimal @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Size="Size"
                              Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
     </TemplateInputGroup>
 </div>
@@ -11,9 +11,6 @@
 
     [Parameter]
     public int? Size { get; set; }
-
-    [Parameter]
-    public bool? HasChangeEventOnInput { get; set; }
 
 }
 

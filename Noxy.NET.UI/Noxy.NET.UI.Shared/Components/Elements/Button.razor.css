@@ -18,7 +18,7 @@
     transition: box-shadow var(--animation-length-short, 150ms) ease-in-out, border var(--animation-length-short, 150ms) ease-in-out;
 }
 
-.Button[data-is-icon] {
+.Button[data-is-icon="True"] {
     padding: 0;
 }
 

@@ -26,7 +26,7 @@
 
     private static double? GetEventValue(ChangeEventArgs args)
     {
-        return double.TryParse(args.Value?.ToString(), out double value) ? value : null;
+        return double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double value) ? value : null;
     }
 
 }

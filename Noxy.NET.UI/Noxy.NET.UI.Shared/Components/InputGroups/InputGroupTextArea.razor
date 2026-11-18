@@ -1,8 +1,8 @@
 ﻿@inherits BaseInputGroup<string>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <TemplateInputGroup For="@UUIDCode" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
-        <InputElementTextArea @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Size="@SizeCurrent" Rows="RowsCurrent" HasChangeEventOnInput="HasChangeEventOnInputCurrent"
+    <TemplateInputGroup For="@IDCurrent" DisplayName="@DisplayNameCurrent" Description="@DescriptionCurrent" ErrorList="ErrorList">
+        <InputElementTextArea @attributes="InputAttributes" ID="@IDCurrent" Name="@GetName()" Size="@SizeCurrent" Rows="RowsCurrent"
                               Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
     </TemplateInputGroup>
 </div>
@@ -16,9 +16,6 @@
     [Parameter]
     public int? Rows { get; set; }
     private int RowsCurrent => Rows ?? 6;
-
-    [Parameter]
-    public bool? HasChangeEventOnInput { get; set; }
 
 }
 

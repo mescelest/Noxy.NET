@@ -12,7 +12,7 @@
             }
             else
             {
-                <InputElementRadio ID="@item.ID" Name="@item.Name" Option="item.Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" OnChange="x => OnChoiceChange(x, item.Option)"/>
+                <InputElementRadio ID="@item.ID" Name="@item.Name" Option="item.Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" OnChange="OnChange"/>
             }
 
             @ChildContent(item)

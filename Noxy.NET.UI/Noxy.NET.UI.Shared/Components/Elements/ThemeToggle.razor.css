@@ -23,27 +23,27 @@
     transition: border-color 200ms ease-in-out, filter 200ms ease-in-out;
 }
 
-.Button[status="success"] {
+.Button[data-status="success"] {
     --button-background-color: var(--color-success);
 }
 
-.Button[status="info"] {
+.Button[data-status="info"] {
     --button-background-color: var(--color-info);
 }
 
-.Button[status="highlight"] {
+.Button[data-status="highlight"] {
     --button-background-color: var(--color-highlight);
 }
 
-.Button[status="warning"] {
+.Button[data-status="warning"] {
     --button-background-color: var(--color-warning);
 }
 
-.Button[status="notice"] {
+.Button[data-status="notice"] {
     --button-background-color: var(--color-notice);
 }
 
-.Button[status="error"] {
+.Button[data-status="error"] {
     --button-background-color: var(--color-error);
 }
 

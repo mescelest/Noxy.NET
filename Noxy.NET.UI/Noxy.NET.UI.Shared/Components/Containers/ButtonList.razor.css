@@ -7,15 +7,15 @@
     column-gap: var(--size-gap-md);
 }
 
-.ButtonList[alignment="left"] {
+.ButtonList[data-alignment="left"] {
     justify-content: flex-start;
 }
 
-.ButtonList[alignment="center"] {
+.ButtonList[data-alignment="center"] {
     justify-content: center;
 }
 
-.ButtonList[alignment="right"] {
+.ButtonList[data-alignment="right"] {
     justify-content: flex-end;
 }
 
