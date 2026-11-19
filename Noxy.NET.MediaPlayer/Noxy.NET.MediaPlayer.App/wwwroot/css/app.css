@@ -2,20 +2,28 @@
     box-sizing: border-box;
 }
 
-html, body {
+html {
+    display: flex;
+    flex-flow: column;
+    flex: 1 0 auto;
     height: 100%;
-    margin: 0;
-    background: var(--color-primary);
-    color: var(--color-complementary);
     --maui-status-bar-safe-area-background: var(--color-primary);
 }
 
 body {
+    display: flex;
+    flex-flow: column;
+    flex: 1 0 auto;
+    margin: 0;
+    background: var(--color-primary);
+    color: var(--color-complementary);
     font: var(--font-body);
 }
 
 #app {
-    height: 100%;
+    display: flex;
+    flex-flow: column;
+    flex: 1 0 auto;
 }
 
 a {

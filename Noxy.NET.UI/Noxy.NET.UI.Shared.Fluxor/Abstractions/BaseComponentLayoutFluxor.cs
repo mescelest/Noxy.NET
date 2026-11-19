@@ -4,13 +4,13 @@ using Noxy.NET.UI.Models;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class FluxorLayoutComponent : FluxorLayout, ILayoutComponent
+public abstract class BaseComponentLayoutFluxor : FluxorLayout, ILayoutComponent
 {
     public ComponentMetadata Metadata { get; }
 
     public string CssClass => Metadata.Name;
 
-    protected FluxorLayoutComponent()
+    protected BaseComponentLayoutFluxor()
     {
         Metadata = new(GetType());
     }

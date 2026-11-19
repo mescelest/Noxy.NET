@@ -3,18 +3,18 @@
 @inject IStateSelection<FilterFeatureState, int> RuleCountSelection
 @inject IStateSelection<FilterFeatureState, int> BaseTypeCountSelection
 @inject IStateSelection<FilterFeatureState, string> PreviewStylesSelection
-@inherits FluxorElementComponent
+@inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass" role="form" aria-label="Edit filter block">
     <div class="header">
         <div class="config">
             <InputControlText class="name" Size="16" @bind-Value:get="@Block.Name" @bind-Value:set="OnInputNameChange"/>
 
-            <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonCloneClick" title="Clone block" aria-label="Clone block">
+            <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonCloneClick" title="Clone block" aria-label="Clone block">
                 <MaterialIcon Icon="content_copy" Size="20px"/>
             </Button>
 
-            <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="OnButtonDeleteClick" title="Delete block" aria-label="Delete block">
+            <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Error" IsIcon="true" @onclick="OnButtonDeleteClick" title="Delete block" aria-label="Delete block">
                 <MaterialIcon Icon="remove" Size="20px"/>
             </Button>
 

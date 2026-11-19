@@ -1,5 +1,5 @@
 ﻿@inject IStateSelection<FilterFeatureState, ImmutableArray<Guid>> GroupIDsSelection
-@inherits FluxorElementComponent
+@inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @foreach (Guid groupId in GroupIDsSelection.Value)

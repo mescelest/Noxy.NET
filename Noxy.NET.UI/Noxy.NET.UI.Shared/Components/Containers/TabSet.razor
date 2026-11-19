@@ -5,19 +5,18 @@
     @ChildContent
 </CascadingValue>
 
-<div @attributes="AdditionalAttributes" class="@CssClass tab-container">
+<div @attributes="AdditionalAttributes" class="@CssClass">
     <div role="tablist" aria-label="@Label" class="tab-list" @onkeydown="HandleKeyDown">
         @foreach (TabPage item in _pages)
         {
             bool isSelected = item == _activePage;
             string isSelectedAria = isSelected ? "true" : "false";
-            string? isSelectedClass = isSelected ? "active" : null;
             string tabID = $"tab-{item.ID}";
             string panelID = $"panel-{item.ID}";
             int tabIndex = isSelected ? 0 : -1;
 
-            <div class="tab">
-                <button @ref="_tabReferences[item]" type="button" class="tab-button" id="@tabID" tabindex="@tabIndex" data-selected="@isSelectedClass"
+            <div @ref="_tabReferences[item]" class="tab" data-selected="@isSelected">
+                <button type="button" class="tab-button" id="@tabID" tabindex="@tabIndex"
                         role="tab" aria-selected="@isSelectedAria" aria-controls="@panelID" @onclick="() => ActivatePage(item)">
                     @item.Title
                 </button>

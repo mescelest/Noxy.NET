@@ -1,0 +1,27 @@
+.TabSet {
+    display: flex;
+    flex-flow: column;
+}
+
+.tab-list {
+    display: flex;
+    flex-flow: row;
+}
+
+.tab {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+}
+
+.tab-button {
+    display: flex;
+    flex: 1 0 auto;
+    flex-flow: row;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    box-sizing: border-box;
+}

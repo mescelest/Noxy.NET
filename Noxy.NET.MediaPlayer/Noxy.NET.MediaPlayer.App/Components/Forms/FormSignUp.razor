@@ -1,0 +1,29 @@
+@inject ISessionService ServiceSession
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="FormModelSignUp" Context="_context" OnSubmit="Submit">
+        <InputGroupText @bind-Value="_context.Model.Email"/>
+        <InputGroupPassword @bind-Value="_context.Model.Password"/>
+        <Button Type="@HTMLButtonTypeEnum.Submit" Loading="@LoadingCurrent">Sign in</Button>
+    </WebForm>
+</div>
+
+@code {
+
+    [Parameter]
+    public bool? Loading { get; set; }
+    private bool LoadingCurrent => Loading ?? _context.IsSubmitting;
+
+    [Parameter]
+    public EventCallback<string> OnSubmit { get; set; }
+
+    private readonly WebFormContext<FormModelSignUp> _context = new(new());
+
+    private async Task Submit(WebFormContext<FormModelSignUp> context)
+    {
+        await ServiceSession.SignUp(context.Model.Email, context.Model.Password);
+        await OnSubmit.InvokeAsync();
+    }
+
+}

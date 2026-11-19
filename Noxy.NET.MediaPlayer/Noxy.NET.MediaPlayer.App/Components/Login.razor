@@ -5,50 +5,43 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    @if (_showAddress)
-    {
-        <form class="address" @onsubmit="SaveAddress" @onsubmit:preventDefault>
-            <label for="server-address">Server address</label>
-            <div class="address-row">
-                <input id="server-address" type="url" placeholder="https://" @bind="_address" @bind:event="oninput" autocomplete="off"/>
-                <button type="submit" class="plain-button">Save</button>
-            </div>
-            <MessageBox MessageList="_addressMessageList" Status="StatusEnum.Error"/>
-        </form>
-    }
-    else
-    {
-        <button type="button" class="link-button" @onclick="() => _showAddress = true">Server: @_savedAddress (change)</button>
-    }
-
-    <div class="card">
+    <div class="container">
         <h1 class="logo">Noxy Player</h1>
 
-        <div class="providers">
-            @foreach (Provider provider in _providerList)
+        <div class="divider" role="separator"><span>Choose server</span></div>
+
+        <div class="configuration">
+            @if (_showAddress)
             {
-                <button type="button" class="plain-button provider" disabled="@_busy" @onclick="provider.SignIn">@provider.Name</button>
+                <FormServerAddress OnSubmit="SubmitServerAddressHandler"/>
+            }
+            else
+            {
+                <Button class="link-button" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Info" @onclick="() => _showAddress = true">
+                    Server: @_savedAddress (change)
+                </Button>
             }
         </div>
 
-        <MessageBox MessageList="_providerMessageList" Status="StatusEnum.Error"/>
+        <div class="divider" role="separator">Choose login</div>
+
+        <div class="provider-list">
+            <Button class="provider" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Notice" @onclick="SignInGoogle">
+                <MaterialIcon Icon="mail"/>
+                Sign in with Gmail
+            </Button>
+
+            <MessageBox MessageList="_providerMessageList" Status="StatusEnum.Error"/>
+        </div>
 
         <div class="divider" role="separator"><span>or</span></div>
 
-        <TabSet>
+        <TabSet class="login-tab-list">
             <TabPage Title="Sign in">
-                <WebForm T="ModelSignIn" Context="_contextSignIn" OnSubmit="SubmitSignIn">
-                    <InputGroupText @bind-Value="_contextSignIn.Model.Email"/>
-                    <InputGroupPassword @bind-Value="_contextSignIn.Model.Password"/>
-                    <button type="submit" class="plain-button primary" disabled="@_busy">Sign in</button>
-                </WebForm>
+                <FormSignIn OnSubmit="SubmitSignInHandler"/>
             </TabPage>
-            <TabPage Title="Create account">
-                <WebForm T="ModelSignUp" Context="_contextSignUp" OnSubmit="SubmitSignUp">
-                    <InputGroupText @bind-Value="_contextSignUp.Model.Email"/>
-                    <InputGroupPassword @bind-Value="_contextSignUp.Model.Password"/>
-                    <button type="submit" class="plain-button primary" disabled="@_busy">Create account</button>
-                </WebForm>
+            <TabPage Title="Sign up">
+                <FormSignUp OnSubmit="SubmitSignUpHandler"/>
             </TabPage>
         </TabSet>
     </div>
@@ -56,89 +49,49 @@
 
 @code {
 
-    private sealed record Provider(string Name, Func<Task> SignIn);
-
-    private readonly WebFormContext<ModelSignIn> _contextSignIn = new(new());
-    private readonly WebFormContext<ModelSignUp> _contextSignUp = new(new());
-    private readonly List<Provider> _providerList = [];
-    private List<string> _addressMessageList = [];
     private List<string> _providerMessageList = [];
-    private string _address = string.Empty;
+
     private string? _savedAddress;
     private bool _showAddress;
-    private bool _busy;
 
     protected override async Task OnInitializedAsync()
     {
-        // Another provider is one more entry here.
-        _providerList.Add(new("Sign in with Google", SignInWithGoogle));
-
-        _savedAddress = await StorageServerAddress.GetAddress();
-        _address = _savedAddress ?? string.Empty;
-        _showAddress = _savedAddress is null;
+        _savedAddress = await StorageServerAddress.GetAddress() ?? string.Empty;
+        _showAddress = string.IsNullOrWhiteSpace(_savedAddress);
     }
 
-    private async Task SaveAddress()
+    private void SubmitServerAddressHandler(string address)
     {
-        _addressMessageList = [];
+        _showAddress = false;
+        _savedAddress = address;
+    }
+
+    private async Task SignInGoogle()
+    {
         try
         {
-            await StorageServerAddress.SetAddress(_address);
-            _savedAddress = await StorageServerAddress.GetAddress();
-            _address = _savedAddress ?? string.Empty;
-            _showAddress = false;
-        }
-        catch (ArgumentException)
-        {
-            _addressMessageList = ["Enter an http or https address, for example https://music.example.com."];
-        }
-    }
-
-    private Task SubmitSignIn(WebFormContext<ModelSignIn> context)
-    {
-        return Run(async () =>
-        {
-            await ServiceSession.SignIn(context.Model.Email, context.Model.Password);
-            return true;
-        }, message => context.HandleException(message));
-    }
-
-    private Task SubmitSignUp(WebFormContext<ModelSignUp> context)
-    {
-        return Run(async () =>
-        {
-            await ServiceSession.SignUp(context.Model.Email, context.Model.Password);
-            return true;
-        }, message => context.HandleException(message));
-    }
-
-    private Task SignInWithGoogle()
-    {
-        _providerMessageList = [];
-        return Run(() => ServiceSession.SignInWithGoogle(), message => _providerMessageList = [message]);
-    }
-
-    // The sign-in returns false when the user cancelled it: nothing is shown and the page stays as it was.
-    private async Task Run(Func<Task<bool>> signIn, Action<string> showMessage)
-    {
-        if (_busy) return;
-
-        _busy = true;
-        try
-        {
-            if (!await signIn()) return;
+            _providerMessageList = [];
+            await ServiceSession.SignInWithGoogle();
+            await CompleteSignIn();
         }
         catch (Exception exception)
         {
-            showMessage(exception.ToSignInMessage());
-            return;
+            _providerMessageList = [exception.ToSignInMessage()];
         }
-        finally
-        {
-            _busy = false;
-        }
+    }
 
-        // The rest of start-up (the owner check, the syncs, the hub), without restoring the session again, and then Home: the layout swaps to the shell once the session says so.
+    private async Task SubmitSignInHandler()
+    {
+        await CompleteSignIn();
+    }
+
+    private async Task SubmitSignUpHandler()
+    {
+        await CompleteSignIn();
+    }
+
+    private async Task CompleteSignIn()
+    {
         await ServiceStartup.Connect();
         Navigation.NavigateTo("");
     }

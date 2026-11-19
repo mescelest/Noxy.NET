@@ -10,7 +10,7 @@ public enum StatusEnum
     Success,
     Info,
     Highlight,
-    Notice
+    Notice,
 }
 
 public static class WebFormFieldStateEnumExtensions

@@ -2,7 +2,7 @@
 @inject IState<FeaturePlaylistListState> StatePlaylistList
 @inject IDispatcher Dispatcher
 @inject ILibraryActionService ServiceLibraryAction
-@inherits FluxorElementComponent
+@inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <button type="button" class="trigger" disabled="@(Library.SelectedCount == 0)" aria-label="Actions" aria-haspopup="menu" aria-expanded="@_open" @onclick="() => _open = !_open">

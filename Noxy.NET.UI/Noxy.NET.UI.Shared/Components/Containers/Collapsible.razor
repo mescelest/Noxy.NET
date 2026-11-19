@@ -145,7 +145,7 @@
             return;
         }
 
-        // If nothing has changed or we're already animating towards this state, ignore
+        // If nothing has changed, or we're already animating towards this state, ignore
         if (CollapsedCurrent == _isCollapsed || (_isAnimating.HasValue && _isAnimating.Value == CollapsedCurrent)) return;
         _ = Animate(CollapsedCurrent);
     }

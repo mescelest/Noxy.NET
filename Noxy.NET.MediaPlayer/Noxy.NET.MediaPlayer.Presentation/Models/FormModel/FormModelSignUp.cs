@@ -1,17 +1,17 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Noxy.NET.MediaPlayer.Presentation.Models;
+namespace Noxy.NET.MediaPlayer.Presentation.Models.FormModel;
 
-// What the create-account tab collects; the limits are the server's (RequestSignUp).
-public class ModelSignUp
+public class FormModelSignUp
 {
     [Required]
     [EmailAddress]
-    [Display(Name = "Email")]
+    [DisplayName("Email")]
     public string Email { get; set; } = string.Empty;
 
     [Required]
     [MinLength(16), MaxLength(128)]
-    [Display(Name = "Password")]
+    [DisplayName("Password")]
     public string Password { get; set; } = string.Empty;
 }

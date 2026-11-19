@@ -2,6 +2,6 @@
     display: flex;
     flex: 1 1 auto;
     flex-flow: column;
-    row-gap: var(--size-gap-xl, 1.75rem);
+    row-gap: var(--size-gap-lg, 1.5rem);
     min-width: var(--size-column, 20rem);
 }

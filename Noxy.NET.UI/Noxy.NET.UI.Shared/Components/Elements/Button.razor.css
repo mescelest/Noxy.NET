@@ -3,6 +3,7 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
+    column-gap: var(--size-gap-xxs, 0.5rem);
     min-width: var(--size-control-input, var(--size-control-md, 2.625rem));
     min-height: var(--size-control-input, var(--size-control-md, 2.625rem)); 
     position: relative;
@@ -11,8 +12,8 @@
     border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-button, #4D4AD3) 35%, var(--color-primary, #FFFFFF));
     border-radius: var(--size-border-radius-md, 0.25rem);
     box-shadow: 0 0 0 var(--size-border-width-sm, 1px) transparent inset;
-    font: var(--font-button, normal normal 500 normal var(--size-text-body, 1rem) "Segoe UI", "Roboto", sans-serif);
-    color: var(--color-primary, #FFFFFF);
+    font: var(--font-button, normal normal 500 normal, var(--size-text-body, 1rem) "Segoe UI", "Roboto", sans-serif);
+    color: var(--color-light, #FFFFFF);
     box-sizing: border-box;
     cursor: pointer;
     transition: box-shadow var(--animation-length-short, 150ms) ease-in-out, border var(--animation-length-short, 150ms) ease-in-out;
@@ -27,7 +28,7 @@
 }
 
 .Button:focus-visible {
-    outline: var(--size-border-width-md, 2px) solid var(--color-border-focus, var(--color-highlight, #0073EC));
+    outline: var(--size-border-width-md, 2px) solid var(--color-highlight, #0073EC);
     outline-offset: var(--size-gap-tiny, 2px);
 }
 

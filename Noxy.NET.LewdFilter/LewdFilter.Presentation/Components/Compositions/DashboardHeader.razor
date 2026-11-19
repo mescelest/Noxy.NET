@@ -1,6 +1,6 @@
 ﻿@inject IDispatcher Dispatcher
 @inject IState<FilterFeatureState> State
-@inherits FluxorElementComponent
+@inherits BaseComponentElementFluxor
 
 <header @attributes="AdditionalAttributes" class="@CssClass" role="banner">
     <div class="header-brand">
@@ -20,11 +20,11 @@
             <InputFile OnChange="OnFileImportFilterChange" disabled="@State.Value.IsLoading" style="display: none;" accept=".json"/>
         </label>
 
-        <Button type="button" class="btn-header btn-secondary" disabled="@State.Value.IsLoading" @onclick="OnButtonExportClick">
+        <Button Type="@HTMLButtonTypeEnum.Button" class="btn-header btn-secondary" disabled="@State.Value.IsLoading" @onclick="OnButtonExportClick">
             Export JSON
         </Button>
 
-        <Button type="button" class="btn-header btn-primary" disabled="@State.Value.IsLoading" @onclick="OnButtonCompileClick">
+        <Button Type="@HTMLButtonTypeEnum.Button" class="btn-header btn-primary" disabled="@State.Value.IsLoading" @onclick="OnButtonCompileClick">
             Compile & Download
         </Button>
     </div>

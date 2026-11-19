@@ -1,6 +1,6 @@
 ﻿@inject IDispatcher Dispatcher
 @inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
-@inherits FluxorElementComponent
+@inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="header">
@@ -9,7 +9,7 @@
                 <InputControlText ID="@FilterByNameId" Size="24" OnInputDelay="200" @bind-Value:get="@_inputSearch" @bind-Value:set="OnInputSearchChange"/>
             </FormField>
 
-            <Button type="button" Status="StatusEnum.Error" @onclick="OnResetBaseTypes" disabled="@(!CurrentBaseTypeList.Any())">
+            <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Error" @onclick="OnResetBaseTypes" disabled="@(!CurrentBaseTypeList.Any())">
                 Reset All Selections
             </Button>
         </div>

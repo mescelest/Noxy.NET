@@ -59,4 +59,19 @@
         <ProjectReference Include="..\Noxy.NET.MediaPlayer.Storage\Noxy.NET.MediaPlayer.Storage.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <AdditionalFiles Include="Pages\Account.razor"/>
+        <AdditionalFiles Include="Pages\Bandcamp.razor"/>
+        <AdditionalFiles Include="Pages\Home.razor"/>
+        <AdditionalFiles Include="Pages\Library.razor"/>
+        <AdditionalFiles Include="Pages\NotFound.razor"/>
+        <AdditionalFiles Include="Pages\Playlist.razor"/>
+        <AdditionalFiles Include="Pages\Settings.razor"/>
+        <AdditionalFiles Include="Pages\Youtube.razor"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="Components\NarrowWatcher.razor.js"/>
+    </ItemGroup>
+
 </Project>

@@ -9,7 +9,7 @@
             <h2>@TextParameterService.Get(ParameterTextConstants.HeaderFormSignUp)</h2>
 
             <FormAuthenticationSignUp OnSubmit="SignUpFormSubmit">
-                <Button Status="StatusEnum.Info" type="submit">
+                <Button Status="StatusEnum.Info" Type="@HTMLButtonTypeEnum.Submit">
                     @TextParameterService.Get(ParameterTextConstants.ButtonSignUp, ComponentName)
                 </Button>
             </FormAuthenticationSignUp>
@@ -19,7 +19,7 @@
             <h2>@TextParameterService.Get(ParameterTextConstants.HeaderFormSignIn)</h2>
 
             <FormAuthenticationSignIn OnSubmit="SignInFormSubmit">
-                <Button Status="StatusEnum.Success" type="submit">
+                <Button Status="StatusEnum.Success" Type="@HTMLButtonTypeEnum.Submit">
                     @TextParameterService.Get(ParameterTextConstants.ButtonSignIn, ComponentName)
                 </Button>
             </FormAuthenticationSignIn>

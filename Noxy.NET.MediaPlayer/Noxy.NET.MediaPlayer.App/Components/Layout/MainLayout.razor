@@ -1,54 +1,30 @@
-@inject IState<FeatureShellState> StateShell
 @inject IState<FeatureSessionState> StateSession
 @inject IDispatcher Dispatcher
-@inherits FluxorLayoutComponent
+@inherits BaseComponentLayoutFluxor
 
-<div class="@CssClass" data-state="@State" data-narrow="@_narrow" data-sidebar="@SidebarOpen">
-    <NarrowWatcher OnChanged="OnNarrowChanged"/>
+<CascadingValue Value="Context">
+    @* <NarrowWatcher OnChanged="OnNarrowChanged"/> *@
 
     @if (!StateSession.Value.IsRestored)
     {
-        @* Starting: nothing is shown until it is known whether the sign-in screen is needed. *@
+        <Loader Loading="true"/>
     }
     else if (!StateSession.Value.HasSession)
     {
-        @* Signed out: no shell, only the sign-in page. *@
         <Login/>
     }
     else
     {
-        <Header SidebarOpen="SidebarOpen" OnToggleSidebar="ToggleSidebar"></Header>
-
-        <div class="below-header">
-            <aside class="sidebar-slot">
-                <Sidebar OnNavigate="CloseSidebarWhenNarrow"/>
-            </aside>
-
-            @if (_narrow && SidebarOpen)
-            {
-                <div class="scrim" @onclick="CloseSidebarWhenNarrow"></div>
-            }
-
-            <main class="centre">
-                @Body
-            </main>
-        </div>
-
-        <footer class="player-slot">
-            <PlayerBar/>
-        </footer>
+        @Body
     }
-</div>
+</CascadingValue>
 
 @code {
 
-    private string State => !StateSession.Value.IsRestored ? "starting" : !StateSession.Value.HasSession ? "signed-out" : "shell";
+    private bool _isNarrow;
 
-    private bool _narrow;
-    private bool? _narrowOpen;
-
-    // A narrow window starts with the sidebar hidden whatever was stored; opening it there covers the centre and is not remembered.
-    private bool SidebarOpen => _narrow ? _narrowOpen ?? false : StateShell.Value.SidebarOpen;
+    private AppStateEnum State => !StateSession.Value.IsRestored ? AppStateEnum.Starting : !StateSession.Value.HasSession ? AppStateEnum.SignedOut : AppStateEnum.SignedIn;
+    private AppSessionContext Context => new(State, _isNarrow);
 
     protected override void OnInitialized()
     {
@@ -58,21 +34,7 @@
 
     private void OnNarrowChanged(bool narrow)
     {
-        if (narrow == _narrow) return;
-
-        _narrow = narrow;
-        _narrowOpen = null;
-    }
-
-    private void ToggleSidebar()
-    {
-        if (_narrow) _narrowOpen = !SidebarOpen;
-        else Dispatcher.Dispatch(new ActionShellSidebarSet(!SidebarOpen));
-    }
-
-    private void CloseSidebarWhenNarrow()
-    {
-        if (_narrow) _narrowOpen = false;
+        _isNarrow = narrow;
     }
 
 }

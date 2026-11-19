@@ -12,11 +12,12 @@ public static class ExceptionExtension
         // What the sign-in form shows: the title the server answered with, or one fixed sentence. Never the text of another exception, which could carry an address or a token.
         public string ToSignInMessage()
         {
-            if (exception is ApiException apiException && !string.IsNullOrWhiteSpace(apiException.Title)) return apiException.Title;
-            if (exception is ServerAddressMissingException) return Constants.SignInMessageNoAddress;
-            if (exception.IsOfflineFailure) return Constants.SignInMessageOffline;
-
-            return Constants.SignInMessageFailed;
+            return exception switch
+            {
+                ApiException apiException when !string.IsNullOrWhiteSpace(apiException.Title) => apiException.Title,
+                ServerAddressMissingException => Constants.SignInMessageNoAddress,
+                _ => exception.IsOfflineFailure ? Constants.SignInMessageOffline : Constants.SignInMessageFailed
+            };
         }
 
         // What a page shows when an action failed: the server's title, the offline sentence, or one fixed sentence. Never the text of another exception.

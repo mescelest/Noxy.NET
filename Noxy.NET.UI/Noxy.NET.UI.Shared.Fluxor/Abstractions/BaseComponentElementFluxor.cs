@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Components;
 using Noxy.NET.UI.Interfaces;
 using Noxy.NET.UI.Models;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Noxy.NET.UI.Abstractions;
 
-public abstract class FluxorElementComponent : FluxorBlazorComponent, IElementComponent
+public abstract class BaseComponentElementFluxor : BaseComponentBlazorFluxor, IElementComponent
 {
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; init; }

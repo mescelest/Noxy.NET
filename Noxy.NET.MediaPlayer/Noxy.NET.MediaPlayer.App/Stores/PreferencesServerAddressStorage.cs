@@ -1,5 +1,4 @@
 using Noxy.NET.MediaPlayer.Presentation;
-using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 
 namespace Noxy.NET.MediaPlayer.App.Stores;
@@ -15,7 +14,7 @@ public class PreferencesServerAddressStorage : IServerAddressStorage
 
     public Task SetAddress(string address)
     {
-        Preferences.Default.Set(Constants.ServerAddressKey, address.NormalizeServerAddress());
+        Preferences.Default.Set(Constants.ServerAddressKey, address);
 
         return Task.CompletedTask;
     }

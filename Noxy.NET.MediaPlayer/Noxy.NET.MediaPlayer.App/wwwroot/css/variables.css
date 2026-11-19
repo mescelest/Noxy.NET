@@ -71,13 +71,14 @@
 :root {
     --font-family-primary: "Segoe UI", "Roboto", sans-serif;
     --font-label: normal normal 400 normal var(--size-text-label, 0.8125rem) var(--font-family-primary, sans-serif);
+    --font-divider: normal normal 400 normal var(--size-text-label, 0.8725rem) var(--font-family-primary, sans-serif);
     --font-body: normal normal 400 normal var(--size-text-body, 1rem) var(--font-family-primary, sans-serif);
     --font-button: normal normal 500 normal var(--size-text-body, 1rem) var(--font-family-primary, sans-serif);
 }
 
 :root {
     --color-light: #FFFFFF;
-    --color-dark: #000000;
+    --color-dark: #121212;
     --color-none: #4D4AD3;
     --color-muted: #767676;
     --color-highlight: #0073EC;

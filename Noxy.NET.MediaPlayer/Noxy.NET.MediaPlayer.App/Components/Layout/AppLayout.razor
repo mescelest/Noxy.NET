@@ -1,0 +1,56 @@
+@layout MainLayout
+@inject IState<FeatureShellState> StateShell
+@inject IDispatcher Dispatcher
+@inherits BaseComponentLayoutFluxor
+
+<div class="@CssClass" data-sidebar="@SidebarOpen">
+
+    <Header SidebarOpen="SidebarOpen" OnToggleSidebar="ToggleSidebar"></Header>
+
+    <div class="below-header">
+        <aside class="sidebar-slot">
+            <Sidebar OnNavigate="CloseSidebarWhenNarrow"/>
+        </aside>
+
+        @if (IsNarrow && SidebarOpen)
+        {
+            <div class="scrim" @onclick="CloseSidebarWhenNarrow"></div>
+        }
+
+        <main class="centre">
+            @Body
+        </main>
+    </div>
+
+    <footer class="player-slot">
+        <PlayerBar/>
+    </footer>
+
+</div>
+
+@code {
+
+    [CascadingParameter]
+    public bool IsNarrow { get; set; }
+
+    private bool? _narrowOpen;
+    private bool SidebarOpen => IsNarrow ? _narrowOpen ?? false : StateShell.Value.SidebarOpen;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Dispatcher.Dispatch(new ActionShellStarted());
+    }
+
+    private void ToggleSidebar()
+    {
+        if (IsNarrow) _narrowOpen = !SidebarOpen;
+        else Dispatcher.Dispatch(new ActionShellSidebarSet(!SidebarOpen));
+    }
+
+    private void CloseSidebarWhenNarrow()
+    {
+        if (IsNarrow) _narrowOpen = false;
+    }
+
+}

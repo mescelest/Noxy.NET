@@ -1,0 +1,90 @@
+.Login {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: var(--size-gap-md);
+}
+
+.container {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    background-color: var(--color-offset-primary-sm);
+    padding: var(--size-gap-xxl);
+    border-radius: var(--size-border-radius-md);
+    row-gap: var(--size-gap-sm);
+}
+
+.logo {
+    margin: 0;
+    text-align: center;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    column-gap: var(--size-gap-xs);
+    color: var(--color-muted);
+    font: var(--font-divider);
+}
+
+.divider::before, .divider::after {
+    content: "";
+    flex: 1 1 auto;
+    border-top: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+}
+
+
+.address-row, .providers {
+    display: flex;
+    gap: var(--size-gap-xxs);
+}
+
+.providers {
+    flex-flow: column;
+}
+
+.address-row input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: var(--size-control-md);
+    padding: 0 var(--size-gap-xs);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-complementary);
+    font: var(--font-body);
+}
+
+.plain-button {
+    min-height: var(--size-control-md);
+    padding: 0 var(--size-gap-sm);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-complementary);
+    font: var(--font-button);
+    cursor: pointer;
+}
+
+.plain-button:disabled {
+    color: var(--color-disabled);
+    cursor: default;
+}
+
+.plain-button.primary {
+    border-color: var(--color-highlight);
+    background: var(--color-highlight);
+    color: var(--color-light);
+}
+
+.link-button {
+    border: none;
+    background: transparent;
+    color: var(--color-highlight);
+    font: var(--font-label);
+    cursor: pointer;
+}

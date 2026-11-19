@@ -15,7 +15,7 @@
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender) return;
 
-        _module = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Layout/NarrowWatcher.razor.js");
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/NarrowWatcher.razor.js");
         _reference = DotNetObjectReference.Create(this);
         _watch = await _module.InvokeAsync<IJSObjectReference>("WatchNarrow", _reference, nameof(Changed));
         await OnChanged.InvokeAsync(await _module.InvokeAsync<bool>("IsNarrow"));

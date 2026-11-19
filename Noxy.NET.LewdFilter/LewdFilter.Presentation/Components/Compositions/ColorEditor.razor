@@ -1,6 +1,6 @@
 ﻿@inject IDispatcher Dispatcher
 @inject IState<FilterFeatureState> FilterState
-@inherits FluxorElementComponent
+@inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="tab-list" role="tablist">
@@ -40,13 +40,13 @@
                         <TableCell class="table-cell">
                             @if (index == 0)
                             {
-                                <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonAddRowClick">
+                                <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonAddRowClick">
                                     <MaterialIcon Icon="add" Size="20px"/>
                                 </Button>
                             }
                             else
                             {
-                                <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => OnButtonDeleteRowClick(row.ID)">
+                                <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => OnButtonDeleteRowClick(row.ID)">
                                     <MaterialIcon Icon="remove" Size="20px"/>
                                 </Button>
                             }

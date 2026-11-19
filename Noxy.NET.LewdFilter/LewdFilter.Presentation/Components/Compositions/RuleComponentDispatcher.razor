@@ -1,6 +1,6 @@
 @inject IDispatcher Dispatcher
 @inject IStateSelection<FilterFeatureState, ImmutableDictionary<FilterColorTypeEnum, IReadOnlyList<FilterColor>>> ColorCollectionSelection
-@inherits FluxorElementComponent
+@inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @switch (Rule)

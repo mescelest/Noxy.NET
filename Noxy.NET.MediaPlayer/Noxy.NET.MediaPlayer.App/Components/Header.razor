@@ -4,7 +4,7 @@
 @inject ISessionService ServiceSession
 @inject IAppStartupService ServiceStartup
 @inject NavigationManager Navigation
-@inherits FluxorElementComponent
+@inherits BaseComponentElementFluxor
 
 <header @attributes="AdditionalAttributes" class="@CssClass">
     <button type="button" class="icon-button" aria-label="Show or hide the sidebar" aria-expanded="@SidebarOpen" @onclick="OnToggleSidebar">

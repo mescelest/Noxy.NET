@@ -1,6 +1,6 @@
 @inject IDispatcher Dispatcher
 @inject IStateSelection<FilterFeatureState, FilterBlock> BlockSelection
-@inherits FluxorElementComponent
+@inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass" role="table">
     <div class="header" role="rowheader">
@@ -16,7 +16,7 @@
         </div>
 
         <div class="action">
-            <Button type="button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonRuleAddClick">
+            <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Success" IsIcon="true" @onclick="OnButtonRuleAddClick">
                 <MaterialIcon Icon="add" Size="20px"/>
             </Button>
         </div>
@@ -40,7 +40,7 @@
             </div>
 
             <div class="action">
-                <Button type="button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => OnButtonRuleRemoveClick(context.Item.ID)">
+                <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Error" IsIcon="true" @onclick="() => OnButtonRuleRemoveClick(context.Item.ID)">
                     <MaterialIcon Icon="remove" Size="20px"/>
                 </Button>
             </div>
