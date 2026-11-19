@@ -1,50 +1,63 @@
-﻿@using System.Net.Http
-@using System.Net.Http.Json
+﻿@* System libraries *@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
+
+@using System.ComponentModel
+@using System.Globalization
+@using System.Net.Http
+@using System.Net.Http.Json
+
+@* First-party libraries *@
 @using Noxy.NET.MediaPlayer.App
 @using Noxy.NET.MediaPlayer.App.Components
-@using Noxy.NET.MediaPlayer.App.Components.Layout
-@using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services
-@using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores
-@using Fluxor
-@using Fluxor.Blazor.Web.Components
+@using Noxy.NET.MediaPlayer.App.Components.Forms
+@using Noxy.NET.MediaPlayer.App.Components.Layouts
+@using Noxy.NET.MediaPlayer.App.Components.Scaffolding
+@using Noxy.NET.MediaPlayer.App.Enums
+@using Noxy.NET.MediaPlayer.App.Models
+@using Noxy.NET.MediaPlayer.App.Pages
+
+@using Noxy.NET.MediaPlayer.Domain.Declarations
+@using Noxy.NET.MediaPlayer.Domain.Enums
+@using Noxy.NET.MediaPlayer.Domain.Models
+@using Noxy.NET.MediaPlayer.Domain.Responses.Media
 @using Noxy.NET.MediaPlayer.Domain.Responses.Playlist
+@using Noxy.NET.MediaPlayer.Domain.Responses.Remote
+@using Noxy.NET.MediaPlayer.Domain.Responses.Setting
+
+@using Noxy.NET.MediaPlayer.Presentation.Enums
 @using Noxy.NET.MediaPlayer.Presentation.Extensions
 @using Noxy.NET.MediaPlayer.Presentation.Features.Library
 @using Noxy.NET.MediaPlayer.Presentation.Features.Player
 @using Noxy.NET.MediaPlayer.Presentation.Features.PlaylistList
 @using Noxy.NET.MediaPlayer.Presentation.Features.Session
 @using Noxy.NET.MediaPlayer.Presentation.Features.Shell
+@using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services
+@using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores
+@using Noxy.NET.MediaPlayer.Presentation.Models
+@using Noxy.NET.MediaPlayer.Presentation.Models.FormModel
+
 @using Noxy.NET.UI.Abstractions
 @using Noxy.NET.UI.Components
+@using Noxy.NET.UI.Components.Abstractions
+@using Noxy.NET.UI.Components.Containers
 @using Noxy.NET.UI.Components.Elements
 @using Noxy.NET.UI.Components.Graphics
-@using Noxy.NET.UI.Components.Typography
-@using Noxy.NET.UI.Components.Containers
-@using Noxy.NET.UI.Components.Abstractions
+@using Noxy.NET.UI.Components.InputGroups
 @using Noxy.NET.UI.Components.Table
+@using Noxy.NET.UI.Components.Typography
 @using Noxy.NET.UI.Enums
-@using Noxy.NET.MediaPlayer.App.Enums
+@using Noxy.NET.UI.Interfaces
 @using Noxy.NET.UI.Models
 @using Noxy.NET.UI.Models.Abstractions
 @using Noxy.NET.UI.Models.Colors
 @using Noxy.NET.UI.Models.Forms
-@using Noxy.NET.MediaPlayer.App.Pages
-@using Noxy.NET.MediaPlayer.Presentation.Enums
-@using Noxy.NET.MediaPlayer.Presentation.Models
-@using Noxy.NET.UI.Interfaces
-@using System.ComponentModel
-@using Noxy.NET.MediaPlayer.Domain.Responses.Remote
-@using Noxy.NET.MediaPlayer.Domain.Models
-@using Noxy.NET.MediaPlayer.Domain.Responses.Media
-@using Noxy.NET.MediaPlayer.Domain.Enums
-@using Noxy.NET.UI.Components.InputGroups
-@using Noxy.NET.MediaPlayer.Domain.Declarations
-@using Noxy.NET.MediaPlayer.Domain.Responses.Setting
-@using Noxy.NET.MediaPlayer.App.Models
-@using Noxy.NET.MediaPlayer.Presentation.Models.FormModel
-@using Noxy.NET.MediaPlayer.App.Components.Forms
+
+@* Third-party libraries *@
+
+@using Fluxor
+@using Fluxor.Blazor.Web.Components
+

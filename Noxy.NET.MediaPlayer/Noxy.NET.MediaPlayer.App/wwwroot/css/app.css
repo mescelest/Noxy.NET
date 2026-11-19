@@ -13,17 +13,19 @@ html {
 body {
     display: flex;
     flex-flow: column;
-    flex: 1 0 auto;
+    flex: 1 1 auto;
     margin: 0;
     background: var(--color-primary);
     color: var(--color-complementary);
     font: var(--font-body);
+    overflow: auto;
 }
 
 #app {
     display: flex;
     flex-flow: column;
-    flex: 1 0 auto;
+    flex: 1 1 auto;
+    overflow: auto;
 }
 
 a {
@@ -32,6 +34,30 @@ a {
 
 h1:focus {
     outline: none;
+}
+
+h1 {
+    font-size: var(--size-text-h1);
+}
+
+h2 {
+    font-size: var(--size-text-h2);
+}
+
+h3 {
+    font-size: var(--size-text-h3);
+}
+
+h4 {
+    font-size: var(--size-text-h4);
+}
+
+h5 {
+    font-size: var(--size-text-h5);
+}
+
+h6 {
+    font-size: var(--size-text-h6);
 }
 
 .valid.modified:not([type=checkbox]) {

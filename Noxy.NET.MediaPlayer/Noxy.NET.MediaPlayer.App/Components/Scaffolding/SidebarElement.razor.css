@@ -1,0 +1,61 @@
+.SidebarElement {
+    display: flex;
+    flex-flow: column;
+    row-gap: var(--size-gap-lg);
+    padding: var(--size-gap-sm);
+}
+
+.link-list {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-tiny);
+}
+
+.link-list-header {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    column-gap: var(--size-gap-xs);
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    padding: var(--size-gap-xxxs) var(--size-gap-tiny);
+    border-bottom: 1px solid var(--color-offset-primary-lg);
+}
+
+.link-list-header ::deep > .link-list-header-button {
+    min-width: var(--size-control-xs);
+    min-height: var(--size-control-xs);
+}
+
+.link-list ::deep > .link {
+    display: flex;
+    align-items: center;
+    column-gap: var(--size-gap-xs);
+    min-height: var(--size-control-sm);
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+    border-radius: var(--size-border-radius-md);
+    color: var(--color-complementary);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.link-list ::deep > .link:hover {
+    background: var(--color-offset-primary-md);
+}
+
+.link-list ::deep > .link.active {
+    background: var(--color-offset-primary-lg);
+}
+
+::deep .new-playlist {
+    border: none;
+    background: transparent;
+    font: var(--font-body);
+    cursor: pointer;
+}
+
+

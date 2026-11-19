@@ -8,36 +8,36 @@
 @implements IDisposable
 
 <div class="@CssClass">
-    @if (_model is not null)
-    {
-        <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
-
-        @if (_model.Continue is not null)
-        {
-            <section>
-                <h2>Continue</h2>
-                <ContinueCard Info="_model.Continue" OnContinue="Continue"/>
-            </section>
-        }
-
-        <section>
-            <h2>Recently played</h2>
-            @if (_model.HasPlaylists)
-            {
-                <div class="cards">
-                    @foreach (ResponsePlaylist playlist in _model.RecentList)
-                    {
-                        Guid id = playlist.ID;
-                        <PlaylistCard Playlist="playlist" OnPlay="() => Run(() => ServicePlaylist.Play(id))"/>
-                    }
-                </div>
-            }
-            else
-            {
-                <p class="empty">You have no playlists yet. Use "New playlist" in the sidebar to create one.</p>
-            }
-        </section>
-    }
+    @* @if (_model is not null) *@
+    @* { *@
+    @*     <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/> *@
+    @* *@
+    @*     @if (_model.Continue is not null) *@
+    @*     { *@
+    @*         <section> *@
+    @*             <h2>Continue</h2> *@
+    @*             <ContinueCard Info="_model.Continue" OnContinue="Continue"/> *@
+    @*         </section> *@
+    @*     } *@
+    @* *@
+    @*     <section> *@
+    @*         <h2>Recently played</h2> *@
+    @*         @if (_model.HasPlaylists) *@
+    @*         { *@
+    @*             <div class="cards"> *@
+    @*                 @foreach (ResponsePlaylist playlist in _model.RecentList) *@
+    @*                 { *@
+    @*                     Guid id = playlist.ID; *@
+    @*                     <PlaylistCard Playlist="playlist" OnPlay="() => Run(() => ServicePlaylist.Play(id))"/> *@
+    @*                 } *@
+    @*             </div> *@
+    @*         } *@
+    @*         else *@
+    @*         { *@
+    @*             <p class="empty">You have no playlists yet. Use "New playlist" in the sidebar to create one.</p> *@
+    @*         } *@
+    @*     </section> *@
+    @* } *@
 </div>
 
 @code {

@@ -77,7 +77,7 @@
     user-select: none;
 }
 
-.entry[data-over="True"] {
+.entry[data-over] {
     border-top: var(--size-border-width-md) solid var(--color-highlight);
 }
 

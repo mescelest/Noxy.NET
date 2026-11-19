@@ -28,7 +28,7 @@
     cursor: pointer;
 }
 
-.choice[data-on="True"] {
+.choice[data-on] {
     border-color: var(--color-highlight);
     color: var(--color-highlight);
 }

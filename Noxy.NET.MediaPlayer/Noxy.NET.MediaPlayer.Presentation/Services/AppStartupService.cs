@@ -159,14 +159,21 @@ public class AppStartupService(
                 await WaitBeforeRetry(TimeSpan.FromSeconds(Math.Min(Constants.StartupRetryBaseSeconds * Math.Pow(2, attempt), Constants.StartupRetryMaxSeconds)));
 
                 RestoreResultEnum result = await TryRestoreForRetry();
-                if (result == RestoreResultEnum.Offline)
+                switch (result)
                 {
-                    attempt++;
-                    continue;
+                    case RestoreResultEnum.Offline:
+                        attempt++;
+                        continue;
+                    // A manual sign-in may have connected while the loop waited: the syncs and the hub must not run twice for it.
+                    case RestoreResultEnum.SignedIn when !IsConnected:
+                        await ConnectToServer();
+                        break;
+                    case RestoreResultEnum.NoSession:
+                    case RestoreResultEnum.Rejected:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-
-                // A manual sign-in may have connected while the loop waited: the syncs and the hub must not run twice for it.
-                if (result == RestoreResultEnum.SignedIn && !IsConnected) await ConnectToServer();
 
                 return;
             }

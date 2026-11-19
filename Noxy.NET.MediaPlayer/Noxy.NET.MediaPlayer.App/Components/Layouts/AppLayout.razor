@@ -1,0 +1,33 @@
+@layout MainLayout
+@inject IDispatcher Dispatcher
+@inherits BaseComponentLayoutFluxor
+
+<div class="@CssClass">
+    <header>
+        <HeaderElement/>
+    </header>
+
+    <div class="content">
+        <aside>
+            <SidebarElement/>
+        </aside>
+
+        <main>
+            @Body
+        </main>
+    </div>
+
+    <footer>
+        <FooterElement/>
+    </footer>
+</div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Dispatcher.Dispatch(new ActionShellStarted());
+    }
+
+}

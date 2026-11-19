@@ -1,0 +1,44 @@
+.AppLayout {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+header {
+    display: flex;
+    flex-flow: column;
+    flex: 0 0 auto;
+    border-bottom: var(--size-border-width-sm) solid var(--color-offset-primary-md);
+}
+
+.content {
+    display: flex;
+    flex-flow: row;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+aside {
+    display: flex;
+    flex-flow: column;
+    flex: 0 0 auto;
+    width: var(--size-column);
+    border-right: var(--size-border-width-sm) solid var(--color-offset-primary-md);
+    overflow: auto;
+}
+
+main {
+    display: flex;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    flex-flow: column;
+    overflow: auto;
+}
+
+footer {
+    display: flex;
+    flex-flow: column;
+    flex: 0 0 auto;
+    border-top: var(--size-border-width-sm) solid var(--color-offset-primary-md);
+}

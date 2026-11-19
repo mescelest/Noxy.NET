@@ -2,12 +2,12 @@
     --size-text-label: 0.8125rem;
     --size-text-message: 0.875rem;
     --size-text-body: 1rem;
-    --size-text-h1: 2rem;
-    --size-text-h2: 1.75rem;
-    --size-text-h3: 1.5rem;
-    --size-text-h4: 1.375rem;
+    --size-text-h1: 1.6rem;
+    --size-text-h2: 1.5rem;
+    --size-text-h3: 1.4rem;
+    --size-text-h4: 1.325rem;
     --size-text-h5: 1.25rem;
-    --size-text-h6: 1.125rem;
+    --size-text-h6: 1.175rem;
     --size-gap-tiny: 2px;
     --size-gap-xxxs: 0.25rem;
     --size-gap-xxs: 0.5rem;
@@ -71,7 +71,7 @@
 :root {
     --font-family-primary: "Segoe UI", "Roboto", sans-serif;
     --font-label: normal normal 400 normal var(--size-text-label, 0.8125rem) var(--font-family-primary, sans-serif);
-    --font-divider: normal normal 400 normal var(--size-text-label, 0.8725rem) var(--font-family-primary, sans-serif);
+    --font-message: normal normal 400 normal var(--size-text-message, 0.8725rem) var(--font-family-primary, sans-serif);
     --font-body: normal normal 400 normal var(--size-text-body, 1rem) var(--font-family-primary, sans-serif);
     --font-button: normal normal 500 normal var(--size-text-body, 1rem) var(--font-family-primary, sans-serif);
 }
@@ -80,7 +80,7 @@
     --color-light: #FFFFFF;
     --color-dark: #121212;
     --color-none: #4D4AD3;
-    --color-muted: #767676;
+    --color-muted: color-mix(in srgb, transparent 50%, var(--color-primary, #FFFFFF));
     --color-highlight: #0073EC;
     --color-info: #289ED9;
     --color-success: #23883D;
@@ -102,6 +102,7 @@
 }
 
 :root[theme="Dark"] {
+    --color-muted: var(--color-primary);
     --color-primary: var(--color-dark);
     --color-complementary: var(--color-light);
 }

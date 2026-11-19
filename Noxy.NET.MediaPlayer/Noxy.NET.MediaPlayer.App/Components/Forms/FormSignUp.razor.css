@@ -28,7 +28,7 @@
     align-items: center;
     column-gap: var(--size-gap-xs);
     color: var(--color-muted);
-    font: var(--font-divider);
+    font: var(--font-message);
 }
 
 .divider::before, .divider::after {

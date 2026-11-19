@@ -6,17 +6,17 @@
     user-select: none;
 }
 
-.InputControlCheckbox[data-disabled="True"] {
+.InputControlCheckbox[data-disabled] {
     color: var(--color-disabled, #7F7F7F);
     cursor: not-allowed;
 }
 
-.InputControlCheckbox[data-disabled="True"] .visual {
+.InputControlCheckbox[data-disabled] .visual {
     background-color: var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000)));
     border-color: var(--color-disabled, #7F7F7F);
 }
 
-.InputControlCheckbox:not([data-disabled="True"]):hover .visual {
+.InputControlCheckbox:not([data-disabled]):hover .visual {
     border-color: var(--color-highlight, #0073EC);
     box-shadow: 0 0 10px 0 var(--color-offset-primary-lg, color-mix(in srgb, transparent 80%, var(--color-complementary, #000000))) inset;
 }
@@ -37,13 +37,13 @@
     box-sizing: border-box;
 }
 
-.InputControlCheckbox:not([data-disabled="True"]) .visual[data-checked="True"] {
+.InputControlCheckbox:not([data-disabled]) .visual[data-checked] {
     border-color: var(--color-highlight, #0073EC);
     background-color: var(--color-highlight, #0073EC);
     color: var(--color-primary, #FFFFFF);
 }
 
-.InputControlCheckbox:not([data-disabled="True"]):focus-within .visual {
+.InputControlCheckbox:not([data-disabled]):focus-within .visual {
     outline: var(--size-border-width-md, 2px) solid var(--color-highlight, #0073EC);
     outline-offset: var(--size-gap-tiny, 2px);
 }

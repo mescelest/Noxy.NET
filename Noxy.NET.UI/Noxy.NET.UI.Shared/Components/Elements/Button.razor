@@ -1,6 +1,6 @@
 ﻿@inherits BaseComponentElement
 
-<button @attributes="AdditionalAttributes" class="@CssClass" type="@TypeString" disabled="@Disabled" data-status="@StatusString" data-is-icon="@IsIcon">
+<button @attributes="AdditionalAttributes" class="@CssClass" type="@TypeString" disabled="@Disabled" data-loading="@LoadingCurrent" data-status="@StatusString" data-is-icon="@IsIcon">
     <Loader Loading="LoadingCurrent">
         @ChildContent
     </Loader>
@@ -28,9 +28,8 @@
     [Parameter]
     public bool? IsIcon { get; set; }
 
-    private string? LoadingClass => LoadingCurrent ? "loading" : null;
-    private bool? Disabled => TryExtractAttribute("disabled", out bool result) ? result : Loading;
+    private bool? Disabled => TryExtractAttribute("disabled", out bool result) ? result : LoadingCurrent;
 
-    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, LoadingClass);
+    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass);
 
 } 

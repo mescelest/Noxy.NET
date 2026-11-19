@@ -8,7 +8,9 @@
     <div class="container">
         <h1 class="logo">Noxy Player</h1>
 
-        <div class="divider" role="separator"><span>Choose server</span></div>
+        <Divider>
+            <span>Choose server</span>
+        </Divider>
 
         <div class="configuration">
             @if (_showAddress)
@@ -23,7 +25,9 @@
             }
         </div>
 
-        <div class="divider" role="separator">Choose login</div>
+        <Divider>
+            <span>Choose login</span>
+        </Divider>
 
         <div class="provider-list">
             <Button class="provider" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Notice" @onclick="SignInGoogle">
@@ -34,7 +38,9 @@
             <MessageBox MessageList="_providerMessageList" Status="StatusEnum.Error"/>
         </div>
 
-        <div class="divider" role="separator"><span>or</span></div>
+        <Divider>
+            <span>or</span>
+        </Divider>
 
         <TabSet class="login-tab-list">
             <TabPage Title="Sign in">

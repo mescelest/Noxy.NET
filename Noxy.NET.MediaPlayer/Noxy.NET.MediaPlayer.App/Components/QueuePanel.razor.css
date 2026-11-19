@@ -64,12 +64,12 @@ header h2 {
     background: var(--color-offset-primary-md);
 }
 
-.item[data-current="True"] {
+.item[data-current] {
     background: var(--color-offset-primary-lg);
     font-weight: bold;
 }
 
-.item[data-over="True"] {
+.item[data-over] {
     border-top: var(--size-border-width-md) solid var(--color-highlight);
 }
 

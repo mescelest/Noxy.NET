@@ -63,7 +63,7 @@
     cursor: default;
 }
 
-.item[data-destructive="True"] {
+.item[data-destructive] {
     color: var(--color-error);
 }
 

@@ -1,0 +1,28 @@
+@inject IPlaylistService ServicePlaylist
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="FormModelNewPlaylist" Context="_context" ResetAfterSubmit="true" OnSubmit="Submit">
+        <InputGroupText @bind-Value="_context.Model.Name"/>
+        <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">Create</Button>
+    </WebForm>
+</div>
+
+@code {
+
+    [Parameter]
+    public bool? Loading { get; set; }
+    private bool LoadingCurrent => Loading ?? _context.IsSubmitting;
+
+    [Parameter]
+    public EventCallback<Guid> OnSubmit { get; set; }
+
+    private readonly WebFormContext<FormModelNewPlaylist> _context = new(new());
+
+    private async Task Submit(WebFormContext<FormModelNewPlaylist> context)
+    {
+        ResponsePlaylist playlist = await ServicePlaylist.Create(context.Model.Name);
+        await OnSubmit.InvokeAsync(playlist.ID);
+    }
+
+}

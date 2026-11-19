@@ -1,0 +1,51 @@
+.HeaderElement {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    column-gap: var(--size-gap-sm);
+    padding: var(--size-gap-xs) var(--size-gap-sm);
+}
+
+.group {
+    display: flex;
+    flex: 1 0 auto;
+    flex-flow: row;
+    align-items: center;
+    column-gap: var(--size-gap-sm);
+}
+
+.left {
+    justify-content: flex-start;
+}
+
+.right {
+    justify-content: flex-end;
+}
+
+.logo {
+    margin: 0;
+}
+
+.connection-status {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    align-items: center;
+    column-gap: var(--size-gap-xxs);
+    color: var(--color-success);
+    font: var(--font-body);
+    font-weight: 500;
+    line-height: 1rem;
+}
+
+.connection-status[data-offline] {
+    color: var(--color-error);
+}
+
+.connection-message {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: center;
+    column-gap: var(--size-gap-xxxs);
+}

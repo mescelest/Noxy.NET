@@ -45,23 +45,23 @@
     transition: grid-template-rows var(--animation-length-medium, 250ms) ease-in-out, margin var(--animation-length-medium, 250ms) ease-in-out;
 }
 
-.Collapsible[data-collapsed="True"] .content-wrapper {
+.Collapsible[data-collapsed] .content-wrapper {
     grid-template-rows: minmax(0, 0fr);
 }
 
-.Collapsible[data-collapsed="True"] .content-wrapper .content {
+.Collapsible[data-collapsed] .content-wrapper .content {
     visibility: hidden;
 }
 
-.Collapsible:not([data-collapsed="True"]) .content-wrapper .content {
+.Collapsible:not([data-collapsed]) .content-wrapper .content {
     transition: visibility 0s;
 }
 
-.Collapsible[data-loading="True"] .content-wrapper {
+.Collapsible[data-loading] .content-wrapper {
     transition: none;
 }
 
-.Collapsible[data-arrow-collapsed="True"] .arrow-icon {
+.Collapsible[data-arrow-collapsed] .arrow-icon {
     transform: rotate(180deg);
 }
 

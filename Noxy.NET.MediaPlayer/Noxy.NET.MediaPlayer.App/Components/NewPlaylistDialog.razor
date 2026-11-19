@@ -1,18 +1,9 @@
-@inject IPlaylistService ServicePlaylist
 @inject NavigationManager Navigation
 @inherits BaseComponentElement
 
 <Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
     <h2>New playlist</h2>
-    <form class="form" @onsubmit="Create" @onsubmit:preventDefault>
-        <label for="playlist-name">Name</label>
-        <input id="playlist-name" type="text" maxlength="255" autocomplete="off" @bind="_name" @bind:event="oninput"/>
-        <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
-        <div class="actions">
-            <button type="button" class="cancel" @onclick="Close">Cancel</button>
-            <button type="submit" class="create" disabled="@(_busy || string.IsNullOrWhiteSpace(_name))">Create</button>
-        </div>
-    </form>
+    <FormNewPlaylist OnSubmit="Create"/>
 </Dialog>
 
 @code {
@@ -23,10 +14,6 @@
     [Parameter]
     public EventCallback<bool> OpenChanged { get; set; }
 
-    private List<string> _messageList = [];
-    private string _name = string.Empty;
-    private bool _busy;
-
     private Task HandleOpenChanged(bool open)
     {
         return open ? Task.CompletedTask : Close();
@@ -34,30 +21,13 @@
 
     private async Task Close()
     {
-        _name = string.Empty;
-        _messageList = [];
         await OpenChanged.InvokeAsync(false);
     }
 
-    private async Task Create()
+    private async Task Create(Guid id)
     {
-        if (_busy || string.IsNullOrWhiteSpace(_name)) return;
-
-        _busy = true;
-        try
-        {
-            ResponsePlaylist playlist = await ServicePlaylist.Create(_name);
-            await Close();
-            Navigation.NavigateTo($"playlist/{playlist.ID}");
-        }
-        catch (Exception exception)
-        {
-            _messageList = [exception.ToActionMessage()];
-        }
-        finally
-        {
-            _busy = false;
-        }
+        await Close();
+        Navigation.NavigateTo($"playlist/{id}");
     }
 
 }

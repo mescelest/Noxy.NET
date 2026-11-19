@@ -23,20 +23,6 @@
     text-align: center;
 }
 
-.divider {
-    display: flex;
-    align-items: center;
-    column-gap: var(--size-gap-xs);
-    color: var(--color-muted);
-    font: var(--font-divider);
-}
-
-.divider::before, .divider::after {
-    content: "";
-    flex: 1 1 auto;
-    border-top: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
-}
-
 .configuration {
     display: flex;
     flex: 0 0 auto;

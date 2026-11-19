@@ -6,20 +6,23 @@
 @implements IAsyncDisposable
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <button type="button" class="trigger" disabled="@(Reason is not null)" title="@Reason" aria-haspopup="listbox" aria-expanded="@_open" @onclick="Open">
+    <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" disabled="@IsOffline" title="@IsOfflineReason" aria-haspopup="listbox" aria-expanded="@_open" @onclick="ClickOpenHandler">
         @ButtonLabel
-    </button>
+    </Button>
 
     @if (_open)
     {
         <div class="backdrop" @onclick="() => _open = false"></div>
+
         <ul class="list" role="listbox">
             @foreach (ResponseDevice device in DeviceList)
             {
                 ResponseDevice chosen = device;
+                string name = chosen.DeviceID == _thisID ? $"{chosen.Name} (this device)" : chosen.Name;
+
                 <li>
                     <button type="button" role="option" class="device" aria-selected="@chosen.IsActive" @onclick="() => Choose(chosen)">
-                        @(chosen.DeviceID == _thisID ? $"{chosen.Name} (this device)" : chosen.Name)
+                        <span>@name</span>
                         @if (chosen.IsActive)
                         {
                             <span class="active">playing</span>
@@ -27,25 +30,24 @@
                     </button>
                 </li>
             }
+
             @if (DeviceList.Count == 0)
             {
                 <li class="none">No devices are online.</li>
             }
         </ul>
     }
-
-    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
 </div>
 
 @code {
 
-    private List<string> _messageList = [];
     private bool _open;
     private Guid? _thisID;
     private string? _movingTo;
 
     // Offline there is no live session to move: the button says why.
-    private string? Reason => StateSession.Value.IsOffline || !ServiceRemote.IsOnline ? "Offline" : null;
+    private bool IsOffline => StateSession.Value.IsOffline || !ServiceRemote.IsOnline;
+    private string? IsOfflineReason => IsOffline ? "Offline" : null;
 
     private string ButtonLabel => _movingTo is not null ? $"Moving playback to {_movingTo}…" : ServiceRemote.Role == PlaybackRoleEnum.Controller ? $"Playing on {ActiveName}" : "This device";
 
@@ -71,13 +73,11 @@
     private void OnTransferFailed()
     {
         _movingTo = null;
-        _messageList = ["The playback could not be moved."];
         _ = InvokeAsync(StateHasChanged);
     }
 
-    private void Open()
+    private void ClickOpenHandler()
     {
-        _messageList = [];
         _open = !_open;
     }
 
@@ -91,7 +91,6 @@
         }
 
         _open = false;
-        _messageList = [];
         _movingTo = device.Name;
         try
         {
@@ -100,7 +99,6 @@
         catch (Exception exception)
         {
             _movingTo = null;
-            _messageList = [exception is InvalidOperationException ? exception.Message : exception.ToActionMessage()];
         }
     }
 

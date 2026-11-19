@@ -1,0 +1,68 @@
+@inject IState<FeaturePlaylistListState> StatePlaylistList
+@inherits BaseComponentElementFluxor
+
+<nav @attributes="AdditionalAttributes" class="@CssClass" aria-label="Main">
+    <div class="link-list">
+        <NavLink class="link" href="" Match="NavLinkMatch.All" @onclick="OnNavigate">
+            <MaterialIcon Icon="home" Size="var(--size-icon-sm)"/>
+            <span>Home</span>
+        </NavLink>
+        <NavLink class="link" href="library" @onclick="OnNavigate">
+            <MaterialIcon Icon="library_music" Size="var(--size-icon-sm)"/>
+            <span>Library</span>
+        </NavLink>
+        <NavLink class="link" href="account" @onclick="OnNavigate">
+            <MaterialIcon Icon="account_circle" Size="var(--size-icon-sm)"/>
+            <span>Account</span>
+        </NavLink>
+        <NavLink class="link" href="settings" @onclick="OnNavigate">
+            <MaterialIcon Icon="settings" Size="var(--size-icon-sm)"/>
+            <span>Settings</span>
+        </NavLink>
+    </div>
+
+    @* <div class="link-list"> *@
+    @*     <NavLink class="link" href="youtube" @onclick="OnNavigate"> *@
+    @*         <MaterialIcon Icon="radio" Size="var(--size-icon-sm)"/> *@
+    @*         YouTube *@
+    @*     </NavLink> *@
+    @*     <NavLink class="link" href="bandcamp" @onclick="OnNavigate"> *@
+    @*         <MaterialIcon Icon="music_note" Size="var(--size-icon-sm)"/> *@
+    @*         Bandcamp *@
+    @*     </NavLink> *@
+    @* </div> *@
+
+    <div class="link-list">
+        <div class="link-list-header">
+            <span>Playlists</span>
+            <Button class="link-list-header-button" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Status="StatusEnum.Success" @onclick="ClickNewPlaylistHandler">
+                <MaterialIcon Icon="add" Size="var(--size-icon-sm)"/>
+            </Button>
+        </div>
+
+        @foreach (ResponsePlaylist playlist in PlaylistList)
+        {
+            <NavLink class="link" href="@($"playlist/{playlist.ID}")" @onclick="OnNavigate">
+                <span>@playlist.Name</span>
+            </NavLink>
+        }
+    </div>
+
+    <NewPlaylistDialog @bind-Open="_showNewPlaylistDialog"/>
+</nav>
+
+@code {
+
+    [Parameter]
+    public EventCallback OnNavigate { get; set; }
+
+    private List<ResponsePlaylist> PlaylistList => StatePlaylistList.Value.PlaylistList.OrderMostRecentlyPlayedFirst();
+
+    private bool _showNewPlaylistDialog;
+
+    private void ClickNewPlaylistHandler()
+    {
+        _showNewPlaylistDialog = true;
+    }
+
+}

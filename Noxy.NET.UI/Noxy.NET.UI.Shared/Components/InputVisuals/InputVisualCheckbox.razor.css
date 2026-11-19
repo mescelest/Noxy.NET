@@ -12,7 +12,7 @@
     user-select: none;
 }
 
-.InputVisualCheckbox[data-checked="True"] {
+.InputVisualCheckbox[data-checked] {
     background-color: var(--color-complementary, #000000);
 }
 

@@ -1,0 +1,53 @@
+@inject IState<FeatureSessionState> StateSession
+@inject IState<FeatureShellState> StateShell
+@inject IDispatcher Dispatcher
+@inject IAppStartupService ServiceStartup
+@inherits BaseComponentElementFluxor
+
+<header @attributes="AdditionalAttributes" class="@CssClass">
+
+    <div class="group left">
+        <Button IsIcon="true" aria-label="Show or hide the sidebar" aria-expanded="@SidebarOpen" @onclick="ToggleSidebar">
+            <MaterialIcon Icon="menu" Size="var(--size-icon-sm)"/>
+        </Button>
+
+        <h1 class="logo">
+            <span>Noxy Player</span>
+        </h1>
+    </div>
+
+    <div class="group right">
+        <div class="connection-status" data-offline="@StateSession.Value.IsOffline">
+            <div class="connection-message" role="status">
+                @if (StateSession.Value.IsOffline)
+                {
+                    <span>Offline</span>
+                    <MaterialIcon Icon="cancel" Size="var(--size-icon-xs)"/>
+                }
+                else
+                {
+                    <span>Online</span>
+                    <MaterialIcon Icon="check_circle" Size="var(--size-icon-xs)"/>
+                }
+            </div>
+
+            @if (StateSession.Value.IsRetrying)
+            {
+                <Button IsIcon="true" Status="StatusEnum.Warning" @onclick="ServiceStartup.RetryNow">
+                    <MaterialIcon Icon="refresh" Size="var(--size-icon-sm)"/>
+                </Button>
+            }
+        </div>
+    </div>
+</header>
+
+@code {
+
+    private bool SidebarOpen => StateShell.Value.SidebarOpen;
+
+    private void ToggleSidebar()
+    {
+        Dispatcher.Dispatch(new ActionShellSidebarSet(!SidebarOpen));
+    }
+
+}

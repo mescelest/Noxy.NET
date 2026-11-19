@@ -7,7 +7,8 @@ export function Close(element) {
 }
 
 export function Watch(element, dotNetReference, methodName) {
-    const onClose = () => dotNetReference.invokeMethodAsync(methodName);
-    element.addEventListener("close", onClose);
-    return DotNet.createJSObjectReference({dispose: () => element.removeEventListener("close", onClose)});
+    element.addEventListener("close", () => {
+        dotNetReference.invokeMethodAsync(methodName).catch(() => {
+        });
+    });
 }

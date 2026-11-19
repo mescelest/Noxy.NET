@@ -6,49 +6,34 @@
 @inherits BaseComponentPageFluxor
 
 <div class="@CssClass">
-    <GlassPanel>
-        <div class="row-top">
-            <h1>Library</h1>
-            <span class="counts">
-                @Current.VisibleList.Count of @Current.MediaList.Count files · @Current.SelectedCount selected
-                @if (Current.HiddenSelectedCount > 0)
-                {
-                    <span class="hidden-note">(@Current.HiddenSelectedCount hidden by the search)</span>
-                }
-            </span>
-
-            <ActionsMenu/>
-
-            <input type="search" class="search" placeholder="Search the library" aria-label="Search the library" value="@Current.Search" @oninput="OnSearchInput"/>
-        </div>
-    </GlassPanel>
-
-    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
-
-    @if (Current.MediaList.Count == 0)
-    {
-        <MessageBox MessageList="@([EmptyMessage])" Status="StatusEnum.Info"/>
-    }
-    else
+    @if (Current.MediaList.Count > 0)
     {
         <Table class="table" RowCount="Current.VisibleList.Count">
-            <TableHeader>
-                <TableCell>
-                    <input type="checkbox" aria-label="Select all shown" checked="@Current.AllVisibleSelected" @onchange="() => Dispatcher.Dispatch(new ActionLibraryVisibleSelected())"/>
-                </TableCell>
-                <TableCell/>
-                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.Title)" OnClick="() => Sort(LibrarySortEnum.Title)"><strong>Title</strong></TableHeaderCellSort>
-                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.Artist)" OnClick="() => Sort(LibrarySortEnum.Artist)"><strong>Artist</strong></TableHeaderCellSort>
-                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.Album)" OnClick="() => Sort(LibrarySortEnum.Album)"><strong>Album</strong></TableHeaderCellSort>
-                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.Year)" OnClick="() => Sort(LibrarySortEnum.Year)"><strong>Year</strong></TableHeaderCellSort>
-                <TableHeaderCellSort Direction="DirectionOf(LibrarySortEnum.TimeCreated)" OnClick="() => Sort(LibrarySortEnum.TimeCreated)"><strong>Added</strong></TableHeaderCellSort>
+            <TableHeader class="header">
+                <div class="action-row">
+                    <input type="search" class="search" placeholder="Search the library" aria-label="Search the library" value="@Current.Search" @oninput="OnSearchInput"/>
+                    <ActionsMenu/>
+                </div>
+                <div class="header-row">
+                    <TableCell class="cell">
+                        <input type="checkbox" aria-label="Select all shown" checked="@Current.AllVisibleSelected" @onchange="() => Dispatcher.Dispatch(new ActionLibraryVisibleSelected())"/>
+                    </TableCell>
+                    <TableCell class="cell">
+                        <MaterialIcon Icon="download_for_offline" Size="var(--size-icon-sm)"/>
+                    </TableCell>
+                    <TableHeaderCellSort class="cell sort" Direction="DirectionOf(LibrarySortEnum.Title)" OnClick="() => Sort(LibrarySortEnum.Title)"><strong>Title</strong></TableHeaderCellSort>
+                    <TableHeaderCellSort class="cell sort" Direction="DirectionOf(LibrarySortEnum.Artist)" OnClick="() => Sort(LibrarySortEnum.Artist)"><strong>Artist</strong></TableHeaderCellSort>
+                    <TableHeaderCellSort class="cell sort" Direction="DirectionOf(LibrarySortEnum.Album)" OnClick="() => Sort(LibrarySortEnum.Album)"><strong>Album</strong></TableHeaderCellSort>
+                    <TableHeaderCellSort class="cell sort" Direction="DirectionOf(LibrarySortEnum.Year)" OnClick="() => Sort(LibrarySortEnum.Year)"><strong>Year</strong></TableHeaderCellSort>
+                    <TableHeaderCellSort class="cell sort" Direction="DirectionOf(LibrarySortEnum.TimeCreated)" OnClick="() => Sort(LibrarySortEnum.TimeCreated)"><strong>Added</strong></TableHeaderCellSort>
+                </div>
             </TableHeader>
-            <TableBodyVirtualize T="ResponseMediaFile" List="Current.VisibleList" ItemSize="48" Context="entry">
-                <TableRow @key="entry.Row.ID" Index="entry.Index" class="media-row" @ondblclick="() => Play(entry.Row)">
-                    <TableCell>
+            <TableBodyVirtualize T="ResponseMediaFile" class="body" List="Current.VisibleList" ItemSize="48" Context="entry">
+                <TableRow @key="entry.Row.ID" class="row" Index="entry.Index" @ondblclick="() => Play(entry.Row)">
+                    <TableCell class="cell">
                         <input type="checkbox" aria-label="Select @entry.Row.Title" checked="@Current.SelectedSet.Contains(entry.Row.ID)" @onchange="() => Dispatcher.Dispatch(new ActionLibrarySelectionToggled(entry.Row.ID))"/>
                     </TableCell>
-                    <TableCell>
+                    <TableCell class="cell">
                         <FileStatusIcon State="StateOf(entry.Row.ID)"/>
                     </TableCell>
                     <TableCell class="cell" Kind="TableCellKindEnum.RowHeader">@entry.Row.Title</TableCell>
@@ -60,6 +45,26 @@
             </TableBodyVirtualize>
         </Table>
     }
+    else
+    {
+        <MessageBox MessageList="@([EmptyMessage])" Status="StatusEnum.Info"/>
+    }
+    @* <GlassPanel> *@
+    @*     <div class="row-top"> *@
+    @*         <h1>Library</h1> *@
+    @*         <span class="counts"> *@
+    @*             @Current.VisibleList.Count of @Current.MediaList.Count files · @Current.SelectedCount selected *@
+    @*             @if (Current.HiddenSelectedCount > 0) *@
+    @*             { *@
+    @*                 <span class="hidden-note">(@Current.HiddenSelectedCount hidden by the search)</span> *@
+    @*             } *@
+    @*         </span> *@
+    @* *@
+
+    @*     </div> *@
+    @* </GlassPanel> *@
+
+
 </div>
 
 @code {

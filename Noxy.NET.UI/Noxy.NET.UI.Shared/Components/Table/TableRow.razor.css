@@ -5,6 +5,6 @@
     padding: var(--size-gap-xxs, 0.5rem) var(--size-gap-xs, 0.75rem);
 }
 
-.TableRow[data-striped="True"] {
+.TableRow[data-striped] {
     background-color: var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000)));
 }

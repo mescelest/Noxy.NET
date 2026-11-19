@@ -1,0 +1,13 @@
+.Divider {
+    display: flex;
+    align-items: center;
+    column-gap: var(--size-gap-xs);
+    color: var(--color-muted);
+    font: var(--font-message, normal normal 400 normal, var(--size-text-message, 0.875rem) "Segoe UI", "Roboto", sans-serif);
+}
+
+.Divider::before, .Divider::after {
+    content: "";
+    flex: 1 1 auto;
+    border-top: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+}

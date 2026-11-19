@@ -4,7 +4,7 @@
     flex-flow: column;
     row-gap: var(--size-gap-xs, 0.75rem);
     padding: var(--size-gap-xs, 0.75rem);
-    font: var(--font-body, normal normal 400 normal var(--size-text-body, 1rem) "Segoe UI", "Roboto", sans-serif);
+    font: var(--font-body, normal normal 400 normal, var(--size-text-body, 1rem) "Segoe UI", "Roboto", sans-serif);
     color: var(--color-complementary, #000000);
     border: var(--size-border-width-md, 2px) solid var(--color-messagebox, #767676);
     border-radius: var(--size-border-radius-md, 0.25rem);
