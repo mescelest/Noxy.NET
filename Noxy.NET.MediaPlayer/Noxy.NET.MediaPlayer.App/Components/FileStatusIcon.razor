@@ -4,16 +4,16 @@
     @switch (State)
     {
         case FileSyncStateEnum.OnDevice:
-            <MaterialIcon Icon="smartphone" Size="var(--size-icon-sm)"/>
+            <MaterialIcon Icon="check_circle" Size="var(--size-icon-sm)"/>
             break;
         case FileSyncStateEnum.Downloading:
-            <MaterialIcon Icon="download" Size="var(--size-icon-sm)"/>
+            <MaterialIcon Icon="downloading" Size="var(--size-icon-sm)"/>
             break;
         case FileSyncStateEnum.Failed:
-            <MaterialIcon Icon="close" Size="var(--size-icon-sm)"/>
+            <MaterialIcon Icon="error" Size="var(--size-icon-sm)"/>
             break;
         case FileSyncStateEnum.NotDownloaded:
-            <MaterialIcon Icon="cloud_download" Size="var(--size-icon-sm)"/>
+            <MaterialIcon Icon="pending" Size="var(--size-icon-sm)"/>
             break;
         default:
             throw new InvalidEnumArgumentException(nameof(State), (int)State, typeof(FileSyncStateEnum));

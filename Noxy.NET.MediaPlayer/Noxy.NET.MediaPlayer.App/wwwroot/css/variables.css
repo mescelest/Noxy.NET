@@ -80,7 +80,7 @@
     --color-light: #FFFFFF;
     --color-dark: #121212;
     --color-none: #4D4AD3;
-    --color-muted: color-mix(in srgb, transparent 50%, var(--color-primary, #FFFFFF));
+    --color-muted: #767676;
     --color-highlight: #0073EC;
     --color-info: #289ED9;
     --color-success: #23883D;
@@ -102,7 +102,6 @@
 }
 
 :root[theme="Dark"] {
-    --color-muted: var(--color-primary);
     --color-primary: var(--color-dark);
     --color-complementary: var(--color-light);
 }
