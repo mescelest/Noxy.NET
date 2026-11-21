@@ -4,11 +4,13 @@
 
 <form @attributes="AdditionalAttributes" class="@CssClass" @onsubmit="SubmitHandler" @onsubmit:preventDefault>
 
-    <MessageBox MessageList="Context.GetFormErrorList()" Status="@StatusEnum.Error"/>
+    <fieldset disabled="@Disabled">
+        <MessageBox MessageList="Context.GetFormErrorList()" Status="@StatusEnum.Error"/>
 
-    <CascadingValue @key="Context" Value="@Context" IsFixed="true">
-        @ChildContent
-    </CascadingValue>
+        <CascadingValue @key="Context" Value="@Context" IsFixed="true">
+            @ChildContent
+        </CascadingValue>
+    </fieldset>
 
 </form>
 
@@ -16,6 +18,10 @@
 
     [Parameter, EditorRequired]
     public required WebFormContext<T> Context { get; set; }
+
+    // Disables every field and button inside the form, for when something outside it is busy.
+    [Parameter]
+    public bool Disabled { get; set; }
 
     [Parameter]
     public bool? ResetAfterSubmit { get; set; }

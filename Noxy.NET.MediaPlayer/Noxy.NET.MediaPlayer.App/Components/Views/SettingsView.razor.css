@@ -1,23 +1,19 @@
-.Settings {
+.SettingsView {
     display: flex;
     flex-flow: column;
     gap: var(--size-gap-xl);
-    padding: var(--size-gap-lg);
 }
 
-.Settings h1, .Settings h2 {
+.SettingsView ::deep h2 {
     margin: 0 0 var(--size-gap-xs);
-}
-
-.Settings h2 {
     font-size: var(--size-text-h5);
 }
 
-.muted {
+.SettingsView ::deep .muted {
     color: var(--color-muted);
 }
 
-.choice {
+.SettingsView ::deep .choice {
     min-height: var(--size-control-sm);
     margin-right: var(--size-gap-xxs);
     padding: 0 var(--size-gap-sm);
@@ -28,28 +24,12 @@
     cursor: pointer;
 }
 
-.choice[data-on] {
+.SettingsView ::deep .choice[data-on] {
     border-color: var(--color-highlight);
     color: var(--color-highlight);
 }
 
-.choice:disabled {
+.SettingsView ::deep .choice:disabled {
     color: var(--color-disabled);
     cursor: default;
-}
-
-.setting {
-    display: flex;
-    align-items: center;
-    gap: var(--size-gap-sm);
-    padding: var(--size-gap-xxs) 0;
-}
-
-.key {
-    min-width: var(--size-column);
-}
-
-.error {
-    color: var(--color-error);
-    font: var(--font-label);
 }

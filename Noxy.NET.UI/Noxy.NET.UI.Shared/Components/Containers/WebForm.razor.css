@@ -5,3 +5,14 @@
     row-gap: var(--size-gap-lg, 1.5rem);
     min-width: var(--size-column, 20rem);
 }
+
+.WebForm > fieldset {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: inherit;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+}

@@ -1,0 +1,118 @@
+@inject ISettingService ServiceSetting
+@inject ISyncService ServiceSync
+@inherits BaseComponentElement
+@using System.Text.Json
+@using Noxy.NET.MediaPlayer.Presentation
+@implements IDisposable
+
+<section @attributes="AdditionalAttributes" class="@CssClass">
+    <h2>Synced settings</h2>
+    @if (OfflineReason is not null)
+    {
+        <p class="muted">@OfflineReason They are read-only until the server can be reached.</p>
+    }
+    @foreach (ResponseSetting setting in _settingList)
+    {
+        <div class="setting" @key="(setting.Key, _resetCount)">
+            <span class="key">@setting.Key</span>
+            @switch (setting.ValueType)
+            {
+                case SettingValueTypeEnum.Boolean:
+                    <input type="checkbox" checked="@(AsBool(setting))" disabled="@(OfflineReason is not null)" @onchange="args => Save(setting, args.Value is true)"/>
+                    break;
+                case SettingValueTypeEnum.Integer:
+                    SettingDeclarationInteger? integer = SettingCatalog.Find(setting.Key) as SettingDeclarationInteger;
+                    <input type="number" min="@integer?.Minimum" max="@integer?.Maximum" value="@AsText(setting)" disabled="@(OfflineReason is not null)" @onchange="args => SaveInteger(setting, args.Value?.ToString())"/>
+                    break;
+                case SettingValueTypeEnum.Enum:
+                    <select disabled="@(OfflineReason is not null)" @onchange="args => Save(setting, args.Value?.ToString() ?? string.Empty)">
+                        @foreach (string name in MemberNameList(setting.Key))
+                        {
+                            <option value="@name" selected="@(name == AsText(setting))">@name</option>
+                        }
+                    </select>
+                    break;
+                default:
+                    throw new InvalidEnumArgumentException(nameof(setting.ValueType), (int)setting.ValueType, typeof(SettingValueTypeEnum));
+            }
+            @if (_errorMap.TryGetValue(setting.Key, out string? error))
+            {
+                <span class="error">@error</span>
+            }
+        </div>
+    }
+</section>
+
+@code {
+
+    private List<ResponseSetting> _settingList = [];
+    private readonly Dictionary<string, string> _errorMap = [];
+
+    // Raised after a refused write so the inputs are drawn again with the value that is stored.
+    private int _resetCount;
+
+    private string? OfflineReason => ServiceSync.IsOffline ? Constants.ActionMessageOffline : null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ServiceSetting.Changed += OnChanged;
+        ServiceSync.Changed += OnChanged;
+        await Load();
+    }
+
+    private void OnChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await Load();
+            StateHasChanged();
+        });
+    }
+
+    private async Task Load()
+    {
+        _settingList = await ServiceSetting.GetSettingList();
+    }
+
+    // The server is the authority: a refused write leaves the value as it was and shows the reason.
+    private async Task Save(ResponseSetting setting, object value)
+    {
+        _errorMap.Remove(setting.Key);
+        try
+        {
+            await ServiceSetting.Update(setting.Key, JsonSerializer.SerializeToElement(value));
+        }
+        catch (Exception exception)
+        {
+            _errorMap[setting.Key] = exception.ToActionMessage();
+            _resetCount++;
+        }
+
+        await Load();
+    }
+
+    private Task SaveInteger(ResponseSetting setting, string? text)
+    {
+        if (!int.TryParse(text, out int number))
+        {
+            _errorMap[setting.Key] = "Enter a whole number.";
+            _resetCount++;
+            return Task.CompletedTask;
+        }
+
+        return Save(setting, number);
+    }
+
+    private static bool AsBool(ResponseSetting setting) => setting.Value is JsonElement element ? element.ValueKind == JsonValueKind.True : setting.Value is true;
+
+    private static string AsText(ResponseSetting setting) => setting.Value is JsonElement element ? element.ToString() : setting.Value.ToString() ?? string.Empty;
+
+    private static IReadOnlyList<string> MemberNameList(string key) => SettingCatalog.Find(key) is SettingDeclarationEnum declaration ? declaration.MemberNameList : [];
+
+    public void Dispose()
+    {
+        ServiceSetting.Changed -= OnChanged;
+        ServiceSync.Changed -= OnChanged;
+    }
+
+}

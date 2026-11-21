@@ -1,10 +1,9 @@
-@page "/account"
 @inject ISessionService ServiceSession
 @inject IFileStore StoreFile
-@inherits BaseComponentPage
+@inherits BaseComponentElement
 
-<div class="@CssClass">
-    <h1>Account</h1>
+<section @attributes="AdditionalAttributes" class="@CssClass">
+    <h2>Account</h2>
 
     <dl>
         <dt>Signed in as</dt>
@@ -18,7 +17,7 @@
     </dl>
 
     <button type="button" class="sign-out" @onclick="ServiceSession.SignOut">Sign out</button>
-</div>
+</section>
 
 @code {
 

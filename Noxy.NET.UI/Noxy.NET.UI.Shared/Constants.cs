@@ -1,6 +1,7 @@
 namespace Noxy.NET.UI;
 
-internal static class Constants
+public static class Constants
 {
-    public const string AssemblyNameUICommon = "Noxy.NET.UI.Shared";
+    public const string ClassPage = "Page";
+    public const string ClassPageFullscreen = "PageFullscreen";
 }

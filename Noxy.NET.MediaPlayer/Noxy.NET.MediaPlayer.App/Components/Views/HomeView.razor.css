@@ -1,11 +1,10 @@
-.Home {
+.HomeView {
     display: flex;
     flex-flow: column;
     gap: var(--size-gap-xl);
-    padding: var(--size-gap-lg);
 }
 
-.Home h2 {
+.HomeView h2 {
     margin: 0 0 var(--size-gap-sm);
     font-size: var(--size-text-h5);
 }

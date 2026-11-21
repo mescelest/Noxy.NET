@@ -121,3 +121,18 @@ dialog {
     background: var(--color-primary);
     color: var(--color-complementary);
 }
+
+.Page {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: var(--size-gap-xl);
+    padding: var(--size-gap-lg);
+    overflow: auto;
+}
+
+.Page.PageFullscreen {
+    gap: 0;
+    padding: 0;
+}

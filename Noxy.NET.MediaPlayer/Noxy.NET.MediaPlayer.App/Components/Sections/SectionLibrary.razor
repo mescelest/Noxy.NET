@@ -1,0 +1,86 @@
+@inject ISyncService ServiceSync
+@inject IMetadataStore StoreMetadata
+@inject IFileStore StoreFile
+@inherits BaseComponentElement
+@using Noxy.NET.MediaPlayer.Presentation
+@implements IDisposable
+
+<section @attributes="AdditionalAttributes" class="@CssClass">
+    <h2>Library</h2>
+    <p class="muted">@_onDeviceCount of @_mediaCount media files are on this device (@Format(_usedBytes)).</p>
+    <button type="button" class="choice" disabled="@(OfflineReason is not null)" title="@OfflineReason" @onclick="RefreshLibrary">Refresh library</button>
+    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+</section>
+
+@code {
+
+    private List<string> _messageList = [];
+    private int _mediaCount;
+    private int _onDeviceCount;
+    private long _usedBytes;
+
+    private string? OfflineReason => ServiceSync.IsOffline ? Constants.ActionMessageOffline : null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ServiceSync.Changed += OnChanged;
+        await Load();
+    }
+
+    private void OnChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await Load();
+            StateHasChanged();
+        });
+    }
+
+    private async Task Load()
+    {
+        _mediaCount = (await StoreMetadata.GetMediaFileList()).Count;
+        _onDeviceCount = (await StoreMetadata.GetFileStateList()).Count(x => x.State == FileSyncStateEnum.OnDevice);
+        try
+        {
+            _usedBytes = (await StoreFile.GetEstimate()).UsedBytes;
+        }
+        catch (IOException)
+        {
+            _usedBytes = 0;
+        }
+    }
+
+    private async Task RefreshLibrary()
+    {
+        _messageList = [];
+        try
+        {
+            await ServiceSync.SyncLibrary(true);
+            await ServiceSync.SyncPlaylistList(true);
+        }
+        catch (Exception exception)
+        {
+            _messageList = [exception.ToActionMessage()];
+        }
+    }
+
+    private static string Format(long bytes)
+    {
+        string[] unitList = ["B", "KB", "MB", "GB", "TB"];
+        double value = bytes;
+        int unit = 0;
+        while (value >= 1024 && unit < unitList.Length - 1)
+        {
+            value /= 1024;
+            unit++;
+        }
+
+        return $"{value:0.#} {unitList[unit]}";
+    }
+
+    public void Dispose()
+    {
+        ServiceSync.Changed -= OnChanged;
+    }
+
+}

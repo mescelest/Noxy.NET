@@ -48,7 +48,7 @@
     {
         await base.OnAfterFirstRenderAsync();
 
-        await JS.InvokeAsync<IJSObjectReference>("import", $"./_content/{Constants.AssemblyNameUICommon}/Sortable.min.js");
+        await JS.InvokeAsync<IJSObjectReference>("import", $"./_content/{typeof(SortableList<>).Assembly.GetName().Name}/Sortable.min.js");
         _componentModule = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(SortableList<>)));
 
         Dictionary<string, object?> options = new()

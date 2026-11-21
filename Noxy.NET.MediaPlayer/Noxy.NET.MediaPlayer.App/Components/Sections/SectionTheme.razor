@@ -1,0 +1,10 @@
+@inherits BaseComponentElement
+
+<section @attributes="AdditionalAttributes" class="@CssClass">
+    <h2>Theme</h2>
+    <ThemeToggle TType="ThemeEnum" Label="Theme">
+        <Template Context="theme">
+            <button type="button" class="choice" data-on="@(theme.Service.GetTheme() == theme.Value)" @onclick="() => theme.Service.SetTheme(theme.Value)">@theme.Value</button>
+        </Template>
+    </ThemeToggle>
+</section>

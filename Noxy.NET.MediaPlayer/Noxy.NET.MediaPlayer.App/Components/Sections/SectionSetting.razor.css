@@ -1,0 +1,15 @@
+.setting {
+    display: flex;
+    align-items: center;
+    gap: var(--size-gap-sm);
+    padding: var(--size-gap-xxs) 0;
+}
+
+.key {
+    min-width: var(--size-column);
+}
+
+.error {
+    color: var(--color-error);
+    font: var(--font-label);
+}

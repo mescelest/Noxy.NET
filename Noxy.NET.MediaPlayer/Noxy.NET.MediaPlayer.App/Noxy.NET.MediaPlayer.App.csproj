@@ -60,7 +60,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="Pages\Account.razor"/>
         <AdditionalFiles Include="Pages\Bandcamp.razor"/>
         <AdditionalFiles Include="Pages\Home.razor"/>
         <AdditionalFiles Include="Pages\Library.razor"/>

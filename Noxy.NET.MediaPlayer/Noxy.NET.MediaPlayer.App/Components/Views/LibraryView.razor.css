@@ -1,4 +1,4 @@
-.Library {
+.LibraryView {
     display: flex;
     flex-flow: column;
     flex: 1 1 auto;
@@ -6,21 +6,21 @@
     overflow: auto;
 }
 
-.Library ::deep > .table {
+.LibraryView ::deep > .table {
     flex: 1 1 auto;
     grid-template-columns: minmax(0px, max-content) minmax(0px, max-content) 1fr  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content);
     align-content: flex-start;
 }
 
-.Library ::deep > .table .cell {
+.LibraryView ::deep > .table .cell {
     display: flex;
 }
 
-.Library ::deep .table > .header {
+.LibraryView ::deep .table > .header {
     row-gap: var(--size-gap-xs);
 }
 
-.Library ::deep .table > .body > .row {
+.LibraryView ::deep .table > .body > .row {
     align-items: center;
 }
 

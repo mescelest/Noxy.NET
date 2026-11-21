@@ -15,11 +15,11 @@
         <div class="configuration">
             @if (_showAddress)
             {
-                <FormServerAddress OnSubmit="SubmitServerAddressHandler"/>
+                <FormServerAddress Disabled="IsDisabled(LoginSourceEnum.ServerAddress)" OnLoadingChanged="loading => SetBusy(LoginSourceEnum.ServerAddress, loading)" OnSubmit="SubmitServerAddressHandler"/>
             }
             else
             {
-                <Button class="link-button" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Info" @onclick="() => _showAddress = true">
+                <Button class="link-button" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Info" disabled="@IsBusy" @onclick="() => _showAddress = true">
                     Server: @_savedAddress (change)
                 </Button>
             }
@@ -30,7 +30,7 @@
         </Divider>
 
         <div class="provider-list">
-            <Button class="provider" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Notice" @onclick="SignInGoogle">
+            <Button class="provider" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Notice" Loading="@(_busy == LoginSourceEnum.Google)" disabled="@IsBusy" @onclick="SignInGoogle">
                 <MaterialIcon Icon="mail"/>
                 Sign in with Gmail
             </Button>
@@ -44,10 +44,10 @@
 
         <TabSet class="login-tab-list">
             <TabPage Title="Sign in">
-                <FormSignIn OnSubmit="SubmitSignInHandler"/>
+                <FormSignIn Disabled="IsDisabled(LoginSourceEnum.SignIn)" OnLoadingChanged="loading => SetBusy(LoginSourceEnum.SignIn, loading)" OnSubmit="SubmitSignInHandler"/>
             </TabPage>
             <TabPage Title="Sign up">
-                <FormSignUp OnSubmit="SubmitSignUpHandler"/>
+                <FormSignUp Disabled="IsDisabled(LoginSourceEnum.SignUp)" OnLoadingChanged="loading => SetBusy(LoginSourceEnum.SignUp, loading)" OnSubmit="SubmitSignUpHandler"/>
             </TabPage>
         </TabSet>
     </div>
@@ -59,6 +59,18 @@
 
     private string? _savedAddress;
     private bool _showAddress;
+
+    // The one source that is busy: everything else on the screen is disabled until it finishes.
+    private LoginSourceEnum _busy = LoginSourceEnum.None;
+
+    private bool IsBusy => _busy != LoginSourceEnum.None;
+
+    private bool IsDisabled(LoginSourceEnum source) => IsBusy && _busy != source;
+
+    private void SetBusy(LoginSourceEnum source, bool loading)
+    {
+        _busy = loading ? source : LoginSourceEnum.None;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -74,6 +86,7 @@
 
     private async Task SignInGoogle()
     {
+        SetBusy(LoginSourceEnum.Google, true);
         try
         {
             _providerMessageList = [];
@@ -83,6 +96,10 @@
         catch (Exception exception)
         {
             _providerMessageList = [exception.ToSignInMessage()];
+        }
+        finally
+        {
+            SetBusy(LoginSourceEnum.Google, false);
         }
     }
 

@@ -5,5 +5,7 @@ namespace Noxy.NET.UI.Abstractions;
 
 public abstract class BaseComponentPageFluxor : BaseComponentBlazorFluxor, IPageComponent
 {
-    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, "Page");
+    protected const string FullscreenPageClass = Constants.ClassPageFullscreen;
+
+    public override string CssClass => ComponentMetadata.CombineCssClass(base.CssClass, Constants.ClassPage);
 }

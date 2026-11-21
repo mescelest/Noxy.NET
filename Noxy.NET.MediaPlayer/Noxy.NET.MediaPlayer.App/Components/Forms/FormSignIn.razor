@@ -2,7 +2,7 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm T="FormModelSignIn" Context="_context" OnSubmit="Submit">
+    <WebForm T="FormModelSignIn" Context="_context" OnSubmit="Submit" Disabled="Disabled">
         <InputGroupText @bind-Value="_context.Model.Email"/>
         <InputGroupPassword @bind-Value="_context.Model.Password"/>
         <Button Type="@HTMLButtonTypeEnum.Submit" Loading="@LoadingCurrent">Sign in</Button>
@@ -13,6 +13,12 @@
 
     [Parameter]
     public bool? Loading { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnLoadingChanged { get; set; }
     private bool LoadingCurrent => Loading ?? _context.IsSubmitting;
 
     [Parameter]
@@ -22,8 +28,16 @@
 
     private async Task Submit(WebFormContext<FormModelSignIn> context)
     {
-        await ServiceSession.SignIn(context.Model.Email, context.Model.Password);
-        await OnSubmit.InvokeAsync();
+        await OnLoadingChanged.InvokeAsync(true);
+        try
+        {
+            await ServiceSession.SignIn(context.Model.Email, context.Model.Password);
+            await OnSubmit.InvokeAsync();
+        }
+        finally
+        {
+            await OnLoadingChanged.InvokeAsync(false);
+        }
     }
 
 }
