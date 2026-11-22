@@ -48,7 +48,7 @@
 
     private void RejectedHandler(List<IBrowserFile> fileList)
     {
-        ServiceToast.ShowWarning(fileList.Count == 1 ? "1 file was skipped: it is not an audio file." : $"{fileList.Count} files were skipped: they are not audio files.");
+        ServiceToast.ShowWarning(fileList.Count.ToCountText(AppTexts.UploadSkippedOne, AppTexts.UploadSkippedMany));
     }
 
     public void Dispose()

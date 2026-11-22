@@ -1,12 +1,13 @@
 @inject IDeviceService ServiceDevice
 @inject IToastService ServiceToast
+@using Noxy.NET.MediaPlayer.Presentation
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <label for="device-name">Name of this device</label>
     <div class="row">
         <input id="device-name" type="text" maxlength="50" @bind="_name" @bind:event="oninput"/>
-        <button type="button" disabled="@(_busy || string.IsNullOrWhiteSpace(_name))" @onclick="Save">Save</button>
+        <button type="button" disabled="@IsSaveDisabled" @onclick="Save">Save</button>
     </div>
     <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
 </div>
@@ -16,6 +17,8 @@
     private string _name = string.Empty;
     private List<string> _messageList = [];
     private bool _busy;
+
+    private bool IsSaveDisabled => _busy || string.IsNullOrWhiteSpace(_name);
 
     protected override async Task OnInitializedAsync()
     {
@@ -30,11 +33,11 @@
             await ServiceDevice.SetName(_name);
             _name = await ServiceDevice.GetName();
             _messageList = [];
-            ServiceToast.ShowSuccess("Device name saved.");
+            ServiceToast.ShowSuccess(AppTexts.DeviceNameSaved);
         }
         catch (ArgumentException)
         {
-            _messageList = ["Enter a name of 1 to 50 characters."];
+            _messageList = [string.Format(AppTexts.DeviceNameInvalid, PresentationConstants.DeviceNameMaxLength)];
         }
         finally
         {

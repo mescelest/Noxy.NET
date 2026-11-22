@@ -34,17 +34,23 @@ public class DeviceService(IDeviceStore storeDevice, Func<string>? machineName =
     private string DefaultName()
     {
         string name = (machineName?.Invoke() ?? Environment.MachineName).Trim();
-        if (name.Length == 0) return Constants.DefaultDeviceName;
+        if (name.Length == 0) return PresentationTexts.DefaultDeviceName;
 
-        return name.Length > Constants.DeviceNameMaxLength ? name[..Constants.DeviceNameMaxLength].TrimEnd() : name;
+        return name.Length > PresentationConstants.DeviceNameMaxLength ? name[..PresentationConstants.DeviceNameMaxLength].TrimEnd() : name;
     }
 
     public async Task SetName(string name)
     {
         string trimmed = name.Trim();
-        if (trimmed.Length == 0) throw new ArgumentException("The device name cannot be empty.", nameof(name));
-        if (trimmed.Length > Constants.DeviceNameMaxLength) throw new ArgumentException($"The device name cannot be longer than {Constants.DeviceNameMaxLength} characters.", nameof(name));
-
-        await storeDevice.SetDeviceName(trimmed);
+        switch (trimmed.Length)
+        {
+            case 0:
+                throw new ArgumentException("The device name cannot be empty.", nameof(name));
+            case > PresentationConstants.DeviceNameMaxLength:
+                throw new ArgumentException($"The device name cannot be longer than {PresentationConstants.DeviceNameMaxLength} characters.", nameof(name));
+            default:
+                await storeDevice.SetDeviceName(trimmed);
+                break;
+        }
     }
 }

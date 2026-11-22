@@ -2,27 +2,32 @@
 @inject IFileStore StoreFile
 @inherits BaseComponentElement
 
-<section @attributes="AdditionalAttributes" class="@CssClass">
-    <h2>Account</h2>
+<Section @attributes="AdditionalAttributes" class="@CssClass" Title="Account">
 
     <dl>
         <dt>Signed in as</dt>
-        <dd>@(_email ?? "Unknown")</dd>
+        <dd>@EmailText</dd>
 
         <dt>Stored on this device</dt>
-        <dd>@(_estimate is null ? "Unknown" : Format(_estimate.UsedBytes))</dd>
+        <dd>@UsedText</dd>
 
         <dt>Free space on this device</dt>
-        <dd>@(_estimate is null ? "Unknown" : Format(_estimate.FreeBytes))</dd>
+        <dd>@FreeText</dd>
     </dl>
 
     <button type="button" class="sign-out" @onclick="ServiceSession.SignOut">Sign out</button>
-</section>
+</Section>
 
 @code {
 
     private string? _email;
     private StorageEstimate? _estimate;
+
+    private const string TextUnknown = "Unknown";
+
+    private string EmailText => _email ?? TextUnknown;
+    private string UsedText => _estimate is null ? TextUnknown : Format(_estimate.UsedBytes);
+    private string FreeText => _estimate is null ? TextUnknown : Format(_estimate.FreeBytes);
 
     protected override async Task OnInitializedAsync()
     {

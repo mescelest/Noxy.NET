@@ -1,0 +1,26 @@
+.MediaTrackInfo {
+    display: grid;
+    grid-template:
+            "album track status" max-content
+            "album artist status" max-content
+            / max-content max-content max-content;
+    align-items: center;
+    column-gap: var(--size-gap-xs);
+}
+
+.album {
+    grid-area: album;
+    display: flex;
+}
+
+.track {
+    grid-area: track;
+}
+
+.artist {
+    grid-area: artist;
+}
+
+.status {
+    grid-area: status;
+}

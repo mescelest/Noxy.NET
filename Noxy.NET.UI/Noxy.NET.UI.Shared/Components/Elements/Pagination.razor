@@ -3,29 +3,29 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
 
     <Button class="first" disabled="@FirstDisabled" @onclick="FirstButtonClickHandler">
-        @(First ?? DefaultFirst)
+        @FirstContent
     </Button>
 
     <Button class="previous" disabled="@PreviousDisabled" @onclick="PreviousButtonClickHandler">
-        @(Previous ?? DefaultPrevious)
+        @PreviousContent
     </Button>
 
-    <input @key="_inputVersion" id="@IDCurrent" class="page" type="number" min="@(MinPageValue + 1)" max="@(MaxPageValue + 1)" list="@ListID" aria-label="@PageLabelCurrent"
-           value="@(ValueCurrent + 1)" disabled="@DisabledCurrent" @onchange="PageInputChangeHandler"/>
+    <input @key="_inputVersion" id="@IDCurrent" class="page" type="number" min="@MinPageNumber" max="@MaxPageNumber" list="@ListID" aria-label="@PageLabelCurrent"
+           value="@PageNumber" disabled="@DisabledCurrent" @onchange="PageInputChangeHandler"/>
 
     <datalist id="@ListID">
-        @for (int number = MinPageValue + 1; number <= MaxPageValue + 1; number++)
+        @for (int number = MinPageNumber; number <= MaxPageNumber; number++)
         {
             <option value="@number"></option>
         }
     </datalist>
 
     <Button class="next" disabled="@NextDisabled" @onclick="NextButtonClickHandler">
-        @(Next ?? DefaultNext)
+        @NextContent
     </Button>
 
     <Button class="last" disabled="@LastDisabled" @onclick="LastButtonClickHandler">
-        @(Last ?? DefaultLast)
+        @LastContent
     </Button>
 
 </div>
@@ -76,6 +76,16 @@
     private int _inputVersion;
 
     private int ValueCurrent => Value ?? MinPageValue;
+
+    // The pages are counted from zero inside and from one on screen.
+    private int PageNumber => ValueCurrent + 1;
+    private int MinPageNumber => MinPageValue + 1;
+    private int MaxPageNumber => MaxPageValue + 1;
+
+    private RenderFragment FirstContent => First ?? DefaultFirst;
+    private RenderFragment PreviousContent => Previous ?? DefaultPrevious;
+    private RenderFragment NextContent => Next ?? DefaultNext;
+    private RenderFragment LastContent => Last ?? DefaultLast;
     private int MaxPageValue => Math.Max(MinPageValue, (CountCurrent + PageSizeCurrent - 1) / PageSizeCurrent - 1);
 
     private bool FirstDisabled => DisabledCurrent || ValueCurrent == MinPageValue;

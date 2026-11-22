@@ -15,8 +15,8 @@ public static class ExceptionExtension
             return exception switch
             {
                 ApiException apiException when !string.IsNullOrWhiteSpace(apiException.Title) => apiException.Title,
-                ServerAddressMissingException => Constants.SignInMessageNoAddress,
-                _ => exception.IsOfflineFailure ? Constants.SignInMessageOffline : Constants.SignInMessageFailed
+                ServerAddressMissingException => PresentationTexts.SignInMessageNoAddress,
+                _ => exception.IsOfflineFailure ? PresentationTexts.SignInMessageOffline : PresentationTexts.SignInMessageFailed
             };
         }
 
@@ -24,9 +24,9 @@ public static class ExceptionExtension
         public string ToActionMessage(string? failedMessage = null)
         {
             if (exception is ApiException { Title.Length: > 0 } apiException) return apiException.Title;
-            if (exception.IsOfflineFailure) return Constants.ActionMessageOffline;
+            if (exception.IsOfflineFailure) return PresentationTexts.ActionMessageOffline;
 
-            return failedMessage ?? Constants.ActionMessageFailed;
+            return failedMessage ?? PresentationTexts.ActionMessageFailed;
         }
     }
 }

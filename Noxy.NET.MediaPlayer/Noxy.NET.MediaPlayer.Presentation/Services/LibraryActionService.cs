@@ -64,7 +64,7 @@ public class LibraryActionService(IDownloadService serviceDownload, IQueueServic
             }
         }
 
-        return new(idSet.Count - failedList.Count, failedList, failedList.Count == 0 ? null : Constants.ActionMessageRemoveFailed);
+        return new(idSet.Count - failedList.Count, failedList, failedList.Count == 0 ? null : PresentationTexts.ActionMessageRemoveFailed);
     }
 
     public async Task<BulkResult> DeleteFromLibrary(List<Guid> mediaFileIDList)
@@ -83,7 +83,7 @@ public class LibraryActionService(IDownloadService serviceDownload, IQueueServic
             catch (Exception exception) when (IsExpected(exception))
             {
                 failedList.Add(id);
-                message ??= exception.ToActionMessage(Constants.ActionMessageDeleteFailed);
+                message ??= exception.ToActionMessage(PresentationTexts.ActionMessageDeleteFailed);
             }
         }
 
@@ -112,7 +112,7 @@ public class LibraryActionService(IDownloadService serviceDownload, IQueueServic
             catch (Exception exception) when (IsExpected(exception) || exception is IOException)
             {
                 failedList.Add(id);
-                message ??= exception is IOException ? Constants.ActionMessageSaveFailed : exception.ToActionMessage(Constants.ActionMessageSaveFailed);
+                message ??= exception is IOException ? PresentationTexts.ActionMessageSaveFailed : exception.ToActionMessage(PresentationTexts.ActionMessageSaveFailed);
             }
         }
 
@@ -146,7 +146,7 @@ public class LibraryActionService(IDownloadService serviceDownload, IQueueServic
         }
         catch (Exception exception) when (IsExpected(exception))
         {
-            return new(0, [.. mediaFileIDList], exception.ToActionMessage(Constants.ActionMessageAddFailed));
+            return new(0, [.. mediaFileIDList], exception.ToActionMessage(PresentationTexts.ActionMessageAddFailed));
         }
 
         return new(mediaFileIDList.Count, [], null);
@@ -159,7 +159,7 @@ public class LibraryActionService(IDownloadService serviceDownload, IQueueServic
             case LibraryActionEnum.DeleteFromLibrary:
             case LibraryActionEnum.AddToPlaylist:
             case LibraryActionEnum.SaveAsFile:
-                return serviceSync.IsOffline ? Constants.ActionMessageOffline : null;
+                return serviceSync.IsOffline ? PresentationTexts.ActionMessageOffline : null;
             case LibraryActionEnum.Download:
             case LibraryActionEnum.PlayNext:
             case LibraryActionEnum.AddToQueue:

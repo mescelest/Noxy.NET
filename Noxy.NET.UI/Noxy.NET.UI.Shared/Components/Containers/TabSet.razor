@@ -43,7 +43,7 @@
         string tabID = $"tab-{item.ID}";
         string panelID = $"panel-{item.ID}";
 
-        <div class="tab-panel" id="@panelID" role="tabpanel" hidden="@(!isSelected)" aria-labelledby="@tabID">
+        <div class="tab-panel" id="@panelID" role="tabpanel" hidden="@IsHidden(item)" aria-labelledby="@tabID">
             @if (isSelected)
             {
                 @item.ChildContent
@@ -71,6 +71,8 @@
 
     private readonly List<TabPage> _pages = [];
     private TabPage? _activePage;
+
+    private bool IsHidden(TabPage page) => page != _activePage;
 
     private readonly Dictionary<TabPage, ElementReference> _tabReferences = new();
 

@@ -8,9 +8,7 @@ namespace Noxy.NET.Models;
 public class JsonProperty
 {
     [JsonConstructor]
-    public JsonProperty()
-    {
-    }
+    public JsonProperty() { }
 
     public JsonProperty(object? value)
     {

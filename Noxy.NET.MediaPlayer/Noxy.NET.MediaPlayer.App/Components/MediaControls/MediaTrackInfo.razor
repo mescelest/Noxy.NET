@@ -1,0 +1,18 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="album">
+        <MaterialIcon Icon="album" Size="var(--size-icon-xl)"/>
+    </div>
+    <span class="name">@Display.Title</span>
+    <span class="artist">@Display.Artist</span>
+
+    <span class="status">@Display.Status</span>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required PlaybackDisplay Display { get; set; }
+
+}

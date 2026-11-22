@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Noxy.NET.MediaPlayer.App.Resources;
 using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
@@ -47,7 +48,7 @@ public class PreferencesServerAddressStorage : IServerAddressStorage
         List<string> list = ReadList();
         int index = list.IndexOf(oldAddress);
         if (index < 0) throw new ArgumentException("The server address is not saved.", nameof(oldAddress));
-        if (normalized != oldAddress && list.Contains(normalized)) throw new InvalidOperationException("This server is already saved.");
+        if (normalized != oldAddress && list.Contains(normalized)) throw new InvalidOperationException(AppTexts.ServerAddressAlreadySaved);
 
         list[index] = normalized;
         WriteList(list);

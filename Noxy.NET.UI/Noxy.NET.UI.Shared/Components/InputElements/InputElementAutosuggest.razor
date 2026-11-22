@@ -26,7 +26,7 @@
                     OptionDisplay item = _viewList[index];
                     bool selected = index == IndexSelected;
 
-                    <span id="@GetOptionID(index)" class="option" role="option" aria-selected="@(selected ? "true" : "false")" data-selected="@selected" @onmousedown="() => Select(index)" @onmouseenter="() => SetIndexPreview(index)">
+                    <span id="@GetOptionID(index)" class="option" role="option" aria-selected="@AriaSelected(selected)" data-selected="@selected" @onmousedown="() => Select(index)" @onmouseenter="() => SetIndexPreview(index)">
                         @item.Text
                     </span>
                 }
@@ -107,6 +107,8 @@
     private string? ActiveOptionID => _isDropdownOpen && IsIndexValid ? GetOptionID(IndexSelected) : null;
 
     private string GetOptionID(int index) => $"{IDCurrent}-option-{index}";
+
+    private static string AriaSelected(bool selected) => selected ? "true" : "false";
 
     protected override async Task OnAfterFirstRenderAsync()
     {

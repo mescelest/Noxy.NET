@@ -108,6 +108,6 @@ public class HomeServiceTest
     {
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         Assert.DoesNotContain(typeof(HomeService).GetConstructors().Single().GetParameters(), x => x.ParameterType.Name.Contains("Api"));
-        Assert.Equal(6, Constants.HomeRecentCount);
+        Assert.Equal(6, PresentationConstants.HomeRecentCount);
     }
 }

@@ -1,6 +1,6 @@
 @inherits BaseComponentElement
 
-<div @attributes="AdditionalAttributes" class="@CssClass" role="row" aria-rowindex="@(Index + 2)" data-striped="@(Index % 2 == 0)">
+<div @attributes="AdditionalAttributes" class="@CssClass" role="row" aria-rowindex="@AriaRowIndex" data-striped="@IsStriped">
     <CascadingValue Value="TableCellKindEnum.Cell" IsFixed="true">
         @ChildContent
     </CascadingValue>
@@ -14,5 +14,8 @@
     // The position in the list, from zero: it sets the row number the table reports and which rows are striped.
     [Parameter, EditorRequired]
     public int Index { get; set; }
+
+    private int AriaRowIndex => Index + 2;
+    private bool IsStriped => Index % 2 == 0;
 
 }

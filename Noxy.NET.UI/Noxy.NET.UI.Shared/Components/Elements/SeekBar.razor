@@ -1,0 +1,51 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass" style="--seek-progress: @ProgressStyle">
+    <InputElementRange Min="0" Max="Max" Step="Step" Value="Value" ValueChanged="InputHandler" aria-label="@Label" @onchange="ChangeHandler"/>
+</div>
+
+@code {
+
+    [Parameter]
+    public double Value { get; set; }
+
+    [Parameter]
+    public double Max { get; set; }
+
+    // Small enough for the bar to follow a position that is not a whole number.
+    [Parameter]
+    public double Step { get; set; } = 0.01;
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    // While the thumb is dragged.
+    [Parameter]
+    public EventCallback<double> OnInput { get; set; }
+
+    // When the drag ends, or a click or a key sets a new value.
+    [Parameter]
+    public EventCallback<double> OnChange { get; set; }
+
+    private string ProgressStyle => $"{ProgressPercent(Value, Max).ToString("0.##", CultureInfo.InvariantCulture)}%";
+
+    // How far along the bar is filled. Nothing is filled without a length.
+    public static double ProgressPercent(double value, double max)
+    {
+        if (max <= 0) return 0;
+
+        return Math.Clamp(value / max * 100, 0, 100);
+    }
+
+    private Task InputHandler(double? value)
+    {
+        return OnInput.InvokeAsync(value ?? 0);
+    }
+
+    private Task ChangeHandler(ChangeEventArgs args)
+    {
+        double value = double.TryParse(args.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double parsed) ? parsed : 0;
+        return OnChange.InvokeAsync(value);
+    }
+
+}

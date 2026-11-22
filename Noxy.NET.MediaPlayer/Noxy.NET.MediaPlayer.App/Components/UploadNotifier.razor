@@ -14,7 +14,7 @@
 
     private void OnStarted(int count)
     {
-        ServiceToast.ShowInfo(count == 1 ? "Uploading 1 file…" : $"Uploading {count} files…");
+        ServiceToast.ShowInfo(count.ToCountText(AppTexts.UploadStartedOne, AppTexts.UploadStartedMany));
     }
 
     private void OnBatchCompleted(UploadBatchResult result)
@@ -31,18 +31,18 @@
 
         foreach (UploadFailure failure in result.FailureList)
         {
-            ServiceToast.ShowError($"{failure.Name}: {failure.Message}");
+            ServiceToast.ShowError(string.Format(AppTexts.UploadFailureLine, failure.Name, failure.Message));
         }
     }
 
     private async Task<string> SuccessMessageOf(UploadBatchResult result)
     {
-        string files = result.SucceededCount == 1 ? "1 file" : $"{result.SucceededCount} files";
-        if (result.PlaylistID is not { } playlistID) return $"{files} added to your library.";
+        int count = result.SucceededCount;
+        if (result.PlaylistID is not { } playlistID) return count.ToCountText(AppTexts.UploadAddedLibraryOne, AppTexts.UploadAddedLibraryMany);
 
         string? name = (await StoreMetadata.GetPlaylistList()).Find(x => x.ID == playlistID)?.Name;
 
-        return name is null ? $"{files} added." : $"{files} added to {name}.";
+        return name is null ? count.ToCountText(AppTexts.UploadAddedOne, AppTexts.UploadAddedMany) : count.ToCountText(AppTexts.UploadAddedPlaylistOne, AppTexts.UploadAddedPlaylistMany, name);
     }
 
     public void Dispose()

@@ -183,7 +183,7 @@
         {
             // The window may have been resized since, which is what closed it, so the next open reads the layout again.
             _drillIn = await _module.InvokeAsync<bool>(FunctionIsDrillIn);
-            if (trigger is ElementReference element)
+            if (trigger is { } element)
             {
                 await _module.InvokeVoidAsync(FunctionFocusTrigger, element);
             }
@@ -209,7 +209,7 @@
             await CloseAsync();
         }
 
-        if (item.Run is Func<Task> run)
+        if (item.Run is { } run)
         {
             await run();
         }
@@ -310,7 +310,7 @@
 
     private async Task ActivateFocusedAsync()
     {
-        if (Navigator.FocusIndex is not int index) return;
+        if (Navigator.FocusIndex is not { } index) return;
 
         if (ListAt(ActiveDepth)[index].Kind == ContextMenuItemKindEnum.Submenu)
         {
@@ -318,7 +318,7 @@
             return;
         }
 
-        if (Navigator.Choose() is ContextMenuItem item)
+        if (Navigator.Choose() is { } item)
         {
             await ChooseAsync(item);
         }

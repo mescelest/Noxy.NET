@@ -128,16 +128,16 @@ public class UploadServiceTest
         UploadBatchResult result = Assert.Single(_completedList);
         Assert.Equal(0, result.SucceededCount);
         Assert.Equal(["a.mp3", "b.mp3"], result.FailureList.Select(x => x.Name));
-        Assert.All(result.FailureList, x => Assert.Equal(Texts.ActionMessageOffline, x.Message));
+        Assert.All(result.FailureList, x => Assert.Equal(PresentationTexts.ActionMessageOffline, x.Message));
     }
 
     // The texts come from the resource file, which an attribute cannot hold.
     public static TheoryData<UploadFailureReasonEnum?, string> ReasonCaseList => new()
     {
-        { UploadFailureReasonEnum.LibraryFull, Texts.UploadMessageLibraryFull },
-        { UploadFailureReasonEnum.FileMissing, Texts.UploadMessageFileMissing },
-        { UploadFailureReasonEnum.Unknown, Texts.UploadMessageUnknown },
-        { null, Texts.UploadMessageUnknown }
+        { UploadFailureReasonEnum.LibraryFull, PresentationTexts.UploadMessageLibraryFull },
+        { UploadFailureReasonEnum.FileMissing, PresentationTexts.UploadMessageFileMissing },
+        { UploadFailureReasonEnum.Unknown, PresentationTexts.UploadMessageUnknown },
+        { null, PresentationTexts.UploadMessageUnknown }
     };
 
     [Theory]
@@ -240,7 +240,7 @@ public class UploadServiceTest
         UploadBatchResult result = Assert.Single(_completedList);
         Assert.Equal(0, result.SucceededCount);
         UploadFailure failure = Assert.Single(result.FailureList);
-        Assert.Equal(("A song", Texts.UploadMessageNotAddedToPlaylist), (failure.Name, failure.Message));
+        Assert.Equal(("A song", PresentationTexts.UploadMessageNotAddedToPlaylist), (failure.Name, failure.Message));
     }
 
     [Fact]

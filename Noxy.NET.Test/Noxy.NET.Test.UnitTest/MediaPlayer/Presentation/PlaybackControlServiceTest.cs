@@ -265,7 +265,7 @@ public class PlaybackControlServiceTest
         for (int step = 1; step <= 10; step++) dragList.Add(_control.Seek(TimeSpan.FromSeconds(step)));
 
         Assert.Empty(CommandList());
-        Assert.All(_delay.DelayList, x => Assert.Equal(TimeSpan.FromMilliseconds(Constants.RemoteDeferMilliseconds), x));
+        Assert.All(_delay.DelayList, x => Assert.Equal(TimeSpan.FromMilliseconds(PresentationConstants.RemoteDeferMilliseconds), x));
 
         await WaitForTheLastWait(dragList);
         _delay.ReleaseAll();

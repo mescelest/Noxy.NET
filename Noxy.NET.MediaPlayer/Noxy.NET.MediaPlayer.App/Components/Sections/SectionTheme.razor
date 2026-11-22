@@ -1,10 +1,19 @@
 @inherits BaseComponentElement
 
-<section @attributes="AdditionalAttributes" class="@CssClass">
-    <h2>Theme</h2>
+<Section @attributes="AdditionalAttributes" class="@CssClass" Title="Theme">
     <ThemeToggle TType="ThemeEnum" Label="Theme">
         <Template Context="theme">
-            <button type="button" class="choice" data-on="@(theme.Service.GetTheme() == theme.Value)" @onclick="() => theme.Service.SetTheme(theme.Value)">@theme.Value</button>
+            <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusOf(theme.Service.GetTheme() == theme.Value)" @onclick="() => theme.Service.SetTheme(theme.Value)">@theme.Value</Button>
         </Template>
     </ThemeToggle>
-</section>
+</Section>
+
+@code {
+
+    // The theme in force is the highlighted one.
+    private static StatusEnum StatusOf(bool isOn)
+    {
+        return isOn ? StatusEnum.Highlight : StatusEnum.None;
+    }
+
+}

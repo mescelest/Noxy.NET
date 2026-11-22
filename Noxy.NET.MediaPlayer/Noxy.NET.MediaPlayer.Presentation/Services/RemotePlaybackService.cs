@@ -195,7 +195,7 @@ public class RemotePlaybackService : IRemotePlaybackService
             // A report that is behind what was shown by a moment is a delay; one that is further behind (or of another item) is a seek.
             bool sameItem = _remote?.State.CurrentItemID == state.CurrentItemID;
             double behind = _floorSeconds - state.PositionSeconds;
-            if (!(sameItem && behind is > 0 and <= Constants.RemotePositionToleranceSeconds)) _floorSeconds = state.PositionSeconds;
+            if (!(sameItem && behind is > 0 and <= PresentationConstants.RemotePositionToleranceSeconds)) _floorSeconds = state.PositionSeconds;
 
             _remote = new(state, Now());
             _activeDeviceID = state.ActiveDeviceID;

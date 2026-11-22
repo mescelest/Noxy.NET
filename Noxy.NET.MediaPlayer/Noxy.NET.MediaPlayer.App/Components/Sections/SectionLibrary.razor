@@ -5,19 +5,20 @@
 @inherits BaseComponentElement
 @implements IDisposable
 
-<section @attributes="AdditionalAttributes" class="@CssClass">
-    <h2>Library</h2>
-    <p class="muted">@_onDeviceCount of @_mediaCount media files are on this device (@Format(_usedBytes)).</p>
-    <button type="button" class="choice" disabled="@IsOffline" title="@OfflineReason" @onclick="RefreshLibrary">Refresh library</button>
-</section>
+<Section @attributes="AdditionalAttributes" class="@CssClass" Title="Library">
+    <MessageBox MessageList="OnDeviceMessageList" Status="StatusEnum.None"/>
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.None" disabled="@IsOffline" title="@OfflineReason" @onclick="RefreshLibrary">Refresh library</Button>
+</Section>
 
 @code {
 
     private int _mediaCount;
+    private List<string> OnDeviceMessageList => [$"{_onDeviceCount} of {_mediaCount} media files are on this device ({Format(_usedBytes)})."];
+
     private int _onDeviceCount;
     private long _usedBytes;
 
-    private string? OfflineReason => ServiceSync.IsOffline ? Texts.ActionMessageOffline : null;
+    private string? OfflineReason => ServiceSync.IsOffline ? PresentationTexts.ActionMessageOffline : null;
     private bool IsOffline => OfflineReason is not null;
 
     protected override async Task OnInitializedAsync()

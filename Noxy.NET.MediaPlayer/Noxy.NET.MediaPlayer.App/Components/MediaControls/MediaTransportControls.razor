@@ -1,0 +1,89 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Button Type="@HTMLButtonTypeEnum.Button" class="mode" IsIcon="true" Status="StatusEnum.None" title="@ShuffleText" aria-label="@ShuffleText" data-on="@IsShuffleOn" @onclick="ClickShuffleHandler">
+        <MaterialIcon Icon="@IconShuffle" Size="var(--size-icon-md)"/>
+        @if (HasShuffleBadge)
+        {
+            <MaterialIcon class="badge" Icon="@IconShuffleSpreadArtists" Size="var(--size-icon-xxs)"/>
+        }
+    </Button>
+
+    <Button Type="@HTMLButtonTypeEnum.Button" class="icon" IsIcon="true" aria-label="Previous" @onclick="OnPrevious">
+        <MaterialIcon Icon="skip_previous" Size="var(--size-icon-md)"/>
+    </Button>
+
+    <Button Type="@HTMLButtonTypeEnum.Button" class="icon primary" IsIcon="true" aria-label="@PlayingAriaLabel" @onclick="OnPlayPause">
+        <MaterialIcon Icon="@PlayingIcon" Size="var(--size-icon-md)"/>
+    </Button>
+
+    <Button Type="@HTMLButtonTypeEnum.Button" class="icon" IsIcon="true" aria-label="Next" @onclick="OnNext">
+        <MaterialIcon Icon="skip_next" Size="var(--size-icon-md)"/>
+    </Button>
+
+    <Button Type="@HTMLButtonTypeEnum.Button" class="mode" IsIcon="true" Status="StatusEnum.None" title="@RepeatText" aria-label="@RepeatText" data-on="@IsRepeatOn" @onclick="ClickRepeatHandler">
+        <MaterialIcon Icon="@RepeatIcon" Size="var(--size-icon-md)"/>
+    </Button>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required PlaybackDisplay Display { get; set; }
+
+    [Parameter]
+    public EventCallback OnPrevious { get; set; }
+
+    [Parameter]
+    public EventCallback OnPlayPause { get; set; }
+
+    [Parameter]
+    public EventCallback OnNext { get; set; }
+
+    // The mode the click switches to.
+    [Parameter]
+    public EventCallback<ShuffleModeEnum> OnShuffle { get; set; }
+
+    [Parameter]
+    public EventCallback<RepeatModeEnum> OnRepeat { get; set; }
+
+    private const string IconPause = "pause";
+    private const string IconPlay = "play_arrow";
+
+    private string PlayingIcon => Display.IsPlaying ? IconPause : IconPlay;
+    private string PlayingAriaLabel => Display.IsPlaying ? "Pause" : "Play";
+
+    private const string IconShuffle = "shuffle";
+    private const string IconShuffleSpreadArtists = "diversity_3";
+    private const string IconRepeat = "repeat";
+    private const string IconRepeatOnce = "repeat_one";
+
+    // The mode is told by the icon and, as in other players, by colour: off has none, the others have the highlight.
+    private bool IsShuffleOn => Display.Shuffle != ShuffleModeEnum.Off;
+    private bool IsRepeatOn => Display.Repeat != RepeatModeEnum.No;
+
+    // The tooltip says what the mode means, and is the button's name for a screen reader.
+    private string ShuffleText => Display.Shuffle.GetText();
+    private string RepeatText => Display.Repeat.GetText();
+
+    // The shuffle icon stays; spreading the artists out adds a small badge to it.
+    private bool HasShuffleBadge => Display.Shuffle == ShuffleModeEnum.SpreadArtists;
+
+    private string RepeatIcon
+    {
+        get
+        {
+            return Display.Repeat switch
+            {
+                    RepeatModeEnum.No or RepeatModeEnum.Forever => IconRepeat,
+                    RepeatModeEnum.Once => IconRepeatOnce,
+                    _ => throw new InvalidEnumArgumentException(nameof(Display.Repeat), (int)Display.Repeat, typeof(RepeatModeEnum))
+            };
+        }
+    }
+
+    private Task ClickShuffleHandler() => OnShuffle.InvokeAsync(Display.Shuffle.GetNext());
+
+    private Task ClickRepeatHandler() => OnRepeat.InvokeAsync(Display.Repeat.GetNext());
+
+}

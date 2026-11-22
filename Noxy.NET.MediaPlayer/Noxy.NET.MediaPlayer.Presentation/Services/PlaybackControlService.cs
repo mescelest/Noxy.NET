@@ -140,7 +140,7 @@ public class PlaybackControlService : IPlaybackControlService
 
         try
         {
-            await _delay.Wait(TimeSpan.FromMilliseconds(Constants.RemoteDeferMilliseconds), token);
+            await _delay.Wait(TimeSpan.FromMilliseconds(PresentationConstants.RemoteDeferMilliseconds), token);
         }
         catch (OperationCanceledException)
         {

@@ -9,6 +9,27 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Update="Resources\PresentationTexts.Designer.cs">
+            <DependentUpon>PresentationTexts.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Update="Resources\PresentationTexts.resx">
+            <Generator>MSBuild:Compile</Generator>
+            <StronglyTypedFileName>Resources\PresentationTexts.Designer.cs</StronglyTypedFileName>
+            <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+            <StronglyTypedNamespace>Noxy.NET.MediaPlayer.Presentation.Resources</StronglyTypedNamespace>
+            <StronglyTypedClassName>PresentationTexts</StronglyTypedClassName>
+            <PublicClass>true</PublicClass>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Noxy.NET.MediaPlayer.Presentation.Resources"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Fluxor" Version="6.11.0"/>
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.15"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15"/>

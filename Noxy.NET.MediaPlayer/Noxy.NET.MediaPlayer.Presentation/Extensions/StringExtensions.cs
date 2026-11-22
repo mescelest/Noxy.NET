@@ -76,7 +76,7 @@ public static class StringExtensions
         {
             if (!Uri.TryCreate(address.Trim(), UriKind.Absolute, out Uri? uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) || uri.Query.Length > 0 || uri.Fragment.Length > 0 || uri.UserInfo.Length > 0)
             {
-                throw new ArgumentException("The server address must be an http or https address.", nameof(address));
+                throw new ArgumentException(PresentationTexts.ServerAddressInvalid, nameof(address));
             }
 
             return uri.GetLeftPart(UriPartial.Path).TrimEnd('/');

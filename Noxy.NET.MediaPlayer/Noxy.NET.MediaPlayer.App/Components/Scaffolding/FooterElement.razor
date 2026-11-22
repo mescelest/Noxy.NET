@@ -1,6 +1,7 @@
 @inject IState<FeaturePlayerState> StatePlayer
 @inject IState<FeatureLibraryState> StateLibrary
 @inject IState<FeatureSessionState> StateSession
+@inject IPlayerService ServicePlayer
 @inject IPlaybackControlService ServiceControl
 @inject IRemotePlaybackService ServiceRemote
 @inject IToastService ServiceToast
@@ -8,65 +9,14 @@
 @implements IAsyncDisposable
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <input class="seek" type="range" min="0" max="@DurationSeconds" step="1" value="@TimeCurrentSeconds" aria-label="Position" @oninput="InputSeekHandler" @onchange="ChangeSeekHandler"/>
+    <SeekBar Value="Display.Position.TotalSeconds" Max="DurationSeconds" Label="Position" OnInput="InputSeekHandler" OnChange="ChangeSeekHandler"/>
 
     <div class="content">
-        <div class="section left">
-            <div class="album">
-                <MaterialIcon Icon="album" Size="var(--size-icon-xl)"/>
-            </div>
-            <span class="name">@Title</span>
-            <span class="artist">@Artist</span>
+        <MediaTrackInfo Display="Display"/>
 
-            <span class="status">@Status</span>
-        </div>
+        <MediaTransportControls Display="Display" OnPrevious="ClickPreviousHandler" OnPlayPause="ClickPlayingHandler" OnNext="ClickNextHandler" OnShuffle="ChangeShuffle" OnRepeat="ChangeRepeat"/>
 
-        <div class="section center">
-            <Button Type="@HTMLButtonTypeEnum.Button" class="mode" IsIcon="true" aria-label="@ShuffleAriaLabel" data-on="@ShuffleOn" @onclick="CycleShuffle">
-                <MaterialIcon Icon="shuffle" Size="var(--size-icon-md)"/> @Shuffle
-            </Button>
-
-            <Button Type="@HTMLButtonTypeEnum.Button" class="icon" IsIcon="true" aria-label="Previous" @onclick="ClickPreviousHandler">
-                <MaterialIcon Icon="skip_previous" Size="var(--size-icon-md)"/>
-            </Button>
-
-            <Button Type="@HTMLButtonTypeEnum.Button" class="icon primary" IsIcon="true" aria-label="@PlayingAriaLabel" @onclick="ClickPlayingHandler">
-                @if (IsPlaying)
-                {
-                    <MaterialIcon Icon="pause" Size="var(--size-icon-md)"/>
-                }
-                else
-                {
-                    <MaterialIcon Icon="play_arrow" Size="var(--size-icon-md)"/>
-                }
-            </Button>
-
-            <Button Type="@HTMLButtonTypeEnum.Button" class="icon" IsIcon="true" aria-label="Next" @onclick="ClickNextHandler">
-                <MaterialIcon Icon="skip_next" Size="var(--size-icon-md)"/>
-            </Button>
-
-            <Button Type="@HTMLButtonTypeEnum.Button" class="mode" IsIcon="true" aria-label="@RepeatAriaLabel" data-on="@RepeatOn" @onclick="CycleRepeat">
-                <MaterialIcon Icon="repeat" Size="var(--size-icon-md)"/>
-                Repeat: @Repeat
-            </Button>
-        </div>
-
-        <div class="section right">
-            <div class="duration">
-                <span class="time">@Format(TimeCurrent) / @Format(Duration)</span>
-            </div>
-
-            <div class="volume">
-                <MaterialIcon Icon="volume_up" Size="var(--size-icon-md)"/>
-                <input type="range" min="0" max="100" step="1" value="@VolumeCurrent" aria-label="Volume" @oninput="InputVolumeHandler" @onchange="ChangeVolumeHandler"/>
-            </div>
-
-            <Button Type="@HTMLButtonTypeEnum.Button" class="queue" IsIcon="true" popovertarget="@QueuePanel.PopoverID" aria-label="Queue">
-                <MaterialIcon Icon="queue_music" Size="var(--size-icon-md)"/>
-            </Button>
-
-            <DevicePicker/>
-        </div>
+        <MediaOutputControls Display="Display" OnVolumeChanged="ChangeVolume"/>
     </div>
 
     <QueuePanel/>
@@ -74,58 +24,30 @@
 
 @code {
 
-    private TimeSpan? _dragPosition;
-    private int? _dragVolume;
-    private CancellationTokenSource? _tickSource;
+    private const int TickMilliseconds = 250;
 
-    private PlayerSnapshot Snapshot => StatePlayer.Value.Snapshot;
+    private TimeSpan? _dragPosition;
+    private PlaybackDisplay? _display;
+    private CancellationTokenSource? _tickSource;
+    private Dictionary<Guid, ResponseMediaFile>? _mediaMap;
+    private List<ResponseMediaFile>? _mediaMapSource;
+
+    // What the bar shows, worked out once per render: the same figures reach the seek bar and the three sections.
+    private PlaybackDisplay Display => _display ??= PlaybackDisplay.Of(StatePlayer.Value.Snapshot, RemoteState, PositionCurrent, MediaOf, ActiveDeviceName, StateSession.Value.IsOffline);
+
+    private double DurationSeconds => Math.Max(1, Display.Duration.TotalSeconds);
 
     // A controller shows what the active device reports; any other device shows its own player.
     private ResponsePlayerState? RemoteState => ServiceRemote.Role == PlaybackRoleEnum.Controller ? ServiceRemote.Remote?.State : null;
 
-    private bool IsController => RemoteState is not null;
-    private bool IsPlaying => RemoteState is { } remote ? remote.IsPlaying : Snapshot.IsPlaying;
+    // A controller works the position out from the active device's last report; this device reads its own player as it is now, not as it was at the last once-a-second report. A thumb being dragged shows where it is.
+    private TimeSpan PositionCurrent => _dragPosition ?? (RemoteState is not null ? ServiceRemote.GetPosition() : ServicePlayer.Position);
 
-    private TimeSpan PositionCurrent => IsController ? ServiceRemote.GetPosition() : Snapshot.Position;
-    private TimeSpan Duration => RemoteState is { } remote ? MediaOf(remote.CurrentItemID)?.Duration ?? TimeSpan.Zero : Snapshot.Duration;
-    private double DurationSeconds => Math.Max(1, Duration.TotalSeconds);
-    private TimeSpan TimeCurrent => _dragPosition ?? PositionCurrent;
-    private int TimeCurrentSeconds => (int)TimeCurrent.TotalSeconds;
+    private string? ActiveDeviceName => ServiceRemote.DeviceList.FirstOrDefault(x => x.DeviceID == ServiceRemote.ActiveDeviceID)?.Name;
 
-    private int VolumePercent => RemoteState is { } remote ? remote.Volume : (int)Math.Round(Snapshot.Volume * 100);
-    private int VolumeCurrent => _dragVolume ?? VolumePercent;
-
-    private string PlayingAriaLabel => IsPlaying ? "Pause" : "Play";
-
-    private ShuffleModeEnum Shuffle => RemoteState is { } remote ? remote.Shuffle : Snapshot.Shuffle;
-    private string ShuffleAriaLabel => $"Shuffle: {Shuffle}";
-    private bool ShuffleOn => Shuffle != ShuffleModeEnum.Off;
-
-    private RepeatModeEnum Repeat => RemoteState is { } remote ? remote.Repeat : Snapshot.Repeat;
-    private string RepeatAriaLabel => $"Repeat: {Repeat}";
-    private bool RepeatOn => Repeat != RepeatModeEnum.No;
-
-    private string Title => RemoteState is { } remote ? remote.Title ?? string.Empty : MediaOf(Snapshot.Current?.MediaFileID)?.Title ?? string.Empty;
-    private string Artist => RemoteState is { } remote ? remote.Artist ?? string.Empty : MediaOf(Snapshot.Current?.MediaFileID)?.Artist ?? string.Empty;
-
-    private string Status
+    private ResponseMediaFile? MediaOf(Guid id)
     {
-        get
-        {
-            if (IsController) return $"Playing on {ActiveDeviceName}";
-            if (Snapshot.IsWaiting) return "Waiting for a download";
-            return StateSession.Value.IsOffline ? "Offline" : string.Empty;
-        }
-    }
-
-    private string ActiveDeviceName => ServiceRemote.DeviceList.FirstOrDefault(x => x.DeviceID == ServiceRemote.ActiveDeviceID)?.Name ?? "another device";
-
-    private Dictionary<Guid, ResponseMediaFile>? _mediaMap;
-    private List<ResponseMediaFile>? _mediaMapSource;
-
-    private ResponseMediaFile? MediaOf(Guid? id)
-    {
-        return id is not null ? GetMediaMap().GetValueOrDefault(id.Value) : null;
+        return GetMediaMap().GetValueOrDefault(id);
     }
 
     private Dictionary<Guid, ResponseMediaFile> GetMediaMap()
@@ -144,15 +66,23 @@
         _ = Tick(_tickSource.Token);
     }
 
-    // A controller's position moves between the active device's reports: redraw twice a second while it plays.
+    // Every render starts from figures read now, whatever read them before.
+    protected override bool ShouldRender()
+    {
+        _display = null;
+
+        return base.ShouldRender();
+    }
+
+    // The position moves between the reports of the player or of the active device: redraw a few times a second while it plays, so the time and the bar follow it.
     private async Task Tick(CancellationToken token)
     {
-        using PeriodicTimer timer = new(TimeSpan.FromMilliseconds(500));
+        using PeriodicTimer timer = new(TimeSpan.FromMilliseconds(TickMilliseconds));
         try
         {
             while (await timer.WaitForNextTickAsync(token))
             {
-                if (IsController && IsPlaying && _dragPosition is null) await InvokeAsync(StateHasChanged);
+                if (Display.IsPlaying && _dragPosition is null) await InvokeAsync(StateHasChanged);
             }
         }
         catch (OperationCanceledException)
@@ -178,34 +108,38 @@
         }
     }
 
-
-    private Task ChangeVolumeHandler()
+    private void InputSeekHandler(double seconds)
     {
-        int? volume = _dragVolume;
-        _dragVolume = null;
-
-        return volume is null ? Task.CompletedTask : Run(() => ServiceControl.SetVolume(volume.Value));
+        _dragPosition = TimeSpan.FromSeconds(seconds);
     }
 
-    private Task CycleShuffle() => Run(() => ServiceControl.SetShuffle(Shuffle switch
+    private Task ChangeSeekHandler(double seconds)
     {
-        ShuffleModeEnum.Off => ShuffleModeEnum.Random,
-        ShuffleModeEnum.Random => ShuffleModeEnum.SpreadArtists,
-        ShuffleModeEnum.SpreadArtists => ShuffleModeEnum.Off,
-        _ => throw new InvalidEnumArgumentException(nameof(Shuffle), (int)Shuffle, typeof(ShuffleModeEnum))
-    }));
+        _dragPosition = null;
 
-    private Task CycleRepeat() => Run(() => ServiceControl.SetRepeat(Repeat switch
+        return Run(() => ServiceControl.Seek(TimeSpan.FromSeconds(seconds)));
+    }
+
+    private Task ChangeShuffle(ShuffleModeEnum mode) => Run(() => ServiceControl.SetShuffle(mode));
+
+    private Task ChangeRepeat(RepeatModeEnum mode) => Run(() => ServiceControl.SetRepeat(mode));
+
+    private Task ChangeVolume(int volume) => Run(() => ServiceControl.SetVolume(volume));
+
+    private Task ClickPlayingHandler()
     {
-        RepeatModeEnum.No => RepeatModeEnum.Once,
-        RepeatModeEnum.Once => RepeatModeEnum.Forever,
-        RepeatModeEnum.Forever => RepeatModeEnum.No,
-        _ => throw new InvalidEnumArgumentException(nameof(Repeat), (int)Repeat, typeof(RepeatModeEnum))
-    }));
+        return Run(Display.IsPlaying ? ServiceControl.Pause : ServiceControl.Play);
+    }
 
-    private static double ParseDouble(object? value) => double.TryParse(value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double result) ? result : 0;
+    private Task ClickNextHandler()
+    {
+        return Run(ServiceControl.Next);
+    }
 
-    private static string Format(TimeSpan time) => $"{(int)time.TotalMinutes}:{time.Seconds:00}";
+    private Task ClickPreviousHandler()
+    {
+        return Run(ServiceControl.Previous);
+    }
 
     public new async ValueTask DisposeAsync()
     {
@@ -217,39 +151,6 @@
         }
 
         await base.DisposeAsync();
-    }
-
-    private void InputSeekHandler(ChangeEventArgs args)
-    {
-        _dragPosition = TimeSpan.FromSeconds(ParseDouble(args.Value));
-    }
-
-    private Task ChangeSeekHandler()
-    {
-        TimeSpan? position = _dragPosition;
-        _dragPosition = null;
-
-        return position is null ? Task.CompletedTask : Run(() => ServiceControl.Seek(position.Value));
-    }
-
-    private void InputVolumeHandler(ChangeEventArgs args)
-    {
-        _dragVolume = (int)ParseDouble(args.Value);
-    }
-
-    private Task ClickPlayingHandler()
-    {
-        return Run(IsPlaying ? ServiceControl.Pause : ServiceControl.Play);
-    }
-
-    private Task ClickNextHandler()
-    {
-        return Run(ServiceControl.Next);
-    }
-
-    private Task ClickPreviousHandler()
-    {
-        return Run(ServiceControl.Previous);
     }
 
 }

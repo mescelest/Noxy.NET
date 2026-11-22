@@ -111,7 +111,7 @@ h6 {
 
 .material-symbols-outlined {
     display: inline-block;
-    font-family: "Material Symbols Outlined";
+    font-family: var(--font-family-icon);
     font-style: normal;
     font-weight: normal;
     line-height: 1;

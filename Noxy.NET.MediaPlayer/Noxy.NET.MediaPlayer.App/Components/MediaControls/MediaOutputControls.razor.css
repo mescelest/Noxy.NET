@@ -1,0 +1,16 @@
+.MediaOutputControls {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    align-items: center;
+    justify-content: flex-end;
+    column-gap: var(--size-gap-md);
+}
+
+.volume {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row;
+    align-items: center;
+    column-gap: var(--size-gap-xxxs);
+}

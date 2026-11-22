@@ -13,64 +13,6 @@
     padding: var(--size-gap-xs);
 }
 
-.seek {
-    display: flex;
-    flex: 0 0 auto;
-    height: 8px;
-}
-
-.left {
-    display: grid;
-    grid-template: 
-            "album track status" max-content
-            "album artist status" max-content
-            / max-content max-content max-content;
-    align-items: center;
-    column-gap: var(--size-gap-xs);
-}
-
-.album {
-    grid-area: album;
-    display: flex;
-}
-
-.track {
-    grid-area: track;
-}
-
-.artist {
-    grid-area: artist;
-}
-
-.status {
-    grid-area: status;
-}
-
-.center {
-    display: flex;
-    flex-flow: row;
-    align-items: center;
-    column-gap: var(--size-gap-sm);
-}
-
-.right {
-    display: flex;
-    flex: 0 0 auto;
-    flex-flow: row;
-    align-items: center;
-    justify-content: flex-end;
-    column-gap: var(--size-gap-md);
-}
-
-.volume {
-    display: flex;
-    flex: 0 0 auto;
-    flex-flow: row;
-    align-items: center;
-    column-gap: var(--size-gap-xxxs);
-}
-
-
 /*.PlayerBar[data-disabled="true"] {*/
 /*    justify-content: space-between;*/
 /*    color: var(--color-muted);*/

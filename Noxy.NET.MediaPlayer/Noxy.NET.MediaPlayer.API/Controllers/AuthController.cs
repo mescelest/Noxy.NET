@@ -8,7 +8,7 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
 namespace Noxy.NET.MediaPlayer.API.Controllers;
 
 [AllowAnonymous]
-[EnableRateLimiting(Constants.RateLimitPolicyAuth)]
+[EnableRateLimiting(ApiConstants.RateLimitPolicyAuth)]
 [Route("[controller]")]
 [ApiController]
 public class AuthController(IMediator mediator) : ControllerBase

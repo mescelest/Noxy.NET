@@ -31,6 +31,19 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- The designer is a source file the IDE regenerates when the resx is saved. The build does not generate it for this project. -->
+        <Compile Update="Resources\AppTexts.Designer.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>AppTexts.resx</DependentUpon>
+        </Compile>
+        <EmbeddedResource Update="Resources\AppTexts.resx">
+            <Generator>PublicResXFileCodeGenerator</Generator>
+            <LastGenOutput>AppTexts.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
         <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4"/>
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128"/>
         <MauiImage Include="Resources\Images\*"/>

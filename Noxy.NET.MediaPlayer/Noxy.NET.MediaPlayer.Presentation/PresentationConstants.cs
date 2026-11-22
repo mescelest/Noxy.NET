@@ -1,12 +1,13 @@
 namespace Noxy.NET.MediaPlayer.Presentation;
 
-public static class Constants
+public static class PresentationConstants
 {
     // The key the refresh token is kept under in the platform's secure storage.
     public const string RefreshTokenKey = "refreshToken";
 
     // The key the server address is kept under in the platform's preferences.
     public const string ServerAddressKey = "serverAddress";
+    public const string ServerAddressListKey = "serverAddressList";
 
     // An access token that expires within this many seconds is refreshed before it is used.
     public const int RefreshMarginSeconds = 60;
@@ -31,26 +32,6 @@ public static class Constants
     // How many playlist cards the Home page shows.
     public const int HomeRecentCount = 6;
 
-    // What the sign-in form says when the server gave no message of its own.
-    public const string SignInMessageOffline = "The server cannot be reached. Check the server address and your connection.";
-
-    public const string SignInMessageNoAddress = "Enter the server address first.";
-
-    public const string SignInMessageFailed = "Signing in failed. Try again.";
-
-    // What the library actions say when the server gave no message of its own.
-    public const string ActionMessageOffline = "This needs the server, and it cannot be reached right now.";
-
-    public const string ActionMessageRemoveFailed = "Some files could not be removed from this device.";
-
-    public const string ActionMessageDeleteFailed = "Some media files could not be deleted.";
-
-    public const string ActionMessageAddFailed = "The media files could not be added to the playlist.";
-
-    public const string ActionMessageSaveFailed = "The file could not be saved.";
-
-    public const string ActionMessageFailed = "Something went wrong. Try again.";
-
     // The wait before the second try; it doubles for each try after that.
     public const int RetryBaseDelaySeconds = 2;
 
@@ -71,9 +52,6 @@ public static class Constants
 
     // A controller shows the active device's position as the last report plus the time since; a new report that is behind that by no more than this is a delay, not a seek back, and the shown position stays.
     public const double RemotePositionToleranceSeconds = 2;
-
-    // The name of a device whose machine has none.
-    public const string DefaultDeviceName = "This device";
 
     // The longest a device name may be.
     public const int DeviceNameMaxLength = 50;

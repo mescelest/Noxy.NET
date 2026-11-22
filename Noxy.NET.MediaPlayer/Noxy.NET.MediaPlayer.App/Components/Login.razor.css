@@ -44,11 +44,11 @@
 
 .container ::deep > .login-tab-list > .tab-list > .tab {
     flex: 1 1 auto;
-    border-bottom: 1px solid var(--color-muted);
+    border-bottom: var(--size-border-width-sm) solid var(--color-muted);
 }
 
 .container ::deep > .login-tab-list > .tab-list > .tab[data-selected] {
-    border-bottom: 1px solid var(--color-complementary);
+    border-bottom: var(--size-border-width-sm) solid var(--color-complementary);
 }
 
 .container ::deep > .login-tab-list > .tab-list > .tab[data-selected] > button {

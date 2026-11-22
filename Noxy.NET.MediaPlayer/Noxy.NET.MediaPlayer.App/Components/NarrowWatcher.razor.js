@@ -10,7 +10,10 @@ export function WatchNarrow(dotNetReference, methodName) {
         if (now === narrow) return;
 
         narrow = now;
-        dotNetReference.invokeMethodAsync(methodName, now);
+
+        // The reference may already be released when a last resize arrives: that is not an error.
+        dotNetReference.invokeMethodAsync(methodName, now).catch(() => {
+        });
     };
 
     window.addEventListener("resize", onResize);

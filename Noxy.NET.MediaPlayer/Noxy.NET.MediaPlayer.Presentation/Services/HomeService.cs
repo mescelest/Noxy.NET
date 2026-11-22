@@ -16,8 +16,8 @@ public class HomeService(IMetadataStore storeMetadata, IPlaybackControlService s
 
         // The played ones, newest first; when none was ever played, the first of the sidebar order.
         List<ResponsePlaylist> recentList = orderedList.Any(x => x.TimeLastPlayed is not null)
-            ? [.. orderedList.Where(x => x.TimeLastPlayed is not null).Take(Constants.HomeRecentCount)]
-            : [.. orderedList.Take(Constants.HomeRecentCount)];
+            ? [.. orderedList.Where(x => x.TimeLastPlayed is not null).Take(PresentationConstants.HomeRecentCount)]
+            : [.. orderedList.Take(PresentationConstants.HomeRecentCount)];
 
         return new(recentList, await GetContinue(), playlistList.Count > 0);
     }

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="SignInMessageOffline" xml:space="preserve">
+    <value>The server cannot be reached. Check the server address and your connection.</value>
+        <comment>The sign-in form, when the server gave no message of its own.</comment>
+  </data>
+    <data name="SignInMessageNoAddress" xml:space="preserve">
+    <value>Enter the server address first.</value>
+        <comment>The sign-in form, when the server gave no message of its own.</comment>
+  </data>
+    <data name="SignInMessageFailed" xml:space="preserve">
+    <value>Signing in failed. Try again.</value>
+        <comment>The sign-in form, when the server gave no message of its own.</comment>
+  </data>
+    <data name="ActionMessageOffline" xml:space="preserve">
+    <value>This needs the server, and it cannot be reached right now.</value>
+        <comment>The library actions, when the server gave no message of its own.</comment>
+  </data>
+    <data name="ActionMessageRemoveFailed" xml:space="preserve">
+    <value>Some files could not be removed from this device.</value>
+        <comment>The library actions, when the server gave no message of its own.</comment>
+  </data>
+    <data name="ActionMessageDeleteFailed" xml:space="preserve">
+    <value>Some media files could not be deleted.</value>
+        <comment>The library actions, when the server gave no message of its own.</comment>
+  </data>
+    <data name="ActionMessageAddFailed" xml:space="preserve">
+    <value>The media files could not be added to the playlist.</value>
+        <comment>The library actions, when the server gave no message of its own.</comment>
+  </data>
+    <data name="ActionMessageSaveFailed" xml:space="preserve">
+    <value>The file could not be saved.</value>
+        <comment>The library actions, when the server gave no message of its own.</comment>
+  </data>
+    <data name="ActionMessageFailed" xml:space="preserve">
+    <value>Something went wrong. Try again.</value>
+        <comment>The library actions, when the server gave no message of its own.</comment>
+  </data>
+    <data name="ActionMessageUploadFailed" xml:space="preserve">
+    <value>The file could not be uploaded.</value>
+        <comment>An upload, when the server gave no message of its own.</comment>
+  </data>
+    <data name="UploadMessageLibraryFull" xml:space="preserve">
+    <value>Your library is full.</value>
+        <comment>Why the server refused a file it had accepted.</comment>
+  </data>
+    <data name="UploadMessageFileMissing" xml:space="preserve">
+    <value>The file was lost before it could be stored.</value>
+        <comment>Why the server refused a file it had accepted.</comment>
+  </data>
+    <data name="UploadMessageUnknown" xml:space="preserve">
+    <value>The server could not store the file.</value>
+        <comment>Why the server refused a file it had accepted.</comment>
+  </data>
+    <data name="UploadMessageNotAddedToPlaylist" xml:space="preserve">
+    <value>It is in your library, but it could not be added to the playlist.</value>
+        <comment>Why the server refused a file it had accepted.</comment>
+  </data>
+    <data name="DefaultDeviceName" xml:space="preserve">
+    <value>This device</value>
+        <comment>The name of a device whose machine has none.</comment>
+  </data>
+    <data name="PlayerStatusPlayingOn" xml:space="preserve">
+    <value>Playing on {0}</value>
+        <comment>The player bar when another device plays; {0} is its name.</comment>
+  </data>
+    <data name="PlayerStatusAnotherDevice" xml:space="preserve">
+    <value>another device</value>
+        <comment>The name used in "Playing on ..." when the active device is not in the list.</comment>
+  </data>
+    <data name="PlayerStatusWaiting" xml:space="preserve">
+    <value>Waiting for a download</value>
+        <comment>The player bar when the next file is not on this device yet.</comment>
+  </data>
+    <data name="PlayerStatusOffline" xml:space="preserve">
+    <value>Offline</value>
+        <comment>The player bar when the server cannot be reached.</comment>
+  </data>
+    <data name="ShuffleOff" xml:space="preserve">
+    <value>Shuffle: off</value>
+        <comment>The tooltip of the shuffle button in this mode.</comment>
+  </data>
+    <data name="ShuffleRandom" xml:space="preserve">
+    <value>Shuffle: random</value>
+        <comment>The tooltip of the shuffle button in this mode.</comment>
+  </data>
+    <data name="ShuffleSpreadArtists" xml:space="preserve">
+    <value>Shuffle: random, spreading each artist out</value>
+        <comment>The tooltip of the shuffle button in this mode.</comment>
+  </data>
+    <data name="RepeatOff" xml:space="preserve">
+    <value>Repeat: off</value>
+        <comment>The tooltip of the repeat button in this mode.</comment>
+  </data>
+    <data name="RepeatOnce" xml:space="preserve">
+    <value>Repeat: the queue once</value>
+        <comment>The tooltip of the repeat button in this mode.</comment>
+  </data>
+    <data name="RepeatForever" xml:space="preserve">
+    <value>Repeat: the queue forever</value>
+        <comment>The tooltip of the repeat button in this mode.</comment>
+  </data>
+    <data name="DownloadHashMismatch" xml:space="preserve">
+    <value>The downloaded file did not match its hash.</value>
+        <comment>Why a download failed; shown on the media file.</comment>
+  </data>
+    <data name="DownloadInterrupted" xml:space="preserve">
+    <value>The download was interrupted.</value>
+        <comment>Why a download failed; shown on the media file.</comment>
+  </data>
+    <data name="DownloadNotOnServer" xml:space="preserve">
+    <value>The server no longer has this media file.</value>
+        <comment>Why a download failed; shown on the media file.</comment>
+  </data>
+    <data name="DownloadDiskFull" xml:space="preserve">
+    <value>The device has no room for this file.</value>
+        <comment>Why a download failed; shown on the media file.</comment>
+  </data>
+    <data name="DownloadFailed" xml:space="preserve">
+    <value>The download failed.</value>
+        <comment>Why a download failed when nothing more is known.</comment>
+  </data>
+    <data name="ServerAddressInvalid" xml:space="preserve">
+    <value>The server address must be an http or https address.</value>
+        <comment>A server address that is not an absolute http or https address; the form shows it too.</comment>
+  </data>
+</root>

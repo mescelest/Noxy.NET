@@ -35,7 +35,7 @@
     color: var(--color-success);
     font: var(--font-body);
     font-weight: 500;
-    line-height: 1rem;
+    line-height: var(--size-line-height-sm);
 }
 
 .connection-status[data-offline] {

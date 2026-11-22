@@ -36,8 +36,8 @@ public static partial class StyleFileFixture
         return Directory.EnumerateFiles(appFolder, fileName, SearchOption.AllDirectories).First(x => x.Contains($"{Path.DirectorySeparatorChar}wwwroot{Path.DirectorySeparatorChar}css{Path.DirectorySeparatorChar}"));
     }
 
-    // The UI libraries the app uses (the others, such as the wizard and the graphs, are not referenced and may read variables the app does not define).
-    private static readonly string[] UsedUiLibraryList = ["Shared", "Shared.Fluxor", "Elements", "Table", "Dialog", "WebForm", "Graphics"];
+    // The UI libraries the app references (the others are not referenced and may read variables the app does not define).
+    private static readonly string[] UsedUiLibraryList = ["Shared", "Shared.Fluxor"];
 
     public static List<string> UiStylePathList()
     {
@@ -84,10 +84,10 @@ public static partial class StyleFileFixture
         return violationList;
     }
 
-    // A font-family (or the font shorthand) must be a variable; inherit is allowed.
+    // A font-family (or the font shorthand) must be a variable; inherit is allowed. A @font-face block is where a family is named, so it is not a use of one.
     public static List<string> FontLiteralList(string css)
     {
-        return DeclarationList(css)
+        return DeclarationList(FontFaceRegex().Replace(css, string.Empty))
             .Where(x => x.Property is "font-family" or "font")
             .Where(x => !x.Value.Trim().StartsWith("var(", StringComparison.Ordinal) && !x.Value.Trim().Equals("inherit", StringComparison.OrdinalIgnoreCase))
             .Select(x => $"{x.Property}: {x.Value.Trim()}")
@@ -143,6 +143,9 @@ public static partial class StyleFileFixture
 
     [GeneratedRegex(@"/\*.*?\*/", RegexOptions.Singleline)]
     private static partial Regex CommentRegex();
+
+    [GeneratedRegex(@"@font-face\s*\{[^}]*\}")]
+    private static partial Regex FontFaceRegex();
 
     [GeneratedRegex(@"([a-zA-Z-]+)\s*:\s*([^;{}]+)")]
     private static partial Regex DeclarationRegex();

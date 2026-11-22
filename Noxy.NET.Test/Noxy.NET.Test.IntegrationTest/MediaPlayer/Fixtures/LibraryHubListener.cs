@@ -52,7 +52,7 @@ public sealed class LibraryHubListener : IAsyncDisposable
     public static async Task<LibraryHubListener> Connect(ApiFactory factory, string? token, bool tokenInQueryString = false)
     {
         HubConnection connection = new HubConnectionBuilder()
-            .WithUrl(new Uri(factory.Server.BaseAddress, HubConstants.MediaHubPath), options =>
+            .WithUrl(new Uri(factory.Server.BaseAddress, ApplicationConstants.MediaHubPath), options =>
             {
                 options.Transports = HttpTransportType.WebSockets;
                 options.AccessTokenProvider = () => Task.FromResult(token);
@@ -64,7 +64,7 @@ public sealed class LibraryHubListener : IAsyncDisposable
 
                     if (token is not null && tokenInQueryString)
                     {
-                        uri = new UriBuilder(uri) { Query = $"{uri.Query.TrimStart('?')}&{Constants.AccessTokenQueryKey}={Uri.EscapeDataString(token)}" }.Uri;
+                        uri = new UriBuilder(uri) { Query = $"{uri.Query.TrimStart('?')}&{ApiConstants.AccessTokenQueryKey}={Uri.EscapeDataString(token)}" }.Uri;
                     }
                     else if (token is not null)
                     {

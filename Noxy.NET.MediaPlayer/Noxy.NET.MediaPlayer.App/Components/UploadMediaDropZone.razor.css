@@ -13,3 +13,11 @@
     color: var(--color-highlight);
     font: var(--font-button);
 }
+
+/* The zone takes what is left of the page, and what is inside it fills the zone. */
+.UploadMediaDropZone {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}

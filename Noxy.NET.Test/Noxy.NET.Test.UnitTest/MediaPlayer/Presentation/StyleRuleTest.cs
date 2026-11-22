@@ -102,6 +102,7 @@ public class StyleRuleTest
     [InlineData(".a { font-family: var(--font-family-primary); }")]
     [InlineData(".a { font: var(--font-body); }")]
     [InlineData(".a { font-family: inherit; }")]
+    [InlineData("@font-face { font-family: \"Some Face\"; src: url(\"a.woff2\"); } .a { font-family: var(--font-family-primary); }")]
     public void TheFontScanner_AllowsAVariable(string css)
     {
         Assert.Empty(StyleFileFixture.FontLiteralList(css));

@@ -4,11 +4,10 @@
 @using System.Text.Json
 @implements IDisposable
 
-<section @attributes="AdditionalAttributes" class="@CssClass">
-    <h2>Synced settings</h2>
+<Section @attributes="AdditionalAttributes" class="@CssClass" Title="Synced settings">
     @if (IsOffline)
     {
-        <p class="muted">@OfflineReason They are read-only until the server can be reached.</p>
+        <MessageBox MessageList="OfflineMessageList" Status="StatusEnum.None"/>
     }
     @foreach (ResponseSetting setting in _settingList)
     {
@@ -27,7 +26,7 @@
                     <select disabled="@IsOffline" @onchange="args => Save(setting, args.Value?.ToString() ?? string.Empty)">
                         @foreach (string name in MemberNameList(setting.Key))
                         {
-                            <option value="@name" selected="@(name == AsText(setting))">@name</option>
+                            <option value="@name" selected="@IsSelected(setting, name)">@name</option>
                         }
                     </select>
                     break;
@@ -40,7 +39,7 @@
             }
         </div>
     }
-</section>
+</Section>
 
 @code {
 
@@ -50,8 +49,9 @@
     // Raised after a refused write so the inputs are drawn again with the value that is stored.
     private int _resetCount;
 
-    private string? OfflineReason => ServiceSync.IsOffline ? Texts.ActionMessageOffline : null;
+    private string? OfflineReason => ServiceSync.IsOffline ? PresentationTexts.ActionMessageOffline : null;
     private bool IsOffline => OfflineReason is not null;
+    private List<string> OfflineMessageList => [$"{OfflineReason} They are read-only until the server can be reached."];
 
     protected override async Task OnInitializedAsync()
     {
@@ -104,6 +104,8 @@
     }
 
     private static bool AsBool(ResponseSetting setting) => setting.Value is JsonElement element ? element.ValueKind == JsonValueKind.True : setting.Value is true;
+
+    private static bool IsSelected(ResponseSetting setting, string name) => name == AsText(setting);
 
     private static string AsText(ResponseSetting setting) => setting.Value is JsonElement element ? element.ToString() : setting.Value.ToString() ?? string.Empty;
 

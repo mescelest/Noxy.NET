@@ -1,6 +1,6 @@
 namespace Noxy.NET.MediaPlayer.App;
 
-public static class GoogleConstants
+public static class AppConstants
 {
     // The Windows (Desktop app) OAuth client in Google Cloud Console. A client ID is public.
     public const string WindowsClientId = "183545471248-p7bqsimcu1b8sgmgjt2hd1rncqrgec6g.apps.googleusercontent.com";

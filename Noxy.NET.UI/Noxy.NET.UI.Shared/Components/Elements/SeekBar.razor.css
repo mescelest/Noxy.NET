@@ -1,0 +1,64 @@
+/* The fill is a registered property so that it can move smoothly from one position to the next. */
+@property --seek-progress {
+    syntax: "<percentage>";
+    inherits: true;
+    initial-value: 0%;
+}
+
+.SeekBar {
+    --seek-progress: 0%;
+    --seek-track: var(--size-seek-rest, 0.1875rem);
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    height: var(--size-seek-hit, 0.75rem);
+    transition: --seek-progress var(--animation-length-seek, 250ms) linear;
+}
+
+/* While the thumb is held the fill follows it at once. */
+.SeekBar:active {
+    transition: none;
+}
+
+/* A thin line at rest; it grows and shows the thumb when the pointer is over it or it has focus. */
+.SeekBar:hover, .SeekBar:focus-within {
+    --seek-track: var(--size-seek-grown, 0.375rem);
+}
+
+.SeekBar ::deep > input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: var(--seek-track);
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: height var(--animation-length-short, 150ms) ease-in-out;
+}
+
+.SeekBar ::deep > input:focus-visible {
+    outline: none;
+}
+
+.SeekBar ::deep > input::-webkit-slider-runnable-track {
+    height: var(--seek-track);
+    border-radius: var(--size-border-radius-md, 0.25rem);
+    background: linear-gradient(to right, var(--color-highlight, #0073EC) var(--seek-progress), color-mix(in srgb, var(--color-complementary, #000000) 25%, transparent) var(--seek-progress));
+}
+
+.SeekBar ::deep > input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--size-seek-thumb, 0.875rem);
+    height: var(--size-seek-thumb, 0.875rem);
+    margin-top: calc((var(--seek-track) - var(--size-seek-thumb, 0.875rem)) / 2);
+    border: none;
+    border-radius: 50%;
+    background: var(--color-highlight, #0073EC);
+    transform: scale(0);
+    transition: transform var(--animation-length-short, 150ms) ease-in-out;
+}
+
+.SeekBar:hover ::deep > input::-webkit-slider-thumb, .SeekBar:focus-within ::deep > input::-webkit-slider-thumb {
+    transform: scale(1);
+}

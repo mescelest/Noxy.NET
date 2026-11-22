@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
 
             services.AddCors();
             services.AddOptions<CorsOptions>().Configure<IOptions<ConfigCors>>((cors, settings) =>
-                cors.AddPolicy(Constants.CorsPolicyName, policy => policy
+                cors.AddPolicy(ApiConstants.CorsPolicyName, policy => policy
                     .WithOrigins(settings.Value.OriginList)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
@@ -50,9 +50,9 @@ public static class ServiceCollectionExtensions
 
             services.AddRateLimiter(options =>
             {
-                AddSlidingWindowPolicy<ConfigRateLimitAuth>(options, Constants.RateLimitPolicyAuth);
-                AddSlidingWindowPolicy<ConfigRateLimitUpload>(options, Constants.RateLimitPolicyUpload);
-                AddSlidingWindowPolicy<ConfigRateLimitDownload>(options, Constants.RateLimitPolicyDownload);
+                AddSlidingWindowPolicy<ConfigRateLimitAuth>(options, ApiConstants.RateLimitPolicyAuth);
+                AddSlidingWindowPolicy<ConfigRateLimitUpload>(options, ApiConstants.RateLimitPolicyUpload);
+                AddSlidingWindowPolicy<ConfigRateLimitDownload>(options, ApiConstants.RateLimitPolicyDownload);
 
                 options.OnRejected = async (context, cancellationToken) =>
                 {
@@ -64,8 +64,8 @@ public static class ServiceCollectionExtensions
                     IServiceProvider services = context.HttpContext.RequestServices;
                     ConfigRateLimit settings = policy switch
                     {
-                        Constants.RateLimitPolicyUpload => services.GetRequiredService<IOptions<ConfigRateLimitUpload>>().Value,
-                        Constants.RateLimitPolicyDownload => services.GetRequiredService<IOptions<ConfigRateLimitDownload>>().Value,
+                        ApiConstants.RateLimitPolicyUpload => services.GetRequiredService<IOptions<ConfigRateLimitUpload>>().Value,
+                        ApiConstants.RateLimitPolicyDownload => services.GetRequiredService<IOptions<ConfigRateLimitDownload>>().Value,
                         _ => services.GetRequiredService<IOptions<ConfigRateLimitAuth>>().Value
                     };
                     response.Headers.RetryAfter = settings.WindowSeconds.ToString(CultureInfo.InvariantCulture);
@@ -117,8 +117,8 @@ public static class ServiceCollectionExtensions
                     {
                         OnMessageReceived = context =>
                         {
-                            string? token = context.Request.Query[Constants.AccessTokenQueryKey];
-                            if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments(Constants.HubsPath))
+                            string? token = context.Request.Query[ApiConstants.AccessTokenQueryKey];
+                            if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments(ApiConstants.HubsPath))
                             {
                                 context.Token = token;
                             }

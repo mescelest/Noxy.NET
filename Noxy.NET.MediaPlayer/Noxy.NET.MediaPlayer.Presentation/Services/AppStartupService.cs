@@ -156,7 +156,7 @@ public class AppStartupService(
         {
             while (true)
             {
-                await WaitBeforeRetry(TimeSpan.FromSeconds(Math.Min(Constants.StartupRetryBaseSeconds * Math.Pow(2, attempt), Constants.StartupRetryMaxSeconds)));
+                await WaitBeforeRetry(TimeSpan.FromSeconds(Math.Min(PresentationConstants.StartupRetryBaseSeconds * Math.Pow(2, attempt), PresentationConstants.StartupRetryMaxSeconds)));
 
                 RestoreResultEnum result = await TryRestoreForRetry();
                 switch (result)

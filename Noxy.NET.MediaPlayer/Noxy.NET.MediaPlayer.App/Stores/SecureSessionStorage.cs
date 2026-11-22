@@ -9,24 +9,24 @@ public class SecureSessionStorage : ISessionStorage
     {
         try
         {
-            return await SecureStorage.Default.GetAsync(Constants.RefreshTokenKey);
+            return await SecureStorage.Default.GetAsync(PresentationConstants.RefreshTokenKey);
         }
         catch (Exception)
         {
             // The secure store can be unreadable (for example after the OS key changed): the user signs in again.
-            SecureStorage.Default.Remove(Constants.RefreshTokenKey);
+            SecureStorage.Default.Remove(PresentationConstants.RefreshTokenKey);
             return null;
         }
     }
 
     public async Task SetRefreshToken(string token)
     {
-        await SecureStorage.Default.SetAsync(Constants.RefreshTokenKey, token);
+        await SecureStorage.Default.SetAsync(PresentationConstants.RefreshTokenKey, token);
     }
 
     public Task ClearRefreshToken()
     {
-        SecureStorage.Default.Remove(Constants.RefreshTokenKey);
+        SecureStorage.Default.Remove(PresentationConstants.RefreshTokenKey);
         return Task.CompletedTask;
     }
 }

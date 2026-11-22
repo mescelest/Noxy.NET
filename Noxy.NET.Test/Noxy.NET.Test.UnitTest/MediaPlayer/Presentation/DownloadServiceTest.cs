@@ -153,7 +153,7 @@ public class DownloadServiceTest
         bool result = await _serviceDownload.EnsureOnDevice(media.ID);
 
         Assert.False(result);
-        Assert.Equal(Constants.MaxDownloadAttempts, _clientApi.FileRequestList.Count);
+        Assert.Equal(PresentationConstants.MaxDownloadAttempts, _clientApi.FileRequestList.Count);
         Assert.Empty(await _storeFile.GetHeldIDList());
         Assert.Empty(await _storeFile.GetPartialIDList());
         FileState? state = await State(media.ID);
@@ -200,7 +200,7 @@ public class DownloadServiceTest
         bool result = await _serviceDownload.EnsureOnDevice(media.ID);
 
         Assert.False(result);
-        Assert.Equal(Constants.MaxDownloadAttempts, _clientApi.FileRequestList.Count);
+        Assert.Equal(PresentationConstants.MaxDownloadAttempts, _clientApi.FileRequestList.Count);
         Assert.Equal([TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4)], _delay.DelayList);
         Assert.Equal(FileSyncStateEnum.Failed, (await State(media.ID))?.State);
         Assert.Empty(await _storeFile.GetPartialIDList());
@@ -308,7 +308,7 @@ public class DownloadServiceTest
         List<Task<bool>> callList = [.. mediaList.Select(x => _serviceDownload.EnsureOnDevice(x.ID))];
         await Task.Delay(150, TestContext.Current.CancellationToken);
 
-        Assert.Equal(Constants.MaxParallelDownloads, _clientApi.FileRequestList.Count);
+        Assert.Equal(PresentationConstants.MaxParallelDownloads, _clientApi.FileRequestList.Count);
 
         gate.SetResult();
         bool[] resultList = await Task.WhenAll(callList);
@@ -387,7 +387,7 @@ public class DownloadServiceTest
             return await Whole(Bytes(500));
         };
         List<Task<bool>> callList = [.. mediaList.Select(x => _serviceDownload.EnsureOnDevice(x.ID))];
-        await WaitUntil(() => Task.FromResult(_clientApi.FileRequestList.Count == Constants.MaxParallelDownloads));
+        await WaitUntil(() => Task.FromResult(_clientApi.FileRequestList.Count == PresentationConstants.MaxParallelDownloads));
         ResponseMediaFile waiting = mediaList.Single(x => _clientApi.FileRequestList.All(r => r.ID != x.ID));
 
         await _serviceDownload.Cancel(waiting.ID);
@@ -562,17 +562,17 @@ public class DownloadServiceTest
     {
         (List<ResponseMediaFile> mediaList, TaskCompletionSource gate) = await AddMediaAndServe(6);
         await _serviceDownload.QueueMissing([.. mediaList.Select(x => x.ID)]);
-        await WaitUntil(() => Task.FromResult(_clientApi.FileRequestList.Count == Constants.MaxParallelDownloads));
+        await WaitUntil(() => Task.FromResult(_clientApi.FileRequestList.Count == PresentationConstants.MaxParallelDownloads));
 
-        _storeFile.FreeBytes = Constants.StorageReserveBytes;
+        _storeFile.FreeBytes = PresentationConstants.StorageReserveBytes;
         gate.SetResult();
         await WaitUntil(() => Task.FromResult(_serviceDownload.GetProgress().StoppedReason is not null));
 
         DownloadProgress progress = _serviceDownload.GetProgress();
         Assert.Equal(DownloadStopReasonEnum.StorageLow, progress.StoppedReason);
         Assert.Equal(6, progress.Total);
-        Assert.Equal(Constants.MaxParallelDownloads, _clientApi.FileRequestList.Count);
-        Assert.Equal(Constants.MaxParallelDownloads, (await _storeMetadata.GetFileStateList()).Count(x => x.State == FileSyncStateEnum.OnDevice));
+        Assert.Equal(PresentationConstants.MaxParallelDownloads, _clientApi.FileRequestList.Count);
+        Assert.Equal(PresentationConstants.MaxParallelDownloads, (await _storeMetadata.GetFileStateList()).Count(x => x.State == FileSyncStateEnum.OnDevice));
         Assert.Equal(3, mediaList.Count(x => _clientApi.FileRequestList.All(r => r.ID != x.ID)));
     }
 
@@ -581,7 +581,7 @@ public class DownloadServiceTest
     {
         (List<ResponseMediaFile> mediaList, TaskCompletionSource gate) = await AddMediaAndServe(3);
         gate.SetResult();
-        _storeFile.FreeBytes = Constants.StorageReserveBytes + mediaList.Min(x => x.SizeBytes) - 1;
+        _storeFile.FreeBytes = PresentationConstants.StorageReserveBytes + mediaList.Min(x => x.SizeBytes) - 1;
 
         await _serviceDownload.QueueMissing([.. mediaList.Select(x => x.ID)]);
         await WaitUntil(() => Task.FromResult(_serviceDownload.GetProgress().StoppedReason is not null));
@@ -650,7 +650,7 @@ public class DownloadServiceTest
     {
         (List<ResponseMediaFile> mediaList, TaskCompletionSource gate) = await AddMediaAndServe(5);
         await _serviceDownload.QueueMissing([.. mediaList.Select(x => x.ID)]);
-        await WaitUntil(() => Task.FromResult(_clientApi.FileRequestList.Count == Constants.MaxParallelDownloads));
+        await WaitUntil(() => Task.FromResult(_clientApi.FileRequestList.Count == PresentationConstants.MaxParallelDownloads));
         ResponseMediaFile waiting = mediaList.First(x => _clientApi.FileRequestList.All(r => r.ID != x.ID));
 
         await _serviceDownload.Cancel(waiting.ID);

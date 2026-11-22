@@ -2,8 +2,8 @@
 @inherits BaseComponentElementFluxor
 
 <Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
-    <h2>Edit playlist</h2>
-    @if (Open && Playlist is ResponsePlaylist playlist)
+    <h2>@AppTexts.EditPlaylistTitle</h2>
+    @if (Open && Playlist is { } playlist)
     {
         <FormEditPlaylist Playlist="playlist" OnSubmit="Close"/>
     }

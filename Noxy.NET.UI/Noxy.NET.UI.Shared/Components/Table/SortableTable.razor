@@ -1,7 +1,7 @@
 ﻿@typeparam T
 @inherits BaseComponentElement
 
-<div @attributes="AdditionalAttributes" class="@CssClass" role="table" aria-rowcount="@(List.Count + 1)">
+<div @attributes="AdditionalAttributes" class="@CssClass" role="table" aria-rowcount="@AriaRowCount">
     <div class="header" role="row" aria-rowindex="1">
         @Header
     </div>
@@ -10,7 +10,8 @@
         @if (List.Count > 0)
         {
             <SortableList List="List" OnUpdate="OnUpdate" KeySelector="KeySelector" HandleClass="@HandleClass" DragClass="sortable-row" GhostClass="@GhostClass">
-                <div @key="@GetRowKey(context)" class="sortable-row" role="row" aria-rowindex="@(context.Index + 2)" aria-keyshortcuts="@KeyShortcuts" data-striped="@(context.Index % 2 == 0)" tabindex="0" @onkeydown="args => OnKeyDown(args, context.Index)">
+                <div @key="@GetRowKey(context)" class="sortable-row" role="row" aria-rowindex="@AriaRowIndex(context.Index)" aria-keyshortcuts="@KeyShortcuts" data-striped="@IsStriped(context.Index)" tabindex="0"
+                     @onkeydown="args => OnKeyDown(args, context.Index)">
                     @RowContent((context.Item, context.Index))
                 </div>
             </SortableList>
@@ -23,6 +24,12 @@
 </div>
 
 @code {
+
+    private int AriaRowCount => List.Count + 1;
+
+    private static int AriaRowIndex(int index) => index + 2;
+
+    private static bool IsStriped(int index) => index % 2 == 0;
 
     [Parameter, EditorRequired]
     public required IReadOnlyList<T> List { get; set; }

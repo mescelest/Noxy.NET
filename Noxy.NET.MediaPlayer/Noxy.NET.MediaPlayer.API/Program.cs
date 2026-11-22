@@ -37,7 +37,7 @@ WebApplication app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseResponseCompression();
-app.UseCors(Constants.CorsPolicyName);
+app.UseCors(ApiConstants.CorsPolicyName);
 app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
@@ -52,6 +52,6 @@ else
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<MediaHub>(HubConstants.MediaHubPath);
+app.MapHub<MediaHub>(ApplicationConstants.MediaHubPath);
 
 await app.RunAsync();

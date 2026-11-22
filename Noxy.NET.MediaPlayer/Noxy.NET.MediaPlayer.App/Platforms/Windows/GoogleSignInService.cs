@@ -55,17 +55,17 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
 
     private static async Task<string> ReadClientSecret(CancellationToken cancellationToken)
     {
-        string path = Path.Combine(AppContext.BaseDirectory, GoogleConstants.SecretFileName);
-        if (!File.Exists(path)) throw new InvalidOperationException($"The Google client secret file {GoogleConstants.SecretFileName} is missing next to the app.");
+        string path = Path.Combine(AppContext.BaseDirectory, AppConstants.SecretFileName);
+        if (!File.Exists(path)) throw new InvalidOperationException($"The Google client secret file {AppConstants.SecretFileName} is missing next to the app.");
 
         await using FileStream stream = File.OpenRead(path);
         using JsonDocument document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
-        if (document.RootElement.TryGetProperty(GoogleConstants.SecretFileProperty, out JsonElement element) && element.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(element.GetString()))
+        if (document.RootElement.TryGetProperty(AppConstants.SecretFileProperty, out JsonElement element) && element.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(element.GetString()))
         {
             return element.GetString() ?? throw new InvalidOperationException("The Google client secret is empty.");
         }
 
-        throw new InvalidOperationException($"The Google client secret file {GoogleConstants.SecretFileName} has no {GoogleConstants.SecretFileProperty}.");
+        throw new InvalidOperationException($"The Google client secret file {AppConstants.SecretFileName} has no {AppConstants.SecretFileProperty}.");
     }
 
     // The page the browser lands on after Google sends it back: a real file in Resources/Raw, read before the browser opens so a missing file fails the sign-in early.
@@ -97,16 +97,16 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
     {
         Dictionary<string, string> parameterMap = new()
         {
-            ["client_id"] = GoogleConstants.WindowsClientId,
+            ["client_id"] = AppConstants.WindowsClientId,
             ["redirect_uri"] = redirectUri,
             ["response_type"] = ResponseTypeCode,
-            ["scope"] = GoogleConstants.Scope,
+            ["scope"] = AppConstants.Scope,
             ["code_challenge"] = pkce.Challenge,
             ["code_challenge_method"] = PkceChallenge.Method,
             [StateKey] = state
         };
 
-        return new($"{GoogleConstants.AuthorizationEndpoint}?{string.Join("&", parameterMap.Select(x => $"{x.Key}={Uri.EscapeDataString(x.Value)}"))}");
+        return new($"{AppConstants.AuthorizationEndpoint}?{string.Join("&", parameterMap.Select(x => $"{x.Key}={Uri.EscapeDataString(x.Value)}"))}");
     }
 
     // Requests with no code and no error (a favicon, say) are answered and skipped. A denied request returns null; a response that does not carry our state is not trusted.
@@ -152,7 +152,7 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
         Dictionary<string, string> fieldMap = new()
         {
             ["code"] = code,
-            ["client_id"] = GoogleConstants.WindowsClientId,
+            ["client_id"] = AppConstants.WindowsClientId,
             ["client_secret"] = clientSecret,
             ["code_verifier"] = verifier,
             ["grant_type"] = GrantTypeAuthorizationCode,
@@ -163,7 +163,7 @@ public class GoogleSignInService(IHttpClientFactory factoryHttpClient) : IGoogle
         {
             using HttpClient client = factoryHttpClient.CreateClient();
             using FormUrlEncodedContent body = new(fieldMap);
-            using HttpResponseMessage response = await client.PostAsync(GoogleConstants.TokenEndpoint, body, cancellationToken);
+            using HttpResponseMessage response = await client.PostAsync(AppConstants.TokenEndpoint, body, cancellationToken);
             if (!response.IsSuccessStatusCode) return null;
 
             await using Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken);

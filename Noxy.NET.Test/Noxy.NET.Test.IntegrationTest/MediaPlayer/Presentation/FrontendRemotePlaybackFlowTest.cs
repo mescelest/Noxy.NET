@@ -338,11 +338,11 @@ public class FrontendRemotePlaybackFlowTest
         Assert.Equal(20000, library.Count);
 
         Assert.True(await laptop.Queue.StartSource(new() { Kind = QueueSourceKindEnum.Library, PlaylistID = null, Sort = LibrarySortEnum.Title, Descending = false, Search = string.Empty }, library.OrderBy(x => x.Title).First().ID, ShuffleModeEnum.Random));
-        Assert.Equal(Constants.QueueMaxItemCount, laptop.Queue.Queue.ItemCount);
+        Assert.Equal(PresentationConstants.QueueMaxItemCount, laptop.Queue.Queue.ItemCount);
         bool? accepted = await laptop.Reporter.ClaimNow();
 
         Assert.True(accepted);
-        await Until(() => phone.Queue.Queue.ItemCount == Constants.QueueMaxItemCount && phone.Remote.Role == PlaybackRoleEnum.Controller, "the phone to hold the full queue", 60);
+        await Until(() => phone.Queue.Queue.ItemCount == PresentationConstants.QueueMaxItemCount && phone.Remote.Role == PlaybackRoleEnum.Controller, "the phone to hold the full queue", 60);
         Assert.Equal(QueueOf(laptop).Current, QueueOf(phone).Current);
     }
 }

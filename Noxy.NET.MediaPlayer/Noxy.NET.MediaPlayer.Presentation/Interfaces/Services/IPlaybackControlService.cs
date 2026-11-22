@@ -15,7 +15,7 @@ public interface IPlaybackControlService
 
     Task Pause();
 
-    // A controller sends one command after the changes of a drag have stopped for Constants.RemoteDeferMilliseconds; the local player changes at once on a device that is not a controller.
+    // A controller sends one command after the changes of a drag have stopped for PresentationConstants.RemoteDeferMilliseconds; the local player changes at once on a device that is not a controller.
     Task Seek(TimeSpan position);
 
     Task Next();

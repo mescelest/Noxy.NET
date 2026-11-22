@@ -43,7 +43,7 @@ public class FeatureShellEffectsTest
     [InlineData("0")]
     public async Task AnUnreadableStoredValue_MeansOpen(string stored)
     {
-        await _storage.Set(Constants.SidebarOpenKey, stored);
+        await _storage.Set(PresentationConstants.SidebarOpenKey, stored);
 
         await _effects.RestoreSidebar(new(), _dispatcher);
 

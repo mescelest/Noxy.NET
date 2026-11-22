@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="LibraryActions" xml:space="preserve">
+    <value>Actions</value>
+        <comment>The name of the button that opens the actions menu for the ticked rows.</comment>
+  </data>
+    <data name="LibraryDownload" xml:space="preserve">
+    <value>Download to this device</value>
+        <comment>The menu of the Library and of a playlist's entries.</comment>
+  </data>
+    <data name="LibraryPlayNext" xml:space="preserve">
+    <value>Play next</value>
+        <comment>The menu of the Library and of a playlist's entries.</comment>
+  </data>
+    <data name="LibraryAddToQueue" xml:space="preserve">
+    <value>Add to queue</value>
+        <comment>The menu of the Library and of a playlist's entries.</comment>
+  </data>
+    <data name="LibrarySaveAsFile" xml:space="preserve">
+    <value>Save as file</value>
+        <comment>The menu of the Library and of a playlist's entries.</comment>
+  </data>
+    <data name="LibraryAddToPlaylist" xml:space="preserve">
+    <value>Add to playlist</value>
+        <comment>The menu of the Library and of a playlist's entries. Also the title of the dialog that asks which playlist.</comment>
+  </data>
+    <data name="LibraryRemoveFromDevice" xml:space="preserve">
+    <value>Remove from this device</value>
+        <comment>The menu of the Library and of a playlist's entries. Also the title of its confirmation.</comment>
+  </data>
+    <data name="LibraryRemoveFromPlaylist" xml:space="preserve">
+    <value>Remove from this playlist</value>
+        <comment>The menu of the Library and of a playlist's entries. Also the title of its confirmation.</comment>
+  </data>
+    <data name="LibraryDeleteOne" xml:space="preserve">
+    <value>Delete song</value>
+        <comment>The menu of the Library and of a playlist's entries. For one row.</comment>
+  </data>
+    <data name="LibraryDeleteMany" xml:space="preserve">
+    <value>Delete {0} songs</value>
+        <comment>The menu of the Library and of a playlist's entries. For a ticked group; {0} is how many.</comment>
+  </data>
+    <data name="LibrarySelectedGroup" xml:space="preserve">
+    <value>{0} selected songs</value>
+        <comment>The sub-menu that repeats the actions for the whole ticked group; {0} is how many.</comment>
+  </data>
+    <data name="MediaFileCountOne" xml:space="preserve">
+    <value>{0} media file</value>
+        <comment>A count inside a sentence, for exactly one.</comment>
+  </data>
+    <data name="MediaFileCountMany" xml:space="preserve">
+    <value>{0} media files</value>
+        <comment>A count inside a sentence, for any other number.</comment>
+  </data>
+    <data name="ConfirmRemoveFromDeviceMessage" xml:space="preserve">
+    <value>Remove {0} from this device? They stay in your library.</value>
+        <comment>{0} is a count of media files.</comment>
+  </data>
+    <data name="ConfirmRemoveFromPlaylistMessage" xml:space="preserve">
+    <value>Remove {0} from this playlist? They stay in your library.</value>
+        <comment>{0} is a count of media files.</comment>
+  </data>
+    <data name="ConfirmDeleteTitle" xml:space="preserve">
+    <value>Delete from library</value>
+        <comment>The title of the confirmation of deleting.</comment>
+  </data>
+    <data name="ConfirmDeleteMessage" xml:space="preserve">
+    <value>Delete {0} from your library?</value>
+        <comment>{0} is a count of media files.</comment>
+  </data>
+    <data name="ConfirmRemoveAccept" xml:space="preserve">
+    <value>Remove</value>
+        <comment>The accept button of the remove confirmations.</comment>
+  </data>
+    <data name="ConfirmDeleteAccept" xml:space="preserve">
+    <value>Delete</value>
+        <comment>The accept button of the delete confirmation.</comment>
+  </data>
+    <data name="ConfirmHiddenOne" xml:space="preserve">
+    <value>1 of them is hidden by the current search.</value>
+        <comment>Added to a confirmation when the search hides one of the ticked rows.</comment>
+  </data>
+    <data name="ConfirmHiddenMany" xml:space="preserve">
+    <value>{0} of them are hidden by the current search.</value>
+        <comment>Added to a confirmation when the search hides some of the ticked rows.</comment>
+  </data>
+    <data name="ChooserNoPlaylists" xml:space="preserve">
+    <value>You have no playlists yet.</value>
+        <comment>In the dialog that asks which playlist.</comment>
+  </data>
+    <data name="ChooserCancel" xml:space="preserve">
+    <value>Cancel</value>
+        <comment>In the dialog that asks which playlist.</comment>
+  </data>
+    <data name="PlaylistPlay" xml:space="preserve">
+    <value>Play</value>
+        <comment>The menu of a playlist.</comment>
+  </data>
+    <data name="PlaylistDownloadAll" xml:space="preserve">
+    <value>Download all</value>
+        <comment>The menu of a playlist.</comment>
+  </data>
+    <data name="PlaylistEdit" xml:space="preserve">
+    <value>Edit…</value>
+        <comment>The menu of a playlist.</comment>
+  </data>
+    <data name="PlaylistRefresh" xml:space="preserve">
+    <value>Refresh</value>
+        <comment>The menu of a playlist.</comment>
+  </data>
+    <data name="PlaylistDelete" xml:space="preserve">
+    <value>Delete playlist</value>
+        <comment>The menu of a playlist.</comment>
+  </data>
+    <data name="PlaylistDeleteConfirm" xml:space="preserve">
+    <value>Click again to delete</value>
+        <comment>The delete item of a playlist's menu, after the first click.</comment>
+  </data>
+    <data name="EditPlaylistTitle" xml:space="preserve">
+    <value>Edit playlist</value>
+        <comment>The title of the dialog.</comment>
+  </data>
+    <data name="EditPlaylistAllowDuplicates" xml:space="preserve">
+    <value>Allow the same song twice</value>
+        <comment>The checkbox of the edit playlist form.</comment>
+  </data>
+    <data name="EditPlaylistSave" xml:space="preserve">
+    <value>Save</value>
+        <comment>The button of the edit playlist form.</comment>
+  </data>
+    <data name="BulkFailed" xml:space="preserve">
+    <value>{0} failed. {1}</value>
+        <comment>The warning after a library action when some media files failed; {0} is how many, {1} the reason the server gave.</comment>
+  </data>
+    <data name="DeviceNameSaved" xml:space="preserve">
+    <value>Device name saved.</value>
+        <comment>The toast after saving this device's name.</comment>
+  </data>
+    <data name="DeviceNameInvalid" xml:space="preserve">
+    <value>Enter a name of 1 to {0} characters.</value>
+        <comment>Under the device name field; {0} is the longest a name may be.</comment>
+  </data>
+    <data name="UploadSkippedOne" xml:space="preserve">
+    <value>{0} file was skipped: it is not an audio file.</value>
+        <comment>The warning after dropping files; for exactly one.</comment>
+  </data>
+    <data name="UploadSkippedMany" xml:space="preserve">
+    <value>{0} files were skipped: they are not audio files.</value>
+        <comment>The warning after dropping files; for any other number.</comment>
+  </data>
+    <data name="UploadStartedOne" xml:space="preserve">
+    <value>Uploading {0} file…</value>
+        <comment>The toast when an upload starts; for exactly one.</comment>
+  </data>
+    <data name="UploadStartedMany" xml:space="preserve">
+    <value>Uploading {0} files…</value>
+        <comment>The toast when an upload starts; for any other number.</comment>
+  </data>
+    <data name="UploadFailureLine" xml:space="preserve">
+    <value>{0}: {1}</value>
+        <comment>One failed file in the error toast; {0} is its name, {1} the reason.</comment>
+  </data>
+    <data name="UploadAddedLibraryOne" xml:space="preserve">
+    <value>{0} file added to your library.</value>
+        <comment>The toast after an upload to the library; for exactly one.</comment>
+  </data>
+    <data name="UploadAddedLibraryMany" xml:space="preserve">
+    <value>{0} files added to your library.</value>
+        <comment>The toast after an upload to the library; for any other number.</comment>
+  </data>
+    <data name="UploadAddedPlaylistOne" xml:space="preserve">
+    <value>{0} file added to {1}.</value>
+        <comment>The toast after an upload to a playlist; {1} is its name; for exactly one.</comment>
+  </data>
+    <data name="UploadAddedPlaylistMany" xml:space="preserve">
+    <value>{0} files added to {1}.</value>
+        <comment>The toast after an upload to a playlist; {1} is its name; for any other number.</comment>
+  </data>
+    <data name="UploadAddedOne" xml:space="preserve">
+    <value>{0} file added.</value>
+        <comment>The toast after an upload to a playlist that is not known any more; for exactly one.</comment>
+  </data>
+    <data name="UploadAddedMany" xml:space="preserve">
+    <value>{0} files added.</value>
+        <comment>The toast after an upload to a playlist that is not known any more; for any other number.</comment>
+  </data>
+    <data name="ServerAddressAlreadySaved" xml:space="preserve">
+    <value>This server is already saved.</value>
+        <comment>The server form, when the address is one that is already in the list.</comment>
+  </data>
+</root>

@@ -155,7 +155,7 @@
         // Closed again while measuring: there is nothing left to place.
         if (!_shown) return;
 
-        Rect anchor = Point is PopoverPoint point ? new(point.X, point.Y, 0, 0) : measurement.Anchor;
+        Rect anchor = Point is { } point ? new(point.X, point.Y, 0, 0) : measurement.Anchor;
         PlacementRequest request = new(anchor, measurement.PanelWidth, measurement.PanelHeight, measurement.ViewportWidth, measurement.ViewportHeight, Side, Align, Gap ?? measurement.Gap, Margin ?? measurement.Margin);
         PlacementResult result = request.Resolve();
 

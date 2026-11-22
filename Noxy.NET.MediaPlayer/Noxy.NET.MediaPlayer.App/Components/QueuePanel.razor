@@ -29,7 +29,7 @@
             }
             else if (row.Item is { } item)
             {
-                <div class="item" data-current="@row.IsCurrent" data-over="@(_overID == item.ItemID)" draggable="@row.IsUpcoming"
+                <div class="item" data-current="@row.IsCurrent" data-over="@IsOver(item)" draggable="@row.IsUpcoming"
                      @ondragstart="() => _dragID = item.ItemID" @ondragover="() => _overID = item.ItemID" @ondragover:preventDefault @ondrop="() => Drop(item)" @ondrop:preventDefault
                      @onclick="() => Run(() => ServiceControl.JumpTo(item.ItemID, true))">
                     <span class="grip">
@@ -81,6 +81,8 @@
             StateHasChanged();
         });
     }
+
+    private bool IsOver(QueueItem item) => _overID == item.ItemID;
 
     private void ToggleHistory()
     {

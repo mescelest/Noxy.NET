@@ -96,7 +96,7 @@ public class SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService s
     {
         if (_accessToken is null) return null;
 
-        if (_accessTokenExpires is { } expires && expires - time.GetUtcNow().UtcDateTime <= TimeSpan.FromSeconds(Constants.RefreshMarginSeconds))
+        if (_accessTokenExpires is { } expires && expires - time.GetUtcNow().UtcDateTime <= TimeSpan.FromSeconds(PresentationConstants.RefreshMarginSeconds))
         {
             await Refresh();
         }

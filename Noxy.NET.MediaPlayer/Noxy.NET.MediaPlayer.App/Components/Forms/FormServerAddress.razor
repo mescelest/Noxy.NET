@@ -43,7 +43,7 @@
         }
         catch (ArgumentException)
         {
-            context.HandleException("The server address must be an http or https address.");
+            context.HandleException(PresentationTexts.ServerAddressInvalid);
             return;
         }
         catch (InvalidOperationException exception)

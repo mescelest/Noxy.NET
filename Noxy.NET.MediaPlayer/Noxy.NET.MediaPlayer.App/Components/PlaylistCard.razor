@@ -4,7 +4,7 @@
     <a class="open" href="@($"playlist/{Playlist.ID}")">
         <span class="art"><MaterialIcon Icon="music_note" Size="var(--size-icon-xl)"/></span>
         <span class="name">@Playlist.Name</span>
-        <span class="meta">@Playlist.EntryCount @(Playlist.EntryCount == 1 ? "file" : "files")</span>
+        <span class="meta">@EntryCountText</span>
     </a>
     @if (OnPlay.HasDelegate)
     {
@@ -21,5 +21,7 @@
 
     [Parameter]
     public EventCallback OnPlay { get; set; }
+
+    private string EntryCountText => $"{Playlist.EntryCount} {(Playlist.EntryCount == 1 ? "file" : "files")}";
 
 }

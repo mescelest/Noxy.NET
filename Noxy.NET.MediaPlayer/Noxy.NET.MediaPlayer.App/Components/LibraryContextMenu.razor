@@ -6,19 +6,19 @@
 @inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" disabled="@IsNothingTicked" aria-label="Actions" aria-haspopup="menu" popovertarget="@MenuID">
+    <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" disabled="@IsNothingTicked" aria-label="@AppTexts.LibraryActions" aria-haspopup="menu" popovertarget="@MenuID">
         <MaterialIcon Icon="more_horiz" Size="var(--size-icon-md)"/>
     </Button>
 
     <ContextMenu @ref="_menu" ID="@MenuID" ItemList="ItemList" Side="PlacementSideEnum.Bottom" Align="PlacementAlignEnum.End" OnClose="CloseHandler"/>
 
-    <ConfirmActionDialog Open="@(_confirm is not null)" OpenChanged="CloseConfirm" Title="@_confirm?.Title" Message="@_confirm?.Message" Detail="@_confirm?.Detail" AcceptText="@_confirm?.AcceptText" OnSubmit="SubmitConfirm"/>
+    <ConfirmActionDialog Open="@IsConfirming" OpenChanged="CloseConfirm" Title="@_confirm?.Title" Message="@_confirm?.Message" Detail="@_confirm?.Detail" AcceptText="@_confirm?.AcceptText" OnSubmit="SubmitConfirm"/>
 
     <Dialog @bind-Open="_choosingPlaylist">
-        <h2>Add to playlist</h2>
+        <h2>@AppTexts.LibraryAddToPlaylist</h2>
         @if (StatePlaylistList.Value.PlaylistList.Count == 0)
         {
-            <p>You have no playlists yet.</p>
+            <p>@AppTexts.ChooserNoPlaylists</p>
         }
         @foreach (ResponsePlaylist playlist in StatePlaylistList.Value.PlaylistList)
         {
@@ -26,7 +26,7 @@
             <button type="button" class="playlist-choice" @onclick="() => AddToPlaylist(playlistID)">@playlist.Name</button>
         }
         <div class="actions">
-            <button type="button" class="cancel" @onclick="() => _choosingPlaylist = false">Cancel</button>
+            <button type="button" class="cancel" @onclick="() => _choosingPlaylist = false">@AppTexts.ChooserCancel</button>
         </div>
     </Dialog>
 </div>
@@ -57,7 +57,6 @@
     public EventCallback OnPlaylistChanged { get; set; }
 
     private const string MenuID = "library-context-menu";
-    private const string TextRemoveFromPlaylist = "Remove from this playlist";
 
     private ContextMenu? _menu;
     private LibraryMenuScope? _scope;
@@ -66,6 +65,8 @@
     private bool _choosingPlaylist;
 
     private bool IsNothingTicked => SelectedSet.Count == 0;
+
+    private bool IsConfirming => _confirm is not null;
 
     // A right-click on a row acts on that row; the Actions button acts on the ticked rows.
     private List<ContextMenuItem> ItemList => _scope is { } scope ? BuildRowItemList(scope) : BuildItemList(SelectedKeyList, true);
@@ -92,7 +93,7 @@
         if (scope.HasGroup)
         {
             list.Add(ContextMenuItem.Separator());
-            list.Add(ContextMenuItem.Submenu($"{scope.GroupIDList.Count} selected songs", BuildItemList(scope.GroupIDList, true)));
+            list.Add(ContextMenuItem.Submenu(string.Format(AppTexts.LibrarySelectedGroup, scope.GroupIDList.Count), BuildItemList(scope.GroupIDList, true)));
         }
 
         return list;
@@ -104,22 +105,22 @@
         List<Guid> idList = MediaFileIDListOf(keyList);
         List<ContextMenuItem> list =
         [
-                ItemOf(LibraryActionEnum.Download, "Download to this device", () => Show(ServiceLibraryAction.Download(idList))),
-                ItemOf(LibraryActionEnum.PlayNext, "Play next", () => Show(ServiceLibraryAction.PlayNext(idList))),
-                ItemOf(LibraryActionEnum.AddToQueue, "Add to queue", () => Show(ServiceLibraryAction.AddToQueue(idList))),
-                ItemOf(LibraryActionEnum.SaveAsFile, "Save as file", () => Show(ServiceLibraryAction.SaveAsFile(idList))),
-                ItemOf(LibraryActionEnum.AddToPlaylist, "Add to playlist", () => ChoosePlaylist(idList)),
-                ItemOf(LibraryActionEnum.RemoveFromDevice, "Remove from this device", () => Confirm("Remove from this device", $"Remove {Count(idList.Count)} from this device? They stay in your library.", "Remove", () => Show(ServiceLibraryAction.RemoveFromDevice(idList)), isTicked))
+            ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(idList))),
+            ItemOf(LibraryActionEnum.PlayNext, AppTexts.LibraryPlayNext, () => Show(ServiceLibraryAction.PlayNext(idList))),
+            ItemOf(LibraryActionEnum.AddToQueue, AppTexts.LibraryAddToQueue, () => Show(ServiceLibraryAction.AddToQueue(idList))),
+            ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(idList))),
+            ItemOf(LibraryActionEnum.AddToPlaylist, AppTexts.LibraryAddToPlaylist, () => ChoosePlaylist(idList)),
+            ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => Confirm(AppTexts.LibraryRemoveFromDevice, string.Format(AppTexts.ConfirmRemoveFromDeviceMessage, Count(idList.Count)), AppTexts.ConfirmRemoveAccept, () => Show(ServiceLibraryAction.RemoveFromDevice(idList)), isTicked))
         ];
 
         // The last item: on a playlist's page the entries leave the playlist, in the Library the media files leave the library.
-        if (PlaylistID is Guid playlistID)
+        if (PlaylistID is { } playlistID)
         {
-            list.Add(ContextMenuItem.Item(TextRemoveFromPlaylist, () => Confirm(TextRemoveFromPlaylist, $"Remove {Count(keyList.Count)} from this playlist? They stay in your library.", "Remove", () => RemoveFromPlaylist(playlistID, keyList), isTicked), isDestructive: true));
+            list.Add(ContextMenuItem.Item(AppTexts.LibraryRemoveFromPlaylist, () => Confirm(AppTexts.LibraryRemoveFromPlaylist, string.Format(AppTexts.ConfirmRemoveFromPlaylistMessage, Count(keyList.Count)), AppTexts.ConfirmRemoveAccept, () => RemoveFromPlaylist(playlistID, keyList), isTicked), isDestructive: true));
         }
         else
         {
-            list.Add(ItemOf(LibraryActionEnum.DeleteFromLibrary, DeleteText(idList.Count), () => Confirm("Delete from library", $"Delete {Count(idList.Count)} from your library?", "Delete", () => DeleteFromLibrary(idList, isTicked), isTicked), true));
+            list.Add(ItemOf(LibraryActionEnum.DeleteFromLibrary, DeleteText(idList.Count), () => Confirm(AppTexts.ConfirmDeleteTitle, string.Format(AppTexts.ConfirmDeleteMessage, Count(idList.Count)), AppTexts.ConfirmDeleteAccept, () => DeleteFromLibrary(idList, isTicked), isTicked), true));
         }
 
         return list;
@@ -127,7 +128,7 @@
 
     private List<Guid> MediaFileIDListOf(List<Guid> keyList)
     {
-        return MediaFileIDOf is Func<Guid, Guid> map ? [.. keyList.Select(map)] : keyList;
+        return MediaFileIDOf is { } map ? [.. keyList.Select(map)] : keyList;
     }
 
     // The keys are entry IDs here: the entries that were ticked leave, not the rows at the same places of the stored order.
@@ -152,9 +153,9 @@
         return ContextMenuItem.Item(text, run, reason is not null, reason, isDestructive);
     }
 
-    private static string Count(int count) => count == 1 ? "1 media file" : $"{count} media files";
+    private static string Count(int count) => count.ToCountText(AppTexts.MediaFileCountOne, AppTexts.MediaFileCountMany);
 
-    private static string DeleteText(int count) => count == 1 ? "Delete song" : $"Delete {count} songs";
+    private static string DeleteText(int count) => count.ToCountText(AppTexts.LibraryDeleteOne, AppTexts.LibraryDeleteMany);
 
     private async Task DeleteFromLibrary(List<Guid> idList, bool isTicked)
     {
@@ -180,7 +181,7 @@
 
         if (result.FailedIDList.Count > 0)
         {
-            ServiceToast.ShowWarning($"{result.FailedIDList.Count} failed. {result.Message}".Trim());
+            ServiceToast.ShowWarning(string.Format(AppTexts.BulkFailed, result.FailedIDList.Count, result.Message).Trim());
         }
     }
 
@@ -188,7 +189,7 @@
     private Task Confirm(string title, string message, string acceptText, Func<Task> run, bool isTicked)
     {
         int hidden = isTicked ? HiddenSelectedCount : 0;
-        string? detail = hidden > 0 ? $"{hidden} of them {(hidden == 1 ? "is" : "are")} hidden by the current search." : null;
+        string? detail = hidden > 0 ? hidden.ToCountText(AppTexts.ConfirmHiddenOne, AppTexts.ConfirmHiddenMany) : null;
         _confirm = new ConfirmRequest(title, message, detail, acceptText, run);
 
         return Task.CompletedTask;

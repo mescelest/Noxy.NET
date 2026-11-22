@@ -12,15 +12,9 @@ namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
 public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashService serviceHash, IMetadataStore storeMetadata, IDelay delay, ILogger<DownloadService> logger) : IDownloadService
 {
-    private const string HashMismatchError = "The downloaded file did not match its hash.";
-    private const string InterruptedError = "The download was interrupted.";
-    private const string NotOnServerError = "The server no longer has this media file.";
-    private const string DiskFullError = "The device has no room for this file.";
-    private const string UnexpectedError = "The download failed.";
-
     private readonly Lock _lock = new();
     private readonly Dictionary<Guid, (CancellationTokenSource Source, Task<bool> Task)> _jobMap = [];
-    private readonly SemaphoreSlim _slots = new(Constants.MaxParallelDownloads, Constants.MaxParallelDownloads);
+    private readonly SemaphoreSlim _slots = new(PresentationConstants.MaxParallelDownloads, PresentationConstants.MaxParallelDownloads);
 
     // The bulk download, all guarded by _lock. The active set holds the media files queued or running in it; the workers pull from the queue until it is empty.
     private readonly Queue<Guid> _bulkQueue = new();
@@ -79,7 +73,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
                 _bulkTotal++;
             }
 
-            workersToStart = Math.Min(Constants.MaxParallelDownloads - _bulkWorkerCount, _bulkQueue.Count);
+            workersToStart = Math.Min(PresentationConstants.MaxParallelDownloads - _bulkWorkerCount, _bulkQueue.Count);
             _bulkWorkerCount += workersToStart;
         }
 
@@ -164,7 +158,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
         }
 
         StorageEstimate estimate = await storeFile.GetEstimate();
-        if (estimate.FreeBytes < media.SizeBytes + Constants.StorageReserveBytes)
+        if (estimate.FreeBytes < media.SizeBytes + PresentationConstants.StorageReserveBytes)
         {
             StopBulk(id);
             return;
@@ -274,25 +268,25 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
 
         // The ETag of the bytes in the partial file, set as soon as a response arrives so that a download cut off mid-stream can still resume with If-Range.
         StrongBox<string?> eTag = new();
-        string error = UnexpectedError;
+        string error = PresentationTexts.DownloadFailed;
 
         try
         {
-            for (int attempt = 1; attempt <= Constants.MaxDownloadAttempts; attempt++)
+            for (int attempt = 1; attempt <= PresentationConstants.MaxDownloadAttempts; attempt++)
             {
                 try
                 {
                     if (await TryDownload(media, eTag, token)) return true;
 
-                    error = HashMismatchError;
+                    error = PresentationTexts.DownloadHashMismatch;
                 }
                 catch (StorageFullException)
                 {
-                    return await Fail(id, DiskFullError);
+                    return await Fail(id, PresentationTexts.DownloadDiskFull);
                 }
                 catch (ApiException exception) when (exception.Status is HttpStatusCode.NotFound or HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
                 {
-                    return await Fail(id, exception.Status == HttpStatusCode.NotFound ? NotOnServerError : exception.Title);
+                    return await Fail(id, exception.Status == HttpStatusCode.NotFound ? PresentationTexts.DownloadNotOnServer : exception.Title);
                 }
                 catch (Exception exception) when (!token.IsCancellationRequested)
                 {
@@ -303,11 +297,11 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
                         eTag.Value = null;
                     }
 
-                    logger.LogWarning(exception, "Download attempt {Attempt} of {MaxAttempts} failed.", attempt, Constants.MaxDownloadAttempts);
-                    error = InterruptedError;
+                    logger.LogWarning(exception, "Download attempt {Attempt} of {MaxAttempts} failed.", attempt, PresentationConstants.MaxDownloadAttempts);
+                    error = PresentationTexts.DownloadInterrupted;
                 }
 
-                if (attempt < Constants.MaxDownloadAttempts) await delay.Wait(TimeSpan.FromSeconds(Constants.RetryBaseDelaySeconds * Math.Pow(2, attempt - 1)), token);
+                if (attempt < PresentationConstants.MaxDownloadAttempts) await delay.Wait(TimeSpan.FromSeconds(PresentationConstants.RetryBaseDelaySeconds * Math.Pow(2, attempt - 1)), token);
             }
 
             return await Fail(id, error);

@@ -79,7 +79,7 @@ public sealed class UploadService : IUploadService, IDisposable
         }
         catch (Exception exception) when (exception is ApiException || exception.IsOfflineFailure)
         {
-            Finish(batch, null, new UploadFailure(file.Name, exception.ToActionMessage(Texts.ActionMessageUploadFailed)));
+            Finish(batch, null, new UploadFailure(file.Name, exception.ToActionMessage(PresentationTexts.ActionMessageUploadFailed)));
             return;
         }
 
@@ -127,7 +127,7 @@ public sealed class UploadService : IUploadService, IDisposable
             }
             catch (Exception exception) when (exception is ApiException || exception.IsOfflineFailure)
             {
-                Finish(batch, null, new UploadFailure(result.Title, Texts.UploadMessageNotAddedToPlaylist));
+                Finish(batch, null, new UploadFailure(result.Title, PresentationTexts.UploadMessageNotAddedToPlaylist));
                 return;
             }
         }
@@ -155,9 +155,9 @@ public sealed class UploadService : IUploadService, IDisposable
     {
         return reason switch
         {
-            null or UploadFailureReasonEnum.Unknown => Texts.UploadMessageUnknown,
-            UploadFailureReasonEnum.LibraryFull => Texts.UploadMessageLibraryFull,
-            UploadFailureReasonEnum.FileMissing => Texts.UploadMessageFileMissing,
+            null or UploadFailureReasonEnum.Unknown => PresentationTexts.UploadMessageUnknown,
+            UploadFailureReasonEnum.LibraryFull => PresentationTexts.UploadMessageLibraryFull,
+            UploadFailureReasonEnum.FileMissing => PresentationTexts.UploadMessageFileMissing,
             _ => throw new InvalidEnumArgumentException(nameof(reason), (int)reason.Value, typeof(UploadFailureReasonEnum))
         };
     }

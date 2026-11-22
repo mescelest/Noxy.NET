@@ -11,25 +11,36 @@ public static class ResponseMediaFileListExtension
         // Every word of the query must be found (case-insensitive substring, accents as typed) in the title, artist, album, album artist or genre. A blank query returns everything. Always a new list.
         public List<ResponseMediaFile> Filter(string? query)
         {
-            string[] wordList = (query ?? string.Empty).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-            return wordList.Length == 0
-                ? [.. mediaFileList]
-                : mediaFileList.Where(mediaFile => wordList.All(word => Matches(mediaFile, word))).ToList();
+            return FilterBy(mediaFileList, query, x => x);
         }
 
         // Stable: equal keys keep their order, in both directions. A media file with no key (no artist, album or year) always comes last. Always a new list.
         public List<ResponseMediaFile> Sort(LibrarySortEnum sort, bool descending)
         {
-            return sort switch
-            {
-                LibrarySortEnum.Title => SortByText(mediaFileList, x => x.Title, descending),
-                LibrarySortEnum.Artist => SortByText(mediaFileList, x => x.Artist, descending),
-                LibrarySortEnum.Album => SortByText(mediaFileList, x => x.Album, descending),
-                LibrarySortEnum.Year => SortByNumber(mediaFileList, x => x.Year, descending),
-                LibrarySortEnum.TimeCreated => SortByNumber(mediaFileList, x => x.TimeCreated.Ticks, descending),
-                _ => throw new InvalidEnumArgumentException(nameof(sort), (int)sort, typeof(LibrarySortEnum))
-            };
+            return SortBy(mediaFileList, sort, descending, x => x);
         }
+    }
+
+    // The same filter for any list whose items carry a media file, such as the entries of a playlist.
+    internal static List<T> FilterBy<T>(List<T> list, string? query, Func<T, ResponseMediaFile> mediaFileOf)
+    {
+        string[] wordList = (query ?? string.Empty).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        return wordList.Length == 0
+            ? [.. list]
+            : list.Where(item => wordList.All(word => Matches(mediaFileOf(item), word))).ToList();
+    }
+
+    internal static List<T> SortBy<T>(List<T> list, LibrarySortEnum sort, bool descending, Func<T, ResponseMediaFile> mediaFileOf)
+    {
+        return sort switch
+        {
+            LibrarySortEnum.Title => SortByText(list, x => mediaFileOf(x).Title, descending),
+            LibrarySortEnum.Artist => SortByText(list, x => mediaFileOf(x).Artist, descending),
+            LibrarySortEnum.Album => SortByText(list, x => mediaFileOf(x).Album, descending),
+            LibrarySortEnum.Year => SortByNumber(list, x => mediaFileOf(x).Year, descending),
+            LibrarySortEnum.TimeCreated => SortByNumber(list, x => mediaFileOf(x).TimeCreated.Ticks, descending),
+            _ => throw new InvalidEnumArgumentException(nameof(sort), (int)sort, typeof(LibrarySortEnum))
+        };
     }
 
     private static bool Matches(ResponseMediaFile mediaFile, string word)
@@ -46,10 +57,10 @@ public static class ResponseMediaFileListExtension
         return field is not null && field.Contains(word, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static List<ResponseMediaFile> SortByText(List<ResponseMediaFile> mediaFileList, Func<ResponseMediaFile, string?> key, bool descending)
+    private static List<T> SortByText<T>(List<T> list, Func<T, string?> key, bool descending)
     {
-        List<ResponseMediaFile> keyed = mediaFileList.Where(x => key(x) is not null).ToList();
-        List<ResponseMediaFile> unkeyed = mediaFileList.Where(x => key(x) is null).ToList();
+        List<T> keyed = list.Where(x => key(x) is not null).ToList();
+        List<T> unkeyed = list.Where(x => key(x) is null).ToList();
 
         keyed = descending
             ? keyed.OrderByDescending(key, StringComparer.OrdinalIgnoreCase).ToList()
@@ -58,10 +69,10 @@ public static class ResponseMediaFileListExtension
         return [.. keyed, .. unkeyed];
     }
 
-    private static List<ResponseMediaFile> SortByNumber(List<ResponseMediaFile> mediaFileList, Func<ResponseMediaFile, long?> key, bool descending)
+    private static List<T> SortByNumber<T>(List<T> list, Func<T, long?> key, bool descending)
     {
-        List<ResponseMediaFile> keyed = mediaFileList.Where(x => key(x) is not null).ToList();
-        List<ResponseMediaFile> unkeyed = mediaFileList.Where(x => key(x) is null).ToList();
+        List<T> keyed = list.Where(x => key(x) is not null).ToList();
+        List<T> unkeyed = list.Where(x => key(x) is null).ToList();
 
         keyed = descending ? keyed.OrderByDescending(key).ToList() : keyed.OrderBy(key).ToList();
 

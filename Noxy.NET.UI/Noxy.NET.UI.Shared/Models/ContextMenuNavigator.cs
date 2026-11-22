@@ -38,13 +38,13 @@ public class ContextMenuNavigator(List<ContextMenuItem> rootList, bool drillIn)
     public void MoveNext()
     {
         List<ContextMenuItem> list = ActiveList;
-        FocusIndex = Find(list, FocusIndex is int current ? current + 1 : 0, 1, _ => true) ?? FocusIndex;
+        FocusIndex = Find(list, FocusIndex is { } current ? current + 1 : 0, 1, _ => true) ?? FocusIndex;
     }
 
     public void MovePrevious()
     {
         List<ContextMenuItem> list = ActiveList;
-        FocusIndex = Find(list, FocusIndex is int current ? current - 1 : list.Count - 1, -1, _ => true) ?? FocusIndex;
+        FocusIndex = Find(list, FocusIndex is { } current ? current - 1 : list.Count - 1, -1, _ => true) ?? FocusIndex;
     }
 
     public void MoveFirst()
@@ -62,15 +62,15 @@ public class ContextMenuNavigator(List<ContextMenuItem> rootList, bool drillIn)
     {
         List<ContextMenuItem> list = ActiveList;
         string wanted = char.ToUpperInvariant(letter).ToString();
-        FocusIndex = Find(list, FocusIndex is int current ? current + 1 : 0, 1, x => x.Text.StartsWith(wanted, StringComparison.CurrentCultureIgnoreCase)) ?? FocusIndex;
+        FocusIndex = Find(list, FocusIndex is { } current ? current + 1 : 0, 1, x => x.Text.StartsWith(wanted, StringComparison.CurrentCultureIgnoreCase)) ?? FocusIndex;
     }
 
     public void OpenSubmenu()
     {
-        if (FocusIndex is not int index) return;
+        if (FocusIndex is not { } index) return;
 
         ContextMenuItem item = ActiveList[index];
-        if (item.Kind != ContextMenuItemKindEnum.Submenu || !item.IsEnabled || item.SubItemList is not List<ContextMenuItem> subItemList) return;
+        if (item.Kind != ContextMenuItemKindEnum.Submenu || !item.IsEnabled || item.SubItemList is not { } subItemList) return;
 
         _openPath.Add(index);
         FocusIndex = Find(subItemList, 0, 1, _ => true);
@@ -128,7 +128,7 @@ public class ContextMenuNavigator(List<ContextMenuItem> rootList, bool drillIn)
             list = list[index].SubItemList ?? throw new InvalidOperationException("An opened sub-menu item has no items.");
         }
 
-        if (FocusIndex is int focus && (focus >= list.Count || !list[focus].IsEnabled))
+        if (FocusIndex is { } focus && (focus >= list.Count || !list[focus].IsEnabled))
         {
             FocusIndex = null;
         }
@@ -136,7 +136,7 @@ public class ContextMenuNavigator(List<ContextMenuItem> rootList, bool drillIn)
 
     public ContextMenuItem? Choose()
     {
-        if (FocusIndex is not int index) return null;
+        if (FocusIndex is not { } index) return null;
 
         ContextMenuItem item = ActiveList[index];
         return item.Kind == ContextMenuItemKindEnum.Item && item.IsEnabled ? item : null;

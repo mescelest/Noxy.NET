@@ -14,7 +14,7 @@ public class FeatureShellEffects(IDevicePreferenceStorage storageDevicePreferenc
     {
         try
         {
-            await storageDevicePreference.Set(Constants.SidebarOpenKey, action.SidebarOpen ? OpenText : ClosedText);
+            await storageDevicePreference.Set(PresentationConstants.SidebarOpenKey, action.SidebarOpen ? OpenText : ClosedText);
         }
         catch (Exception exception)
         {
@@ -30,7 +30,7 @@ public class FeatureShellEffects(IDevicePreferenceStorage storageDevicePreferenc
         bool open = true;
         try
         {
-            open = await storageDevicePreference.Get(Constants.SidebarOpenKey) != ClosedText;
+            open = await storageDevicePreference.Get(PresentationConstants.SidebarOpenKey) != ClosedText;
         }
         catch (Exception exception)
         {

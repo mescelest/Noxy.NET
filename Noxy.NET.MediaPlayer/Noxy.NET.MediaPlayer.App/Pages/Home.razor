@@ -1,6 +1,105 @@
 @page "/"
+@inject IHomeService ServiceHome
+@inject IPlaylistService ServicePlaylist
+@inject IPlaybackControlService ServiceControl
+@inject IPlayerService ServicePlayer
+@inject ISyncService ServiceSync
+@inject IToastService ServiceToast
 @inherits BaseComponentPage
+@implements IDisposable
 
 <div class="@CssClass">
-    <HomeView/>
+    @if (_model is not null)
+    {
+        @if (_model.Continue is not null)
+        {
+            <Section Title="Continue">
+                <ContinueCard Info="_model.Continue" OnContinue="Continue"/>
+            </Section>
+        }
+
+        <Section Title="Recently played">
+            @if (_model.HasPlaylists)
+            {
+                <ButtonList>
+                    @foreach (ResponsePlaylist playlist in _model.RecentList)
+                    {
+                        Guid id = playlist.ID;
+                        <PlaylistCard Playlist="playlist" OnPlay="() => Run(() => ServicePlaylist.Play(id))"/>
+                    }
+                </ButtonList>
+            }
+            else
+            {
+                <MessageBox MessageList="@(["You have no playlists yet. Use \"New playlist\" in the sidebar to create one."])" Status="StatusEnum.Info"/>
+            }
+        </Section>
+    }
 </div>
+
+@code {
+
+    private HomeModel? _model;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ServiceSync.Changed += OnChanged;
+        ServicePlayer.Changed += OnPlayerChanged;
+        await Load();
+    }
+
+    private (Guid? ItemID, bool IsPlaying) _lastPlayer;
+
+    // The player raises Changed for every tick of the position: the page only follows a change of the current item or of playing.
+    private void OnPlayerChanged()
+    {
+        (Guid? ItemID, bool IsPlaying) now = (ServicePlayer.Current?.ItemID, ServicePlayer.IsPlaying);
+        if (now == _lastPlayer) return;
+
+        _lastPlayer = now;
+        OnChanged();
+    }
+
+    private void OnChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await Load();
+            StateHasChanged();
+        });
+    }
+
+    private async Task Load()
+    {
+        try
+        {
+            _model = await ServiceHome.Get();
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
+    // The page never starts playback by itself: only a click here does.
+    private Task Continue() => Run(() => ServiceControl.Continue());
+
+    private async Task Run(Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
+    public void Dispose()
+    {
+        ServiceSync.Changed -= OnChanged;
+        ServicePlayer.Changed -= OnPlayerChanged;
+    }
+
+}

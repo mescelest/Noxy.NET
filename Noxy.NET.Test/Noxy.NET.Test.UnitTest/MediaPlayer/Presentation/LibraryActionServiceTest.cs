@@ -1,7 +1,6 @@
 using System.Net;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Models;
-using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Models;
@@ -125,7 +124,7 @@ public class LibraryActionServiceTest
         Assert.Empty(_api.DeleteMediaList);
         Assert.Equal(0, result.SucceededCount);
         Assert.Equal(idList, result.FailedIDList);
-        Assert.Equal(Constants.ActionMessageOffline, result.Message);
+        Assert.Equal(PresentationTexts.ActionMessageOffline, result.Message);
     }
 
     [Fact]
@@ -135,7 +134,7 @@ public class LibraryActionServiceTest
 
         BulkResult result = await _service.DeleteFromLibrary(Ids(1));
 
-        Assert.Equal(Constants.ActionMessageOffline, result.Message);
+        Assert.Equal(PresentationTexts.ActionMessageOffline, result.Message);
     }
 
     [Fact]
@@ -173,7 +172,7 @@ public class LibraryActionServiceTest
         BulkResult result = await _service.AddToPlaylist(Guid.CreateVersion7(), Ids(1));
 
         Assert.Empty(_api.AddEntryCallList);
-        Assert.Equal(Constants.ActionMessageOffline, result.Message);
+        Assert.Equal(PresentationTexts.ActionMessageOffline, result.Message);
     }
 
     [Theory]
@@ -186,7 +185,7 @@ public class LibraryActionServiceTest
 
         _sync.IsOffline = true;
 
-        Assert.Equal(Constants.ActionMessageOffline, _service.GetDisabledReason(action));
+        Assert.Equal(PresentationTexts.ActionMessageOffline, _service.GetDisabledReason(action));
     }
 
     [Theory]
@@ -288,7 +287,7 @@ public class LibraryActionServiceTest
 
         Assert.Empty(_saver.AskedList);
         Assert.Empty(_api.TaggedFileRequestList);
-        Assert.Equal(Constants.ActionMessageOffline, result.Message);
+        Assert.Equal(PresentationTexts.ActionMessageOffline, result.Message);
     }
 
     [Fact]

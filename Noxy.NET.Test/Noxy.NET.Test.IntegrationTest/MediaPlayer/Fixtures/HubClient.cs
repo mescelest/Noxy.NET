@@ -43,7 +43,7 @@ public sealed class HubClient : IAsyncDisposable
     public static async Task<HubClient> Connect(ApiFactory factory, string? token, string name = "Device", Guid? deviceID = null, bool register = true)
     {
         HubConnection connection = new HubConnectionBuilder()
-            .WithUrl(new Uri(factory.Server.BaseAddress, HubConstants.MediaHubPath), options =>
+            .WithUrl(new Uri(factory.Server.BaseAddress, ApplicationConstants.MediaHubPath), options =>
             {
                 options.Transports = HttpTransportType.WebSockets;
                 options.AccessTokenProvider = () => Task.FromResult(token);

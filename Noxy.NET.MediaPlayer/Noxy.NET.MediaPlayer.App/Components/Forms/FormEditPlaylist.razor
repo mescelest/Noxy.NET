@@ -6,9 +6,9 @@
     <WebForm T="FormModelEditPlaylist" Context="_context" OnSubmit="Submit">
         <InputGroupText @bind-Value="_context.Model.Name"/>
         <InputControlCheckbox Option="true" @bind-Value="_context.Model.AllowDuplicates">
-            <span>Allow the same song twice</span>
+            <span>@AppTexts.EditPlaylistAllowDuplicates</span>
         </InputControlCheckbox>
-        <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">Save</Button>
+        <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">@AppTexts.EditPlaylistSave</Button>
     </WebForm>
 </div>
 

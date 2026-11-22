@@ -15,8 +15,6 @@
     public required ResponsePlaylist Playlist { get; set; }
 
     private const string MenuIDPrefix = "playlist-menu-";
-    private const string TextDelete = "Delete playlist";
-    private const string TextDeleteConfirm = "Click again to delete";
 
     private ContextMenu? _menu;
     private bool _editing;
@@ -28,12 +26,12 @@
     // The first activation of Delete only asks again, and keeps the menu open; the second one deletes.
     private List<ContextMenuItem> ItemList =>
     [
-            ContextMenuItem.Item("Play", () => Run(() => ServicePlaylist.Play(Playlist.ID))),
-            ContextMenuItem.Item("Download all", () => Run(() => ServicePlaylist.DownloadAll(Playlist.ID))),
-            ContextMenuItem.Item("Edit…", Edit),
-            ContextMenuItem.Item("Refresh", () => Run(() => ServicePlaylist.Refresh(Playlist.ID))),
+            ContextMenuItem.Item(AppTexts.PlaylistPlay, () => Run(() => ServicePlaylist.Play(Playlist.ID))),
+            ContextMenuItem.Item(AppTexts.PlaylistDownloadAll, () => Run(() => ServicePlaylist.DownloadAll(Playlist.ID))),
+            ContextMenuItem.Item(AppTexts.PlaylistEdit, Edit),
+            ContextMenuItem.Item(AppTexts.PlaylistRefresh, () => Run(() => ServicePlaylist.Refresh(Playlist.ID))),
             ContextMenuItem.Separator(),
-            ContextMenuItem.Item(_confirmingDelete ? TextDeleteConfirm : TextDelete, Delete, isDestructive: true, closesMenu: _confirmingDelete)
+            ContextMenuItem.Item(_confirmingDelete ? AppTexts.PlaylistDeleteConfirm : AppTexts.PlaylistDelete, Delete, isDestructive: true, closesMenu: _confirmingDelete)
     ];
 
     public async Task OpenAtAsync(MouseEventArgs args)

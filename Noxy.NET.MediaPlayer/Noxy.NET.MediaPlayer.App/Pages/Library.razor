@@ -1,6 +1,92 @@
 @page "/library"
+@inject IState<FeatureLibraryState> StateLibrary
+@inject IDispatcher Dispatcher
+@inject IPlaybackControlService ServicePlaybackControl
+@inject IToastService ServiceToast
 @inherits BaseComponentPageFluxor
 
 <div class="@CssClass @FullscreenPageClass">
-    <LibraryView/>
+    <UploadMediaDropZone>
+        <MediaFileTable RowList="RowList" IsEmpty="IsLibraryEmpty" EmptyTitle="Your library is empty"
+                        EmptyDescription="Upload music files from your computer to start your library. Once they are in, you can search and sort them, play them, and put them in playlists." StateMap="Current.StateMap" Sort="Current.Sort"
+                        Descending="Current.Descending" OnSortChanged="Sort"
+                        SelectedSet="Current.SelectedSet" AllSelected="Current.AllVisibleSelected" OnToggleAll="ToggleAllVisibleSelected" OnToggleRow="ToggleSelected"
+                        OnPlay="Play" OnContextMenu="OpenRowMenu">
+            <ToolContent>
+                <input type="search" class="search" placeholder="Search the library" aria-label="Search the library" value="@Current.Search" @oninput="OnSearchInput"/>
+                <ButtonList>
+                    <UploadMediaButton/>
+                    <LibraryContextMenu @ref="_contextMenu" SelectedSet="Current.SelectedSet" SelectedKeyList="Current.SelectedIDList" HiddenSelectedCount="Current.HiddenSelectedCount"/>
+                </ButtonList>
+            </ToolContent>
+            <EmptyContent>
+                <UploadMediaButton/>
+            </EmptyContent>
+        </MediaFileTable>
+    </UploadMediaDropZone>
 </div>
+
+@code {
+
+    private LibraryContextMenu? _contextMenu;
+    private List<MediaFileTableRow> _rowList = [];
+    private List<ResponseMediaFile>? _rowSource;
+
+    private FeatureLibraryState Current => StateLibrary.Value;
+
+    // The rows follow the visible list and are rebuilt only when it is another list.
+    private List<MediaFileTableRow> RowList
+    {
+        get
+        {
+            if (ReferenceEquals(_rowSource, Current.VisibleList)) return _rowList;
+
+            _rowSource = Current.VisibleList;
+            return _rowList = [.. _rowSource.Select(x => new MediaFileTableRow(x.ID, x))];
+        }
+    }
+
+    private async Task OpenRowMenu((MouseEventArgs Args, MediaFileTableRow Row) context)
+    {
+        if (_contextMenu is null) return;
+
+        await _contextMenu.OpenAtAsync(context.Args, context.Row.Key);
+    }
+
+    private bool IsLibraryEmpty => Current.MediaList.Count == 0;
+
+    // The feature toggles: the new value of the box is already what the state will say once it is dispatched.
+    private void ToggleAllVisibleSelected()
+    {
+        Dispatcher.Dispatch(new ActionLibraryVisibleSelected());
+    }
+
+    private void ToggleSelected(Guid id)
+    {
+        Dispatcher.Dispatch(new ActionLibrarySelectionToggled(id));
+    }
+
+    private void Sort(LibrarySortEnum sort)
+    {
+        Dispatcher.Dispatch(new ActionLibrarySortChanged(sort));
+    }
+
+    private void OnSearchInput(ChangeEventArgs args)
+    {
+        Dispatcher.Dispatch(new ActionLibrarySearchChanged(args.Value?.ToString() ?? string.Empty));
+    }
+
+    // The played list is exactly what the page shows: the same sort and search.
+    private async Task Play(MediaFileTableRow row)
+    {
+        try
+        {
+            await ServicePlaybackControl.StartLibrary(row.MediaFile.ID, Current.Sort, Current.Descending, Current.Search);
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
+}

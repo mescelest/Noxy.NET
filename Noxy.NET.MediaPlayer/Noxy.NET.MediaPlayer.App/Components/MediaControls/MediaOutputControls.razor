@@ -1,0 +1,52 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="duration">
+        <span class="time">@Time</span>
+    </div>
+
+    <div class="volume">
+        <MaterialIcon Icon="volume_up" Size="var(--size-icon-md)"/>
+        <input type="range" min="0" max="100" step="1" value="@VolumeCurrent" aria-label="Volume" @oninput="InputVolumeHandler" @onchange="ChangeVolumeHandler"/>
+    </div>
+
+    <Button Type="@HTMLButtonTypeEnum.Button" class="queue" IsIcon="true" popovertarget="@QueuePanel.PopoverID" aria-label="Queue">
+        <MaterialIcon Icon="queue_music" Size="var(--size-icon-md)"/>
+    </Button>
+
+    <DevicePicker/>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required PlaybackDisplay Display { get; set; }
+
+    // The volume the slider was left at, in percent.
+    [Parameter]
+    public EventCallback<int> OnVolumeChanged { get; set; }
+
+    private int? _dragVolume;
+
+    private int VolumeCurrent => _dragVolume ?? Display.VolumePercent;
+
+    private string Time => $"{Format(Display.Position)} / {Format(Display.Duration)}";
+
+    private static string Format(TimeSpan time) => $"{(int)time.TotalMinutes}:{time.Seconds:00}";
+
+    private static double ParseDouble(object? value) => double.TryParse(value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double result) ? result : 0;
+
+    private void InputVolumeHandler(ChangeEventArgs args)
+    {
+        _dragVolume = (int)ParseDouble(args.Value);
+    }
+
+    private Task ChangeVolumeHandler()
+    {
+        int? volume = _dragVolume;
+        _dragVolume = null;
+
+        return volume is null ? Task.CompletedTask : OnVolumeChanged.InvokeAsync(volume.Value);
+    }
+
+}
