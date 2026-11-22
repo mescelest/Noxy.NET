@@ -2,12 +2,11 @@
 @inject ISyncService ServiceSync
 @inherits BaseComponentElement
 @using System.Text.Json
-@using Noxy.NET.MediaPlayer.Presentation
 @implements IDisposable
 
 <section @attributes="AdditionalAttributes" class="@CssClass">
     <h2>Synced settings</h2>
-    @if (OfflineReason is not null)
+    @if (IsOffline)
     {
         <p class="muted">@OfflineReason They are read-only until the server can be reached.</p>
     }
@@ -18,14 +17,14 @@
             @switch (setting.ValueType)
             {
                 case SettingValueTypeEnum.Boolean:
-                    <input type="checkbox" checked="@(AsBool(setting))" disabled="@(OfflineReason is not null)" @onchange="args => Save(setting, args.Value is true)"/>
+                    <InputControlCheckbox Option="true" aria-label="@setting.Key" Disabled="@IsOffline" @bind-Value:get="@AsBool(setting)" @bind-Value:set="value => Save(setting, value)"/>
                     break;
                 case SettingValueTypeEnum.Integer:
                     SettingDeclarationInteger? integer = SettingCatalog.Find(setting.Key) as SettingDeclarationInteger;
-                    <input type="number" min="@integer?.Minimum" max="@integer?.Maximum" value="@AsText(setting)" disabled="@(OfflineReason is not null)" @onchange="args => SaveInteger(setting, args.Value?.ToString())"/>
+                    <input type="number" min="@integer?.Minimum" max="@integer?.Maximum" value="@AsText(setting)" disabled="@IsOffline" @onchange="args => SaveInteger(setting, args.Value?.ToString())"/>
                     break;
                 case SettingValueTypeEnum.Enum:
-                    <select disabled="@(OfflineReason is not null)" @onchange="args => Save(setting, args.Value?.ToString() ?? string.Empty)">
+                    <select disabled="@IsOffline" @onchange="args => Save(setting, args.Value?.ToString() ?? string.Empty)">
                         @foreach (string name in MemberNameList(setting.Key))
                         {
                             <option value="@name" selected="@(name == AsText(setting))">@name</option>
@@ -51,7 +50,8 @@
     // Raised after a refused write so the inputs are drawn again with the value that is stored.
     private int _resetCount;
 
-    private string? OfflineReason => ServiceSync.IsOffline ? Constants.ActionMessageOffline : null;
+    private string? OfflineReason => ServiceSync.IsOffline ? Texts.ActionMessageOffline : null;
+    private bool IsOffline => OfflineReason is not null;
 
     protected override async Task OnInitializedAsync()
     {

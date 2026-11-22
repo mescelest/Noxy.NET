@@ -11,7 +11,7 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class QueueSourceService(IMetadataStore storeMetadata, ISettingService serviceSetting, IShuffleService serviceShuffle, Random random) : IQueueSourceService
+public class QueueSourceService(IMetadataStore storeMetadata, IShuffleService serviceShuffle, Random random) : IQueueSourceService
 {
     private sealed record BuiltSource(List<QueueItem> ItemList, Dictionary<Guid, string?> ArtistMap);
 
@@ -25,17 +25,17 @@ public class QueueSourceService(IMetadataStore storeMetadata, ISettingService se
         BuiltSource? built = await Load(source);
         if (built is null) return null;
 
-        if (startID is null) return serviceShuffle.Order(built.ItemList, shuffle, ArtistOf(built)).Take(Constants.QueueMaxItemCount).ToList();
+        if (startID is null) return serviceShuffle.Order(built.ItemList, shuffle, ArtistOf(built)).Take(PresentationConstants.QueueMaxItemCount).ToList();
 
         int index = built.ItemList.FindIndex(x => Key(source, x) == startID);
         if (index < 0) return null;
 
-        if (shuffle == ShuffleModeEnum.Off) return built.ItemList.GetRange(index, Math.Min(built.ItemList.Count - index, Constants.QueueMaxItemCount));
+        if (shuffle == ShuffleModeEnum.Off) return built.ItemList.GetRange(index, Math.Min(built.ItemList.Count - index, PresentationConstants.QueueMaxItemCount));
 
         List<QueueItem> rest = [.. built.ItemList];
         rest.RemoveAt(index);
 
-        return [built.ItemList[index], .. serviceShuffle.Order(rest, shuffle, ArtistOf(built)).Take(Constants.QueueMaxItemCount - 1)];
+        return [built.ItemList[index], .. serviceShuffle.Order(rest, shuffle, ArtistOf(built)).Take(PresentationConstants.QueueMaxItemCount - 1)];
     }
 
     public async Task<List<QueueItem>?> Regenerate(ResponseQueueSource source, ShuffleModeEnum shuffle, QueueItem current, List<QueueItem> excludeItemList)
@@ -56,7 +56,7 @@ public class QueueSourceService(IMetadataStore storeMetadata, ISettingService se
 
         List<QueueItem> remaining = candidateList.Where(x => !excludeKeySet.Contains(Key(source, x))).ToList();
 
-        return serviceShuffle.Order(remaining, shuffle, ArtistOf(built)).Take(Math.Max(0, Constants.QueueMaxItemCount - excludeItemList.Count - 1)).ToList();
+        return serviceShuffle.Order(remaining, shuffle, ArtistOf(built)).Take(Math.Max(0, PresentationConstants.QueueMaxItemCount - excludeItemList.Count - 1)).ToList();
     }
 
     public async Task<QueuePlacement?> PlaceNew(ResponseQueueSource source, ShuffleModeEnum shuffle, LiveQueue queue, Guid mediaFileID, Guid? entryID = null)
@@ -90,23 +90,6 @@ public class QueueSourceService(IMetadataStore storeMetadata, ISettingService se
         }
 
         return null;
-    }
-
-    public async Task<ShuffleModeEnum> GetShuffle(ResponseQueueSource? source)
-    {
-        return (await FindPlaylist(source))?.Shuffle ?? await serviceSetting.GetShuffle();
-    }
-
-    public async Task<RepeatModeEnum> GetRepeat(ResponseQueueSource? source)
-    {
-        return (await FindPlaylist(source))?.Repeat ?? await serviceSetting.GetRepeat();
-    }
-
-    private async Task<ResponsePlaylist?> FindPlaylist(ResponseQueueSource? source)
-    {
-        if (source is not { Kind: QueueSourceKindEnum.Playlist, PlaylistID: { } playlistID }) return null;
-
-        return (await storeMetadata.GetPlaylistList()).Find(x => x.ID == playlistID);
     }
 
     private static bool IsNew(ResponseQueueSource source, QueueItem item, Guid mediaFileID, Guid? entryID, HashSet<Guid> queuedItemIDSet)

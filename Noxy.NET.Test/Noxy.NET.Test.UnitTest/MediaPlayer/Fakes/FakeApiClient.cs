@@ -187,6 +187,19 @@ public sealed class FakeApiClient : IApiClient
         return Task.CompletedTask;
     }
 
+    // Answers each UploadMedia call, and may throw to script a refusal. The default accepts every file as a new job.
+    public Func<string, ResponseUploadAccepted> UploadHandler { get; set; } = _ => new() { JobID = Guid.NewGuid() };
+
+    public List<(string FileName, string? ContentType, Guid JobID)> UploadCallList { get; } = [];
+
+    public Task<ResponseUploadAccepted> UploadMedia(string fileName, string? contentType, Func<Stream> openContent)
+    {
+        ResponseUploadAccepted accepted = UploadHandler(fileName);
+        UploadCallList.Add((fileName, contentType, accepted.JobID));
+
+        return Task.FromResult(accepted);
+    }
+
     public Task<ResponsePlaylistDetail> AddPlaylistEntryList(Guid id, RequestAddPlaylistEntry request)
     {
         AddEntryCallList.Add((id, request));

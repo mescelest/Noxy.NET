@@ -1,0 +1,97 @@
+.ToastRenderer {
+    position: fixed;
+    right: 0;
+    bottom: var(--toast-offset-bottom, var(--size-gap-lg, 1.5rem));
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    row-gap: var(--size-gap-xxs, 0.5rem);
+    padding: 0 var(--size-gap-sm, 1rem);
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    column-gap: var(--size-gap-xs, 0.75rem);
+    box-sizing: border-box;
+    width: min(100%, var(--size-column, 20rem) * 1.5);
+    padding: var(--size-gap-xs, 0.75rem);
+    border: var(--size-border-width-md, 2px) solid var(--color-toast, #767676);
+    border-radius: var(--size-border-radius-md, 0.25rem);
+    background-color: color-mix(in srgb, var(--color-toast, #767676) 60%, var(--color-primary, #FFFFFF));
+    color: var(--color-complementary, #000000);
+    font: var(--font-message, normal normal 400 normal var(--size-text-message, 0.875rem) "Segoe UI", "Roboto", sans-serif);
+    pointer-events: auto;
+    animation: toast-rise var(--animation-length-short, 150ms) ease-out;
+}
+
+.message {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.close {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.toast[data-status="default"] {
+    --color-toast: var(--color-default, #4D4AD3);
+}
+
+.toast[data-status="none"] {
+    --color-toast: var(--color-offset-primary-lg, #767676);
+}
+
+.toast[data-status="success"] {
+    --color-toast: var(--color-success, #23883D);
+}
+
+.toast[data-status="info"] {
+    --color-toast: var(--color-info, #289ED9);
+}
+
+.toast[data-status="highlight"] {
+    --color-toast: var(--color-highlight, #0073EC);
+}
+
+.toast[data-status="warning"] {
+    --color-toast: var(--color-warning, #D97F00);
+}
+
+.toast[data-status="notice"] {
+    --color-toast: var(--color-notice, #A948DD);
+}
+
+.toast[data-status="error"] {
+    --color-toast: var(--color-error, #E42B21);
+}
+
+@keyframes toast-rise {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast {
+        animation: none;
+    }
+}

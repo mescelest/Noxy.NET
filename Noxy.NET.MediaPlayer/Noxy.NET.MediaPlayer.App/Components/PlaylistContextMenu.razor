@@ -1,0 +1,90 @@
+@inject IPlaylistService ServicePlaylist
+@inject IToastService ServiceToast
+@inject NavigationManager Navigation
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <ContextMenu @ref="_menu" ID="@MenuID(Playlist.ID)" ItemList="ItemList" OnClose="CloseHandler"/>
+
+    <EditPlaylistDialog @bind-Open="_editing" PlaylistID="Playlist.ID"/>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required ResponsePlaylist Playlist { get; set; }
+
+    private const string MenuIDPrefix = "playlist-menu-";
+    private const string TextDelete = "Delete playlist";
+    private const string TextDeleteConfirm = "Click again to delete";
+
+    private ContextMenu? _menu;
+    private bool _editing;
+    private bool _confirmingDelete;
+
+    // The playlist's "⋯" button puts this in its popovertarget attribute.
+    public static string MenuID(Guid playlistID) => MenuIDPrefix + playlistID.ToString("N");
+
+    // The first activation of Delete only asks again, and keeps the menu open; the second one deletes.
+    private List<ContextMenuItem> ItemList =>
+    [
+            ContextMenuItem.Item("Play", () => Run(() => ServicePlaylist.Play(Playlist.ID))),
+            ContextMenuItem.Item("Download all", () => Run(() => ServicePlaylist.DownloadAll(Playlist.ID))),
+            ContextMenuItem.Item("Edit…", Edit),
+            ContextMenuItem.Item("Refresh", () => Run(() => ServicePlaylist.Refresh(Playlist.ID))),
+            ContextMenuItem.Separator(),
+            ContextMenuItem.Item(_confirmingDelete ? TextDeleteConfirm : TextDelete, Delete, isDestructive: true, closesMenu: _confirmingDelete)
+    ];
+
+    public async Task OpenAtAsync(MouseEventArgs args)
+    {
+        if (_menu is null) return;
+
+        await _menu.OpenAtAsync(args);
+    }
+
+    // Closing the menu, however it happens, puts Delete back to its first step.
+    private Task CloseHandler()
+    {
+        _confirmingDelete = false;
+        return Task.CompletedTask;
+    }
+
+    private Task Edit()
+    {
+        _editing = true;
+        return Task.CompletedTask;
+    }
+
+    private async Task Delete()
+    {
+        if (!_confirmingDelete)
+        {
+            _confirmingDelete = true;
+            return;
+        }
+
+        bool isOnScreen = Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/') == $"playlist/{Playlist.ID}";
+        if (!await Run(() => ServicePlaylist.Delete(Playlist.ID))) return;
+
+        if (isOnScreen)
+        {
+            Navigation.NavigateTo(string.Empty);
+        }
+    }
+
+    private async Task<bool> Run(Func<Task> action)
+    {
+        try
+        {
+            await action();
+            return true;
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+            return false;
+        }
+    }
+
+}

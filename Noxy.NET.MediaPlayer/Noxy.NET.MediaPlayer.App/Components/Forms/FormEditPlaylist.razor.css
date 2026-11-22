@@ -1,0 +1,5 @@
+.FormEditPlaylist {
+    display: flex;
+    flex-flow: column;
+    gap: var(--size-gap-xs);
+}

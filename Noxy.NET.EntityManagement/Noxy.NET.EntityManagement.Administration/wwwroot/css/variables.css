@@ -70,7 +70,7 @@
 :root {
     --color-light: #FFFFFF;
     --color-dark: #000000;
-    --color-none: #4D4AD3;
+    --color-default: #4D4AD3;
     --color-muted: #767676;
     --color-highlight: #0073EC;
     --color-info: #289ED9;

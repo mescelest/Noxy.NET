@@ -20,9 +20,4 @@ public interface IQueueSourceService
     // entryID names the playlist entry that is new, when the caller knows it; otherwise the first entry of that media file that is not in the queue is taken.
     // Where a media file that joined the source belongs in the queue, or null when it does not belong (it sorts before the current item, or nothing is playing).
     Task<QueuePlacement?> PlaceNew(ResponseQueueSource source, ShuffleModeEnum shuffle, LiveQueue queue, Guid mediaFileID, Guid? entryID = null);
-
-    // The mode that applies to a queue: the playing playlist's own when it has one, else the user's setting (also with no source, and for the Library).
-    Task<ShuffleModeEnum> GetShuffle(ResponseQueueSource? source);
-
-    Task<RepeatModeEnum> GetRepeat(ResponseQueueSource? source);
 }

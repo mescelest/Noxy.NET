@@ -1,0 +1,69 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass" data-dragging="@IsDragging" @ondragenter="DragEnterHandler">
+    @ChildContent
+    @if (IsDragging)
+    {
+        <div class="hint">@DraggingContent</div>
+    }
+    <InputFile class="drop" data-active="@IsDragging" OnChange="SelectedHandler" multiple="@MultipleCurrent" disabled="@DisabledCurrent" tabindex="-1" aria-hidden="true" @ondragleave="DragLeaveHandler"/>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // Shown over the zone for as long as files are dragged over it.
+    [Parameter]
+    public RenderFragment? DraggingContent { get; set; }
+
+    // The kinds of file that are taken, as the accept attribute of a file input says it (for example "audio/*"). Null takes every file. The others are reported to OnRejected.
+    [Parameter]
+    public string? Accept { get; set; }
+
+    [Parameter]
+    public bool? Multiple { get; set; }
+    private bool MultipleCurrent => Multiple ?? true;
+
+    [Parameter]
+    public bool? Disabled { get; set; }
+    private bool DisabledCurrent => Disabled ?? false;
+
+    // The files that were dropped and fit Accept, in the order the browser gave them. Nothing is read: the caller opens the ones it wants.
+    [Parameter]
+    public EventCallback<List<IBrowserFile>> OnSelected { get; set; }
+
+    // The files that were dropped and do not fit Accept.
+    [Parameter]
+    public EventCallback<List<IBrowserFile>> OnRejected { get; set; }
+
+    private const string TypeFiles = "Files";
+
+    private bool IsDragging { get; set; }
+
+    // Only a drag of files counts: dragging something inside the page (reordering a list, say) leaves the zone alone.
+    private void DragEnterHandler(DragEventArgs args)
+    {
+        IsDragging = !DisabledCurrent && args.DataTransfer.Types.Contains(TypeFiles);
+    }
+
+    private void DragLeaveHandler()
+    {
+        IsDragging = false;
+    }
+
+    private async Task SelectedHandler(InputFileChangeEventArgs args)
+    {
+        IsDragging = false;
+
+        List<IBrowserFile> fileList = [.. args.GetMultipleFiles(args.FileCount)];
+        List<IBrowserFile> acceptedList = [.. fileList.Where(x => x.IsAccepted(Accept))];
+        List<IBrowserFile> rejectedList = [.. fileList.Except(acceptedList)];
+
+        if (!MultipleCurrent && acceptedList.Count > 1) acceptedList = [acceptedList[0]];
+        if (rejectedList.Count > 0) await OnRejected.InvokeAsync(rejectedList);
+        if (acceptedList.Count > 0) await OnSelected.InvokeAsync(acceptedList);
+    }
+
+}

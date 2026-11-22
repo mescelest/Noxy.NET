@@ -1,0 +1,227 @@
+@inject IServerAddressStorage StorageServerAddress
+@inject IJSRuntime JS
+@inherits BaseComponentElement
+@using Noxy.NET.UI.Extensions
+@implements IAsyncDisposable
+
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
+    @if (_showForm)
+    {
+        <h2>@Title</h2>
+        <FormServerAddress Address="_editing" OnSubmit="Saved"/>
+        <div class="actions">
+            <button type="button" class="plain" @onclick="Back">Back</button>
+        </div>
+    }
+    else
+    {
+        <h2>Servers</h2>
+        @if (_addressList.Count == 0)
+        {
+            <p class="empty">No server saved yet.</p>
+        }
+        else
+        {
+            <ul class="server-list">
+                @foreach (string address in _addressList)
+                {
+                    <li @key="address" class="server">
+                        <span class="address">@address</span>
+                        @if (IsCurrent(address))
+                        {
+                            <span class="in-use">In use</span>
+                        }
+                        <button type="button" class="plain" @onclick="() => Edit(address)">Edit</button>
+                        <button type="button" class="plain delete" data-confirming="@IsConfirming(address)" @onclick="() => Delete(address)">
+                            @DeleteLabelOf(address)
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+
+        <div class="actions">
+            <button type="button" class="plain" @onclick="Add">Add server</button>
+            <button type="button" class="plain" @onclick="Close">Close</button>
+        </div>
+    }
+</Dialog>
+
+@code {
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    // Raised after a server was added, edited or removed, so the picker follows.
+    [Parameter]
+    public EventCallback OnChanged { get; set; }
+
+    private List<string> _addressList = [];
+    private string? _current;
+    private bool _wasOpen;
+
+    // The form is shown instead of the list: it edits the saved address, or adds a new one when that is null.
+    private bool _showForm;
+    private string? _editing;
+
+    // The address whose delete button was clicked once: a second click removes it.
+    private string? _confirming;
+
+    private string Title => _editing is null ? "Add server" : "Edit server";
+
+    private bool IsCurrent(string address) => address == _current;
+
+    private bool IsConfirming(string address) => _confirming == address;
+
+    private string DeleteLabelOf(string address) => IsConfirming(address) ? "Confirm" : "Delete";
+
+    private const string FunctionWatchOutsideClick = "WatchOutsideClick";
+    private const string SelectorConfirming = "[data-confirming]";
+
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _watch;
+    private DotNetObjectReference<ServerManageDialog>? _reference;
+    private bool _watching;
+    private bool _disposed;
+
+    // A click outside the delete button that waits for its second click cancels it, without blocking what was clicked instead.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        await SyncWatchAsync();
+    }
+
+    private async Task SyncWatchAsync()
+    {
+        if (_disposed || Open == _watching) return;
+
+        _watching = Open;
+        if (Open)
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(ServerManageDialog), true));
+            _reference ??= DotNetObjectReference.Create(this);
+            _watch = await _module.InvokeAsync<IJSObjectReference>(FunctionWatchOutsideClick, _reference, nameof(ClickedOutside), SelectorConfirming);
+        }
+        else if (_watch is not null)
+        {
+            await StopWatchAsync();
+        }
+    }
+
+    private async Task StopWatchAsync()
+    {
+        IJSObjectReference? watch = _watch;
+        _watch = null;
+        if (watch is null) return;
+
+        try
+        {
+            await watch.InvokeVoidAsync("dispose");
+            await watch.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
+    }
+
+    [JSInvokable]
+    public async Task ClickedOutside()
+    {
+        if (_confirming is null) return;
+
+        _confirming = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+
+        _disposed = true;
+        await StopWatchAsync();
+        try
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
+
+        _reference?.Dispose();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Open == _wasOpen) return;
+
+        _wasOpen = Open;
+        if (!Open) return;
+
+        _editing = null;
+        _confirming = null;
+        await Load();
+        _showForm = _addressList.Count == 0;
+    }
+
+    private async Task Load()
+    {
+        _addressList = await StorageServerAddress.GetAddressList();
+        _current = await StorageServerAddress.GetAddress();
+    }
+
+    private Task HandleOpenChanged(bool open)
+    {
+        return open ? Task.CompletedTask : Close();
+    }
+
+    private async Task Close()
+    {
+        await OpenChanged.InvokeAsync(false);
+    }
+
+    private void Add()
+    {
+        _confirming = null;
+        _editing = null;
+        _showForm = true;
+    }
+
+    private void Edit(string address)
+    {
+        _confirming = null;
+        _editing = address;
+        _showForm = true;
+    }
+
+    private async Task Back()
+    {
+        _showForm = false;
+        await Load();
+    }
+
+    private async Task Saved(string address)
+    {
+        await Load();
+        await OnChanged.InvokeAsync();
+        _showForm = false;
+    }
+
+    private async Task Delete(string address)
+    {
+        if (_confirming != address)
+        {
+            _confirming = address;
+            return;
+        }
+
+        _confirming = null;
+        await StorageServerAddress.RemoveAddress(address);
+        await Load();
+        await OnChanged.InvokeAsync();
+    }
+
+}

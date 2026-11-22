@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Models;
-using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Remote;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
@@ -152,7 +151,7 @@ public class PlayerService(
     {
         EnsureWired();
 
-        ShuffleModeEnum shuffle = await serviceQueueSource.GetShuffle(source);
+        ShuffleModeEnum shuffle = await serviceSetting.GetShuffle();
         if (!await serviceQueue.StartSource(source, startID, shuffle)) return false;
 
         int version;
@@ -284,15 +283,7 @@ public class PlayerService(
     {
         EnsureWired();
 
-        if (serviceQueue.Queue.Source is { Kind: QueueSourceKindEnum.Playlist, PlaylistID: { } playlistID })
-        {
-            ResponsePlaylist updated = await clientApi.UpdatePlaylist(playlistID, new() { Shuffle = new(shuffle) });
-            await serviceSync.ApplyPlaylistUpdated(updated);
-        }
-        else
-        {
-            await serviceSetting.Update(SettingKey.Shuffle, JsonSerializer.SerializeToElement(shuffle.ToString()));
-        }
+        await serviceSetting.Update(SettingKey.Shuffle, JsonSerializer.SerializeToElement(shuffle.ToString()));
 
         await RefreshModes();
         await serviceQueue.Regenerate(shuffle);
@@ -302,15 +293,7 @@ public class PlayerService(
     {
         EnsureWired();
 
-        if (serviceQueue.Queue.Source is { Kind: QueueSourceKindEnum.Playlist, PlaylistID: { } playlistID })
-        {
-            ResponsePlaylist updated = await clientApi.UpdatePlaylist(playlistID, new() { Repeat = new(repeat) });
-            await serviceSync.ApplyPlaylistUpdated(updated);
-        }
-        else
-        {
-            await serviceSetting.Update(SettingKey.Repeat, JsonSerializer.SerializeToElement(repeat.ToString()));
-        }
+        await serviceSetting.Update(SettingKey.Repeat, JsonSerializer.SerializeToElement(repeat.ToString()));
 
         await RefreshModes();
     }
@@ -432,13 +415,13 @@ public class PlayerService(
         ResponseQueueSource? source = serviceQueue.Queue.Source;
         if (source is null) return null;
 
-        RepeatModeEnum repeat = await serviceQueueSource.GetRepeat(source);
+        RepeatModeEnum repeat = await serviceSetting.GetRepeat();
         lock (_lock)
         {
             if (repeat == RepeatModeEnum.No || (repeat == RepeatModeEnum.Once && _repeatPassCount >= 1)) return null;
         }
 
-        List<QueueItem>? pass = await serviceQueueSource.Build(source, await serviceQueueSource.GetShuffle(source), null);
+        List<QueueItem>? pass = await serviceQueueSource.Build(source, await serviceSetting.GetShuffle(), null);
         if (pass is null || pass.Count == 0) return null;
 
         // A playlist entry is already in the queue's history under its own ID, and an ID may appear only once: each repeated item is new.
@@ -536,7 +519,7 @@ public class PlayerService(
     {
         ResponseQueue queue = serviceQueue.GetSnapshot();
         List<Guid> windowList;
-        lock (_lock) windowList = queue.UserQueueList.Concat(queue.SourceList).Where(x => !_failedSet.Contains(x.ItemID)).Select(x => x.MediaFileID).Distinct().Take(Constants.PrefetchCount).ToList();
+        lock (_lock) windowList = queue.UserQueueList.Concat(queue.SourceList).Where(x => !_failedSet.Contains(x.ItemID)).Select(x => x.MediaFileID).Distinct().Take(PresentationConstants.PrefetchCount).ToList();
 
         List<Guid> missingList = [];
         foreach (Guid id in windowList)
@@ -568,9 +551,8 @@ public class PlayerService(
 
     private async Task RefreshModes()
     {
-        ResponseQueueSource? source = serviceQueue.Queue.Source;
-        ShuffleModeEnum shuffle = await serviceQueueSource.GetShuffle(source);
-        RepeatModeEnum repeat = await serviceQueueSource.GetRepeat(source);
+        ShuffleModeEnum shuffle = await serviceSetting.GetShuffle();
+        RepeatModeEnum repeat = await serviceSetting.GetRepeat();
 
         bool changed;
         lock (_lock)

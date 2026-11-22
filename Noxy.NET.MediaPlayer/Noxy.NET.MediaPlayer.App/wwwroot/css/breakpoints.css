@@ -1,4 +1,10 @@
 /* The only place a media query condition is written. */
+@media (hover: none) {
+    :root {
+        --layout-touch: 1;
+    }
+}
+
 @media (max-width: 45rem) {
     :root {
         --size-layout-sidebar: var(--size-control-xxl);

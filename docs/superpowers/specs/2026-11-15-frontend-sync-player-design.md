@@ -29,7 +29,7 @@ The media player is a sync-and-play app, not a streaming service. A user's media
 - Server-side search or sorting.
 - Automatic eviction of files from the device: files leave only when the user removes them or the media file is deleted.
 - Editing media file tags from the UI (the endpoint exists; the screen can come later).
-- Uploading media files from the UI (the endpoint exists; a later design).
+- Uploading media files from the UI: built later, see the Library and Playlist pages in `2026-11-15-frontend-screens-design.md`.
 
 ## Anti-goals
 

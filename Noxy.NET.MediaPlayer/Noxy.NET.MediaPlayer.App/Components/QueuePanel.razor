@@ -2,19 +2,19 @@
 @inject IQueueService ServiceQueue
 @inject IPlayerService ServicePlayer
 @inject IPlaybackControlService ServiceControl
+@inject IToastService ServiceToast
 @inherits BaseComponentElementFluxor
 @implements IAsyncDisposable
 
-<aside @attributes="AdditionalAttributes" class="@CssClass" aria-label="Queue">
+<Popover @ref="_popover" @attributes="AdditionalAttributes" ID="@PopoverID" Side="PlacementSideEnum.Top" Align="PlacementAlignEnum.End" class="@CssClass" aria-label="Queue">
+    <div class="panel">
     <header>
         <h2>Queue</h2>
         <button type="button" class="text" @onclick="Clear">Clear</button>
-        <button type="button" class="text" @onclick="OnClose" aria-label="Close the queue">
+        <button type="button" class="text" @onclick="ClickCloseHandler" aria-label="Close the queue">
             <MaterialIcon Icon="close" Size="var(--size-icon-md)"/>
         </button>
     </header>
-
-    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
 
     @if (_historyCount > 0)
     {
@@ -47,17 +47,18 @@
             }
         </Virtualize>
     </div>
-</aside>
+    </div>
+</Popover>
 
 @code {
 
     private sealed record QueueRow(string? Label, QueueItem? Item, bool IsCurrent, bool IsUpcoming);
 
-    [Parameter]
-    public EventCallback OnClose { get; set; }
+    // The player bar's queue button puts this in its popovertarget attribute.
+    public const string PopoverID = "queue-panel";
 
+    private Popover? _popover;
     private List<QueueRow> _rowList = [];
-    private List<string> _messageList = [];
     private bool _showHistory;
     private int _historyCount;
     private Guid? _dragID;
@@ -129,18 +130,25 @@
 
     private async Task Run(Func<Task> action)
     {
-        _messageList = [];
         try
         {
             await action();
         }
         catch (Exception exception)
         {
-            _messageList = [exception.ToActionMessage()];
+            ServiceToast.ShowError(exception.ToActionMessage());
         }
     }
 
     private Task Clear() => Run(ServicePlayer.Clear);
+
+    private async Task ClickCloseHandler()
+    {
+        if (_popover is not null)
+        {
+            await _popover.HideAsync();
+        }
+    }
 
     // The dragged entry takes its place after the one it is dropped on; synced to every device through the live session.
     private async Task Drop(QueueItem target)

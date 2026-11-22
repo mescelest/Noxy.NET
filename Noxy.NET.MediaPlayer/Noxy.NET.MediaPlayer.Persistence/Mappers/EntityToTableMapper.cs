@@ -124,8 +124,6 @@ public class EntityToTableMapper : IEntityToTableMapper
             AllowDuplicates = entity.AllowDuplicates,
             TimeModified = entity.TimeModified,
             TimeLastPlayed = entity.TimeLastPlayed,
-            Shuffle = entity.Shuffle,
-            Repeat = entity.Repeat,
             EntryList = [.. entity.EntryList.Select(Map)]
         };
     }

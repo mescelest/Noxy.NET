@@ -17,7 +17,7 @@ Users need a few settings that follow them from device to device. Today there is
 
 ## Non-goals
 
-- Shuffle and repeat **per playlist**: built. Two nullable columns on the playlist (`Shuffle`, `Repeat`), null meaning "use the global setting"; `PATCH /Playlist/{id}` sets them (a left-out field is untouched, an explicit `null` clears the mode, the same value changes nothing). A real change moves the playlist's modified time, so the list and detail ETags change and other devices download the entries again: accepted, mode changes are rare.
+- Shuffle and repeat **per playlist**: not built, and not planned. They are global only: the player bar's buttons write the `Shuffle` and `Repeat` settings, and a playlist has no mode of its own.
 - The shuffle algorithms themselves (frontend work), and any mode that picks media for the user.
 - Equalizer, crossfade, shortcuts and any structured value: left for later. The design leaves room (a new derived type) but builds none.
 - Device-local settings (storage path, watched folders, theme): they never reach the server.

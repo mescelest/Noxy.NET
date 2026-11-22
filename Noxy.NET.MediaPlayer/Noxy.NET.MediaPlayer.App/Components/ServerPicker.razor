@@ -1,0 +1,65 @@
+@inject IServerAddressStorage StorageServerAddress
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <select class="select" aria-label="Server" disabled="@IsSelectDisabled" @onchange="Select">
+        @if (_current is null)
+        {
+            <option value="" selected>@PlaceholderText</option>
+        }
+        @foreach (string address in _addressList)
+        {
+            <option value="@address" selected="@IsCurrent(address)">@address</option>
+        }
+    </select>
+    <Button class="manage" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" disabled="@Disabled" aria-label="Manage servers" @onclick="OpenDialog">
+        <MaterialIcon Icon="settings" Size="var(--size-icon-sm)"/>
+    </Button>
+
+    <ServerManageDialog @bind-Open="_open" OnChanged="Load"/>
+</div>
+
+@code {
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    private List<string> _addressList = [];
+    private string? _current;
+    private bool _open;
+
+    private bool IsSelectDisabled => Disabled || _addressList.Count == 0;
+
+    private string PlaceholderText => _addressList.Count == 0 ? "No server saved" : "Choose a server";
+
+    private bool IsCurrent(string address) => address == _current;
+
+    private void OpenDialog()
+    {
+        _open = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+
+        // Nothing to pick yet: the first thing to do is to add a server.
+        _open = _addressList.Count == 0;
+    }
+
+    private async Task Load()
+    {
+        _addressList = await StorageServerAddress.GetAddressList();
+        _current = await StorageServerAddress.GetAddress();
+    }
+
+    private async Task Select(ChangeEventArgs args)
+    {
+        string? address = args.Value?.ToString();
+        if (string.IsNullOrEmpty(address)) return;
+
+        await StorageServerAddress.SetAddress(address);
+        await Load();
+    }
+
+}

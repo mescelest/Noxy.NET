@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+using Noxy.NET.MediaPlayer.Application;
 using Noxy.NET.MediaPlayer.Application.Commands.Media;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Models.Media;
@@ -30,7 +31,7 @@ public class MediaController(IMediator mediator, IOptions<ConfigStorage> configS
     // Multipart so the file is streamed to disk instead of buffered. The optional "title" field must come before the "file" field.
     // Keep this action free of parameters: any parameter makes MVC read the form first, which consumes the body.
     [HttpPost]
-    [EnableRateLimiting(Constants.RateLimitPolicyUpload)]
+    [EnableRateLimiting(ApiConstants.RateLimitPolicyUpload)]
     public async Task<ActionResult<ResponseUploadAccepted>> Upload()
     {
         CancellationToken cancellationToken = HttpContext.RequestAborted;
@@ -55,10 +56,10 @@ public class MediaController(IMediator mediator, IOptions<ConfigStorage> configS
 
             switch (disposition.Name.Value)
             {
-                case Constants.UploadTitleField:
+                case ApplicationConstants.TitleField:
                     title = await ReadText(section.Body, cancellationToken);
                     break;
-                case Constants.UploadFileField when !StringSegment.IsNullOrEmpty(disposition.FileName):
+                case ApplicationConstants.FileField when !StringSegment.IsNullOrEmpty(disposition.FileName):
                 {
                     ResponseUploadAccepted response = await mediator.Send(new CommandMediaUpload(UserID, HeaderUtilities.RemoveQuotes(disposition.FileName).ToString(), title, section.Body), cancellationToken);
                     return StatusCode(StatusCodes.Status202Accepted, response);
@@ -66,7 +67,7 @@ public class MediaController(IMediator mediator, IOptions<ConfigStorage> configS
             }
         }
 
-        return Problem(statusCode: StatusCodes.Status400BadRequest, title: $$"""Expected a "{{Constants.UploadFileField}}" field.""");
+        return Problem(statusCode: StatusCodes.Status400BadRequest, title: $$"""Expected a "{{ApplicationConstants.FileField}}" field.""");
     }
 
     [HttpGet]
@@ -114,7 +115,7 @@ public class MediaController(IMediator mediator, IOptions<ConfigStorage> configS
 
     // A copy of the media file with its current tags written into it, for a user who saves the file. Rate limited, because every request makes a copy.
     [HttpGet($"{IdRoute}/Download")]
-    [EnableRateLimiting(Constants.RateLimitPolicyDownload)]
+    [EnableRateLimiting(ApiConstants.RateLimitPolicyDownload)]
     public async Task<ActionResult> Download(Guid id, CancellationToken cancellationToken)
     {
         MediaDownload download = await mediator.Send(new QueryMediaFileWithTags(UserID, id), cancellationToken);

@@ -15,6 +15,8 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
 
     public event Action<LibraryDiff>? LibraryDiffApplied;
 
+    public event Action<ResponseUploadResult>? UploadResultReceived;
+
     public bool IsOffline { get; private set; }
 
     public async Task SyncLibrary(bool force = false)
@@ -106,9 +108,19 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
 
     public async Task ApplyUploadSucceeded(ResponseUploadResult result)
     {
-        if (result.Media is null) return;
+        if (result.Media is not null)
+        {
+            await ApplyMediaUpdated(result.Media);
+        }
 
-        await ApplyMediaUpdated(result.Media);
+        UploadResultReceived?.Invoke(result);
+    }
+
+    public Task ApplyUploadFailed(ResponseUploadResult result)
+    {
+        UploadResultReceived?.Invoke(result);
+
+        return Task.CompletedTask;
     }
 
     // Compares by ID and by ContentHash: a change that only touches metadata leaves the bytes on the device right, so it is not a change here.

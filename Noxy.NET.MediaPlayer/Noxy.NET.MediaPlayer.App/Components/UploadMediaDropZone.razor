@@ -1,0 +1,59 @@
+@inject IUploadService ServiceUpload
+@inject ISyncService ServiceSync
+@inject IToastService ServiceToast
+@inherits BaseComponentElement
+@implements IDisposable
+
+<FileDropZone @attributes="AdditionalAttributes" class="@CssClass" Accept="@AcceptAudio" Disabled="@IsOffline" OnSelected="SelectedHandler" OnRejected="RejectedHandler">
+    <DraggingContent>
+        <div class="hint">
+            <MaterialIcon Icon="upload_file" Size="var(--size-icon-xl)"/>
+            <span>@HintText</span>
+        </div>
+    </DraggingContent>
+    <ChildContent>
+        @ChildContent
+    </ChildContent>
+</FileDropZone>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // The playlist the files are added to once they are in the library. Null uploads to the library alone.
+    [Parameter]
+    public Guid? PlaylistID { get; set; }
+
+    private const string AcceptAudio = "audio/*";
+
+    private bool IsOffline => ServiceSync.IsOffline;
+
+    private string HintText => PlaylistID is null ? "Drop audio files to add them to your library" : "Drop audio files to add them to your library and this playlist";
+
+    protected override void OnInitialized()
+    {
+        ServiceSync.Changed += OnSyncChanged;
+    }
+
+    private void OnSyncChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SelectedHandler(List<IBrowserFile> fileList)
+    {
+        await ServiceUpload.Upload(fileList.ToUploadFileList(), PlaylistID);
+    }
+
+    private void RejectedHandler(List<IBrowserFile> fileList)
+    {
+        ServiceToast.ShowWarning(fileList.Count == 1 ? "1 file was skipped: it is not an audio file." : $"{fileList.Count} files were skipped: they are not audio files.");
+    }
+
+    public void Dispose()
+    {
+        ServiceSync.Changed -= OnSyncChanged;
+    }
+
+}

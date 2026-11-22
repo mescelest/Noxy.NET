@@ -13,6 +13,9 @@ public interface ISyncService
     // Raised after the library changed, when at least one media file was added, removed or got other bytes (a new ContentHash). Not raised for a change that only touches metadata.
     event Action<LibraryDiff>? LibraryDiffApplied;
 
+    // Raised for every upload result the hub reports for this user, from this device or another, after the library has been updated.
+    event Action<ResponseUploadResult>? UploadResultReceived;
+
     // True when the last call could not reach the server (no address saved, network down or timed out).
     bool IsOffline { get; }
 
@@ -38,4 +41,6 @@ public interface ISyncService
 
     // A failed upload carries no media: nothing changes.
     Task ApplyUploadSucceeded(ResponseUploadResult result);
+
+    Task ApplyUploadFailed(ResponseUploadResult result);
 }

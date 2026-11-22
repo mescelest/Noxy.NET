@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Noxy.NET.MediaPlayer.Application;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -105,6 +106,14 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
         await EnsureSuccess(response);
     }
 
+    public async Task<ResponseUploadAccepted> UploadMedia(string fileName, string? contentType, Func<Stream> openContent)
+    {
+        using HttpResponseMessage response = await Send(HttpMethod.Post, MediaPath, null, null, contentFactory: () => BuildUploadContent(fileName, contentType, openContent), timeout: Timeout.InfiniteTimeSpan);
+        await EnsureSuccess(response);
+
+        return await ReadBody<ResponseUploadAccepted>(response);
+    }
+
     public async Task<ResponsePlaylistDetail> AddPlaylistEntryList(Guid id, RequestAddPlaylistEntry request)
     {
         return await Write<ResponsePlaylistDetail>(HttpMethod.Post, $"{PlaylistPath}/{id}/EntryList", request);
@@ -181,32 +190,43 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     }
 
     // Sends the request with the current access token. An unauthorized answer gets one refresh and one more try with a fresh copy of the request (the body is built again for each try, since sending disposes it); if the refresh fails or the second try is unauthorized as well, the answer is thrown as it came.
-    private async Task<HttpResponseMessage> Send(HttpMethod method, string path, object? body, string? eTag, FileRange? range = null, HttpCompletionOption completion = HttpCompletionOption.ResponseContentRead)
+    private async Task<HttpResponseMessage> Send(HttpMethod method, string path, object? body, string? eTag, FileRange? range = null, HttpCompletionOption completion = HttpCompletionOption.ResponseContentRead, Func<HttpContent>? contentFactory = null,
+        TimeSpan? timeout = null)
     {
         string address = await storageServerAddress.GetAddress() ?? throw new ServerAddressMissingException();
 
-        HttpResponseMessage response = await SendOnce(address, method, path, body, eTag, range, completion);
+        HttpResponseMessage response = await SendOnce(address, method, path, body, eTag, range, completion, contentFactory, timeout);
         if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
 
         if (!await serviceSession.Refresh()) throw await ToExceptionAndDispose(response);
 
         response.Dispose();
-        response = await SendOnce(address, method, path, body, eTag, range, completion);
+        response = await SendOnce(address, method, path, body, eTag, range, completion, contentFactory, timeout);
         if (response.StatusCode == HttpStatusCode.Unauthorized) throw await ToExceptionAndDispose(response);
 
         return response;
     }
 
-    private async Task<HttpResponseMessage> SendOnce(string address, HttpMethod method, string path, object? body, string? eTag, FileRange? range, HttpCompletionOption completion)
+    private async Task<HttpResponseMessage> SendOnce(string address, HttpMethod method, string path, object? body, string? eTag, FileRange? range, HttpCompletionOption completion, Func<HttpContent>? contentFactory, TimeSpan? timeout)
     {
         using HttpRequestMessage request = new(method, $"{address}{path}");
-        request.Content = body is null ? null : JsonContent.Create(body);
+        request.Content = contentFactory is not null ? contentFactory() : body is null ? null : JsonContent.Create(body);
         if (await serviceSession.GetAccessToken() is { } token) request.Headers.Authorization = new(BearerScheme, token);
         if (eTag is not null) request.Headers.TryAddWithoutValidation(IfNoneMatchHeader, eTag);
         if (range is not null) request.Headers.Range = new(range.Start, null);
         if (range?.IfRange is not null) request.Headers.IfRange = new(EntityTagHeaderValue.Parse(range.IfRange));
 
-        return await client.SendAsync(request, completion);
+        using CancellationTokenSource timeoutSource = new(timeout ?? TimeSpan.FromSeconds(PresentationConstants.HttpTimeoutSeconds));
+
+        return await client.SendAsync(request, completion, timeoutSource.Token);
+    }
+
+    private static MultipartFormDataContent BuildUploadContent(string fileName, string? contentType, Func<Stream> openContent)
+    {
+        StreamContent file = new(openContent());
+        if (MediaTypeHeaderValue.TryParse(contentType, out MediaTypeHeaderValue? parsed)) file.Headers.ContentType = parsed;
+
+        return new() { { file, ApplicationConstants.FileField, fileName } };
     }
 
     private sealed record FileRange(long Start, string? IfRange);

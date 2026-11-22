@@ -22,7 +22,7 @@ public sealed class FrontendClient : IAsyncDisposable
         HttpClient httpClient = new(Network, false);
         FakeServerAddressStorage storageServerAddress = new(factory.Server.BaseAddress.ToString().TrimEnd('/'));
 
-        Store = new SqliteMetadataStore(Path.Combine(folder, Constants.MetadataDatabaseFileName));
+        Store = new SqliteMetadataStore(Path.Combine(folder, StorageConstants.MetadataDatabaseFileName));
         Session = new(new AuthApiClient(httpClient, storageServerAddress), new FakeGoogleSignInService(), sessionStorage, Time);
         Api = new(httpClient, Session, storageServerAddress);
         Sync = new(Api, Store);
@@ -34,10 +34,10 @@ public sealed class FrontendClient : IAsyncDisposable
         Download = new(Api, FileStore, new HashService(), Store, new Delay(), NullLogger<DownloadService>.Instance);
         Reconciler = new(FileStore, Store, Download);
 
-        QueueSource = new(Store, SettingService, new ShuffleService(Random.Shared), Random.Shared);
-        QueueFile = new(Path.Combine(folder, Constants.LocalQueueFileName));
+        QueueSource = new(Store, new ShuffleService(Random.Shared), Random.Shared);
+        QueueFile = new(Path.Combine(folder, StorageConstants.LocalQueueFileName));
         Queue = new(QueueSource, SettingService, QueueFile, Sync, Store, Time, NullLogger<QueueService>.Instance);
-        DeviceFile = new(Path.Combine(folder, Constants.DeviceFileName));
+        DeviceFile = new(Path.Combine(folder, StorageConstants.DeviceFileName));
         Device = new(DeviceFile);
         Player = new(Audio, Download, FileStore, Store, Sync, DeviceFile, Queue, QueueSource, SettingService, Api, NullLogger<PlayerService>.Instance);
         Remote = new(Hub, Device, Queue, Time, NullLogger<RemotePlaybackService>.Instance);

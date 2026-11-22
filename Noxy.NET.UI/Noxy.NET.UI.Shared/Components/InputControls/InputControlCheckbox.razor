@@ -13,7 +13,7 @@
         </div>
     }
 
-    <InputElementCheckbox TOption="TOption" @attributes="@AdditionalAttributes" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+    <InputElementCheckbox TOption="TOption" @attributes="@AdditionalAttributes" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" disabled="@DisabledCurrent"/>
 
     @if (ChildContent != null)
     {
@@ -34,6 +34,7 @@
 
     [Parameter]
     public bool? Disabled { get; set; }
+    private bool DisabledCurrent => Disabled ?? false;
 
     private bool Checked => EqualityComparer<TOption>.Default.Equals(Value, Option);
 

@@ -20,7 +20,7 @@ public class QueueSourceServiceTest
 
     public QueueSourceServiceTest()
     {
-        _service = new(_storeMetadata, _serviceSetting, new ShuffleService(new Random(11)), new Random(12));
+        _service = new(_storeMetadata, new ShuffleService(new Random(11)), new Random(12));
     }
 
     private static ResponseQueueSource Library(LibrarySortEnum sort = LibrarySortEnum.Title, bool descending = false, string search = "")
@@ -96,7 +96,7 @@ public class QueueSourceServiceTest
         await other.SaveMediaFile(second);
 
         List<Guid> one = MediaOf(await _service.BuildBase(Library()));
-        List<Guid> two = MediaOf(await new QueueSourceService(other, _serviceSetting, new ShuffleService(new Random(1)), new Random(1)).BuildBase(Library()));
+        List<Guid> two = MediaOf(await new QueueSourceService(other, new ShuffleService(new Random(1)), new Random(1)).BuildBase(Library()));
 
         Assert.Equal([first.ID, second.ID], one);
         Assert.Equal(one, two);
@@ -309,53 +309,32 @@ public class QueueSourceServiceTest
         Assert.Null(placement.AfterItemID);
     }
 
-    [Fact]
-    public async Task TheEffectiveMode_IsThePlaylistsWhenSet_ElseTheGlobal()
-    {
-        _serviceSetting.Shuffle = ShuffleModeEnum.SpreadArtists;
-        _serviceSetting.Repeat = RepeatModeEnum.Forever;
-        ResponseMediaFile one = await AddMedia("One");
-        (Guid plain, _) = await AddPlaylist([one]);
-        Guid own = Guid.NewGuid();
-        await _storeMetadata.SavePlaylist(new ResponsePlaylist
-        {
-            ID = own, Name = "Own", AllowDuplicates = true, EntryCount = 0, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null, Shuffle = ShuffleModeEnum.Random, Repeat = RepeatModeEnum.Once
-        });
-
-        Assert.Equal(ShuffleModeEnum.Random, await _service.GetShuffle(Playlist(own)));
-        Assert.Equal(RepeatModeEnum.Once, await _service.GetRepeat(Playlist(own)));
-        Assert.Equal(ShuffleModeEnum.SpreadArtists, await _service.GetShuffle(Playlist(plain)));
-        Assert.Equal(RepeatModeEnum.Forever, await _service.GetRepeat(Playlist(plain)));
-        Assert.Equal(ShuffleModeEnum.SpreadArtists, await _service.GetShuffle(Library()));
-        Assert.Equal(RepeatModeEnum.Forever, await _service.GetRepeat(null));
-    }
-
     [Theory]
     [InlineData(ShuffleModeEnum.Off)]
     [InlineData(ShuffleModeEnum.Random)]
     public async Task Build_OfALibraryBiggerThanTheQueueLimit_IsCutToTheLimit_WithTheStartItemFirst(ShuffleModeEnum shuffle)
     {
-        List<ResponseMediaFile> mediaList = Enumerable.Range(0, Constants.QueueMaxItemCount + 200).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
+        List<ResponseMediaFile> mediaList = Enumerable.Range(0, PresentationConstants.QueueMaxItemCount + 200).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
         await _storeMetadata.ReplaceMediaFileList(mediaList);
 
         List<QueueItem> built = Have(await _service.Build(Library(), shuffle, mediaList[10].ID));
 
-        Assert.Equal(Constants.QueueMaxItemCount, built.Count);
+        Assert.Equal(PresentationConstants.QueueMaxItemCount, built.Count);
         Assert.Equal(mediaList[10].ID, built[0].MediaFileID);
         Assert.Equal(built.Count, built.Select(x => x.MediaFileID).Distinct().Count());
-        if (shuffle == ShuffleModeEnum.Off) Assert.Equal(mediaList[Constants.QueueMaxItemCount + 9].ID, built[^1].MediaFileID);
+        if (shuffle == ShuffleModeEnum.Off) Assert.Equal(mediaList[PresentationConstants.QueueMaxItemCount + 9].ID, built[^1].MediaFileID);
     }
 
     [Fact]
     public async Task Regenerate_OfALibraryBiggerThanTheQueueLimit_KeepsTheWholeQueueWithinTheLimit()
     {
-        List<ResponseMediaFile> mediaList = Enumerable.Range(0, Constants.QueueMaxItemCount + 200).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
+        List<ResponseMediaFile> mediaList = Enumerable.Range(0, PresentationConstants.QueueMaxItemCount + 200).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
         await _storeMetadata.ReplaceMediaFileList(mediaList);
         List<QueueItem> excluded = mediaList.Take(40).Select(x => new QueueItem(Guid.NewGuid(), x.ID)).ToList();
 
         List<QueueItem> built = Have(await _service.Regenerate(Library(), ShuffleModeEnum.Random, new(Guid.NewGuid(), mediaList[50].ID), excluded));
 
-        Assert.Equal(Constants.QueueMaxItemCount - excluded.Count - 1, built.Count);
+        Assert.Equal(PresentationConstants.QueueMaxItemCount - excluded.Count - 1, built.Count);
     }
 
     [Fact]
@@ -370,8 +349,8 @@ public class QueueSourceServiceTest
         List<QueueItem> spread = Have(await _service.Build(Library(), ShuffleModeEnum.SpreadArtists, mediaList[0].ID));
         stopwatch.Stop();
 
-        Assert.Equal(Constants.QueueMaxItemCount, random.Count);
-        Assert.Equal(Constants.QueueMaxItemCount, spread.Count);
+        Assert.Equal(PresentationConstants.QueueMaxItemCount, random.Count);
+        Assert.Equal(PresentationConstants.QueueMaxItemCount, spread.Count);
         Assert.NotEmpty(off);
         Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(10), $"Took {stopwatch.Elapsed}.");
     }

@@ -110,7 +110,7 @@ Then the variables:
 :root {
     --color-light: #FFFFFF;
     --color-dark: #000000;
-    --color-none: #4D4AD3;
+    --color-default: #4D4AD3;
     --color-muted: #767676;
     --color-highlight: #0073EC;
     --color-info: #289ED9;
@@ -165,7 +165,7 @@ Then the variables:
 |-----------------------------------------------------------------------------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
 | `--color-primary`                                                                       | `--color-light` (Dark: `--color-dark`)                | the page behind everything: buttons, inputs, table header, autosuggest dropdown                         |
 | `--color-complementary`                                                                 | `--color-dark` (Dark: `--color-light`)                | text and outlines: buttons, collapsible, inputs, loader, message box, autosuggest                       |
-| `--color-none`                                                                          | `#4D4AD3`                                             | `Button` and `MessageBox` with no status                                                                |
+| `--color-default`                                                                       | `#4D4AD3`                                             | `Button` and `MessageBox` with no status (`Default`)                                                    |
 | `--color-highlight`                                                                     | `#0073EC`                                             | `Button` and `MessageBox` highlight status, focus rings and checked state in the inputs                 |
 | `--color-info`, `--color-success`, `--color-warning`, `--color-notice`, `--color-error` | `#289ED9`, `#23883D`, `#D97F00`, `#A948DD`, `#E42B21` | the status of `Button` and `MessageBox`                                                                 |
 | `--color-muted`                                                                         | `#767676`                                             | unchecked checkbox and radio                                                                            |
@@ -228,7 +228,7 @@ Then the variables:
 ### Tuning
 
 - **Density:** change the `--size-control-*` and `--size-gap-*` values. `--size-control-input` decides how tall every input and button is, and `--size-control-md` is what it normally points at, so one change there resizes them all.
-- **Brand:** `--color-highlight` is the accent (focus, checked, highlight status) and `--color-none` is the default button. The other status colours only matter where a status is shown.
+- **Brand:** `--color-highlight` is the accent (focus, checked, highlight status) and `--color-default` is the default button. The other status colours only matter where a status is shown.
 - **Dark mode:** only `--color-primary` and `--color-complementary` swap. Choose the status colours so they stay readable on both backgrounds, and keep the text colours at a 4.5:1 contrast on the page colour.
 - **Text size:** `rem` follows the user's setting, so don't set the root font size in `px`. `--size-text-body: 1rem` is 16px at the browser's default.
 - **Rounded or square:** `--size-border-radius-md` is used by buttons, inputs and the message box; set it to `0` for square corners.

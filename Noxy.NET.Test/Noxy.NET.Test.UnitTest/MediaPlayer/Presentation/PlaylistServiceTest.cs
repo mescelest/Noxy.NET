@@ -1,5 +1,5 @@
 using System.Net;
-using Noxy.NET.MediaPlayer.Domain.Enums;
+using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
@@ -134,23 +134,6 @@ public class PlaylistServiceTest
     }
 
     [Fact]
-    public async Task SetShuffle_And_SetRepeat_SendOnlyThatModeAsAPlaylistUpdate_AndNullClearsIt()
-    {
-        Guid id = Guid.CreateVersion7();
-
-        await _service.SetShuffle(id, ShuffleModeEnum.Random);
-        await _service.SetRepeat(id, null);
-
-        Assert.Equal(2, _api.UpdatePlaylistRequestList.Count);
-        Assert.True(_api.UpdatePlaylistRequestList[0].Request.Shuffle.HasValue);
-        Assert.Equal(ShuffleModeEnum.Random, _api.UpdatePlaylistRequestList[0].Request.Shuffle.Value);
-        Assert.False(_api.UpdatePlaylistRequestList[0].Request.Repeat.HasValue);
-        Assert.True(_api.UpdatePlaylistRequestList[1].Request.Repeat.HasValue);
-        Assert.Null(_api.UpdatePlaylistRequestList[1].Request.Repeat.Value);
-        Assert.False(_api.UpdatePlaylistRequestList[1].Request.Shuffle.HasValue);
-    }
-
-    [Fact]
     public async Task Rename_And_SetAllowDuplicates_SendAnUpdateWithOnlyThatField()
     {
         Guid id = Guid.CreateVersion7();
@@ -218,14 +201,39 @@ public class PlaylistServiceTest
         await Assert.ThrowsAsync<HttpRequestException>(() => _service.Create("x"));
         await Assert.ThrowsAsync<HttpRequestException>(() => _service.Rename(id, "x"));
         await Assert.ThrowsAsync<HttpRequestException>(() => _service.SetAllowDuplicates(id, true));
-        await Assert.ThrowsAsync<HttpRequestException>(() => _service.SetShuffle(id, null));
-        await Assert.ThrowsAsync<HttpRequestException>(() => _service.SetRepeat(id, null));
         await Assert.ThrowsAsync<HttpRequestException>(() => _service.RemoveEntryList(id, [Guid.CreateVersion7()]));
         await Assert.ThrowsAsync<HttpRequestException>(() => _service.MoveEntry(id, Guid.CreateVersion7(), 0));
         await Assert.ThrowsAsync<HttpRequestException>(() => _service.Delete(id));
 
         Assert.Empty(_sync.PlaylistUpdatedList);
         Assert.Empty(_sync.PlaylistDeletedList);
+        Assert.Null(await _store.GetPlaylistDetail(id));
+    }
+
+    [Fact]
+    public async Task Edit_SendsTheTrimmedNameAndTheDuplicatesRuleInOneUpdate()
+    {
+        Guid id = Guid.CreateVersion7();
+
+        await _service.Edit(id, " New name ", false);
+
+        (Guid RequestID, RequestUpdatePlaylist Request) sent = Assert.Single(_api.UpdatePlaylistRequestList);
+        Assert.Equal(id, sent.RequestID);
+        Assert.Equal("New name", sent.Request.Name.Value);
+        Assert.False(sent.Request.AllowDuplicates.Value);
+        Assert.Single(_sync.PlaylistUpdatedList);
+    }
+
+    [Fact]
+    public async Task Edit_WhenTheServerRefuses_ThrowsItsApiException_AndChangesNothingLocally()
+    {
+        _api.WriteFailure = new ApiException(HttpStatusCode.BadRequest, "The playlist has the same song twice.");
+        Guid id = Guid.CreateVersion7();
+
+        ApiException exception = await Assert.ThrowsAsync<ApiException>(() => _service.Edit(id, "x", false));
+
+        Assert.Equal("The playlist has the same song twice.", exception.Title);
+        Assert.Empty(_sync.PlaylistUpdatedList);
         Assert.Null(await _store.GetPlaylistDetail(id));
     }
 

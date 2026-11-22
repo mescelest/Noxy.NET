@@ -1,7 +1,6 @@
 using Noxy.NET.MediaPlayer.Application.Handlers.Playlist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Entities;
-using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.Test.MediaPlayer.Fakes;
@@ -215,105 +214,4 @@ public class HandlerPlaylistUpdateTest
 
         await Assert.ThrowsAsync<PlaylistNotFoundException>(() => _handler.Handle(new(Guid.CreateVersion7(), id, new("Stolen")), Token).AsTask());
     }
-
-    #region -- Modes --
-
-    [Fact]
-    public async Task Update_SetsTheShuffleMode_AndBumpsTheModifiedTime_AndPublishes()
-    {
-        Guid id = Create();
-        Advance();
-
-        ResponsePlaylist response = await _handler.Handle(new(UserID, id, Shuffle: new(ShuffleModeEnum.Random)), Token);
-
-        Assert.Equal(ShuffleModeEnum.Random, response.Shuffle);
-        Assert.Equal(ShuffleModeEnum.Random, Stored(id).Shuffle);
-        Assert.Equal(_time.Now.UtcDateTime, Stored(id).TimeModified);
-        Assert.Equal(ShuffleModeEnum.Random, Assert.Single(_publisher.GetList<NotificationPlaylistUpdated>()).Playlist.Shuffle);
-    }
-
-    [Fact]
-    public async Task Update_SetsTheRepeatMode()
-    {
-        Guid id = Create();
-
-        ResponsePlaylist response = await _handler.Handle(new(UserID, id, Repeat: new(RepeatModeEnum.Forever)), Token);
-
-        Assert.Equal(RepeatModeEnum.Forever, response.Repeat);
-        Assert.Equal(RepeatModeEnum.Forever, Stored(id).Repeat);
-        Assert.Null(Stored(id).Shuffle);
-        Assert.Single(_publisher.GetList<NotificationPlaylistUpdated>());
-    }
-
-    [Fact]
-    public async Task Update_WithTheModeItAlreadyHas_ChangesNothing_AndPublishesNothing()
-    {
-        Guid id = Create();
-        Stored(id).Shuffle = ShuffleModeEnum.Random;
-        Stored(id).Repeat = RepeatModeEnum.Once;
-        DateTime modified = Stored(id).TimeModified;
-        int commits = _store.CommitCount;
-        Advance();
-
-        await _handler.Handle(new(UserID, id, Shuffle: new(ShuffleModeEnum.Random), Repeat: new(RepeatModeEnum.Once)), Token);
-
-        Assert.Equal(commits, _store.CommitCount);
-        Assert.Empty(_publisher.GetList<NotificationPlaylistUpdated>());
-        Assert.Equal(modified, Stored(id).TimeModified);
-    }
-
-    [Fact]
-    public async Task Update_WithExplicitNull_ClearsTheMode()
-    {
-        Guid id = Create();
-        Stored(id).Shuffle = ShuffleModeEnum.SpreadArtists;
-        Stored(id).Repeat = RepeatModeEnum.Forever;
-
-        ResponsePlaylist response = await _handler.Handle(new(UserID, id, Shuffle: new(null)), Token);
-
-        Assert.Null(response.Shuffle);
-        Assert.Null(Stored(id).Shuffle);
-        Assert.Equal(RepeatModeEnum.Forever, Stored(id).Repeat);
-        Assert.Single(_publisher.GetList<NotificationPlaylistUpdated>());
-    }
-
-    [Fact]
-    public async Task Update_WithExplicitNullOnAModeThatIsAlreadyNull_ChangesNothing()
-    {
-        Guid id = Create();
-        int commits = _store.CommitCount;
-
-        await _handler.Handle(new(UserID, id, Shuffle: new(null), Repeat: new(null)), Token);
-
-        Assert.Equal(commits, _store.CommitCount);
-        Assert.Empty(_publisher.GetList<NotificationPlaylistUpdated>());
-    }
-
-    [Fact]
-    public async Task Update_WithTheFieldLeftOut_DoesNotTouchTheMode()
-    {
-        Guid id = Create();
-        Stored(id).Shuffle = ShuffleModeEnum.Random;
-        Stored(id).Repeat = RepeatModeEnum.Once;
-
-        await _handler.Handle(new(UserID, id, new("Renamed")), Token);
-
-        Assert.Equal(ShuffleModeEnum.Random, Stored(id).Shuffle);
-        Assert.Equal(RepeatModeEnum.Once, Stored(id).Repeat);
-    }
-
-    [Fact]
-    public async Task Update_OfTheModeDoesNotChangeTheEntriesOrTheDuplicateRule()
-    {
-        List<Guid> mediaFileIDList = MediaFileIDList(2);
-        Guid id = Create(allowDuplicates: false, mediaFileIDList: mediaFileIDList);
-
-        await _handler.Handle(new(UserID, id, Shuffle: new(ShuffleModeEnum.Random), Repeat: new(RepeatModeEnum.Forever)), Token);
-
-        Assert.Equal(mediaFileIDList, Stored(id).EntryList.OrderBy(x => x.Position).Select(x => x.MediaFileID));
-        Assert.False(Stored(id).AllowDuplicates);
-        Assert.Equal(2, Assert.Single(_publisher.GetList<NotificationPlaylistUpdated>()).Playlist.EntryCount);
-    }
-
-    #endregion -- Modes --
 }

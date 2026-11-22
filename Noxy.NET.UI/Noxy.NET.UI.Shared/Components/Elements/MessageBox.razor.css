@@ -17,8 +17,14 @@
     margin-left: var(--size-gap-xs, 0.75rem);
 }
 
+.MessageBox[data-status="default"] {
+    --color-messagebox: var(--color-default, #4D4AD3);
+}
+
 .MessageBox[data-status="none"] {
-    --color-messagebox: var(--color-none, #4D4AD3);
+    --color-messagebox: var(--color-offset-primary-lg, #767676);
+    border-width: var(--size-border-width-sm, 1px);
+    background-color: transparent;
 }
 
 .MessageBox[data-status="success"] {

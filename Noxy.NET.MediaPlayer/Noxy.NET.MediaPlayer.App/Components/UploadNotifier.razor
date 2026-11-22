@@ -1,0 +1,54 @@
+@inject IUploadService ServiceUpload
+@inject IToastService ServiceToast
+@inject IMetadataStore StoreMetadata
+@inherits BaseComponentBlazor
+@implements IDisposable
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        ServiceUpload.Started += OnStarted;
+        ServiceUpload.BatchCompleted += OnBatchCompleted;
+    }
+
+    private void OnStarted(int count)
+    {
+        ServiceToast.ShowInfo(count == 1 ? "Uploading 1 file…" : $"Uploading {count} files…");
+    }
+
+    private void OnBatchCompleted(UploadBatchResult result)
+    {
+        _ = Report(result);
+    }
+
+    private async Task Report(UploadBatchResult result)
+    {
+        if (result.SucceededCount > 0)
+        {
+            ServiceToast.ShowSuccess(await SuccessMessageOf(result));
+        }
+
+        foreach (UploadFailure failure in result.FailureList)
+        {
+            ServiceToast.ShowError($"{failure.Name}: {failure.Message}");
+        }
+    }
+
+    private async Task<string> SuccessMessageOf(UploadBatchResult result)
+    {
+        string files = result.SucceededCount == 1 ? "1 file" : $"{result.SucceededCount} files";
+        if (result.PlaylistID is not { } playlistID) return $"{files} added to your library.";
+
+        string? name = (await StoreMetadata.GetPlaylistList()).Find(x => x.ID == playlistID)?.Name;
+
+        return name is null ? $"{files} added." : $"{files} added to {name}.";
+    }
+
+    public void Dispose()
+    {
+        ServiceUpload.Started -= OnStarted;
+        ServiceUpload.BatchCompleted -= OnBatchCompleted;
+    }
+
+}

@@ -13,7 +13,7 @@
         </div>
     }
 
-    <InputElementRadio TOption="TOption" @attributes="AdditionalAttributes" class="@GetComponentClass()" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+    <InputElementRadio TOption="TOption" @attributes="AdditionalAttributes" class="@GetComponentClass()" ID="@IDCurrent" Name="@GetName()" Option="Option" Value="Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression" disabled="@DisabledCurrent"/>
 
     @ChildContent
 </label>
@@ -31,6 +31,7 @@
 
     [Parameter]
     public bool? Disabled { get; set; }
+    private bool DisabledCurrent => Disabled ?? false;
 
     private bool Checked => EqualityComparer<TOption>.Default.Equals(Value, Option);
 }

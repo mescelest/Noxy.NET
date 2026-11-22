@@ -1,0 +1,60 @@
+@inject IToastService ServiceToast
+@inherits BaseComponentElement
+@implements IDisposable
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @foreach (Toast toast in _toastList)
+    {
+        <div @key="toast.ID" class="toast" role="@RoleOf(toast)" data-status="@toast.Status.ToText()">
+            <span class="message">@toast.Message</span>
+            <button type="button" class="close" aria-label="Dismiss" @onclick="() => ServiceToast.Dismiss(toast.ID)">
+                <MaterialIcon Icon="close" Size="var(--size-icon-xs, 1.25rem)"/>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+
+    // How many toasts are shown at once: the rest wait until there is room.
+    [Parameter]
+    public int MaxVisible { get; set; } = 3;
+
+    // How long a temporary toast stays when it has no duration of its own.
+    [Parameter]
+    public TimeSpan DefaultDuration { get; set; } = TimeSpan.FromSeconds(5);
+
+    private const string RoleAlert = "alert";
+    private const string RoleStatus = "status";
+
+    private List<Toast> _toastList = [];
+
+    protected override void OnInitialized()
+    {
+        ServiceToast.Changed += OnChanged;
+        _toastList = ServiceToast.GetVisibleList();
+    }
+
+    protected override void OnParametersSet()
+    {
+        ServiceToast.MaxVisible = MaxVisible;
+        ServiceToast.DefaultDuration = DefaultDuration;
+    }
+
+    private void OnChanged()
+    {
+        _ = InvokeAsync(() =>
+        {
+            _toastList = ServiceToast.GetVisibleList();
+            StateHasChanged();
+        });
+    }
+
+    private static string RoleOf(Toast toast) => toast.Status == StatusEnum.Error ? RoleAlert : RoleStatus;
+
+    public void Dispose()
+    {
+        ServiceToast.Changed -= OnChanged;
+    }
+
+}

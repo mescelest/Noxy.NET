@@ -1,0 +1,51 @@
+@inject IPlaylistService ServicePlaylist
+@using Noxy.NET.MediaPlayer.Presentation.Exceptions
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="FormModelEditPlaylist" Context="_context" OnSubmit="Submit">
+        <InputGroupText @bind-Value="_context.Model.Name"/>
+        <InputControlCheckbox Option="true" @bind-Value="_context.Model.AllowDuplicates">
+            <span>Allow the same song twice</span>
+        </InputControlCheckbox>
+        <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">Save</Button>
+    </WebForm>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required ResponsePlaylist Playlist { get; set; }
+
+    [Parameter]
+    public bool? Loading { get; set; }
+    private bool LoadingCurrent => Loading ?? _context.IsSubmitting;
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private WebFormContext<FormModelEditPlaylist> _context = new(new());
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _context = new(new() { Name = Playlist.Name, AllowDuplicates = Playlist.AllowDuplicates });
+    }
+
+    private async Task Submit(WebFormContext<FormModelEditPlaylist> context)
+    {
+        try
+        {
+            await ServicePlaylist.Edit(Playlist.ID, context.Model.Name, context.Model.AllowDuplicates);
+        }
+        catch (Exception exception) when (exception is ApiException or HttpRequestException)
+        {
+            // A refusal, such as turning the rule off while the playlist has the same song twice, belongs to the form.
+            context.HandleException(exception);
+            return;
+        }
+
+        await OnSubmit.InvokeAsync();
+    }
+
+}

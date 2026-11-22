@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -30,7 +29,7 @@ public class PlayerServiceTest
 
     public PlayerServiceTest()
     {
-        QueueSourceService serviceSource = new(_storeMetadata, _serviceSetting, new ShuffleService(new Random(31)), new Random(32));
+        QueueSourceService serviceSource = new(_storeMetadata, new ShuffleService(new Random(31)), new Random(32));
         _queue = new(serviceSource, _serviceSetting, _storeLocalQueue, _sync, _storeMetadata, new FakeTimeProvider(), new FakeLogger<QueueService>()) { OwnsPlayback = true };
         _player = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, serviceSource, _serviceSetting, _api, _logger);
     }
@@ -58,7 +57,7 @@ public class PlayerServiceTest
         await _player.StartLibrary(mediaFileID, LibrarySortEnum.Title, false, string.Empty);
     }
 
-    private async Task<(Guid PlaylistID, List<ResponsePlaylistEntry> EntryList)> AddPlaylist(List<Guid> mediaFileIDList, ShuffleModeEnum? shuffle = null, RepeatModeEnum? repeat = null)
+    private async Task<(Guid PlaylistID, List<ResponsePlaylistEntry> EntryList)> AddPlaylist(List<Guid> mediaFileIDList)
     {
         Guid playlistID = Guid.NewGuid();
         List<ResponsePlaylistEntry> entryList = [];
@@ -70,7 +69,7 @@ public class PlayerServiceTest
 
         ResponsePlaylistDetail detail = new()
         {
-            ID = playlistID, Name = "List", AllowDuplicates = true, EntryCount = entryList.Count, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null, Shuffle = shuffle, Repeat = repeat, EntryList = entryList
+            ID = playlistID, Name = "List", AllowDuplicates = true, EntryCount = entryList.Count, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null, EntryList = entryList
         };
         await _storeMetadata.SavePlaylist(detail);
         await _storeMetadata.SavePlaylistDetail(detail);
@@ -705,21 +704,23 @@ public class PlayerServiceTest
     #region -- Shuffle and repeat modes --
 
     [Fact]
-    public async Task SetShuffle_OnAPlaylistQueue_WritesThePlaylistsOwnMode_AndRegenerates()
+    public async Task SetShuffle_OnAPlaylistQueue_WritesTheGlobalSetting_AndRegenerates()
     {
         List<Guid> idList = await AddMedia(10);
         (Guid playlistID, List<ResponsePlaylistEntry> entryList) = await AddPlaylist(idList);
-        _api.UpdatePlaylistHandler = (id, request) => new() { ID = id, Name = "List", AllowDuplicates = true, EntryCount = 10, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null, Shuffle = request.Shuffle.Value };
+        _serviceSetting.UpdateHandler = (_, _) =>
+        {
+            _serviceSetting.Shuffle = ShuffleModeEnum.Random;
+            return Task.CompletedTask;
+        };
         await _player.StartPlaylist(playlistID, entryList[0].ID);
         List<QueueItem> before = Snapshot().SourceList;
 
         await _player.SetShuffle(ShuffleModeEnum.Random);
 
-        (Guid ID, RequestUpdatePlaylist Request) request = Assert.Single(_api.UpdatePlaylistRequestList);
-        Assert.Equal(playlistID, request.ID);
-        Assert.Equal(ShuffleModeEnum.Random, request.Request.Shuffle.Value);
-        Assert.False(request.Request.Repeat.HasValue);
-        Assert.Empty(_serviceSetting.UpdateRequestList);
+        Assert.Equal("Shuffle", _serviceSetting.UpdateRequestList.Single().Key);
+        Assert.Equal("Random", _serviceSetting.UpdateRequestList.Single().Value.GetString());
+        Assert.Empty(_api.UpdatePlaylistRequestList);
         Assert.Equal(before.Select(x => x.ItemID).Order(), Snapshot().SourceList.Select(x => x.ItemID).Order());
         Assert.NotEqual(before, Snapshot().SourceList);
     }
@@ -744,20 +745,19 @@ public class PlayerServiceTest
     }
 
     [Fact]
-    public async Task SetRepeat_WritesTheGlobalSettingForALibraryQueue_AndThePlaylistsOwnModeForAPlaylist()
+    public async Task SetRepeat_WritesTheGlobalSetting_ForALibraryQueueAndAPlaylistQueue()
     {
         List<Guid> idList = await AddMedia(3);
         (Guid playlistID, List<ResponsePlaylistEntry> entryList) = await AddPlaylist(idList);
-        _api.UpdatePlaylistHandler = (id, request) => new() { ID = id, Name = "List", AllowDuplicates = true, EntryCount = 3, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null, Repeat = request.Repeat.Value };
         await Start(idList[0]);
 
         await _player.SetRepeat(RepeatModeEnum.Forever);
-        Assert.Equal("Repeat", _serviceSetting.UpdateRequestList.Single().Key);
-
         await _player.StartPlaylist(playlistID, entryList[0].ID);
         await _player.SetRepeat(RepeatModeEnum.Once);
 
-        Assert.Equal(RepeatModeEnum.Once, _api.UpdatePlaylistRequestList.Single().Request.Repeat.Value);
+        Assert.Equal(["Repeat", "Repeat"], _serviceSetting.UpdateRequestList.Select(x => x.Key));
+        Assert.Equal(["Forever", "Once"], _serviceSetting.UpdateRequestList.Select(x => x.Value.GetString()));
+        Assert.Empty(_api.UpdatePlaylistRequestList);
     }
 
     [Fact]
@@ -802,24 +802,20 @@ public class PlayerServiceTest
     }
 
     [Fact]
-    public async Task TheEffectiveMode_IsThePlaylistsWhenSet_ElseTheGlobal()
+    public async Task TheEffectiveMode_IsTheGlobalSetting_ForAPlaylistQueueAndALibraryQueue()
     {
         _serviceSetting.Shuffle = ShuffleModeEnum.SpreadArtists;
         _serviceSetting.Repeat = RepeatModeEnum.Forever;
         List<Guid> idList = await AddMedia(3);
-        (Guid own, List<ResponsePlaylistEntry> ownEntryList) = await AddPlaylist(idList, ShuffleModeEnum.Random, RepeatModeEnum.Once);
-        (Guid plain, List<ResponsePlaylistEntry> plainEntryList) = await AddPlaylist(idList);
+        (Guid playlistID, List<ResponsePlaylistEntry> entryList) = await AddPlaylist(idList);
 
-        await _player.StartPlaylist(own, ownEntryList[0].ID);
-        Assert.Equal(ShuffleModeEnum.Random, _player.Shuffle);
-        Assert.Equal(RepeatModeEnum.Once, _player.Repeat);
-
-        await _player.StartPlaylist(plain, plainEntryList[0].ID);
+        await _player.StartPlaylist(playlistID, entryList[0].ID);
         Assert.Equal(ShuffleModeEnum.SpreadArtists, _player.Shuffle);
         Assert.Equal(RepeatModeEnum.Forever, _player.Repeat);
 
         await Start(idList[0]);
         Assert.Equal(ShuffleModeEnum.SpreadArtists, _player.Shuffle);
+        Assert.Equal(RepeatModeEnum.Forever, _player.Repeat);
     }
 
     #endregion -- Shuffle and repeat modes --
@@ -881,7 +877,7 @@ public class PlayerServiceTest
         await Start(idList[0]);
 
         List<Guid> requested = [.. _download.EnqueueCallList.SelectMany(x => x)];
-        Assert.Equal(idList.Skip(1).Take(Constants.PrefetchCount), requested);
+        Assert.Equal(idList.Skip(1).Take(PresentationConstants.PrefetchCount), requested);
     }
 
     [Fact]
@@ -1238,7 +1234,7 @@ public class PlayerServiceTest
     public async Task TheVolume_SurvivesARestart()
     {
         await _player.SetVolume(0.6);
-        PlayerService restarted = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, new QueueSourceService(_storeMetadata, _serviceSetting, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _api, _logger);
+        PlayerService restarted = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, new QueueSourceService(_storeMetadata, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _api, _logger);
 
         await restarted.LoadVolume();
 

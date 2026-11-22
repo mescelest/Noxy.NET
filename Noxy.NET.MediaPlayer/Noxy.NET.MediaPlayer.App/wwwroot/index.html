@@ -9,6 +9,18 @@
         if (localStorage.theme) document.documentElement.setAttribute("theme", localStorage.theme);
     } catch (e) {
     }</script>
+    <script>
+        // A file dropped anywhere on the page would make the web view open it. Only a file input may take a drop: a drop zone puts one over itself while files are dragged across it.
+        window.addEventListener("dragover", e => {
+            if (e.dataTransfer.types.includes("Files") && e.target.type !== "file") {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "none";
+            }
+        });
+        window.addEventListener("drop", e => {
+            if (e.dataTransfer.types.includes("Files") && e.target.type !== "file") e.preventDefault();
+        });
+    </script>
     <link rel="stylesheet" href="css/app.css"/>
     <link rel="stylesheet" href="css/breakpoints.css"/>
     <link rel="stylesheet" href="css/variables.css"/>

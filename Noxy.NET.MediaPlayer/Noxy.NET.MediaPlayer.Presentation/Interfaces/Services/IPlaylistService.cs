@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
@@ -22,10 +21,8 @@ public interface IPlaylistService
 
     Task SetAllowDuplicates(Guid id, bool allow);
 
-    // Writes the playlist's own mode; null means follow the global setting.
-    Task SetShuffle(Guid id, ShuffleModeEnum? mode);
-
-    Task SetRepeat(Guid id, RepeatModeEnum? mode);
+    // The name and the duplicates rule in one update; the server treats a field that has not changed as no change.
+    Task Edit(Guid id, string name, bool allowDuplicates);
 
     Task RemoveEntryList(Guid id, List<Guid> entryIDList);
 

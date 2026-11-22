@@ -1,0 +1,226 @@
+@inject IState<FeaturePlaylistListState> StatePlaylistList
+@inject IDispatcher Dispatcher
+@inject ILibraryActionService ServiceLibraryAction
+@inject IPlaylistService ServicePlaylist
+@inject IToastService ServiceToast
+@inherits BaseComponentElementFluxor
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" disabled="@IsNothingTicked" aria-label="Actions" aria-haspopup="menu" popovertarget="@MenuID">
+        <MaterialIcon Icon="more_horiz" Size="var(--size-icon-md)"/>
+    </Button>
+
+    <ContextMenu @ref="_menu" ID="@MenuID" ItemList="ItemList" Side="PlacementSideEnum.Bottom" Align="PlacementAlignEnum.End" OnClose="CloseHandler"/>
+
+    <ConfirmActionDialog Open="@(_confirm is not null)" OpenChanged="CloseConfirm" Title="@_confirm?.Title" Message="@_confirm?.Message" Detail="@_confirm?.Detail" AcceptText="@_confirm?.AcceptText" OnSubmit="SubmitConfirm"/>
+
+    <Dialog @bind-Open="_choosingPlaylist">
+        <h2>Add to playlist</h2>
+        @if (StatePlaylistList.Value.PlaylistList.Count == 0)
+        {
+            <p>You have no playlists yet.</p>
+        }
+        @foreach (ResponsePlaylist playlist in StatePlaylistList.Value.PlaylistList)
+        {
+            Guid playlistID = playlist.ID;
+            <button type="button" class="playlist-choice" @onclick="() => AddToPlaylist(playlistID)">@playlist.Name</button>
+        }
+        <div class="actions">
+            <button type="button" class="cancel" @onclick="() => _choosingPlaylist = false">Cancel</button>
+        </div>
+    </Dialog>
+</div>
+
+@code {
+
+    private sealed record ConfirmRequest(string Title, string Message, string? Detail, string AcceptText, Func<Task> Run);
+
+    // The keys of the ticked rows, and the same in page order with the ones the search hides last. A key is what the page tells its rows apart by.
+    [Parameter, EditorRequired]
+    public required IReadOnlySet<Guid> SelectedSet { get; set; }
+
+    [Parameter, EditorRequired]
+    public required List<Guid> SelectedKeyList { get; set; }
+
+    [Parameter]
+    public int HiddenSelectedCount { get; set; }
+
+    // Turns a row key into the media file it stands for. Unset, the key is the media file's ID, as in the Library.
+    [Parameter]
+    public Func<Guid, Guid>? MediaFileIDOf { get; set; }
+
+    // Set on a playlist's page: the keys are then entry IDs, and the last item removes entries from this playlist instead of deleting from the library.
+    [Parameter]
+    public Guid? PlaylistID { get; set; }
+
+    [Parameter]
+    public EventCallback OnPlaylistChanged { get; set; }
+
+    private const string MenuID = "library-context-menu";
+    private const string TextRemoveFromPlaylist = "Remove from this playlist";
+
+    private ContextMenu? _menu;
+    private LibraryMenuScope? _scope;
+    private ConfirmRequest? _confirm;
+    private List<Guid> _playlistTargetList = [];
+    private bool _choosingPlaylist;
+
+    private bool IsNothingTicked => SelectedSet.Count == 0;
+
+    // A right-click on a row acts on that row; the Actions button acts on the ticked rows.
+    private List<ContextMenuItem> ItemList => _scope is { } scope ? BuildRowItemList(scope) : BuildItemList(SelectedKeyList, true);
+
+    // Opens at the pointer for the row that was clicked. A row in a ticked group also gets the group's actions in a sub-menu.
+    public async Task OpenAtAsync(MouseEventArgs args, Guid rowKey)
+    {
+        if (_menu is null) return;
+
+        _scope = LibraryMenuScope.Of(rowKey, SelectedSet, SelectedKeyList);
+        StateHasChanged();
+        await _menu.OpenAtAsync(args);
+    }
+
+    private Task CloseHandler()
+    {
+        _scope = null;
+        return Task.CompletedTask;
+    }
+
+    private List<ContextMenuItem> BuildRowItemList(LibraryMenuScope scope)
+    {
+        List<ContextMenuItem> list = BuildItemList([scope.ClickedID], false);
+        if (scope.HasGroup)
+        {
+            list.Add(ContextMenuItem.Separator());
+            list.Add(ContextMenuItem.Submenu($"{scope.GroupIDList.Count} selected songs", BuildItemList(scope.GroupIDList, true)));
+        }
+
+        return list;
+    }
+
+    // The menu in its order: one more entry is one more item. isTicked is true when the list is the ticked rows.
+    private List<ContextMenuItem> BuildItemList(List<Guid> keyList, bool isTicked)
+    {
+        List<Guid> idList = MediaFileIDListOf(keyList);
+        List<ContextMenuItem> list =
+        [
+                ItemOf(LibraryActionEnum.Download, "Download to this device", () => Show(ServiceLibraryAction.Download(idList))),
+                ItemOf(LibraryActionEnum.PlayNext, "Play next", () => Show(ServiceLibraryAction.PlayNext(idList))),
+                ItemOf(LibraryActionEnum.AddToQueue, "Add to queue", () => Show(ServiceLibraryAction.AddToQueue(idList))),
+                ItemOf(LibraryActionEnum.SaveAsFile, "Save as file", () => Show(ServiceLibraryAction.SaveAsFile(idList))),
+                ItemOf(LibraryActionEnum.AddToPlaylist, "Add to playlist", () => ChoosePlaylist(idList)),
+                ItemOf(LibraryActionEnum.RemoveFromDevice, "Remove from this device", () => Confirm("Remove from this device", $"Remove {Count(idList.Count)} from this device? They stay in your library.", "Remove", () => Show(ServiceLibraryAction.RemoveFromDevice(idList)), isTicked))
+        ];
+
+        // The last item: on a playlist's page the entries leave the playlist, in the Library the media files leave the library.
+        if (PlaylistID is Guid playlistID)
+        {
+            list.Add(ContextMenuItem.Item(TextRemoveFromPlaylist, () => Confirm(TextRemoveFromPlaylist, $"Remove {Count(keyList.Count)} from this playlist? They stay in your library.", "Remove", () => RemoveFromPlaylist(playlistID, keyList), isTicked), isDestructive: true));
+        }
+        else
+        {
+            list.Add(ItemOf(LibraryActionEnum.DeleteFromLibrary, DeleteText(idList.Count), () => Confirm("Delete from library", $"Delete {Count(idList.Count)} from your library?", "Delete", () => DeleteFromLibrary(idList, isTicked), isTicked), true));
+        }
+
+        return list;
+    }
+
+    private List<Guid> MediaFileIDListOf(List<Guid> keyList)
+    {
+        return MediaFileIDOf is Func<Guid, Guid> map ? [.. keyList.Select(map)] : keyList;
+    }
+
+    // The keys are entry IDs here: the entries that were ticked leave, not the rows at the same places of the stored order.
+    private async Task RemoveFromPlaylist(Guid playlistID, List<Guid> entryIDList)
+    {
+        try
+        {
+            await ServicePlaylist.RemoveEntryList(playlistID, entryIDList);
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+            return;
+        }
+
+        await OnPlaylistChanged.InvokeAsync();
+    }
+
+    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run, bool isDestructive = false)
+    {
+        string? reason = ServiceLibraryAction.GetDisabledReason(action);
+        return ContextMenuItem.Item(text, run, reason is not null, reason, isDestructive);
+    }
+
+    private static string Count(int count) => count == 1 ? "1 media file" : $"{count} media files";
+
+    private static string DeleteText(int count) => count == 1 ? "Delete song" : $"Delete {count} songs";
+
+    private async Task DeleteFromLibrary(List<Guid> idList, bool isTicked)
+    {
+        await Show(ServiceLibraryAction.DeleteFromLibrary(idList));
+        if (isTicked)
+        {
+            Dispatcher.Dispatch(new ActionLibrarySelectionCleared());
+        }
+    }
+
+    private async Task Show(Task<BulkResult> action)
+    {
+        BulkResult result;
+        try
+        {
+            result = await action;
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+            return;
+        }
+
+        if (result.FailedIDList.Count > 0)
+        {
+            ServiceToast.ShowWarning($"{result.FailedIDList.Count} failed. {result.Message}".Trim());
+        }
+    }
+
+    // Asks first with the real count, and for the ticked rows says how many of them the search hides.
+    private Task Confirm(string title, string message, string acceptText, Func<Task> run, bool isTicked)
+    {
+        int hidden = isTicked ? HiddenSelectedCount : 0;
+        string? detail = hidden > 0 ? $"{hidden} of them {(hidden == 1 ? "is" : "are")} hidden by the current search." : null;
+        _confirm = new ConfirmRequest(title, message, detail, acceptText, run);
+
+        return Task.CompletedTask;
+    }
+
+    private Task CloseConfirm(bool open)
+    {
+        if (!open) _confirm = null;
+
+        return Task.CompletedTask;
+    }
+
+    private async Task SubmitConfirm(bool accepted)
+    {
+        ConfirmRequest? request = _confirm;
+        _confirm = null;
+        if (accepted && request is not null) await request.Run();
+    }
+
+    private Task ChoosePlaylist(List<Guid> idList)
+    {
+        _playlistTargetList = idList;
+        _choosingPlaylist = true;
+
+        return Task.CompletedTask;
+    }
+
+    private Task AddToPlaylist(Guid playlistID)
+    {
+        _choosingPlaylist = false;
+
+        return Show(ServiceLibraryAction.AddToPlaylist(playlistID, _playlistTargetList));
+    }
+
+}

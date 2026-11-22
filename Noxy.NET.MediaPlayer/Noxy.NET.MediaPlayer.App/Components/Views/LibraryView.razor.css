@@ -6,46 +6,46 @@
     overflow: auto;
 }
 
-.LibraryView ::deep > .table {
-    flex: 1 1 auto;
-    grid-template-columns: minmax(0px, max-content) minmax(0px, max-content) 1fr  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content);
-    align-content: flex-start;
-}
-
-.LibraryView ::deep > .table .cell {
+/* The drop zone is the one child of the view and takes what is left of the window, the table inside it fills that. */
+.LibraryView ::deep > .zone {
     display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
-.LibraryView ::deep .table > .header {
-    row-gap: var(--size-gap-xs);
-}
-
-.LibraryView ::deep .table > .body > .row {
-    align-items: center;
-}
-
-.action-row {
-    grid-column: 1 / -1;
+.tool-list {
     display: flex;
     flex-flow: row;
-    justify-content: space-between;
-}
-
-.header-row {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
     align-items: center;
+    gap: var(--size-gap-xxs);
 }
 
-.header-row ::deep > .sort > button {
+.empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--size-gap-sm);
+    min-height: 0;
+    margin: var(--size-gap-sm);
+    padding: var(--size-gap-lg);
+    border: var(--size-border-width-md) dashed var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-lg);
+    text-align: center;
+    color: var(--color-muted);
+}
+
+.empty h2 {
+    margin: 0;
     color: var(--color-complementary);
-    background-color: transparent;
-    border: none;
-    padding: 0;
+}
+
+.empty p {
+    max-width: var(--size-column);
     margin: 0;
 }
-
 
 /*.row-top {*/
 /*    display: flex;*/

@@ -25,6 +25,13 @@ public sealed class FakeSyncService : ISyncService
 
     public event Action<LibraryDiff>? LibraryDiffApplied;
 
+    public event Action<ResponseUploadResult>? UploadResultReceived;
+
+    public void RaiseUploadResult(ResponseUploadResult result)
+    {
+        UploadResultReceived?.Invoke(result);
+    }
+
     public void RaiseChanged()
     {
         Changed?.Invoke();
@@ -85,6 +92,12 @@ public sealed class FakeSyncService : ISyncService
     public Task ApplyUploadSucceeded(ResponseUploadResult result)
     {
         CallList.Add(nameof(ApplyUploadSucceeded));
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyUploadFailed(ResponseUploadResult result)
+    {
+        CallList.Add(nameof(ApplyUploadFailed));
         return Task.CompletedTask;
     }
 }

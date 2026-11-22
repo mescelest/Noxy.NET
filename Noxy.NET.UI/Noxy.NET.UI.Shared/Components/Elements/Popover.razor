@@ -1,0 +1,190 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits BaseComponentElement
+
+<div @ref="_element" @attributes="AdditionalAttributes" id="@ID" popover="auto" class="@CssClass" data-placement="@PlacementName">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    // Raised once the panel is open and placed, which is when it can take focus.
+    [Parameter]
+    public EventCallback OnOpened { get; set; }
+
+    // The element the panel sits next to. Unset, it is the trigger whose popovertarget attribute holds the ID.
+    [Parameter]
+    public ElementReference? Anchor { get; set; }
+
+    // Window coordinates the panel opens at, instead of next to an element (a right-click).
+    [Parameter]
+    public PopoverPoint? Point { get; set; }
+
+    [Parameter]
+    public PlacementSideEnum Side { get; set; } = PlacementSideEnum.Bottom;
+
+    [Parameter]
+    public PlacementAlignEnum Align { get; set; } = PlacementAlignEnum.Start;
+
+    // Pixels between the anchor and the panel, and between the panel and the window edge. Unset reads the CSS variables.
+    [Parameter]
+    public double? Gap { get; set; }
+
+    [Parameter]
+    public double? Margin { get; set; }
+
+    [Parameter]
+    public string? ID { get; set; }
+
+    private const string FunctionShow = "Show";
+    private const string FunctionHide = "Hide";
+    private const string FunctionMeasure = "Measure";
+    private const string FunctionApply = "Apply";
+    private const string FunctionWatch = "Watch";
+
+    private ElementReference _element;
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<Popover>? _reference;
+    private PlacementSideEnum? _placement;
+    private bool _shown;
+    private bool _disposed;
+
+    private string? PlacementName => _placement?.ToString().ToLowerInvariant();
+
+    protected override async Task OnAfterFirstRenderAsync()
+    {
+        await base.OnAfterFirstRenderAsync();
+
+        if (_disposed) return;
+
+        IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(Popover)));
+
+        // The component can be disposed while the module loads: then nobody else releases it.
+        if (_disposed)
+        {
+            await DisposeModuleAsync(module);
+            return;
+        }
+
+        _module = module;
+        _reference = DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync(FunctionWatch, _element, _reference, nameof(Opened), nameof(Closed));
+
+        await SyncOpenStateAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await SyncOpenStateAsync();
+    }
+
+    public async Task ShowAsync()
+    {
+        if (_disposed || _module is null) return;
+
+        await _module.InvokeVoidAsync(FunctionShow, _element);
+    }
+
+    public async Task HideAsync()
+    {
+        if (_disposed || _module is null) return;
+
+        await _module.InvokeVoidAsync(FunctionHide, _element);
+    }
+
+    private async Task SyncOpenStateAsync()
+    {
+        if (_disposed || _module is null || Open == _shown) return;
+
+        // Set before the call so the toggle event it raises is not taken for the user opening or closing the panel.
+        _shown = Open;
+        try
+        {
+            await _module.InvokeVoidAsync(Open ? FunctionShow : FunctionHide, _element);
+        }
+        catch (JSException)
+        {
+            _shown = !Open;
+            throw;
+        }
+    }
+
+    [JSInvokable]
+    public async Task Opened()
+    {
+        if (_disposed || _module is null) return;
+
+        bool isNew = !_shown;
+        _shown = true;
+
+        await PlaceAsync(_module);
+
+        // The trigger's popovertarget opens the panel without the parent asking, so the parent is told.
+        if (isNew)
+        {
+            await OpenChanged.InvokeAsync(true);
+        }
+
+        await OnOpened.InvokeAsync();
+    }
+
+    [JSInvokable]
+    public async Task Closed()
+    {
+        if (_disposed || !_shown) return;
+
+        _shown = false;
+        _placement = null;
+        await OpenChanged.InvokeAsync(false);
+    }
+
+    private async Task PlaceAsync(IJSObjectReference module)
+    {
+        // A reference the parent has not captured yet has no ID; the script then falls back to the trigger.
+        ElementReference? anchorElement = Anchor is { Id: not null } ? Anchor : null;
+        PopoverMeasurement measurement = await module.InvokeAsync<PopoverMeasurement>(FunctionMeasure, _element, anchorElement);
+
+        // Closed again while measuring: there is nothing left to place.
+        if (!_shown) return;
+
+        Rect anchor = Point is PopoverPoint point ? new(point.X, point.Y, 0, 0) : measurement.Anchor;
+        PlacementRequest request = new(anchor, measurement.PanelWidth, measurement.PanelHeight, measurement.ViewportWidth, measurement.ViewportHeight, Side, Align, Gap ?? measurement.Gap, Margin ?? measurement.Margin);
+        PlacementResult result = request.Resolve();
+
+        await module.InvokeVoidAsync(FunctionApply, _element, result.X, result.Y, result.MaxHeight);
+        _placement = result.Side;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+
+        _disposed = true;
+        if (_module is not null)
+        {
+            await DisposeModuleAsync(_module);
+        }
+
+        _reference?.Dispose();
+    }
+
+    private static async Task DisposeModuleAsync(IJSObjectReference module)
+    {
+        try
+        {
+            await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
+    }
+
+}

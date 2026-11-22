@@ -1,0 +1,36 @@
+.trigger {
+    min-height: var(--size-control-sm);
+    padding: 0 var(--size-gap-xs);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-complementary);
+    cursor: pointer;
+}
+
+.trigger:disabled {
+    color: var(--color-disabled);
+    cursor: default;
+}
+
+.playlist-choice {
+    display: block;
+    width: 100%;
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+    border: none;
+    background: transparent;
+    color: var(--color-complementary);
+    font: var(--font-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.playlist-choice:hover {
+    background: var(--color-offset-primary-md);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--size-gap-xs);
+}

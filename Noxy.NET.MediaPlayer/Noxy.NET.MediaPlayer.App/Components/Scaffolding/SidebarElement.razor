@@ -38,9 +38,17 @@
 
         @foreach (ResponsePlaylist playlist in PlaylistList)
         {
-            <NavLink class="link" href="@($"playlist/{playlist.ID}")" @onclick="OnNavigate">
-                <span>@playlist.Name</span>
-            </NavLink>
+            ResponsePlaylist row = playlist;
+
+            <div @key="row.ID" class="playlist-row" @oncontextmenu="args => OpenPlaylistMenu(args, row.ID)" @oncontextmenu:preventDefault>
+                <NavLink class="link" href="@($"playlist/{row.ID}")" @onclick="OnNavigate">
+                    <span>@row.Name</span>
+                </NavLink>
+                <Button class="more" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Status="StatusEnum.None" aria-label="@($"Actions for {row.Name}")" aria-haspopup="menu" popovertarget="@PlaylistContextMenu.MenuID(row.ID)">
+                    <MaterialIcon Icon="more_horiz" Size="var(--size-icon-sm)"/>
+                </Button>
+                <PlaylistContextMenu @ref="_menuMap[row.ID]" Playlist="row"/>
+            </div>
         }
     </div>
 
@@ -55,6 +63,16 @@
     private List<ResponsePlaylist> PlaylistList => StatePlaylistList.Value.PlaylistList.OrderMostRecentlyPlayedFirst();
 
     private bool _showNewPlaylistDialog;
+    private readonly Dictionary<Guid, PlaylistContextMenu> _menuMap = [];
+
+    // A right-click on a playlist opens the same menu as its "⋯" button, at the pointer.
+    private async Task OpenPlaylistMenu(MouseEventArgs args, Guid playlistID)
+    {
+        if (_menuMap.TryGetValue(playlistID, out PlaylistContextMenu? menu))
+        {
+            await menu.OpenAtAsync(args);
+        }
+    }
 
     private void ClickNewPlaylistHandler()
     {

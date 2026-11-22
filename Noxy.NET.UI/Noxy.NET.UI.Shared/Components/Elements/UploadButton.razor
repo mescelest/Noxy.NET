@@ -1,0 +1,77 @@
+@inject IJSRuntime JS
+@inherits BaseComponentElement
+@implements IAsyncDisposable
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="@Status" IsIcon="@IsIcon" Loading="@Loading" disabled="@DisabledCurrent" @onclick="OpenPicker">
+        @ChildContent
+    </Button>
+    <InputFile @ref="_input" class="input" OnChange="SelectedHandler" multiple="@MultipleCurrent" accept="@Accept" tabindex="-1" aria-hidden="true"/>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // The kinds of file the picker offers, as the accept attribute of a file input says it (for example "audio/*"). Null offers every file.
+    [Parameter]
+    public string? Accept { get; set; }
+
+    // More than one file can be picked at once unless this is false.
+    [Parameter]
+    public bool? Multiple { get; set; }
+    private bool MultipleCurrent => Multiple ?? true;
+
+    [Parameter]
+    public bool? Disabled { get; set; }
+    private bool DisabledCurrent => Disabled ?? false;
+
+    [Parameter]
+    public bool? Loading { get; set; }
+
+    [Parameter]
+    public bool? IsIcon { get; set; }
+
+    [Parameter]
+    public StatusEnum? Status { get; set; }
+
+    // The files that were picked, in the order the picker gave them. Nothing is read: the caller opens the ones it wants.
+    [Parameter]
+    public EventCallback<List<IBrowserFile>> OnSelected { get; set; }
+
+    private const string FunctionOpen = "Open";
+
+    private InputFile? _input;
+    private IJSObjectReference? _module;
+
+    private async Task OpenPicker()
+    {
+        if (_input?.Element is not { } element) return;
+
+        _module ??= await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(UploadButton)));
+        await _module.InvokeVoidAsync(FunctionOpen, element);
+    }
+
+    private async Task SelectedHandler(InputFileChangeEventArgs args)
+    {
+        List<IBrowserFile> fileList = [.. args.GetMultipleFiles(args.FileCount)];
+        if (fileList.Count == 0) return;
+
+        await OnSelected.InvokeAsync(fileList);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
+    }
+
+}

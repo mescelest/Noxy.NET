@@ -1,0 +1,37 @@
+.ContextMenu {
+    padding: 0;
+}
+
+.menu {
+    display: flex;
+    flex-flow: column;
+    outline: none;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: var(--size-gap-xxs, 0.5rem);
+    min-height: var(--size-control-sm, 2.25rem);
+    width: 100%;
+    text-align: left;
+}
+
+.item[aria-haspopup]::after {
+    content: "›";
+    margin-inline-start: auto;
+}
+
+.item[aria-disabled="true"] {
+    cursor: default;
+}
+
+.back::before {
+    content: "‹";
+}
+
+.separator {
+    height: 0;
+    border-top: var(--size-border-width-sm, 1px) solid currentColor;
+    opacity: 0.25;
+}

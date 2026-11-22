@@ -1,15 +1,16 @@
 .QueuePanel {
-    position: absolute;
-    right: 0;
-    bottom: var(--size-layout-player-bar);
-    z-index: 30;
-    display: flex;
-    flex-flow: column;
-    width: var(--size-queue-panel);
-    max-height: var(--size-page-md);
+    width: min(var(--size-queue-panel), calc(100vw - 2 * var(--popover-margin)));
+    padding: 0;
     border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
     border-radius: var(--size-border-radius-lg);
     background: var(--color-primary);
+    color: var(--color-complementary);
+}
+
+.panel {
+    display: flex;
+    flex-flow: column;
+    max-height: var(--size-page-md);
 }
 
 header {

@@ -1,0 +1,55 @@
+@inject IUploadService ServiceUpload
+@inject ISyncService ServiceSync
+@inherits BaseComponentElement
+@implements IDisposable
+
+<UploadButton @attributes="AdditionalAttributes" class="@CssClass" Accept="@AcceptAudio" Disabled="@IsOffline" Loading="@_isSending" Status="StatusEnum.Highlight" OnSelected="SelectedHandler">
+    <MaterialIcon Icon="upload_file" Size="var(--size-icon-md)"/>
+    <span>@LabelCurrent</span>
+</UploadButton>
+
+@code {
+
+    // The playlist the files are added to once they are in the library. Null uploads to the library alone.
+    [Parameter]
+    public Guid? PlaylistID { get; set; }
+
+    [Parameter]
+    public string? Label { get; set; }
+    private string LabelCurrent => Label ?? "Upload";
+
+    private const string AcceptAudio = "audio/*";
+
+    private bool _isSending;
+
+    private bool IsOffline => ServiceSync.IsOffline;
+
+    protected override void OnInitialized()
+    {
+        ServiceSync.Changed += OnSyncChanged;
+    }
+
+    private void OnSyncChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SelectedHandler(List<IBrowserFile> fileList)
+    {
+        _isSending = true;
+        try
+        {
+            await ServiceUpload.Upload(fileList.ToUploadFileList(), PlaylistID);
+        }
+        finally
+        {
+            _isSending = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        ServiceSync.Changed -= OnSyncChanged;
+    }
+
+}

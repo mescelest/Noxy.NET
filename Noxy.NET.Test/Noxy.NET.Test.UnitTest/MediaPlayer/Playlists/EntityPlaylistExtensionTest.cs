@@ -1,5 +1,4 @@
 using Noxy.NET.MediaPlayer.Domain.Entities;
-using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 
 namespace Noxy.NET.Test.MediaPlayer.Playlists;
@@ -101,23 +100,5 @@ public class EntityPlaylistExtensionTest
         Assert.Equal(new DateTime(2026, 5, 6, 7, 8, 9, DateTimeKind.Utc), playlist.ToResponse(0).TimeLastPlayed);
         Assert.Equal(DateTimeKind.Utc, playlist.ToResponse(0).TimeLastPlayed?.Kind);
         Assert.Equal(DateTimeKind.Utc, playlist.ToDetailResponse().TimeLastPlayed?.Kind);
-    }
-
-    [Fact]
-    public void ToResponse_CarriesTheModes_AndNullByDefault()
-    {
-        EntityPlaylist playlist = CreatePlaylist();
-        Assert.Null(playlist.ToResponse(0).Shuffle);
-        Assert.Null(playlist.ToResponse(0).Repeat);
-        Assert.Null(playlist.ToDetailResponse().Shuffle);
-        Assert.Null(playlist.ToDetailResponse().Repeat);
-
-        playlist.Shuffle = ShuffleModeEnum.SpreadArtists;
-        playlist.Repeat = RepeatModeEnum.Once;
-
-        Assert.Equal(ShuffleModeEnum.SpreadArtists, playlist.ToResponse(0).Shuffle);
-        Assert.Equal(RepeatModeEnum.Once, playlist.ToResponse(0).Repeat);
-        Assert.Equal(ShuffleModeEnum.SpreadArtists, playlist.ToDetailResponse().Shuffle);
-        Assert.Equal(RepeatModeEnum.Once, playlist.ToDetailResponse().Repeat);
     }
 }

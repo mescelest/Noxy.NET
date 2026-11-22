@@ -1,9 +1,11 @@
+@inject IState<FeatureLibraryState> StateLibrary
+@inject IState<FeaturePlaylistListState> StatePlaylistList
 @inject IPlaylistService ServicePlaylist
 @inject ISyncService ServiceSync
 @inject IMetadataStore StoreMetadata
-@inject NavigationManager Navigation
-@inherits BaseComponentElement
-@implements IDisposable
+@inject IToastService ServiceToast
+@inherits BaseComponentElementFluxor
+@implements IAsyncDisposable
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @if (_gone)
@@ -12,73 +14,49 @@
     }
     else if (_detail is null)
     {
-        <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
         <p class="loading">Loading…</p>
     }
     else
     {
-        <GlassPanel>
+        <UploadMediaDropZone PlaylistID="Id" class="zone">
             <div class="row-top">
                 <h1>@_detail.Name</h1>
                 <span class="counts">@_detail.EntryList.Count @(_detail.EntryList.Count == 1 ? "file" : "files") · @_selectedSet.Count selected</span>
-                <button type="button" class="plain-button primary" @onclick="() => Run(() => ServicePlaylist.Play(Id))" aria-label="Play">
+                <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" aria-label="Play" @onclick="ClickPlayHandler">
                     <MaterialIcon Icon="play_arrow" Size="var(--size-icon-md)"/>
-                    Play
-                </button>
-                <button type="button" class="plain-button" @onclick="() => Run(() => ServicePlaylist.DownloadAll(Id))">Download all</button>
-                <button type="button" class="plain-button" @onclick="() => Run(() => ServicePlaylist.Refresh(Id))">Refresh</button>
-                <button type="button" class="plain-button" disabled="@(_selectedSet.Count == 0)" @onclick="RemoveSelected">Remove selected</button>
-                <button type="button" class="plain-button danger" @onclick="Delete">Delete playlist</button>
-            </div>
-            <div class="row-settings">
-                <label><input type="checkbox" checked="@_detail.AllowDuplicates" @onchange="args => Run(() => ServicePlaylist.SetAllowDuplicates(Id, args.Value is true))"/> Allow the same media file twice</label>
-                <label>
-                    Shuffle
-                    <select @onchange="args => Run(() => ServicePlaylist.SetShuffle(Id, ParseShuffle(args.Value?.ToString())))">
-                        <option value="" selected="@(_detail.Shuffle is null)">Follow my setting</option>
-                        @foreach (ShuffleModeEnum mode in Enum.GetValues<ShuffleModeEnum>())
-                        {
-                            <option value="@mode" selected="@(_detail.Shuffle == mode)">@mode</option>
-                        }
-                    </select>
-                </label>
-                <label>
-                    Repeat
-                    <select @onchange="args => Run(() => ServicePlaylist.SetRepeat(Id, ParseRepeat(args.Value?.ToString())))">
-                        <option value="" selected="@(_detail.Repeat is null)">Follow my setting</option>
-                        @foreach (RepeatModeEnum mode in Enum.GetValues<RepeatModeEnum>())
-                        {
-                            <option value="@mode" selected="@(_detail.Repeat == mode)">@mode</option>
-                        }
-                    </select>
-                </label>
-            </div>
-            <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
-        </GlassPanel>
-
-        @if (_detail.EntryList.Count == 0)
-        {
-            <MessageBox MessageList="@(["This playlist is empty. Add media files from the Library."])" Status="StatusEnum.Info"/>
-        }
-        else
-        {
-            <ul class="entries">
-                @foreach (ResponsePlaylistEntry entry in _detail.EntryList.OrderBy(x => x.Position))
+                    <span>Play</span>
+                </Button>
+                <UploadMediaButton PlaylistID="Id" Label="Upload to playlist"/>
+                @if (Summary is ResponsePlaylist summary)
                 {
-                    <li @key="entry.ID" class="entry" draggable="true" data-over="@(_overID == entry.ID)"
-                        @ondblclick="() => Run(() => ServicePlaylist.Play(Id, entry.ID))"
-                        @ondragstart="() => _dragID = entry.ID"
-                        @ondragover="() => _overID = entry.ID" @ondragover:preventDefault
-                        @ondrop="() => Drop(entry)" @ondrop:preventDefault>
-                        <span class="grip" aria-hidden="true"><MaterialIcon Icon="drag_indicator" Size="var(--size-icon-md)"/></span>
-                        <input type="checkbox" aria-label="Select @entry.MediaFile.Title" checked="@_selectedSet.Contains(entry.ID)" @onchange="() => Toggle(entry.ID)"/>
-                        <span class="cell">@entry.MediaFile.Title</span>
-                        <span class="cell">@entry.MediaFile.Artist</span>
-                        <span class="cell">@entry.MediaFile.Album</span>
-                    </li>
+                    <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Status="StatusEnum.None" aria-label="Playlist actions" aria-haspopup="menu" popovertarget="@PlaylistContextMenu.MenuID(summary.ID)">
+                        <MaterialIcon Icon="more_horiz" Size="var(--size-icon-md)"/>
+                    </Button>
+                    <PlaylistContextMenu Playlist="summary"/>
                 }
-            </ul>
-        }
+            </div>
+
+            <MediaFileTable RowList="_rowList" IsEmpty="IsPlaylistEmpty" StateMap="StateLibrary.Value.StateMap" Sort="_sort" Descending="_descending" OnSortChanged="ChangeSort"
+                            SelectedSet="_selectedSet" AllSelected="IsAllSelected" OnToggleAll="ToggleAllShown" OnToggleRow="ToggleRow" OnPlay="Play" OnContextMenu="OpenRowMenu"
+                            IsReorderable="CanReorder" ReorderHint="ReorderHint" OnMove="Move">
+                <ToolContent>
+                    <input type="search" class="search" placeholder="Search the playlist" aria-label="Search the playlist" value="@_search" @oninput="InputSearchHandler"/>
+                    <div class="tool-list">
+                        @if (_sort is not null)
+                        {
+                            <Button Type="@HTMLButtonTypeEnum.Button" @onclick="ClickClearSortHandler">Clear sort</Button>
+                        }
+                        <LibraryContextMenu @ref="_contextMenu" PlaylistID="Id" SelectedSet="_selectedSet" SelectedKeyList="SelectedKeyList" HiddenSelectedCount="HiddenSelectedCount"
+                                            MediaFileIDOf="MediaFileIDOf" OnPlaylistChanged="Load"/>
+                    </div>
+                </ToolContent>
+                <EmptyContent>
+                    <div class="empty">
+                        <MessageBox MessageList="@(["This playlist is empty. Add media files from the Library."])" Status="StatusEnum.Info"/>
+                    </div>
+                </EmptyContent>
+            </MediaFileTable>
+        </UploadMediaDropZone>
     }
 </div>
 
@@ -87,13 +65,39 @@
     [Parameter]
     public Guid Id { get; set; }
 
+    private const string HintClearSort = "Clear the sort to reorder";
+    private const string HintClearSearch = "Clear the search to reorder";
+
     private ResponsePlaylistDetail? _detail;
     private bool _gone;
-    private List<string> _messageList = [];
     private readonly HashSet<Guid> _selectedSet = [];
-    private Guid? _dragID;
-    private Guid? _overID;
     private Guid _loadedID;
+
+    // What the page shows is its own and forgotten when the page is left: the sort and the search never change the playlist.
+    private LibrarySortEnum? _sort;
+    private bool _descending;
+    private string _search = string.Empty;
+    private List<MediaFileTableRow> _rowList = [];
+    private Dictionary<Guid, Guid> _mediaFileIDMap = [];
+    private LibraryContextMenu? _contextMenu;
+
+    private ResponsePlaylist? Summary => StatePlaylistList.Value.PlaylistList.FirstOrDefault(x => x.ID == Id);
+
+    private bool IsPlaylistEmpty => _detail is not null && _detail.EntryList.Count == 0;
+
+    private bool IsAllSelected => _rowList.Count > 0 && _rowList.All(x => _selectedSet.Contains(x.Key));
+
+    private bool CanReorder => ResponsePlaylistEntryListExtension.CanReorder(_search, _sort);
+
+    private string? ReorderHint
+    {
+        get
+        {
+            if (CanReorder) return null;
+
+            return _sort is not null ? HintClearSort : HintClearSearch;
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -103,6 +107,10 @@
         _detail = null;
         _gone = false;
         _selectedSet.Clear();
+        _sort = null;
+        _descending = false;
+        _search = string.Empty;
+        _rowList = [];
         ServiceSync.Changed -= OnSyncChanged;
         ServiceSync.Changed += OnSyncChanged;
 
@@ -126,66 +134,125 @@
         try
         {
             _detail = await StoreMetadata.GetPlaylistDetail(Id);
-            if (_detail is not null) return;
+            if (_detail is null)
+            {
+                _gone = !(await StoreMetadata.GetPlaylistList()).Any(x => x.ID == Id);
+                return;
+            }
 
-            _gone = !(await StoreMetadata.GetPlaylistList()).Any(x => x.ID == Id);
+            RebuildRows();
         }
         catch (Exception exception)
         {
-            _messageList = [exception.ToActionMessage()];
+            ServiceToast.ShowError(exception.ToActionMessage());
         }
     }
 
-    private async Task Run(Func<Task> action)
+    // The rows are the stored order, filtered and sorted for the eyes only. A media file twice in the playlist is two rows with their own keys.
+    private void RebuildRows()
     {
-        _messageList = [];
+        if (_detail is null) return;
+
+        List<ResponsePlaylistEntry> storedList = [.. _detail.EntryList.OrderBy(x => x.Position)];
+        _rowList = [.. storedList.ToDisplayList(_search, _sort, _descending).Select(x => new MediaFileTableRow(x.ID, x.MediaFile))];
+        _mediaFileIDMap = storedList.ToDictionary(x => x.ID, x => x.MediaFileID);
+        _selectedSet.IntersectWith(_mediaFileIDMap.Keys);
+    }
+
+    // Says whether the action went through: a failure is raised as a toast.
+    private async Task<bool> Run(Func<Task> action)
+    {
         try
         {
             await action();
+            return true;
         }
         catch (Exception exception)
         {
-            _messageList = [exception.ToActionMessage()];
+            ServiceToast.ShowError(exception.ToActionMessage());
+            return false;
         }
     }
 
-    private void Toggle(Guid entryID)
+    private Task ClickPlayHandler() => Run(() => ServicePlaylist.Play(Id));
+
+    // Playback follows the playlist's own order, whatever the rows show.
+    private Task Play(MediaFileTableRow row) => Run(() => ServicePlaylist.Play(Id, row.Key));
+
+    // A second click on the same column turns the direction round, as in the Library.
+    private void ChangeSort(LibrarySortEnum column)
     {
-        if (!_selectedSet.Add(entryID)) _selectedSet.Remove(entryID);
+        _descending = _sort == column && !_descending;
+        _sort = column;
+        RebuildRows();
     }
 
-    private async Task RemoveSelected()
+    private void ClickClearSortHandler()
     {
-        List<Guid> entryIDList = [.. _selectedSet];
-        _selectedSet.Clear();
-        await Run(() => ServicePlaylist.RemoveEntryList(Id, entryIDList));
+        _sort = null;
+        _descending = false;
+        RebuildRows();
+    }
+
+    private void InputSearchHandler(ChangeEventArgs args)
+    {
+        _search = args.Value?.ToString() ?? string.Empty;
+        RebuildRows();
+    }
+
+    private void ToggleRow(Guid entryID)
+    {
+        if (!_selectedSet.Remove(entryID))
+        {
+            _selectedSet.Add(entryID);
+        }
+    }
+
+    private void ToggleAllShown()
+    {
+        bool isAllSelected = IsAllSelected;
+        foreach (MediaFileTableRow row in _rowList)
+        {
+            if (isAllSelected)
+            {
+                _selectedSet.Remove(row.Key);
+            }
+            else
+            {
+                _selectedSet.Add(row.Key);
+            }
+        }
+    }
+
+    // The ticked entries in the order of the rows, then the ones a search hides.
+    private List<Guid> SelectedKeyList => [.. _rowList.Where(x => _selectedSet.Contains(x.Key)).Select(x => x.Key), .. _selectedSet.Except(_rowList.Select(x => x.Key))];
+
+    private int HiddenSelectedCount => _selectedSet.Count - _rowList.Count(x => _selectedSet.Contains(x.Key));
+
+    // An entry stands for its media file; the same media file can be two entries.
+    private Guid MediaFileIDOf(Guid entryID) => _mediaFileIDMap.GetValueOrDefault(entryID, entryID);
+
+    private async Task OpenRowMenu((MouseEventArgs Args, MediaFileTableRow Row) context)
+    {
+        if (_contextMenu is null) return;
+
+        await _contextMenu.OpenAtAsync(context.Args, context.Row.Key);
+    }
+
+    // The dragged entry goes to the stored position of the one it is dropped on.
+    private async Task Move((Guid DragKey, Guid TargetKey) move)
+    {
+        ResponsePlaylistEntry? target = _detail?.EntryList.FirstOrDefault(x => x.ID == move.TargetKey);
+        if (target is null) return;
+
+        await Run(() => ServicePlaylist.MoveEntry(Id, move.DragKey, target.Position));
         await Load();
     }
 
-    private async Task Drop(ResponsePlaylistEntry target)
-    {
-        Guid? dragged = _dragID;
-        _dragID = null;
-        _overID = null;
-        if (dragged is null || dragged == target.ID) return;
-
-        await Run(() => ServicePlaylist.MoveEntry(Id, dragged.Value, target.Position));
-        await Load();
-    }
-
-    private async Task Delete()
-    {
-        await Run(() => ServicePlaylist.Delete(Id));
-        if (_messageList.Count == 0) Navigation.NavigateTo("");
-    }
-
-    private static ShuffleModeEnum? ParseShuffle(string? value) => Enum.TryParse(value, out ShuffleModeEnum mode) ? mode : null;
-
-    private static RepeatModeEnum? ParseRepeat(string? value) => Enum.TryParse(value, out RepeatModeEnum mode) ? mode : null;
-
-    public void Dispose()
+    public new async ValueTask DisposeAsync()
     {
         ServiceSync.Changed -= OnSyncChanged;
+        await base.DisposeAsync();
     }
 
 }

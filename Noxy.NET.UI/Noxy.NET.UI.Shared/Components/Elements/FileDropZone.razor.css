@@ -1,0 +1,28 @@
+.FileDropZone {
+    position: relative;
+}
+
+.hint {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* The file input covers the zone only while files are dragged over it, so that the drop lands on it and the browser hands the files over. */
+.drop {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.drop[data-active] {
+    pointer-events: auto;
+}

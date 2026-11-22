@@ -1,0 +1,440 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inherits BaseComponentElement
+
+<Popover @ref="_popover" @attributes="AdditionalAttributes" ID="@IDCurrent" Open="_open" OpenChanged="OpenChangedHandler" OnOpened="OpenedHandler"
+         Anchor="AnchorCurrent" Point="_point" Side="Side" Align="Align" class="@CssClass">
+    <div class="root" @onkeydown="KeyDownHandler" @onkeydown:preventDefault>
+        @RenderMenu(RootDepth)
+    </div>
+</Popover>
+
+@code {
+    [Parameter]
+    public List<ContextMenuItem> ItemList { get; set; } = [];
+
+    [Parameter]
+    public ElementReference? Anchor { get; set; }
+
+    [Parameter]
+    public PlacementSideEnum Side { get; set; } = PlacementSideEnum.Bottom;
+
+    [Parameter]
+    public PlacementAlignEnum Align { get; set; } = PlacementAlignEnum.Start;
+
+    [Parameter]
+    public string? ID { get; set; }
+
+    // Raised when the menu has closed, however it came about, so the owner can reset what it changed while the menu was open.
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private const string IDPrefix = "context-menu-";
+    private const string FunctionIsDrillIn = "IsDrillIn";
+    private const string FunctionFocusItem = "FocusItem";
+    private const string FunctionFocusTrigger = "FocusTrigger";
+
+    private const string KeyArrowDown = "ArrowDown";
+    private const string KeyArrowUp = "ArrowUp";
+    private const string KeyArrowLeft = "ArrowLeft";
+    private const string KeyArrowRight = "ArrowRight";
+    private const string KeyHome = "Home";
+    private const string KeyEnd = "End";
+    private const string KeyEnter = "Enter";
+    private const string KeySpace = " ";
+    private const string KeyEscape = "Escape";
+    private const string KeyTab = "Tab";
+    private const string KeyContextMenu = "ContextMenu";
+    private const string KeyF10 = "F10";
+
+    private readonly string _generatedID = IDPrefix + Guid.NewGuid().ToString("N");
+    private readonly Dictionary<int, ElementReference> _menuRefMap = [];
+    private readonly Dictionary<(int Depth, int Index), ElementReference> _itemRefMap = [];
+
+    private Popover? _popover;
+    private IJSObjectReference? _module;
+    private ContextMenuNavigator? _navigator;
+    private List<ContextMenuItem>? _navigatorSource;
+    private PopoverPoint? _point;
+    private ElementReference? _anchorOverride;
+    private bool _drillIn;
+    private bool _open;
+    private bool _focusPending;
+    private bool _disposed;
+
+    private string IDCurrent => ID ?? _generatedID;
+    private ElementReference? AnchorCurrent => _anchorOverride ?? Anchor;
+
+    // Built when first needed from the items as they are then, and rebuilt in place while the owner changes them.
+    private ContextMenuNavigator Navigator
+    {
+        get
+        {
+            if (_navigator is null)
+            {
+                _navigator = new(ItemList, _drillIn);
+                _navigatorSource = ItemList;
+            }
+
+            return _navigator;
+        }
+    }
+
+    // With drill-in the one list on screen is the deepest open level; in a fly-out the first level is always on screen.
+    private int RootDepth => _drillIn ? Navigator.OpenPath.Count : 0;
+    private int ActiveDepth => Navigator.OpenPath.Count;
+
+    public static bool IsMenuKey(KeyboardEventArgs args)
+    {
+        return args.Key == KeyContextMenu || (args.ShiftKey && args.Key == KeyF10);
+    }
+
+    protected override async Task OnAfterFirstRenderAsync()
+    {
+        await base.OnAfterFirstRenderAsync();
+
+        if (_disposed) return;
+
+        IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(ContextMenu)));
+        if (_disposed)
+        {
+            await DisposeModuleAsync(module);
+            return;
+        }
+
+        _module = module;
+        _drillIn = await _module.InvokeAsync<bool>(FunctionIsDrillIn);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (!_focusPending || _module is null || !_open || _disposed) return;
+
+        _focusPending = false;
+        ElementReference? menu = _menuRefMap.TryGetValue(ActiveDepth, out ElementReference element) ? element : null;
+        await _module.InvokeVoidAsync(FunctionFocusItem, menu, Navigator.FocusIndex);
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (_navigator is null || ReferenceEquals(_navigatorSource, ItemList)) return;
+
+        _navigator.Replace(ItemList);
+        _navigatorSource = ItemList;
+    }
+
+    public Task OpenAtAsync(MouseEventArgs args)
+    {
+        return OpenAtAsync(args.ClientX, args.ClientY);
+    }
+
+    public Task OpenAtAsync(double x, double y)
+    {
+        _point = new(x, y);
+        _anchorOverride = null;
+        _open = true;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    // The menu key and Shift+F10 open it at the focused element, which is not the pointer.
+    public Task OpenAtElementAsync(ElementReference element)
+    {
+        _point = null;
+        _anchorOverride = element;
+        _open = true;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    public async Task CloseAsync()
+    {
+        if (_popover is null) return;
+
+        await _popover.HideAsync();
+    }
+
+    private Task OpenChangedHandler(bool open)
+    {
+        _open = open;
+        return open ? Task.CompletedTask : ClosedAsync();
+    }
+
+    private void OpenedHandler()
+    {
+        _focusPending = true;
+    }
+
+    private async Task ClosedAsync()
+    {
+        ElementReference? trigger = AnchorCurrent;
+        _navigator = null;
+        _navigatorSource = null;
+        _point = null;
+        _anchorOverride = null;
+        _menuRefMap.Clear();
+        _itemRefMap.Clear();
+
+        if (_module is not null && !_disposed)
+        {
+            // The window may have been resized since, which is what closed it, so the next open reads the layout again.
+            _drillIn = await _module.InvokeAsync<bool>(FunctionIsDrillIn);
+            if (trigger is ElementReference element)
+            {
+                await _module.InvokeVoidAsync(FunctionFocusTrigger, element);
+            }
+        }
+
+        await OnClose.InvokeAsync();
+    }
+
+    private void RequestFocus()
+    {
+        _focusPending = true;
+    }
+
+    private List<ContextMenuItem> ListAt(int depth)
+    {
+        return Navigator.LevelList[depth];
+    }
+
+    private async Task ChooseAsync(ContextMenuItem item)
+    {
+        if (item.ClosesMenu)
+        {
+            await CloseAsync();
+        }
+
+        if (item.Run is Func<Task> run)
+        {
+            await run();
+        }
+    }
+
+    private async Task ClickItemHandler(int depth, int index)
+    {
+        ContextMenuItem item = ListAt(depth)[index];
+        if (!item.IsEnabled) return;
+
+        if (item.Kind == ContextMenuItemKindEnum.Submenu)
+        {
+            Navigator.FocusAt(depth, index);
+            Navigator.OpenSubmenu();
+            RequestFocus();
+            return;
+        }
+
+        await ChooseAsync(item);
+    }
+
+    // The mouse over an item focuses it and closes what was open below it; over a sub-menu item it opens that too, unless the
+    // sub-menu would replace the list, which only a click should do.
+    private void HoverItemHandler(int depth, int index)
+    {
+        ContextMenuItem item = ListAt(depth)[index];
+        if (!item.IsEnabled) return;
+
+        Navigator.FocusAt(depth, index);
+        if (item.Kind == ContextMenuItemKindEnum.Submenu && !_drillIn)
+        {
+            Navigator.OpenSubmenu();
+        }
+
+        RequestFocus();
+    }
+
+    private void ClickBackHandler()
+    {
+        Navigator.Close();
+        RequestFocus();
+    }
+
+    private Task SubmenuClosedHandler(int depth)
+    {
+        Navigator.CloseTo(depth);
+        return Task.CompletedTask;
+    }
+
+    private async Task KeyDownHandler(KeyboardEventArgs args)
+    {
+        switch (args.Key)
+        {
+            case KeyArrowDown:
+                Navigator.MoveNext();
+                break;
+            case KeyArrowUp:
+                Navigator.MovePrevious();
+                break;
+            case KeyHome:
+                Navigator.MoveFirst();
+                break;
+            case KeyEnd:
+                Navigator.MoveLast();
+                break;
+            case KeyArrowRight:
+                Navigator.OpenSubmenu();
+                break;
+            case KeyArrowLeft:
+                Navigator.Close();
+                break;
+            case KeyEscape:
+                if (!Navigator.Close())
+                {
+                    await CloseAsync();
+                    return;
+                }
+
+                break;
+            case KeyTab:
+                await CloseAsync();
+                return;
+            case KeyEnter:
+            case KeySpace:
+                await ActivateFocusedAsync();
+                break;
+            default:
+                if (IsLetter(args))
+                {
+                    Navigator.MoveToLetter(args.Key[0]);
+                }
+
+                break;
+        }
+
+        RequestFocus();
+    }
+
+    private async Task ActivateFocusedAsync()
+    {
+        if (Navigator.FocusIndex is not int index) return;
+
+        if (ListAt(ActiveDepth)[index].Kind == ContextMenuItemKindEnum.Submenu)
+        {
+            Navigator.OpenSubmenu();
+            return;
+        }
+
+        if (Navigator.Choose() is ContextMenuItem item)
+        {
+            await ChooseAsync(item);
+        }
+    }
+
+    private static bool IsLetter(KeyboardEventArgs args)
+    {
+        return args.Key.Length == 1 && char.IsLetterOrDigit(args.Key[0]) && !args.CtrlKey && !args.AltKey && !args.MetaKey;
+    }
+
+    private bool IsOpenSubmenu(int depth, int index)
+    {
+        return !_drillIn && Navigator.OpenPath.Count > depth && Navigator.OpenPath[depth] == index;
+    }
+
+    private bool IsFocusedItem(int depth, int index)
+    {
+        return depth == ActiveDepth && Navigator.FocusIndex == index;
+    }
+
+    private string SubmenuID(int depth)
+    {
+        return $"{IDCurrent}-{depth + 1}";
+    }
+
+    private static string? AriaDisabled(ContextMenuItem item)
+    {
+        return item.IsEnabled ? null : AriaValue(true);
+    }
+
+    private static string? DisabledTitle(ContextMenuItem item)
+    {
+        return item.IsEnabled ? null : item.DisabledReason;
+    }
+
+    private static string AriaValue(bool value)
+    {
+        return value.ToString().ToLowerInvariant();
+    }
+
+    private ElementReference ItemAnchor(int depth, int index)
+    {
+        return _itemRefMap.TryGetValue((depth, index), out ElementReference element) ? element : default;
+    }
+
+    private RenderFragment RenderMenu(int depth) => @<div class="menu" role="menu" tabindex="-1" data-depth="@depth" @ref="_menuRefMap[depth]">
+                                                        @if (_drillIn && Navigator.CanGoBack)
+                                                        {
+                                                            <button type="button" class="item back" role="menuitem" @onclick="ClickBackHandler">Back</button>
+                                                        }
+
+                                                        @foreach ((int index, ContextMenuItem item) in ListAt(depth).Index())
+                                                        {
+                                                            @RenderItem(depth, index, item)
+                                                        }
+                                                    </div>;
+
+    private RenderFragment RenderItem(int depth, int index, ContextMenuItem item) => @<text>
+                                                                                          @if (item.Kind == ContextMenuItemKindEnum.Separator)
+                                                                                          {
+                                                                                              <div class="separator" role="separator" data-index="@index"></div>
+                                                                                          }
+                                                                                          else if (item.Kind == ContextMenuItemKindEnum.Submenu)
+                                                                                          {
+                                                                                              <button type="button" class="item" role="menuitem" data-index="@index" aria-haspopup="menu" aria-expanded="@AriaValue(IsOpenSubmenu(depth, index))"
+                                                                                                      aria-disabled="@AriaDisabled(item)" title="@DisabledTitle(item)"
+                                                                                                      @ref="_itemRefMap[(depth, index)]" @onclick="() => ClickItemHandler(depth, index)" @onmouseenter="() => HoverItemHandler(depth, index)">
+                                                                                                  @RenderContent(item)
+                                                                                              </button>
+
+                                                                                              @if (IsOpenSubmenu(depth, index))
+                                                                                              {
+                                                                                                  <Popover ID="@SubmenuID(depth)" Open="true" OpenChanged="() => SubmenuClosedHandler(depth)" Anchor="ItemAnchor(depth, index)" Side="PlacementSideEnum.Right"
+                                                                                                           Align="PlacementAlignEnum.Start" class="submenu">
+                                                                                                      @RenderMenu(depth + 1)
+                                                                                                  </Popover>
+                                                                                              }
+                                                                                          }
+                                                                                          else
+                                                                                          {
+                                                                                              <button type="button" class="item" role="menuitem" data-index="@index" data-destructive="@item.IsDestructive" aria-disabled="@AriaDisabled(item)"
+                                                                                                      title="@DisabledTitle(item)"
+                                                                                                      @onclick="() => ClickItemHandler(depth, index)" @onmouseenter="() => HoverItemHandler(depth, index)">
+                                                                                                  @RenderContent(item)
+                                                                                              </button>
+                                                                                          }
+                                                                                      </text>;
+
+    private RenderFragment RenderContent(ContextMenuItem item) => @<text>
+                                                                       @if (item.Icon is not null)
+                                                                       {
+                                                                           <MaterialIcon Icon="@item.Icon" Size="var(--size-icon-md)"/>
+                                                                       }
+
+                                                                       <span>@item.Text</span>
+                                                                   </text>;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+
+        _disposed = true;
+        if (_module is not null)
+        {
+            await DisposeModuleAsync(_module);
+        }
+    }
+
+    private static async Task DisposeModuleAsync(IJSObjectReference module)
+    {
+        try
+        {
+            await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
+    }
+
+}

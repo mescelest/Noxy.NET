@@ -1,25 +1,24 @@
 @inject ISyncService ServiceSync
 @inject IMetadataStore StoreMetadata
 @inject IFileStore StoreFile
+@inject IToastService ServiceToast
 @inherits BaseComponentElement
-@using Noxy.NET.MediaPlayer.Presentation
 @implements IDisposable
 
 <section @attributes="AdditionalAttributes" class="@CssClass">
     <h2>Library</h2>
     <p class="muted">@_onDeviceCount of @_mediaCount media files are on this device (@Format(_usedBytes)).</p>
-    <button type="button" class="choice" disabled="@(OfflineReason is not null)" title="@OfflineReason" @onclick="RefreshLibrary">Refresh library</button>
-    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
+    <button type="button" class="choice" disabled="@IsOffline" title="@OfflineReason" @onclick="RefreshLibrary">Refresh library</button>
 </section>
 
 @code {
 
-    private List<string> _messageList = [];
     private int _mediaCount;
     private int _onDeviceCount;
     private long _usedBytes;
 
-    private string? OfflineReason => ServiceSync.IsOffline ? Constants.ActionMessageOffline : null;
+    private string? OfflineReason => ServiceSync.IsOffline ? Texts.ActionMessageOffline : null;
+    private bool IsOffline => OfflineReason is not null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,7 +51,6 @@
 
     private async Task RefreshLibrary()
     {
-        _messageList = [];
         try
         {
             await ServiceSync.SyncLibrary(true);
@@ -60,7 +58,7 @@
         }
         catch (Exception exception)
         {
-            _messageList = [exception.ToActionMessage()];
+            ServiceToast.ShowError(exception.ToActionMessage());
         }
     }
 

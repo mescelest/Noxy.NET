@@ -5,18 +5,18 @@
     justify-content: center;
     column-gap: var(--size-gap-xxs, 0.5rem);
     min-width: var(--size-control-input, var(--size-control-md, 2.625rem));
-    min-height: var(--size-control-input, var(--size-control-md, 2.625rem)); 
+    min-height: var(--size-control-input, var(--size-control-md, 2.625rem));
     position: relative;
     padding: 0 var(--size-gap-xxs, 0.5rem);
     background-color: var(--color-button, #4D4AD3);
     border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-button, #4D4AD3) 35%, var(--color-primary, #FFFFFF));
     border-radius: var(--size-border-radius-md, 0.25rem);
-    box-shadow: 0 0 0 var(--size-border-width-sm, 1px) transparent inset;
+    box-shadow: 0 0 0 transparent;
     font: var(--font-button, normal normal 500 normal, var(--size-text-body, 1rem) "Segoe UI", "Roboto", sans-serif);
     color: var(--color-light, #FFFFFF);
     box-sizing: border-box;
     cursor: pointer;
-    transition: box-shadow var(--animation-length-short, 150ms) ease-in-out, border var(--animation-length-short, 150ms) ease-in-out;
+    transition: background-color var(--animation-length-short, 150ms) ease-in-out, box-shadow var(--animation-length-short, 150ms) ease-in-out;
 }
 
 .Button[data-is-icon] {
@@ -32,12 +32,15 @@
     outline-offset: var(--size-gap-tiny, 2px);
 }
 
+/* The light changes, nothing moves: hover brightens the fill and adds a soft glow, press brightens it further. */
 .Button:not(:disabled):hover {
-    border-bottom-width: calc(var(--size-border-width-lg, 3px) * 2);
+    background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 85%, var(--color-light, #FFFFFF));
+    box-shadow: 0 0 var(--size-gap-xs, 0.75rem) color-mix(in srgb, var(--color-button, #4D4AD3) 55%, transparent);
 }
 
 .Button:not(:disabled):active {
-    border-bottom-width: var(--size-border-width-sm, 1px);
+    background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 70%, var(--color-light, #FFFFFF));
+    box-shadow: 0 0 0 transparent;
 }
 
 .Button:disabled:not(.loading) {
@@ -47,8 +50,32 @@
     cursor: not-allowed;
 }
 
+.Button[data-status="default"] {
+    --color-button: var(--color-default, #4D4AD3);
+}
+
+/* The wireframe look: no fill, a thin border, and only a faint wash on hover and press. */
 .Button[data-status="none"] {
-    --color-button: var(--color-none, #4D4AD3);
+    --color-button: var(--color-complementary, #000000);
+    background-color: transparent;
+    border-width: var(--size-border-width-sm, 1px);
+    border-color: var(--color-offset-primary-lg, #767676);
+    color: var(--color-complementary, #000000);
+}
+
+.Button[data-status="none"]:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--color-button, #000000) 8%, transparent);
+    box-shadow: 0 0 0 transparent;
+}
+
+.Button[data-status="none"]:not(:disabled):active {
+    background-color: color-mix(in srgb, var(--color-button, #000000) 16%, transparent);
+}
+
+.Button[data-status="none"]:disabled:not(.loading) {
+    background-color: transparent;
+    border-color: var(--color-disabled, #7F7F7F);
+    color: var(--color-disabled, #7F7F7F);
 }
 
 .Button[data-status="success"] {

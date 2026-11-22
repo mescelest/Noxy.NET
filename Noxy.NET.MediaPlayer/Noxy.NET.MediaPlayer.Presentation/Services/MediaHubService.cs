@@ -19,6 +19,7 @@ public class MediaHubService(ISyncService serviceSync, ISettingService serviceSe
     public static IReadOnlyList<string> HandledEventNameList { get; } =
     [
         nameof(MediaHubEventEnum.UploadSucceeded),
+        nameof(MediaHubEventEnum.UploadFailed),
         nameof(MediaHubEventEnum.MediaUpdated),
         nameof(MediaHubEventEnum.MediaDeleted),
         nameof(MediaHubEventEnum.PlaylistUpdated),
@@ -153,7 +154,7 @@ public class MediaHubService(ISyncService serviceSync, ISettingService serviceSe
     private HubConnection Build(string address)
     {
         HubConnection connection = new HubConnectionBuilder()
-            .WithUrl(address + HubConstants.MediaHubPath, options =>
+            .WithUrl(address + ApplicationConstants.MediaHubPath, options =>
             {
                 options.AccessTokenProvider = serviceSession.GetAccessToken;
                 ConfigureConnection(options);
@@ -162,6 +163,7 @@ public class MediaHubService(ISyncService serviceSync, ISettingService serviceSe
             .Build();
 
         connection.On<ResponseUploadResult>(nameof(MediaHubEventEnum.UploadSucceeded), x => Run(nameof(MediaHubEventEnum.UploadSucceeded), () => serviceSync.ApplyUploadSucceeded(x)));
+        connection.On<ResponseUploadResult>(nameof(MediaHubEventEnum.UploadFailed), x => Run(nameof(MediaHubEventEnum.UploadFailed), () => serviceSync.ApplyUploadFailed(x)));
         connection.On<ResponseMediaFile>(nameof(MediaHubEventEnum.MediaUpdated), x => Run(nameof(MediaHubEventEnum.MediaUpdated), () => serviceSync.ApplyMediaUpdated(x)));
         connection.On<Guid>(nameof(MediaHubEventEnum.MediaDeleted), x => Run(nameof(MediaHubEventEnum.MediaDeleted), () => serviceSync.ApplyMediaDeleted(x)));
         connection.On<ResponsePlaylist>(nameof(MediaHubEventEnum.PlaylistUpdated), x => Run(nameof(MediaHubEventEnum.PlaylistUpdated), () => serviceSync.ApplyPlaylistUpdated(x)));

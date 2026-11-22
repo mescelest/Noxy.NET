@@ -30,7 +30,43 @@
     min-height: var(--size-control-xs);
 }
 
-.link-list ::deep > .link {
+.playlist-row {
+    display: flex;
+    align-items: center;
+    column-gap: var(--size-gap-tiny);
+}
+
+.playlist-row ::deep > .link {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Hidden until the row is hovered or has focus inside, but never removed, so a keyboard or screen reader still reaches it. */
+.playlist-row ::deep > .more {
+    flex: 0 0 auto;
+    min-width: var(--size-control-xs);
+    min-height: var(--size-control-xs);
+    opacity: 0;
+}
+
+.playlist-row:hover ::deep > .more, .playlist-row:focus-within ::deep > .more {
+    opacity: 1;
+}
+
+/* With no hover to reveal it (touch) or no room to hover over (narrow), it is always shown. */
+@container style(--layout-narrow: 1) {
+    .playlist-row ::deep > .more {
+        opacity: 1;
+    }
+}
+
+@container style(--layout-touch: 1) {
+    .playlist-row ::deep > .more {
+        opacity: 1;
+    }
+}
+
+.link-list ::deep > .link, .playlist-row ::deep > .link {
     display: flex;
     align-items: center;
     column-gap: var(--size-gap-xs);
@@ -44,11 +80,11 @@
     white-space: nowrap;
 }
 
-.link-list ::deep > .link:hover {
+.link-list ::deep > .link:hover, .playlist-row ::deep > .link:hover {
     background: var(--color-offset-primary-md);
 }
 
-.link-list ::deep > .link.active {
+.link-list ::deep > .link.active, .playlist-row ::deep > .link.active {
     background: var(--color-offset-primary-lg);
 }
 

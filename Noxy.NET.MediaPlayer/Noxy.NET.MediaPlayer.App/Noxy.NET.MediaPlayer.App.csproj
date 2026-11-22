@@ -70,6 +70,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Include="Components\Dialogs\ServerManageDialog.razor.js"/>
         <None Include="Components\NarrowWatcher.razor.js"/>
     </ItemGroup>
 

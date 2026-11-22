@@ -19,8 +19,6 @@ public static class EntityPlaylistExtension
                 TimeCreated = DateTime.SpecifyKind(playlist.TimeCreated, DateTimeKind.Utc),
                 TimeModified = DateTime.SpecifyKind(playlist.TimeModified, DateTimeKind.Utc),
                 TimeLastPlayed = playlist.TimeLastPlayed is { } played ? DateTime.SpecifyKind(played, DateTimeKind.Utc) : null,
-                Shuffle = playlist.Shuffle,
-                Repeat = playlist.Repeat
             };
         }
 
@@ -35,8 +33,6 @@ public static class EntityPlaylistExtension
                 TimeCreated = DateTime.SpecifyKind(playlist.TimeCreated, DateTimeKind.Utc),
                 TimeModified = DateTime.SpecifyKind(playlist.TimeModified, DateTimeKind.Utc),
                 TimeLastPlayed = playlist.TimeLastPlayed is { } played ? DateTime.SpecifyKind(played, DateTimeKind.Utc) : null,
-                Shuffle = playlist.Shuffle,
-                Repeat = playlist.Repeat,
                 EntryList =
                 [
                     .. playlist.EntryList.OrderBy(x => x.Position).Select(x => new ResponsePlaylistEntry

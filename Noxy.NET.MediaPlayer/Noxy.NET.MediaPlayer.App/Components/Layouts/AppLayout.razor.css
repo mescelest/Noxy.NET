@@ -42,3 +42,7 @@ footer {
     flex: 0 0 auto;
     border-top: var(--size-border-width-sm) solid var(--color-offset-primary-md);
 }
+
+aside:not([data-open]) {
+    display: none;
+}

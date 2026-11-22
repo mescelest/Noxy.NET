@@ -1,4 +1,5 @@
 @layout MainLayout
+@inject IState<FeatureShellState> StateShell
 @inject IDispatcher Dispatcher
 @inherits BaseComponentLayoutFluxor
 
@@ -8,7 +9,7 @@
     </header>
 
     <div class="content">
-        <aside>
+        <aside data-open="@SidebarOpen">
             <SidebarElement/>
         </aside>
 
@@ -23,6 +24,8 @@
 </div>
 
 @code {
+
+    private bool SidebarOpen => StateShell.Value.SidebarOpen;
 
     protected override void OnInitialized()
     {

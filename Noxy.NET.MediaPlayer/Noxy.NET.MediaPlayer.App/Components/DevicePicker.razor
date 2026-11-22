@@ -6,15 +6,12 @@
 @implements IAsyncDisposable
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" disabled="@IsOffline" title="@IsOfflineReason" aria-haspopup="listbox" aria-expanded="@_open" @onclick="ClickOpenHandler">
+    <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" disabled="@IsOffline" title="@IsOfflineReason" aria-haspopup="listbox" aria-expanded="@_open" popovertarget="@PopoverID">
         @ButtonLabel
     </Button>
 
-    @if (_open)
-    {
-        <div class="backdrop" @onclick="() => _open = false"></div>
-
-        <ul class="list" role="listbox">
+    <Popover @ref="_popover" ID="@PopoverID" @bind-Open="_open" Side="PlacementSideEnum.Top" Align="PlacementAlignEnum.End" class="list">
+        <ul class="devices" role="listbox">
             @foreach (ResponseDevice device in DeviceList)
             {
                 ResponseDevice chosen = device;
@@ -36,13 +33,18 @@
                 <li class="none">No devices are online.</li>
             }
         </ul>
-    }
+    </Popover>
 </div>
 
 @code {
 
+    private const string PopoverIDPrefix = "device-picker-";
+
+    private Popover? _popover;
     private bool _open;
     private Guid? _thisID;
+
+    private string PopoverID { get; } = PopoverIDPrefix + Guid.NewGuid().ToString("N");
     private string? _movingTo;
 
     // Offline there is no live session to move: the button says why.
@@ -76,21 +78,20 @@
         _ = InvokeAsync(StateHasChanged);
     }
 
-    private void ClickOpenHandler()
-    {
-        _open = !_open;
-    }
-
     private async Task Choose(ResponseDevice device)
     {
+        if (_popover is not null)
+        {
+            await _popover.HideAsync();
+        }
+
         // Moving to the device that already plays changes nothing and no update follows, so there is nothing to wait for.
         if (device.IsActive || (device.DeviceID == _thisID && ServiceRemote.Role != PlaybackRoleEnum.Controller))
         {
-            _open = false;
             return;
         }
 
-        _open = false;
+
         _movingTo = device.Name;
         try
         {

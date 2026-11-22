@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Noxy.NET.MediaPlayer.API;
+using Noxy.NET.MediaPlayer.Application;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Models.Upload;
 using Noxy.NET.MediaPlayer.Domain.Entities;
@@ -183,7 +184,7 @@ public class MediaUploadFlowTest
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         JsonElement problem = (await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken));
-        Assert.Equal($$"""Expected a "{{Constants.UploadFileField}}" field.""", problem.GetProperty("title").GetString());
+        Assert.Equal($$"""Expected a "{{ApplicationConstants.FileField}}" field.""", problem.GetProperty("title").GetString());
         Assert.Empty(Directory.GetFiles(factory.StagingFolder));
     }
 
@@ -257,7 +258,7 @@ public class MediaUploadFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
 
-        HttpResponseMessage response = await factory.CreateClient().GetAsync($"/Media?{Constants.AccessTokenQueryKey}={user.Token}", TestContext.Current.CancellationToken);
+        HttpResponseMessage response = await factory.CreateClient().GetAsync($"/Media?{ApiConstants.AccessTokenQueryKey}={user.Token}", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }

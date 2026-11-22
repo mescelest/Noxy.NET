@@ -24,7 +24,7 @@ public class QueueServiceTest
 
     public QueueServiceTest()
     {
-        QueueSourceService serviceSource = new(_storeMetadata, _serviceSetting, new ShuffleService(new Random(21)), new Random(22));
+        QueueSourceService serviceSource = new(_storeMetadata, new ShuffleService(new Random(21)), new Random(22));
         _service = new(serviceSource, _serviceSetting, _storeLocalQueue, _serviceSync, _storeMetadata, new FakeTimeProvider(), _logger);
         _service.EditApplied += _editList.Add;
         _service.Changed += () => _changedCount++;
@@ -643,7 +643,7 @@ public class QueueServiceTest
         await _service.SaveLocalCopy(0);
 
         FakeSyncService sync = new();
-        QueueService restored = new(new QueueSourceService(_storeMetadata, _serviceSetting, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _storeLocalQueue, sync, _storeMetadata, new FakeTimeProvider(), new FakeLogger<QueueService>())
+        QueueService restored = new(new QueueSourceService(_storeMetadata, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _storeLocalQueue, sync, _storeMetadata, new FakeTimeProvider(), new FakeLogger<QueueService>())
             { OwnsPlayback = true };
         await restored.LoadLocalCopy();
         await SavePlaylist(playlistID, [entryList[0], entryList[2]]);
@@ -702,7 +702,7 @@ public class QueueServiceTest
         await _service.SaveLocalCopy(41.5);
         ResponseQueue saved = Snapshot();
 
-        QueueService other = new(new QueueSourceService(_storeMetadata, _serviceSetting, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _storeLocalQueue, new FakeSyncService(), _storeMetadata, new FakeTimeProvider(),
+        QueueService other = new(new QueueSourceService(_storeMetadata, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _storeLocalQueue, new FakeSyncService(), _storeMetadata, new FakeTimeProvider(),
             new FakeLogger<QueueService>());
         TimeSpan? position = await other.LoadLocalCopy();
 
@@ -761,7 +761,7 @@ public class QueueServiceTest
     [Fact]
     public async Task AnEditOfAFullQueue_WritesNothing_AndTheCopyIsWrittenOnceWhenSaved()
     {
-        List<ResponseMediaFile> mediaList = Enumerable.Range(0, Constants.QueueMaxItemCount).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
+        List<ResponseMediaFile> mediaList = Enumerable.Range(0, PresentationConstants.QueueMaxItemCount).Select(index => MediaFileFactory.Create($"Media {index:00000}")).ToList();
         await _storeMetadata.ReplaceMediaFileList(mediaList);
         await Start(mediaList[0].ID);
         int saved = _storeLocalQueue.SaveCount;
@@ -773,7 +773,7 @@ public class QueueServiceTest
         await _service.SaveLocalCopy(0);
 
         Assert.Equal(saved + 1, _storeLocalQueue.SaveCount);
-        Assert.Equal(Constants.QueueMaxItemCount - 1, Snapshot().SourceList.Count);
+        Assert.Equal(PresentationConstants.QueueMaxItemCount - 1, Snapshot().SourceList.Count);
     }
 
     #endregion -- The local copy --

@@ -15,10 +15,12 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddPresentation()
         {
             services.TryAddSingleton(TimeProvider.System);
-            services.AddHttpClient<IAuthApiClient, AuthApiClient>(client => client.Timeout = TimeSpan.FromSeconds(Constants.HttpTimeoutSeconds));
-            services.AddHttpClient<IApiClient, ApiClient>(client => client.Timeout = TimeSpan.FromSeconds(Constants.HttpTimeoutSeconds));
+            services.AddHttpClient<IAuthApiClient, AuthApiClient>(client => client.Timeout = TimeSpan.FromSeconds(PresentationConstants.HttpTimeoutSeconds));
+            // The time limit is kept per request by the client itself, so an upload can take longer than a normal call.
+            services.AddHttpClient<IApiClient, ApiClient>(client => client.Timeout = Timeout.InfiniteTimeSpan);
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<ISyncService, SyncService>();
+            services.AddSingleton<IUploadService, UploadService>();
             services.AddSingleton<ISettingService, SettingService>();
             services.AddSingleton<IMetadataSyncService, MetadataSyncService>();
             services.AddSingleton<IDeviceService, DeviceService>();

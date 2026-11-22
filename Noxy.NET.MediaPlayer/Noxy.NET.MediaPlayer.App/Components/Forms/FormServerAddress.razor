@@ -2,7 +2,7 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <WebForm T="FormModelServerAddress" Context="_context" OnSubmit="Submit" Disabled="Disabled">
+    <WebForm T="FormModelServerAddress" Context="_context" OnSubmit="Submit">
         <InputGroupText @bind-Value="_context.Model.ServerAddress"/>
         <Button Type="@HTMLButtonTypeEnum.Submit" Loading="@LoadingCurrent">Save</Button>
     </WebForm>
@@ -12,41 +12,47 @@
 
     [Parameter]
     public bool? Loading { get; set; }
-
-    [Parameter]
-    public bool Disabled { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> OnLoadingChanged { get; set; }
     private bool LoadingCurrent => Loading ?? _context.IsSubmitting;
+
+    // The saved address that is edited, or null to add a new one.
+    [Parameter]
+    public string? Address { get; set; }
 
     [Parameter]
     public EventCallback<string> OnSubmit { get; set; }
 
     private readonly WebFormContext<FormModelServerAddress> _context = new(new());
-    private string? _savedAddress;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        _savedAddress = await StorageServerAddress.GetAddress();
-        _context.Model.ServerAddress = _savedAddress ?? string.Empty;
+        _context.Model.ServerAddress = Address ?? string.Empty;
     }
 
     private async Task Submit(WebFormContext<FormModelServerAddress> context)
     {
-        await OnLoadingChanged.InvokeAsync(true);
         try
         {
-            await StorageServerAddress.SetAddress(context.Model.ServerAddress);
-            _savedAddress = await StorageServerAddress.GetAddress();
-            context.Model.ServerAddress = _savedAddress ?? string.Empty;
-
-            await OnSubmit.InvokeAsync(_savedAddress);
+            if (Address is null)
+            {
+                await StorageServerAddress.SetAddress(context.Model.ServerAddress);
+            }
+            else
+            {
+                await StorageServerAddress.ReplaceAddress(Address, context.Model.ServerAddress);
+            }
         }
-        finally
+        catch (ArgumentException)
         {
-            await OnLoadingChanged.InvokeAsync(false);
+            context.HandleException("The server address must be an http or https address.");
+            return;
         }
+        catch (InvalidOperationException exception)
+        {
+            context.HandleException(exception.Message);
+            return;
+        }
+
+        await OnSubmit.InvokeAsync(context.Model.ServerAddress.NormalizeServerAddress());
     }
 
 }

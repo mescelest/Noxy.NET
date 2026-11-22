@@ -94,7 +94,7 @@ public class QueueService : IQueueService
             QueueItem? before = _queue.Current;
             try
             {
-                lock (_stateLock) _queue.Apply(edit, Constants.QueueHistoryLimit);
+                lock (_stateLock) _queue.Apply(edit, PresentationConstants.QueueHistoryLimit);
             }
             catch (InvalidQueueEditException)
             {
@@ -124,7 +124,7 @@ public class QueueService : IQueueService
                 else outcome.CurrentRemoved = OwnsPlayback;
             }
 
-            LiveQueue replaced = LiveQueue.From(target, Constants.QueueHistoryLimit);
+            LiveQueue replaced = LiveQueue.From(target, PresentationConstants.QueueHistoryLimit);
             lock (_stateLock) _queue = replaced;
             _ghostItemID = null;
             _knownEntryIDSet = null;
@@ -182,7 +182,7 @@ public class QueueService : IQueueService
         {
             try
             {
-                LiveQueue loaded = LiveQueue.From(snapshot.Queue, Constants.QueueHistoryLimit);
+                LiveQueue loaded = LiveQueue.From(snapshot.Queue, PresentationConstants.QueueHistoryLimit);
                 lock (_stateLock) _queue = loaded;
             }
             catch (InvalidQueueEditException)
@@ -260,7 +260,7 @@ public class QueueService : IQueueService
             ResponseQueueSource? source = _queue.ToResponse().Source;
             if (source is { Kind: QueueSourceKindEnum.Library })
             {
-                ShuffleModeEnum shuffle = await _serviceSource.GetShuffle(source);
+                ShuffleModeEnum shuffle = await _serviceSetting.GetShuffle();
                 foreach (Guid mediaFileID in diff.AddedList.Select(x => x.ID))
                 {
                     QueuePlacement? placement = await _serviceSource.PlaceNew(source, shuffle, _queue, mediaFileID);
@@ -308,7 +308,7 @@ public class QueueService : IQueueService
             HashSet<Guid> goneSet = known.Where(x => !entryIDSet.Contains(x)).ToHashSet();
             foreach (QueueEdit edit in RemovalEditList(goneSet, x => x.ItemID)) ApplyLocked(edit, outcome);
 
-            ShuffleModeEnum shuffle = await _serviceSource.GetShuffle(source);
+            ShuffleModeEnum shuffle = await _serviceSetting.GetShuffle();
             foreach (ResponsePlaylistEntry entry in detail.EntryList.Where(x => !known.Contains(x.ID)).OrderBy(x => x.Position))
             {
                 QueuePlacement? placement = await _serviceSource.PlaceNew(source, shuffle, _queue, entry.MediaFileID, entry.ID);
@@ -367,7 +367,7 @@ public class QueueService : IQueueService
     {
         QueueItem? before = _queue.Current;
         ResponseQueueDelta? applied;
-        lock (_stateLock) applied = _queue.Apply(edit, Constants.QueueHistoryLimit);
+        lock (_stateLock) applied = _queue.Apply(edit, PresentationConstants.QueueHistoryLimit);
         if (applied is null) return;
 
         outcome.AppliedList.Add(edit);
@@ -387,7 +387,7 @@ public class QueueService : IQueueService
         _ghostItemID = null;
         QueueEdit drop = new() { Edit = QueueEditEnum.Remove, ItemID = ghost };
         ResponseQueueDelta? dropped;
-        lock (_stateLock) dropped = _queue.Apply(drop, Constants.QueueHistoryLimit);
+        lock (_stateLock) dropped = _queue.Apply(drop, PresentationConstants.QueueHistoryLimit);
         if (dropped is not null) outcome.AppliedList.Add(drop);
     }
 

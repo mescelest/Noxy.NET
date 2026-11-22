@@ -1,0 +1,18 @@
+.Popover {
+    --popover-gap: var(--size-gap-xxxs, 0.25rem);
+    --popover-margin: var(--size-gap-xxs, 0.5rem);
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    overflow: auto;
+    visibility: hidden;
+}
+
+/* A consumer's display rule would otherwise beat the browser's own hiding of a closed popover. */
+.Popover:not(:popover-open) {
+    display: none;
+}
+
+.Popover[data-placed] {
+    visibility: visible;
+}

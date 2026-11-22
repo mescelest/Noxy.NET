@@ -19,10 +19,12 @@
 
     <ItemGroup>
         <Using Include="Xunit"/>
+        <Using Include="Noxy.NET.MediaPlayer.Presentation.Resources"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Noxy.NET.Shared\Noxy.NET.Shared.csproj"/>
+        <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Shared\Noxy.NET.UI.Shared.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Application\Noxy.NET.MediaPlayer.Application.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Presentation\Noxy.NET.MediaPlayer.Presentation.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Storage\Noxy.NET.MediaPlayer.Storage.csproj"/>

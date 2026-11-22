@@ -15,6 +15,7 @@ public class MediaHubServiceTest
         List<string> expected =
         [
             nameof(MediaHubEventEnum.UploadSucceeded),
+            nameof(MediaHubEventEnum.UploadFailed),
             nameof(MediaHubEventEnum.MediaUpdated),
             nameof(MediaHubEventEnum.MediaDeleted),
             nameof(MediaHubEventEnum.PlaylistUpdated),

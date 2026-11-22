@@ -3,6 +3,7 @@
 @inject IState<FeatureSessionState> StateSession
 @inject IPlaybackControlService ServiceControl
 @inject IRemotePlaybackService ServiceRemote
+@inject IToastService ServiceToast
 @inherits BaseComponentElementFluxor
 @implements IAsyncDisposable
 
@@ -60,7 +61,7 @@
                 <input type="range" min="0" max="100" step="1" value="@VolumeCurrent" aria-label="Volume" @oninput="InputVolumeHandler" @onchange="ChangeVolumeHandler"/>
             </div>
 
-            <Button Type="@HTMLButtonTypeEnum.Button" class="queue" IsIcon="true" @onclick="ClickQueueHandler" aria-expanded="@_queueOpen">
+            <Button Type="@HTMLButtonTypeEnum.Button" class="queue" IsIcon="true" popovertarget="@QueuePanel.PopoverID" aria-label="Queue">
                 <MaterialIcon Icon="queue_music" Size="var(--size-icon-md)"/>
             </Button>
 
@@ -68,18 +69,11 @@
         </div>
     </div>
 
-    <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
-
-    @if (_queueOpen)
-    {
-        <QueuePanel OnClose="CloseQueuePanelHandler"/>
-    }
+    <QueuePanel/>
 </div>
 
 @code {
 
-    private List<string> _messageList = [];
-    private bool _queueOpen;
     private TimeSpan? _dragPosition;
     private int? _dragVolume;
     private CancellationTokenSource? _tickSource;
@@ -174,14 +168,13 @@
 
     private async Task Run(Func<Task> action)
     {
-        _messageList = [];
         try
         {
             await action();
         }
         catch (Exception exception)
         {
-            _messageList = [exception.ToActionMessage()];
+            ServiceToast.ShowError(exception.ToActionMessage());
         }
     }
 
@@ -257,16 +250,6 @@
     private Task ClickPreviousHandler()
     {
         return Run(ServiceControl.Previous);
-    }
-
-    private void ClickQueueHandler()
-    {
-        _queueOpen = !_queueOpen;
-    }
-
-    private void CloseQueuePanelHandler()
-    {
-        _queueOpen = false;
     }
 
 }

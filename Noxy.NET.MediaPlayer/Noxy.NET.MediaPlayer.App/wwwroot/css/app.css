@@ -1,3 +1,13 @@
+/* Thin scrollbars with no track: only the thumb shows, faint until the pointer is over what scrolls. */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
+}
+
+*:hover {
+    scrollbar-color: var(--color-scrollbar-thumb-hover) transparent;
+}
+
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -120,6 +130,37 @@ dialog {
     border-radius: var(--size-border-radius-lg);
     background: var(--color-primary);
     color: var(--color-complementary);
+}
+
+.ContextMenu, .ContextMenu .submenu {
+    min-width: var(--size-column);
+    padding: var(--size-gap-xxxs);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-lg);
+    background: var(--color-primary);
+    color: var(--color-complementary);
+}
+
+.ContextMenu .item {
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+    border: none;
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-complementary);
+    font: var(--font-body);
+    cursor: pointer;
+}
+
+.ContextMenu .item:hover:not([aria-disabled="true"]), .ContextMenu .item:focus-visible {
+    background: var(--color-offset-primary-md);
+}
+
+.ContextMenu .item[aria-disabled="true"] {
+    color: var(--color-disabled);
+}
+
+.ContextMenu .item[data-destructive] {
+    color: var(--color-error);
 }
 
 .Page {

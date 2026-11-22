@@ -1,0 +1,9 @@
+/* Only the column that is sorted shows an arrow, and it is a thin, small one in the muted colour, close to the title. */
+.SortHeaderCell ::deep button {
+    column-gap: var(--size-gap-tiny);
+}
+
+.SortHeaderCell ::deep .direction {
+    display: inline-flex;
+    color: var(--color-muted);
+}

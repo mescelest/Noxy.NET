@@ -4,6 +4,7 @@ namespace Noxy.NET.UI.Enums;
 
 public enum StatusEnum
 {
+    Default,
     None,
     Error,
     Warning,
@@ -19,6 +20,7 @@ public static class WebFormFieldStateEnumExtensions
     {
         return value switch
         {
+            StatusEnum.Default => "default",
             StatusEnum.None => "none",
             StatusEnum.Error => "error",
             StatusEnum.Warning => "warning",

@@ -53,11 +53,13 @@
     --size-layout-sidebar: clamp(var(--size-column), 15%, 25rem);
     --size-layout-header: var(--size-control-xl);
     --size-layout-player-bar: calc(var(--size-control-xxl) + var(--size-gap-sm));
+    --toast-offset-bottom: calc(var(--size-layout-player-bar) + var(--size-gap-sm));
     --size-library-row: var(--size-control-lg);
     --size-card-width: 12.5rem;
     --size-card-height: 15rem;
     --size-queue-panel: 23.75rem;
     --layout-narrow: 0;
+    --layout-touch: 0;
     --table-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
     --table-columns-library: var(--size-control-xs) var(--size-control-xs) minmax(10rem, 3fr) minmax(6.25rem, 2fr) minmax(6.25rem, 2fr) 4.5rem 8rem;
 }
@@ -79,8 +81,7 @@
 :root {
     --color-light: #FFFFFF;
     --color-dark: #121212;
-    --color-none: #4D4AD3;
-    --color-muted: #767676;
+    --color-default: #4D4AD3;
     --color-highlight: #0073EC;
     --color-info: #289ED9;
     --color-success: #23883D;
@@ -114,12 +115,18 @@
 }
 
 :root {
+    /* The text tones between full strength and the page, worked out from the theme so they stay readable in both: muted for secondary text, faded for hints, low-light for what only needs to be felt. */
+    --color-muted: color-mix(in srgb, var(--color-complementary, #000000) 62%, var(--color-primary, #FFFFFF));
+    --color-faded: color-mix(in srgb, var(--color-complementary, #000000) 48%, var(--color-primary, #FFFFFF));
+    --color-low-light: color-mix(in srgb, var(--color-complementary, #000000) 34%, var(--color-primary, #FFFFFF));
     --color-offset-primary-sm: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
     --color-offset-primary-md: color-mix(in srgb, transparent 90%, var(--color-complementary, #000000));
     --color-offset-primary-lg: color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
     --color-offset-complementary-sm: color-mix(in srgb, transparent 90%, var(--color-primary, #FFFFFF));
     --color-offset-complementary-md: color-mix(in srgb, transparent 80%, var(--color-primary, #FFFFFF));
     --color-offset-complementary-lg: color-mix(in srgb, transparent 50%, var(--color-primary, #FFFFFF));
+    --color-scrollbar-thumb: var(--color-offset-primary-lg);
+    --color-scrollbar-thumb-hover: color-mix(in srgb, transparent 50%, var(--color-complementary, #000000));
 }
 
 /* The frosted glass of the library panel and the player bar. */

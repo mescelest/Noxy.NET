@@ -1,0 +1,26 @@
+@inherits BaseComponentElement
+
+<TableHeaderCellSort @attributes="AdditionalAttributes" class="@CssClass" Direction="Direction" OnClick="OnClick">
+    <ChildContent>
+        @ChildContent
+    </ChildContent>
+    <AscendingContent>
+        <MaterialIcon Icon="arrow_upward" Size="var(--size-icon-xxs)" Weight="300"/>
+    </AscendingContent>
+    <DescendingContent>
+        <MaterialIcon Icon="arrow_downward" Size="var(--size-icon-xxs)" Weight="300"/>
+    </DescendingContent>
+</TableHeaderCellSort>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public SortDirectionEnum? Direction { get; set; }
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+}

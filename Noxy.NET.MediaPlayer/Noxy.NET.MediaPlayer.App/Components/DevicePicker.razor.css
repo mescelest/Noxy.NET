@@ -1,7 +1,3 @@
-.DevicePicker {
-    position: relative;
-}
-
 .trigger, .device {
     min-height: var(--size-control-sm);
     padding: 0 var(--size-gap-xs);
@@ -18,24 +14,19 @@
     cursor: default;
 }
 
-.backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 40;
-}
-
 .list {
-    position: absolute;
-    right: 0;
-    bottom: 100%;
-    z-index: 50;
     min-width: var(--size-column);
-    margin: 0 0 var(--size-gap-xxxs);
     padding: var(--size-gap-xxxs);
-    list-style: none;
     border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
     border-radius: var(--size-border-radius-lg);
     background: var(--color-primary);
+    color: var(--color-complementary);
+}
+
+.devices {
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 .device {

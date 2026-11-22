@@ -1,6 +1,6 @@
 @inject ISessionService ServiceSession
 @inject IAppStartupService ServiceStartup
-@inject IServerAddressStorage StorageServerAddress
+@inject IToastService ServiceToast
 @inject NavigationManager Navigation
 @inherits BaseComponentElement
 
@@ -13,16 +13,7 @@
         </Divider>
 
         <div class="configuration">
-            @if (_showAddress)
-            {
-                <FormServerAddress Disabled="IsDisabled(LoginSourceEnum.ServerAddress)" OnLoadingChanged="loading => SetBusy(LoginSourceEnum.ServerAddress, loading)" OnSubmit="SubmitServerAddressHandler"/>
-            }
-            else
-            {
-                <Button class="link-button" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Info" disabled="@IsBusy" @onclick="() => _showAddress = true">
-                    Server: @_savedAddress (change)
-                </Button>
-            }
+            <ServerPicker Disabled="IsBusy"/>
         </div>
 
         <Divider>
@@ -30,12 +21,10 @@
         </Divider>
 
         <div class="provider-list">
-            <Button class="provider" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Notice" Loading="@(_busy == LoginSourceEnum.Google)" disabled="@IsBusy" @onclick="SignInGoogle">
+            <Button class="provider" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Notice" Loading="@IsGoogleBusy" disabled="@IsBusy" @onclick="SignInGoogle">
                 <MaterialIcon Icon="mail"/>
                 Sign in with Gmail
             </Button>
-
-            <MessageBox MessageList="_providerMessageList" Status="StatusEnum.Error"/>
         </div>
 
         <Divider>
@@ -44,21 +33,16 @@
 
         <TabSet class="login-tab-list">
             <TabPage Title="Sign in">
-                <FormSignIn Disabled="IsDisabled(LoginSourceEnum.SignIn)" OnLoadingChanged="loading => SetBusy(LoginSourceEnum.SignIn, loading)" OnSubmit="SubmitSignInHandler"/>
+                <FormSignIn Disabled="@IsSignInDisabled" OnLoadingChanged="SetSignInBusy" OnSubmit="SubmitSignInHandler"/>
             </TabPage>
             <TabPage Title="Sign up">
-                <FormSignUp Disabled="IsDisabled(LoginSourceEnum.SignUp)" OnLoadingChanged="loading => SetBusy(LoginSourceEnum.SignUp, loading)" OnSubmit="SubmitSignUpHandler"/>
+                <FormSignUp Disabled="@IsSignUpDisabled" OnLoadingChanged="SetSignUpBusy" OnSubmit="SubmitSignUpHandler"/>
             </TabPage>
         </TabSet>
     </div>
 </div>
 
 @code {
-
-    private List<string> _providerMessageList = [];
-
-    private string? _savedAddress;
-    private bool _showAddress;
 
     // The one source that is busy: everything else on the screen is disabled until it finishes.
     private LoginSourceEnum _busy = LoginSourceEnum.None;
@@ -67,21 +51,25 @@
 
     private bool IsDisabled(LoginSourceEnum source) => IsBusy && _busy != source;
 
+    private bool IsGoogleBusy => _busy == LoginSourceEnum.Google;
+
+    private bool IsSignInDisabled => IsDisabled(LoginSourceEnum.SignIn);
+
+    private bool IsSignUpDisabled => IsDisabled(LoginSourceEnum.SignUp);
+
+    private void SetSignInBusy(bool loading)
+    {
+        SetBusy(LoginSourceEnum.SignIn, loading);
+    }
+
+    private void SetSignUpBusy(bool loading)
+    {
+        SetBusy(LoginSourceEnum.SignUp, loading);
+    }
+
     private void SetBusy(LoginSourceEnum source, bool loading)
     {
         _busy = loading ? source : LoginSourceEnum.None;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        _savedAddress = await StorageServerAddress.GetAddress() ?? string.Empty;
-        _showAddress = string.IsNullOrWhiteSpace(_savedAddress);
-    }
-
-    private void SubmitServerAddressHandler(string address)
-    {
-        _showAddress = false;
-        _savedAddress = address;
     }
 
     private async Task SignInGoogle()
@@ -89,13 +77,12 @@
         SetBusy(LoginSourceEnum.Google, true);
         try
         {
-            _providerMessageList = [];
             await ServiceSession.SignInWithGoogle();
             await CompleteSignIn();
         }
         catch (Exception exception)
         {
-            _providerMessageList = [exception.ToSignInMessage()];
+            ServiceToast.ShowError(exception.ToSignInMessage());
         }
         finally
         {

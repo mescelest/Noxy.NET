@@ -48,6 +48,9 @@ public interface IApiClient
     // Deletes the media file from the library (DELETE /Media/{id}, 204). The server pushes the change to every device.
     Task DeleteMedia(Guid id);
 
+    // Sends one file to the library (POST /Media, multipart) and returns the job the server made for it; the result of the job comes later on the hub. The content is opened again when the send has to be tried a second time. A request has no time limit of its own here, since a file can take longer than a normal call.
+    Task<ResponseUploadAccepted> UploadMedia(string fileName, string? contentType, Func<Stream> openContent);
+
     Task<ResponsePlaylistDetail> AddPlaylistEntryList(Guid id, RequestAddPlaylistEntry request);
 
     Task<ResponsePlaylistDetail> RemovePlaylistEntryList(Guid id, RequestRemovePlaylistEntry request);

@@ -1,5 +1,4 @@
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
-using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
@@ -48,14 +47,9 @@ public class PlaylistService(IApiClient clientApi, ISyncService serviceSync, IDo
         await Update(id, new() { AllowDuplicates = new(allow) });
     }
 
-    public async Task SetShuffle(Guid id, ShuffleModeEnum? mode)
+    public async Task Edit(Guid id, string name, bool allowDuplicates)
     {
-        await Update(id, new() { Shuffle = new(mode) });
-    }
-
-    public async Task SetRepeat(Guid id, RepeatModeEnum? mode)
-    {
-        await Update(id, new() { Repeat = new(mode) });
+        await Update(id, new() { Name = new(name.Trim()), AllowDuplicates = new(allowDuplicates) });
     }
 
     public async Task RemoveEntryList(Guid id, List<Guid> entryIDList)

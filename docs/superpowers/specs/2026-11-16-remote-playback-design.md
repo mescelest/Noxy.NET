@@ -67,7 +67,7 @@ The user wants one device to do the playing and every other signed-in device to 
 - **Turning shuffle on or off** regenerates only the source part, from the current item: shuffled when on, in the source's normal order starting after the current item when off. The user queue is not touched.
 - **Repeat** applies to the source part: when it runs out, `No` stops, `Once` appends the source once more (regenerated, so a new shuffle), `Forever` appends it each time it ends. The user queue is played once and consumed.
 - **The source changes underneath** (a media file uploaded or deleted, a playlist edited): the active device, which holds the synced library, sends `InsertSourceItem` where the source's order puts the new item (after the current item for a sorted Library; at a random place after the current item when shuffled) or `RemoveSourceItem`. A deleted item that is playing finishes first, then is dropped (so Previous goes to the item before it). A deleted playlist lets the current item finish and ends the source part.
-- **Effective shuffle and repeat** are the playing playlist's own when set, else the user's settings (as in the settings design).
+- **Effective shuffle and repeat** are the user's global settings; a playlist has no mode of its own (as in the settings design).
 
 ### The `KeepQueuedItems` setting
 

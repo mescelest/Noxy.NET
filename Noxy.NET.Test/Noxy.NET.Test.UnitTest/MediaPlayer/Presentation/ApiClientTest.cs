@@ -707,15 +707,15 @@ public class ApiClientTest
     }
 
     [Fact]
-    public async Task UpdatePlaylist_WithAShuffleAndRepeatMode_SendsThemByName_AndWithNullSendsNull_AndWithNeitherSendsNeither()
+    public async Task UpdatePlaylist_SendsOnlyTheFieldsThatAreSet()
     {
         _handler.Respond = _ => Ok(Playlist());
 
-        await _client.UpdatePlaylist(PlaylistID, new() { Shuffle = new(ShuffleModeEnum.Random), Repeat = new(RepeatModeEnum.Forever) });
-        await _client.UpdatePlaylist(PlaylistID, new() { Shuffle = new(null) });
         await _client.UpdatePlaylist(PlaylistID, new() { Name = new("Renamed") });
+        await _client.UpdatePlaylist(PlaylistID, new() { AllowDuplicates = new(false) });
+        await _client.UpdatePlaylist(PlaylistID, new() { Name = new("Mix"), AllowDuplicates = new(true) });
 
-        Assert.Equal(["{\"shuffle\":\"Random\",\"repeat\":\"Forever\"}", "{\"shuffle\":null}", "{\"name\":\"Renamed\"}"], _handler.RequestList.Select(x => x.Body));
+        Assert.Equal(["{\"name\":\"Renamed\"}", "{\"allowDuplicates\":false}", "{\"name\":\"Mix\",\"allowDuplicates\":true}"], _handler.RequestList.Select(x => x.Body));
     }
 
     [Theory]

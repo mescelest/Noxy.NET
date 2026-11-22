@@ -10,7 +10,7 @@
 
     [Parameter]
     public StatusEnum? Status { get; set; }
-    private StatusEnum StatusCurrent => Status ?? StatusEnum.None;
+    private StatusEnum StatusCurrent => Status ?? StatusEnum.Default;
     private string StatusString => StatusCurrent.ToText();
 
     [Parameter]

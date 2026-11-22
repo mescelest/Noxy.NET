@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Net.Http.Headers;
-using Noxy.NET.MediaPlayer.API;
+using Noxy.NET.MediaPlayer.Application;
 using Noxy.NET.MediaPlayer.Domain.Responses.Authentication;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
@@ -71,8 +71,8 @@ public sealed class MediaApiClient(ApiFactory factory)
     private async Task<HttpResponseMessage> Send(string? token, HttpContent file, string fileName, string? title)
     {
         using MultipartFormDataContent form = [];
-        if (title is not null) form.Add(new StringContent(title), Constants.UploadTitleField);
-        form.Add(file, Constants.UploadFileField, fileName);
+        if (title is not null) form.Add(new StringContent(title), ApplicationConstants.TitleField);
+        form.Add(file, ApplicationConstants.FileField, fileName);
 
         using HttpRequestMessage request = new(HttpMethod.Post, "/Media");
         request.Content = form;
@@ -84,7 +84,7 @@ public sealed class MediaApiClient(ApiFactory factory)
     public async Task<HttpResponseMessage> UploadWithoutFile(string? token, string title)
     {
         using MultipartFormDataContent form = [];
-        form.Add(new StringContent(title), Constants.UploadTitleField);
+        form.Add(new StringContent(title), ApplicationConstants.TitleField);
 
         using HttpRequestMessage request = new(HttpMethod.Post, "/Media");
         request.Content = form;
