@@ -123,7 +123,7 @@ public class SettingRepositoryTest : IDisposable
         await using IUnitOfWork read = _fixture.UoWFactory.Create();
         EntityUserSettingInteger found = Assert.IsType<EntityUserSettingInteger>(await read.Setting.FindSetting(user.ID, SampleKey, TestContext.Current.CancellationToken));
         Assert.Equal(55, found.Value);
-        Assert.Equal(new DateTime(2027, 2, 3, 4, 5, 6), found.TimeModified);
+        Assert.Equal(new(2027, 2, 3, 4, 5, 6), found.TimeModified);
     }
 
     [Fact]

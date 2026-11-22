@@ -110,7 +110,7 @@ public class MediaController(IMediator mediator, IOptions<ConfigStorage> configS
         MediaDownload download = await mediator.Send(new QueryMediaFile(UserID, id), cancellationToken);
 
         // The hash is the ETag, so a device can resume a partial download only against the same bytes. Range requests also let a player seek. The file result disposes the stream.
-        return File(download.Content, download.ContentType, download.FileName, lastModified: null, entityTag: new EntityTagHeaderValue($"\"{download.ContentHash}\""), enableRangeProcessing: true);
+        return File(download.Content, download.ContentType, download.FileName, lastModified: null, entityTag: new($"\"{download.ContentHash}\""), enableRangeProcessing: true);
     }
 
     // A copy of the media file with its current tags written into it, for a user who saves the file. Rate limited, because every request makes a copy.

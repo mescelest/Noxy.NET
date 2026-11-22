@@ -12,6 +12,6 @@ public class RequestListMediaToQueryTest
 
         QueryMediaList query = new RequestListMedia { Skip = 3, Take = 7 }.ToQuery(userID);
 
-        Assert.Equal(new QueryMediaList(userID, 3, 7), query);
+        Assert.Equal(new(userID, 3, 7), query);
     }
 }

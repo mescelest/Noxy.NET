@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Genre;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -36,7 +35,7 @@ public class HandlerGenreDeleteTest
 
     private EntityMediaFile SeedFile(string title, params EntityGenre[] genreList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = UserID, TimeModified = Original };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = UserID, TimeModified = Original };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.GenreLinkList = [.. genreList.Select((x, index) => new EntityMediaFileGenre { MediaFileID = file.ID, GenreID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -51,7 +50,7 @@ public class HandlerGenreDeleteTest
         EntityMediaFile had = SeedFile("One", genre, other);
         EntityMediaFile unrelated = SeedFile("Two", other);
 
-        await _handler.Handle(new CommandGenreDelete(UserID, genre.ID), Token);
+        await _handler.Handle(new(UserID, genre.ID), Token);
 
         Assert.Equal(other.ID, Assert.Single(_store.GenreList).ID);
         Assert.Equal(2, _store.MediaFileList.Count);
@@ -68,7 +67,7 @@ public class HandlerGenreDeleteTest
     {
         EntityGenre foreign = SeedGenre("Theirs", Guid.CreateVersion7());
 
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandGenreDelete(UserID, foreign.ID), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, foreign.ID), Token).AsTask());
 
         Assert.Single(_store.GenreList);
         Assert.Empty(_publisher.PublishedList);
@@ -80,7 +79,7 @@ public class HandlerGenreDeleteTest
         EntityGenre genre = SeedGenre("Rock");
         _store.FailCommit = true;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(new CommandGenreDelete(UserID, genre.ID), Token).AsTask());
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(new(UserID, genre.ID), Token).AsTask());
 
         Assert.Empty(_publisher.PublishedList);
     }

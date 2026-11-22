@@ -17,7 +17,7 @@ public abstract class LocalQueueStoreContract
 
     private static LocalQueueSnapshot Snapshot(int historyCount, bool hasCurrent, int userCount, int sourceCount, bool hasSource, long revision = 7)
     {
-        return new LocalQueueSnapshot(new ResponseQueue
+        return new(new()
         {
             QueueRevision = revision,
             Source = hasSource ? new ResponseQueueSource { Kind = QueueSourceKindEnum.Library, PlaylistID = null, Sort = LibrarySortEnum.Title, Descending = true, Search = "abc" } : null,
@@ -25,7 +25,7 @@ public abstract class LocalQueueStoreContract
             Current = hasCurrent ? new QueueItem(Guid.NewGuid(), Guid.NewGuid()) : null,
             UserQueueList = ItemList(userCount),
             SourceList = ItemList(sourceCount)
-        }, 12.5, new DateTime(2026, 11, 17, 10, 0, 0, DateTimeKind.Utc));
+        }, 12.5, new(2026, 11, 17, 10, 0, 0, DateTimeKind.Utc));
     }
 
     private static void AssertSame(LocalQueueSnapshot expected, LocalQueueSnapshot? actual)

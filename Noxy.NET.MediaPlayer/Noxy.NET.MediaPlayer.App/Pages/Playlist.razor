@@ -60,9 +60,6 @@
     [Parameter]
     public Guid Id { get; set; }
 
-    private const string HintClearSort = "Clear the sort to reorder";
-    private const string HintClearSearch = "Clear the search to reorder";
-
     private ResponsePlaylistDetail? _detail;
     private bool _gone;
     private readonly HashSet<Guid> _selectedSet = [];
@@ -83,16 +80,6 @@
     private bool IsAllSelected => _rowList.Count > 0 && _rowList.All(x => _selectedSet.Contains(x.Key));
 
     private bool CanReorder => ResponsePlaylistEntryListExtension.CanReorder(_search, _sort);
-
-    private string? ReorderHint
-    {
-        get
-        {
-            if (CanReorder) return null;
-
-            return _sort is not null ? HintClearSort : HintClearSearch;
-        }
-    }
 
     protected override async Task OnParametersSetAsync()
     {

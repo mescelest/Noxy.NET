@@ -71,7 +71,7 @@ public class RequestUpdatePlaylistTest
     [Fact]
     public void ANameOver255Characters_IsInvalid()
     {
-        Assert.NotEmpty(Validate(new() { Name = new(new string('a', 256)) }));
+        Assert.NotEmpty(Validate(new() { Name = new(new('a', 256)) }));
     }
 
     [Theory]

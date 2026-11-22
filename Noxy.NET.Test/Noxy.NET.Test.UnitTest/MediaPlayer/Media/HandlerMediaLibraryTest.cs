@@ -25,7 +25,7 @@ public class HandlerMediaLibraryTest
         EntityMediaFile file = new()
         {
             TimeCreated = timeCreated ?? new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-            TimeModified = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            TimeModified = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
             SizeBytes = bytes.Length,

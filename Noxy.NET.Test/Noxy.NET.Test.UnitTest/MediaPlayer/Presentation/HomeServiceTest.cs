@@ -71,7 +71,7 @@ public class HomeServiceTest
 
         HomeModel model = await _service.Get();
 
-        Assert.Equal(new ContinueInfo("Song", "Band", 42), model.Continue);
+        Assert.Equal(new("Song", "Band", 42), model.Continue);
     }
 
     [Fact]

@@ -40,7 +40,7 @@ public class HandlerAlbumListTest
 
     private void LinkNewFile(EntityAlbum album, Guid userID)
     {
-        _store.MediaFileList.Add(new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = userID, AlbumID = album.ID });
+        _store.MediaFileList.Add(new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = userID, AlbumID = album.ID });
     }
 
     private Task<MetadataLibrary<ResponseAlbum>> List(string? ifNoneMatch = null)

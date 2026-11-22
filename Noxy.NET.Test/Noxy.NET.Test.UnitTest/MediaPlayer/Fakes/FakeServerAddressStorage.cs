@@ -41,7 +41,7 @@ public sealed class FakeServerAddressStorage(string? address = "https://server.e
     {
         string normalized = newAddress.NormalizeServerAddress();
         int index = _addressList.IndexOf(oldAddress);
-        if (index < 0) throw new ArgumentException("The server address is not saved.", nameof(oldAddress));
+        if (index < 0) throw new InvalidOperationException("The server address is not saved.");
         if (normalized != oldAddress && _addressList.Contains(normalized)) throw new InvalidOperationException("This server is already saved.");
 
         _addressList[index] = normalized;

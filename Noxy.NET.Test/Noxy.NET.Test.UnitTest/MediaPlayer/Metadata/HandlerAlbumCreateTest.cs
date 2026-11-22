@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Album;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
@@ -33,7 +32,7 @@ public class HandlerAlbumCreateTest
 
     private Task<ResponseAlbum> Create(string title, params Guid[] artistIDList)
     {
-        return _handler.Handle(new CommandAlbumCreate(UserID, title, [.. artistIDList]), Token).AsTask();
+        return _handler.Handle(new(UserID, title, [.. artistIDList]), Token).AsTask();
     }
 
     [Fact]
@@ -91,7 +90,7 @@ public class HandlerAlbumCreateTest
     [Fact]
     public async Task Create_ATitleOver255Characters_IsRejected()
     {
-        await Assert.ThrowsAsync<ArgumentException>(() => Create(new string('a', 256)));
+        await Assert.ThrowsAsync<ArgumentException>(() => Create(new('a', 256)));
     }
 
     [Fact]
@@ -134,7 +133,7 @@ public class HandlerAlbumCreateTest
     public async Task Create_TheSameTitleForAnotherUser_IsAllowed()
     {
         await Create("Record");
-        await _handler.Handle(new CommandAlbumCreate(Guid.CreateVersion7(), "Record", []), Token);
+        await _handler.Handle(new(Guid.CreateVersion7(), "Record", []), Token);
 
         Assert.Equal(2, _store.AlbumList.Count);
     }

@@ -69,7 +69,7 @@ public class HandlerMediaUploadTest
             Title = "Waiting",
             ContentType = "audio/mpeg",
             SizeBytes = sizeBytes,
-            ContentHash = new string('a', 64)
+            ContentHash = new('a', 64)
         });
     }
 
@@ -135,7 +135,7 @@ public class HandlerMediaUploadTest
     [Fact]
     public async Task Enqueue_TooLongTitleOrFileName_IsCutToTheColumnLength()
     {
-        await Enqueue("a.mp3", Mp3(), new string('t', 400));
+        await Enqueue("a.mp3", Mp3(), new('t', 400));
         await Enqueue(new string('a', 600) + ".mp3", Mp3());
 
         Assert.All(_store.MediaUploadJobList, job => Assert.Equal(255, job.Title.Length));

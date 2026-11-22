@@ -237,7 +237,7 @@ public class MetadataResolutionServiceTest
         string longTitle = new('t', 256);
 
         ResolvedMetadata first = await ResolveAndCommit(Tags([longName], longTitle, genre: [longGenre]));
-        ResolvedMetadata second = await ResolveAndCommit(Tags([new string('x', 255) + "different tail"], longTitle[..255], genre: [new string('g', 255)]));
+        ResolvedMetadata second = await ResolveAndCommit(Tags([new string('x', 255) + "different tail"], longTitle[..255], genre: [new('g', 255)]));
 
         Assert.Equal(255, first.ArtistList[0].Name.Length);
         Assert.Equal(255, first.Album?.Title.Length);

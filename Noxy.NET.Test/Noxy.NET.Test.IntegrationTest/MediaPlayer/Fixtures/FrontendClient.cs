@@ -22,7 +22,7 @@ public sealed class FrontendClient : IAsyncDisposable
         HttpClient httpClient = new(Network, false);
         FakeServerAddressStorage storageServerAddress = new(factory.Server.BaseAddress.ToString().TrimEnd('/'));
 
-        Store = new SqliteMetadataStore(Path.Combine(folder, StorageConstants.MetadataDatabaseFileName));
+        Store = new(Path.Combine(folder, StorageConstants.MetadataDatabaseFileName));
         Session = new(new AuthApiClient(httpClient, storageServerAddress), new FakeGoogleSignInService(), sessionStorage, Time);
         Api = new(httpClient, Session, storageServerAddress);
         Sync = new(Api, Store);

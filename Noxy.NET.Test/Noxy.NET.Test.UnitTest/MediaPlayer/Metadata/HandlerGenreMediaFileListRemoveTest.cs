@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Genre;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Services;
@@ -36,7 +35,7 @@ public class HandlerGenreMediaFileListRemoveTest
 
     private EntityMediaFile SeedFile(string title, Guid? userID = null, params EntityGenre[] genreList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = userID ?? UserID, TimeModified = Original };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = userID ?? UserID, TimeModified = Original };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.GenreLinkList = [.. genreList.Select((x, index) => new EntityMediaFileGenre { MediaFileID = file.ID, GenreID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -56,7 +55,7 @@ public class HandlerGenreMediaFileListRemoveTest
         EntityMediaFile file = SeedFile("One", null, genre, other);
         EntityMediaFile untouched = SeedFile("Two", null, genre);
 
-        ResponseGenre response = await _handler.Handle(new CommandGenreMediaFileListRemove(UserID, genre.ID, [file.ID]), Token);
+        ResponseGenre response = await _handler.Handle(new(UserID, genre.ID, [file.ID]), Token);
 
         Assert.Equal([other.ID], Stored(file).GenreLinkList.Select(x => x.GenreID).ToList());
         Assert.Single(Stored(untouched).GenreLinkList);
@@ -73,8 +72,8 @@ public class HandlerGenreMediaFileListRemoveTest
         EntityMediaFile file = SeedFile("One");
         EntityMediaFile foreign = SeedFile("Theirs", Guid.CreateVersion7(), genre);
 
-        await _handler.Handle(new CommandGenreMediaFileListRemove(UserID, genre.ID, [file.ID]), Token);
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new CommandGenreMediaFileListRemove(UserID, genre.ID, [foreign.ID]), Token).AsTask());
+        await _handler.Handle(new(UserID, genre.ID, [file.ID]), Token);
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, genre.ID, [foreign.ID]), Token).AsTask());
 
         Assert.Equal(0, _store.CommitCount);
         Assert.Empty(_publisher.PublishedList);

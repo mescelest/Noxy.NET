@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Album;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Services;
@@ -36,7 +35,7 @@ public class HandlerAlbumMediaFileListRemoveTest
 
     private EntityMediaFile SeedFile(string title, EntityAlbum? album = null, Guid? userID = null)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = userID ?? UserID, TimeModified = Original, AlbumID = album?.ID };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = userID ?? UserID, TimeModified = Original, AlbumID = album?.ID };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         _store.MediaFileList.Add(file);
         return file;
@@ -56,7 +55,7 @@ public class HandlerAlbumMediaFileListRemoveTest
         EntityMediaFile alsoInAlbum = SeedFile("Two", album);
         EntityMediaFile inOther = SeedFile("Three", other);
 
-        ResponseAlbum response = await _handler.Handle(new CommandAlbumMediaFileListRemove(UserID, album.ID, [inAlbum.ID, inOther.ID]), Token);
+        ResponseAlbum response = await _handler.Handle(new(UserID, album.ID, [inAlbum.ID, inOther.ID]), Token);
 
         Assert.Null(Stored(inAlbum).AlbumID);
         Assert.Equal(album.ID, Stored(alsoInAlbum).AlbumID);
@@ -74,8 +73,8 @@ public class HandlerAlbumMediaFileListRemoveTest
         EntityMediaFile file = SeedFile("One");
         EntityMediaFile foreign = SeedFile("Theirs", album, Guid.CreateVersion7());
 
-        await _handler.Handle(new CommandAlbumMediaFileListRemove(UserID, album.ID, [file.ID]), Token);
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new CommandAlbumMediaFileListRemove(UserID, album.ID, [foreign.ID]), Token).AsTask());
+        await _handler.Handle(new(UserID, album.ID, [file.ID]), Token);
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, album.ID, [foreign.ID]), Token).AsTask());
 
         Assert.Equal(0, _store.CommitCount);
         Assert.Empty(_publisher.PublishedList);
@@ -88,6 +87,6 @@ public class HandlerAlbumMediaFileListRemoveTest
         _store.AlbumList.Add(foreign);
         EntityMediaFile file = SeedFile("One");
 
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandAlbumMediaFileListRemove(UserID, foreign.ID, [file.ID]), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, foreign.ID, [file.ID]), Token).AsTask());
     }
 }

@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Artist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -37,7 +36,7 @@ public class HandlerArtistMediaFileListAddTest
 
     private EntityMediaFile SeedFile(string title, Guid? userID = null, params EntityArtist[] artistList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = userID ?? UserID, TimeModified = Original };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = userID ?? UserID, TimeModified = Original };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.ArtistLinkList = [.. artistList.Select((x, index) => new EntityMediaFileArtist { MediaFileID = file.ID, ArtistID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -51,7 +50,7 @@ public class HandlerArtistMediaFileListAddTest
 
     private Task<ResponseArtist> Add(EntityArtist artist, params EntityMediaFile[] fileList)
     {
-        return _handler.Handle(new CommandArtistMediaFileListAdd(UserID, artist.ID, [.. fileList.Select(x => x.ID)]), Token).AsTask();
+        return _handler.Handle(new(UserID, artist.ID, [.. fileList.Select(x => x.ID)]), Token).AsTask();
     }
 
     [Fact]
@@ -124,7 +123,7 @@ public class HandlerArtistMediaFileListAddTest
         EntityArtist artist = SeedArtist("A");
         EntityMediaFile valid = SeedFile("One");
 
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new CommandArtistMediaFileListAdd(UserID, artist.ID, [valid.ID, Guid.CreateVersion7()]), Token).AsTask());
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, artist.ID, [valid.ID, Guid.CreateVersion7()]), Token).AsTask());
 
         Assert.Empty(Stored(valid).ArtistLinkList);
         Assert.Equal(0, _store.CommitCount);
@@ -157,7 +156,7 @@ public class HandlerArtistMediaFileListAddTest
         EntityArtist artist = SeedArtist("A");
         EntityMediaFile file = SeedFile("One");
 
-        ResponseArtist response = await _handler.Handle(new CommandArtistMediaFileListAdd(UserID, artist.ID, [file.ID, file.ID]), Token);
+        ResponseArtist response = await _handler.Handle(new(UserID, artist.ID, [file.ID, file.ID]), Token);
 
         Assert.Single(Stored(file).ArtistLinkList);
         Assert.Equal(1, response.MediaFileCount);

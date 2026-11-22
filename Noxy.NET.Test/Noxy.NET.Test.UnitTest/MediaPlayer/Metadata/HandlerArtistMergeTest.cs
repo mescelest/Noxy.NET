@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Artist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -37,7 +36,7 @@ public class HandlerArtistMergeTest
 
     private EntityMediaFile SeedFile(string title, EntityAlbum? album = null, params EntityArtist[] artistList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album?.ID };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album?.ID };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.ArtistLinkList = [.. artistList.Select((x, index) => new EntityMediaFileArtist { MediaFileID = file.ID, ArtistID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -59,7 +58,7 @@ public class HandlerArtistMergeTest
 
     private Task<ResponseArtist> Merge(EntityArtist source, EntityArtist target)
     {
-        return _handler.Handle(new CommandArtistMerge(UserID, source.ID, target.ID), Token).AsTask();
+        return _handler.Handle(new(UserID, source.ID, target.ID), Token).AsTask();
     }
 
     [Fact]

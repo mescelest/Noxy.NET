@@ -27,7 +27,7 @@ public abstract class BaseHandlerNamedItemRename<TCommand, TItem, TItemResponse>
             TItem item = await Load(uow, command.UserID, command.ID, cancellationToken);
             int linkedCount = (await ServiceItem.GetLinkedMediaFileList(uow, command.UserID, item.ID, cancellationToken)).Count;
 
-            if (name == item.Name) return new MetadataChangeResult<TItemResponse>(ServiceItem.ToResponse(item, linkedCount), false, new(), []);
+            if (name == item.Name) return new(ServiceItem.ToResponse(item, linkedCount), false, new(), []);
 
             DateTime now = Now;
             MetadataChangeSet changeSet = new();
@@ -43,7 +43,7 @@ public abstract class BaseHandlerNamedItemRename<TCommand, TItem, TItemResponse>
                     List<ResponseMediaFile> mergedMediaList = TouchChangeSet(uow, changeSet, now);
                     await uow.Commit(cancellationToken);
 
-                    return new MetadataChangeResult<TItemResponse>(merged, true, changeSet, mergedMediaList);
+                    return new(merged, true, changeSet, mergedMediaList);
                 }
             }
 

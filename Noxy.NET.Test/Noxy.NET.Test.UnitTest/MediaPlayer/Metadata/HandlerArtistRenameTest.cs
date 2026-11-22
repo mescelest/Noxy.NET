@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Media;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Artist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
@@ -39,7 +38,7 @@ public class HandlerArtistRenameTest
 
     private EntityMediaFile SeedFile(string title, EntityAlbum? album = null, params EntityArtist[] artistList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album?.ID };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album?.ID };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.ArtistLinkList = [.. artistList.Select((x, index) => new EntityMediaFileArtist { MediaFileID = file.ID, ArtistID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -66,7 +65,7 @@ public class HandlerArtistRenameTest
 
     private Task<ResponseArtist> Rename(EntityArtist artist, string name, Guid? userID = null)
     {
-        return _handler.Handle(new CommandArtistRename(userID ?? UserID, artist.ID, name), Token).AsTask();
+        return _handler.Handle(new(userID ?? UserID, artist.ID, name), Token).AsTask();
     }
 
     [Fact]
@@ -268,7 +267,7 @@ public class HandlerArtistRenameTest
     [Fact]
     public async Task Rename_AnUnknownArtist_ThrowsNotFound()
     {
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandArtistRename(UserID, Guid.CreateVersion7(), "x"), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, Guid.CreateVersion7(), "x"), Token).AsTask());
     }
 
     [Theory]

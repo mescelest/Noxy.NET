@@ -38,7 +38,7 @@ public abstract class BaseHandlerNamedItemMediaFileListRemove<TCommand, TItem, T
                 removed++;
             }
 
-            if (removed == 0) return new MetadataChangeResult<TItemResponse>(ServiceItem.ToResponse(item, linkedCount), false, changeSet, []);
+            if (removed == 0) return new(ServiceItem.ToResponse(item, linkedCount), false, changeSet, []);
 
             TItemResponse response = ServiceItem.ToResponse(item, linkedCount - removed);
             ServiceItem.AddUpdated(changeSet, response);

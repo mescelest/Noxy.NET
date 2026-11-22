@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Album;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -37,7 +36,7 @@ public class HandlerAlbumMediaFileListAddTest
 
     private EntityMediaFile SeedFile(string title, EntityAlbum? album = null, Guid? userID = null)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = userID ?? UserID, TimeModified = Original, AlbumID = album?.ID };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = userID ?? UserID, TimeModified = Original, AlbumID = album?.ID };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         _store.MediaFileList.Add(file);
         return file;
@@ -56,7 +55,7 @@ public class HandlerAlbumMediaFileListAddTest
         EntityMediaFile fresh = SeedFile("One");
         EntityMediaFile replaced = SeedFile("Two", previous);
 
-        ResponseAlbum response = await _handler.Handle(new CommandAlbumMediaFileListAdd(UserID, album.ID, [fresh.ID, replaced.ID]), Token);
+        ResponseAlbum response = await _handler.Handle(new(UserID, album.ID, [fresh.ID, replaced.ID]), Token);
 
         Assert.Equal(album.ID, Stored(fresh).AlbumID);
         Assert.Equal(album.ID, Stored(replaced).AlbumID);
@@ -75,7 +74,7 @@ public class HandlerAlbumMediaFileListAddTest
         EntityAlbum album = SeedAlbum("Target");
         EntityMediaFile file = SeedFile("One", album);
 
-        ResponseAlbum response = await _handler.Handle(new CommandAlbumMediaFileListAdd(UserID, album.ID, [file.ID]), Token);
+        ResponseAlbum response = await _handler.Handle(new(UserID, album.ID, [file.ID]), Token);
 
         Assert.Equal(1, response.MediaFileCount);
         Assert.Equal(0, _store.CommitCount);
@@ -91,8 +90,8 @@ public class HandlerAlbumMediaFileListAddTest
         EntityMediaFile valid = SeedFile("One");
         EntityMediaFile foreignFile = SeedFile("Theirs", null, Guid.CreateVersion7());
 
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new CommandAlbumMediaFileListAdd(UserID, album.ID, [valid.ID, foreignFile.ID]), Token).AsTask());
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandAlbumMediaFileListAdd(UserID, foreignAlbum.ID, [valid.ID]), Token).AsTask());
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, album.ID, [valid.ID, foreignFile.ID]), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, foreignAlbum.ID, [valid.ID]), Token).AsTask());
 
         Assert.Null(Stored(valid).AlbumID);
         Assert.Equal(0, _store.CommitCount);

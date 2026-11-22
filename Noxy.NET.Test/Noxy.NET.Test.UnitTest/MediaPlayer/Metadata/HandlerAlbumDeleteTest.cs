@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Album;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -36,7 +35,7 @@ public class HandlerAlbumDeleteTest
 
     private EntityMediaFile SeedFile(string title, EntityAlbum? album)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album?.ID };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album?.ID };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         _store.MediaFileList.Add(file);
         return file;
@@ -50,7 +49,7 @@ public class HandlerAlbumDeleteTest
         EntityMediaFile had = SeedFile("One", album);
         EntityMediaFile unrelated = SeedFile("Two", other);
 
-        await _handler.Handle(new CommandAlbumDelete(UserID, album.ID), Token);
+        await _handler.Handle(new(UserID, album.ID), Token);
 
         Assert.Equal(other.ID, Assert.Single(_store.AlbumList).ID);
         Assert.Equal(2, _store.MediaFileList.Count);
@@ -70,7 +69,7 @@ public class HandlerAlbumDeleteTest
     {
         EntityAlbum foreign = SeedAlbum("Theirs", Guid.CreateVersion7());
 
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandAlbumDelete(UserID, foreign.ID), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, foreign.ID), Token).AsTask());
 
         Assert.Single(_store.AlbumList);
         Assert.Empty(_publisher.PublishedList);
@@ -82,7 +81,7 @@ public class HandlerAlbumDeleteTest
         EntityAlbum album = SeedAlbum("Record");
         _store.FailCommit = true;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(new CommandAlbumDelete(UserID, album.ID), Token).AsTask());
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(new(UserID, album.ID), Token).AsTask());
 
         Assert.Empty(_publisher.PublishedList);
     }

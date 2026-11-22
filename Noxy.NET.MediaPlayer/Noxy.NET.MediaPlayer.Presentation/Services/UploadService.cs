@@ -79,7 +79,7 @@ public sealed class UploadService : IUploadService, IDisposable
         }
         catch (Exception exception) when (exception is ApiException || exception.IsOfflineFailure)
         {
-            Finish(batch, null, new UploadFailure(file.Name, exception.ToActionMessage(PresentationTexts.ActionMessageUploadFailed)));
+            Finish(batch, null, new(file.Name, exception.ToActionMessage(PresentationTexts.ActionMessageUploadFailed)));
             return;
         }
 
@@ -115,7 +115,7 @@ public sealed class UploadService : IUploadService, IDisposable
     {
         if (!result.Succeeded || result.Media is null)
         {
-            Finish(batch, null, new UploadFailure(result.Title, ReasonMessageOf(result.Reason)));
+            Finish(batch, null, new(result.Title, ReasonMessageOf(result.Reason)));
             return;
         }
 
@@ -127,7 +127,7 @@ public sealed class UploadService : IUploadService, IDisposable
             }
             catch (Exception exception) when (exception is ApiException || exception.IsOfflineFailure)
             {
-                Finish(batch, null, new UploadFailure(result.Title, PresentationTexts.UploadMessageNotAddedToPlaylist));
+                Finish(batch, null, new(result.Title, PresentationTexts.UploadMessageNotAddedToPlaylist));
                 return;
             }
         }

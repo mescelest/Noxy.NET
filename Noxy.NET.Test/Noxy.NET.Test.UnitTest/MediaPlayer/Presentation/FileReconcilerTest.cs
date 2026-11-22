@@ -169,7 +169,7 @@ public class FileReconcilerTest
         await _reconciler.Repair();
 
         Assert.NotNull(await _storeFile.GetPath(media.ID));
-        Assert.Equal(new FileState(media.ID, FileSyncStateEnum.OnDevice, HashA, null), await State(media.ID));
+        Assert.Equal(new(media.ID, FileSyncStateEnum.OnDevice, HashA, null), await State(media.ID));
     }
 
     [Fact]

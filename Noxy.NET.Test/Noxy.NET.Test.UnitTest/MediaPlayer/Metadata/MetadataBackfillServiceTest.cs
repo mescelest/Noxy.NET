@@ -29,7 +29,7 @@ public class MetadataBackfillServiceTest
 
     private EntityMediaFile SeedFile(string? artist = null, string? album = null, string? albumArtist = null, string? genre = null, Guid? userID = null, string title = "Title")
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = userID ?? UserID, TimeModified = Original };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = userID ?? UserID, TimeModified = Original };
         file.Metadata = new() { Title = title, Artist = artist, Album = album, AlbumArtist = albumArtist, Genre = genre, MediaFileID = file.ID };
         _store.MediaFileList.Add(file);
         return file;

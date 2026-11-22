@@ -7,7 +7,6 @@ using Noxy.NET.MediaPlayer.Presentation.Features.PlaylistList;
 using Noxy.NET.MediaPlayer.Presentation.Features.Session;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
-using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
@@ -124,7 +123,7 @@ public class StateBridgeService(
 
     private void DispatchPlayer()
     {
-        dispatcher.Dispatch(new ActionPlayerChanged(new PlayerSnapshot(servicePlayer.Current, servicePlayer.IsDisabled, servicePlayer.IsPlaying, servicePlayer.IsWaiting, servicePlayer.Position, servicePlayer.Duration, servicePlayer.Volume,
+        dispatcher.Dispatch(new ActionPlayerChanged(new(servicePlayer.Current, servicePlayer.IsDisabled, servicePlayer.IsPlaying, servicePlayer.IsWaiting, servicePlayer.Position, servicePlayer.Duration, servicePlayer.Volume,
             servicePlayer.Shuffle, servicePlayer.Repeat, servicePlayer.PlaylistID,
             servicePlayer.Queue.ItemCount)));
     }

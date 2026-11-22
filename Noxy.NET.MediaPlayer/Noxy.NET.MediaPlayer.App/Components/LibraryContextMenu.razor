@@ -190,7 +190,7 @@
     {
         int hidden = isTicked ? HiddenSelectedCount : 0;
         string? detail = hidden > 0 ? hidden.ToCountText(AppTexts.ConfirmHiddenOne, AppTexts.ConfirmHiddenMany) : null;
-        _confirm = new ConfirmRequest(title, message, detail, acceptText, run);
+        _confirm = new(title, message, detail, acceptText, run);
 
         return Task.CompletedTask;
     }

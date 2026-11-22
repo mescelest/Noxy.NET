@@ -35,7 +35,7 @@ public class PlaylistRepositoryTest : IDisposable
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
             SizeBytes = 1234,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             UserID = userID
         };
 

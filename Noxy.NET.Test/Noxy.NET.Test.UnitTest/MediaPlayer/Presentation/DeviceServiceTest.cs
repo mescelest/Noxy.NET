@@ -37,7 +37,7 @@ public class DeviceServiceTest
     [Fact]
     public async Task GetName_ForAMachineNameOver50Characters_IsCutSoTheServerAcceptsIt()
     {
-        string name = await new DeviceService(_storeDevice, () => new string('m', 80)).GetName();
+        string name = await new DeviceService(_storeDevice, () => new('m', 80)).GetName();
 
         Assert.Equal(50, name.Length);
     }
@@ -63,10 +63,10 @@ public class DeviceServiceTest
     {
         DeviceService service = new(_storeDevice);
 
-        await Assert.ThrowsAsync<ArgumentException>(() => service.SetName(new string('a', 51)));
-        await service.SetName(new string('a', 50));
+        await Assert.ThrowsAsync<ArgumentException>(() => service.SetName(new('a', 51)));
+        await service.SetName(new('a', 50));
 
-        Assert.Equal(new string('a', 50), await service.GetName());
+        Assert.Equal(new('a', 50), await service.GetName());
     }
 
     [Fact]
@@ -76,6 +76,6 @@ public class DeviceServiceTest
 
         await service.SetName($" {new string('a', 50)} ");
 
-        Assert.Equal(new string('a', 50), await service.GetName());
+        Assert.Equal(new('a', 50), await service.GetName());
     }
 }

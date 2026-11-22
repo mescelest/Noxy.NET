@@ -36,7 +36,7 @@ public class ApiClientTest
             Title = title,
             ContentType = "audio/mpeg",
             SizeBytes = 3,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             TimeCreated = DateTime.UtcNow,
             TimeModified = DateTime.UtcNow
         };

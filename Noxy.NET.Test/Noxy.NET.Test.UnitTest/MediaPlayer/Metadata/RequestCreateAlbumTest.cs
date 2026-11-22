@@ -32,7 +32,7 @@ public class RequestCreateAlbumTest
     [Fact]
     public void ATitleOver255Characters_IsInvalid()
     {
-        Assert.Single(Validate(new() { Title = new string('a', 256) }));
+        Assert.Single(Validate(new() { Title = new('a', 256) }));
     }
 
     [Fact]

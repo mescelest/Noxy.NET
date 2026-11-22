@@ -509,7 +509,7 @@ public class HandlerMediaUpdateTest
 
         Assert.Equal(_time.Now.UtcDateTime, response.TimeModified);
         Assert.Equal(_time.Now.UtcDateTime, Stored(file).TimeModified);
-        Assert.Equal(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), response.TimeCreated);
+        Assert.Equal(new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), response.TimeCreated);
     }
 
     [Fact]

@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Services;
@@ -44,10 +43,10 @@ public class LocalDataOwnerServiceTest
         await _storeMetadata.SavePlaylistDetail(detail);
         await _storeMetadata.SetLibraryETag("\"lib\"");
         await _storeMetadata.SetPlaylistListETag("\"pl\"");
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, new string('a', 64), null));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, new('a', 64), null));
         await _storeMetadata.Setting.ReplaceList([new() { Key = "Shuffle", ValueType = SettingValueTypeEnum.Enum, Value = JsonSerializer.SerializeToElement("Random"), TimeModified = DateTime.UtcNow }]);
         await _storeMetadata.Setting.SetETag("\"set\"");
-        await _storeMetadata.Artist.ReplaceList([new ResponseArtist { ID = Guid.NewGuid(), Name = "Old artist", MediaFileCount = 1, TimeModified = DateTime.UtcNow }]);
+        await _storeMetadata.Artist.ReplaceList([new() { ID = Guid.NewGuid(), Name = "Old artist", MediaFileCount = 1, TimeModified = DateTime.UtcNow }]);
         await _storeMetadata.Artist.SetETag("\"art\"");
         await _storeMetadata.SetOwnerUserID(_oldUser);
 

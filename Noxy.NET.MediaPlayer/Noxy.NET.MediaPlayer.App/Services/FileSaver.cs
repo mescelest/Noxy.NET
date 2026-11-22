@@ -37,7 +37,7 @@ public class FileSaver : IFileSaver
             await content.CopyToAsync(target);
         }
 
-        await Share.Default.RequestAsync(new ShareFileRequest { Title = suggestedName, File = new ShareFile(path) });
+        await Share.Default.RequestAsync(new ShareFileRequest { Title = suggestedName, File = new(path) });
 
         return true;
     }

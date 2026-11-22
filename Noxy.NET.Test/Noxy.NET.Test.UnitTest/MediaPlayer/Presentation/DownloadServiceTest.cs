@@ -88,7 +88,7 @@ public class DownloadServiceTest
         bool result = await _serviceDownload.EnsureOnDevice(media.ID);
 
         Assert.True(result);
-        Assert.Equal(new FileState(media.ID, FileSyncStateEnum.OnDevice, media.ContentHash, null), await State(media.ID));
+        Assert.Equal(new(media.ID, FileSyncStateEnum.OnDevice, media.ContentHash, null), await State(media.ID));
         string? path = await _storeFile.GetPath(media.ID);
         Assert.NotNull(path);
         Assert.EndsWith(".flac", path);
@@ -548,13 +548,13 @@ public class DownloadServiceTest
 
         await _serviceDownload.QueueMissing([.. mediaList.Select(x => x.ID)]);
 
-        Assert.Equal(new DownloadProgress(5, 0, 0, 0, null), _serviceDownload.GetProgress());
+        Assert.Equal(new(5, 0, 0, 0, null), _serviceDownload.GetProgress());
 
         gate.SetResult();
         await WaitForTheBulkToEnd();
 
         long expectedBytes = mediaList.Take(4).Sum(x => x.SizeBytes);
-        Assert.Equal(new DownloadProgress(5, 4, 1, expectedBytes, null), _serviceDownload.GetProgress());
+        Assert.Equal(new(5, 4, 1, expectedBytes, null), _serviceDownload.GetProgress());
     }
 
     [Fact]
@@ -612,7 +612,7 @@ public class DownloadServiceTest
     {
         await _serviceDownload.QueueMissing([]);
 
-        Assert.Equal(new DownloadProgress(0, 0, 0, 0, null), _serviceDownload.GetProgress());
+        Assert.Equal(new(0, 0, 0, 0, null), _serviceDownload.GetProgress());
         Assert.Empty(_clientApi.FileRequestList);
     }
 
@@ -642,7 +642,7 @@ public class DownloadServiceTest
         await _serviceDownload.QueueMissing([mediaList[1].ID]);
         await WaitForTheBulkToEnd();
 
-        Assert.Equal(new DownloadProgress(1, 1, 0, mediaList[1].SizeBytes, null), _serviceDownload.GetProgress());
+        Assert.Equal(new(1, 1, 0, mediaList[1].SizeBytes, null), _serviceDownload.GetProgress());
     }
 
     [Fact]

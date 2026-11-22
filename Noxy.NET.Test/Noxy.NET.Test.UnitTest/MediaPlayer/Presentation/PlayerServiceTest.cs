@@ -29,7 +29,7 @@ public class PlayerServiceTest
 
     public PlayerServiceTest()
     {
-        QueueSourceService serviceSource = new(_storeMetadata, new ShuffleService(new Random(31)), new Random(32));
+        QueueSourceService serviceSource = new(_storeMetadata, new ShuffleService(new(31)), new(32));
         _queue = new(serviceSource, _serviceSetting, _storeLocalQueue, _sync, _storeMetadata, new FakeTimeProvider(), new FakeLogger<QueueService>()) { OwnsPlayback = true };
         _player = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, serviceSource, _serviceSetting, _api, _logger);
     }
@@ -992,7 +992,7 @@ public class PlayerServiceTest
         _download.RaiseChanged();
         await WaitUntil(() => _player.StateOf(item) == FileSyncStateEnum.Downloading);
 
-        await _storeMetadata.SaveFileState(new(id, FileSyncStateEnum.OnDevice, new string('a', 64), null));
+        await _storeMetadata.SaveFileState(new(id, FileSyncStateEnum.OnDevice, new('a', 64), null));
         _download.RaiseChanged();
         await WaitUntil(() => _player.StateOf(item) == FileSyncStateEnum.OnDevice);
     }
@@ -1234,7 +1234,7 @@ public class PlayerServiceTest
     public async Task TheVolume_SurvivesARestart()
     {
         await _player.SetVolume(0.6);
-        PlayerService restarted = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, new QueueSourceService(_storeMetadata, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _api, _logger);
+        PlayerService restarted = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, new QueueSourceService(_storeMetadata, new ShuffleService(new(1)), new(1)), _serviceSetting, _api, _logger);
 
         await restarted.LoadVolume();
 

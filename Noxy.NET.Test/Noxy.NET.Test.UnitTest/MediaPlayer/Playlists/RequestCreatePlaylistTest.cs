@@ -35,6 +35,6 @@ public class RequestCreatePlaylistTest
     [InlineData(256, false)]
     public void TheNameIsLimitedTo255Characters(int length, bool valid)
     {
-        Assert.Equal(valid, Validate(new() { Name = new string('a', length) }).Count == 0);
+        Assert.Equal(valid, Validate(new() { Name = new('a', length) }).Count == 0);
     }
 }

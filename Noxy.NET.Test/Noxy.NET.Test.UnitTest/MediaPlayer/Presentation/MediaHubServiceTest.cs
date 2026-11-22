@@ -84,9 +84,9 @@ public class MediaHubServiceTest
     {
         MediaHubService serviceHub = new(new FakeSyncService(), new FakeSettingService(), new FakeMetadataSyncService(), new FakeSessionService(), new FakeServerAddressStorage(), new FakeLogger<MediaHubService>());
 
-        Assert.Null(await serviceHub.Invoke<bool?>(MediaHubMethodEnum.ClaimActive, new object()));
+        Assert.Null(await serviceHub.Invoke<bool?>(MediaHubMethodEnum.ClaimActive, new()));
         Assert.Null(await serviceHub.Invoke<List<string>>(MediaHubMethodEnum.RequestSnapshot, null));
-        await serviceHub.Send(MediaHubMethodEnum.EditQueue, new object());
+        await serviceHub.Send(MediaHubMethodEnum.EditQueue, new());
     }
 
     [Fact]

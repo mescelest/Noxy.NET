@@ -1,6 +1,5 @@
 using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -233,7 +232,7 @@ public sealed class MediaApiClient(ApiFactory factory)
 
     private static void Authorize(HttpRequestMessage request, string? token)
     {
-        if (token is not null) request.Headers.Authorization = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, token);
+        if (token is not null) request.Headers.Authorization = new(JwtBearerDefaults.AuthenticationScheme, token);
     }
 
     private static Guid ReadSubject(string token)

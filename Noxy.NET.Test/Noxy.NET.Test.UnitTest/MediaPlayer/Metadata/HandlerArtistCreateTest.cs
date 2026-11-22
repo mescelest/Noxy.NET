@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Artist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
@@ -27,7 +26,7 @@ public class HandlerArtistCreateTest
 
     private Task<ResponseArtist> Create(string name, Guid? userID = null)
     {
-        return _handler.Handle(new CommandArtistCreate(userID ?? UserID, name), Token).AsTask();
+        return _handler.Handle(new(userID ?? UserID, name), Token).AsTask();
     }
 
     [Fact]
@@ -79,7 +78,7 @@ public class HandlerArtistCreateTest
     [Fact]
     public async Task Create_ANameOver255Characters_IsRejected()
     {
-        await Assert.ThrowsAsync<ArgumentException>(() => Create(new string('a', 256)));
+        await Assert.ThrowsAsync<ArgumentException>(() => Create(new('a', 256)));
 
         Assert.Empty(_store.ArtistList);
     }
@@ -87,7 +86,7 @@ public class HandlerArtistCreateTest
     [Fact]
     public async Task Create_ANameOf255Characters_IsAccepted()
     {
-        ResponseArtist response = await Create(new string('a', 255));
+        ResponseArtist response = await Create(new('a', 255));
 
         Assert.Equal(255, response.Name.Length);
     }

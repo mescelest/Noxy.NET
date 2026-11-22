@@ -47,7 +47,7 @@ public class PreferencesServerAddressStorage : IServerAddressStorage
 
         List<string> list = ReadList();
         int index = list.IndexOf(oldAddress);
-        if (index < 0) throw new ArgumentException("The server address is not saved.", nameof(oldAddress));
+        if (index < 0) throw new InvalidOperationException(AppTexts.ServerAddressNotSaved);
         if (normalized != oldAddress && list.Contains(normalized)) throw new InvalidOperationException(AppTexts.ServerAddressAlreadySaved);
 
         list[index] = normalized;

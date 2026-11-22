@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Genre;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
@@ -26,7 +25,7 @@ public class HandlerGenreCreateTest
 
     private Task<ResponseGenre> Create(string name, Guid? userID = null)
     {
-        return _handler.Handle(new CommandGenreCreate(userID ?? UserID, name), Token).AsTask();
+        return _handler.Handle(new(userID ?? UserID, name), Token).AsTask();
     }
 
     [Fact]

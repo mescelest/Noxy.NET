@@ -3,7 +3,7 @@
 @inherits BaseComponentElement
 
 <Popover @ref="_popover" @attributes="AdditionalAttributes" ID="@IDCurrent" Open="_open" OpenChanged="OpenChangedHandler" OnOpened="OpenedHandler"
-         Anchor="AnchorCurrent" Point="_point" Side="Side" Align="Align" class="@CssClass">
+         Anchor="Anchor" Point="_point" Side="Side" Align="Align" class="@CssClass">
     <div class="root" @onkeydown="KeyDownHandler" @onkeydown:preventDefault>
         @RenderMenu(RootDepth)
     </div>
@@ -44,8 +44,6 @@
     private const string KeySpace = " ";
     private const string KeyEscape = "Escape";
     private const string KeyTab = "Tab";
-    private const string KeyContextMenu = "ContextMenu";
-    private const string KeyF10 = "F10";
 
     private readonly string _generatedID = IDPrefix + Guid.NewGuid().ToString("N");
     private readonly Dictionary<int, ElementReference> _menuRefMap = [];
@@ -56,14 +54,12 @@
     private ContextMenuNavigator? _navigator;
     private List<ContextMenuItem>? _navigatorSource;
     private PopoverPoint? _point;
-    private ElementReference? _anchorOverride;
     private bool _drillIn;
     private bool _open;
     private bool _focusPending;
     private bool _disposed;
 
     private string IDCurrent => ID ?? _generatedID;
-    private ElementReference? AnchorCurrent => _anchorOverride ?? Anchor;
 
     // Built when first needed from the items as they are then, and rebuilt in place while the owner changes them.
     private ContextMenuNavigator Navigator
@@ -83,11 +79,6 @@
     // With drill-in the one list on screen is the deepest open level; in a fly-out the first level is always on screen.
     private int RootDepth => _drillIn ? Navigator.OpenPath.Count : 0;
     private int ActiveDepth => Navigator.OpenPath.Count;
-
-    public static bool IsMenuKey(KeyboardEventArgs args)
-    {
-        return args.Key == KeyContextMenu || (args.ShiftKey && args.Key == KeyF10);
-    }
 
     protected override async Task OnAfterFirstRenderAsync()
     {
@@ -135,17 +126,6 @@
     public Task OpenAtAsync(double x, double y)
     {
         _point = new(x, y);
-        _anchorOverride = null;
-        _open = true;
-        StateHasChanged();
-        return Task.CompletedTask;
-    }
-
-    // The menu key and Shift+F10 open it at the focused element, which is not the pointer.
-    public Task OpenAtElementAsync(ElementReference element)
-    {
-        _point = null;
-        _anchorOverride = element;
         _open = true;
         StateHasChanged();
         return Task.CompletedTask;
@@ -171,11 +151,10 @@
 
     private async Task ClosedAsync()
     {
-        ElementReference? trigger = AnchorCurrent;
+        ElementReference? trigger = Anchor;
         _navigator = null;
         _navigatorSource = null;
         _point = null;
-        _anchorOverride = null;
         _menuRefMap.Clear();
         _itemRefMap.Clear();
 
@@ -332,11 +311,6 @@
     private bool IsOpenSubmenu(int depth, int index)
     {
         return !_drillIn && Navigator.OpenPath.Count > depth && Navigator.OpenPath[depth] == index;
-    }
-
-    private bool IsFocusedItem(int depth, int index)
-    {
-        return depth == ActiveDepth && Navigator.FocusIndex == index;
     }
 
     private string SubmenuID(int depth)

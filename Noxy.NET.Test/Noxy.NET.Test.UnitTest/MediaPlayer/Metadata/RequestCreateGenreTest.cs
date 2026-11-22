@@ -18,7 +18,7 @@ public class RequestCreateGenreTest
     [Fact]
     public void ANameUpTo255Characters_IsValid()
     {
-        Assert.Empty(Validate(new() { Name = new string('a', 255) }));
+        Assert.Empty(Validate(new() { Name = new('a', 255) }));
     }
 
     [Theory]
@@ -32,7 +32,7 @@ public class RequestCreateGenreTest
     [Fact]
     public void ANameOver255Characters_IsInvalid()
     {
-        Assert.Single(Validate(new() { Name = new string('a', 256) }));
+        Assert.Single(Validate(new() { Name = new('a', 256) }));
     }
 
     [Fact]

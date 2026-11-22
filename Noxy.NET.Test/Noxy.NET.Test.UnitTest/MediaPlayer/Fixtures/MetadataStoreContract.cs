@@ -21,7 +21,7 @@ public abstract class MetadataStoreContract
             Title = title,
             ContentType = "audio/mpeg",
             SizeBytes = 1234,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             TimeCreated = Start,
             TimeModified = Start
         };
@@ -35,7 +35,7 @@ public abstract class MetadataStoreContract
             Title = "Title with ünïcödé and \"quotes\"",
             ContentType = "audio/flac",
             SizeBytes = 9_876_543_210,
-            ContentHash = new string('b', 64),
+            ContentHash = new('b', 64),
             TimeCreated = Start,
             TimeModified = Start.AddMinutes(5),
             Artist = "Artist; Other",
@@ -411,7 +411,7 @@ public abstract class MetadataStoreContract
 
         List<FileState> list = await store.GetFileStateList();
         Assert.Equal(2, list.Count);
-        Assert.Equal(new FileState(id, FileSyncStateEnum.Failed, null, "The hash did not match."), list.Single(x => x.MediaFileID == id));
+        Assert.Equal(new(id, FileSyncStateEnum.Failed, null, "The hash did not match."), list.Single(x => x.MediaFileID == id));
         Assert.Equal(OnDevice(other, "def"), list.Single(x => x.MediaFileID == other));
 
         await store.SaveFileState(OnDevice(id, "ghi"));

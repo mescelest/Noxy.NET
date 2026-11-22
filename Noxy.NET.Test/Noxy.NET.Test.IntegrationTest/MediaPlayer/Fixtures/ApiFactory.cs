@@ -24,7 +24,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         _settings = new()
         {
             [ConfigurationPath.Combine(ConfigConnectionString.SectionName, nameof(ConfigConnectionString.Database))] = connectionString,
-            [ConfigurationPath.Combine(ConfigJwt.SectionName, nameof(ConfigJwt.Secret))] = new string('s', 48),
+            [ConfigurationPath.Combine(ConfigJwt.SectionName, nameof(ConfigJwt.Secret))] = new('s', 48),
             [ConfigurationPath.Combine(ConfigStorage.SectionName, nameof(ConfigStorage.RootPath))] = StorageRoot,
             [ConfigurationPath.Combine(ConfigStorage.SectionName, nameof(ConfigStorage.MaxSizeBytes))] = "100000",
             [ConfigurationPath.Combine(ConfigUpload.SectionName, nameof(ConfigUpload.PollSeconds))] = "3600"

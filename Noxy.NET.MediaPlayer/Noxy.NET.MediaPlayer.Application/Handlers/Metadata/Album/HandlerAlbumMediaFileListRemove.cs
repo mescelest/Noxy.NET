@@ -37,7 +37,7 @@ public class HandlerAlbumMediaFileListRemove(
                 removed++;
             }
 
-            if (removed == 0) return new MetadataChangeResult<ResponseAlbum>(album.ToResponse(fileCount), false, changeSet, []);
+            if (removed == 0) return new(album.ToResponse(fileCount), false, changeSet, []);
 
             ResponseAlbum response = album.ToResponse(fileCount - removed);
             changeSet.AddUpdated(response);

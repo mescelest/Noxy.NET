@@ -16,7 +16,7 @@ public class ResponseMediaFileListExtensionTest
             Title = title,
             ContentType = "audio/mpeg",
             SizeBytes = 1,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             TimeCreated = Start.AddHours(-hoursOld),
             TimeModified = Start,
             Artist = artist,

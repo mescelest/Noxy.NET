@@ -15,7 +15,7 @@ public class EntityMediaFileExtensionTest
             FilePath = "stored.mp3",
             ContentType = "audio/mpeg",
             SizeBytes = 1234,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             UserID = Guid.CreateVersion7()
         };
         file.Metadata = new() { Title = "Media", MediaFileID = file.ID };

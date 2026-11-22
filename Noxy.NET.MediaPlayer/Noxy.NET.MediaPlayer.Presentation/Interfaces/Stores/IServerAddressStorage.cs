@@ -14,7 +14,7 @@ public interface IServerAddressStorage
     // Every saved address, in the order they were added.
     Task<List<string>> GetAddressList();
 
-    // Replaces a saved address in place, and follows it when it is the one in use. Throws ArgumentException when the saved address is unknown or the new one is invalid, and InvalidOperationException when another saved address already has it.
+    // Replaces a saved address in place, and follows it when it is the one in use. Throws ArgumentException when the new address is invalid, and InvalidOperationException when the saved address is unknown or another saved address already has the new one. The message of an InvalidOperationException is shown to the user.
     Task ReplaceAddress(string oldAddress, string newAddress);
 
     // Removes a saved address, and stops using it when it was the one in use.

@@ -384,6 +384,15 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The server address is not saved..
+        /// </summary>
+        public static string ServerAddressNotSaved {
+            get {
+                return ResourceManager.GetString("ServerAddressNotSaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} files added to your library..
         /// </summary>
         public static string UploadAddedLibraryMany {

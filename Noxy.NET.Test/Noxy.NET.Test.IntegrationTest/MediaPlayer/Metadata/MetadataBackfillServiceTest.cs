@@ -48,7 +48,7 @@ public class MetadataBackfillServiceTest : IDisposable
         for (int index = 0; index < count; index++)
         {
             (string? artist, string? album, string? albumArtist, string? genre) = text(index);
-            EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = userID };
+            EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = userID };
             file.Metadata = new() { Title = $"Title {index}", Artist = artist, Album = album, AlbumArtist = albumArtist, Genre = genre, MediaFileID = file.ID };
             uow.Media.AddMediaFile(file);
             fileList.Add(file);
@@ -113,7 +113,7 @@ public class MetadataBackfillServiceTest : IDisposable
         EntityUser second = await CreateUser("second@example.com");
         await SeedFileList(first.ID, 1, _ => ("Radiohead", "OK Computer", null, "Rock"));
         await SeedFileList(second.ID, 1, _ => ("radiohead", "OK Computer", null, "Rock"));
-        await SeedFileList(first.ID, 1, _ => (";", " ", "", new string('g', 400)));
+        await SeedFileList(first.ID, 1, _ => (";", " ", "", new('g', 400)));
 
         await _service.Run(TestContext.Current.CancellationToken);
 

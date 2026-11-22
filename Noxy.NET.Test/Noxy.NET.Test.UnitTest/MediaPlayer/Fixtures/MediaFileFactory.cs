@@ -15,7 +15,7 @@ public static class MediaFileFactory
             Year = year,
             ContentType = "audio/mpeg",
             SizeBytes = 3,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             TimeCreated = timeCreated ?? DateTime.UtcNow,
             TimeModified = DateTime.UtcNow
         };

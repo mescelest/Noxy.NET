@@ -33,7 +33,7 @@ public class MediaTagWritingServiceTest : IDisposable
             FilePath = "stored.mp3",
             ContentType = "audio/mpeg",
             SizeBytes = 1,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             UserID = Guid.CreateVersion7()
         };
     }

@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Genre;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -37,7 +36,7 @@ public class HandlerGenreMergeTest
 
     private EntityMediaFile SeedFile(string title, params EntityGenre[] genreList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = UserID, TimeModified = Original };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = UserID, TimeModified = Original };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.GenreLinkList = [.. genreList.Select((x, index) => new EntityMediaFileGenre { MediaFileID = file.ID, GenreID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -58,7 +57,7 @@ public class HandlerGenreMergeTest
         EntityMediaFile onlySource = SeedFile("Two", source);
         EntityMediaFile untouched = SeedFile("Three", target);
 
-        ResponseGenre response = await _handler.Handle(new CommandGenreMerge(UserID, source.ID, target.ID), Token);
+        ResponseGenre response = await _handler.Handle(new(UserID, source.ID, target.ID), Token);
 
         Assert.Equal(target.ID, response.ID);
         Assert.Equal(3, response.MediaFileCount);
@@ -77,8 +76,8 @@ public class HandlerGenreMergeTest
         EntityGenre mine = SeedGenre("Mine");
         EntityGenre foreign = SeedGenre("Theirs", Guid.CreateVersion7());
 
-        await Assert.ThrowsAsync<InvalidMetadataOperationException>(() => _handler.Handle(new CommandGenreMerge(UserID, mine.ID, mine.ID), Token).AsTask());
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandGenreMerge(UserID, mine.ID, foreign.ID), Token).AsTask());
+        await Assert.ThrowsAsync<InvalidMetadataOperationException>(() => _handler.Handle(new(UserID, mine.ID, mine.ID), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, mine.ID, foreign.ID), Token).AsTask());
 
         Assert.Equal(0, _store.CommitCount);
     }

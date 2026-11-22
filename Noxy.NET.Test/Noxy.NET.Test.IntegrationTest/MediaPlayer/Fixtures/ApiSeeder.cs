@@ -17,7 +17,7 @@ public sealed class ApiSeeder(ApiFactory factory)
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
             SizeBytes = 10,
-            ContentHash = new string('d', 64),
+            ContentHash = new('d', 64),
             UserID = userID
         };
         file.Metadata = new() { Title = "Already here", MediaFileID = file.ID };
@@ -67,7 +67,7 @@ public sealed class ApiSeeder(ApiFactory factory)
             Title = "Seeded",
             ContentType = "audio/mpeg",
             SizeBytes = content.Length,
-            ContentHash = new string('c', 64),
+            ContentHash = new('c', 64),
             Status = status
         };
 

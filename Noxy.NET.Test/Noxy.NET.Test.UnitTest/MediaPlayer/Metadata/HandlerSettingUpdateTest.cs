@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Noxy.NET.MediaPlayer.Application.Commands.Setting;
 using Noxy.NET.MediaPlayer.Application.Handlers.Setting;
 using Noxy.NET.MediaPlayer.Application.Notifications.Setting;
 using Noxy.NET.MediaPlayer.Domain.Declarations;
@@ -36,7 +35,7 @@ public class HandlerSettingUpdateTest
 
     private Task<ResponseSetting> Update(string key, string json, Guid? userID = null)
     {
-        return _handler.Handle(new CommandSettingUpdate(userID ?? UserID, key, Json(json)), Token).AsTask();
+        return _handler.Handle(new(userID ?? UserID, key, Json(json)), Token).AsTask();
     }
 
     [Fact]

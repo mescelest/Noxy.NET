@@ -200,4 +200,8 @@
     <value>This server is already saved.</value>
         <comment>The server form, when the address is one that is already in the list.</comment>
   </data>
+    <data name="ServerAddressNotSaved" xml:space="preserve">
+    <value>The server address is not saved.</value>
+        <comment>The server form, when the address being edited is no longer in the list.</comment>
+  </data>
 </root>

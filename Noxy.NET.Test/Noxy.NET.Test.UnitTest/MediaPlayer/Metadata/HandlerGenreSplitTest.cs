@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Genre;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
@@ -36,7 +35,7 @@ public class HandlerGenreSplitTest
 
     private EntityMediaFile SeedFile(string title, params EntityGenre[] genreList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = UserID, TimeModified = Original };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = UserID, TimeModified = Original };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.GenreLinkList = [.. genreList.Select((x, index) => new EntityMediaFileGenre { MediaFileID = file.ID, GenreID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -56,7 +55,7 @@ public class HandlerGenreSplitTest
         EntityGenre existing = SeedGenre("Roll");
         EntityMediaFile file = SeedFile("One", before, combined);
 
-        List<ResponseGenre> responseList = await _handler.Handle(new CommandGenreSplit(UserID, combined.ID, ["Rock", "roll"]), Token);
+        List<ResponseGenre> responseList = await _handler.Handle(new(UserID, combined.ID, ["Rock", "roll"]), Token);
 
         Assert.Equal(["Rock", "Roll"], responseList.Select(x => x.Name).ToList());
         Assert.Equal(existing.ID, responseList[1].ID);
@@ -74,8 +73,8 @@ public class HandlerGenreSplitTest
         EntityGenre combined = SeedGenre("Rock & Roll");
         EntityGenre foreign = SeedGenre("Theirs", Guid.CreateVersion7());
 
-        await Assert.ThrowsAsync<InvalidMetadataOperationException>(() => _handler.Handle(new CommandGenreSplit(UserID, combined.ID, ["Rock", "rock"]), Token).AsTask());
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandGenreSplit(UserID, foreign.ID, ["A", "B"]), Token).AsTask());
+        await Assert.ThrowsAsync<InvalidMetadataOperationException>(() => _handler.Handle(new(UserID, combined.ID, ["Rock", "rock"]), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, foreign.ID, ["A", "B"]), Token).AsTask());
 
         Assert.Equal(0, _store.CommitCount);
     }

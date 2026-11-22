@@ -27,8 +27,8 @@ public class RequestRegisterDeviceTest
         Assert.NotEmpty(Validate(new RequestRegisterDevice { DeviceID = Guid.Empty, Name = "Laptop" }));
         Assert.NotEmpty(Validate(new RequestRegisterDevice { DeviceID = Guid.CreateVersion7(), Name = string.Empty }));
         Assert.NotEmpty(Validate(new RequestRegisterDevice { DeviceID = Guid.CreateVersion7(), Name = "   " }));
-        Assert.NotEmpty(Validate(new RequestRegisterDevice { DeviceID = Guid.CreateVersion7(), Name = new string('a', new ConfigRemote().MaxDeviceNameLength + 1) }));
-        Assert.Empty(Validate(new RequestRegisterDevice { DeviceID = Guid.CreateVersion7(), Name = new string('a', new ConfigRemote().MaxDeviceNameLength) }));
+        Assert.NotEmpty(Validate(new RequestRegisterDevice { DeviceID = Guid.CreateVersion7(), Name = new('a', new ConfigRemote().MaxDeviceNameLength + 1) }));
+        Assert.Empty(Validate(new RequestRegisterDevice { DeviceID = Guid.CreateVersion7(), Name = new('a', new ConfigRemote().MaxDeviceNameLength) }));
     }
 
     [Fact]

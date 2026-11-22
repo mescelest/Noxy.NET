@@ -38,7 +38,7 @@ public class HandlerAlbumUpdate(
             string identityKey = EntityAlbum.BuildIdentityKey(titleKey, artistList.Select(x => x.ID));
             bool artistsChanged = !album.ArtistLinkList.OrderBy(x => x.Position).Select(x => x.ArtistID).SequenceEqual(artistList.Select(x => x.ID));
 
-            if (title == album.Title && !artistsChanged) return new MetadataChangeResult<ResponseAlbum>(album.ToResponse(fileList.Count), false, new(), []);
+            if (title == album.Title && !artistsChanged) return new(album.ToResponse(fileList.Count), false, new(), []);
 
             DateTime now = Now;
             MetadataChangeSet changeSet = new();
@@ -54,7 +54,7 @@ public class HandlerAlbumUpdate(
                     List<ResponseMediaFile> mergedMediaList = TouchChangeSet(uow, changeSet, now);
                     await uow.Commit(cancellationToken);
 
-                    return new MetadataChangeResult<ResponseAlbum>(changeSet.AlbumUpdatedList.Single(x => x.ID == other.ID), true, changeSet, mergedMediaList);
+                    return new(changeSet.AlbumUpdatedList.Single(x => x.ID == other.ID), true, changeSet, mergedMediaList);
                 }
             }
 

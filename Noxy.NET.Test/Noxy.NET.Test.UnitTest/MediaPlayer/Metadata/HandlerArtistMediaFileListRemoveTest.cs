@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Artist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -37,7 +36,7 @@ public class HandlerArtistMediaFileListRemoveTest
 
     private EntityMediaFile SeedFile(string title, Guid? userID = null, params EntityArtist[] artistList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = userID ?? UserID, TimeModified = Original };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = userID ?? UserID, TimeModified = Original };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.ArtistLinkList = [.. artistList.Select((x, index) => new EntityMediaFileArtist { MediaFileID = file.ID, ArtistID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -51,7 +50,7 @@ public class HandlerArtistMediaFileListRemoveTest
 
     private Task<ResponseArtist> Remove(EntityArtist artist, params EntityMediaFile[] fileList)
     {
-        return _handler.Handle(new CommandArtistMediaFileListRemove(UserID, artist.ID, [.. fileList.Select(x => x.ID)]), Token).AsTask();
+        return _handler.Handle(new(UserID, artist.ID, [.. fileList.Select(x => x.ID)]), Token).AsTask();
     }
 
     [Fact]
@@ -109,7 +108,7 @@ public class HandlerArtistMediaFileListRemoveTest
         EntityMediaFile foreign = SeedFile("Theirs", Guid.CreateVersion7(), artist);
 
         await Assert.ThrowsAsync<MediaNotFoundException>(() => Remove(artist, valid, foreign));
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new CommandArtistMediaFileListRemove(UserID, artist.ID, [Guid.CreateVersion7()]), Token).AsTask());
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, artist.ID, [Guid.CreateVersion7()]), Token).AsTask());
 
         Assert.Single(Stored(valid).ArtistLinkList);
         Assert.Single(Stored(foreign).ArtistLinkList);

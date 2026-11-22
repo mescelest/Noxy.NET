@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Artist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -36,7 +35,7 @@ public class HandlerArtistDeleteTest
 
     private EntityMediaFile SeedFile(string title, EntityAlbum? album = null, params EntityArtist[] artistList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album?.ID };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album?.ID };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.ArtistLinkList = [.. artistList.Select((x, index) => new EntityMediaFileArtist { MediaFileID = file.ID, ArtistID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -58,7 +57,7 @@ public class HandlerArtistDeleteTest
 
     private Task Delete(EntityArtist artist, Guid? userID = null)
     {
-        return _handler.Handle(new CommandArtistDelete(userID ?? UserID, artist.ID), Token).AsTask();
+        return _handler.Handle(new(userID ?? UserID, artist.ID), Token).AsTask();
     }
 
     [Fact]
@@ -178,7 +177,7 @@ public class HandlerArtistDeleteTest
     [Fact]
     public async Task Delete_AnUnknownArtist_ThrowsNotFound()
     {
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandArtistDelete(UserID, Guid.CreateVersion7()), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, Guid.CreateVersion7()), Token).AsTask());
     }
 
     [Fact]
@@ -198,7 +197,7 @@ public class HandlerArtistDeleteTest
         EntityArtist artist = SeedArtist("A");
         using CancellationTokenSource source = new();
 
-        await _handler.Handle(new CommandArtistDelete(UserID, artist.ID), source.Token);
+        await _handler.Handle(new(UserID, artist.ID), source.Token);
 
         Assert.All(_publisher.TokenList, x => Assert.Equal(source.Token, x));
     }

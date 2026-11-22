@@ -1,6 +1,6 @@
+using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.API.Handlers.Remote;
 using Noxy.NET.MediaPlayer.Domain.Enums;
-using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Remote;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
@@ -68,7 +68,7 @@ public class HandlerNotificationRemoteTest
     [Fact]
     public async Task QueueSnapshot_PushesTheQueueToThatUserOnly()
     {
-        ResponseQueue queue = new() { QueueRevision = 1, Source = null, HistoryList = [], Current = new QueueItem(Guid.CreateVersion7(), Guid.CreateVersion7()), UserQueueList = [], SourceList = [] };
+        ResponseQueue queue = new() { QueueRevision = 1, Source = null, HistoryList = [], Current = new(Guid.CreateVersion7(), Guid.CreateVersion7()), UserQueueList = [], SourceList = [] };
 
         await new HandlerNotificationQueueSnapshot(_hub, new FakeLogger<HandlerNotificationQueueSnapshot>()).Handle(new(UserID, queue), Token);
 
@@ -106,6 +106,6 @@ public class HandlerNotificationRemoteTest
         await new HandlerNotificationSessionEnded(_hub, logger).Handle(new(UserID), Token);
 
         Assert.Empty(_hub.SendList);
-        Assert.Contains(logger.EntryList, x => x.Level == Microsoft.Extensions.Logging.LogLevel.Warning);
+        Assert.Contains(logger.EntryList, x => x.Level == LogLevel.Warning);
     }
 }

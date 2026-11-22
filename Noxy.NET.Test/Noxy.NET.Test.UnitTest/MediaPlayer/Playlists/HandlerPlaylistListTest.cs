@@ -35,7 +35,7 @@ public class HandlerPlaylistListTest
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
             SizeBytes = 3,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             UserID = UserID,
             TimeModified = _now
         };

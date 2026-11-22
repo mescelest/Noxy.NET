@@ -67,7 +67,7 @@ public class RequestMergeAndSplitItemTest
     [Fact]
     public void Split_ANameOver255Characters_IsInvalid()
     {
-        Assert.Single(Validate(new RequestSplitItem { NameList = ["A", new string('b', RequestSplitItem.MaxNameLength + 1)] }));
+        Assert.Single(Validate(new RequestSplitItem { NameList = ["A", new('b', RequestSplitItem.MaxNameLength + 1)] }));
     }
 
     [Fact]

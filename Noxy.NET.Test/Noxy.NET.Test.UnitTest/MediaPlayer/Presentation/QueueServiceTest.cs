@@ -24,7 +24,7 @@ public class QueueServiceTest
 
     public QueueServiceTest()
     {
-        QueueSourceService serviceSource = new(_storeMetadata, new ShuffleService(new Random(21)), new Random(22));
+        QueueSourceService serviceSource = new(_storeMetadata, new ShuffleService(new(21)), new(22));
         _service = new(serviceSource, _serviceSetting, _storeLocalQueue, _serviceSync, _storeMetadata, new FakeTimeProvider(), _logger);
         _service.EditApplied += _editList.Add;
         _service.Changed += () => _changedCount++;
@@ -643,7 +643,7 @@ public class QueueServiceTest
         await _service.SaveLocalCopy(0);
 
         FakeSyncService sync = new();
-        QueueService restored = new(new QueueSourceService(_storeMetadata, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _storeLocalQueue, sync, _storeMetadata, new FakeTimeProvider(), new FakeLogger<QueueService>())
+        QueueService restored = new(new QueueSourceService(_storeMetadata, new ShuffleService(new(1)), new(1)), _serviceSetting, _storeLocalQueue, sync, _storeMetadata, new FakeTimeProvider(), new FakeLogger<QueueService>())
             { OwnsPlayback = true };
         await restored.LoadLocalCopy();
         await SavePlaylist(playlistID, [entryList[0], entryList[2]]);
@@ -702,7 +702,7 @@ public class QueueServiceTest
         await _service.SaveLocalCopy(41.5);
         ResponseQueue saved = Snapshot();
 
-        QueueService other = new(new QueueSourceService(_storeMetadata, new ShuffleService(new Random(1)), new Random(1)), _serviceSetting, _storeLocalQueue, new FakeSyncService(), _storeMetadata, new FakeTimeProvider(),
+        QueueService other = new(new QueueSourceService(_storeMetadata, new ShuffleService(new(1)), new(1)), _serviceSetting, _storeLocalQueue, new FakeSyncService(), _storeMetadata, new FakeTimeProvider(),
             new FakeLogger<QueueService>());
         TimeSpan? position = await other.LoadLocalCopy();
 

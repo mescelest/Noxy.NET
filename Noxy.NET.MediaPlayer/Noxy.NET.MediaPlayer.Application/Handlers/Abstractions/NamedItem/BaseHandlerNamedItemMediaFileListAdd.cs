@@ -40,7 +40,7 @@ public abstract class BaseHandlerNamedItemMediaFileListAdd<TCommand, TItem, TIte
                 added++;
             }
 
-            if (added == 0) return new MetadataChangeResult<TItemResponse>(ServiceItem.ToResponse(item, linkedCount), false, changeSet, []);
+            if (added == 0) return new(ServiceItem.ToResponse(item, linkedCount), false, changeSet, []);
 
             TItemResponse response = ServiceItem.ToResponse(item, linkedCount + added);
             ServiceItem.AddUpdated(changeSet, response);

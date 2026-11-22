@@ -36,12 +36,12 @@ public class CommandMediaUploadTest
     {
         string title = new string('a', 254) + " bbb";
 
-        Assert.Equal(new string('a', 254), ResolveTitle(title, "media.mp3"));
+        Assert.Equal(new('a', 254), ResolveTitle(title, "media.mp3"));
     }
 
     [Fact]
     public void ResolveTitle_TooLongTitle_IsCutTo255()
     {
-        Assert.Equal(255, ResolveTitle(new string('a', 400), "media.mp3").Length);
+        Assert.Equal(255, ResolveTitle(new('a', 400), "media.mp3").Length);
     }
 }

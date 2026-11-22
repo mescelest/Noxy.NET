@@ -17,7 +17,7 @@ public class RequestUpdateMediaTest
 
     private static Optional<string?> Text(int length)
     {
-        return new(new string('a', length));
+        return new(new('a', length));
     }
 
     [Fact]

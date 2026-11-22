@@ -29,7 +29,7 @@ public class HandlerNotificationTest
             Title = "Media",
             ContentType = "audio/mpeg",
             SizeBytes = 1,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             TimeCreated = DateTime.UtcNow,
             TimeModified = DateTime.UtcNow
         };

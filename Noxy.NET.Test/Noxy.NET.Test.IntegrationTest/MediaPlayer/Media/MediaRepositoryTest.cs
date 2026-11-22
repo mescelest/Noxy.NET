@@ -36,7 +36,7 @@ public class MediaRepositoryTest : IDisposable
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
             SizeBytes = 1234,
-            ContentHash = new string('a', 64),
+            ContentHash = new('a', 64),
             UserID = userID
         };
 
@@ -215,14 +215,14 @@ public class MediaRepositoryTest : IDisposable
     {
         EntityUser user = await CreateUser();
         EntityMediaFile file = CreateMediaFile(user.ID);
-        file.ContentHash = new string('b', 64);
+        file.ContentHash = new('b', 64);
         file.TimeModified = new(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc);
         await Add(file);
 
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         EntityMediaFile? found = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken);
 
-        Assert.Equal(new string('b', 64), found?.ContentHash);
+        Assert.Equal(new('b', 64), found?.ContentHash);
         Assert.Equal(file.TimeModified, found?.TimeModified);
     }
 
@@ -283,7 +283,7 @@ public class MediaRepositoryTest : IDisposable
             Title = "Media",
             ContentType = "audio/mpeg",
             SizeBytes = 100,
-            ContentHash = new string('c', 64)
+            ContentHash = new('c', 64)
         };
     }
 
@@ -509,7 +509,7 @@ public class MediaRepositoryTest : IDisposable
         Assert.Equal("After", saved.Metadata?.Title);
         Assert.Equal("Someone", saved.Metadata?.Artist);
         Assert.Equal(2001, saved.Metadata?.Year);
-        Assert.Equal(new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc), saved.TimeModified);
+        Assert.Equal(new(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc), saved.TimeModified);
         Assert.Equal(file.FilePath, saved.FilePath);
     }
 

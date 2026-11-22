@@ -39,7 +39,7 @@ public class HandlerArtistListTest
 
     private void LinkNewFile(EntityArtist artist, Guid userID)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = userID };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = userID };
         file.ArtistLinkList = [new() { MediaFileID = file.ID, ArtistID = artist.ID, Position = 0 }];
         _store.MediaFileList.Add(file);
     }

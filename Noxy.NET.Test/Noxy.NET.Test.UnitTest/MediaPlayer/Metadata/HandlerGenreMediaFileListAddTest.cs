@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Genre;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -37,7 +36,7 @@ public class HandlerGenreMediaFileListAddTest
 
     private EntityMediaFile SeedFile(string title, params EntityGenre[] genreList)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = UserID, TimeModified = Original };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = UserID, TimeModified = Original };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         file.GenreLinkList = [.. genreList.Select((x, index) => new EntityMediaFileGenre { MediaFileID = file.ID, GenreID = x.ID, Position = index })];
         _store.MediaFileList.Add(file);
@@ -57,7 +56,7 @@ public class HandlerGenreMediaFileListAddTest
         EntityMediaFile lacking = SeedFile("One", other);
         EntityMediaFile had = SeedFile("Two", genre);
 
-        ResponseGenre response = await _handler.Handle(new CommandGenreMediaFileListAdd(UserID, genre.ID, [lacking.ID, had.ID]), Token);
+        ResponseGenre response = await _handler.Handle(new(UserID, genre.ID, [lacking.ID, had.ID]), Token);
 
         Assert.Equal([other.ID, genre.ID], Stored(lacking).GenreLinkList.OrderBy(x => x.Position).Select(x => x.GenreID).ToList());
         Assert.Single(Stored(had).GenreLinkList);
@@ -75,9 +74,9 @@ public class HandlerGenreMediaFileListAddTest
         EntityGenre foreign = SeedGenre("Theirs", Guid.CreateVersion7());
         EntityMediaFile file = SeedFile("One", genre);
 
-        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new CommandGenreMediaFileListAdd(UserID, genre.ID, [Guid.CreateVersion7()]), Token).AsTask());
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandGenreMediaFileListAdd(UserID, foreign.ID, [file.ID]), Token).AsTask());
-        await _handler.Handle(new CommandGenreMediaFileListAdd(UserID, genre.ID, [file.ID]), Token);
+        await Assert.ThrowsAsync<MediaNotFoundException>(() => _handler.Handle(new(UserID, genre.ID, [Guid.CreateVersion7()]), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, foreign.ID, [file.ID]), Token).AsTask());
+        await _handler.Handle(new(UserID, genre.ID, [file.ID]), Token);
 
         Assert.Equal(0, _store.CommitCount);
         Assert.Empty(_publisher.PublishedList);

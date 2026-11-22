@@ -15,12 +15,11 @@ namespace Noxy.NET.Test.MediaPlayer.Presentation;
 public class QueueSourceServiceTest
 {
     private readonly FakeMetadataStore _storeMetadata = new();
-    private readonly FakeSettingService _serviceSetting = new();
     private readonly QueueSourceService _service;
 
     public QueueSourceServiceTest()
     {
-        _service = new(_storeMetadata, new ShuffleService(new Random(11)), new Random(12));
+        _service = new(_storeMetadata, new ShuffleService(new(11)), new(12));
     }
 
     private static ResponseQueueSource Library(LibrarySortEnum sort = LibrarySortEnum.Title, bool descending = false, string search = "")
@@ -96,7 +95,7 @@ public class QueueSourceServiceTest
         await other.SaveMediaFile(second);
 
         List<Guid> one = MediaOf(await _service.BuildBase(Library()));
-        List<Guid> two = MediaOf(await new QueueSourceService(other, new ShuffleService(new Random(1)), new Random(1)).BuildBase(Library()));
+        List<Guid> two = MediaOf(await new QueueSourceService(other, new ShuffleService(new(1)), new(1)).BuildBase(Library()));
 
         Assert.Equal([first.ID, second.ID], one);
         Assert.Equal(one, two);

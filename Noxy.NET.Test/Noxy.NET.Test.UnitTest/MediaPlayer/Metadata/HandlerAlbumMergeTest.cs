@@ -1,4 +1,3 @@
-using Noxy.NET.MediaPlayer.Application.Commands.Metadata;
 using Noxy.NET.MediaPlayer.Application.Handlers.Metadata.Album;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
@@ -45,7 +44,7 @@ public class HandlerAlbumMergeTest
 
     private EntityMediaFile SeedFile(string title, EntityAlbum album)
     {
-        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new string('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album.ID };
+        EntityMediaFile file = new() { FilePath = $"{Guid.CreateVersion7()}.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = UserID, TimeModified = Original, AlbumID = album.ID };
         file.Metadata = new() { Title = title, MediaFileID = file.ID };
         _store.MediaFileList.Add(file);
         return file;
@@ -66,7 +65,7 @@ public class HandlerAlbumMergeTest
         EntityMediaFile moving = SeedFile("One", source);
         EntityMediaFile staying = SeedFile("Two", target);
 
-        ResponseAlbum response = await _handler.Handle(new CommandAlbumMerge(UserID, source.ID, target.ID), Token);
+        ResponseAlbum response = await _handler.Handle(new(UserID, source.ID, target.ID), Token);
 
         Assert.Equal(target.ID, response.ID);
         Assert.Equal("Target", response.Title);
@@ -90,9 +89,9 @@ public class HandlerAlbumMergeTest
         EntityAlbum mine = SeedAlbum("Mine");
         EntityAlbum foreign = SeedAlbum("Theirs", Guid.CreateVersion7());
 
-        await Assert.ThrowsAsync<InvalidMetadataOperationException>(() => _handler.Handle(new CommandAlbumMerge(UserID, mine.ID, mine.ID), Token).AsTask());
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandAlbumMerge(UserID, mine.ID, foreign.ID), Token).AsTask());
-        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new CommandAlbumMerge(UserID, foreign.ID, mine.ID), Token).AsTask());
+        await Assert.ThrowsAsync<InvalidMetadataOperationException>(() => _handler.Handle(new(UserID, mine.ID, mine.ID), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, mine.ID, foreign.ID), Token).AsTask());
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _handler.Handle(new(UserID, foreign.ID, mine.ID), Token).AsTask());
 
         Assert.Equal(2, _store.AlbumList.Count);
         Assert.Equal(0, _store.CommitCount);
@@ -105,7 +104,7 @@ public class HandlerAlbumMergeTest
         EntityAlbum target = SeedAlbum("Target");
         _store.FailCommit = true;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(new CommandAlbumMerge(UserID, source.ID, target.ID), Token).AsTask());
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(new(UserID, source.ID, target.ID), Token).AsTask());
 
         Assert.Empty(_publisher.PublishedList);
     }

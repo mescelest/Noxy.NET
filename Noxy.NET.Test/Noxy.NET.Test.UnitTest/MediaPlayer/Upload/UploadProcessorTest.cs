@@ -43,7 +43,7 @@ public class UploadProcessorTest
             TitleWasSent = titleWasSent,
             ContentType = "audio/mpeg",
             SizeBytes = size,
-            ContentHash = new string('c', 64)
+            ContentHash = new('c', 64)
         };
 
         _store.MediaUploadJobList.Add(job);
@@ -58,7 +58,7 @@ public class UploadProcessorTest
             FilePath = $"{Guid.CreateVersion7()}.mp3",
             ContentType = "audio/mpeg",
             SizeBytes = size,
-            ContentHash = new string('d', 64),
+            ContentHash = new('d', 64),
             UserID = userID
         });
     }
@@ -228,7 +228,7 @@ public class UploadProcessorTest
     public async Task ProcessNext_ALongEmbeddedTitle_IsCutTo255Characters()
     {
         AddJob(titleWasSent: false);
-        _tagReader.Result = Tags(title: new string('t', 400));
+        _tagReader.Result = Tags(title: new('t', 400));
 
         await ProcessNext();
 
@@ -256,7 +256,7 @@ public class UploadProcessorTest
     public async Task ProcessNext_LongCommentAndSubtitle_AreCutToTheirColumnLengths()
     {
         AddJob();
-        _tagReader.Result = new(null, [], null, [], [], null, null, null, new string('c', 5000), new string('s', 400), null);
+        _tagReader.Result = new(null, [], null, [], [], null, null, null, new('c', 5000), new('s', 400), null);
 
         await ProcessNext();
 
