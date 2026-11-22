@@ -10,11 +10,19 @@
     padding-right: calc(var(--size-control-icon, var(--size-icon-sm, 1.5rem)) + var(--size-gap-xxxs, 0.25rem) * 2);
     border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
     border-radius: var(--size-border-radius-md, 0.25rem);
+    background: var(--color-primary, transparent);
+    color: var(--color-complementary, inherit);
     font-size: inherit;
     font-family: inherit;
     box-sizing: border-box;
     transition: box-shadow 100ms ease-in-out;
     appearance: none;
+}
+
+/* The list that opens does not take the background of the select, so it needs the same pair of colours. */
+.InputControlSelect ::deep select option {
+    background: var(--color-primary, transparent);
+    color: var(--color-complementary, inherit);
 }
 
 .InputControlSelect ::deep select:hover {
@@ -37,6 +45,7 @@
     position: absolute;
     right: 0.75rem;
     top: calc(50% + 0px);
+    color: var(--color-complementary, inherit);
     font-size: 0.875rem;
     font-style: normal;
     transform: translateY(-50%) rotate(90deg);

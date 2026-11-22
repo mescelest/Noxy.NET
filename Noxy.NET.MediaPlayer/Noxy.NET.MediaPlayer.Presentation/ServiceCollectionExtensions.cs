@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IPlaylistService, PlaylistService>();
             services.AddSingleton<IHomeService, HomeService>();
             services.AddScoped<IStateBridgeService, StateBridgeService>();
+            services.AddSingleton<IDeviceResetService, DeviceResetService>();
             services.AddSingleton<IAppStartupService, AppStartupService>();
 
             return services;

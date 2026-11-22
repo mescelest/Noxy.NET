@@ -26,6 +26,19 @@ public sealed class FakeLocalDataOwnerService : ILocalDataOwnerService
         Changed?.Invoke();
     }
 
+    public int WipeLocalDataCount { get; private set; }
+
+    // Runs inside WipeLocalData, so a test can record what had happened by then.
+    public Action? OnWipeLocalData { get; set; }
+
+    public Task WipeLocalData()
+    {
+        WipeLocalDataCount++;
+        OnWipeLocalData?.Invoke();
+
+        return Task.CompletedTask;
+    }
+
     public Task EnsureOwner()
     {
         EnsureOwnerCount++;

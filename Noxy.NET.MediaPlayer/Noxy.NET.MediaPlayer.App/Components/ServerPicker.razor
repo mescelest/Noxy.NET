@@ -2,16 +2,9 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <select class="select" aria-label="Server" disabled="@IsSelectDisabled" @onchange="Select">
-        @if (_current is null)
-        {
-            <option value="" selected>@PlaceholderText</option>
-        }
-        @foreach (string address in _addressList)
-        {
-            <option value="@address" selected="@IsCurrent(address)">@address</option>
-        }
-    </select>
+    <InputControlSelect TOption="string" ID="server-picker" Name="server" aria-label="Server" disabled="@IsSelectDisabled" OptionList="_optionList" @bind-Value:get="@CurrentOption" @bind-Value:set="Select">
+        @OptionText(context)
+    </InputControlSelect>
     <Button class="manage" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" disabled="@Disabled" aria-label="Manage servers" @onclick="OpenDialog">
         <MaterialIcon Icon="settings" Size="var(--size-icon-sm)"/>
     </Button>
@@ -24,15 +17,21 @@
     [Parameter]
     public bool Disabled { get; set; }
 
+    // The empty option stands for "no server in use": it is the placeholder, and it is there only while none is.
+    private const string PlaceholderOption = "";
+
     private List<string> _addressList = [];
+    private HashSet<string> _optionList = [];
     private string? _current;
     private bool _open;
 
     private bool IsSelectDisabled => Disabled || _addressList.Count == 0;
 
+    private string CurrentOption => _current ?? PlaceholderOption;
+
     private string PlaceholderText => _addressList.Count == 0 ? "No server saved" : "Choose a server";
 
-    private bool IsCurrent(string address) => address == _current;
+    private string OptionText(string? option) => string.IsNullOrEmpty(option) ? PlaceholderText : option;
 
     private void OpenDialog()
     {
@@ -51,11 +50,11 @@
     {
         _addressList = await StorageServerAddress.GetAddressList();
         _current = await StorageServerAddress.GetAddress();
+        _optionList = _current is null ? [PlaceholderOption, .. _addressList] : [.. _addressList];
     }
 
-    private async Task Select(ChangeEventArgs args)
+    private async Task Select(string? address)
     {
-        string? address = args.Value?.ToString();
         if (string.IsNullOrEmpty(address)) return;
 
         await StorageServerAddress.SetAddress(address);

@@ -4,18 +4,7 @@
     gap: var(--size-gap-xxs);
 }
 
-.select {
+.ServerPicker ::deep .InputControlSelect {
     flex: 1 1 auto;
     min-width: 0;
-    height: var(--size-control-md);
-    padding: 0 var(--size-gap-xs);
-    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-md);
-    background: transparent;
-    color: var(--color-complementary);
-    font: var(--font-body);
-}
-
-.select:disabled {
-    color: var(--color-disabled);
 }

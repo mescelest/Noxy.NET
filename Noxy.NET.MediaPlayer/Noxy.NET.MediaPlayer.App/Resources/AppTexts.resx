@@ -200,6 +200,34 @@
     <value>This server is already saved.</value>
         <comment>The server form, when the address is one that is already in the list.</comment>
   </data>
+    <data name="ResetPreferencesButton" xml:space="preserve">
+    <value>Reset preferences</value>
+        <comment>The button on the settings page that puts the preferences of this device back to their defaults.</comment>
+  </data>
+    <data name="ResetPreferencesMessage" xml:space="preserve">
+    <value>Put the preferences of this device back to their defaults? You stay signed in and your downloads stay.</value>
+        <comment>The message of the reset preferences confirmation.</comment>
+  </data>
+    <data name="ResetPreferencesAccept" xml:space="preserve">
+    <value>Reset</value>
+        <comment>The accept button of the reset preferences confirmation.</comment>
+  </data>
+    <data name="DeleteAllDataButton" xml:space="preserve">
+    <value>Delete all my data</value>
+        <comment>The button on the settings page that removes everything this device holds.</comment>
+  </data>
+    <data name="DeleteAllDataMessage" xml:space="preserve">
+    <value>Delete all your data from this device? This signs you out and removes your downloaded songs, saved queue, saved server addresses and preferences.</value>
+        <comment>The message of the delete all data confirmation.</comment>
+  </data>
+    <data name="DeleteAllDataDetail" xml:space="preserve">
+    <value>Nothing is deleted from your library on the server. This cannot be undone.</value>
+        <comment>The second sentence of the delete all data confirmation.</comment>
+  </data>
+    <data name="DeleteAllDataAccept" xml:space="preserve">
+    <value>Delete all</value>
+        <comment>The accept button of the delete all data confirmation.</comment>
+  </data>
     <data name="ServerAddressNotSaved" xml:space="preserve">
     <value>The server address is not saved.</value>
         <comment>The server form, when the address being edited is no longer in the list.</comment>

@@ -23,8 +23,12 @@ public sealed class FakeLocalQueueStore : ILocalQueueStore
         return Task.CompletedTask;
     }
 
+    // How many times Clear was called.
+    public int ClearCount { get; private set; }
+
     public Task Clear()
     {
+        ClearCount++;
         _json = null;
         return Task.CompletedTask;
     }

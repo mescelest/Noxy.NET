@@ -482,6 +482,48 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
             }
         }
         
+        public static string ResetPreferencesButton {
+            get {
+                return ResourceManager.GetString("ResetPreferencesButton", resourceCulture);
+            }
+        }
+
+        public static string ResetPreferencesMessage {
+            get {
+                return ResourceManager.GetString("ResetPreferencesMessage", resourceCulture);
+            }
+        }
+
+        public static string ResetPreferencesAccept {
+            get {
+                return ResourceManager.GetString("ResetPreferencesAccept", resourceCulture);
+            }
+        }
+
+        public static string DeleteAllDataButton {
+            get {
+                return ResourceManager.GetString("DeleteAllDataButton", resourceCulture);
+            }
+        }
+
+        public static string DeleteAllDataMessage {
+            get {
+                return ResourceManager.GetString("DeleteAllDataMessage", resourceCulture);
+            }
+        }
+
+        public static string DeleteAllDataDetail {
+            get {
+                return ResourceManager.GetString("DeleteAllDataDetail", resourceCulture);
+            }
+        }
+
+        public static string DeleteAllDataAccept {
+            get {
+                return ResourceManager.GetString("DeleteAllDataAccept", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Uploading {0} file….
         /// </summary>

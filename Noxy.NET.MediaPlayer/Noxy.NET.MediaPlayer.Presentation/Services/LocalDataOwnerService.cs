@@ -62,6 +62,13 @@ public class LocalDataOwnerService(
         SetVerified(true);
     }
 
+    public async Task WipeLocalData()
+    {
+        await Wipe();
+        await storeMetadata.SetOwnerUserID(null);
+        Wiped?.Invoke();
+    }
+
     // The data is the previous account's again once the session ends: it must be checked once more at the next sign-in.
     private void SubscribeToTheSession()
     {

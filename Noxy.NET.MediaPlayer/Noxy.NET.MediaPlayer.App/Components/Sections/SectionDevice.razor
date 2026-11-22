@@ -1,5 +1,66 @@
+@inject IDeviceResetService ServiceDeviceReset
+@inject IToastService ServiceToast
 @inherits BaseComponentElement
 
 <Section @attributes="AdditionalAttributes" class="@CssClass" Title="Device">
     <DeviceNameField/>
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.None" @onclick="AskResetPreferences">@AppTexts.ResetPreferencesButton</Button>
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.None" @onclick="AskDeleteAllData">@AppTexts.DeleteAllDataButton</Button>
+
+    <ConfirmActionDialog Open="_isResettingPreferences" OpenChanged="CloseResetPreferences" Title="@AppTexts.ResetPreferencesButton" Message="@AppTexts.ResetPreferencesMessage" AcceptText="@AppTexts.ResetPreferencesAccept" OnSubmit="SubmitResetPreferences"/>
+    <ConfirmActionDialog Open="_isDeletingAllData" OpenChanged="CloseDeleteAllData" Title="@AppTexts.DeleteAllDataButton" Message="@AppTexts.DeleteAllDataMessage" Detail="@AppTexts.DeleteAllDataDetail" AcceptText="@AppTexts.DeleteAllDataAccept"
+                         OnSubmit="SubmitDeleteAllData"/>
 </Section>
+
+@code {
+
+    private bool _isResettingPreferences;
+    private bool _isDeletingAllData;
+
+    private void AskResetPreferences()
+    {
+        _isResettingPreferences = true;
+    }
+
+    private void AskDeleteAllData()
+    {
+        _isDeletingAllData = true;
+    }
+
+    private void CloseResetPreferences(bool open)
+    {
+        _isResettingPreferences = open;
+    }
+
+    private void CloseDeleteAllData(bool open)
+    {
+        _isDeletingAllData = open;
+    }
+
+    private async Task SubmitResetPreferences(bool accepted)
+    {
+        if (!accepted) return;
+
+        await Run(ServiceDeviceReset.ResetPreferences);
+    }
+
+    private async Task SubmitDeleteAllData(bool accepted)
+    {
+        if (!accepted) return;
+
+        await Run(ServiceDeviceReset.DeleteAllData);
+    }
+
+    private async Task Run(Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
+}

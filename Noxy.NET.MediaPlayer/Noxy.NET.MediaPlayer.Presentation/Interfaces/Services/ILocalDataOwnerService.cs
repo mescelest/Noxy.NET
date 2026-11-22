@@ -6,6 +6,9 @@ public interface ILocalDataOwnerService
     // Reads the signed-in user from the access token. With no owner stored it records the user and keeps the data; for the same user it does nothing; for a different user it wipes everything of the old account first and then records the new one. Signed out, or a token it cannot read, does nothing: a failure to read must never destroy data.
     Task EnsureOwner();
 
+    // Removes everything this device holds of an account and forgets the owner, so that whoever signs in next starts empty. Raises Wiped.
+    Task WipeLocalData();
+
     // Raised after a different account signed in and the old one's data was wiped, so the screens read the empty lists at once.
     event Action? Wiped;
 
