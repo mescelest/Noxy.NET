@@ -1,0 +1,21 @@
+@inherits BaseComponentElement
+
+<section @attributes="AdditionalAttributes" class="@CssClass">
+    <DynamicHTMLTag Tag="@LevelTag" class="title">@Title</DynamicHTMLTag>
+    @ChildContent
+</section>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required string Title { get; set; }
+
+    [Parameter]
+    public HTMLHeaderLevelEnum? Level { get; set; }
+    private HTMLHeaderLevelEnum LevelCurrent => Level ?? HTMLHeaderLevelEnum.H2;
+    private string LevelTag => LevelCurrent.ToText();
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+}

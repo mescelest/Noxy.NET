@@ -1,0 +1,4 @@
+.Section ::deep > .title {
+    margin: 0 0 var(--size-gap-sm, 1rem);
+    font-size: var(--size-text-h5, 1.25rem);
+}
