@@ -1,0 +1,59 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TemplateInputGroup For="@For" DisplayName="@DisplayName" Description="@Description" ErrorList="ErrorListCombined">
+        <InputControlComposite>
+            @ChildContent
+        </InputControlComposite>
+    </TemplateInputGroup>
+</div>
+
+@code {
+
+    [CascadingParameter]
+    public IWebFormContext? Context { get; set; }
+
+    [Parameter]
+    public string? DisplayName { get; set; }
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    // The ID of the control the label belongs to, usually the first one.
+    [Parameter]
+    public string? For { get; set; }
+
+    // The fields whose errors are shown together, such as the two behind a scheme and a host. What is worth saying to the user about them is up to the one who uses this.
+    [Parameter]
+    public IEnumerable<string>? FieldNameList { get; set; }
+
+    // Errors of the caller's own, shown after the fields'.
+    [Parameter]
+    public IEnumerable<string>? ErrorList { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+
+    private List<string> ErrorListCombined => CombineErrorList(Context, FieldNameList, ErrorList);
+
+    // The errors of each named field in the order of the names, then the given ones. Each message once.
+    public static List<string> CombineErrorList(IWebFormContext? context, IEnumerable<string>? fieldNameList, IEnumerable<string>? errorList)
+    {
+        List<string> list = [];
+        if (context is not null)
+        {
+            foreach (string name in fieldNameList ?? [])
+            {
+                if (context.TryGetFieldErrorList(name, out IReadOnlyList<string> fieldErrorList))
+                {
+                    list.AddRange(fieldErrorList);
+                }
+            }
+        }
+
+        list.AddRange(errorList ?? []);
+
+        return [.. list.Distinct()];
+    }
+
+}

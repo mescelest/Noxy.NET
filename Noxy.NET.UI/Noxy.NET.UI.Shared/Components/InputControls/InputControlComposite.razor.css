@@ -1,0 +1,57 @@
+/* One control to look at: the controls inside share their edges, only the outer corners are round, and the one with focus is drawn over its neighbours. */
+.InputControlComposite {
+    display: flex;
+    flex: 0 1 auto;
+    flex-flow: row;
+    align-items: stretch;
+    max-width: 100%;
+}
+
+/* A control or an addon takes the width of its content; the last one takes what is left. */
+.InputControlComposite ::deep > * {
+    flex: 0 0 auto;
+}
+
+.InputControlComposite ::deep > :last-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.InputControlComposite ::deep > :last-child :is(input, textarea) {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.InputControlComposite ::deep > * + * {
+    margin-left: calc(-1 * var(--size-border-width-sm, 1px));
+}
+
+.InputControlComposite ::deep > :not(:last-child) :is(input, select, textarea, button),
+.InputControlComposite ::deep > :not(:last-child):is(.addon) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.InputControlComposite ::deep > :not(:first-child) :is(input, select, textarea, button),
+.InputControlComposite ::deep > :not(:first-child):is(.addon) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.InputControlComposite ::deep > :focus-within {
+    position: relative;
+    z-index: 1;
+}
+
+/* A plain piece of text, such as a fixed "https://", drawn like the controls. */
+.InputControlComposite ::deep > .addon {
+    display: flex;
+    align-items: center;
+    padding-inline: var(--size-gap-xxs, 0.5rem);
+    border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
+    border-radius: var(--size-border-radius-md, 0.25rem);
+    background-color: var(--color-offset-primary-sm, transparent);
+    color: var(--color-muted, inherit);
+    box-sizing: border-box;
+    white-space: nowrap;
+}

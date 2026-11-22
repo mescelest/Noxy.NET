@@ -1,4 +1,5 @@
-@implements IDisposable
+@implements IAsyncDisposable
+@inject IJSRuntime JS
 @inherits BaseComponentElement
 
 <CascadingValue Value="this" IsFixed="true">
@@ -6,7 +7,14 @@
 </CascadingValue>
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <div role="tablist" aria-label="@Label" class="tab-list" @onkeydown="HandleKeyDown">
+    @if (IsArrowShown)
+    {
+        <button type="button" class="tab-scroll tab-scroll-back" tabindex="-1" aria-label="@ScrollBackLabelCurrent" disabled="@IsScrollBackDisabled" @onclick="ClickScrollBackHandler">
+            @PreviousContentCurrent
+        </button>
+    }
+
+    <div @ref="_listElement" role="tablist" aria-label="@Label" class="tab-list" @onkeydown="HandleKeyDown">
         @foreach (TabPage item in _pages)
         {
             bool isSelected = item == _activePage;
@@ -37,6 +45,13 @@
         }
     </div>
 
+    @if (IsArrowShown)
+    {
+        <button type="button" class="tab-scroll tab-scroll-next" tabindex="-1" aria-label="@ScrollForwardLabelCurrent" disabled="@IsScrollForwardDisabled" @onclick="ClickScrollForwardHandler">
+            @NextContentCurrent
+        </button>
+    }
+
     @foreach (TabPage item in _pages)
     {
         bool isSelected = item == _activePage;
@@ -64,6 +79,37 @@
     [Parameter]
     public string? Label { get; set; }
 
+    // Whether arrows to scroll the tabs are offered. They appear only while the tabs do not fit, and each moves one tab width.
+    [Parameter]
+    public bool ShowArrows { get; set; } = true;
+
+    [Parameter]
+    public RenderFragment? PreviousContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? NextContent { get; set; }
+
+    // The names of the two arrows for assistive technology; the arrow alone says nothing.
+    [Parameter]
+    public string? ScrollBackLabel { get; set; }
+    private string ScrollBackLabelCurrent => ScrollBackLabel ?? DefaultScrollBackLabel;
+
+    [Parameter]
+    public string? ScrollForwardLabel { get; set; }
+    private string ScrollForwardLabelCurrent => ScrollForwardLabel ?? DefaultScrollForwardLabel;
+
+    private const string DefaultScrollBackLabel = "Scroll tabs back";
+    private const string DefaultScrollForwardLabel = "Scroll tabs forward";
+    private static readonly RenderFragment DefaultPrevious = builder => builder.AddContent(0, "‹");
+    private static readonly RenderFragment DefaultNext = builder => builder.AddContent(0, "›");
+
+    private const string FunctionWatch = "Watch";
+    private const string FunctionUnwatch = "Unwatch";
+    private const string FunctionScroll = "Scroll";
+    private const string FunctionScrollToTab = "ScrollToTab";
+    private const int DirectionBack = -1;
+    private const int DirectionForward = 1;
+
     private const string KeyNext = "ArrowRight";
     private const string KeyPrevious = "ArrowLeft";
     private const string KeyFirst = "Home";
@@ -75,6 +121,74 @@
     private bool IsHidden(TabPage page) => page != _activePage;
 
     private readonly Dictionary<TabPage, ElementReference> _tabReferences = new();
+
+    private ElementReference _listElement;
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<TabSet>? _reference;
+    private bool _isOverflowing;
+    private bool _canScrollBack;
+    private bool _canScrollForward;
+    private bool _isScrollToActivePending = true;
+    private bool _disposed;
+
+    private bool IsArrowShown => ShowArrows && _isOverflowing;
+    private bool IsScrollBackDisabled => !_canScrollBack;
+    private bool IsScrollForwardDisabled => !_canScrollForward;
+    private RenderFragment PreviousContentCurrent => PreviousContent ?? DefaultPrevious;
+    private RenderFragment NextContentCurrent => NextContent ?? DefaultNext;
+
+    protected override async Task OnAfterFirstRenderAsync()
+    {
+        await base.OnAfterFirstRenderAsync();
+
+        if (_disposed) return;
+
+        IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(TabSet)));
+
+        // The component can be disposed while the module loads: then nobody else releases it.
+        if (_disposed)
+        {
+            await ReleaseModuleAsync(module);
+            return;
+        }
+
+        _module = module;
+        _reference = DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync(FunctionWatch, _listElement, _reference, nameof(OverflowChanged));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        // The tab that was chosen is brought into view when it is partly hidden.
+        if (!_isScrollToActivePending || _module is null || _disposed) return;
+        if (_activePage is null || !_tabReferences.TryGetValue(_activePage, out ElementReference tab)) return;
+
+        _isScrollToActivePending = false;
+        await _module.InvokeVoidAsync(FunctionScrollToTab, tab);
+    }
+
+    [JSInvokable]
+    public Task OverflowChanged(bool isOverflowing, bool canScrollBack, bool canScrollForward)
+    {
+        _isOverflowing = isOverflowing;
+        _canScrollBack = canScrollBack;
+        _canScrollForward = canScrollForward;
+
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private Task ClickScrollBackHandler() => ScrollAsync(DirectionBack);
+
+    private Task ClickScrollForwardHandler() => ScrollAsync(DirectionForward);
+
+    private async Task ScrollAsync(int direction)
+    {
+        if (_module is null || _disposed) return;
+
+        await _module.InvokeVoidAsync(FunctionScroll, _listElement, direction);
+    }
 
     public void AddPage(TabPage page)
     {
@@ -105,6 +219,7 @@
     private void ActivatePage(TabPage page)
     {
         _activePage = page;
+        _isScrollToActivePending = true;
         StateHasChanged();
     }
 
@@ -143,10 +258,31 @@
         }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        if (_disposed) return;
+
+        _disposed = true;
         _pages.Clear();
         _tabReferences.Clear();
+        if (_module is not null)
+        {
+            await ReleaseModuleAsync(_module);
+        }
+
+        _reference?.Dispose();
+    }
+
+    // The watching is stopped before the module is let go, so nothing calls into the reference afterwards.
+    private async Task ReleaseModuleAsync(IJSObjectReference module)
+    {
+        try
+        {
+            await module.InvokeVoidAsync(FunctionUnwatch, _listElement);
+            await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
     }
 
 }

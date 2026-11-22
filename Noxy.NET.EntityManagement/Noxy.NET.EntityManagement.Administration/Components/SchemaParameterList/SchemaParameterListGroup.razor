@@ -168,11 +168,11 @@
     {
         return
             @<div class="action-list">
-                <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" type="submit">
+                <Button Status="StatusEnum.Success" Loading="IsLoadingUpdate" Type="@HTMLButtonTypeEnum.Submit">
                     @TextParameterService.Get(ParameterTextConstants.ButtonUpdate, ComponentName)
                 </Button>
 
-                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" type="button" @onclick="ButtonEditCancelHandler">
+                <Button Status="StatusEnum.Error" Loading="IsLoadingUpdate" Type="@HTMLButtonTypeEnum.Button" @onclick="ButtonEditCancelHandler">
                     @TextParameterService.Get(ParameterTextConstants.ButtonCancel, ComponentName)
                 </Button>
             </div>;

@@ -1,11 +1,21 @@
+/* The list sits between two arrows that are there only while the tabs do not fit. The arrows are beside the list, not around it, so the list stays a direct child. */
 .TabSet {
-    display: flex;
-    flex-flow: column;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-content: start;
 }
 
 .tab-list {
     display: flex;
     flex-flow: row;
+    grid-column: 2;
+    grid-row: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tab-list::-webkit-scrollbar {
+    display: none;
 }
 
 .tab {
@@ -24,4 +34,35 @@
     border: none;
     cursor: pointer;
     box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.tab-scroll {
+    display: flex;
+    grid-row: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--size-gap-xxs, 0.5rem);
+    background-color: transparent;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.tab-scroll-back {
+    grid-column: 1;
+}
+
+.tab-scroll-next {
+    grid-column: 3;
+}
+
+.tab-scroll:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.tab-panel {
+    grid-column: 1 / -1;
 }

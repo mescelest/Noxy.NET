@@ -93,7 +93,7 @@
     {
         return
             @<ButtonList Alignment="ButtonListAlignmentEnum.Right">
-                <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
+                <Button Status="StatusEnum.Info" Loading="IsLoading" Type="@HTMLButtonTypeEnum.Submit">
                     @TextParameterService.Get(ParameterTextConstants.ButtonCreate)
                 </Button>
             </ButtonList>;

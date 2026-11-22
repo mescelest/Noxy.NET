@@ -8,11 +8,12 @@
     public EventCallback<bool> OnChanged { get; set; }
 
     private const string FunctionIsNarrow = "IsNarrow";
-    private const string FunctionWatchNarrow = "WatchNarrow";
-    private const string FunctionDispose = "dispose";
+    private const string FunctionWatch = "Watch";
+    private const string FunctionUnwatch = "Unwatch";
 
+    // The script module is shared by every watcher, so each one names its own listener.
+    private readonly string _key = Guid.NewGuid().ToString("N");
     private IJSObjectReference? _module;
-    private IJSObjectReference? _watch;
     private DotNetObjectReference<NarrowWatcher>? _reference;
     private bool _disposed;
 
@@ -21,38 +22,24 @@
         await base.OnAfterRenderAsync(firstRender);
         if (!firstRender || _disposed) return;
 
-        try
-        {
-            IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(NarrowWatcher), local: true));
-            if (_disposed)
-            {
-                // Disposed while the module loaded: nobody else will release it.
-                await ReleaseAsync(module);
-                return;
-            }
+        IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(NarrowWatcher), local: true));
 
-            _module = module;
-            _reference = DotNetObjectReference.Create(this);
-            _watch = await _module.InvokeAsync<IJSObjectReference>(FunctionWatchNarrow, _reference, nameof(Changed));
-            if (_disposed) return;
+        // The component can be disposed while the module loads: then nobody else releases it.
+        if (_disposed)
+        {
+            await ReleaseModuleAsync(module);
+            return;
+        }
 
-            await OnChanged.InvokeAsync(await _module.InvokeAsync<bool>(FunctionIsNarrow));
-        }
-        catch (JSDisconnectedException)
-        {
-            // The window is closing.
-        }
-        catch (ObjectDisposedException)
-        {
-            // Disposed between two calls.
-        }
+        _module = module;
+        _reference = DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync(FunctionWatch, _key, _reference, nameof(Changed));
+        await OnChanged.InvokeAsync(await _module.InvokeAsync<bool>(FunctionIsNarrow));
     }
 
     [JSInvokable]
     public Task Changed(bool narrow)
     {
-        if (_disposed) return Task.CompletedTask;
-
         return InvokeAsync(() => OnChanged.InvokeAsync(narrow));
     }
 
@@ -61,41 +48,24 @@
         if (_disposed) return;
 
         _disposed = true;
-
-        // The script stops listening first, so nothing calls into the reference once it is released.
-        if (_watch is not null)
+        if (_module is not null)
         {
-            await StopAsync(_watch);
-            await ReleaseAsync(_watch);
+            await ReleaseModuleAsync(_module);
         }
-
-        if (_module is not null) await ReleaseAsync(_module);
 
         _reference?.Dispose();
     }
 
-    private static async Task StopAsync(IJSObjectReference watch)
+    // The listener is stopped before the module is let go, so nothing calls into the reference afterwards.
+    private async Task ReleaseModuleAsync(IJSObjectReference module)
     {
         try
         {
-            await watch.InvokeVoidAsync(FunctionDispose);
+            await module.InvokeVoidAsync(FunctionUnwatch, _key);
+            await module.DisposeAsync();
         }
         catch (JSDisconnectedException) { }
         catch (JSException) { }
-        catch (ObjectDisposedException) { }
-        catch (TaskCanceledException) { }
-    }
-
-    private static async Task ReleaseAsync(IJSObjectReference reference)
-    {
-        try
-        {
-            await reference.DisposeAsync();
-        }
-        catch (JSDisconnectedException) { }
-        catch (JSException) { }
-        catch (ObjectDisposedException) { }
-        catch (TaskCanceledException) { }
     }
 
 }

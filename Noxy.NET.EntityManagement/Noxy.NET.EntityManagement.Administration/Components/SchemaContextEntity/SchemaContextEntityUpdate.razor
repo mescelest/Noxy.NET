@@ -8,7 +8,7 @@
 
     <FormSchemaContextUpdate SchemaContext="SchemaContext" OnSubmit="Submit">
         <ButtonList Alignment="ButtonListAlignmentEnum.Right">
-            <Button Status="StatusEnum.Info" Loading="IsLoading" type="submit">
+            <Button Status="StatusEnum.Info" Loading="IsLoading" Type="@HTMLButtonTypeEnum.Submit">
                 @TextParameterService.Get(ParameterTextConstants.ButtonUpdate)
             </Button>
         </ButtonList>
