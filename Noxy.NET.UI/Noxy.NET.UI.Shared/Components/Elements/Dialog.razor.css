@@ -15,6 +15,11 @@
     padding: 0;
 }
 
+/* The button is closer to the edge than a focus ring is wide, so the ring is drawn inside the button, not around it, where the dialog would cut it off. */
+.Dialog ::deep > .close:focus-visible {
+    outline-offset: calc(-1 * var(--size-border-width-md, 2px));
+}
+
 /* Whatever comes first, usually the title, keeps clear of the button however long it is. */
 .Dialog ::deep > .close + * {
     padding-inline-end: calc(var(--dialog-close-size) + var(--dialog-close-offset));
