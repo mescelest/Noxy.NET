@@ -3,7 +3,7 @@
 @inherits BaseComponentLayoutFluxor
 
 <CascadingValue Value="Context">
-    @* <NarrowWatcher OnChanged="OnNarrowChanged"/> *@
+    <NarrowWatcher OnChanged="OnNarrowChanged"/>
 
     @if (!StateSession.Value.IsRestored)
     {

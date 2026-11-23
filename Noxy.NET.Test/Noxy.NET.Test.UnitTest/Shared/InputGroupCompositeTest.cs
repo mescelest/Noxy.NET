@@ -4,6 +4,7 @@ using Noxy.NET.UI.Models.Forms;
 
 namespace Noxy.NET.Test.Shared;
 
+// ReSharper disable UnusedMember.Local
 public class InputGroupCompositeTest
 {
     private sealed class AddressModel
