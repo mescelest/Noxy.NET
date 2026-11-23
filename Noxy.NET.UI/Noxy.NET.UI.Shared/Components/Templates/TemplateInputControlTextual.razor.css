@@ -2,7 +2,7 @@
     display: flex;
 }
 
-.TemplateInputControlTextual ::deep input {
+.TemplateInputControlTextual ::deep > input {
     height: var(--size-control-input, var(--size-control-md, 2.625rem));
     padding-inline: var(--size-gap-xxs, 0.5rem);
     border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
@@ -15,11 +15,11 @@
     transition: box-shadow 100ms ease-in-out;
 }
 
-.TemplateInputControlTextual ::deep input:hover {
+.TemplateInputControlTextual ::deep > input:hover {
     box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000))) inset;
 }
 
-.TemplateInputControlTextual ::deep input:focus {
+.TemplateInputControlTextual ::deep > input:focus {
     padding-inline: calc(var(--size-gap-xxs, 0.5rem) - 1px);
     border-color: var(--color-highlight, #0073EC);
     border-width: var(--size-border-width-md, 2px);
@@ -27,7 +27,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .TemplateInputControlTextual ::deep input {
+    .TemplateInputControlTextual ::deep > input {
         transition: none;
     }
 }

@@ -9,13 +9,13 @@
     display: flex;
 }
 
-.control ::deep .input {
+.control ::deep > .TemplateInputControlTextual > .input {
     width: 100%;
     box-sizing: border-box;
     padding-right: calc((var(--size-control-input, var(--size-control-md, 2.625rem)) - var(--size-control-choice, var(--size-control-xxs, 1.5rem))) + var(--size-control-choice, var(--size-control-xxs, 1.5rem)));
 }
 
-.control ::deep .input:focus {
+.control ::deep > .TemplateInputControlTextual > .input:focus {
     padding-right: calc((var(--size-control-input, var(--size-control-md, 2.625rem)) - var(--size-control-choice, var(--size-control-xxs, 1.5rem))) + var(--size-control-choice, var(--size-control-xxs, 1.5rem)) - 1px);
 }
 
@@ -55,13 +55,13 @@
     -moz-user-select: none;
 }
 
-.content ::deep .color-scroll-hue {
+.content ::deep > .color-scroll-hue {
     grid-area: hue;
     writing-mode: vertical-lr;
     direction: rtl;
 }
 
-.content ::deep .color-input {
+.content ::deep > .color-input-list > .TemplateInputControlTextual > .color-input {
     width: 5.5ch;
 }
 

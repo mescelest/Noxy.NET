@@ -13,7 +13,7 @@
 }
 
 /* The file input covers the zone only while files are dragged over it, so that the drop lands on it and the browser hands the files over. */
-.drop {
+.FileDropZone ::deep > .drop {
     position: absolute;
     inset: 0;
     z-index: 2;
@@ -23,6 +23,6 @@
     pointer-events: none;
 }
 
-.drop[data-active] {
+.FileDropZone ::deep > .drop[data-active] {
     pointer-events: auto;
 }

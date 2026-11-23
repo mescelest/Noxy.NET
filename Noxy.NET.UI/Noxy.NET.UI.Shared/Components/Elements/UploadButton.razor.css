@@ -2,6 +2,7 @@
     display: inline-flex;
 }
 
-.input {
+/* The file input belongs to the framework's component, so the rule has to reach into it. */
+.UploadButton ::deep > .input {
     display: none;
 }

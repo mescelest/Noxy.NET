@@ -5,22 +5,23 @@
     min-height: 0;
 }
 
-.MediaFileTable ::deep .table {
+.MediaFileTable ::deep > .table {
     flex: 1 1 auto;
     grid-template-columns: minmax(0px, max-content) minmax(0px, max-content) 1fr  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content);
     align-content: flex-start;
 }
 
 /* The reorder handle is one more column in front of the rest. */
-.MediaFileTable ::deep .table[data-grip] {
+.MediaFileTable ::deep > .table[data-grip] {
     grid-template-columns: minmax(0px, max-content) minmax(0px, max-content) minmax(0px, max-content) 1fr  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content);
 }
 
-.MediaFileTable ::deep .table .cell {
+.MediaFileTable ::deep > .table > .header > .header-row > .cell,
+.MediaFileTable ::deep > .table > .body > .row-menu > .row > .cell {
     display: flex;
 }
 
-.MediaFileTable ::deep .table > .header {
+.MediaFileTable ::deep > .table > .header {
     row-gap: var(--size-gap-xs);
 }
 
@@ -29,20 +30,20 @@
     display: contents;
 }
 
-.MediaFileTable ::deep .table > .body > .row-menu > .row {
+.MediaFileTable ::deep > .table > .body > .row-menu > .row {
     align-items: center;
 }
 
-.MediaFileTable ::deep .table > .body > .row-menu > .row[data-over] {
+.MediaFileTable ::deep > .table > .body > .row-menu > .row[data-over] {
     border-top: var(--size-border-width-md) solid var(--color-highlight);
 }
 
-.MediaFileTable ::deep .table .grip {
+.MediaFileTable ::deep > .table > .body > .row-menu > .row > .grip {
     color: var(--color-muted);
     cursor: grab;
 }
 
-.MediaFileTable ::deep .table .grip[data-disabled] {
+.MediaFileTable ::deep > .table > .body > .row-menu > .row > .grip[data-disabled] {
     opacity: 0.4;
     cursor: not-allowed;
 }
@@ -55,7 +56,7 @@
 }
 
 /* With no media files the box takes the place of the rows and fills what is left of the window. */
-.MediaFileTable ::deep .table[data-empty] {
+.MediaFileTable ::deep > .table[data-empty] {
     grid-template-rows: auto 1fr;
     align-content: stretch;
 }

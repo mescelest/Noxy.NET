@@ -4,7 +4,7 @@
     flex-flow: column;
 }
 
-.InputGroupRadio ::deep .TemplateInputGroup .control {
+.InputGroupRadio ::deep > .TemplateInputGroup > .wrapper > .control {
     display: flex;
     flex: 0 0 auto;
     flex-flow: row;

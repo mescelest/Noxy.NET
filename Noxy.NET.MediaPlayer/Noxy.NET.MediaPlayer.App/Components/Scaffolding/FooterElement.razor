@@ -26,6 +26,9 @@
 
     private const int TickMilliseconds = 250;
 
+    // Half of the seek bar's step of 0.01 seconds.
+    private const double SeekToleranceSeconds = 0.005;
+
     private TimeSpan? _dragPosition;
     private double? _committedSeconds;
     private PlaybackDisplay? _display;
@@ -112,11 +115,17 @@
     private void InputSeekHandler(double seconds)
     {
         // The webview reports the end of a drag or a click as the change first and the last input after it (seen in a log), so an input that repeats the value just committed is the tail of that gesture, not a new drag.
-        bool isTail = _committedSeconds == seconds;
+        bool isTail = IsSameSeek(_committedSeconds, seconds);
         _committedSeconds = null;
         if (isTail) return;
 
         _dragPosition = TimeSpan.FromSeconds(seconds);
+    }
+
+    // Two readings of the same spot on the bar, which are never compared for exact equality: they match when they are within half a step of the bar.
+    private static bool IsSameSeek(double? committedSeconds, double seconds)
+    {
+        return committedSeconds is { } committed && Math.Abs(committed - seconds) < SeekToleranceSeconds;
     }
 
     private Task ChangeSeekHandler(double seconds)

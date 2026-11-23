@@ -4,7 +4,7 @@
     gap: var(--size-gap-xxs);
 }
 
-.ServerPicker ::deep .InputControlSelect {
+.ServerPicker ::deep > .InputControlSelect {
     flex: 1 1 auto;
     min-width: 0;
 }

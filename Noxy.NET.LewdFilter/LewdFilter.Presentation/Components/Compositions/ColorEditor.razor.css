@@ -37,7 +37,7 @@
     flex-flow: column;
 }
 
-.ColorEditor ::deep .table {
+.ColorEditor ::deep > .tab-panel > .table {
     display: grid;
     grid-template-columns: max-content max-content max-content;
     align-items: center;

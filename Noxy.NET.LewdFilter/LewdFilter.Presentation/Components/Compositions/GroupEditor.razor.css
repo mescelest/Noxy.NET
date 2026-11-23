@@ -5,21 +5,21 @@
     row-gap: var(--size-gap-md);
 }
 
-.GroupEditor ::deep .table {
+.GroupEditor ::deep > .table {
     display: grid;
     grid-template-columns: max-content 1fr max-content max-content max-content max-content;
     align-items: center;
     row-gap: var(--size-gap-xs);
 }
 
-.GroupEditor ::deep .SortableList {
+.GroupEditor ::deep > .table > .SortableList {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: subgrid;
     row-gap: var(--size-gap-xs);
 }
 
-.GroupEditor ::deep .sortable-row {
+.GroupEditor ::deep > .table > .SortableList > .sortable-row {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: subgrid;

@@ -41,9 +41,12 @@
 
     private static double ParseDouble(object? value) => double.TryParse(value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double result) ? result : 0;
 
+    // The slider moves in whole percent; rounding, not cutting, so a value read as 69.9999 is 70.
+    private static int ParseVolume(object? value) => (int)Math.Round(ParseDouble(value));
+
     private Task InputVolumeHandler(ChangeEventArgs args)
     {
-        int volume = (int)ParseDouble(args.Value);
+        int volume = ParseVolume(args.Value);
 
         // The webview can report the end of a gesture as the change first and the last input after it (seen on the seek bar), so an input that repeats the value just committed is the tail of that gesture, not a new drag.
         bool isTail = _committedVolume == volume;
@@ -58,7 +61,7 @@
     // The value comes from the event itself, so the release counts whichever of the two events came first.
     private Task ChangeVolumeHandler(ChangeEventArgs args)
     {
-        int volume = (int)ParseDouble(args.Value);
+        int volume = ParseVolume(args.Value);
         _committedVolume = volume;
         _dragVolume = null;
 

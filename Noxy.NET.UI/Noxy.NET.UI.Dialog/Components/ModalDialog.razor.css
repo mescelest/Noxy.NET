@@ -1,7 +1,0 @@
-﻿.ModalDialog {
-    display: flex;
-    flex: 0 1 auto;
-    flex-flow: column;
-    position: relative;
-    overflow: auto;
-}

@@ -1,7 +1,0 @@
-.GlassPanel {
-    flex: 0 0 auto;
-    padding: var(--size-gap-xs) var(--size-gap-sm);
-    border-bottom: var(--size-border-width-sm) solid var(--glass-border-color);
-    background: color-mix(in srgb, var(--color-primary) var(--glass-opacity), transparent);
-    backdrop-filter: blur(var(--glass-blur));
-}

@@ -6,16 +6,16 @@
 }
 
 /* Like the other players: no colour when the mode is off, the highlight when it is on. */
-.MediaTransportControls .mode {
+.MediaTransportControls ::deep > .mode:not([data-on]) {
     color: var(--color-muted);
 }
 
-.MediaTransportControls .mode[data-on] {
+.MediaTransportControls ::deep > .mode[data-on] {
     color: var(--color-highlight);
 }
 
 /* The badge sits in the corner of the icon without changing the size of the button. */
-.MediaTransportControls .mode ::deep .badge {
+.MediaTransportControls ::deep > .mode > .badge {
     position: absolute;
     right: var(--size-gap-tiny);
     bottom: var(--size-gap-tiny);

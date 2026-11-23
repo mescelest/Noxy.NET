@@ -4,7 +4,7 @@
     flex-flow: column;
 }
 
-.InputGroupAutosuggest ::deep .InputElementAutosuggest .input {
+.InputGroupAutosuggest ::deep > .TemplateInputGroup > .wrapper > .control > .InputElementAutosuggest > .input {
     max-width: 100%;
     min-height: var(--size-control-md, 2.625rem);
     margin: 0;

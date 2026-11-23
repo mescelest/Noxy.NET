@@ -4,7 +4,7 @@
     align-self: flex-start;
 }
 
-.TemplateInputControlSelect ::deep select {
+.TemplateInputControlSelect ::deep > select {
     width: 100%;
     height: var(--size-control-input, var(--size-control-md, 2.625rem));
     padding-left: var(--size-gap-xxs, 0.5rem);
@@ -18,11 +18,11 @@
     appearance: none;
 }
 
-.TemplateInputControlSelect ::deep select:hover {
+.TemplateInputControlSelect ::deep > select:hover {
     box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000))) inset;
 }
 
-.TemplateInputControlSelect ::deep select:focus {
+.TemplateInputControlSelect ::deep > select:focus {
     padding-left: calc(var(--size-gap-xxs, 0.5rem) - 1px);
     padding-right: calc(var(--size-gap-xxl, 2rem) - 1px);
     border-color: var(--color-highlight, #0073EC);
@@ -45,7 +45,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .TemplateInputControlSelect ::deep select {
+    .TemplateInputControlSelect ::deep > select {
         transition: none;
     }
 }

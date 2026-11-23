@@ -4,14 +4,14 @@
     flex-flow: column;
 }
 
-.InputGroupCheckboxSet ::deep .InputElementCheckboxSet {
+.InputGroupCheckboxSet ::deep > .TemplateInputGroup > .wrapper > .control > .InputElementCheckboxSet {
     display: flex;
     flex: 0 1 auto;
     flex-flow: column;
     row-gap: var(--size-gap-xs, 0.75rem);
 }
 
-.InputGroupCheckboxSet ::deep .InputElementCheckboxSet > .option {
+.InputGroupCheckboxSet ::deep > .TemplateInputGroup > .wrapper > .control > .InputElementCheckboxSet > .option {
     display: flex;
     flex-flow: row;
     align-items: center;

@@ -3,7 +3,7 @@
     position: relative;
 }
 
-.InputControlSelect ::deep select {
+.InputControlSelect ::deep > select {
     width: 100%;
     height: var(--size-control-input, var(--size-control-md, 2.625rem));
     padding-left: var(--size-gap-xxs, 0.5rem);
@@ -20,16 +20,16 @@
 }
 
 /* The list that opens does not take the background of the select, so it needs the same pair of colours. */
-.InputControlSelect ::deep select option {
+.InputControlSelect ::deep > select > option {
     background: var(--color-primary, transparent);
     color: var(--color-complementary, inherit);
 }
 
-.InputControlSelect ::deep select:hover {
+.InputControlSelect ::deep > select:hover {
     box-shadow: 0 0 8px 2px var(--color-offset-primary-sm, color-mix(in srgb, transparent 96%, var(--color-complementary, #000000))) inset;
 }
 
-.InputControlSelect ::deep select:focus {
+.InputControlSelect ::deep > select:focus {
     padding-left: calc(var(--size-gap-xxs, 0.5rem) - 1px);
     padding-right: calc(var(--size-control-icon, var(--size-icon-sm, 1.5rem)) + var(--size-gap-xxxs, 0.25rem) * 2 - 1px);
     border-color: var(--color-highlight, #0073EC);
@@ -53,7 +53,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .InputControlSelect ::deep select {
+    .InputControlSelect ::deep > select {
         transition: none;
     }
 }

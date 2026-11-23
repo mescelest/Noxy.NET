@@ -23,7 +23,7 @@
     padding: 0;
 }
 
-.Button.loading > ::deep .Loader {
+.Button.loading ::deep > .Loader {
     stroke: var(--color-on-button, #FFFFFF);
 }
 
@@ -97,7 +97,7 @@
     border-color: transparent;
 }
 
-.Button[data-appearance="outline"].loading > ::deep .Loader, .Button[data-appearance="ghost"].loading > ::deep .Loader {
+.Button[data-appearance="outline"].loading ::deep > .Loader, .Button[data-appearance="ghost"].loading ::deep > .Loader {
     stroke: var(--color-button, #4D4AD3);
 }
 

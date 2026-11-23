@@ -6,7 +6,7 @@
     column-gap: var(--size-gap-xxs);
 }
 
-.InputControlBeamEffect ::deep .temporary .visual {
+.InputControlBeamEffect ::deep > .temporary > .visual {
     width: calc(var(--size-control-input) - var(--size-border-width-md) * 2);
     height: calc(var(--size-control-input) - var(--size-border-width-md) * 2);
     font-size: 20px;
