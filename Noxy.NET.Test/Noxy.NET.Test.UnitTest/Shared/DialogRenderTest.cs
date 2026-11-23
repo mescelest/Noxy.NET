@@ -32,6 +32,7 @@ public class DialogRenderTest
         string html = await RenderAsync(new() { [nameof(Dialog.IsRequired)] = isRequired });
 
         Assert.Contains("aria-label=\"Close\"", html);
+        Assert.Contains("data-dialog-close", html);
         Assert.True(html.IndexOf("aria-label=\"Close\"", StringComparison.Ordinal) < html.IndexOf("the content", StringComparison.Ordinal));
     }
 

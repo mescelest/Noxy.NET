@@ -27,6 +27,12 @@
     stroke: var(--color-on-button, #FFFFFF);
 }
 
+/* A loader is 100 pixels wide unless told otherwise; in a button it is the size of an icon. */
+.Button.loading ::deep > .Loader > .spinner {
+    width: var(--size-control-icon, var(--size-icon-sm, 1.5rem));
+    height: var(--size-control-icon, var(--size-icon-sm, 1.5rem));
+}
+
 .Button:focus-visible {
     outline: var(--size-border-width-md, 2px) solid var(--color-highlight, #0073EC);
     outline-offset: var(--size-gap-tiny, 2px);

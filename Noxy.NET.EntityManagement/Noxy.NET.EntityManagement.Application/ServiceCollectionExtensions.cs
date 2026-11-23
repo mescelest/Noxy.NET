@@ -28,6 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITextService, TextService>();
         services.AddScoped<IElementService, ElementService>();
         services.AddScoped<IRelationService, RelationService>();
+        services.AddScoped<IContextService, ContextService>();
 
         return services;
     }

@@ -14,8 +14,15 @@
     font: var(--font-button);
 }
 
-/* The zone takes what is left of the page, and what is inside it fills the zone. */
+/* The zone takes all that is left of the page, and what is inside it fills the zone. The zone is a component, so it is reached from this element and not styled as this component's own root. */
 .UploadMediaDropZone {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.UploadMediaDropZone ::deep > .zone {
     display: flex;
     flex-flow: column;
     flex: 1 1 auto;

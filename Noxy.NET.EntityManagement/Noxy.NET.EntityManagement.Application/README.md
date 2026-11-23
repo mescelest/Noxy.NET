@@ -62,3 +62,21 @@ IReadOnlyList<RelationModel> ofCase = await relations.GetRelationList(caseID);  
 - **A link of its own kind only once.** A person is linked to a case once. A second role in the same case is another relation in the schema, or another attribute.
 - **`ChangeRelation`** changes the attributes that are given, as `ChangeElement` does for values. **`EndRelation`** ends the link and its attributes, which move to the history; the elements stay. Ending an element ends all of its links.
 - **History:** `GetRelationHistory(elementID)` gives the links that have ended, in either direction, and `GetAttributeHistory(relationID)` the attributes that have ended.
+
+## Contexts
+
+`IContextService` reads what a page of a context needs. A context is a flat group of elements that belong together: no depth, no hierarchy.
+
+```csharp
+ElementPageModel page = await contexts.GetElementPage("case-file", "person", skip: 0, take: 50);   // no starting element: the elements of one kind
+ContextModel? context = await contexts.GetContext("case-file", caseID);                          // a starting element: it and what is directly related to it
+```
+
+- **One step, either way.** The result is the starting element with its values, then a group per relation and direction: `Forward` when the element is the one the relation reads from, `Inverse` when it is the one it reads to. A group holds the related elements
+  whose
+  kind is in the context, each with its values and the attributes of the link (a role, a note). The other people in a case are not in the result for a person: ask for the case.
+- **Nothing is guessed.** Two relations between the same kinds are two groups, each with its relation identifier. A group is there when the definition allows it, also when nothing is related yet, so a page can show an empty list. The order is that of the
+  definitions.
+- **Three queries** however many elements are related: the links of the element, the related elements, and the values of those elements together with the attributes of the links. Links and elements that have ended are not there.
+- **What is a bad request.** An element whose kind is not in the context throws `DataValidationException` with `WrongElement`. A context or element kind that is not defined throws `KeyNotFoundException`. An element that does not exist, or has ended, gives
+  `null`.

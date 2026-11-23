@@ -51,6 +51,16 @@ public sealed class DataRepository(EntityManagementContext context, TimeProvider
             .ToListAsync(cancellationToken);
     }
 
+    public Task<List<DataElement>> GetElementList(IReadOnlyCollection<Guid> idList, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(idList);
+
+        return context.DataElement.AsNoTracking()
+            .Where(x => idList.Contains(x.ID))
+            .OrderBy(x => x.TimeCreated).ThenBy(x => x.ID)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<int> GetElementCount(string schemaIdentifier, CancellationToken cancellationToken = default)
     {
         return context.DataElement.CountAsync(x => x.SchemaIdentifier == schemaIdentifier, cancellationToken);

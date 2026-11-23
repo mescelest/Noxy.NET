@@ -88,11 +88,3 @@
     background: var(--color-offset-primary-lg);
 }
 
-::deep .new-playlist {
-    border: none;
-    background: transparent;
-    font: var(--font-body);
-    cursor: pointer;
-}
-
-

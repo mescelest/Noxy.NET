@@ -1,0 +1,28 @@
+context case-file
+context people
+element case
+element case property name
+element case property note
+element person
+element person property age
+element person property name
+element person property picture
+property age Integer
+property name String
+property note String
+property picture Image
+property role String
+relation person-involved-in-case attribute note
+relation person-involved-in-case attribute role
+relation person-involved-in-case person case ManyToMany
+text case-file-context-title Line
+text case-title Line
+text people-context-title Line
+text person-involved-in-case-forward-title Line
+text person-involved-in-case-inverse-title Line
+text person-title Line
+text property-age-title Line
+text property-name-title Line
+text property-note-title Line
+text property-picture-title Line
+text property-role-title Line

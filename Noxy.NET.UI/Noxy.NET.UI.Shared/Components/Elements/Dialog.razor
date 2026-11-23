@@ -5,7 +5,7 @@
 <dialog @ref="_element" @attributes="AdditionalAttributes" class="@CssClass">
     @if (!IsRequiredCurrent)
     {
-        <Button Type="@HTMLButtonTypeEnum.Button" class="close" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="@CloseLabelCurrent" @onclick="CloseHandler">
+        <Button Type="@HTMLButtonTypeEnum.Button" class="close" data-dialog-close IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="@CloseLabelCurrent" @onclick="CloseHandler">
             @if (CloseContentCurrent is null)
             {
                 <span aria-hidden="true">&times;</span>

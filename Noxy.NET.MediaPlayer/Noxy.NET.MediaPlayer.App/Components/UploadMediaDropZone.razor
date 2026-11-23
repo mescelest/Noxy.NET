@@ -4,17 +4,19 @@
 @inherits BaseComponentElement
 @implements IDisposable
 
-<FileDropZone @attributes="AdditionalAttributes" class="@CssClass" Accept="@AcceptAudio" Disabled="@IsOffline" OnSelected="SelectedHandler" OnRejected="RejectedHandler">
-    <DraggingContent>
-        <div class="hint">
-            <MaterialIcon Icon="upload_file" Size="var(--size-icon-xl)"/>
-            <span>@HintText</span>
-        </div>
-    </DraggingContent>
-    <ChildContent>
-        @ChildContent
-    </ChildContent>
-</FileDropZone>
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <FileDropZone class="zone" Accept="@AcceptAudio" Disabled="@IsOffline" OnSelected="SelectedHandler" OnRejected="RejectedHandler">
+        <DraggingContent>
+            <div class="hint">
+                <MaterialIcon Icon="upload_file" Size="var(--size-icon-xl)"/>
+                <span>@HintText</span>
+            </div>
+        </DraggingContent>
+        <ChildContent>
+            @ChildContent
+        </ChildContent>
+    </FileDropZone>
+</div>
 
 @code {
 

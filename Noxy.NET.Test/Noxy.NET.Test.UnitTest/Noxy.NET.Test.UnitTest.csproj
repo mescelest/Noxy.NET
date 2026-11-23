@@ -30,6 +30,7 @@
         <ProjectReference Include="..\..\Noxy.NET.MediaPlayer\Noxy.NET.MediaPlayer.Storage\Noxy.NET.MediaPlayer.Storage.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.EntityManagement\Noxy.NET.EntityManagement.Definitions\Noxy.NET.EntityManagement.Definitions.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.EntityManagement.Demo\Noxy.NET.EntityManagement.Demo.Definitions\Noxy.NET.EntityManagement.Demo.Definitions.csproj"/>
+        <ProjectReference Include="..\..\Noxy.NET.EntityManagement\Noxy.NET.EntityManagement.Contract\Noxy.NET.EntityManagement.Contract.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.EntityManagement\Noxy.NET.EntityManagement.Domain\Noxy.NET.EntityManagement.Domain.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.EntityManagement\Noxy.NET.EntityManagement.Persistence\Noxy.NET.EntityManagement.Persistence.csproj"/>
         <ProjectReference Include="..\..\Noxy.NET.EntityManagement\Noxy.NET.EntityManagement.Application\Noxy.NET.EntityManagement.Application.csproj"/>

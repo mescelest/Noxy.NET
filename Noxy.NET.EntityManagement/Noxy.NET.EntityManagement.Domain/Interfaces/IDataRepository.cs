@@ -16,6 +16,9 @@ public interface IDataRepository
     // The elements of one kind in the schema, oldest first, a page at a time.
     Task<List<DataElement>> GetElementList(string schemaIdentifier, int skip, int take, CancellationToken cancellationToken = default);
 
+    // The current elements with these identifiers, in one query. One that is not there, or has ended, is left out. Oldest first.
+    Task<List<DataElement>> GetElementList(IReadOnlyCollection<Guid> idList, CancellationToken cancellationToken = default);
+
     Task<int> GetElementCount(string schemaIdentifier, CancellationToken cancellationToken = default);
 
     // Ends the element and every property of it: all of their rows move to the history. False when there is no such element.

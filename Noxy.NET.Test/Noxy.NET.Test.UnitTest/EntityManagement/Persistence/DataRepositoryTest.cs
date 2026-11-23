@@ -75,6 +75,23 @@ public class DataRepositoryTest : IDisposable
     }
 
     [Fact]
+    public async Task SeveralElements_AreReadByIdentifierInOneCall_LeavingOutWhatIsNotThereOrHasEnded()
+    {
+        DataRepository repository = _db.CreateRepository();
+        DataElement first = await repository.CreateElement(NewElement("person", T0));
+        DataElement second = await repository.CreateElement(NewElement("case", T0.AddMinutes(1)));
+        DataElement ended = await repository.CreateElement(NewElement("person", T0.AddMinutes(2)));
+        DataElement other = await repository.CreateElement(NewElement("person", T0.AddMinutes(3)));
+        await _db.CreateRepository().EndElement(ended.ID, UserA);
+
+        List<DataElement> found = await _db.CreateRepository().GetElementList([second.ID, first.ID, ended.ID, Guid.NewGuid()]);
+
+        Assert.Equal([first.ID, second.ID], found.Select(x => x.ID));
+        Assert.DoesNotContain(found, x => x.ID == other.ID);
+        Assert.Empty(await _db.CreateRepository().GetElementList(new List<Guid>()));
+    }
+
+    [Fact]
     public async Task AnElement_CannotBeListedWithANegativePage()
     {
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _db.CreateRepository().GetElementList("person", -1, 10));
