@@ -3,6 +3,19 @@
 @inherits BaseComponentElement
 
 <dialog @ref="_element" @attributes="AdditionalAttributes" class="@CssClass">
+    @if (!IsRequiredCurrent)
+    {
+        <Button Type="@HTMLButtonTypeEnum.Button" class="close" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="@CloseLabelCurrent" @onclick="CloseHandler">
+            @if (CloseContentCurrent is null)
+            {
+                <span aria-hidden="true">&times;</span>
+            }
+            else
+            {
+                @CloseContentCurrent
+            }
+        </Button>
+    }
     @ChildContent
 </dialog>
 
@@ -21,9 +34,26 @@
     private const string FunctionWatch = "Watch";
     private const string FunctionSetBackdropClose = "SetBackdropClose";
 
-    // A click on the backdrop closes the dialog. Off by default: a modal normally closes only through its own buttons or Escape.
+    // A required dialog asks for something the user has to give: it has no close button and a click on the backdrop does nothing, so it closes only through its own buttons (or Escape). Otherwise it can be dismissed: a close button sits in the corner and a click on the backdrop closes it.
     [Parameter]
-    public bool CloseOnBackdrop { get; set; }
+    public bool? IsRequired { get; set; }
+    private bool IsRequiredCurrent => IsRequired ?? false;
+
+    // The name an app gives a cascading RenderFragment to set what every close button holds, once, at its root.
+    public const string CloseContentName = "DialogCloseContent";
+
+    // What this dialog's close button holds. Before the app's own (the cascading one), and a plain cross when neither is given.
+    [Parameter]
+    public RenderFragment? CloseContent { get; set; }
+
+    [CascadingParameter(Name = CloseContentName)]
+    public RenderFragment? CloseContentApp { get; set; }
+    private RenderFragment? CloseContentCurrent => CloseContent ?? CloseContentApp;
+
+    // What the close button is called for a screen reader.
+    [Parameter]
+    public string? CloseLabel { get; set; }
+    private string CloseLabelCurrent => CloseLabel ?? "Close";
 
     private ElementReference _element;
     private IJSObjectReference? _module;
@@ -64,7 +94,21 @@
     {
         if (_disposed || _module is null) return;
 
-        await _module.InvokeVoidAsync(FunctionSetBackdropClose, _element, CloseOnBackdrop);
+        await _module.InvokeVoidAsync(FunctionSetBackdropClose, _element, !IsRequiredCurrent);
+    }
+
+    // The same way out as Escape: the element closes, and its close event reports it to the owner.
+    private async Task CloseHandler()
+    {
+        if (_disposed) return;
+
+        if (_module is null)
+        {
+            await OpenChanged.InvokeAsync(false);
+            return;
+        }
+
+        await _module.InvokeVoidAsync(FunctionClose, _element);
     }
 
     private async Task SyncOpenStateAsync()

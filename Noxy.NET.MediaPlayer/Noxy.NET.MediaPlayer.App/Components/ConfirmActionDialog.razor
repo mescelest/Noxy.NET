@@ -1,6 +1,6 @@
 @inherits BaseComponentElement
 
-<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="OpenChanged">
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="OpenChanged" IsRequired="true">
     <h2>@Title</h2>
     <p>@Message</p>
     @if (!string.IsNullOrEmpty(Detail))

@@ -46,6 +46,38 @@ public class DialogRenderTest
     }
 
     [Fact]
+    public async Task TheAppCanSetTheCloseContentOnceForEveryDialog_AndADialogCanStillOverrideIt()
+    {
+        await using ServiceProvider services = new ServiceCollection().AddLogging().AddSingleton<IJSRuntime, FakeJSRuntime>().BuildServiceProvider();
+        await using HtmlRenderer renderer = new(services, NullLoggerFactory.Instance);
+
+        RenderFragment appIcon = builder => builder.AddMarkupContent(0, "<i>app-icon</i>");
+        RenderFragment ownIcon = builder => builder.AddMarkupContent(0, "<i>own-icon</i>");
+        RenderFragment twoDialogs = builder =>
+        {
+            builder.OpenComponent<Dialog>(0);
+            builder.CloseComponent();
+            builder.OpenComponent<Dialog>(1);
+            builder.AddComponentParameter(2, nameof(Dialog.CloseContent), ownIcon);
+            builder.CloseComponent();
+        };
+
+        string html = await renderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var root = await renderer.RenderComponentAsync<CascadingValue<RenderFragment>>(ParameterView.FromDictionary(new Dictionary<string, object?>
+            {
+                [nameof(CascadingValue<RenderFragment>.Name)] = Dialog.CloseContentName,
+                [nameof(CascadingValue<RenderFragment>.Value)] = appIcon,
+                [nameof(CascadingValue<RenderFragment>.ChildContent)] = twoDialogs
+            }));
+            return root.ToHtmlString();
+        });
+
+        Assert.Equal(1, html.Split("<i>app-icon</i>").Length - 1);
+        Assert.Equal(1, html.Split("<i>own-icon</i>").Length - 1);
+    }
+
+    [Fact]
     public async Task TheCloseButton_CanBeNamedAndFilledByTheOwner()
     {
         string html = await RenderAsync(new()

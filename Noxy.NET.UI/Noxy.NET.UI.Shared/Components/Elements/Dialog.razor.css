@@ -1,0 +1,21 @@
+.Dialog {
+    --dialog-close-size: var(--size-control-xxs, 1.5rem);
+    --dialog-close-offset: var(--size-gap-tiny, 2px);
+}
+
+/* A modal dialog is positioned, so the close button sits against the corner of its box. */
+.Dialog ::deep > .close {
+    position: absolute;
+    top: var(--dialog-close-offset);
+    right: var(--dialog-close-offset);
+    width: var(--dialog-close-size);
+    height: var(--dialog-close-size);
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+}
+
+/* Whatever comes first, usually the title, keeps clear of the button however long it is. */
+.Dialog ::deep > .close + * {
+    padding-inline-end: calc(var(--dialog-close-size) + var(--dialog-close-offset));
+}
