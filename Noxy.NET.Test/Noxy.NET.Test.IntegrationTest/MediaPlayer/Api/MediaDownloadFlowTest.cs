@@ -2,8 +2,8 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using Noxy.NET.MediaPlayer.API.Configurations;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
+using Noxy.NET.Test.MediaPlayer.Fixtures.Extensions;
 
 namespace Noxy.NET.Test.MediaPlayer.Api;
 

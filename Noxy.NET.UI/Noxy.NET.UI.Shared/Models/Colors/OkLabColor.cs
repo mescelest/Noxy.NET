@@ -19,7 +19,7 @@ public record OkLabColor : BaseColor
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"oklab({Lightness} {AxisA} {AxisB})" : $"oklab({Lightness} {AxisA} {AxisB} / {AlphaCssString})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"oklab({Css(Lightness)} {Css(AxisA)} {Css(AxisB)})" : $"oklab({Css(Lightness)} {Css(AxisA)} {Css(AxisB)} / {AlphaCssString})";
 
     public override OkLabColor ToOkLab() => this;
 
@@ -60,7 +60,7 @@ public record OkLabColor : BaseColor
     {
         color = null;
         ReadOnlySpan<char> span = input.AsSpan().Trim();
-        if (!span.StartsWith("oklab", StringComparison.OrdinalIgnoreCase) || !TryPrepareFormat(span, 5, out ReadOnlySpan<char> content)) return false;
+        if (!span.StartsWith("oklab", StringComparison.OrdinalIgnoreCase) || !TryPrepareFormat(span, 6, out ReadOnlySpan<char> content)) return false;
 
         if (!TryReadCssColorComponent(content, out ReadOnlySpan<char> tokenLightness, out ReadOnlySpan<char> rem1)) return false;
         if (!TryParsePercentageOrRaw(tokenLightness, out double lightness, percentageScale: 100.0)) return false;

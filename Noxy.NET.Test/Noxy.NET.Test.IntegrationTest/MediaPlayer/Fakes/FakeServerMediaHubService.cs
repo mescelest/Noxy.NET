@@ -7,7 +7,14 @@ using Noxy.NET.MediaPlayer.Presentation.Services;
 
 namespace Noxy.NET.Test.MediaPlayer.Fakes;
 
-public sealed class FakeServerMediaHubService(ISyncService serviceSync, ISettingService serviceSetting, IMetadataSyncService serviceMetadataSync, ISessionService serviceSession, IServerAddressStorage storageServerAddress, ILogger<MediaHubService> logger, HttpMessageHandler handler)
+public sealed class FakeServerMediaHubService(
+    ISyncService serviceSync,
+    ISettingService serviceSetting,
+    IMetadataSyncService serviceMetadataSync,
+    ISessionService serviceSession,
+    IServerAddressStorage storageServerAddress,
+    ILogger<MediaHubService> logger,
+    HttpMessageHandler handler)
     : MediaHubService(serviceSync, serviceSetting, serviceMetadataSync, serviceSession, storageServerAddress, logger)
 {
     protected override void ConfigureConnection(HttpConnectionOptions options)

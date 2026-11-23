@@ -1,20 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Title>Noxy.NET.CaseManagement.Domain</Title>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.1.0</Version>
+        <Title>Noxy.NET.EntityManagement.Domain</Title>
         <Authors>Noxy.NET</Authors>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <RootNamespace>Noxy.NET.EntityManagement.Domain</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\Noxy.NET.Shared\Noxy.NET.Shared.csproj"/>
-        <ProjectReference Include="..\..\Noxy.NET.UI\Noxy.NET.UI.Shared\Noxy.NET.UI.Shared.csproj"/>
+        <None Include="README.md" Pack="true" PackagePath=""/>
     </ItemGroup>
 
 </Project>

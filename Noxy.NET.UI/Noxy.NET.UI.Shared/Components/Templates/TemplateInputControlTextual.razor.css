@@ -7,6 +7,8 @@
     padding-inline: var(--size-gap-xxs, 0.5rem);
     border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
     border-radius: var(--size-border-radius-md, 0.25rem);
+    background-color: var(--color-input, #FFFFFF);
+    color: var(--color-on-input, #121212);
     font-size: inherit;
     font-family: inherit;
     box-sizing: border-box;

@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Noxy.NET.EntityManagement.Application;
 using Noxy.NET.EntityManagement.Application.Interfaces;
-using Noxy.NET.EntityManagement.Application.Interfaces.Services;
 using Noxy.NET.EntityManagement.Application.Services;
-using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
-using Noxy.NET.EntityManagement.Domain.Entities.Schemas;
-using Noxy.NET.EntityManagement.Domain.Entities.Schemas.Discriminators;
+using Noxy.NET.EntityManagement.Definitions;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -12,40 +10,25 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    // Runs the definitions and the texts, and registers the result and the services that use it. If they are not valid this throws now, with every problem, so the application does not start.
+    // The services read from the repositories of the persistence library, so that has to be added too (AddEntityManagementPersistence).
+    public static IServiceCollection AddEntityManagementApplication(this IServiceCollection services, Action<EntityManagementApplicationOptions> configure)
     {
-        services.AddScoped<IJWTService, JWTService>();
-        services.AddScoped<ISchemaBuilderService, SchemaBuilderService>();
-        services.AddScoped<ISchemaValidatorService, SchemaValidatorService>();
-        services.AddScoped<ITaskBundlingService, TaskBundlingService>();
+        ArgumentNullException.ThrowIfNull(configure);
 
-        services.AddSingleton<IParameterService, ParameterService>();
+        EntityManagementApplicationOptions options = new();
+        configure(options);
+
+        DefinitionRegistry definition = options.BuildDefinition();
+        DefinitionTextRegistry texts = options.BuildTexts(definition);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton(definition);
+        services.AddSingleton(texts);
+        services.AddScoped<ITextService, TextService>();
+        services.AddScoped<IElementService, ElementService>();
+        services.AddScoped<IRelationService, RelationService>();
 
         return services;
-    }
-
-    public static async Task<IHost> UseApplication(this IHost app)
-    {
-        try
-        {
-            using IServiceScope scope = app.Services.CreateScope();
-
-            ISchemaBuilderService serviceSchemaBuilder = scope.ServiceProvider.GetRequiredService<ISchemaBuilderService>();
-            EntitySchema schema = await serviceSchemaBuilder.ConstructSchema();
-            List<EntitySchemaParameter> listSchemaParameter = schema.ParameterList?.Select(x => x.GetValue()).ToList() ?? [];
-
-            IUnitOfWorkFactory serviceUoWFactory = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>();
-            await using IUnitOfWork uow = await serviceUoWFactory.Create();
-
-            List<EntityDataParameter> listDataParameter = await uow.Data.GetParameterList();
-            IParameterService serviceParameter = scope.ServiceProvider.GetRequiredService<IParameterService>();
-            serviceParameter.Initialize(listSchemaParameter, listDataParameter);
-        }
-        catch
-        {
-            // ignored
-        }
-
-        return app;
     }
 }

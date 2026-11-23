@@ -19,7 +19,7 @@ public record LchColor : BaseColor
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"lch({Lightness}% {Chroma} {Hue})" : $"lch({Lightness}% {Chroma} {Hue} / {AlphaCssString})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"lch({Css(Lightness)}% {Css(Chroma)} {Css(Hue)})" : $"lch({Css(Lightness)}% {Css(Chroma)} {Css(Hue)} / {AlphaCssString})";
 
     public override LabColor ToLab()
     {

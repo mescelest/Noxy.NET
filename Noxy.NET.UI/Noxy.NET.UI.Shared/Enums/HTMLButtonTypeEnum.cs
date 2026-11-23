@@ -18,7 +18,7 @@ public static class HTMLButtonTypeEnumExtensions
             HTMLButtonTypeEnum.Button => "button",
             HTMLButtonTypeEnum.Submit => "submit",
             HTMLButtonTypeEnum.Reset => "reset",
-            _ => throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(HTMLTextAlignmentEnum))
+            _ => throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(HTMLButtonTypeEnum))
         };
     }
 }

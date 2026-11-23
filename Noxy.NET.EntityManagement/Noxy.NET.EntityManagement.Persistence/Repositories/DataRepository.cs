@@ -1,113 +1,148 @@
-using System.ComponentModel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Noxy.NET.EntityManagement.Application.Interfaces.Services;
-using Noxy.NET.EntityManagement.Domain.Entities.Data;
-using Noxy.NET.EntityManagement.Domain.Entities.Data.Discriminators;
-using Noxy.NET.EntityManagement.Domain.Interfaces.Repositories;
-using Noxy.NET.EntityManagement.Domain.Models.Filters.Data;
-using Noxy.NET.EntityManagement.Persistence.Abstractions;
-using Noxy.NET.EntityManagement.Persistence.Extensions;
-using Noxy.NET.EntityManagement.Persistence.Tables.Data;
-using Noxy.NET.EntityManagement.Persistence.Tables.Data.Discriminators;
+using Noxy.NET.EntityManagement.Domain.Entities;
+using Noxy.NET.EntityManagement.Domain.Interfaces;
 
 namespace Noxy.NET.EntityManagement.Persistence.Repositories;
 
-public class DataRepository(DataContext context, IDependencyInjectionService serviceDependencyInjection) : BaseRepository(context, serviceDependencyInjection), IDataRepository
+// Each write is one SaveChanges, which is one transaction: the row that ends and the row that replaces it are moved and added together, or not at all.
+public sealed class DataRepository(EntityManagementContext context, TimeProvider timeProvider) : IDataRepository
 {
-    public async Task<List<EntityDataParameter>> GetParameterList()
+    public async Task<DataElement> CreateElement(DataElement element, CancellationToken cancellationToken = default)
     {
-        List<TableDataParameter> result = await Context.DataParameter.AsNoTracking().ToListAsync();
-        return result.Select(MapperT2E.Map).ToList();
+        ArgumentNullException.ThrowIfNull(element);
+
+        context.DataElement.Add(element);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return element;
     }
 
-    public async Task<EntityDataParameter> GetParameterByID(Guid id)
+    public async Task<DataElement> CreateElement(DataElement element, IReadOnlyList<DataProperty> propertyList, CancellationToken cancellationToken = default)
     {
-        TableDataParameter result = await Context.DataParameter.AsNoTracking().SingleAsync(x => x.ID == id);
-        return MapperT2E.Map(result);
+        ArgumentNullException.ThrowIfNull(element);
+        ArgumentNullException.ThrowIfNull(propertyList);
+        OwnerData.ThrowIfNotOfOwner(element.ID, propertyList.Select(x => x.OwnerID), propertyList.Select(x => x.PropertyIdentifier));
+
+        context.DataElement.Add(element);
+        foreach (DataProperty property in propertyList)
+        {
+            context.Add(property);
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return element;
     }
 
-    public async Task<List<EntityDataParameter>> GetParameterListByIdentifier(string identifier, FilterDataParameterList filter)
+    public Task<DataElement?> FindElement(Guid id, CancellationToken cancellationToken = default)
     {
-        IQueryable<TableDataParameter> query = Context.DataParameter.AsNoTracking();
-        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Value, $"%{filter.Search}%"));
-
-        List<TableDataParameter> result = await query
-            .Where(x => x.SchemaIdentifier == identifier)
-            .OrderByDynamic(filter.SortColumn, filter.SortDirection == ListSortDirection.Descending)
-            .Skip(filter.PageNumber * filter.PageSize)
-            .Take(filter.PageSize)
-            .ToListAsync();
-
-        return [.. result.Select(MapperT2E.Map)];
+        return context.DataElement.AsNoTracking().SingleOrDefaultAsync(x => x.ID == id, cancellationToken);
     }
 
-    public async Task<int> GetParameterCountByIdentifier(string identifier, FilterDataParameterCount filter)
+    public Task<List<DataElement>> GetElementList(string schemaIdentifier, int skip, int take, CancellationToken cancellationToken = default)
     {
-        IQueryable<TableDataParameter> query = Context.DataParameter.AsNoTracking();
-        if (!string.IsNullOrWhiteSpace(filter.Search)) query = query.Where(x => EF.Functions.Like(x.Value, $"%{filter.Search}%"));
+        ArgumentOutOfRangeException.ThrowIfNegative(skip);
+        ArgumentOutOfRangeException.ThrowIfNegative(take);
 
-        return await query.Where(x => x.SchemaIdentifier == identifier).CountAsync();
+        return context.DataElement.AsNoTracking()
+            .Where(x => x.SchemaIdentifier == schemaIdentifier)
+            .OrderBy(x => x.TimeCreated).ThenBy(x => x.ID)
+            .Skip(skip).Take(take)
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<EntityDataParameterStyle> GetParameterStyleByID(Guid id)
+    public Task<int> GetElementCount(string schemaIdentifier, CancellationToken cancellationToken = default)
     {
-        TableDataParameterStyle result = await Context.DataParameterStyle.AsNoTracking().SingleAsync(x => x.ID == id);
-        return MapperT2E.Map(result);
+        return context.DataElement.CountAsync(x => x.SchemaIdentifier == schemaIdentifier, cancellationToken);
     }
 
-    public async Task<EntityDataParameterSystem> GetParameterSystemByID(Guid id)
+    public async Task<bool> EndElement(Guid id, Guid endedByUserID, CancellationToken cancellationToken = default)
     {
-        TableDataParameterSystem result = await Context.DataParameterSystem.AsNoTracking().SingleAsync(x => x.ID == id);
-        return MapperT2E.Map(result);
+        DataElement? element = await context.DataElement.SingleOrDefaultAsync(x => x.ID == id, cancellationToken);
+        if (element is null) return false;
+
+        DateTime timeEnded = timeProvider.GetUtcNow().UtcDateTime;
+
+        // The element, its values, and the relations it is part of (either way) with their values: one step, so no relation is left pointing at an element that has ended.
+        List<DataRelation> relationList = await context.DataRelation.Where(x => x.FromElementID == id || x.ToElementID == id).ToListAsync(cancellationToken);
+        await OwnerData.EndOwnedAsync(context, [id], relationList, endedByUserID, timeEnded, cancellationToken);
+
+        context.Add(element.ToHistory(endedByUserID, timeEnded));
+        context.Remove(element);
+
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
-    public async Task<EntityDataParameterText> GetParameterTextByID(Guid id)
+    public Task<List<DataProperty>> GetPropertyList(Guid ownerID, CancellationToken cancellationToken = default)
     {
-        TableDataParameterText result = await Context.DataParameterText.AsNoTracking().SingleAsync(x => x.ID == id);
-        return MapperT2E.Map(result);
+        return context.DataProperty.AsNoTracking()
+            .Where(x => x.OwnerID == ownerID)
+            .OrderBy(x => x.PropertyIdentifier)
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<EntityDataParameterStyle> CreateParameterStyle(EntityDataParameterStyle entity)
+    public Task<List<DataProperty>> GetPropertyList(IReadOnlyCollection<Guid> ownerIDList, CancellationToken cancellationToken = default)
     {
-        EntityEntry<TableDataParameterStyle> result = await Context.DataParameterStyle.AddAsync(MapperE2T.Map(entity));
-        return MapperT2E.Map(result.Entity);
+        ArgumentNullException.ThrowIfNull(ownerIDList);
+
+        return context.DataProperty.AsNoTracking()
+            .Where(x => ownerIDList.Contains(x.OwnerID))
+            .OrderBy(x => x.OwnerID).ThenBy(x => x.PropertyIdentifier)
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<EntityDataParameterSystem> CreateParameterSystem(EntityDataParameterSystem entity)
+    public Task<bool> ChangeElementProperties(Guid elementID, IReadOnlyList<DataProperty> setList, IReadOnlyList<string> clearList, Guid endedByUserID, CancellationToken cancellationToken = default)
     {
-        EntityEntry<TableDataParameterSystem> result = await Context.DataParameterSystem.AddAsync(MapperE2T.Map(entity));
-        return MapperT2E.Map(result.Entity);
+        // The check that the element exists and the changes are one transaction, so the element cannot end in between.
+        return OwnerData.ChangePropertiesAsync(context, timeProvider, elementID, ct => context.DataElement.AnyAsync(x => x.ID == elementID, ct), setList, clearList, endedByUserID, cancellationToken);
     }
 
-    public async Task<EntityDataParameterText> CreateParameterText(EntityDataParameterText entity)
+    public async Task<TProperty> SetProperty<TProperty>(TProperty property, CancellationToken cancellationToken = default) where TProperty : DataProperty
     {
-        EntityEntry<TableDataParameterText> result = await Context.DataParameterText.AddAsync(MapperE2T.Map(entity));
-        return MapperT2E.Map(result.Entity);
+        ArgumentNullException.ThrowIfNull(property);
+
+        TProperty? current = await FindCurrent<TProperty>(property.OwnerID, property.PropertyIdentifier, cancellationToken);
+        if (current is not null)
+        {
+            // The new row takes over at the moment it was made, so there is no gap and no overlap between the two.
+            context.Add(current.ToHistory(property.CreatedByUserID, property.TimeCreated));
+            context.Remove(current);
+        }
+
+        context.Add(property);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return property;
     }
 
-    public void UpdateParameter(EntityDataParameter entity)
+    public async Task<bool> ClearProperty<TProperty>(Guid ownerID, string propertyIdentifier, Guid endedByUserID, CancellationToken cancellationToken = default) where TProperty : DataProperty
     {
-        Context.DataParameter.Update(MapperE2T.Map(entity));
+        TProperty? current = await FindCurrent<TProperty>(ownerID, propertyIdentifier, cancellationToken);
+        if (current is null) return false;
+
+        context.Add(current.ToHistory(endedByUserID, timeProvider.GetUtcNow().UtcDateTime));
+        context.Remove(current);
+
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
-    public void UpdateParameterStyle(EntityDataParameterStyle entity)
+    public Task<HistoryElement?> FindElementHistory(Guid id, CancellationToken cancellationToken = default)
     {
-        Context.DataParameterStyle.Update(MapperE2T.Map(entity));
+        return context.HistoryElement.AsNoTracking().SingleOrDefaultAsync(x => x.ID == id, cancellationToken);
     }
 
-    public void UpdateParameterSystem(EntityDataParameterSystem entity)
+    public Task<List<HistoryProperty>> GetPropertyHistoryList(Guid ownerID, CancellationToken cancellationToken = default)
     {
-        Context.DataParameterSystem.Update(MapperE2T.Map(entity));
+        return context.HistoryProperty.AsNoTracking()
+            .Where(x => x.OwnerID == ownerID)
+            .OrderBy(x => x.TimeEnded).ThenBy(x => x.TimeCreated)
+            .ToListAsync(cancellationToken);
     }
 
-    public void UpdateParameterText(EntityDataParameterText entity)
+    private Task<TProperty?> FindCurrent<TProperty>(Guid ownerID, string propertyIdentifier, CancellationToken cancellationToken) where TProperty : DataProperty
     {
-        Context.DataParameterText.Update(MapperE2T.Map(entity));
-    }
-
-    public void RemoveParameter(EntityDataParameter entity)
-    {
-        Context.DataParameter.Remove(MapperE2T.Map(entity));
+        return context.Set<TProperty>().SingleOrDefaultAsync(x => x.OwnerID == ownerID && x.PropertyIdentifier == propertyIdentifier, cancellationToken);
     }
 }

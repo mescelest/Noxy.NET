@@ -19,7 +19,7 @@ public record OkLchColor : BaseColor
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"oklch({Lightness * 100}% {Chroma} {Hue})" : $"oklch({Lightness * 100}% {Chroma} {Hue} / {AlphaCssString})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"oklch({Css(Lightness * 100)}% {Css(Chroma)} {Css(Hue)})" : $"oklch({Css(Lightness * 100)}% {Css(Chroma)} {Css(Hue)} / {AlphaCssString})";
 
     public override RgbColor ToRgb()
     {
@@ -67,7 +67,7 @@ public record OkLchColor : BaseColor
     {
         color = null;
         ReadOnlySpan<char> span = input.AsSpan().Trim();
-        if (!span.StartsWith("oklch", StringComparison.OrdinalIgnoreCase) || !TryPrepareFormat(span, 5, out ReadOnlySpan<char> content)) return false;
+        if (!span.StartsWith("oklch", StringComparison.OrdinalIgnoreCase) || !TryPrepareFormat(span, 6, out ReadOnlySpan<char> content)) return false;
 
         if (!TryReadCssColorComponent(content, out ReadOnlySpan<char> tokenLightness, out ReadOnlySpan<char> rem1)) return false;
         if (!TryParsePercentageOrRaw(tokenLightness, out double lightness, percentageScale: 100.0)) return false;

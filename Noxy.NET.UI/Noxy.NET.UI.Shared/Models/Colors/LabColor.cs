@@ -22,7 +22,7 @@ public record LabColor : BaseColor
         Alpha = Math.Clamp(alpha, 0.0, 1.0);
     }
 
-    public override string ToCssString() => Alpha >= 1.0 ? $"lab({Lightness}% {AxisA} {AxisB})" : $"lab({Lightness}% {AxisA} {AxisB} / {AlphaCssString})";
+    public override string ToCssString() => Alpha >= 1.0 ? $"lab({Css(Lightness)}% {Css(AxisA)} {Css(AxisB)})" : $"lab({Css(Lightness)}% {Css(AxisA)} {Css(AxisB)} / {AlphaCssString})";
 
     public override RgbColor ToRgb() => ToXyz().ToRgb();
     public override HexColor ToHex() => ToRgb().ToHex();
@@ -48,7 +48,13 @@ public record LabColor : BaseColor
         );
     }
 
-    public override LchColor ToLch() => ToRgb().ToLch();
+    public override LchColor ToLch()
+    {
+        double chroma = Math.Sqrt(AxisA * AxisA + AxisB * AxisB);
+        double hue = Math.Atan2(AxisB, AxisA) * (180.0 / Math.PI);
+        return new(Lightness, chroma, hue, Alpha);
+    }
+
     public override OkLabColor ToOkLab() => ToRgb().ToOkLab();
     public override OkLchColor ToOkLch() => ToRgb().ToOkLch();
 

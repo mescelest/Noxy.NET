@@ -1,7 +1,0 @@
-.AuthenticationLayout {
-    display: flex;
-    flex: 1 1 auto;
-    flex-flow: column;
-    align-items: center;
-    justify-content: center;
-}

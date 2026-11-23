@@ -9,11 +9,11 @@
     position: relative;
     padding: 0 var(--size-gap-xxs, 0.5rem);
     background-color: var(--color-button, #4D4AD3);
-    border: var(--size-border-width-lg, 3px) solid color-mix(in srgb, var(--color-button, #4D4AD3) 35%, var(--color-primary, #FFFFFF));
+    border: var(--size-border-width-lg, 3px) solid var(--color-button-border, color-mix(in srgb, var(--color-button, #4D4AD3) 35%, var(--color-surface, #FFFFFF)));
     border-radius: var(--size-border-radius-md, 0.25rem);
     box-shadow: 0 0 0 transparent;
     font: var(--font-button, normal normal 500 normal, var(--size-text-body, 1rem) "Segoe UI", "Roboto", sans-serif);
-    color: var(--color-light, #FFFFFF);
+    color: var(--color-on-button, #FFFFFF);
     box-sizing: border-box;
     cursor: pointer;
     transition: background-color var(--animation-length-short, 150ms) ease-in-out, box-shadow var(--animation-length-short, 150ms) ease-in-out;
@@ -24,7 +24,7 @@
 }
 
 .Button.loading > ::deep .Loader {
-    stroke: var(--color-complementary, #000000);
+    stroke: var(--color-on-button, #FFFFFF);
 }
 
 .Button:focus-visible {
@@ -34,24 +34,28 @@
 
 /* The light changes, nothing moves: hover brightens the fill and adds a soft glow, press brightens it further. */
 .Button:not(:disabled):hover {
-    background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 85%, var(--color-light, #FFFFFF));
+    background-color: var(--color-button-hover, color-mix(in srgb, var(--color-button, #4D4AD3) 85%, var(--color-light, #FFFFFF)));
     box-shadow: 0 0 var(--size-gap-xs, 0.75rem) color-mix(in srgb, var(--color-button, #4D4AD3) 55%, transparent);
 }
 
 .Button:not(:disabled):active {
-    background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 70%, var(--color-light, #FFFFFF));
+    background-color: var(--color-button-active, color-mix(in srgb, var(--color-button, #4D4AD3) 70%, var(--color-light, #FFFFFF)));
     box-shadow: 0 0 0 transparent;
 }
 
 .Button:disabled:not(.loading) {
     border-color: transparent;
     background-color: var(--color-disabled, #7F7F7F);
-    color: color-mix(in srgb, var(--color-disabled, #7F7F7F) 20%, var(--color-primary, #FFFFFF));
+    color: var(--color-on-disabled, #FFFFFF);
     cursor: not-allowed;
 }
 
 .Button[data-status="default"] {
     --color-button: var(--color-default, #4D4AD3);
+    --color-button-hover: var(--color-default-hover);
+    --color-button-active: var(--color-default-active);
+    --color-button-border: var(--color-default-border);
+    --color-on-button: var(--color-on-default, #FFFFFF);
 }
 
 /* The wireframe look: no fill, a thin border, and only a faint wash on hover and press. */
@@ -80,26 +84,50 @@
 
 .Button[data-status="success"] {
     --color-button: var(--color-success, #23883D);
+    --color-button-hover: var(--color-success-hover);
+    --color-button-active: var(--color-success-active);
+    --color-button-border: var(--color-success-border);
+    --color-on-button: var(--color-on-success, #FFFFFF);
 }
 
 .Button[data-status="info"] {
     --color-button: var(--color-info, #289ED9);
+    --color-button-hover: var(--color-info-hover);
+    --color-button-active: var(--color-info-active);
+    --color-button-border: var(--color-info-border);
+    --color-on-button: var(--color-on-info, #06202F);
 }
 
 .Button[data-status="highlight"] {
     --color-button: var(--color-highlight, #0073EC);
+    --color-button-hover: var(--color-highlight-hover);
+    --color-button-active: var(--color-highlight-active);
+    --color-button-border: var(--color-highlight-border);
+    --color-on-button: var(--color-on-highlight, #FFFFFF);
 }
 
 .Button[data-status="warning"] {
     --color-button: var(--color-warning, #D97F00);
+    --color-button-hover: var(--color-warning-hover);
+    --color-button-active: var(--color-warning-active);
+    --color-button-border: var(--color-warning-border);
+    --color-on-button: var(--color-on-warning, #241400);
 }
 
 .Button[data-status="notice"] {
     --color-button: var(--color-notice, #A948DD);
+    --color-button-hover: var(--color-notice-hover);
+    --color-button-active: var(--color-notice-active);
+    --color-button-border: var(--color-notice-border);
+    --color-on-button: var(--color-on-notice, #FFFFFF);
 }
 
 .Button[data-status="error"] {
     --color-button: var(--color-error, #E42B21);
+    --color-button-hover: var(--color-error-hover);
+    --color-button-active: var(--color-error-active);
+    --color-button-border: var(--color-error-border);
+    --color-on-button: var(--color-on-error, #FFFFFF);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -62,27 +62,112 @@
     --font-button: normal normal 500 normal var(--size-text-body, 16px) var(--font-family-primary, sans-serif);
 }
 
+/* The two ends of the palette. */
 :root {
     --color-light: #FFFFFF;
-    --color-dark: #000000;
-    --color-default: #4D4AD3;
-    --color-muted: #767676;
-    --color-highlight: #0073EC;
-    --color-info: #289ED9;
-    --color-success: #23883D;
-    --color-warning: #D97F00;
-    --color-notice: #A948DD;
-    --color-error: #E42B21;
-    --color-disabled: #7f7f7f;
+    --color-dark: #121212;
 }
 
+/* Which theme is showing. light-dark() below follows this, and so do the browser's own controls (scrollbars, date pickers).
+   No theme attribute: follow the system. theme="Light" or theme="Dark" on the root element forces one.
+   A project without a dark theme adds  :root { color-scheme: light; }  after this file. */
 :root {
-    --color-primary: var(--color-light);
-    --color-complementary: var(--color-dark);
-    --color-offset-primary-sm: color-mix(in srgb, transparent 96%, var(--color-complementary, #000000));
-    --color-offset-primary-md: color-mix(in srgb, transparent 90%, var(--color-complementary, #000000));
-    --color-offset-primary-lg: color-mix(in srgb, transparent 80%, var(--color-complementary, #000000));
-    --color-offset-complementary-sm: color-mix(in srgb, transparent 90%, var(--color-primary, #FFFFFF));
-    --color-offset-complementary-md: color-mix(in srgb, transparent 80%, var(--color-primary, #FFFFFF));
-    --color-offset-complementary-lg: color-mix(in srgb, transparent 50%, var(--color-primary, #FFFFFF));
+    color-scheme: light dark;
+}
+
+:root[theme="Light"] {
+    color-scheme: light;
+}
+
+:root[theme="Dark"] {
+    color-scheme: dark;
+}
+
+/* The two sides of a theme: the page and what is written on it. */
+:root {
+    --color-primary: light-dark(var(--color-light), var(--color-dark));
+    --color-complementary: light-dark(var(--color-dark), var(--color-light));
+}
+
+/* The status colours, each with its "on" colour. Checked for 4.5:1 between a fill and its "on" colour, and 3:1 between a fill and the page, in both themes (disabled is exempt). */
+:root {
+    --color-default: light-dark(#4D4AD3, #5F5CE6);
+    --color-on-default: #FFFFFF;
+    --color-highlight: #0073EC;
+    --color-on-highlight: #FFFFFF;
+    --color-info: #289ED9;
+    --color-on-info: #06202F;
+    --color-success: #23883D;
+    --color-on-success: #FFFFFF;
+    --color-warning: #D97F00;
+    --color-on-warning: #241400;
+    --color-notice: #A948DD;
+    --color-on-notice: #FFFFFF;
+    --color-error: #E42B21;
+    --color-on-error: #FFFFFF;
+    --color-disabled: #7F7F7F;
+    --color-on-disabled: #FFFFFF;
+}
+
+/* The surfaces a control sits on, with what is written on them. */
+:root {
+    --color-surface: var(--color-primary);
+    --color-on-surface: light-dark(#121212, #F2F2F2);
+    --color-input: light-dark(#FFFFFF, #1E1E1E);
+    --color-on-input: light-dark(#121212, #EBEBEB);
+}
+
+/* The shades of each colour, all worked out from its fill, so a new colour only needs a fill and an "on".
+   hover and active brighten it, subtle is a faint wash for backgrounds, border is the soft edge of a filled control. */
+:root {
+    --color-default-hover: color-mix(in srgb, var(--color-default) 85%, var(--color-light));
+    --color-default-active: color-mix(in srgb, var(--color-default) 70%, var(--color-light));
+    --color-default-subtle: color-mix(in srgb, var(--color-default) 14%, transparent);
+    --color-default-border: color-mix(in srgb, var(--color-default) 35%, var(--color-surface));
+    --color-highlight-hover: color-mix(in srgb, var(--color-highlight) 85%, var(--color-light));
+    --color-highlight-active: color-mix(in srgb, var(--color-highlight) 70%, var(--color-light));
+    --color-highlight-subtle: color-mix(in srgb, var(--color-highlight) 14%, transparent);
+    --color-highlight-border: color-mix(in srgb, var(--color-highlight) 35%, var(--color-surface));
+    --color-info-hover: color-mix(in srgb, var(--color-info) 85%, var(--color-light));
+    --color-info-active: color-mix(in srgb, var(--color-info) 70%, var(--color-light));
+    --color-info-subtle: color-mix(in srgb, var(--color-info) 14%, transparent);
+    --color-info-border: color-mix(in srgb, var(--color-info) 35%, var(--color-surface));
+    --color-success-hover: color-mix(in srgb, var(--color-success) 85%, var(--color-light));
+    --color-success-active: color-mix(in srgb, var(--color-success) 70%, var(--color-light));
+    --color-success-subtle: color-mix(in srgb, var(--color-success) 14%, transparent);
+    --color-success-border: color-mix(in srgb, var(--color-success) 35%, var(--color-surface));
+    --color-warning-hover: color-mix(in srgb, var(--color-warning) 85%, var(--color-light));
+    --color-warning-active: color-mix(in srgb, var(--color-warning) 70%, var(--color-light));
+    --color-warning-subtle: color-mix(in srgb, var(--color-warning) 14%, transparent);
+    --color-warning-border: color-mix(in srgb, var(--color-warning) 35%, var(--color-surface));
+    --color-notice-hover: color-mix(in srgb, var(--color-notice) 85%, var(--color-light));
+    --color-notice-active: color-mix(in srgb, var(--color-notice) 70%, var(--color-light));
+    --color-notice-subtle: color-mix(in srgb, var(--color-notice) 14%, transparent);
+    --color-notice-border: color-mix(in srgb, var(--color-notice) 35%, var(--color-surface));
+    --color-error-hover: color-mix(in srgb, var(--color-error) 85%, var(--color-light));
+    --color-error-active: color-mix(in srgb, var(--color-error) 70%, var(--color-light));
+    --color-error-subtle: color-mix(in srgb, var(--color-error) 14%, transparent);
+    --color-error-border: color-mix(in srgb, var(--color-error) 35%, var(--color-surface));
+}
+
+/* The text tones between full strength and the page, worked out from the theme so they stay readable in both: muted for secondary text, faded for hints, low-light for what only needs to be felt. */
+:root {
+    --color-muted: color-mix(in srgb, var(--color-complementary) 62%, var(--color-primary));
+    --color-faded: color-mix(in srgb, var(--color-complementary) 48%, var(--color-primary));
+    --color-low-light: color-mix(in srgb, var(--color-complementary) 34%, var(--color-primary));
+}
+
+/* Faint tints of the text colour over the page (and of the page over the text), for borders and stripes. */
+:root {
+    --color-offset-primary-sm: color-mix(in srgb, transparent 96%, var(--color-complementary));
+    --color-offset-primary-md: color-mix(in srgb, transparent 90%, var(--color-complementary));
+    --color-offset-primary-lg: color-mix(in srgb, transparent 80%, var(--color-complementary));
+    --color-offset-complementary-sm: color-mix(in srgb, transparent 90%, var(--color-primary));
+    --color-offset-complementary-md: color-mix(in srgb, transparent 80%, var(--color-primary));
+    --color-offset-complementary-lg: color-mix(in srgb, transparent 50%, var(--color-primary));
+}
+
+/* This app has no dark theme, so it stays light whatever the system says. */
+:root {
+    color-scheme: light;
 }

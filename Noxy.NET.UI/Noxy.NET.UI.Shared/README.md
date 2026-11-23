@@ -7,7 +7,7 @@
 The components carry no colours or sizes of their own. They read CSS variables, almost always with a built-in fallback (`var(--size-gap-xs, 0.75rem)`), so a page works without defining anything, but defining the variables once gives every component the same
 look.
 
-- Define the variables on `:root` in a stylesheet that loads before the component styles. Copy the block under *Quick start* into your project's `variables.css` and edit it.
+- Define the variables on `:root` in a stylesheet that loads before the component styles. Copy `wwwroot/css/variables.css` from this library into your project (see *Quick start*) and edit it. It holds every variable the components read, colours included.
 - Sizes are in `rem`, so they follow the user's font size and the browser's text zoom. Border widths, shadows and blurs stay in `px`, because a hairline should stay a hairline.
 - The theme is the `theme` attribute on `<html>` (`Light` or `Dark`). `ThemeToggle` and `ThemeService` read the stored choice, else the system's preference, set the attribute, and remember a choice in `localStorage`. To avoid a flash of the wrong theme before
   Blazor starts, set the attribute from storage in the page head and let the CSS follow the system when there is no attribute (both are in *Quick start*).
@@ -25,157 +25,52 @@ In the page head, before any stylesheet, so the stored theme is worn on the firs
 }</script>
 ```
 
-Then the variables:
+Then the variables. Copy `wwwroot/css/variables.css` from this library into your project's `wwwroot/css` and link it before the component styles:
 
-```css
-/* Sizes: text, gaps, borders, controls, icons, page widths. */
-:root {
-    --size-text-label: 0.8125rem;
-    --size-text-message: 0.875rem;
-    --size-text-body: 1rem;
-    --size-text-h1: 2rem;
-    --size-text-h2: 1.75rem;
-    --size-text-h3: 1.5rem;
-    --size-text-h4: 1.375rem;
-    --size-text-h5: 1.25rem;
-    --size-text-h6: 1.125rem;
-
-    --size-gap-tiny: 2px;
-    --size-gap-xxxs: 0.25rem;
-    --size-gap-xxs: 0.5rem;
-    --size-gap-xs: 0.75rem;
-    --size-gap-sm: 1rem;
-    --size-gap-md: 1.25rem;
-    --size-gap-lg: 1.5rem;
-    --size-gap-xl: 1.75rem;
-    --size-gap-xxl: 2rem;
-    --size-gap-xxxl: 2.25rem;
-    --size-gap-huge: 2.5rem;
-
-    --size-border-width-sm: 1px;
-    --size-border-width-md: 2px;
-    --size-border-width-lg: 3px;
-    --size-border-radius-sm: 0.125rem;
-    --size-border-radius-md: 0.25rem;
-    --size-border-radius-lg: 0.5rem;
-    --size-box-shadow: 2px;
-
-    --size-control-xxs: 1.5rem;
-    --size-control-xs: 1.875rem;
-    --size-control-sm: 2.25rem;
-    --size-control-md: 2.625rem;
-    --size-control-lg: 3rem;
-    --size-control-xl: 4rem;
-    --size-control-xxl: 5.75rem;
-
-    --size-icon-xxs: 1rem;
-    --size-icon-xs: 1.25rem;
-    --size-icon-sm: 1.5rem;
-    --size-icon-md: 1.75rem;
-    --size-icon-lg: 2rem;
-    --size-icon-xl: 2.25rem;
-    --size-icon-xxl: 2.5rem;
-
-    --size-page-xs: 20rem;
-    --size-page-sm: 22.5rem;
-    --size-page-md: 45rem;
-    --size-page-lg: 80rem;
-    --size-page-xl: 120rem;
-    --size-column: 20rem;
-}
-
-/* What the form controls and a few components read, built from the sizes above. */
-:root {
-    --size-border-width: var(--size-border-width-sm);
-    --size-border-radius: var(--size-border-radius-md);
-    --size-control-input: var(--size-control-md);
-    --size-control-choice: var(--size-control-xxs);
-    --size-control-icon: var(--size-icon-sm);
-}
-
-:root {
-    --animation-length-short: 150ms;
-    --animation-length-medium: 250ms;
-    --animation-length-long: 500ms;
-}
-
-:root {
-    --font-family-primary: "Segoe UI", "Roboto", sans-serif;
-    --font-label: normal normal 400 normal var(--size-text-label) var(--font-family-primary);
-    --font-body: normal normal 400 normal var(--size-text-body) var(--font-family-primary);
-    --font-button: normal normal 500 normal var(--size-text-body) var(--font-family-primary);
-}
-
-/* The palette and the status colours. */
-:root {
-    --color-light: #FFFFFF;
-    --color-dark: #000000;
-    --color-default: #4D4AD3;
-    --color-muted: #767676;
-    --color-highlight: #0073EC;
-    --color-info: #289ED9;
-    --color-success: #23883D;
-    --color-warning: #D97F00;
-    --color-notice: #A948DD;
-    --color-error: #E42B21;
-    --color-disabled: #7F7F7F;
-}
-
-/* The two sides of a theme: the page and what is written on it. Light is the default, Dark swaps them. */
-:root,
-:root[theme="Light"] {
-    --color-primary: var(--color-light);
-    --color-complementary: var(--color-dark);
-}
-
-:root[theme="Dark"] {
-    --color-primary: var(--color-dark);
-    --color-complementary: var(--color-light);
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([theme]) {
-        --color-primary: var(--color-dark);
-        --color-complementary: var(--color-light);
-    }
-}
-
-/* Faint tints of the text colour over the page (and of the page over the text), for borders and stripes. */
-:root {
-    --color-offset-primary-sm: color-mix(in srgb, transparent 96%, var(--color-complementary));
-    --color-offset-primary-md: color-mix(in srgb, transparent 90%, var(--color-complementary));
-    --color-offset-primary-lg: color-mix(in srgb, transparent 80%, var(--color-complementary));
-    --color-offset-complementary-sm: color-mix(in srgb, transparent 90%, var(--color-primary));
-    --color-offset-complementary-md: color-mix(in srgb, transparent 80%, var(--color-primary));
-    --color-offset-complementary-lg: color-mix(in srgb, transparent 50%, var(--color-primary));
-}
-
-:root {
-    --color-border: var(--color-complementary);
-    --color-border-focus: var(--color-highlight);
-    --color-control: var(--color-complementary);
-}
+```html
+<link rel="stylesheet" href="css/variables.css"/>
 ```
+
+The file holds every variable the shared components read, at the standard value: sizes, fonts, motion and colours. Edit it in place, and add your own app's variables below. To skip the copy, link it from the library
+(`_content/Noxy.NET.UI.Shared/css/variables.css`) and set only the variables you want to change in a stylesheet that loads after it.
+
+### Colours
+
+The colours are the last part of `variables.css`, the file under *Quick start*.
+
+- **Pairs.** Every colour has a fill and an "on" colour: what is written or drawn inside it (`--color-warning` and `--color-on-warning`). A component never picks its own text colour, so contrast is decided in this one file. Use them as a pair in your own
+  components too.
+- **Handpicked per theme.** Each value is `light-dark(light, dark)`, or a single value where it reads well on both pages. To tune one theme, write the pair out: `--color-warning: light-dark(#D97F00, #F2A33A);`.
+- **Shades.** Every status colour has `-hover`, `-active`, `-subtle` and `-border`, all worked out from its fill with `color-mix`. A new colour only needs a fill and an "on".
+- **Surfaces.** `--color-surface` with `--color-on-surface`, and `--color-input` with `--color-on-input`, for the page and for inputs.
+- **Themes.** `color-scheme` on the root decides which side of `light-dark()` shows: the system's by default, or `theme="Light"` and `theme="Dark"` on `<html>`. A project without a dark theme adds `:root { color-scheme: light; }` after the file and stays
+  light.
+- **Contrast.** Between a fill and its "on" colour it is at least 4.5:1, and between a fill and the page at least 3:1, in both themes (`disabled` is exempt). Keep to that when you change a colour.
+- **Needs** a browser with `light-dark()` (Chromium 123, Safari 17.5, Firefox 120 or newer).
 
 ### Reference
 
 **Colours**
 
-| Variable                                                                                | Standard                                              | Used by                                                                                                 |
-|-----------------------------------------------------------------------------------------|-------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| `--color-primary`                                                                       | `--color-light` (Dark: `--color-dark`)                | the page behind everything: buttons, inputs, table header, autosuggest dropdown                         |
-| `--color-complementary`                                                                 | `--color-dark` (Dark: `--color-light`)                | text and outlines: buttons, collapsible, inputs, loader, message box, autosuggest                       |
-| `--color-default`                                                                       | `#4D4AD3`                                             | `Button` and `MessageBox` with no status (`Default`)                                                    |
-| `--color-highlight`                                                                     | `#0073EC`                                             | `Button` and `MessageBox` highlight status, focus rings and checked state in the inputs                 |
-| `--color-info`, `--color-success`, `--color-warning`, `--color-notice`, `--color-error` | `#289ED9`, `#23883D`, `#D97F00`, `#A948DD`, `#E42B21` | the status of `Button` and `MessageBox`                                                                 |
-| `--color-muted`                                                                         | `#767676`                                             | unchecked checkbox and radio                                                                            |
-| `--color-disabled`                                                                      | `#7F7F7F`                                             | disabled `Button`, checkbox, radio                                                                      |
-| `--color-offset-primary-sm`, `-lg`                                                      | 4% and 20% of the text colour                         | table rows and header (`sm`), input borders and backgrounds (`sm`, `lg`)                                |
-| `--color-offset-primary-md`, `--color-offset-complementary-*`                           | see the block                                         | not read by the shared components                                                                       |
-| `--color-border`                                                                        | `--color-complementary`                               | the border of text inputs, selects, the checkbox and radio boxes, the autosuggest and the colour swatch |
-| `--color-border-focus`                                                                  | `--color-highlight`                                   | the focus ring of `Button`                                                                              |
-| `--color-control`                                                                       | `--color-complementary`                               | not read by the shared components                                                                       |
-| `--color-light`, `--color-dark`                                                         | `#FFFFFF`, `#000000`                                  | the palette the theme is built from                                                                     |
+| Variable                                                                                                    | Standard                                              | Used by                                                                                                                          |
+|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| `--color-primary`                                                                                           | `light-dark(--color-light, --color-dark)`             | the page behind everything: buttons, inputs, table header, autosuggest dropdown                                                  |
+| `--color-complementary`                                                                                     | `light-dark(--color-dark, --color-light)`             | text and outlines: buttons, collapsible, inputs, loader, message box, autosuggest                                                |
+| `--color-default`                                                                                           | `#4D4AD3` (Dark: `#5F5CE6`)                           | `Button` and `MessageBox` with no status (`Default`)                                                                             |
+| `--color-highlight`                                                                                         | `#0073EC`                                             | `Button` and `MessageBox` highlight status, focus rings and checked state in the inputs                                          |
+| `--color-info`, `--color-success`, `--color-warning`, `--color-notice`, `--color-error`                     | `#289ED9`, `#23883D`, `#D97F00`, `#A948DD`, `#E42B21` | the status of `Button` and `MessageBox`                                                                                          |
+| `--color-muted`                                                                                             | 62% of the text colour over the page                  | unchecked checkbox and radio                                                                                                     |
+| `--color-disabled`                                                                                          | `#7F7F7F`                                             | disabled `Button`, checkbox, radio                                                                                               |
+| `--color-offset-primary-sm`, `-lg`                                                                          | 4% and 20% of the text colour                         | table rows and header (`sm`), input borders and backgrounds (`sm`, `lg`)                                                         |
+| `--color-offset-primary-md`, `--color-offset-complementary-*`                                               | see the block                                         | not read by the shared components                                                                                                |
+| `--color-border`                                                                                            | `--color-complementary`                               | the border of text inputs, selects, the checkbox and radio boxes, the autosuggest and the colour swatch                          |
+| `--color-border-focus`                                                                                      | `--color-highlight`                                   | the focus ring of `Button`                                                                                                       |
+| `--color-control`                                                                                           | `--color-complementary`                               | not read by the shared components                                                                                                |
+| `--color-light`, `--color-dark`                                                                             | `#FFFFFF`, `#121212`                                  | the palette the theme is built from                                                                                              |
+| `--color-on-<status>` (`default`, `highlight`, `info`, `success`, `warning`, `notice`, `error`, `disabled`) | handpicked per theme                                  | what is written or drawn on that status colour: the text and loader of `Button`. Always use it as a pair with `--color-<status>` |
+| `--color-<status>-hover`, `-active`, `-border`                                                              | worked out from `--color-<status>` with `color-mix`   | the hover, pressed and frame colours of `Button`. `-subtle` (a faint wash) is for backgrounds                                    |
+| `--color-input`, `--color-on-input`                                                                         | handpicked per theme                                  | the background and text of text inputs                                                                                           |
+| `--color-surface`, `--color-on-surface`                                                                     | handpicked per theme                                  | the page a control sits on and what is written on it                                                                             |
 
 **Sizes**
 
@@ -229,11 +124,43 @@ Then the variables:
 
 - **Density:** change the `--size-control-*` and `--size-gap-*` values. `--size-control-input` decides how tall every input and button is, and `--size-control-md` is what it normally points at, so one change there resizes them all.
 - **Brand:** `--color-highlight` is the accent (focus, checked, highlight status) and `--color-default` is the default button. The other status colours only matter where a status is shown.
-- **Dark mode:** only `--color-primary` and `--color-complementary` swap. Choose the status colours so they stay readable on both backgrounds, and keep the text colours at a 4.5:1 contrast on the page colour.
+- **Dark mode:** hand-pick each colour and its `--color-on-*` for both themes, for example `--color-warning: light-dark(#D97F00, #F2A33A)`, and set `color-scheme` on the root (`light dark` by default, `light` or `dark` when the theme is forced) so
+  `light-dark()` picks the right side. Keep 4.5:1 between a colour and its "on" colour, and 3:1 between the colour and the page.
 - **Text size:** `rem` follows the user's setting, so don't set the root font size in `px`. `--size-text-body: 1rem` is 16px at the browser's default.
 - **Rounded or square:** `--size-border-radius-md` is used by buttons, inputs and the message box; set it to `0` for square corners.
 - **Without the variables:** every variable a component reads has a built-in fallback equal to the standard value in the tables above, so a project that defines none of them gets the same sizes and colours as the block under *Quick start* (in the Light theme).
   Define a variable only for what you want to change.
+
+## Wizard
+
+A list of numbered steps beside the content of the current step. The progress lives in a `WizardContext`, which you create and keep in your own component, so the content of a step can complete or fail it.
+
+```razor
+<Wizard Context="_context" Label="Set up" OnWizardComplete="FinishAsync">
+    <WizardStep Title="Account" Subtitle="Who you are">
+        <FormAccount OnValid="_context.CompleteStep" OnInvalid="_context.FailStep"/>
+    </WizardStep>
+    <WizardStep Title="Settings">
+        ...
+    </WizardStep>
+</Wizard>
+
+@code {
+    private readonly WizardContext _context = new();
+}
+```
+
+- **Steps.** A step is completed (before the progress), active (the one still to do) or pending (not reachable yet). The current step has a ring and `aria-current="step"`. Each step is a button in an ordered list, so the keyboard and screen readers can use it.
+  Pending steps are disabled, unless the step has `IgnoreCompletion`.
+- **`CompleteStep()`** moves the progress to the next step and shows it. On the last step it raises `OnWizardComplete`. Completing an earlier step again moves the progress back to the step after it, so the later steps are checked again.
+- **`FailStep()`** moves the progress back to the current step.
+- **`GoToStep(index, ignoreProgress)`** shows a step. Without `ignoreProgress` only the steps the user has reached can be shown.
+- **Events** on the context: `StepChanged`, `WizardCompleted` and `StateChanged` (anything the steps show changed).
+- **Order.** Steps register in the order they are rendered, so a step that appears later in the middle takes that place in the list.
+- **Text for assistive technology.** `Label` names the list on `Wizard`, and `CompletedLabel` (default `Completed`) is said after a completed step. Set both for a language other than English.
+- **Colours.** Pending steps use the surface and border colours, active steps `--color-highlight` with `--color-on-highlight`, and completed steps `--color-success` with `--color-on-success`. The connecting lines use `--color-offset-primary-lg`.
+
+This replaces the separate `Noxy.NET.UI.Wizard` package: reference `Noxy.NET.UI.Shared` instead. The components are now in `Noxy.NET.UI.Components.Containers`, and the `WizardStep` parameter `IgnoreCompletion` is a `bool` instead of a `bool?`.
 
 ## Table
 

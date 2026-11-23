@@ -9,6 +9,9 @@ public abstract record BaseColor
     public abstract double Alpha { get; }
     public string AlphaCssString => Alpha.ToString("0.00", CultureInfo.InvariantCulture);
 
+    // A number in a CSS string: always with a point, whatever the culture of the machine, and without the noise of floating point (65.50000000000001).
+    protected static string Css(double value) => Math.Round(value, 4).ToString(CultureInfo.InvariantCulture);
+
     protected const float Tolerance = 0.00001f;
 
     public abstract string ToCssString();
@@ -162,7 +165,7 @@ public abstract record BaseColor
         {
             valueToken = token[..^3];
         }
-        else if (token.EndsWith("rad", StringComparison.OrdinalIgnoreCase))
+        else if (token.EndsWith("rad", StringComparison.OrdinalIgnoreCase) && !token.EndsWith("grad", StringComparison.OrdinalIgnoreCase))
         {
             valueToken = token[..^3];
             factor = 180.0 / Math.PI;
@@ -188,6 +191,7 @@ public abstract record BaseColor
     protected static bool TryReadAndParseAlpha(ReadOnlySpan<char> remainder, out double alpha)
     {
         alpha = 1.0;
-        return remainder.IsEmpty || TryReadCssColorComponent(remainder, out ReadOnlySpan<char> tokenAlpha, out _) && TryParseAlpha(tokenAlpha, out alpha);
+        // The slash before the alpha stays on the remainder when it follows a space ("1 2 3 / 0.5").
+        return remainder.IsEmpty || TryReadCssColorComponent(remainder.TrimStart().TrimStart('/').TrimStart(), out ReadOnlySpan<char> tokenAlpha, out _) && TryParseAlpha(tokenAlpha, out alpha);
     }
 }

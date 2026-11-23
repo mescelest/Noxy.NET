@@ -1,11 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Noxy.NET.EntityManagement.Application.Interfaces;
-using Noxy.NET.EntityManagement.Application.Interfaces.Services;
-using Noxy.NET.EntityManagement.Application.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Noxy.NET.EntityManagement.Domain.Interfaces;
 using Noxy.NET.EntityManagement.Persistence;
-using Noxy.NET.EntityManagement.Persistence.Interfaces.Services;
-using Noxy.NET.EntityManagement.Persistence.Services;
+using Noxy.NET.EntityManagement.Persistence.Repositories;
 
 #pragma warning disable IDE0130, S1200
 // ReSharper disable once CheckNamespace
@@ -13,26 +10,24 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddPersistence(this IServiceCollection services, Action<DbContextOptionsBuilder> options)
+    // Registers the database and the repository. The migrations that create the tables are written for SQLite.
+    public static IServiceCollection AddEntityManagementPersistence(this IServiceCollection services, Action<DbContextOptionsBuilder> options)
     {
-        services.AddDbContextFactory<DataContext>(options);
-
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
-        services.AddScoped<IDependencyInjectionService, DependencyInjectionService>();
-
-        services.AddSingleton<IEntityToTableMapper, EntityToTableMapper>();
-        services.AddSingleton<ITableToEntityMapper, TableToEntityMapper>();
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddDbContext<EntityManagementContext>(options);
+        services.AddScoped<IDataRepository, DataRepository>();
+        services.AddScoped<IRelationRepository, RelationRepository>();
+        services.AddScoped<ITextRepository, TextRepository>();
 
         return services;
     }
 
-    public static async Task<IHost> UsePersistence(this IHost app)
+    // Creates the tables, or brings them up to date. Call it once at startup.
+    public static async Task MigrateEntityManagementAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
     {
-        IDbContextFactory<DataContext> factory = app.Services.GetRequiredService<IDbContextFactory<DataContext>>();
-        await using DataContext context = await factory.CreateDbContextAsync();
-        await context.Database.MigrateAsync();
+        await using AsyncServiceScope scope = services.CreateAsyncScope();
+        EntityManagementContext context = scope.ServiceProvider.GetRequiredService<EntityManagementContext>();
 
-        return app;
+        await context.Database.MigrateAsync(cancellationToken);
     }
 }

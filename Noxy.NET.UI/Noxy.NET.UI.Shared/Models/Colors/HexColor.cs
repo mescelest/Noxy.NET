@@ -18,7 +18,7 @@ public sealed record HexColor : BaseColor
         Green = Math.Clamp(g, 0, 255);
         Blue = Math.Clamp(b, 0, 255);
         Alpha = Math.Clamp(a, 0.0, 1.0);
-        Value = Alpha >= 1.0 ? $"#{Red:X2}{Green:X2}{Blue:X2}" : $"#{Red:X2}{Green:X2}{Blue:X2}{Math.Round(Alpha * 255):X2}";
+        Value = Alpha >= 1.0 ? $"#{Red:X2}{Green:X2}{Blue:X2}" : $"#{Red:X2}{Green:X2}{Blue:X2}{(int)Math.Round(Alpha * 255):X2}";
     }
 
     public override string ToCssString() => Value;
