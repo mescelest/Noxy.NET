@@ -74,6 +74,9 @@ public interface IPlayerService
     // Clamped to 0 to 1. Applied at once and kept on the device.
     Task SetVolume(double volume);
 
+    // Clamped to 0 to 1. Applied at once but not saved: for each step of a drag, with SetVolume called once at the end.
+    Task PreviewVolume(double volume);
+
     // Writes the playing playlist's own mode (the global setting for the Library) and builds the source part again from the current item. Throws when the server cannot be reached or refuses; the mode is unchanged then.
     Task SetShuffle(ShuffleModeEnum shuffle);
 

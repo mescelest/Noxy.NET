@@ -59,6 +59,12 @@ public sealed class FakePlaybackControlService : IPlaybackControlService
         return Task.CompletedTask;
     }
 
+    public Task PreviewVolume(int volume)
+    {
+        CallList.Add($"PreviewVolume {volume}");
+        return Task.CompletedTask;
+    }
+
     public Task SetShuffle(ShuffleModeEnum shuffle)
     {
         CallList.Add($"SetShuffle {shuffle}");

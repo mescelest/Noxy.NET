@@ -22,11 +22,16 @@
     [Parameter, EditorRequired]
     public required PlaybackDisplay Display { get; set; }
 
+    // Each step of a drag, in percent.
+    [Parameter]
+    public EventCallback<int> OnVolumePreview { get; set; }
+
     // The volume the slider was left at, in percent.
     [Parameter]
     public EventCallback<int> OnVolumeChanged { get; set; }
 
     private int? _dragVolume;
+    private int? _committedVolume;
 
     private int VolumeCurrent => _dragVolume ?? Display.VolumePercent;
 
@@ -36,17 +41,28 @@
 
     private static double ParseDouble(object? value) => double.TryParse(value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double result) ? result : 0;
 
-    private void InputVolumeHandler(ChangeEventArgs args)
+    private Task InputVolumeHandler(ChangeEventArgs args)
     {
-        _dragVolume = (int)ParseDouble(args.Value);
+        int volume = (int)ParseDouble(args.Value);
+
+        // The webview can report the end of a gesture as the change first and the last input after it (seen on the seek bar), so an input that repeats the value just committed is the tail of that gesture, not a new drag.
+        bool isTail = _committedVolume == volume;
+        _committedVolume = null;
+        if (isTail) return Task.CompletedTask;
+
+        _dragVolume = volume;
+
+        return OnVolumePreview.InvokeAsync(volume);
     }
 
-    private Task ChangeVolumeHandler()
+    // The value comes from the event itself, so the release counts whichever of the two events came first.
+    private Task ChangeVolumeHandler(ChangeEventArgs args)
     {
-        int? volume = _dragVolume;
+        int volume = (int)ParseDouble(args.Value);
+        _committedVolume = volume;
         _dragVolume = null;
 
-        return volume is null ? Task.CompletedTask : OnVolumeChanged.InvokeAsync(volume.Value);
+        return OnVolumeChanged.InvokeAsync(volume);
     }
 
 }

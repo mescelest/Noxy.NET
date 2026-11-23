@@ -51,6 +51,18 @@ public class AppStartupServiceTest
         Assert.Empty(_serviceQueue.StartSourceList);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Start_LoadsTheStoredVolume_SignedInOrNot_SoTheSliderIsRightBeforeAnythingPlays(bool signedIn)
+    {
+        _serviceSession.RestoreSucceeds = signedIn;
+
+        await _serviceStartup.Start();
+
+        Assert.Single(_servicePlayer.CallList, "LoadVolume");
+    }
+
     [Fact]
     public async Task Start_WhenNotSignedIn_StillLoadsTheLocalQueue_SoPlaybackNeverNeedsTheServer()
     {

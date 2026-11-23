@@ -319,15 +319,7 @@ public class PlayerService(
     // The volume belongs to the device: applied at once and kept in the device's own store, so it survives a restart. A save that fails does not undo the volume.
     public async Task SetVolume(double volume)
     {
-        double clamped = Math.Clamp(volume, 0, 1);
-        lock (_lock)
-        {
-            _volume = clamped;
-            _volumeLoaded = true;
-        }
-
-        await playerAudio.SetVolume(clamped);
-        _changed?.Invoke();
+        double clamped = await ApplyVolume(volume);
 
         try
         {
@@ -338,6 +330,27 @@ public class PlayerService(
             // The subject only: the value is not ours to log.
             logger.LogWarning(exception, "The volume could not be saved on the device.");
         }
+    }
+
+    // A step of a drag changes the sound at once and writes nothing: the file would be rewritten for every step. The user has still set a volume on this device, so a stored one does not replace it.
+    public async Task PreviewVolume(double volume)
+    {
+        await ApplyVolume(volume);
+    }
+
+    private async Task<double> ApplyVolume(double volume)
+    {
+        double clamped = Math.Clamp(volume, 0, 1);
+        lock (_lock)
+        {
+            _volume = clamped;
+            _volumeLoaded = true;
+        }
+
+        await playerAudio.SetVolume(clamped);
+        _changed?.Invoke();
+
+        return clamped;
     }
 
     // Reads the stored volume once, so Volume is right before anything has played. A volume the user already set on this device wins.

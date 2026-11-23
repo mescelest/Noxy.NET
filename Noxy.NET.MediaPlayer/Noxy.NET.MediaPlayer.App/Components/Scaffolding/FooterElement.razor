@@ -16,7 +16,7 @@
 
         <MediaTransportControls Display="Display" OnPrevious="ClickPreviousHandler" OnPlayPause="ClickPlayingHandler" OnNext="ClickNextHandler" OnShuffle="ChangeShuffle" OnRepeat="ChangeRepeat"/>
 
-        <MediaOutputControls Display="Display" OnVolumeChanged="ChangeVolume"/>
+        <MediaOutputControls Display="Display" OnVolumePreview="PreviewVolume" OnVolumeChanged="ChangeVolume"/>
     </div>
 
     <QueuePanel/>
@@ -27,6 +27,7 @@
     private const int TickMilliseconds = 250;
 
     private TimeSpan? _dragPosition;
+    private double? _committedSeconds;
     private PlaybackDisplay? _display;
     private CancellationTokenSource? _tickSource;
     private Dictionary<Guid, ResponseMediaFile>? _mediaMap;
@@ -110,11 +111,17 @@
 
     private void InputSeekHandler(double seconds)
     {
+        // The webview reports the end of a drag or a click as the change first and the last input after it (seen in a log), so an input that repeats the value just committed is the tail of that gesture, not a new drag.
+        bool isTail = _committedSeconds == seconds;
+        _committedSeconds = null;
+        if (isTail) return;
+
         _dragPosition = TimeSpan.FromSeconds(seconds);
     }
 
     private Task ChangeSeekHandler(double seconds)
     {
+        _committedSeconds = seconds;
         _dragPosition = null;
 
         return Run(() => ServiceControl.Seek(TimeSpan.FromSeconds(seconds)));
@@ -123,6 +130,8 @@
     private Task ChangeShuffle(ShuffleModeEnum mode) => Run(() => ServiceControl.SetShuffle(mode));
 
     private Task ChangeRepeat(RepeatModeEnum mode) => Run(() => ServiceControl.SetRepeat(mode));
+
+    private Task PreviewVolume(int volume) => Run(() => ServiceControl.PreviewVolume(volume));
 
     private Task ChangeVolume(int volume) => Run(() => ServiceControl.SetVolume(volume));
 

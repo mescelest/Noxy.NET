@@ -142,6 +142,15 @@ public sealed class FakePlayerService : IPlayerService
         return Task.CompletedTask;
     }
 
+    public Task PreviewVolume(double volume)
+    {
+        CallList.Add($"PreviewVolume {volume}");
+        Volume = volume;
+        Changed?.Invoke();
+
+        return Task.CompletedTask;
+    }
+
     public Task SetShuffle(ShuffleModeEnum shuffle)
     {
         CallList.Add($"SetShuffle {shuffle}");

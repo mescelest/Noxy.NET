@@ -51,6 +51,8 @@ public class AppStartupService(
 
     public async Task Start()
     {
+        // A setting of this device, so it needs neither the session nor the server: the slider is right before the first media file plays.
+        await servicePlayer.LoadVolume();
         await RepairFiles();
         Subscribe();
         await LoadLocalQueue();

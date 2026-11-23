@@ -25,6 +25,9 @@ public interface IPlaybackControlService
     // 0 to 100. Deferred like Seek on a controller.
     Task SetVolume(int volume);
 
+    // 0 to 100, for each step of a drag. This device changes its sound at once without saving it; a controller sends the last step after a pause, like SetVolume.
+    Task PreviewVolume(int volume);
+
     Task SetShuffle(ShuffleModeEnum shuffle);
 
     Task SetRepeat(RepeatModeEnum repeat);

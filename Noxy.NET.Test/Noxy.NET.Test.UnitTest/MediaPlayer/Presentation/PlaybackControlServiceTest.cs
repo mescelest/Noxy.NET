@@ -295,6 +295,52 @@ public class PlaybackControlServiceTest
     }
 
     [Fact]
+    public async Task PreviewVolume_ADragAsAController_SendsOneCommand_WithTheLastValue()
+    {
+        AsController();
+        List<Task> dragList = [];
+        for (int volume = 10; volume <= 60; volume += 10) dragList.Add(_control.PreviewVolume(volume));
+
+        await WaitForTheLastWait(dragList);
+        _delay.ReleaseAll();
+        await Task.WhenAll(dragList);
+
+        RequestPlayerCommand command = Assert.Single(CommandList());
+        Assert.Equal(PlayerCommandEnum.SetVolume, command.Command);
+        Assert.Equal(60, command.Volume);
+        Assert.Empty(_player.CallList);
+    }
+
+    [Fact]
+    public async Task PreviewVolume_AsAController_AndTheReleaseThatFollows_SendOneCommand()
+    {
+        AsController();
+        List<Task> dragList = [];
+        for (int volume = 10; volume <= 50; volume += 10) dragList.Add(_control.PreviewVolume(volume));
+        dragList.Add(_control.SetVolume(55));
+
+        await WaitForTheLastWait(dragList);
+        _delay.ReleaseAll();
+        await Task.WhenAll(dragList);
+
+        RequestPlayerCommand command = Assert.Single(CommandList());
+        Assert.Equal(55, command.Volume);
+    }
+
+    [Fact]
+    public async Task NotAsAController_PreviewVolume_ChangesTheLocalPlayerAtOnce_AndSavesNothing()
+    {
+        _remote.Role = PlaybackRoleEnum.Active;
+
+        await _control.PreviewVolume(40);
+        await _control.PreviewVolume(250);
+
+        Assert.Equal([$"PreviewVolume {0.4}", $"PreviewVolume {1.0}"], _player.CallList);
+        Assert.Empty(_delay.DelayList);
+        Assert.Empty(_hub.CallList);
+    }
+
+    [Fact]
     public async Task ASeekAfterThePauseOfADrag_SendsAnother()
     {
         AsController();

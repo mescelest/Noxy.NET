@@ -1206,6 +1206,52 @@ public class PlayerServiceTest
     }
 
     [Fact]
+    public async Task PreviewVolume_AppliesAtOnce_AndStoresNothing()
+    {
+        int before = _storeMetadata.VolumeWriteList.Count;
+
+        await _player.PreviewVolume(0.456);
+
+        Assert.Equal(0.456, _audio.Volume);
+        Assert.Equal(0.456, _player.Volume);
+        Assert.Equal(before, _storeMetadata.VolumeWriteList.Count);
+    }
+
+    [Theory]
+    [InlineData(1.7, 1)]
+    [InlineData(-3, 0)]
+    public async Task PreviewVolume_IsClampedToZeroAndOne(double asked, double expected)
+    {
+        await _player.PreviewVolume(asked);
+
+        Assert.Equal(expected, _player.Volume);
+        Assert.Equal(expected, _audio.Volume);
+    }
+
+    [Fact]
+    public async Task PreviewVolume_RaisesChanged_SoTheScreensFollowTheSlider()
+    {
+        int changed = 0;
+        _player.Changed += () => changed++;
+
+        await _player.PreviewVolume(0.5);
+
+        Assert.True(changed > 0);
+    }
+
+    [Fact]
+    public async Task PreviewVolume_BeforeTheFirstStart_IsNotReplacedByTheStoredVolume()
+    {
+        Guid id = await AddMedia();
+        await _storeMetadata.SetVolume(35);
+        await _player.PreviewVolume(0.6);
+
+        await Start(id);
+
+        Assert.Equal(0.6, _audio.Volume);
+    }
+
+    [Fact]
     public async Task SetVolume_BeforeTheFirstStart_IsNotReplacedByTheStoredVolume()
     {
         Guid id = await AddMedia();

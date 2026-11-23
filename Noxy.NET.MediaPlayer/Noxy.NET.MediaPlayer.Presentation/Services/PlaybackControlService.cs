@@ -127,6 +127,18 @@ public class PlaybackControlService : IPlaybackControlService
         }
     }
 
+    public async Task PreviewVolume(int volume)
+    {
+        if (!IsController)
+        {
+            await _servicePlayer.PreviewVolume(Math.Clamp(volume, 0, 100) / 100.0);
+            return;
+        }
+
+        // Only the last step of a drag, after a pause, is sent, and the release that follows takes over from it.
+        await SetVolume(volume);
+    }
+
     // Waits out the pause after the last change of a drag: a change that comes in the meantime takes over (the earlier call ends, sending nothing). True for the call that is still the latest when the pause is over.
     private async Task<bool> Deferred(Func<CancellationTokenSource, CancellationTokenSource?> swap)
     {
