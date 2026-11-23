@@ -28,7 +28,7 @@
                 <UploadMediaButton PlaylistID="Id" Label="Upload to playlist"/>
                 @if (Summary is { } summary)
                 {
-                    <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Status="StatusEnum.None" aria-label="Playlist actions" aria-haspopup="menu" popovertarget="@PlaylistContextMenu.MenuID(summary.ID)">
+                    <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="Playlist actions" aria-haspopup="menu" popovertarget="@PlaylistContextMenu.MenuID(summary.ID)">
                         <MaterialIcon Icon="more_horiz" Size="var(--size-icon-md)"/>
                     </Button>
                     <PlaylistContextMenu Playlist="summary"/>

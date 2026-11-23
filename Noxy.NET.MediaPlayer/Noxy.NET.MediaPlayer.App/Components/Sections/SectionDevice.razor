@@ -4,8 +4,8 @@
 
 <Section @attributes="AdditionalAttributes" class="@CssClass" Title="Device">
     <DeviceNameField/>
-    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.None" @onclick="AskResetPreferences">@AppTexts.ResetPreferencesButton</Button>
-    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.None" @onclick="AskDeleteAllData">@AppTexts.DeleteAllDataButton</Button>
+    <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="AskResetPreferences">@AppTexts.ResetPreferencesButton</Button>
+    <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="AskDeleteAllData">@AppTexts.DeleteAllDataButton</Button>
 
     <ConfirmActionDialog Open="_isResettingPreferences" OpenChanged="CloseResetPreferences" Title="@AppTexts.ResetPreferencesButton" Message="@AppTexts.ResetPreferencesMessage" AcceptText="@AppTexts.ResetPreferencesAccept" OnSubmit="SubmitResetPreferences"/>
     <ConfirmActionDialog Open="_isDeletingAllData" OpenChanged="CloseDeleteAllData" Title="@AppTexts.DeleteAllDataButton" Message="@AppTexts.DeleteAllDataMessage" Detail="@AppTexts.DeleteAllDataDetail" AcceptText="@AppTexts.DeleteAllDataAccept"

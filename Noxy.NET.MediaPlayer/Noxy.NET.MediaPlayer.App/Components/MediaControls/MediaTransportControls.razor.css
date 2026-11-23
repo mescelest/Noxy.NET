@@ -7,8 +7,6 @@
 
 /* Like the other players: no colour when the mode is off, the highlight when it is on. */
 .MediaTransportControls .mode {
-    border-color: transparent;
-    background-color: transparent;
     color: var(--color-muted);
 }
 

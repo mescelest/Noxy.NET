@@ -58,28 +58,47 @@
     --color-on-button: var(--color-on-default, #FFFFFF);
 }
 
-/* The wireframe look: no fill, a thin border, and only a faint wash on hover and press. */
+/* The neutral colours, for a button that should not draw the eye. */
 .Button[data-status="none"] {
     --color-button: var(--color-complementary, #000000);
-    background-color: transparent;
-    border-width: var(--size-border-width-sm, 1px);
-    border-color: var(--color-offset-primary-lg, #767676);
-    color: var(--color-complementary, #000000);
+    --color-button-border: var(--color-offset-primary-lg, #767676);
+    --color-on-button: var(--color-surface, #FFFFFF);
 }
 
-.Button[data-status="none"]:not(:disabled):hover {
-    background-color: color-mix(in srgb, var(--color-button, #000000) 8%, transparent);
+/* Outline and ghost: no fill, the status colour on the text, and only a faint wash on hover and press.
+   Ghost keeps its border but makes it invisible, so switching between the two never moves the button. */
+.Button[data-appearance="outline"], .Button[data-appearance="ghost"] {
+    background-color: transparent;
+    border-width: var(--size-border-width-sm, 1px);
+    border-color: var(--color-button, #4D4AD3);
+    color: var(--color-button, #4D4AD3);
+}
+
+.Button[data-appearance="ghost"] {
+    border-color: transparent;
+}
+
+.Button[data-appearance="outline"]:not(:disabled):hover, .Button[data-appearance="ghost"]:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 8%, transparent);
     box-shadow: 0 0 0 transparent;
 }
 
-.Button[data-status="none"]:not(:disabled):active {
-    background-color: color-mix(in srgb, var(--color-button, #000000) 16%, transparent);
+.Button[data-appearance="outline"]:not(:disabled):active, .Button[data-appearance="ghost"]:not(:disabled):active {
+    background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 16%, transparent);
 }
 
-.Button[data-status="none"]:disabled:not(.loading) {
+.Button[data-appearance="outline"]:disabled:not(.loading), .Button[data-appearance="ghost"]:disabled:not(.loading) {
     background-color: transparent;
     border-color: var(--color-disabled, #7F7F7F);
     color: var(--color-disabled, #7F7F7F);
+}
+
+.Button[data-appearance="ghost"]:disabled:not(.loading) {
+    border-color: transparent;
+}
+
+.Button[data-appearance="outline"].loading > ::deep .Loader, .Button[data-appearance="ghost"].loading > ::deep .Loader {
+    stroke: var(--color-button, #4D4AD3);
 }
 
 .Button[data-status="success"] {

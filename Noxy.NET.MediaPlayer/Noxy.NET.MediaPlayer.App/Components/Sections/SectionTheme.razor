@@ -3,14 +3,19 @@
 <Section @attributes="AdditionalAttributes" class="@CssClass" Title="Theme">
     <ThemeToggle TType="ThemeEnum" Label="Theme">
         <Template Context="theme">
-            <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusOf(theme.Service.GetTheme() == theme.Value)" @onclick="() => theme.Service.SetTheme(theme.Value)">@theme.Value</Button>
+            <Button Type="@HTMLButtonTypeEnum.Button" Appearance="AppearanceOf(theme.Service.GetTheme() == theme.Value)" Status="StatusOf(theme.Service.GetTheme() == theme.Value)" @onclick="() => theme.Service.SetTheme(theme.Value)">@theme.Value</Button>
         </Template>
     </ThemeToggle>
 </Section>
 
 @code {
 
-    // The theme in force is the highlighted one.
+    // The theme in force is the highlighted one, filled; the others are outlined.
+    private static ButtonAppearanceEnum AppearanceOf(bool isOn)
+    {
+        return isOn ? ButtonAppearanceEnum.Filled : ButtonAppearanceEnum.Outline;
+    }
+
     private static StatusEnum StatusOf(bool isOn)
     {
         return isOn ? StatusEnum.Highlight : StatusEnum.None;

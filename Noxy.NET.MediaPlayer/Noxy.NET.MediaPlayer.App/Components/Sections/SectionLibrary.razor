@@ -7,7 +7,7 @@
 
 <Section @attributes="AdditionalAttributes" class="@CssClass" Title="Library">
     <MessageBox MessageList="OnDeviceMessageList" Status="StatusEnum.None"/>
-    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.None" disabled="@IsOffline" title="@OfflineReason" @onclick="RefreshLibrary">Refresh library</Button>
+    <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" disabled="@IsOffline" title="@OfflineReason" @onclick="RefreshLibrary">Refresh library</Button>
 </Section>
 
 @code {

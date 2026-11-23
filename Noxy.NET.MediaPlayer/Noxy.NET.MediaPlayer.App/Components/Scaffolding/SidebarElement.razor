@@ -31,7 +31,7 @@
     <div class="link-list">
         <div class="link-list-header">
             <span>Playlists</span>
-            <Button class="link-list-header-button" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Status="StatusEnum.Success" @onclick="ClickNewPlaylistHandler">
+            <Button class="link-list-header-button" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Success" @onclick="ClickNewPlaylistHandler">
                 <MaterialIcon Icon="add" Size="var(--size-icon-sm)"/>
             </Button>
         </div>
@@ -44,7 +44,7 @@
                 <NavLink class="link" href="@($"playlist/{row.ID}")" @onclick="OnNavigate">
                     <span>@row.Name</span>
                 </NavLink>
-                <Button class="more" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Status="StatusEnum.None" aria-label="@($"Actions for {row.Name}")" aria-haspopup="menu" popovertarget="@PlaylistContextMenu.MenuID(row.ID)">
+                <Button class="more" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="@($"Actions for {row.Name}")" aria-haspopup="menu" popovertarget="@PlaylistContextMenu.MenuID(row.ID)">
                     <MaterialIcon Icon="more_horiz" Size="var(--size-icon-sm)"/>
                 </Button>
                 <PlaylistContextMenu @ref="_menuMap[row.ID]" Playlist="row"/>

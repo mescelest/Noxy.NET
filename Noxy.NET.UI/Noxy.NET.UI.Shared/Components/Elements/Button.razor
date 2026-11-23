@@ -1,6 +1,6 @@
 ﻿@inherits BaseComponentElement
 
-<button @attributes="AdditionalAttributes" class="@CssClass" type="@TypeString" disabled="@Disabled" data-loading="@LoadingCurrent" data-status="@StatusString" data-is-icon="@IsIcon">
+<button @attributes="AdditionalAttributes" class="@CssClass" type="@TypeString" disabled="@Disabled" data-loading="@LoadingCurrent" data-status="@StatusString" data-appearance="@AppearanceString" data-is-icon="@IsIcon">
     <Loader Loading="LoadingCurrent">
         @ChildContent
     </Loader>
@@ -12,6 +12,11 @@
     public StatusEnum? Status { get; set; }
     private StatusEnum StatusCurrent => Status ?? StatusEnum.Default;
     private string StatusString => StatusCurrent.ToText();
+
+    [Parameter]
+    public ButtonAppearanceEnum? Appearance { get; set; }
+    private ButtonAppearanceEnum AppearanceCurrent => Appearance ?? ButtonAppearanceEnum.Filled;
+    private string AppearanceString => AppearanceCurrent.ToText();
 
     [Parameter]
     public HTMLButtonTypeEnum? Type { get; set; }
