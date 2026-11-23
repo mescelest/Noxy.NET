@@ -467,7 +467,7 @@ public class RelationServiceTest : IDisposable
         Assert.Equal([kept.ID], (await Relations().GetRelationList(case1)).Select(x => x.ID));
         Assert.Empty(await Relations().GetRelationList(case2));
         Assert.Equal(2, (await Relations().GetRelationHistory(person)).Count);
-        Assert.Equal(1, (await Relations().GetRelationHistory(case2)).Count);
+        Assert.Single(await Relations().GetRelationHistory(case2));
         Assert.All(await Relations().GetRelationHistory(person), x => Assert.Equal((UserB, T0.AddDays(1)), (x.EndedByUserID, x.TimeEnded)));
     }
 
