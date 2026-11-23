@@ -20,11 +20,13 @@
         {
             <p>@AppTexts.ChooserNoPlaylists</p>
         }
-        @foreach (ResponsePlaylist playlist in StatePlaylistList.Value.PlaylistList)
-        {
-            Guid playlistID = playlist.ID;
-            <button type="button" class="playlist-choice" @onclick="() => AddToPlaylist(playlistID)">@playlist.Name</button>
-        }
+        <div class="playlist-choice-list">
+            @foreach (ResponsePlaylist playlist in StatePlaylistList.Value.PlaylistList)
+            {
+                Guid playlistID = playlist.ID;
+                <button type="button" class="playlist-choice" @onclick="() => AddToPlaylist(playlistID)">@playlist.Name</button>
+            }
+        </div>
         <div class="actions">
             <button type="button" class="cancel" @onclick="() => _choosingPlaylist = false">@AppTexts.ChooserCancel</button>
         </div>

@@ -22,10 +22,6 @@
     justify-content: flex-end;
 }
 
-.logo {
-    margin: 0;
-}
-
 .connection-status {
     display: flex;
     flex: 0 0 auto;

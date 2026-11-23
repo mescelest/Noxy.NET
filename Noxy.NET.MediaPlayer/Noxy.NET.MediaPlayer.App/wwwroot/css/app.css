@@ -42,6 +42,11 @@ a {
     color: var(--color-highlight);
 }
 
+/* Space between things comes from the row-gap of what holds them, never from the margins of the heading or the paragraph. */
+h1, h2, h3, h4, h5, h6, p {
+    margin: 0;
+}
+
 h1:focus {
     outline: none;
 }
@@ -130,6 +135,13 @@ dialog {
     border-radius: var(--size-border-radius-lg);
     background: var(--color-primary);
     color: var(--color-complementary);
+}
+
+/* Only while open: a display set on the dialog itself would also show it closed. */
+dialog[open] {
+    display: flex;
+    flex-flow: column;
+    row-gap: var(--size-gap-xs);
 }
 
 .ContextMenu, .ContextMenu .submenu {
