@@ -1,0 +1,20 @@
+.Wizard {
+    display: flex;
+    flex: 1 1 auto;
+    column-gap: var(--size-gap-md, 1.25rem);
+}
+
+.steps {
+    display: flex;
+    flex-flow: column;
+    row-gap: var(--size-gap-lg, 1.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+}

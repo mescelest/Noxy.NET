@@ -1,0 +1,218 @@
+/*
+    Every variable the components of Noxy.NET.UI.Shared read, at its standard value. Copy this file into your project as variables.css, link it before the component styles, and edit what you want to change.
+    The library also serves it as _content/Noxy.NET.UI.Shared/css/variables.css, so you can link it from there and override single variables in your own stylesheet after it.
+
+    Sizes are in rem so they follow the user's font size. Border widths, shadows and blurs stay in px, because a hairline should stay a hairline.
+    Every colour is a pair: the fill, and the "on" colour that is written or drawn inside it (--color-warning and --color-on-warning). Always use them together.
+    Each colour is picked by hand per theme with light-dark(light, dark). Where a colour reads well on both pages the two sides are the same, so write the pair out as light-dark(a, b) when you want to tune a theme on its own.
+*/
+
+/* Sizes: text, gaps, borders, controls, icons, page widths. */
+:root {
+    --size-text-label: 0.8125rem;
+    --size-text-message: 0.875rem;
+    --size-text-body: 1rem;
+    --size-text-h1: 2rem;
+    --size-text-h2: 1.75rem;
+    --size-text-h3: 1.5rem;
+    --size-text-h4: 1.375rem;
+    --size-text-h5: 1.25rem;
+    --size-text-h6: 1.125rem;
+
+    --size-gap-tiny: 2px;
+    --size-gap-xxxs: 0.25rem;
+    --size-gap-xxs: 0.5rem;
+    --size-gap-xs: 0.75rem;
+    --size-gap-sm: 1rem;
+    --size-gap-md: 1.25rem;
+    --size-gap-lg: 1.5rem;
+    --size-gap-xl: 1.75rem;
+    --size-gap-xxl: 2rem;
+    --size-gap-xxxl: 2.25rem;
+    --size-gap-huge: 2.5rem;
+
+    --size-border-width-sm: 1px;
+    --size-border-width-md: 2px;
+    --size-border-width-lg: 3px;
+    --size-border-radius-sm: 0.125rem;
+    --size-border-radius-md: 0.25rem;
+    --size-border-radius-lg: 0.5rem;
+    --size-box-shadow: 2px;
+
+    --size-control-xxs: 1.5rem;
+    --size-control-xs: 1.875rem;
+    --size-control-sm: 2.25rem;
+    --size-control-md: 2.625rem;
+    --size-control-lg: 3rem;
+    --size-control-xl: 4rem;
+    --size-control-xxl: 5.75rem;
+
+    --size-icon-xxs: 1rem;
+    --size-icon-xs: 1.25rem;
+    --size-icon-sm: 1.5rem;
+    --size-icon-md: 1.75rem;
+    --size-icon-lg: 2rem;
+    --size-icon-xl: 2.25rem;
+    --size-icon-xxl: 2.5rem;
+
+    --size-page-xs: 20rem;
+    --size-page-sm: 22.5rem;
+    --size-page-md: 45rem;
+    --size-page-lg: 80rem;
+    --size-page-xl: 120rem;
+    --size-column: 20rem;
+}
+
+/* What the form controls and a few components read, built from the sizes above. Change these to restyle every input and button at once. */
+:root {
+    --size-border-width: var(--size-border-width-sm);
+    --size-border-radius: var(--size-border-radius-md);
+    --size-control-input: var(--size-control-md);
+    --size-control-choice: var(--size-control-xxs);
+    --size-control-icon: var(--size-icon-sm);
+}
+
+/* The seek bar: the track at rest and while grown, the grab area around it, and the thumb. */
+:root {
+    --size-seek-rest: 0.1875rem;
+    --size-seek-grown: 0.375rem;
+    --size-seek-hit: 0.75rem;
+    --size-seek-thumb: 0.875rem;
+}
+
+/* Layout: how far above the bottom edge toasts sit, and the default column template of a table. */
+:root {
+    --toast-offset-bottom: var(--size-gap-lg);
+    --table-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
+}
+
+/* Motion. */
+:root {
+    --animation-length-short: 150ms;
+    --animation-length-medium: 250ms;
+    --animation-length-long: 500ms;
+    --animation-length-seek: 250ms;
+    --loader-duration: 1000ms;
+}
+
+/* Fonts. */
+:root {
+    --font-family-primary: "Segoe UI", "Roboto", sans-serif;
+    --font-family-icon: "Material Symbols Outlined", sans-serif;
+    --font-label: normal normal 400 normal var(--size-text-label) var(--font-family-primary);
+    --font-message: normal normal 400 normal var(--size-text-message) var(--font-family-primary);
+    --font-body: normal normal 400 normal var(--size-text-body) var(--font-family-primary);
+    --font-button: normal normal 500 normal var(--size-text-body) var(--font-family-primary);
+}
+
+/* The two ends of the palette. */
+:root {
+    --color-light: #FFFFFF;
+    --color-dark: #121212;
+}
+
+/* Which theme is showing. light-dark() below follows this, and so do the browser's own controls (scrollbars, date pickers).
+   No theme attribute: follow the system. theme="Light" or theme="Dark" on the root element forces one.
+   A project without a dark theme adds  :root { color-scheme: light; }  after this file. */
+:root {
+    color-scheme: light dark;
+}
+
+:root[theme="Light"] {
+    color-scheme: light;
+}
+
+:root[theme="Dark"] {
+    color-scheme: dark;
+}
+
+/* The two sides of a theme: the page and what is written on it. */
+:root {
+    --color-primary: light-dark(var(--color-light), var(--color-dark));
+    --color-complementary: light-dark(var(--color-dark), var(--color-light));
+}
+
+/* The status colours, each with its "on" colour. Checked for 4.5:1 between a fill and its "on" colour, and 3:1 between a fill and the page, in both themes (disabled is exempt). */
+:root {
+    --color-default: light-dark(#4D4AD3, #5F5CE6);
+    --color-on-default: #FFFFFF;
+    --color-highlight: #0073EC;
+    --color-on-highlight: #FFFFFF;
+    --color-info: #289ED9;
+    --color-on-info: #06202F;
+    --color-success: #23883D;
+    --color-on-success: #FFFFFF;
+    --color-warning: #D97F00;
+    --color-on-warning: #241400;
+    --color-notice: #A948DD;
+    --color-on-notice: #FFFFFF;
+    --color-error: #E42B21;
+    --color-on-error: #FFFFFF;
+    --color-disabled: #7F7F7F;
+    --color-on-disabled: #FFFFFF;
+}
+
+/* The surfaces a control sits on, with what is written on them. */
+:root {
+    --color-surface: var(--color-primary);
+    --color-on-surface: light-dark(#121212, #F2F2F2);
+    --color-input: light-dark(#FFFFFF, #1E1E1E);
+    --color-on-input: light-dark(#121212, #EBEBEB);
+}
+
+/* The shades of each colour, all worked out from its fill, so a new colour only needs a fill and an "on".
+   hover and active brighten it, subtle is a faint wash for backgrounds, border is the soft edge of a filled control. */
+:root {
+    --color-default-hover: color-mix(in srgb, var(--color-default) 85%, var(--color-light));
+    --color-default-active: color-mix(in srgb, var(--color-default) 70%, var(--color-light));
+    --color-default-subtle: color-mix(in srgb, var(--color-default) 14%, transparent);
+    --color-default-border: color-mix(in srgb, var(--color-default) 35%, var(--color-surface));
+    --color-highlight-hover: color-mix(in srgb, var(--color-highlight) 85%, var(--color-light));
+    --color-highlight-active: color-mix(in srgb, var(--color-highlight) 70%, var(--color-light));
+    --color-highlight-subtle: color-mix(in srgb, var(--color-highlight) 14%, transparent);
+    --color-highlight-border: color-mix(in srgb, var(--color-highlight) 35%, var(--color-surface));
+    --color-info-hover: color-mix(in srgb, var(--color-info) 85%, var(--color-light));
+    --color-info-active: color-mix(in srgb, var(--color-info) 70%, var(--color-light));
+    --color-info-subtle: color-mix(in srgb, var(--color-info) 14%, transparent);
+    --color-info-border: color-mix(in srgb, var(--color-info) 35%, var(--color-surface));
+    --color-success-hover: color-mix(in srgb, var(--color-success) 85%, var(--color-light));
+    --color-success-active: color-mix(in srgb, var(--color-success) 70%, var(--color-light));
+    --color-success-subtle: color-mix(in srgb, var(--color-success) 14%, transparent);
+    --color-success-border: color-mix(in srgb, var(--color-success) 35%, var(--color-surface));
+    --color-warning-hover: color-mix(in srgb, var(--color-warning) 85%, var(--color-light));
+    --color-warning-active: color-mix(in srgb, var(--color-warning) 70%, var(--color-light));
+    --color-warning-subtle: color-mix(in srgb, var(--color-warning) 14%, transparent);
+    --color-warning-border: color-mix(in srgb, var(--color-warning) 35%, var(--color-surface));
+    --color-notice-hover: color-mix(in srgb, var(--color-notice) 85%, var(--color-light));
+    --color-notice-active: color-mix(in srgb, var(--color-notice) 70%, var(--color-light));
+    --color-notice-subtle: color-mix(in srgb, var(--color-notice) 14%, transparent);
+    --color-notice-border: color-mix(in srgb, var(--color-notice) 35%, var(--color-surface));
+    --color-error-hover: color-mix(in srgb, var(--color-error) 85%, var(--color-light));
+    --color-error-active: color-mix(in srgb, var(--color-error) 70%, var(--color-light));
+    --color-error-subtle: color-mix(in srgb, var(--color-error) 14%, transparent);
+    --color-error-border: color-mix(in srgb, var(--color-error) 35%, var(--color-surface));
+}
+
+/* The text tones between full strength and the page, worked out from the theme so they stay readable in both: muted for secondary text, faded for hints, low-light for what only needs to be felt. */
+:root {
+    --color-muted: color-mix(in srgb, var(--color-complementary) 62%, var(--color-primary));
+    --color-faded: color-mix(in srgb, var(--color-complementary) 48%, var(--color-primary));
+    --color-low-light: color-mix(in srgb, var(--color-complementary) 34%, var(--color-primary));
+}
+
+/* Faint tints of the text colour over the page (and of the page over the text), for borders and stripes. */
+:root {
+    --color-offset-primary-sm: color-mix(in srgb, transparent 96%, var(--color-complementary));
+    --color-offset-primary-md: color-mix(in srgb, transparent 90%, var(--color-complementary));
+    --color-offset-primary-lg: color-mix(in srgb, transparent 80%, var(--color-complementary));
+    --color-offset-complementary-sm: color-mix(in srgb, transparent 90%, var(--color-primary));
+    --color-offset-complementary-md: color-mix(in srgb, transparent 80%, var(--color-primary));
+    --color-offset-complementary-lg: color-mix(in srgb, transparent 50%, var(--color-primary));
+}
+
+/* What the form controls read for their lines and fills. */
+:root {
+    --color-border: var(--color-complementary);
+    --color-border-focus: var(--color-highlight);
+    --color-control: var(--color-complementary);
+}

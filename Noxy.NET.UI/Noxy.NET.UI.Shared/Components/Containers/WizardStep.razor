@@ -1,0 +1,94 @@
+@inherits BaseComponentElement
+@implements IDisposable
+
+<li @attributes="AdditionalAttributes" class="@CssClass" data-state="@State" data-current="@IsCurrent">
+    <button type="button" class="step-button" disabled="@IsLocked" aria-current="@AriaCurrent" @onclick="ClickHandler">
+        <span class="icon" aria-hidden="true">
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                <circle class="disc" cx="20" cy="20" r="13"/>
+                <circle class="edge" cx="20" cy="20" r="13"/>
+                @if (IsCurrent)
+                {
+                    <circle class="ring" cx="20" cy="20" r="17"/>
+                }
+                <text class="number" x="20" y="20">@(Index + 1)</text>
+            </svg>
+        </span>
+
+        <span class="label">
+            <span class="title">@Title</span>
+            @if (!string.IsNullOrEmpty(Subtitle))
+            {
+                <span class="subtitle">@Subtitle</span>
+            }
+            @if (IsCompleted)
+            {
+                <span class="visually-hidden">@CompletedLabelCurrent</span>
+            }
+        </span>
+    </button>
+</li>
+
+@code {
+
+    private const string StateCompleted = "completed";
+    private const string StateActive = "active";
+    private const string StatePending = "pending";
+    private const string DefaultCompletedLabel = "Completed";
+
+    [CascadingParameter, EditorRequired]
+    public required WizardContext Context { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    // Lets the user go to this step before the steps in front of it are completed.
+    [Parameter]
+    public bool IgnoreCompletion { get; set; }
+
+    // Said after a completed step for assistive technology; the colour alone says nothing.
+    [Parameter]
+    public string? CompletedLabel { get; set; }
+    private string CompletedLabelCurrent => CompletedLabel ?? DefaultCompletedLabel;
+
+    // What is shown while this is the current step.
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private int Index => Context.IndexOf(this);
+
+    private bool IsCurrent => Context.IsStepCurrent(this);
+    private bool IsActive => Context.IsStepActive(this);
+    private bool IsCompleted => Context.IsStepCompleted(this);
+    private bool IsLocked => !IgnoreCompletion && !Context.IsStepReachable(Index);
+
+    private string State => IsCompleted ? StateCompleted : IsActive ? StateActive : StatePending;
+    private string? AriaCurrent => IsCurrent ? "step" : null;
+
+    protected override void OnInitialized()
+    {
+        Context.AddStep(this);
+        Context.StateChanged += StateChangedHandler;
+    }
+
+    private void StateChangedHandler(object? sender, EventArgs _)
+    {
+        // A step with no content has no parameter that changes, so it would not be drawn again by its parent.
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ClickHandler()
+    {
+        Context.GoToStep(Index, IgnoreCompletion);
+    }
+
+    public void Dispose()
+    {
+        Context.StateChanged -= StateChangedHandler;
+        Context.RemoveStep(this);
+    }
+
+}

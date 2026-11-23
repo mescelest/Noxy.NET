@@ -1,0 +1,51 @@
+# Noxy.NET.EntityManagement.Definitions
+
+The schema of an entity management system, written in code. A project describes what its data looks like with a file of `Add...` calls, and this library checks the calls and holds the result.
+
+- **Text parameter:** a text a user will see. It only says that the text exists and what kind it is (line, text or rich text). What it says is registered apart, in each language, so everything shown to a user can be translated.
+- **Property:** a typed field (`Boolean`, `DateTime`, `Decimal`, `Image`, `Integer`, `String`), optionally required, and with a maximum length for a string. Properties are defined once and can belong to several elements.
+- **Element:** a kind of thing (a person, a location), made of properties.
+- **Relation:** a link between two kinds of element, with a title for each direction, and optionally properties of its own (a role, a note).
+- **Context:** a group of elements that belong together, and so the data to query for a page.
+
+Identifiers are plain strings: lower case letters and digits, separated by single `-` or `.` (`person`, `person-involved-in-case`, `acme.weapon`). They are what is stored with the data, so they never change once data exists.
+
+```csharp
+public sealed class PersonDefinition : IDefinition
+{
+    public void Define(IDefinitionBuilder builder)
+    {
+        builder.AddTextParameter("person-title", TextKindEnum.Line);
+        builder.AddTextParameter("name-title", TextKindEnum.Line);
+
+        builder.AddProperty("name", PropertyKindEnum.String, "name-title", isRequired: true, maxLength: 200);
+        builder.AddElement("person", "person-title", ["name"]);
+    }
+}
+
+DefinitionRegistry registry = DefinitionBuilder.Create(new PersonDefinition());
+```
+
+The calls only collect. `Build` (or `Create`) checks everything at once and either returns a read-only `DefinitionRegistry`, or throws a `DefinitionException` that lists every problem it found: a bad or duplicate identifier, a text, property, element or
+relation that is used but not defined, a maximum length on a property that is not a string, a context without elements. The calls can be made in any order.
+
+## The texts
+
+What the texts say is written in files of their own, one call for each text and culture, so a system can ship any number of languages. A language is a file; adding one is adding a file.
+
+```csharp
+public sealed class EnglishTexts : IDefinitionTexts
+{
+    public void Define(IDefinitionTextBuilder builder)
+    {
+        builder.AddText("person-title", "en", "Person");
+        builder.AddText("name-title", "en", "Name");
+    }
+}
+
+DefinitionTextRegistry texts = DefinitionTextBuilder.Create(registry, new EnglishTexts(), new DanishTexts());
+```
+
+These are defaults. A person can edit a text in the running system, and the edit is kept in the database and is never replaced by a newer default. The texts are checked against the definition when they are built, and every problem is reported together: a text
+of a text parameter that is not defined, a culture that is not a language tag (`en`, `da-DK`, `zh-Hans-CN`), an empty text, a text twice in one culture, and a text parameter that has no text in the fallback culture (`en` unless another is given), so there is
+always something to show. Cultures are compared without regard to case.

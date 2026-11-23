@@ -1,0 +1,132 @@
+/* Each state is a fill with the colour of what is written on it, and the ring that marks the current step. */
+.WizardStep {
+    --step-fill: var(--color-surface, #FFFFFF);
+    --step-edge: var(--color-offset-primary-lg, #767676);
+    --step-on: var(--color-muted, #767676);
+    --step-ring: var(--color-highlight, #0073EC);
+    position: relative;
+}
+
+.WizardStep[data-state="active"] {
+    --step-fill: var(--color-highlight, #0073EC);
+    --step-edge: var(--color-highlight-border, #0073EC);
+    --step-on: var(--color-on-highlight, #FFFFFF);
+    --step-ring: var(--step-fill);
+}
+
+.WizardStep[data-state="completed"] {
+    --step-fill: var(--color-success, #23883D);
+    --step-edge: var(--color-success-border, #23883D);
+    --step-on: var(--color-on-success, #FFFFFF);
+    --step-ring: var(--step-fill);
+}
+
+/* The line down to the next step, from the middle of the circle. */
+.WizardStep:not(:last-child)::after {
+    content: " ";
+    position: absolute;
+    top: calc(100% + var(--size-gap-tiny, 2px));
+    left: calc(var(--size-control-md, 2.625rem) / 2);
+    width: var(--size-border-width-md, 2px);
+    height: calc(var(--size-gap-lg, 1.5rem) - 2 * var(--size-gap-tiny, 2px));
+    background-color: var(--color-offset-primary-lg, #767676);
+    transform: translateX(-50%);
+}
+
+.step-button {
+    display: flex;
+    align-items: center;
+    column-gap: var(--size-gap-xxxs, 0.25rem);
+    min-height: var(--size-control-md, 2.625rem);
+    padding: 0 var(--size-gap-xs, 0.75rem) 0 0;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--size-control-md, 2.625rem);
+    font: inherit;
+    color: var(--color-on-surface, var(--color-complementary, #000000));
+    text-align: start;
+    cursor: pointer;
+    transition: background-color var(--animation-length-medium, 250ms) ease-in-out;
+}
+
+.step-button:disabled {
+    color: var(--color-muted, #767676);
+    cursor: default;
+}
+
+.step-button:not(:disabled):not([aria-current]):hover {
+    background-color: var(--color-offset-primary-md, #E6E6E6);
+}
+
+.step-button:focus-visible {
+    outline: var(--size-border-width-md, 2px) solid var(--color-border-focus, #0073EC);
+    outline-offset: var(--size-gap-tiny, 2px);
+}
+
+.icon {
+    flex: 0 0 auto;
+    width: var(--size-control-md, 2.625rem);
+    height: var(--size-control-md, 2.625rem);
+}
+
+.icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.disc {
+    fill: var(--step-fill);
+}
+
+.edge {
+    fill: none;
+    stroke: var(--step-edge);
+    stroke-width: var(--size-border-width-md, 2px);
+}
+
+.ring {
+    fill: none;
+    stroke: var(--step-ring);
+    stroke-width: var(--size-border-width-md, 2px);
+}
+
+.number {
+    fill: var(--step-on);
+    font-size: var(--size-text-body, 1rem);
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    user-select: none;
+}
+
+.label {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    user-select: none;
+}
+
+.title {
+    font-size: var(--size-text-h6, 1.125rem);
+    font-weight: 700;
+}
+
+.subtitle {
+    font-size: var(--size-text-message, 0.875rem);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .step-button {
+        transition: none;
+    }
+}

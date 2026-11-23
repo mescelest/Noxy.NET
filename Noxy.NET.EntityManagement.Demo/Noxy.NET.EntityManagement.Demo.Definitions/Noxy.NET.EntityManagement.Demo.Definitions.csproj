@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Noxy.NET.EntityManagement.Demo.Definitions</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Noxy.NET.EntityManagement\Noxy.NET.EntityManagement.Definitions\Noxy.NET.EntityManagement.Definitions.csproj"/>
+    </ItemGroup>
+
+</Project>

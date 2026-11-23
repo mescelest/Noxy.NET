@@ -1,0 +1,79 @@
+@inherits BaseComponentElement
+@implements IDisposable
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <CascadingValue Value="Context">
+        <ol class="steps" aria-label="@Label">
+            @ChildContent
+        </ol>
+
+        <div class="content">
+            @Context.CurrentStep?.ChildContent
+        </div>
+    </CascadingValue>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required WizardContext Context { get; set; }
+
+    // The steps, as WizardStep components.
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // The name of the list of steps for assistive technology.
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public EventCallback OnWizardComplete { get; set; }
+
+    private WizardContext? _subscribedContext;
+
+    protected override void OnParametersSet()
+    {
+        if (ReferenceEquals(_subscribedContext, Context)) return;
+
+        Unsubscribe();
+        _subscribedContext = Context;
+        Context.StateChanged += StateChangedHandler;
+        Context.WizardCompleted += WizardCompletedHandler;
+    }
+
+    private void StateChangedHandler(object? sender, EventArgs _)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void WizardCompletedHandler(object? sender, EventArgs _)
+    {
+        // The handler of the app may throw: that goes to the renderer like any other error, instead of being lost.
+        InvokeAsync(async () =>
+        {
+            try
+            {
+                await OnWizardComplete.InvokeAsync();
+            }
+            catch (Exception exception)
+            {
+                await DispatchExceptionAsync(exception);
+            }
+        });
+    }
+
+    private void Unsubscribe()
+    {
+        if (_subscribedContext is null) return;
+
+        _subscribedContext.StateChanged -= StateChangedHandler;
+        _subscribedContext.WizardCompleted -= WizardCompletedHandler;
+        _subscribedContext = null;
+    }
+
+    public void Dispose()
+    {
+        Unsubscribe();
+    }
+
+}
