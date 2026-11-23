@@ -72,14 +72,25 @@ public class QueueActionServiceTest
     }
 
     [Fact]
-    public async Task PlayNext_OfASourceItem_AddsTheFileAndRemovesTheOriginal()
+    public async Task PlayNext_OfASourceItem_MovesItToTheFront_WithoutAddingANewOne()
     {
         QueueItem fromSource = Item();
         SetQueue([], Item(), [], [fromSource]);
 
         await _service.PlayNext([fromSource.ItemID]);
 
-        Assert.Equal([$"PlayNext {fromSource.MediaFileID}", $"RemoveFromQueue {fromSource.ItemID}"], _control.CallList);
+        Assert.Equal([$"MoveInQueue {fromSource.ItemID} "], _control.CallList);
+    }
+
+    [Fact]
+    public async Task PlayNext_OfUserQueueAndSourceItemsTogether_KeepsTheOrderOfTheQueue()
+    {
+        QueueItem queued = Item(), first = Item(), second = Item();
+        SetQueue([], Item(), [queued], [first, second]);
+
+        await _service.PlayNext([queued.ItemID, second.ItemID]);
+
+        Assert.Equal([$"MoveInQueue {second.ItemID} ", $"MoveInQueue {queued.ItemID} "], _control.CallList);
     }
 
     [Fact]
