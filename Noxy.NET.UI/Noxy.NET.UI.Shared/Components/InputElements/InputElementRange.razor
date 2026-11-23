@@ -1,8 +1,8 @@
 ﻿@inherits BaseInput<double?>
 @implements INotifyInputChanged
 
-<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="range" min="@Min" max="@Max" step="@Step" value="@Value"
-       aria-valuemin="@Min" aria-valuemax="@Max" aria-valuenow="@Value" @oninput="OnInputChange"/>
+<input @attributes="AdditionalAttributes" class="@CssClass" id="@IDCurrent" name="@GetName()" type="range" min="@MinText" max="@MaxText" step="@StepText" value="@ValueText"
+       aria-valuemin="@MinText" aria-valuemax="@MaxText" aria-valuenow="@ValueText" @oninput="OnInputChange"/>
 
 @code {
 
@@ -17,6 +17,15 @@
 
     [Parameter]
     public EventCallback<ChangeEventArgs> OnChange { get; set; }
+
+    // The browser only reads a number with a dot, so these are never written with the culture of the machine (a decimal comma makes the max, step and value invalid).
+    private string MinText => Min.ToString(CultureInfo.InvariantCulture);
+
+    private string MaxText => Max.ToString(CultureInfo.InvariantCulture);
+
+    private string? StepText => Step?.ToString(CultureInfo.InvariantCulture);
+
+    private string? ValueText => Value?.ToString(CultureInfo.InvariantCulture);
 
     private void OnInputChange(ChangeEventArgs args)
     {

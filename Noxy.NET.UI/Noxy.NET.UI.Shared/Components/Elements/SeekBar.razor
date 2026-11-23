@@ -1,6 +1,12 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass" style="--seek-progress: @ProgressStyle">
+    <div class="track" aria-hidden="true">
+        <div class="fill"></div>
+    </div>
+    <div class="lane" aria-hidden="true">
+        <div class="thumb"></div>
+    </div>
     <InputElementRange Min="0" Max="Max" Step="Step" Value="Value" ValueChanged="InputHandler" aria-label="@Label" @onchange="ChangeHandler"/>
 </div>
 
