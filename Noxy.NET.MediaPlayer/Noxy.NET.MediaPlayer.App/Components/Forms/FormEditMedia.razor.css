@@ -1,7 +1,7 @@
 /* Two columns when the dialog is wide enough, one when it is not; what is wide spans them all. */
 .fields {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(var(--size-column), 1fr));
     column-gap: var(--size-gap-sm);
     row-gap: var(--size-gap-sm);
 

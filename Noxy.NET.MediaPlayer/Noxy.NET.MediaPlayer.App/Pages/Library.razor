@@ -8,7 +8,7 @@
 <div class="@CssClass @FullscreenPageClass">
     <UploadMediaDropZone>
         <MediaFileHeader Name="Library" EntryCount="Current.MediaList.Count" SelectedCount="Current.SelectedSet.Count">
-            <LibraryContextMenu @ref="_contextMenu" SelectedSet="Current.SelectedSet" SelectedKeyList="Current.SelectedIDList" HiddenSelectedCount="Current.HiddenSelectedCount" ShowTrigger="@HasSelection"/>
+            <LibraryContextMenu @ref="_contextMenu" SelectedSet="Current.SelectedSet" SelectedKeyList="Current.SelectedIDList" ShowTrigger="@HasSelection"/>
         </MediaFileHeader>
 
         <MediaFileTable RowList="RowList" IsEmpty="IsLibraryEmpty" EmptyTitle="Your library is empty"

@@ -16,8 +16,6 @@
 
     <ContextMenu @ref="_menu" ID="@MenuID" ItemList="ItemList" Side="PlacementSideEnum.Bottom" Align="PlacementAlignEnum.End" OnClose="CloseHandler"/>
 
-    <ConfirmActionDialog Open="@IsConfirming" OpenChanged="CloseConfirm" Title="@_confirm?.Title" Message="@_confirm?.Message" AcceptText="@_confirm?.AcceptText" OnSubmit="SubmitConfirm"/>
-
     <Dialog @bind-Open="_choosingPlaylist">
         <h2>@AppTexts.LibraryAddToPlaylist</h2>
         @if (StatePlaylistList.Value.PlaylistList.Count == 0)
@@ -39,8 +37,6 @@
 
 @code {
 
-    private sealed record ConfirmRequest(string Title, string Message, string AcceptText, Func<Task> Run);
-
     // The item IDs of the ticked rows, and the same in the order of the list.
     [Parameter, EditorRequired]
     public required IReadOnlySet<Guid> SelectedSet { get; set; }
@@ -60,13 +56,10 @@
 
     private ContextMenu? _menu;
     private Guid? _clickedKey;
-    private ConfirmRequest? _confirm;
     private List<Guid> _playlistTargetList = [];
     private bool _choosingPlaylist;
 
     private bool IsNothingTicked => SelectedSet.Count == 0;
-
-    private bool IsConfirming => _confirm is not null;
 
     // A right-click on a row acts on that row; the button acts on the ticked rows.
     private List<ContextMenuItem> ItemList => _clickedKey is { } key ? BuildItemList([key]) : BuildItemList(SelectedKeyList);
@@ -107,15 +100,15 @@
         list.Add(ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(mediaFileIDList)), "download"));
         list.Add(ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(mediaFileIDList)), "save_alt"));
         list.Add(AddToPlaylistItem(mediaFileIDList));
-        list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => ConfirmRemoveFromDevice(mediaFileIDList), "delete_sweep"));
+        list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => Show(ServiceLibraryAction.RemoveFromDevice(mediaFileIDList)), "delete_sweep", true, AppTexts.ConfirmActionAgain));
 
         return list;
     }
 
-    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run, string icon)
+    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run, string icon, bool isDestructive = false, string? confirmText = null)
     {
         string? reason = ServiceLibraryAction.GetDisabledReason(action);
-        return ContextMenuItem.Item(text, run, reason is not null, reason, icon: icon);
+        return ContextMenuItem.Item(text, run, reason is not null, reason, isDestructive, icon, confirmText: confirmText);
     }
 
     private async Task Run(Func<Task> action)
@@ -147,28 +140,6 @@
         {
             ServiceToast.ShowWarning(string.Format(AppTexts.BulkFailed, result.FailedIDList.Count, result.Message).Trim());
         }
-    }
-
-    private Task ConfirmRemoveFromDevice(List<Guid> mediaFileIDList)
-    {
-        string message = string.Format(AppTexts.ConfirmRemoveFromDeviceMessage, mediaFileIDList.Count.ToCountText(AppTexts.MediaFileCountOne, AppTexts.MediaFileCountMany));
-        _confirm = new(AppTexts.LibraryRemoveFromDevice, message, AppTexts.ConfirmRemoveAccept, () => Show(ServiceLibraryAction.RemoveFromDevice(mediaFileIDList)));
-
-        return Task.CompletedTask;
-    }
-
-    private Task CloseConfirm(bool open)
-    {
-        if (!open) _confirm = null;
-
-        return Task.CompletedTask;
-    }
-
-    private async Task SubmitConfirm(bool accepted)
-    {
-        ConfirmRequest? request = _confirm;
-        _confirm = null;
-        if (accepted && request is not null) await request.Run();
     }
 
     private Task ChoosePlaylist(List<Guid> mediaFileIDList)

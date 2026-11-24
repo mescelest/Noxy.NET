@@ -132,33 +132,6 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remove.
-        /// </summary>
-        public static string ConfirmRemoveAccept {
-            get {
-                return ResourceManager.GetString("ConfirmRemoveAccept", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Remove {0} from this device? They stay in your library..
-        /// </summary>
-        public static string ConfirmRemoveFromDeviceMessage {
-            get {
-                return ResourceManager.GetString("ConfirmRemoveFromDeviceMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Remove {0} from this playlist? They stay in your library..
-        /// </summary>
-        public static string ConfirmRemoveFromPlaylistMessage {
-            get {
-                return ResourceManager.GetString("ConfirmRemoveFromPlaylistMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Enter a name of 1 to {0} characters..
         /// </summary>
         public static string DeviceNameInvalid {

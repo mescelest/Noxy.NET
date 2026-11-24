@@ -21,7 +21,7 @@
     {
         <UploadMediaDropZone PlaylistID="Id">
             <MediaFileHeader Name="@_detail.Name" EntryCount="_detail.EntryList.Count" SelectedCount="_selectedSet.Count">
-                <LibraryContextMenu @ref="_contextMenu" PlaylistID="Id" SelectedSet="_selectedSet" SelectedKeyList="SelectedKeyList" HiddenSelectedCount="HiddenSelectedCount"
+                <LibraryContextMenu @ref="_contextMenu" PlaylistID="Id" SelectedSet="_selectedSet" SelectedKeyList="SelectedKeyList"
                                     MediaFileIDOf="MediaFileIDOf" OnPlaylistChanged="Load" ShowTrigger="@HasSelection"/>
             </MediaFileHeader>
 
@@ -211,8 +211,6 @@
 
     // The ticked entries in the order of the rows, then the ones a search hides.
     private List<Guid> SelectedKeyList => [.. _rowList.Where(x => _selectedSet.Contains(x.Key)).Select(x => x.Key), .. _selectedSet.Except(_rowList.Select(x => x.Key))];
-
-    private int HiddenSelectedCount => _selectedSet.Count - _rowList.Count(x => _selectedSet.Contains(x.Key));
 
     // An entry stands for its media file; the same media file can be two entries.
     private Guid MediaFileIDOf(Guid entryID) => _mediaFileIDMap.GetValueOrDefault(entryID, entryID);

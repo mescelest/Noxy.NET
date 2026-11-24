@@ -60,14 +60,6 @@
     <value>{0} media files</value>
         <comment>A count inside a sentence, for any other number.</comment>
   </data>
-    <data name="ConfirmRemoveFromDeviceMessage" xml:space="preserve">
-    <value>Remove {0} from this device? They stay in your library.</value>
-        <comment>{0} is a count of media files.</comment>
-  </data>
-    <data name="ConfirmRemoveFromPlaylistMessage" xml:space="preserve">
-    <value>Remove {0} from this playlist? They stay in your library.</value>
-        <comment>{0} is a count of media files.</comment>
-  </data>
     <data name="ConfirmDeleteTitle" xml:space="preserve">
     <value>Delete from library</value>
         <comment>The title of the confirmation of deleting.</comment>
@@ -75,10 +67,6 @@
     <data name="ConfirmDeleteMessage" xml:space="preserve">
     <value>Delete {0} from your library?</value>
         <comment>{0} is a count of media files.</comment>
-  </data>
-    <data name="ConfirmRemoveAccept" xml:space="preserve">
-    <value>Remove</value>
-        <comment>The accept button of the remove confirmations.</comment>
   </data>
     <data name="ConfirmDeleteAccept" xml:space="preserve">
     <value>Delete</value>
