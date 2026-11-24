@@ -1,6 +1,6 @@
 # Playlist page like the Library: design
 
-Status: short design for a small change, agreed in conversation with the user on 2026-11-21 (the decisions below marked as theirs); the calls marked *(my call)* are mine. Not built. Awaiting approval before a plan is written. Depends on the context menu and popover (`2026-11-21-context-menu-and-popover-design.md`) for the Actions menu.
+Status: short design for a small change, agreed in conversation with the user on 2026-11-21 (the decisions below marked as theirs); the calls marked *(my call)* are mine. Built, as `Pages/Playlist.razor` on `MediaFileTable` (there is no `PlaylistView` component; the page holds its own components). Depended on the context menu and popover (`2026-11-21-context-menu-and-popover-design.md`) for the Actions menu.
 
 ## Intent
 

@@ -1,6 +1,6 @@
 # Context menu and popover: design
 
-Status: agreed in conversation with the user on 2026-11-21 (approach chosen, behaviour decided where marked). Not built. Awaiting approval of this document before a plan is written.
+Status: agreed in conversation with the user on 2026-11-21 (approach chosen, behaviour decided where marked). Built: `ContextMenu` and `Popover` are in `Noxy.NET.UI.Shared`, and the Library, playlist and queue menus use them.
 
 ## Intent
 

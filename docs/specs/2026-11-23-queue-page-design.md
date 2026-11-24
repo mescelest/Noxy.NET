@@ -1,5 +1,7 @@
 # Queue page instead of the queue popup: design
 
+Status: built (the `/queue` page, `QueueList` and `QueueContextMenu`; the popup `QueuePanel` is deleted).
+
 ## Intent
 
 The queue is a small popup opened from the player bar. It is hard to navigate and gives no overview, and while it was being tried it closed on every click inside it. The user wants a dedicated page for the queue, laid out like the playlist and Library pages, where the whole queue is one scrollable list: what was played above the current song, what is coming below it. The popup goes away completely.

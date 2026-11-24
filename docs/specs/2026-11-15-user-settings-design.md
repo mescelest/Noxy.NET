@@ -1,6 +1,6 @@
 # User settings: typed, one value per setting
 
-Status: draft for the user's approval, written 2026-11-15 from the brainstorming conversation. Backend only. It replaces the "User settings" section of `2026-11-15-metadata-entities-design.md` and the settings record that was built from it (`EntityUserSettings`, a single row with a boolean column per setting). Lines marked *(my call)* are decisions I made without asking, so check them.
+Status: implemented (backend), written 2026-11-15 from the brainstorming conversation. Backend only. It replaces the "User settings" section of `2026-11-15-metadata-entities-design.md` and the settings record that was built from it (`EntityUserSettings`, a single row with a boolean column per setting). Lines marked *(my call)* are decisions I made without asking, so check them.
 
 ## Intent
 
@@ -8,7 +8,7 @@ Users need a few settings that follow them from device to device. Today there is
 
 ## Goals
 
-- **Four settings to ship with:** `Shuffle` (enum: `Off`, `Random`, `SpreadArtists`), `Repeat` (enum: `No`, `Once`, `Forever`), `MergeOnRename` (boolean) and `KeepQueuedItems` (boolean, default false: keep the user queue when a different source starts, see `2026-11-16-remote-playback-design.md`). The user wants several ways to shuffle: completely random, or something smarter such as avoiding media from the same artist in a row. The server only stores which mode was chosen; the shuffling itself is done on the device, so a new mode is one new enum member with no migration. *(My call: the member names, and shipping the two modes the user named. A mode that adds media the user did not choose is deliberately not included.)* *(Volume was a fifth setting until 2026-11-16; it is per device now, see the remote playback design.)*
+- **Four settings to ship with (a fifth, `PrefetchCount`, was added later: an integer from 0 to 10, default 3, how many queue entries after the current one are downloaded ahead of time):** `Shuffle` (enum: `Off`, `Random`, `SpreadArtists`), `Repeat` (enum: `No`, `Once`, `Forever`), `MergeOnRename` (boolean) and `KeepQueuedItems` (boolean, default false: keep the user queue when a different source starts, see `2026-11-16-remote-playback-design.md`). The user wants several ways to shuffle: completely random, or something smarter such as avoiding media from the same artist in a row. The server only stores which mode was chosen; the shuffling itself is done on the device, so a new mode is one new enum member with no migration. *(My call: the member names, and shipping the two modes the user named. A mode that adds media the user did not choose is deliberately not included.)* *(Volume was a fifth setting until 2026-11-16; it is per device now, see the remote playback design.)*
 - **Strongly typed storage:** an abstract user-setting base (user, key, modified time) with a derived table per value type, each holding one non-null `Value`: boolean, integer, decimal, string and enum. The enum table stores the enum member's name, so reordering an enum later cannot change saved values.
 - **Every setting declared once in code:** key, value type, default, and its limits (a range for a number, the member list for an enum). The server only accepts a value that matches the declaration, and code reads a setting as its real type, not as a key lookup.
 - **Defaults are not stored.** A user with no saved row for a setting gets the declared default. The row is created the first time the setting is changed. Nothing is created when a user is created.
@@ -53,7 +53,7 @@ A setting declaration names the key, the value type, the default and the limits.
 ### Data
 
 - `EntityUserSetting` (abstract): ID, user, key, modified time. A unique index on (user, key).
-- Derived: `EntityUserSettingBoolean`, `…Integer`, `…Decimal`, `…String`, `…Enum`, each with one `Value`. Only the types the four settings need are built now (boolean, integer, enum); decimal and string are added when a setting needs them *(my call, to avoid tables nothing uses)*.
+- Derived: `EntityUserSettingBoolean`, `…Integer`, `…Decimal`, `…String`, `…Enum`, each with one `Value`. Only boolean, integer and enum are built; decimal and string are added when a setting needs them *(my call, to avoid tables nothing uses)*.
 
 ### Endpoints
 

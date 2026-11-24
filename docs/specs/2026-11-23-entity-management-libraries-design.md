@@ -1,6 +1,6 @@
 # Entity management as a set of libraries: schema in code, data with history, relations: design
 
-Status: direction agreed with the user on 2026-11-23 (decisions below). Nothing is built yet. The detailed shape of each phase is to be confirmed before it starts. Priority: the rebuilt Administration, as the way to test the data in real time.
+Status: direction agreed with the user on 2026-11-23 (decisions below). Built so far: the Definitions, Domain, Persistence, Application and Contract libraries and the demo definitions (the API and Presentation libraries and the Administration are not built yet). The detailed shape of each phase is to be confirmed before it starts. Priority: the rebuilt Administration, as the way to test the data in real time.
 
 ## Intent
 
