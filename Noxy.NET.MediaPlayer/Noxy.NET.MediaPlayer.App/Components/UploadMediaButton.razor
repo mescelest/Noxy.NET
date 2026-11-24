@@ -19,7 +19,7 @@
 
     [Parameter]
     public string? Label { get; set; }
-    private string LabelCurrent => Label ?? "Upload";
+    private string LabelCurrent => Label ?? AppTexts.UploadButton;
 
     private const string AcceptAudio = "audio/*";
 

@@ -9,7 +9,7 @@
         }
     </Button>
 
-    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" class="icon" IsIcon="true" aria-label="Previous" @onclick="OnPrevious">
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" class="icon" IsIcon="true" aria-label="@AppTexts.PlayerPrevious" @onclick="OnPrevious">
         <MaterialIcon Icon="skip_previous" Size="var(--size-icon-md)"/>
     </Button>
 
@@ -17,7 +17,7 @@
         <MaterialIcon Icon="@PlayingIcon" Size="var(--size-icon-md)"/>
     </Button>
 
-    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" class="icon" IsIcon="true" aria-label="Next" @onclick="OnNext">
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" class="icon" IsIcon="true" aria-label="@AppTexts.PlayerNext" @onclick="OnNext">
         <MaterialIcon Icon="skip_next" Size="var(--size-icon-md)"/>
     </Button>
 
@@ -51,7 +51,7 @@
     private const string IconPlay = "play_arrow";
 
     private string PlayingIcon => Display.IsPlaying ? IconPause : IconPlay;
-    private string PlayingAriaLabel => Display.IsPlaying ? "Pause" : "Play";
+    private string PlayingAriaLabel => Display.IsPlaying ? AppTexts.PlayerPause : AppTexts.PlayerPlay;
 
     private const string IconShuffle = "shuffle";
     private const string IconShuffleSpreadArtists = "diversity_3";

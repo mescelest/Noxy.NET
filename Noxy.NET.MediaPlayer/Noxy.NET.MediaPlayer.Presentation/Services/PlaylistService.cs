@@ -9,9 +9,9 @@ namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
 public class PlaylistService(IApiClient clientApi, ISyncService serviceSync, IDownloadService serviceDownload, IMetadataStore storeMetadata, IPlaybackControlService serviceControl) : IPlaylistService
 {
-    public async Task<ResponsePlaylist> Create(string name, bool allowDuplicates = true)
+    public async Task<ResponsePlaylist> Create(string name, bool allowDuplicates = true, int? artHue = null)
     {
-        ResponsePlaylist playlist = await clientApi.CreatePlaylist(new() { Name = name.Trim(), AllowDuplicates = allowDuplicates });
+        ResponsePlaylist playlist = await clientApi.CreatePlaylist(new() { Name = name.Trim(), AllowDuplicates = allowDuplicates, ArtHue = artHue });
         await serviceSync.ApplyPlaylistUpdated(playlist);
 
         return playlist;

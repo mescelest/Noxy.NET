@@ -7,12 +7,12 @@
 <header @attributes="AdditionalAttributes" class="@CssClass">
 
     <div class="group left">
-        <Button IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="Show or hide the sidebar" aria-expanded="@SidebarOpen" @onclick="ToggleSidebar">
+        <Button IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="@AppTexts.HeaderToggleSidebar" aria-expanded="@SidebarOpen" @onclick="ToggleSidebar">
             <MaterialIcon Icon="menu" Size="var(--size-icon-sm)"/>
         </Button>
 
         <h1 class="logo">
-            <span>Noxy Player</span>
+            <span>@AppTexts.AppName</span>
         </h1>
     </div>
 
@@ -21,12 +21,12 @@
             <div class="connection-message" role="status">
                 @if (StateSession.Value.IsOffline)
                 {
-                    <span>Offline</span>
+                    <span>@AppTexts.StatusOffline</span>
                     <MaterialIcon Icon="cancel" Size="var(--size-icon-xs)"/>
                 }
                 else
                 {
-                    <span>Online</span>
+                    <span>@AppTexts.StatusOnline</span>
                     <MaterialIcon Icon="check_circle" Size="var(--size-icon-xs)"/>
                 }
             </div>

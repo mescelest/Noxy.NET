@@ -2,10 +2,10 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <InputControlSelect TOption="string" ID="server-picker" Name="server" aria-label="Server" disabled="@IsSelectDisabled" OptionList="_optionList" @bind-Value:get="@CurrentOption" @bind-Value:set="Select">
+    <InputControlSelect TOption="string" ID="server-picker" Name="server" aria-label="@AppTexts.ServerPickerLabel" disabled="@IsSelectDisabled" OptionList="_optionList" @bind-Value:get="@CurrentOption" @bind-Value:set="Select">
         @OptionText(context)
     </InputControlSelect>
-    <Button class="manage" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" IsIcon="true" disabled="@Disabled" aria-label="Manage servers" @onclick="OpenDialog">
+    <Button class="manage" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" IsIcon="true" disabled="@Disabled" aria-label="@AppTexts.ServerPickerManage" @onclick="OpenDialog">
         <MaterialIcon Icon="settings" Size="var(--size-icon-sm)"/>
     </Button>
 
@@ -29,7 +29,7 @@
 
     private string CurrentOption => _current ?? PlaceholderOption;
 
-    private string PlaceholderText => _addressList.Count == 0 ? "No server saved" : "Choose a server";
+    private string PlaceholderText => _addressList.Count == 0 ? AppTexts.ServerPickerNone : AppTexts.ServerPickerChoose;
 
     private string OptionText(string? option) => string.IsNullOrEmpty(option) ? PlaceholderText : option;
 

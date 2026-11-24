@@ -10,6 +10,12 @@ namespace Noxy.NET.Test.MediaPlayer.Storage;
 public class FileStorageServiceTest : IDisposable
 {
     private readonly string _root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+    private readonly ConfigStorage _config;
+
+    public FileStorageServiceTest()
+    {
+        _config = new() { RootPath = _root, AllowedExtensionList = ["mp3"] };
+    }
 
     public void Dispose()
     {
@@ -21,7 +27,8 @@ public class FileStorageServiceTest : IDisposable
 
     private FileStorageService Create(long maxSizeBytes = 1024)
     {
-        return new(Options.Create(new ConfigStorage { RootPath = _root, MaxSizeBytes = maxSizeBytes, AllowedExtensionList = ["mp3"] }));
+        _config.MaxSizeBytes = maxSizeBytes;
+        return new(Options.Create(_config));
     }
 
     private static MemoryStream Bytes(int count)
@@ -29,9 +36,14 @@ public class FileStorageServiceTest : IDisposable
         return new(new byte[count]);
     }
 
+    private string LibraryPath(string fileName)
+    {
+        return Path.Combine(_root, _config.LibraryFolderName, fileName);
+    }
+
     private string StagingPath(string fileName)
     {
-        return Path.Combine(_root, FileStorageService.StagingFolderName, fileName);
+        return Path.Combine(_root, _config.StagingFolderName, fileName);
     }
 
     // Files reach the library by being staged and then promoted.
@@ -48,7 +60,8 @@ public class FileStorageServiceTest : IDisposable
         Create();
 
         Assert.True(Directory.Exists(_root));
-        Assert.True(Directory.Exists(Path.Combine(_root, FileStorageService.StagingFolderName)));
+        Assert.True(Directory.Exists(Path.Combine(_root, _config.StagingFolderName)));
+        Assert.True(Directory.Exists(Path.Combine(_root, _config.LibraryFolderName)));
     }
 
     [Fact]
@@ -71,7 +84,7 @@ public class FileStorageServiceTest : IDisposable
         StoredFile stored = await service.StageAsync(new MemoryStream([1, 2, 3]), "mp3", TestContext.Current.CancellationToken);
 
         Assert.True(File.Exists(StagingPath(stored.FileName)));
-        Assert.False(File.Exists(Path.Combine(_root, stored.FileName)));
+        Assert.False(File.Exists(LibraryPath(stored.FileName)));
     }
 
     [Fact]
@@ -192,7 +205,7 @@ public class FileStorageServiceTest : IDisposable
         service.Promote(stored.FileName);
         service.Promote(stored.FileName);
 
-        Assert.True(File.Exists(Path.Combine(_root, stored.FileName)));
+        Assert.True(File.Exists(LibraryPath(stored.FileName)));
     }
 
     [Fact]
@@ -209,7 +222,7 @@ public class FileStorageServiceTest : IDisposable
 
         service.Delete(fileName);
 
-        Assert.False(File.Exists(Path.Combine(_root, fileName)));
+        Assert.False(File.Exists(LibraryPath(fileName)));
     }
 
     [Fact]
@@ -260,7 +273,7 @@ public class FileStorageServiceTest : IDisposable
         Assert.Throws<ArgumentException>(() => service.DeleteStaged(fileName));
     }
 
-    private string TemporaryFolder => Path.Combine(_root, FileStorageService.TemporaryFolderName);
+    private string TemporaryFolder => Path.Combine(_root, _config.TemporaryFolderName);
 
     [Fact]
     public void Constructor_RemovesLeftoverTemporaryFiles()
@@ -297,7 +310,7 @@ public class FileStorageServiceTest : IDisposable
         Assert.NotEqual(first, second);
         Assert.Equal(TemporaryFolder, Path.GetDirectoryName(first));
         Assert.Equal([1, 2, 3], await File.ReadAllBytesAsync(first, TestContext.Current.CancellationToken));
-        Assert.Equal([1, 2, 3], await File.ReadAllBytesAsync(Path.Combine(_root, fileName), TestContext.Current.CancellationToken));
+        Assert.Equal([1, 2, 3], await File.ReadAllBytesAsync(LibraryPath(fileName), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -313,7 +326,7 @@ public class FileStorageServiceTest : IDisposable
         }
 
         Assert.False(File.Exists(copy));
-        Assert.True(File.Exists(Path.Combine(_root, fileName)));
+        Assert.True(File.Exists(LibraryPath(fileName)));
     }
 
     [Fact]
@@ -333,7 +346,7 @@ public class FileStorageServiceTest : IDisposable
     {
         FileStorageService service = Create();
         string fileName = await AddToLibrary(service, [1]);
-        File.Delete(Path.Combine(_root, fileName));
+        File.Delete(LibraryPath(fileName));
 
         Assert.Throws<FileNotFoundException>(() => service.CopyToTemporary(fileName));
     }
@@ -353,5 +366,26 @@ public class FileStorageServiceTest : IDisposable
         Assert.Throws<ArgumentException>(() => service.OpenTemporary(path));
         Assert.Throws<ArgumentException>(() => service.DeleteTemporary(path));
         Assert.True(File.Exists(Path.GetFullPath(path)));
+    }
+
+    [Fact]
+    public async Task ConfiguredFolderNames_AreTheOnesThatAreUsed()
+    {
+        _config.LibraryFolderName = "files";
+        _config.StagingFolderName = "incoming";
+        _config.TemporaryFolderName = "scratch";
+        FileStorageService service = Create();
+
+        StoredFile stored = await service.StageAsync(new MemoryStream([1, 2, 3]), "mp3", TestContext.Current.CancellationToken);
+        Assert.True(File.Exists(Path.Combine(_root, "incoming", stored.FileName)));
+
+        service.Promote(stored.FileName);
+        Assert.True(File.Exists(Path.Combine(_root, "files", stored.FileName)));
+
+        string copy = service.CopyToTemporary(stored.FileName);
+        Assert.Equal(Path.Combine(_root, "scratch"), Path.GetDirectoryName(copy));
+        Assert.False(Directory.Exists(Path.Combine(_root, "library")));
+        Assert.False(Directory.Exists(Path.Combine(_root, "staging")));
+        Assert.False(Directory.Exists(Path.Combine(_root, "temporary")));
     }
 }

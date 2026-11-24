@@ -4,19 +4,19 @@
 @using Noxy.NET.MediaPlayer.Presentation.Exceptions
 @inherits BaseComponentElementFluxor
 
-<nav @attributes="AdditionalAttributes" class="@CssClass" aria-label="Main">
+<nav @attributes="AdditionalAttributes" class="@CssClass" aria-label="@AppTexts.SidebarMain">
     <div class="link-list">
         <NavLink class="link" href="" Match="NavLinkMatch.All" @onclick="OnNavigate">
             <MaterialIcon Icon="home" Size="var(--size-icon-sm)"/>
-            <span>Home</span>
+            <span>@AppTexts.SidebarHome</span>
         </NavLink>
         <NavLink class="link" href="library" @onclick="OnNavigate">
             <MaterialIcon Icon="library_music" Size="var(--size-icon-sm)"/>
-            <span>Library</span>
+            <span>@AppTexts.SidebarLibrary</span>
         </NavLink>
         <NavLink class="link" href="settings" @onclick="OnNavigate">
             <MaterialIcon Icon="settings" Size="var(--size-icon-sm)"/>
-            <span>Settings</span>
+            <span>@AppTexts.SidebarSettings</span>
         </NavLink>
     </div>
 
@@ -33,20 +33,21 @@
 
     <div class="link-list">
         <div class="link-list-header">
-            <span>Playlists</span>
-            <Button class="link-list-header-button" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Success" @onclick="ClickNewPlaylistHandler">
+            <span>@AppTexts.SidebarPlaylists</span>
+            <Button class="link-list-header-button" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Success" aria-label="@AppTexts.NewPlaylistTitle" title="@AppTexts.NewPlaylistTitle"
+                    @onclick="ClickNewPlaylistHandler">
                 <MaterialIcon Icon="add" Size="var(--size-icon-sm)"/>
             </Button>
         </div>
 
-        <SortableList T="ResponsePlaylist" class="playlist-list" HandleClass="sortable-item" List="PlaylistList" OnUpdate="MoveHandler" Context="entry">
+        <SortableList T="ResponsePlaylist" class="playlist-list" HandleClass="sortable-item" FilterSelector="dialog, [popover]" List="PlaylistList" OnUpdate="MoveHandler" Context="entry">
             @{ ResponsePlaylist row = entry.Item; }
             <div @key="row.ID" class="playlist-row sortable-item" @oncontextmenu="args => OpenPlaylistMenu(args, row.ID)" @oncontextmenu:preventDefault>
                 <NavLink class="link" href="@($"playlist/{row.ID}")" @onclick="OnNavigate">
-                    <PlaylistArt Playlist="row"/>
+                    <PlaylistArt Hue="row.ArtHueCurrent"/>
                     <span>@row.Name</span>
                 </NavLink>
-                <Button class="more" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="@($"Actions for {row.Name}")" aria-haspopup="menu"
+                <Button class="more" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="@string.Format(AppTexts.SidebarPlaylistActions, row.Name)" aria-haspopup="menu"
                         popovertarget="@PlaylistContextMenu.MenuID(row.ID, PlaylistContextMenu.PlaceSidebar)">
                     <MaterialIcon Icon="more_horiz" Size="var(--size-icon-sm)"/>
                 </Button>

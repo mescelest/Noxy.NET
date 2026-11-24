@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Storage;
 using Noxy.NET.MediaPlayer.Storage.Stores;
 
 namespace Noxy.NET.Test.MediaPlayer.Presentation;
@@ -115,5 +116,19 @@ public class DiskArtCacheStoreTest : IDisposable
 
         Assert.Null(await store.Get(first, Version));
         Assert.Null(await store.Get(second, Version));
+    }
+
+    [Fact]
+    public async Task TheFolderName_IsTheOneGiven_ElseTheDefault()
+    {
+        Guid id = Guid.CreateVersion7();
+
+        await new DiskArtCacheStore(_folder, "covers").Save(id, Version, [1]);
+        await new DiskArtCacheStore(_folder).Save(id, Version, [2]);
+
+        Assert.True(Directory.Exists(Path.Combine(_folder, "covers")));
+        Assert.True(Directory.Exists(Path.Combine(_folder, StorageConstants.ArtCacheFolderName)));
+        Assert.Equal<byte[]?>([1], await new DiskArtCacheStore(_folder, "covers").Get(id, Version));
+        Assert.Equal<byte[]?>([2], await new DiskArtCacheStore(_folder).Get(id, Version));
     }
 }

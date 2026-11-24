@@ -193,6 +193,132 @@ namespace Noxy.NET.MediaPlayer.Presentation.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Album.
+        /// </summary>
+        public static string FieldAlbum {
+            get {
+                return ResourceManager.GetString("FieldAlbum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Album artist.
+        /// </summary>
+        public static string FieldAlbumArtist {
+            get {
+                return ResourceManager.GetString("FieldAlbumArtist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow the same song twice.
+        /// </summary>
+        public static string FieldAllowDuplicates {
+            get {
+                return ResourceManager.GetString("FieldAllowDuplicates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Artist.
+        /// </summary>
+        public static string FieldArtist {
+            get {
+                return ResourceManager.GetString("FieldArtist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Comment.
+        /// </summary>
+        public static string FieldComment {
+            get {
+                return ResourceManager.GetString("FieldComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disc.
+        /// </summary>
+        public static string FieldDisc {
+            get {
+                return ResourceManager.GetString("FieldDisc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string FieldEmail {
+            get {
+                return ResourceManager.GetString("FieldEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Genre.
+        /// </summary>
+        public static string FieldGenre {
+            get {
+                return ResourceManager.GetString("FieldGenre", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string FieldName {
+            get {
+                return ResourceManager.GetString("FieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string FieldPassword {
+            get {
+                return ResourceManager.GetString("FieldPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subtitle.
+        /// </summary>
+        public static string FieldSubtitle {
+            get {
+                return ResourceManager.GetString("FieldSubtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Title.
+        /// </summary>
+        public static string FieldTitle {
+            get {
+                return ResourceManager.GetString("FieldTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Track.
+        /// </summary>
+        public static string FieldTrack {
+            get {
+                return ResourceManager.GetString("FieldTrack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Year.
+        /// </summary>
+        public static string FieldYear {
+            get {
+                return ResourceManager.GetString("FieldYear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to another device.
         /// </summary>
         public static string PlayerStatusAnotherDevice {

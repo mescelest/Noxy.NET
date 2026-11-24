@@ -1,19 +1,23 @@
 @inherits BaseComponentElement
 
 <span @attributes="AdditionalAttributes" class="@CssClass" style="@StyleCurrent" aria-hidden="true">
-    <MaterialIcon Icon="queue_music" Size="var(--size-icon-xs)"/>
+    <MaterialIcon Icon="queue_music" Size="@IconSize"/>
 </span>
 
 @code {
 
+    // The colour of the tile on the colour wheel, in degrees. The colour in the stylesheet is worked out from it.
     [Parameter, EditorRequired]
-    public required ResponsePlaylist Playlist { get; set; }
+    public required int Hue { get; set; }
 
-    // Every playlist has its own hue, which the colour in the stylesheet is worked out from.
     // The size of the square, as a CSS length; unset, it is --size-playlist-art.
     [Parameter]
     public string? Size { get; set; }
 
-    private string StyleCurrent => Size is null ? $"--playlist-hue: {Playlist.ArtHueCurrent}" : $"--playlist-hue: {Playlist.ArtHueCurrent}; --size-playlist-art: {Size}";
+    // The icon in the square, as a CSS length; unset, it is --size-icon-xs.
+    [Parameter]
+    public string? IconSize { get; set; } = "var(--size-icon-xs)";
+
+    private string StyleCurrent => Size is null ? $"--playlist-hue: {Hue}" : $"--playlist-hue: {Hue}; --size-playlist-art: {Size}";
 
 }

@@ -8,17 +8,19 @@
 @inherits BaseComponentPage
 @implements IDisposable
 
-<div class="@CssClass">
+<div class="@CssClass @FullscreenPageClass">
+    <PageHeader Name="@AppTexts.HomeTitle"/>
+
     @if (_model is not null)
     {
         @if (_model.Continue is not null)
         {
-            <Section Title="Continue">
+            <Section Title="@AppTexts.ContinueTitle">
                 <ContinueCard Info="_model.Continue" OnContinue="Continue"/>
             </Section>
         }
 
-        <Section Title="Recently played">
+        <Section Title="@AppTexts.HomeRecentlyPlayed">
             @if (_model.HasPlaylists)
             {
                 <ButtonList>
@@ -31,7 +33,7 @@
             }
             else
             {
-                <MessageBox MessageList="@(["You have no playlists yet. Use \"New playlist\" in the sidebar to create one."])" Status="StatusEnum.Info"/>
+                <MessageBox MessageList="@([AppTexts.HomeNoPlaylists])" Status="StatusEnum.Info"/>
             }
         </Section>
     }

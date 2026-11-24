@@ -6,7 +6,7 @@ namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 // What the playlist screens do. Every write sends the request, saves the answer into the local copy at once, and throws when the server cannot be reached or refuses (ApiException, HttpRequestException), so the page can show the reason; nothing changes locally then.
 public interface IPlaylistService
 {
-    Task<ResponsePlaylist> Create(string name, bool allowDuplicates = true);
+    Task<ResponsePlaylist> Create(string name, bool allowDuplicates = true, int? artHue = null);
 
     // Syncs the playlist's detail. It downloads nothing: that is "Download all", or playing. Offline it uses the stored detail. A playlist the server no longer has is removed locally.
     Task Open(Guid id);

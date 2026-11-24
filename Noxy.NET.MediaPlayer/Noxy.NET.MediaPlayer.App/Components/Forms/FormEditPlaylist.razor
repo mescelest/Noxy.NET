@@ -8,24 +8,7 @@
         <InputControlCheckbox Option="true" @bind-Value="_context.Model.AllowDuplicates">
             <span>@AppTexts.EditPlaylistAllowDuplicates</span>
         </InputControlCheckbox>
-        <fieldset class="colours">
-            <legend>@AppTexts.EditPlaylistColor</legend>
-            <InputControlRadio TOption="int?" Option="null" @bind-Value="_context.Model.ArtHue" class="choice">
-                <Visual Context="isChecked">
-                    <span class="swatch" style="@DefaultStyle" data-checked="@isChecked"></span>
-                </Visual>
-                <ChildContent>@AppTexts.EditPlaylistColorDefault</ChildContent>
-            </InputControlRadio>
-            @foreach (int hue in FormModelEditPlaylist.HueList)
-            {
-                <InputControlRadio TOption="int?" Option="hue" @bind-Value="_context.Model.ArtHue" class="choice" aria-label="@HueLabel(hue)">
-                    <Visual Context="isChecked">
-                        <span class="swatch" style="@HueStyle(hue)" data-checked="@isChecked"></span>
-                    </Visual>
-                    <ChildContent></ChildContent>
-                </InputControlRadio>
-            }
-        </fieldset>
+        <PlaylistColorPicker DefaultHue="Playlist.ArtHueDefault" @bind-Value="_context.Model.ArtHue"/>
         <div class="actions">
             <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">@AppTexts.EditPlaylistSave</Button>
         </div>
@@ -45,12 +28,6 @@
     public EventCallback OnSubmit { get; set; }
 
     private WebFormContext<FormModelEditPlaylist> _context = new(new());
-
-    private string DefaultStyle => HueStyle(Playlist.ArtHueDefault);
-
-    private static string HueStyle(int hue) => $"--playlist-hue: {hue}";
-
-    private static string HueLabel(int hue) => string.Format(AppTexts.EditPlaylistColorHue, hue);
 
     protected override void OnInitialized()
     {

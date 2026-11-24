@@ -152,4 +152,60 @@
     <value>The folder could not be opened.</value>
         <comment>The library actions, when the file manager could not be started.</comment>
   </data>
+    <data name="FieldTitle" xml:space="preserve">
+    <value>Title</value>
+        <comment>The label of the title field of a form.</comment>
+  </data>
+    <data name="FieldArtist" xml:space="preserve">
+    <value>Artist</value>
+        <comment>The label of the artist field of a form.</comment>
+  </data>
+    <data name="FieldAlbum" xml:space="preserve">
+    <value>Album</value>
+        <comment>The label of the album field of a form.</comment>
+  </data>
+    <data name="FieldAlbumArtist" xml:space="preserve">
+    <value>Album artist</value>
+        <comment>The label of the album artist field of a form.</comment>
+  </data>
+    <data name="FieldGenre" xml:space="preserve">
+    <value>Genre</value>
+        <comment>The label of the genre field of a form.</comment>
+  </data>
+    <data name="FieldSubtitle" xml:space="preserve">
+    <value>Subtitle</value>
+        <comment>The label of the subtitle field of a form.</comment>
+  </data>
+    <data name="FieldYear" xml:space="preserve">
+    <value>Year</value>
+        <comment>The label of the year field of a form.</comment>
+  </data>
+    <data name="FieldTrack" xml:space="preserve">
+    <value>Track</value>
+        <comment>The label of the track number field of a form.</comment>
+  </data>
+    <data name="FieldDisc" xml:space="preserve">
+    <value>Disc</value>
+        <comment>The label of the disc number field of a form.</comment>
+  </data>
+    <data name="FieldComment" xml:space="preserve">
+    <value>Comment</value>
+        <comment>The label of the comment field of a form.</comment>
+  </data>
+    <data name="FieldName" xml:space="preserve">
+    <value>Name</value>
+        <comment>The label of the name field of a form.</comment>
+  </data>
+    <data name="FieldAllowDuplicates" xml:space="preserve">
+    <value>Allow the same song twice</value>
+        <comment>The label of the box that lets a playlist hold the same song twice.</comment>
+  </data>
+    <data name="FieldEmail" xml:space="preserve">
+    <value>Email</value>
+        <comment>The label of the email field of a form.</comment>
+  </data>
+    <data name="FieldPassword" xml:space="preserve">
+    <value>Password</value>
+        <comment>The label of the password field of a form.</comment>
+  </data>
 </root>

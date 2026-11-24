@@ -36,6 +36,7 @@
     --size-dialog-margin: var(--size-gap-xs);
     --size-dialog-list-height: 60dvh;
     --size-playlist-art: var(--size-control-xs);
+    --playlist-color-columns: 6;
     --size-album-art: var(--size-control-xs);
     --size-button-min-width: 6rem;
     --size-icon-xxs: 1rem;
@@ -146,7 +147,8 @@
     --color-surface: var(--color-primary);
     --color-on-surface: light-dark(#121212, #F2F2F2);
     --color-input: light-dark(#FFFFFF, #1E1E1E);
-    --color-playlist-art: light-dark(hsl(var(--playlist-hue, 220) 45% 45%), hsl(var(--playlist-hue, 220) 35% 38%));
+    /* The place of a playlist tile on the colour wheel. Each tile sets its own; this is for one that does not. */
+    --playlist-hue: 220;
     --color-on-playlist-art: #FFFFFF;
     --color-album-art: var(--color-offset-primary-md);
     --color-on-album-art: var(--color-on-surface);
@@ -229,4 +231,9 @@
     --size-control-input: var(--size-control-md);
     --size-control-choice: var(--size-control-xxs);
     --size-control-icon: var(--size-icon-sm);
+}
+
+/* The colour of a playlist's tile. It has to be worked out on the element that carries the hue: declared on :root it would be worked out there, where there is none, and every tile would get the fallback. */
+[style*="--playlist-hue"] {
+    --color-playlist-art: light-dark(hsl(var(--playlist-hue) 45% 45%), hsl(var(--playlist-hue) 35% 38%));
 }

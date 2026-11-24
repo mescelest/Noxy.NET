@@ -7,7 +7,7 @@
     <div class="scroller" @ref="_scroller">
         <div class="header-row" role="row">
             <div class="cell" role="columnheader">
-                <InputControlCheckbox Option="true" aria-label="Select all" @bind-Value:get="@AllSelected" @bind-Value:set="ChangeAllHandler"/>
+                <InputControlCheckbox Option="true" aria-label="@AppTexts.SelectAll" @bind-Value:get="@AllSelected" @bind-Value:set="ChangeAllHandler"/>
             </div>
             <div class="cell" role="columnheader"></div>
             <div class="cell" role="columnheader"><strong>@AppTexts.QueueColumnTitle</strong></div>
@@ -235,7 +235,7 @@
 
     private Guid? AlbumIDOf(QueueListRow row) => MediaOf(MediaFileIDOf(row))?.AlbumID;
 
-    private string SelectLabel(QueueListRow row) => $"Select {TitleOf(row)}";
+    private string SelectLabel(QueueListRow row) => string.Format(AppTexts.SelectRow, TitleOf(row));
 
     private string DurationOf(QueueListRow row)
     {

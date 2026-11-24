@@ -1,23 +1,17 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Presentation.Attributes;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Models.FormModel;
 
 public class FormModelEditPlaylist
 {
-    private const int HueCount = 12;
-    private const int HueStep = 30;
-
-    // The colours the tile can be given, round the colour wheel.
-    public static IReadOnlyList<int> HueList { get; } = [.. Enumerable.Range(0, HueCount).Select(x => x * HueStep)];
-
     [Required]
     [MaxLength(255)]
-    [DisplayName("Name")]
+    [DisplayText(nameof(PresentationTexts.FieldName))]
     public string Name { get; set; } = string.Empty;
 
-    [DisplayName("Allow the same song twice")]
+    [DisplayText(nameof(PresentationTexts.FieldAllowDuplicates))]
     public bool AllowDuplicates { get; set; } = true;
 
     // The chosen hue, or null for the default one.

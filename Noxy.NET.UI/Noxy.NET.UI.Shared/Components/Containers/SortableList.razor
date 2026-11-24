@@ -39,6 +39,10 @@
     public string? GhostClass { get; set; }
     private string GhostClassCurrent => !string.IsNullOrWhiteSpace(GhostClass) ? GhostClass : "sortable-ghost";
 
+    // A selector (or several, separated by commas) for what inside an item does not start a drag, such as a dialog or a menu that lives in the item. A press on it is left alone, so it can still focus and select.
+    [Parameter]
+    public string? FilterSelector { get; set; }
+
     private ElementReference _refElement;
     private IJSObjectReference? _componentModule;
     private IJSObjectReference? _refInstance;
@@ -84,7 +88,9 @@
                 { "draggable", $".{DragClassCurrent}" },
                 { "handle", $".{HandleClassCurrent}" },
                 { "delay", TouchHoldMilliseconds },
-                { "delayOnTouchOnly", true }
+                { "delayOnTouchOnly", true },
+                { "filter", FilterSelector },
+                { "preventOnFilter", false }
         };
         _componentModule = module;
         _refDotNet = DotNetObjectReference.Create(this);

@@ -9,7 +9,7 @@
 @implements IAsyncDisposable
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <SeekBar Value="Display.Position.TotalSeconds" Max="DurationSeconds" Label="Position" OnInput="InputSeekHandler" OnChange="ChangeSeekHandler"/>
+    <SeekBar Value="Display.Position.TotalSeconds" Max="DurationSeconds" Label="@AppTexts.PlayerPosition" OnInput="InputSeekHandler" OnChange="ChangeSeekHandler"/>
 
     <div class="content">
         <MediaTrackInfo Display="Display"/>

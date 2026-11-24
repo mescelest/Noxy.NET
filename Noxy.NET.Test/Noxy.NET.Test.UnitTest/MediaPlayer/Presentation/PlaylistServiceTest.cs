@@ -309,4 +309,13 @@ public class PlaylistServiceTest
         RequestUpdatePlaylist sent = Assert.Single(_api.UpdatePlaylistRequestList).Request;
         Assert.False(sent.ArtHue.HasValue);
     }
+
+    [Fact]
+    public async Task Create_SendsTheArtHueItWasGiven_AndNullWhenNone()
+    {
+        await _service.Create("Colourful", true, 200);
+        await _service.Create("Plain");
+
+        Assert.Equal([200, null], _api.CreatePlaylistRequestList.Select(x => x.ArtHue));
+    }
 }

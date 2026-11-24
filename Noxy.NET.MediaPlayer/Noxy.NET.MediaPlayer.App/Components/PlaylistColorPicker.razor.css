@@ -1,0 +1,40 @@
+.PlaylistColorPicker {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    column-gap: var(--size-gap-md);
+    row-gap: var(--size-gap-xs);
+}
+
+/* The name of the choice takes a row of its own above the preview and the colours. */
+.label {
+    flex: 1 0 100%;
+}
+
+/* The colours in rows of the same length, as many as it takes. */
+.choices {
+    display: grid;
+    grid-template-columns: repeat(var(--playlist-color-columns), max-content);
+    gap: var(--size-gap-xs);
+}
+
+/* A colour is the tile of the playlist itself in miniature, worked out from the same hue. The one chosen has a ring. */
+.swatch {
+    width: var(--size-control-xxs);
+    height: var(--size-control-xxs);
+    padding: 0;
+    border: 0;
+    border-radius: var(--size-border-radius-md);
+    background: var(--color-playlist-art);
+    cursor: pointer;
+}
+
+.swatch[aria-checked="true"] {
+    outline: var(--size-border-width-md) solid var(--color-on-surface);
+    outline-offset: var(--size-border-width-md);
+}
+
+.swatch:focus-visible {
+    outline: var(--size-border-width-md) solid var(--color-highlight);
+    outline-offset: var(--size-border-width-md);
+}

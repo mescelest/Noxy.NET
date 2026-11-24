@@ -7,6 +7,12 @@ namespace Noxy.NET.Test.MediaPlayer.Art;
 public class ArtStorageServiceTest : IDisposable
 {
     private readonly string _root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+    private readonly ConfigStorage _config;
+
+    public ArtStorageServiceTest()
+    {
+        _config = new() { RootPath = _root, AllowedExtensionList = ["mp3"] };
+    }
 
     public void Dispose()
     {
@@ -18,12 +24,12 @@ public class ArtStorageServiceTest : IDisposable
 
     private ArtStorageService Create()
     {
-        return new(Options.Create(new ConfigStorage { RootPath = _root, AllowedExtensionList = ["mp3"] }));
+        return new(Options.Create(_config));
     }
 
     private string AlbumFolder()
     {
-        return Path.Combine(_root, ArtStorageService.ArtFolderName, ArtStorageService.AlbumFolderName);
+        return Path.Combine(_root, _config.AlbumArtFolderName);
     }
 
     private static byte[] ReadAll(Stream? stream)
@@ -125,5 +131,18 @@ public class ArtStorageServiceTest : IDisposable
         await service.SaveAlbumArt(albumID, [3, 4], TestContext.Current.CancellationToken);
 
         Assert.Equal<byte[]>([3, 4], ReadAll(service.OpenAlbumArt(albumID)));
+    }
+
+    [Fact]
+    public async Task ConfiguredFolderName_IsTheOneThatIsUsed()
+    {
+        _config.AlbumArtFolderName = "covers";
+        ArtStorageService service = Create();
+        Guid albumID = Guid.CreateVersion7();
+
+        await service.SaveAlbumArt(albumID, [1, 2], TestContext.Current.CancellationToken);
+
+        Assert.True(File.Exists(Path.Combine(_root, "covers", $"{albumID}.jpg")));
+        Assert.False(Directory.Exists(Path.Combine(_root, "albumart")));
     }
 }

@@ -121,4 +121,32 @@ public class HandlerPlaylistCreateTest
     {
         await Assert.ThrowsAsync<ArgumentException>(() => Create("   "));
     }
+
+    [Fact]
+    public async Task Create_WithAnArtHue_SavesIt_AndTheResponseCarriesIt()
+    {
+        ResponsePlaylist response = await _handler.Handle(new(UserID, "Mix", true, 200), Token);
+
+        Assert.Equal(200, response.ArtHue);
+        Assert.Equal(200, _store.PlaylistList.Single(x => x.ID == response.ID).ArtHue);
+    }
+
+    [Fact]
+    public async Task Create_WithNoArtHue_LeavesItNull()
+    {
+        ResponsePlaylist response = await _handler.Handle(new(UserID, "Mix", true), Token);
+
+        Assert.Null(response.ArtHue);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(360)]
+    public async Task Create_WithAnArtHueOutsideTheWheel_IsRefused_AndSavesNothing(int hue)
+    {
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _handler.Handle(new(UserID, "Mix", true, hue), Token).AsTask());
+
+        Assert.Empty(_store.PlaylistList);
+        Assert.Empty(_publisher.PublishedList);
+    }
 }

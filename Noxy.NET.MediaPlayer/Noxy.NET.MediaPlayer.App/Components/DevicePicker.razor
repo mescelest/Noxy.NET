@@ -12,19 +12,19 @@
     </Button>
 
     <Popover @ref="_popover" ID="@PopoverID" @bind-Open="_open" Side="PlacementSideEnum.Top" Align="PlacementAlignEnum.End" class="list PopoverSurface">
-        <div class="PopoverLabel">Choose device to play on</div>
+        <div class="PopoverLabel">@AppTexts.DevicePickerTitle</div>
         <ul class="devices" role="listbox">
             @foreach (ResponseDevice device in DeviceList)
             {
                 ResponseDevice chosen = device;
-                string name = chosen.DeviceID == _thisID ? $"{chosen.Name} (this device)" : chosen.Name;
+                string name = chosen.DeviceID == _thisID ? string.Format(AppTexts.DevicePickerThisDeviceNamed, chosen.Name) : chosen.Name;
 
                 <li>
                     <button type="button" role="option" class="device PopoverRow" aria-selected="@chosen.IsActive" @onclick="() => Choose(chosen)">
                         <span class="name">@name</span>
                         @if (chosen.IsActive)
                         {
-                            <MaterialIcon class="active" Icon="graphic_eq" Size="var(--size-icon-xs)" title="Playing" aria-label="Playing"/>
+                            <MaterialIcon class="active" Icon="graphic_eq" Size="var(--size-icon-xs)" title="@AppTexts.DevicePickerPlaying" aria-label="@AppTexts.DevicePickerPlaying"/>
                         }
                     </button>
                 </li>
@@ -32,7 +32,7 @@
 
             @if (DeviceList.Count == 0)
             {
-                <li class="none">No devices are online.</li>
+                <li class="none">@AppTexts.DevicePickerNone</li>
             }
         </ul>
     </Popover>
@@ -51,12 +51,12 @@
 
     // Offline there is no live session to move: the button says why.
     private bool IsOffline => StateSession.Value.IsOffline || !ServiceRemote.IsOnline;
-    private string? IsOfflineReason => IsOffline ? "Offline" : null;
+    private string? IsOfflineReason => IsOffline ? AppTexts.StatusOffline : null;
 
     // Which device the music plays on, or that it is being moved.
-    private string DeviceLabel => _movingTo is not null ? $"Moving playback to {_movingTo}…" : ServiceRemote.Role == PlaybackRoleEnum.Controller ? $"Playing on {ActiveName}" : "This device";
+    private string DeviceLabel => _movingTo is not null ? string.Format(AppTexts.DevicePickerMoving, _movingTo) : ServiceRemote.Role == PlaybackRoleEnum.Controller ? string.Format(AppTexts.DevicePickerPlayingOn, ActiveName) : AppTexts.DevicePickerThisDevice;
 
-    private string ActiveName => ServiceRemote.DeviceList.FirstOrDefault(x => x.DeviceID == ServiceRemote.ActiveDeviceID)?.Name ?? "another device";
+    private string ActiveName => ServiceRemote.DeviceList.FirstOrDefault(x => x.DeviceID == ServiceRemote.ActiveDeviceID)?.Name ?? AppTexts.DevicePickerAnotherDevice;
 
     // This device first, then the others in the order the server sent them.
     private List<ResponseDevice> DeviceList => [.. ServiceRemote.DeviceList.OrderByDescending(x => x.DeviceID == _thisID)];

@@ -6,10 +6,10 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="container">
-        <h1 class="logo">Noxy Player</h1>
+        <h1 class="logo">@AppTexts.AppName</h1>
 
         <Divider>
-            <span>Choose server</span>
+            <span>@AppTexts.LoginChooseServer</span>
         </Divider>
 
         <div class="configuration">
@@ -17,25 +17,25 @@
         </div>
 
         <Divider>
-            <span>Choose login</span>
+            <span>@AppTexts.LoginChooseLogin</span>
         </Divider>
 
         <div class="provider-list">
             <Button class="provider" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.Error" Loading="@IsGoogleBusy" disabled="@IsBusy" @onclick="SignInGoogle">
                 <MaterialIcon Icon="mail"/>
-                Sign in with Gmail
+                @AppTexts.LoginGoogle
             </Button>
         </div>
 
         <Divider>
-            <span>or</span>
+            <span>@AppTexts.LoginOr</span>
         </Divider>
 
         <TabSet class="login-tab-list">
-            <TabPage Title="Sign in">
+            <TabPage Title="@AppTexts.AuthSignIn">
                 <FormSignIn Disabled="@IsSignInDisabled" OnLoadingChanged="SetSignInBusy" OnSubmit="SubmitSignInHandler"/>
             </TabPage>
-            <TabPage Title="Sign up">
+            <TabPage Title="@AppTexts.AuthSignUp">
                 <FormSignUp Disabled="@IsSignUpDisabled" OnLoadingChanged="SetSignUpBusy" OnSubmit="SubmitSignUpHandler"/>
             </TabPage>
         </TabSet>

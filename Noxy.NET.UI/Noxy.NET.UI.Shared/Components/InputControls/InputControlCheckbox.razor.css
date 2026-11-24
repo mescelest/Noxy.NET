@@ -1,5 +1,7 @@
 .InputControlCheckbox {
     display: flex;
+    /* Only the box and the text can be pressed, not the rest of the row a flex column would stretch it across. */
+    width: fit-content;
     column-gap: var(--size-gap-xxs, 0.5rem);
     align-items: center;
     cursor: pointer;

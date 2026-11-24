@@ -5,6 +5,7 @@ using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Models.Playlist;
 using Noxy.NET.MediaPlayer.Application.Notifications.Playlist;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
@@ -18,6 +19,13 @@ public class HandlerPlaylistCreate(IUnitOfWorkFactory factoryUnitOfWork, IOption
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(command.Name, nameof(command));
 
+        // The request refuses these already; this keeps a command from anywhere else from storing one.
+        if (command.ArtHue is { } hue)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(hue, PlaylistArtHue.Min, nameof(command));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(hue, PlaylistArtHue.Max, nameof(command));
+        }
+
         await using IUnitOfWork uow = factoryUnitOfWork.Create();
 
         if (await uow.Playlist.CountPlaylists(command.UserID, cancellationToken) >= configPlaylist.Value.MaxPlaylistsPerUser) throw new PlaylistLimitReachedException();
@@ -28,6 +36,7 @@ public class HandlerPlaylistCreate(IUnitOfWorkFactory factoryUnitOfWork, IOption
             UserID = command.UserID,
             Name = command.Name.Trim(),
             AllowDuplicates = command.AllowDuplicates,
+            ArtHue = command.ArtHue,
             TimeCreated = now,
             TimeModified = now
         };

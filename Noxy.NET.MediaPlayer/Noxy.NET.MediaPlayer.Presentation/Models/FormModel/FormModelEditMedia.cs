@@ -1,6 +1,6 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Presentation.Attributes;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Models.FormModel;
 
@@ -9,43 +9,43 @@ public class FormModelEditMedia
 {
     [Required]
     [MaxLength(255)]
-    [DisplayName("Title")]
+    [DisplayText(nameof(PresentationTexts.FieldTitle))]
     public string Title { get; set; } = string.Empty;
 
     [MaxLength(256)]
-    [DisplayName("Artist")]
+    [DisplayText(nameof(PresentationTexts.FieldArtist))]
     public string? Artist { get; set; }
 
     [MaxLength(256)]
-    [DisplayName("Album")]
+    [DisplayText(nameof(PresentationTexts.FieldAlbum))]
     public string? Album { get; set; }
 
     [MaxLength(256)]
-    [DisplayName("Album artist")]
+    [DisplayText(nameof(PresentationTexts.FieldAlbumArtist))]
     public string? AlbumArtist { get; set; }
 
     [MaxLength(128)]
-    [DisplayName("Genre")]
+    [DisplayText(nameof(PresentationTexts.FieldGenre))]
     public string? Genre { get; set; }
 
     [MaxLength(256)]
-    [DisplayName("Subtitle")]
+    [DisplayText(nameof(PresentationTexts.FieldSubtitle))]
     public string? Subtitle { get; set; }
 
     [Range(0, 9999)]
-    [DisplayName("Year")]
+    [DisplayText(nameof(PresentationTexts.FieldYear))]
     public int? Year { get; set; }
 
     [Range(0, 9999)]
-    [DisplayName("Track")]
+    [DisplayText(nameof(PresentationTexts.FieldTrack))]
     public int? TrackNumber { get; set; }
 
     [Range(0, 9999)]
-    [DisplayName("Disc")]
+    [DisplayText(nameof(PresentationTexts.FieldDisc))]
     public int? DiscNumber { get; set; }
 
     [MaxLength(2048)]
-    [DisplayName("Comment")]
+    [DisplayText(nameof(PresentationTexts.FieldComment))]
     public string? Comment { get; set; }
 
     public static FormModelEditMedia From(ResponseMediaFile media)

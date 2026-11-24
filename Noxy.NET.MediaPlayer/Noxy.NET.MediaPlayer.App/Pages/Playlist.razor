@@ -11,11 +11,11 @@
 <div class="@CssClass @FullscreenPageClass">
     @if (_gone)
     {
-        <MessageBox MessageList="@(["This playlist was deleted."])" Status="StatusEnum.Warning"/>
+        <MessageBox MessageList="@([AppTexts.PlaylistDeleted])" Status="StatusEnum.Warning"/>
     }
     else if (_detail is null)
     {
-        <Loader Loading="true" Label="Loading"/>
+        <Loader Loading="true" Label="@AppTexts.PlaylistLoading"/>
     }
     else
     {
@@ -25,25 +25,25 @@
                                     MediaFileIDOf="MediaFileIDOf" OnPlaylistChanged="Load" ShowTrigger="@HasSelection"/>
             </MediaFileHeader>
 
-            <MediaFileTable RowList="_rowList" IsEmpty="IsPlaylistEmpty" EmptyTitle="This playlist is empty" EmptyDescription="Add media files from the Library." StateMap="StateLibrary.Value.StateMap" Sort="_sort" Descending="_descending"
+            <MediaFileTable RowList="_rowList" IsEmpty="IsPlaylistEmpty" EmptyTitle="@AppTexts.PlaylistEmptyTitle" EmptyDescription="@AppTexts.PlaylistEmptyDescription" StateMap="StateLibrary.Value.StateMap" Sort="_sort" Descending="_descending"
                             OnSortChanged="ChangeSort"
                             SelectedSet="_selectedSet" AllSelected="IsAllSelected" OnToggleAll="ToggleAllShown" OnToggleRow="ToggleRow" OnPlay="Play" OnContextMenu="OpenRowMenu"
                             IsReorderable="CanReorder" ReorderHint="ReorderHint" OnMove="Move">
                 <ToolContent>
-                    <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="Search the playlist" aria-label="Search the playlist" Value="@_search" ValueChanged="ChangeSearch"/>
+                    <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.PlaylistSearch" aria-label="@AppTexts.PlaylistSearch" Value="@_search" ValueChanged="ChangeSearch"/>
                     <ButtonList>
                         @if (_sort is not null)
                         {
-                            <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="ClickClearSortHandler">Clear sort</Button>
+                            <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="ClickClearSortHandler">@AppTexts.PlaylistClearSort</Button>
                         }
-                        <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.Highlight" aria-label="Play" @onclick="ClickPlayHandler">
+                        <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.Highlight" aria-label="@AppTexts.CommonPlay" @onclick="ClickPlayHandler">
                             <MaterialIcon Icon="play_arrow" Size="var(--size-icon-md)"/>
-                            <span>Play</span>
+                            <span>@AppTexts.CommonPlay</span>
                         </Button>
                         <UploadMediaButton PlaylistID="Id" Appearance="ButtonAppearanceEnum.Outline"/>
                         @if (Summary is { } summary)
                         {
-                            <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="Playlist actions" aria-haspopup="menu"
+                            <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="@AppTexts.PlaylistActions" aria-haspopup="menu"
                                     popovertarget="@PlaylistContextMenu.MenuID(summary.ID, PlaylistContextMenu.PlacePage)">
                                 <MaterialIcon Icon="more_horiz" Size="var(--size-icon-md)"/>
                             </Button>

@@ -80,4 +80,74 @@ public class ConfigStorageTest
 
         Assert.False(IsValid(config));
     }
+
+    [Fact]
+    public void DefaultFolderNames_AreLibraryStagingTemporaryAndAlbumArt()
+    {
+        ConfigStorage config = Valid();
+
+        Assert.Equal("library", config.LibraryFolderName);
+        Assert.Equal("staging", config.StagingFolderName);
+        Assert.Equal("temporary", config.TemporaryFolderName);
+        Assert.Equal("albumart", config.AlbumArtFolderName);
+    }
+
+    [Fact]
+    public void CustomFolderNames_ThatDiffer_Pass()
+    {
+        ConfigStorage config = Valid();
+        config.LibraryFolderName = "files";
+        config.StagingFolderName = "incoming";
+        config.TemporaryFolderName = "scratch";
+        config.AlbumArtFolderName = "covers";
+
+        Assert.True(IsValid(config));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData(".")]
+    [InlineData("..")]
+    [InlineData("a/b")]
+    [InlineData("a\b")]
+    [InlineData("../outside")]
+    [InlineData("C:")]
+    [InlineData("-leading")]
+    public void ALibraryFolderName_ThatIsNotAPlainFolderName_Fails(string name)
+    {
+        ConfigStorage config = Valid();
+        config.LibraryFolderName = name;
+
+        Assert.False(IsValid(config));
+    }
+
+    [Theory]
+    [InlineData(nameof(ConfigStorage.StagingFolderName))]
+    [InlineData(nameof(ConfigStorage.TemporaryFolderName))]
+    [InlineData(nameof(ConfigStorage.AlbumArtFolderName))]
+    public void EveryFolderName_IsChecked_NotJustTheLibraryOne(string property)
+    {
+        ConfigStorage config = Valid();
+        typeof(ConfigStorage).GetProperty(property)?.SetValue(config, "a/b");
+
+        Assert.False(IsValid(config));
+    }
+
+    [Theory]
+    [InlineData("library", "library", "temporary", "albumart")]
+    [InlineData("library", "staging", "library", "albumart")]
+    [InlineData("library", "staging", "temporary", "library")]
+    [InlineData("library", "staging", "staging", "albumart")]
+    [InlineData("library", "staging", "temporary", "TEMPORARY")]
+    public void FolderNames_ThatAreTheSameFolder_Fail(string library, string staging, string temporary, string albumArt)
+    {
+        ConfigStorage config = Valid();
+        config.LibraryFolderName = library;
+        config.StagingFolderName = staging;
+        config.TemporaryFolderName = temporary;
+        config.AlbumArtFolderName = albumArt;
+
+        Assert.False(IsValid(config));
+    }
 }

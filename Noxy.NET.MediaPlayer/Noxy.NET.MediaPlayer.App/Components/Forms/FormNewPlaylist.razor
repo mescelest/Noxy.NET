@@ -8,8 +8,9 @@
         <InputControlCheckbox Option="true" @bind-Value="_context.Model.AllowDuplicates">
             <span>@AppTexts.EditPlaylistAllowDuplicates</span>
         </InputControlCheckbox>
+        <PlaylistColorPicker @bind-Value="_context.Model.ArtHue"/>
         <div class="actions">
-            <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">Create</Button>
+            <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">@AppTexts.NewPlaylistCreate</Button>
         </div>
     </WebForm>
 </div>
@@ -29,12 +30,12 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _context = new(new() { Name = string.Format(AppTexts.NewPlaylistSuggestedName, StatePlaylistList.Value.PlaylistList.Count + 1) });
+        _context = new(new() { Name = string.Format(AppTexts.NewPlaylistSuggestedName, StatePlaylistList.Value.PlaylistList.Count + 1), ArtHue = PlaylistArtHue.PickChoice(Random.Shared) });
     }
 
     private async Task Submit(WebFormContext<FormModelNewPlaylist> context)
     {
-        ResponsePlaylist playlist = await ServicePlaylist.Create(context.Model.Name, context.Model.AllowDuplicates);
+        ResponsePlaylist playlist = await ServicePlaylist.Create(context.Model.Name, context.Model.AllowDuplicates, context.Model.ArtHue);
         await OnSubmit.InvokeAsync(playlist.ID);
     }
 

@@ -1,7 +1,7 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <ThemeToggle class="group" TType="ThemeEnum" Label="Theme">
+    <ThemeToggle class="group" TType="ThemeEnum" Label="@AppTexts.SettingsTheme">
         <Template Context="theme">
             <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusOf(IsChosen(theme.Value, theme.Service))" aria-pressed="@PressedValue(theme.Value, theme.Service)"
                     @onclick="() => theme.Service.SetTheme(theme.Value)">

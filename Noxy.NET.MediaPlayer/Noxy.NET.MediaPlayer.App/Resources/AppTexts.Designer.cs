@@ -161,27 +161,18 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Colour.
         /// </summary>
-        public static string EditPlaylistColor {
+        public static string PlaylistColor {
             get {
-                return ResourceManager.GetString("EditPlaylistColor", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Default.
-        /// </summary>
-        public static string EditPlaylistColorDefault {
-            get {
-                return ResourceManager.GetString("EditPlaylistColorDefault", resourceCulture);
+                return ResourceManager.GetString("PlaylistColor", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Colour at {0} degrees.
         /// </summary>
-        public static string EditPlaylistColorHue {
+        public static string PlaylistColorHue {
             get {
-                return ResourceManager.GetString("EditPlaylistColorHue", resourceCulture);
+                return ResourceManager.GetString("PlaylistColorHue", resourceCulture);
             }
         }
         
@@ -837,6 +828,843 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         public static string LibraryOpenFolder {
             get {
                 return ResourceManager.GetString("LibraryOpenFolder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Create playlist.
+        /// </summary>
+        public static string NewPlaylistTitle {
+            get {
+                return ResourceManager.GetString("NewPlaylistTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Create.
+        /// </summary>
+        public static string NewPlaylistCreate {
+            get {
+                return ResourceManager.GetString("NewPlaylistCreate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to What shall we play?.
+        /// </summary>
+        public static string HomeTitle {
+            get {
+                return ResourceManager.GetString("HomeTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to You have no playlists yet. Use the Create playlist button in the sidebar to add one..
+        /// </summary>
+        public static string HomeNoPlaylists {
+            get {
+                return ResourceManager.GetString("HomeNoPlaylists", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Playlists.
+        /// </summary>
+        public static string SidebarPlaylists {
+            get {
+                return ResourceManager.GetString("SidebarPlaylists", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Noxy Player.
+        /// </summary>
+        public static string AppName {
+            get {
+                return ResourceManager.GetString("AppName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Offline.
+        /// </summary>
+        public static string StatusOffline {
+            get {
+                return ResourceManager.GetString("StatusOffline", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Online.
+        /// </summary>
+        public static string StatusOnline {
+            get {
+                return ResourceManager.GetString("StatusOnline", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string CommonSave {
+            get {
+                return ResourceManager.GetString("CommonSave", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string CommonCancel {
+            get {
+                return ResourceManager.GetString("CommonCancel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
+        public static string CommonEdit {
+            get {
+                return ResourceManager.GetString("CommonEdit", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string CommonDelete {
+            get {
+                return ResourceManager.GetString("CommonDelete", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Play.
+        /// </summary>
+        public static string CommonPlay {
+            get {
+                return ResourceManager.GetString("CommonPlay", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sign in.
+        /// </summary>
+        public static string AuthSignIn {
+            get {
+                return ResourceManager.GetString("AuthSignIn", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sign up.
+        /// </summary>
+        public static string AuthSignUp {
+            get {
+                return ResourceManager.GetString("AuthSignUp", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Choose server.
+        /// </summary>
+        public static string LoginChooseServer {
+            get {
+                return ResourceManager.GetString("LoginChooseServer", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Choose login.
+        /// </summary>
+        public static string LoginChooseLogin {
+            get {
+                return ResourceManager.GetString("LoginChooseLogin", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to or.
+        /// </summary>
+        public static string LoginOr {
+            get {
+                return ResourceManager.GetString("LoginOr", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sign in with Gmail.
+        /// </summary>
+        public static string LoginGoogle {
+            get {
+                return ResourceManager.GetString("LoginGoogle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Continue.
+        /// </summary>
+        public static string ContinueTitle {
+            get {
+                return ResourceManager.GetString("ContinueTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Recently played.
+        /// </summary>
+        public static string HomeRecentlyPlayed {
+            get {
+                return ResourceManager.GetString("HomeRecentlyPlayed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Name of this device.
+        /// </summary>
+        public static string DeviceNameLabel {
+            get {
+                return ResourceManager.GetString("DeviceNameLabel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Choose device to play on.
+        /// </summary>
+        public static string DevicePickerTitle {
+            get {
+                return ResourceManager.GetString("DevicePickerTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No devices are online..
+        /// </summary>
+        public static string DevicePickerNone {
+            get {
+                return ResourceManager.GetString("DevicePickerNone", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Playing.
+        /// </summary>
+        public static string DevicePickerPlaying {
+            get {
+                return ResourceManager.GetString("DevicePickerPlaying", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Moving playback to {0}….
+        /// </summary>
+        public static string DevicePickerMoving {
+            get {
+                return ResourceManager.GetString("DevicePickerMoving", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Playing on {0}.
+        /// </summary>
+        public static string DevicePickerPlayingOn {
+            get {
+                return ResourceManager.GetString("DevicePickerPlayingOn", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to This device.
+        /// </summary>
+        public static string DevicePickerThisDevice {
+            get {
+                return ResourceManager.GetString("DevicePickerThisDevice", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} (this device).
+        /// </summary>
+        public static string DevicePickerThisDeviceNamed {
+            get {
+                return ResourceManager.GetString("DevicePickerThisDeviceNamed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to another device.
+        /// </summary>
+        public static string DevicePickerAnotherDevice {
+            get {
+                return ResourceManager.GetString("DevicePickerAnotherDevice", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Servers.
+        /// </summary>
+        public static string ServerDialogTitle {
+            get {
+                return ResourceManager.GetString("ServerDialogTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No server saved yet..
+        /// </summary>
+        public static string ServerDialogEmpty {
+            get {
+                return ResourceManager.GetString("ServerDialogEmpty", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Add server.
+        /// </summary>
+        public static string ServerDialogAdd {
+            get {
+                return ResourceManager.GetString("ServerDialogAdd", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Server address.
+        /// </summary>
+        public static string ServerDialogAddress {
+            get {
+                return ResourceManager.GetString("ServerDialogAddress", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm delete.
+        /// </summary>
+        public static string ServerDialogConfirmDelete {
+            get {
+                return ResourceManager.GetString("ServerDialogConfirmDelete", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Title.
+        /// </summary>
+        public static string LibraryColumnTitle {
+            get {
+                return ResourceManager.GetString("LibraryColumnTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Artist.
+        /// </summary>
+        public static string LibraryColumnArtist {
+            get {
+                return ResourceManager.GetString("LibraryColumnArtist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Album.
+        /// </summary>
+        public static string LibraryColumnAlbum {
+            get {
+                return ResourceManager.GetString("LibraryColumnAlbum", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Year.
+        /// </summary>
+        public static string LibraryColumnYear {
+            get {
+                return ResourceManager.GetString("LibraryColumnYear", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Added.
+        /// </summary>
+        public static string LibraryColumnAdded {
+            get {
+                return ResourceManager.GetString("LibraryColumnAdded", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Select all shown.
+        /// </summary>
+        public static string SelectAllShown {
+            get {
+                return ResourceManager.GetString("SelectAllShown", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Select all.
+        /// </summary>
+        public static string SelectAll {
+            get {
+                return ResourceManager.GetString("SelectAll", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Select {0}.
+        /// </summary>
+        public static string SelectRow {
+            get {
+                return ResourceManager.GetString("SelectRow", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Show or hide the sidebar.
+        /// </summary>
+        public static string HeaderToggleSidebar {
+            get {
+                return ResourceManager.GetString("HeaderToggleSidebar", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Main.
+        /// </summary>
+        public static string SidebarMain {
+            get {
+                return ResourceManager.GetString("SidebarMain", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Home.
+        /// </summary>
+        public static string SidebarHome {
+            get {
+                return ResourceManager.GetString("SidebarHome", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Library.
+        /// </summary>
+        public static string SidebarLibrary {
+            get {
+                return ResourceManager.GetString("SidebarLibrary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string SidebarSettings {
+            get {
+                return ResourceManager.GetString("SidebarSettings", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Actions for {0}.
+        /// </summary>
+        public static string SidebarPlaylistActions {
+            get {
+                return ResourceManager.GetString("SidebarPlaylistActions", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Account.
+        /// </summary>
+        public static string SectionAccountTitle {
+            get {
+                return ResourceManager.GetString("SectionAccountTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Signed in as.
+        /// </summary>
+        public static string SectionAccountSignedInAs {
+            get {
+                return ResourceManager.GetString("SectionAccountSignedInAs", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Device.
+        /// </summary>
+        public static string SectionDeviceTitle {
+            get {
+                return ResourceManager.GetString("SectionDeviceTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Media files on this device.
+        /// </summary>
+        public static string SectionDeviceMediaFiles {
+            get {
+                return ResourceManager.GetString("SectionDeviceMediaFiles", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Stored on this device.
+        /// </summary>
+        public static string SectionDeviceStored {
+            get {
+                return ResourceManager.GetString("SectionDeviceStored", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Free space on this device.
+        /// </summary>
+        public static string SectionDeviceFree {
+            get {
+                return ResourceManager.GetString("SectionDeviceFree", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Theme.
+        /// </summary>
+        public static string SettingsTheme {
+            get {
+                return ResourceManager.GetString("SettingsTheme", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown.
+        /// </summary>
+        public static string SettingsUnknown {
+            get {
+                return ResourceManager.GetString("SettingsUnknown", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Server.
+        /// </summary>
+        public static string ServerPickerLabel {
+            get {
+                return ResourceManager.GetString("ServerPickerLabel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Manage servers.
+        /// </summary>
+        public static string ServerPickerManage {
+            get {
+                return ResourceManager.GetString("ServerPickerManage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No server saved.
+        /// </summary>
+        public static string ServerPickerNone {
+            get {
+                return ResourceManager.GetString("ServerPickerNone", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Choose a server.
+        /// </summary>
+        public static string ServerPickerChoose {
+            get {
+                return ResourceManager.GetString("ServerPickerChoose", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Volume.
+        /// </summary>
+        public static string PlayerVolume {
+            get {
+                return ResourceManager.GetString("PlayerVolume", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Queue.
+        /// </summary>
+        public static string PlayerQueue {
+            get {
+                return ResourceManager.GetString("PlayerQueue", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Previous.
+        /// </summary>
+        public static string PlayerPrevious {
+            get {
+                return ResourceManager.GetString("PlayerPrevious", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Next.
+        /// </summary>
+        public static string PlayerNext {
+            get {
+                return ResourceManager.GetString("PlayerNext", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Pause.
+        /// </summary>
+        public static string PlayerPause {
+            get {
+                return ResourceManager.GetString("PlayerPause", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Play.
+        /// </summary>
+        public static string PlayerPlay {
+            get {
+                return ResourceManager.GetString("PlayerPlay", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Position.
+        /// </summary>
+        public static string PlayerPosition {
+            get {
+                return ResourceManager.GetString("PlayerPosition", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Upload.
+        /// </summary>
+        public static string UploadButton {
+            get {
+                return ResourceManager.GetString("UploadButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Drop audio files to add them to your library.
+        /// </summary>
+        public static string UploadDropHint {
+            get {
+                return ResourceManager.GetString("UploadDropHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Drop audio files to add them to your library and this playlist.
+        /// </summary>
+        public static string UploadDropHintPlaylist {
+            get {
+                return ResourceManager.GetString("UploadDropHintPlaylist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Enter a whole number..
+        /// </summary>
+        public static string SettingWholeNumber {
+            get {
+                return ResourceManager.GetString("SettingWholeNumber", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to On this device.
+        /// </summary>
+        public static string FileStatusOnDevice {
+            get {
+                return ResourceManager.GetString("FileStatusOnDevice", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Downloading.
+        /// </summary>
+        public static string FileStatusDownloading {
+            get {
+                return ResourceManager.GetString("FileStatusDownloading", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Download failed.
+        /// </summary>
+        public static string FileStatusFailed {
+            get {
+                return ResourceManager.GetString("FileStatusFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Not downloaded.
+        /// </summary>
+        public static string FileStatusNotDownloaded {
+            get {
+                return ResourceManager.GetString("FileStatusNotDownloaded", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Play {0}.
+        /// </summary>
+        public static string PlaylistCardPlay {
+            get {
+                return ResourceManager.GetString("PlaylistCardPlay", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Library.
+        /// </summary>
+        public static string LibraryTitle {
+            get {
+                return ResourceManager.GetString("LibraryTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Your library is empty.
+        /// </summary>
+        public static string LibraryEmptyTitle {
+            get {
+                return ResourceManager.GetString("LibraryEmptyTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Upload music files from your computer to start your library. Once they are in, you can search and sort them, play them, and put them in playlists..
+        /// </summary>
+        public static string LibraryEmptyDescription {
+            get {
+                return ResourceManager.GetString("LibraryEmptyDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Search the library.
+        /// </summary>
+        public static string LibrarySearch {
+            get {
+                return ResourceManager.GetString("LibrarySearch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Loading.
+        /// </summary>
+        public static string PlaylistLoading {
+            get {
+                return ResourceManager.GetString("PlaylistLoading", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to This playlist is empty.
+        /// </summary>
+        public static string PlaylistEmptyTitle {
+            get {
+                return ResourceManager.GetString("PlaylistEmptyTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Add media files from the Library..
+        /// </summary>
+        public static string PlaylistEmptyDescription {
+            get {
+                return ResourceManager.GetString("PlaylistEmptyDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Search the playlist.
+        /// </summary>
+        public static string PlaylistSearch {
+            get {
+                return ResourceManager.GetString("PlaylistSearch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Clear sort.
+        /// </summary>
+        public static string PlaylistClearSort {
+            get {
+                return ResourceManager.GetString("PlaylistClearSort", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Playlist actions.
+        /// </summary>
+        public static string PlaylistActions {
+            get {
+                return ResourceManager.GetString("PlaylistActions", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string SettingsTitle {
+            get {
+                return ResourceManager.GetString("SettingsTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Not found.
+        /// </summary>
+        public static string NotFoundTitle {
+            get {
+                return ResourceManager.GetString("NotFoundTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sorry, the content you are looking for does not exist..
+        /// </summary>
+        public static string NotFoundMessage {
+            get {
+                return ResourceManager.GetString("NotFoundMessage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Media file.
+        /// </summary>
+        public static string FileSaverMediaFile {
+            get {
+                return ResourceManager.GetString("FileSaverMediaFile", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to This playlist was deleted..
+        /// </summary>
+        public static string PlaylistDeleted {
+            get {
+                return ResourceManager.GetString("PlaylistDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} They are read-only until the server can be reached..
+        /// </summary>
+        public static string SettingOfflineReadOnly {
+            get {
+                return ResourceManager.GetString("SettingOfflineReadOnly", resourceCulture);
             }
         }
     }

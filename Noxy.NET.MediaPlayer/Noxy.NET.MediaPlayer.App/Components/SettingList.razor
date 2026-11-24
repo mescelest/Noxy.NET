@@ -57,7 +57,7 @@
 
     private string? OfflineReason => ServiceSync.IsOffline ? PresentationTexts.ActionMessageOffline : null;
     private bool IsOffline => OfflineReason is not null;
-    private List<string> OfflineMessageList => [$"{OfflineReason} They are read-only until the server can be reached."];
+    private List<string> OfflineMessageList => [string.Format(AppTexts.SettingOfflineReadOnly, OfflineReason)];
 
     protected override async Task OnInitializedAsync()
     {
@@ -102,7 +102,7 @@
     {
         if (number is null)
         {
-            _errorMap[setting.Key] = "Enter a whole number.";
+            _errorMap[setting.Key] = AppTexts.SettingWholeNumber;
             _resetCount++;
             return Task.CompletedTask;
         }

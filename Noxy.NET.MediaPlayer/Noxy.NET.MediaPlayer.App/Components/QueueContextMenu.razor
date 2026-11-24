@@ -178,7 +178,7 @@
     }
 
     // The graphic of a playlist, the size of a menu icon.
-    private static RenderFragment ArtOf(ResponsePlaylist playlist) => @<PlaylistArt Playlist="playlist" Size="var(--size-icon-md)"/>;
+    private static RenderFragment ArtOf(ResponsePlaylist playlist) => @<PlaylistArt Hue="playlist.ArtHueCurrent" Size="var(--size-icon-md)"/>;
 
     private Task AddToPlaylist(Guid playlistID, List<Guid> mediaFileIDList)
     {

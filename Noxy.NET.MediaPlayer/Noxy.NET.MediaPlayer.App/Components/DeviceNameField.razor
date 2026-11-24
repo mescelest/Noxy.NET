@@ -4,7 +4,7 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <label for="device-name">Name of this device</label>
+    <label for="device-name">@AppTexts.DeviceNameLabel</label>
     <input id="device-name" type="text" maxlength="50" value="@_name" @onchange="ChangeHandler"/>
     <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
 </div>

@@ -21,7 +21,7 @@
                 {
                     Guid playlistID = playlist.ID;
                     <button @key="playlistID" type="button" class="playlist" @onclick="() => Choose(playlistID)">
-                        <PlaylistArt Playlist="playlist"/>
+                        <PlaylistArt Hue="playlist.ArtHueCurrent"/>
                         <span class="name">@playlist.Name</span>
                     </button>
                 }

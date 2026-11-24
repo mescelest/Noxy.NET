@@ -9,37 +9,3 @@
     display: flex;
     justify-content: flex-end;
 }
-
-/* The colours of the tile in a row, the default one first. */
-.colours {
-    display: flex;
-    flex-flow: row wrap;
-    gap: var(--size-gap-xs);
-    margin: 0;
-    padding: 0;
-    border: 0;
-}
-
-.colours > legend {
-    flex: 1 0 100%;
-    padding: 0;
-}
-
-.colours ::deep > .choice {
-    gap: var(--size-gap-xxs);
-}
-
-/* A swatch is the colour of the tile itself, made from the same hue. The one chosen has a ring. */
-.swatch {
-    display: inline-block;
-    width: var(--size-control-xxs);
-    height: var(--size-control-xxs);
-    border-radius: var(--size-border-radius-md);
-    background: var(--color-playlist-art);
-    box-sizing: border-box;
-}
-
-.swatch[data-checked="True"] {
-    outline: var(--size-border-width-md) solid var(--color-on-surface);
-    outline-offset: var(--size-border-width-md);
-}

@@ -8,16 +8,16 @@
             </div>
             <div class="header-row">
                 <TableCell class="cell">
-                    <InputControlCheckbox Option="true" aria-label="Select all shown" @bind-Value:get="@AllSelected" @bind-Value:set="ChangeAllHandler"/>
+                    <InputControlCheckbox Option="true" aria-label="@AppTexts.SelectAllShown" @bind-Value:get="@AllSelected" @bind-Value:set="ChangeAllHandler"/>
                 </TableCell>
                 <TableCell class="cell">
                     <MaterialIcon Icon="download_for_offline" Size="var(--size-icon-sm)"/>
                 </TableCell>
-                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Title)" OnClick="() => ClickSortHandler(LibrarySortEnum.Title)"><strong>Title</strong></SortHeaderCell>
-                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Artist)" OnClick="() => ClickSortHandler(LibrarySortEnum.Artist)"><strong>Artist</strong></SortHeaderCell>
-                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Album)" OnClick="() => ClickSortHandler(LibrarySortEnum.Album)"><strong>Album</strong></SortHeaderCell>
-                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Year)" OnClick="() => ClickSortHandler(LibrarySortEnum.Year)"><strong>Year</strong></SortHeaderCell>
-                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.TimeCreated)" OnClick="() => ClickSortHandler(LibrarySortEnum.TimeCreated)"><strong>Added</strong></SortHeaderCell>
+                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Title)" OnClick="() => ClickSortHandler(LibrarySortEnum.Title)"><strong>@AppTexts.LibraryColumnTitle</strong></SortHeaderCell>
+                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Artist)" OnClick="() => ClickSortHandler(LibrarySortEnum.Artist)"><strong>@AppTexts.LibraryColumnArtist</strong></SortHeaderCell>
+                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Album)" OnClick="() => ClickSortHandler(LibrarySortEnum.Album)"><strong>@AppTexts.LibraryColumnAlbum</strong></SortHeaderCell>
+                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Year)" OnClick="() => ClickSortHandler(LibrarySortEnum.Year)"><strong>@AppTexts.LibraryColumnYear</strong></SortHeaderCell>
+                <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.TimeCreated)" OnClick="() => ClickSortHandler(LibrarySortEnum.TimeCreated)"><strong>@AppTexts.LibraryColumnAdded</strong></SortHeaderCell>
             </div>
         </TableHeader>
 
@@ -136,7 +136,7 @@
 
     private bool IsOver(MediaFileTableRow row) => _overKey == row.Key;
 
-    private static string SelectLabel(MediaFileTableRow row) => $"Select {row.MediaFile.Title}";
+    private static string SelectLabel(MediaFileTableRow row) => string.Format(AppTexts.SelectRow, row.MediaFile.Title);
 
     private bool IsSelected(MediaFileTableRow row) => SelectedSet.Contains(row.Key);
 

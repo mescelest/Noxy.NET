@@ -7,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using Noxy.NET.MediaPlayer.API.Configurations;
 using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Persistence;
-using Noxy.NET.MediaPlayer.Persistence.Services;
 
 namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
@@ -40,9 +39,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         context.Database.Migrate();
     }
 
+    // The folder names the host runs with: the tests set none of them, so they are the defaults.
+    private static readonly ConfigStorage Defaults = new();
+
     public string StorageRoot => Path.Combine(_directory, "media");
-    public string StagingFolder => Path.Combine(StorageRoot, FileStorageService.StagingFolderName);
-    public string TemporaryFolder => Path.Combine(StorageRoot, FileStorageService.TemporaryFolderName);
+    public string LibraryFolder => Path.Combine(StorageRoot, Defaults.LibraryFolderName);
+    public string StagingFolder => Path.Combine(StorageRoot, Defaults.StagingFolderName);
+    public string TemporaryFolder => Path.Combine(StorageRoot, Defaults.TemporaryFolderName);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

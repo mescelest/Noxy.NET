@@ -31,7 +31,7 @@
 
     private bool IsOffline => ServiceSync.IsOffline;
 
-    private string HintText => PlaylistID is null ? "Drop audio files to add them to your library" : "Drop audio files to add them to your library and this playlist";
+    private string HintText => PlaylistID is null ? AppTexts.UploadDropHint : AppTexts.UploadDropHintPlaylist;
 
     protected override void OnInitialized()
     {

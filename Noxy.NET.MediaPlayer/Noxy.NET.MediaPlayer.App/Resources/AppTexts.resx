@@ -116,15 +116,11 @@
     <value>Save</value>
         <comment>The button of the edit playlist form.</comment>
   </data>
-    <data name="EditPlaylistColor" xml:space="preserve">
+    <data name="PlaylistColor" xml:space="preserve">
     <value>Colour</value>
-        <comment>The label of the colour choice of the edit playlist form.</comment>
+        <comment>The label of the colour choice of the playlist forms.</comment>
   </data>
-    <data name="EditPlaylistColorDefault" xml:space="preserve">
-    <value>Default</value>
-        <comment>The choice that gives the playlist its own colour again.</comment>
-  </data>
-    <data name="EditPlaylistColorHue" xml:space="preserve">
+    <data name="PlaylistColorHue" xml:space="preserve">
     <value>Colour at {0} degrees</value>
         <comment>The name of one colour swatch for a screen reader; {0} is its place on the colour wheel.</comment>
   </data>
@@ -384,5 +380,377 @@ Nothing is deleted from your library on the server.</value>
     <data name="LibraryOpenFolder" xml:space="preserve">
     <value>Open containing folder</value>
         <comment>The library menu item that shows the file of a song in the file manager.</comment>
+  </data>
+    <data name="NewPlaylistTitle" xml:space="preserve">
+    <value>Create playlist</value>
+        <comment>The title of the create playlist dialog, and the name of the button in the sidebar that opens it.</comment>
+  </data>
+    <data name="NewPlaylistCreate" xml:space="preserve">
+    <value>Create</value>
+        <comment>The button of the create playlist form.</comment>
+  </data>
+    <data name="HomeTitle" xml:space="preserve">
+    <value>What shall we play?</value>
+        <comment>The title of the home page.</comment>
+  </data>
+    <data name="HomeNoPlaylists" xml:space="preserve">
+    <value>You have no playlists yet. Use the Create playlist button in the sidebar to add one.</value>
+        <comment>The message on the home page when there is no playlist.</comment>
+  </data>
+    <data name="SidebarPlaylists" xml:space="preserve">
+    <value>Playlists</value>
+        <comment>The heading of the list of playlists in the sidebar.</comment>
+  </data>
+    <data name="AppName" xml:space="preserve">
+    <value>Noxy Player</value>
+        <comment>The name of the app, in the header and on the sign-in screen.</comment>
+  </data>
+    <data name="StatusOffline" xml:space="preserve">
+    <value>Offline</value>
+        <comment>The header status when the app cannot reach the server, and why the device picker is disabled.</comment>
+  </data>
+    <data name="StatusOnline" xml:space="preserve">
+    <value>Online</value>
+        <comment>The header status when the app can reach the server.</comment>
+  </data>
+    <data name="CommonSave" xml:space="preserve">
+    <value>Save</value>
+        <comment>A button that saves what was typed.</comment>
+  </data>
+    <data name="CommonCancel" xml:space="preserve">
+    <value>Cancel</value>
+        <comment>A button that drops what was typed.</comment>
+  </data>
+    <data name="CommonEdit" xml:space="preserve">
+    <value>Edit</value>
+        <comment>A button that starts editing.</comment>
+  </data>
+    <data name="CommonDelete" xml:space="preserve">
+    <value>Delete</value>
+        <comment>A button that removes something.</comment>
+  </data>
+    <data name="CommonPlay" xml:space="preserve">
+    <value>Play</value>
+        <comment>A button that starts playing.</comment>
+  </data>
+    <data name="AuthSignIn" xml:space="preserve">
+    <value>Sign in</value>
+        <comment>The sign-in tab and its button.</comment>
+  </data>
+    <data name="AuthSignUp" xml:space="preserve">
+    <value>Sign up</value>
+        <comment>The sign-up tab and its button.</comment>
+  </data>
+    <data name="LoginChooseServer" xml:space="preserve">
+    <value>Choose server</value>
+        <comment>The label of the server choice on the sign-in screen.</comment>
+  </data>
+    <data name="LoginChooseLogin" xml:space="preserve">
+    <value>Choose login</value>
+        <comment>The label of the login choice on the sign-in screen.</comment>
+  </data>
+    <data name="LoginOr" xml:space="preserve">
+    <value>or</value>
+        <comment>The word between the sign-in form and the Google button.</comment>
+  </data>
+    <data name="LoginGoogle" xml:space="preserve">
+    <value>Sign in with Gmail</value>
+        <comment>The Google sign-in button.</comment>
+  </data>
+    <data name="ContinueTitle" xml:space="preserve">
+    <value>Continue</value>
+        <comment>The heading of the card that continues what was playing.</comment>
+  </data>
+    <data name="HomeRecentlyPlayed" xml:space="preserve">
+    <value>Recently played</value>
+        <comment>The heading of the recently played playlists on the home page.</comment>
+  </data>
+    <data name="DeviceNameLabel" xml:space="preserve">
+    <value>Name of this device</value>
+        <comment>The label of the field for this device's name.</comment>
+  </data>
+    <data name="DevicePickerTitle" xml:space="preserve">
+    <value>Choose device to play on</value>
+        <comment>The heading of the list of devices to play on.</comment>
+  </data>
+    <data name="DevicePickerNone" xml:space="preserve">
+    <value>No devices are online.</value>
+        <comment>The line in the device list when there is no device.</comment>
+  </data>
+    <data name="DevicePickerPlaying" xml:space="preserve">
+    <value>Playing</value>
+        <comment>The name of the icon that marks the device that is playing.</comment>
+  </data>
+    <data name="DevicePickerMoving" xml:space="preserve">
+    <value>Moving playback to {0}…</value>
+        <comment>The device button while playback is moved; {0} is the device name.</comment>
+  </data>
+    <data name="DevicePickerPlayingOn" xml:space="preserve">
+    <value>Playing on {0}</value>
+        <comment>The device button when another device plays; {0} is its name.</comment>
+  </data>
+    <data name="DevicePickerThisDevice" xml:space="preserve">
+    <value>This device</value>
+        <comment>The device button when this device plays.</comment>
+  </data>
+    <data name="DevicePickerThisDeviceNamed" xml:space="preserve">
+    <value>{0} (this device)</value>
+        <comment>The name of this device in the list; {0} is the name.</comment>
+  </data>
+    <data name="DevicePickerAnotherDevice" xml:space="preserve">
+    <value>another device</value>
+        <comment>The name used for the active device when its name is not known.</comment>
+  </data>
+    <data name="ServerDialogTitle" xml:space="preserve">
+    <value>Servers</value>
+        <comment>The title of the dialog that manages the saved servers.</comment>
+  </data>
+    <data name="ServerDialogEmpty" xml:space="preserve">
+    <value>No server saved yet.</value>
+        <comment>The line in the server dialog when none is saved.</comment>
+  </data>
+    <data name="ServerDialogAdd" xml:space="preserve">
+    <value>Add server</value>
+        <comment>The button that adds a server.</comment>
+  </data>
+    <data name="ServerDialogAddress" xml:space="preserve">
+    <value>Server address</value>
+        <comment>The label of the server address field.</comment>
+  </data>
+    <data name="ServerDialogConfirmDelete" xml:space="preserve">
+    <value>Confirm delete</value>
+        <comment>The delete button after it was pressed once.</comment>
+  </data>
+    <data name="LibraryColumnTitle" xml:space="preserve">
+    <value>Title</value>
+        <comment>The title column of the library table.</comment>
+  </data>
+    <data name="LibraryColumnArtist" xml:space="preserve">
+    <value>Artist</value>
+        <comment>The artist column of the library table.</comment>
+  </data>
+    <data name="LibraryColumnAlbum" xml:space="preserve">
+    <value>Album</value>
+        <comment>The album column of the library table.</comment>
+  </data>
+    <data name="LibraryColumnYear" xml:space="preserve">
+    <value>Year</value>
+        <comment>The year column of the library table.</comment>
+  </data>
+    <data name="LibraryColumnAdded" xml:space="preserve">
+    <value>Added</value>
+        <comment>The column of the library table with the time a song was added.</comment>
+  </data>
+    <data name="SelectAllShown" xml:space="preserve">
+    <value>Select all shown</value>
+        <comment>The name of the box that ticks every row shown.</comment>
+  </data>
+    <data name="SelectAll" xml:space="preserve">
+    <value>Select all</value>
+        <comment>The name of the box that ticks every row.</comment>
+  </data>
+    <data name="SelectRow" xml:space="preserve">
+    <value>Select {0}</value>
+        <comment>The name of the box of one row; {0} is its title.</comment>
+  </data>
+    <data name="HeaderToggleSidebar" xml:space="preserve">
+    <value>Show or hide the sidebar</value>
+        <comment>The name of the button that opens and closes the sidebar.</comment>
+  </data>
+    <data name="SidebarMain" xml:space="preserve">
+    <value>Main</value>
+        <comment>The name of the main navigation for a screen reader.</comment>
+  </data>
+    <data name="SidebarHome" xml:space="preserve">
+    <value>Home</value>
+        <comment>The home link of the sidebar.</comment>
+  </data>
+    <data name="SidebarLibrary" xml:space="preserve">
+    <value>Library</value>
+        <comment>The library link of the sidebar.</comment>
+  </data>
+    <data name="SidebarSettings" xml:space="preserve">
+    <value>Settings</value>
+        <comment>The settings link of the sidebar.</comment>
+  </data>
+    <data name="SidebarPlaylistActions" xml:space="preserve">
+    <value>Actions for {0}</value>
+        <comment>The name of the button that opens the menu of a playlist; {0} is its name.</comment>
+  </data>
+    <data name="SectionAccountTitle" xml:space="preserve">
+    <value>Account</value>
+        <comment>The heading of the account section of the settings.</comment>
+  </data>
+    <data name="SectionAccountSignedInAs" xml:space="preserve">
+    <value>Signed in as</value>
+        <comment>The label of the signed-in email.</comment>
+  </data>
+    <data name="SectionDeviceTitle" xml:space="preserve">
+    <value>Device</value>
+        <comment>The heading of the device section of the settings.</comment>
+  </data>
+    <data name="SectionDeviceMediaFiles" xml:space="preserve">
+    <value>Media files on this device</value>
+        <comment>The label of the number of downloaded files.</comment>
+  </data>
+    <data name="SectionDeviceStored" xml:space="preserve">
+    <value>Stored on this device</value>
+        <comment>The label of the space the downloads take.</comment>
+  </data>
+    <data name="SectionDeviceFree" xml:space="preserve">
+    <value>Free space on this device</value>
+        <comment>The label of the free space on the device.</comment>
+  </data>
+    <data name="SettingsTheme" xml:space="preserve">
+    <value>Theme</value>
+        <comment>The label of the theme choice.</comment>
+  </data>
+    <data name="SettingsUnknown" xml:space="preserve">
+    <value>Unknown</value>
+        <comment>What is shown when a value cannot be read.</comment>
+  </data>
+    <data name="ServerPickerLabel" xml:space="preserve">
+    <value>Server</value>
+        <comment>The name of the server choice.</comment>
+  </data>
+    <data name="ServerPickerManage" xml:space="preserve">
+    <value>Manage servers</value>
+        <comment>The button that opens the server dialog.</comment>
+  </data>
+    <data name="ServerPickerNone" xml:space="preserve">
+    <value>No server saved</value>
+        <comment>The server choice when none is saved.</comment>
+  </data>
+    <data name="ServerPickerChoose" xml:space="preserve">
+    <value>Choose a server</value>
+        <comment>The server choice before one is chosen.</comment>
+  </data>
+    <data name="PlayerVolume" xml:space="preserve">
+    <value>Volume</value>
+        <comment>The name of the volume slider.</comment>
+  </data>
+    <data name="PlayerQueue" xml:space="preserve">
+    <value>Queue</value>
+        <comment>The name of the button that shows the queue.</comment>
+  </data>
+    <data name="PlayerPrevious" xml:space="preserve">
+    <value>Previous</value>
+        <comment>The name of the previous button.</comment>
+  </data>
+    <data name="PlayerNext" xml:space="preserve">
+    <value>Next</value>
+        <comment>The name of the next button.</comment>
+  </data>
+    <data name="PlayerPause" xml:space="preserve">
+    <value>Pause</value>
+        <comment>The name of the play button while playing.</comment>
+  </data>
+    <data name="PlayerPlay" xml:space="preserve">
+    <value>Play</value>
+        <comment>The name of the play button while paused.</comment>
+  </data>
+    <data name="PlayerPosition" xml:space="preserve">
+    <value>Position</value>
+        <comment>The name of the seek bar.</comment>
+  </data>
+    <data name="UploadButton" xml:space="preserve">
+    <value>Upload</value>
+        <comment>The default label of the upload button.</comment>
+  </data>
+    <data name="UploadDropHint" xml:space="preserve">
+    <value>Drop audio files to add them to your library</value>
+        <comment>The hint of the drop zone on the library.</comment>
+  </data>
+    <data name="UploadDropHintPlaylist" xml:space="preserve">
+    <value>Drop audio files to add them to your library and this playlist</value>
+        <comment>The hint of the drop zone on a playlist.</comment>
+  </data>
+    <data name="SettingWholeNumber" xml:space="preserve">
+    <value>Enter a whole number.</value>
+        <comment>The error of a number setting that is not a whole number.</comment>
+  </data>
+    <data name="FileStatusOnDevice" xml:space="preserve">
+    <value>On this device</value>
+        <comment>The state of a file that is downloaded.</comment>
+  </data>
+    <data name="FileStatusDownloading" xml:space="preserve">
+    <value>Downloading</value>
+        <comment>The state of a file that is downloading.</comment>
+  </data>
+    <data name="FileStatusFailed" xml:space="preserve">
+    <value>Download failed</value>
+        <comment>The state of a file whose download failed.</comment>
+  </data>
+    <data name="FileStatusNotDownloaded" xml:space="preserve">
+    <value>Not downloaded</value>
+        <comment>The state of a file that is not downloaded.</comment>
+  </data>
+    <data name="PlaylistCardPlay" xml:space="preserve">
+    <value>Play {0}</value>
+        <comment>The name of the play button of a playlist card; {0} is the playlist name.</comment>
+  </data>
+    <data name="LibraryTitle" xml:space="preserve">
+    <value>Library</value>
+        <comment>The title of the library page.</comment>
+  </data>
+    <data name="LibraryEmptyTitle" xml:space="preserve">
+    <value>Your library is empty</value>
+        <comment>The heading of the empty library.</comment>
+  </data>
+    <data name="LibraryEmptyDescription" xml:space="preserve">
+    <value>Upload music files from your computer to start your library. Once they are in, you can search and sort them, play them, and put them in playlists.</value>
+        <comment>The explanation of the empty library.</comment>
+  </data>
+    <data name="LibrarySearch" xml:space="preserve">
+    <value>Search the library</value>
+        <comment>The placeholder and name of the library search.</comment>
+  </data>
+    <data name="PlaylistLoading" xml:space="preserve">
+    <value>Loading</value>
+        <comment>The name of the spinner while a playlist loads.</comment>
+  </data>
+    <data name="PlaylistEmptyTitle" xml:space="preserve">
+    <value>This playlist is empty</value>
+        <comment>The heading of an empty playlist.</comment>
+  </data>
+    <data name="PlaylistEmptyDescription" xml:space="preserve">
+    <value>Add media files from the Library.</value>
+        <comment>The explanation of an empty playlist.</comment>
+  </data>
+    <data name="PlaylistSearch" xml:space="preserve">
+    <value>Search the playlist</value>
+        <comment>The placeholder and name of the playlist search.</comment>
+  </data>
+    <data name="PlaylistClearSort" xml:space="preserve">
+    <value>Clear sort</value>
+        <comment>The button that puts a playlist back in its own order.</comment>
+  </data>
+    <data name="PlaylistActions" xml:space="preserve">
+    <value>Playlist actions</value>
+        <comment>The name of the button that opens the menu of the playlist on its page.</comment>
+  </data>
+    <data name="SettingsTitle" xml:space="preserve">
+    <value>Settings</value>
+        <comment>The title of the settings page.</comment>
+  </data>
+    <data name="NotFoundTitle" xml:space="preserve">
+    <value>Not found</value>
+        <comment>The title of the page for an address that does not exist.</comment>
+  </data>
+    <data name="NotFoundMessage" xml:space="preserve">
+    <value>Sorry, the content you are looking for does not exist.</value>
+        <comment>The explanation on the not found page.</comment>
+  </data>
+    <data name="FileSaverMediaFile" xml:space="preserve">
+    <value>Media file</value>
+        <comment>The name of the file type in the save dialog.</comment>
+  </data>
+    <data name="PlaylistDeleted" xml:space="preserve">
+    <value>This playlist was deleted.</value>
+        <comment>The warning on a playlist page when the playlist no longer exists.</comment>
+  </data>
+    <data name="SettingOfflineReadOnly" xml:space="preserve">
+    <value>{0} They are read-only until the server can be reached.</value>
+        <comment>The note on the settings when the server cannot be reached; {0} is the offline message.</comment>
   </data>
 </root>

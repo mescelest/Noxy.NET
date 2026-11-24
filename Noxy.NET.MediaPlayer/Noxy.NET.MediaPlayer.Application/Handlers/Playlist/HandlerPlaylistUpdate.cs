@@ -3,6 +3,7 @@ using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
 using Noxy.NET.MediaPlayer.Application.Extensions;
 using Noxy.NET.MediaPlayer.Application.Handlers.Abstractions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
@@ -12,9 +13,6 @@ namespace Noxy.NET.MediaPlayer.Application.Handlers.Playlist;
 
 public class HandlerPlaylistUpdate(IUnitOfWorkFactory factoryUnitOfWork, IPublisher publisher, TimeProvider time) : BaseHandlerPlaylistChange<CommandPlaylistUpdate, ResponsePlaylist>(factoryUnitOfWork, publisher, time)
 {
-    private const int MinArtHue = 0;
-    private const int MaxArtHue = 359;
-
     public override async ValueTask<ResponsePlaylist> Handle(CommandPlaylistUpdate command, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = FactoryUnitOfWork.Create();
@@ -48,8 +46,8 @@ public class HandlerPlaylistUpdate(IUnitOfWorkFactory factoryUnitOfWork, IPublis
             // The request refuses these already; this keeps a command from anywhere else from storing one.
             if (command.ArtHue.Value is { } hue)
             {
-                ArgumentOutOfRangeException.ThrowIfLessThan(hue, MinArtHue, nameof(command));
-                ArgumentOutOfRangeException.ThrowIfGreaterThan(hue, MaxArtHue, nameof(command));
+                ArgumentOutOfRangeException.ThrowIfLessThan(hue, PlaylistArtHue.Min, nameof(command));
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(hue, PlaylistArtHue.Max, nameof(command));
             }
 
             playlist.ArtHue = command.ArtHue.Value;

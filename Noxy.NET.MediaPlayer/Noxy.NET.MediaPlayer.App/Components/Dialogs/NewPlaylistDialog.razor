@@ -2,7 +2,7 @@
 @inherits BaseComponentElement
 
 <Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
-    <h2>New playlist</h2>
+    <h2>@AppTexts.NewPlaylistTitle</h2>
     @if (Open)
     {
         <FormNewPlaylist OnSubmit="Create"/>

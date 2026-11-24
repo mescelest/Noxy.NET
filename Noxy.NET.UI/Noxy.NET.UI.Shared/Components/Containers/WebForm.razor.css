@@ -3,7 +3,8 @@
     flex: 1 1 auto;
     flex-flow: column;
     row-gap: var(--size-gap-lg, 1.5rem);
-    min-width: var(--size-column, 20rem);
+    /* No narrower than a column, unless what it sits in is narrower: in a dialog at the smallest window the padding takes some of the column. */
+    min-width: min(var(--size-column, 20rem), 100%);
 }
 
 .WebForm > fieldset {

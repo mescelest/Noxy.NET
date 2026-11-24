@@ -355,14 +355,14 @@ public class MediaChangeFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
-        Assert.Single(Directory.GetFiles(factory.StorageRoot));
+        Assert.Single(Directory.GetFiles(factory.LibraryFolder));
 
         HttpResponseMessage response = await api.Delete(user.Token, mediaFile.ID);
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         Assert.Empty(await api.GetMediaFileList(user.Token));
         Assert.Equal(HttpStatusCode.NotFound, (await api.Download(user.Token, mediaFile.ID)).StatusCode);
-        Assert.Empty(Directory.GetFiles(factory.StorageRoot));
+        Assert.Empty(Directory.GetFiles(factory.LibraryFolder));
     }
 
     [Fact]
@@ -378,7 +378,7 @@ public class MediaChangeFlowTest
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Single(await api.GetMediaFileList(owner.Token));
-        Assert.Single(Directory.GetFiles(factory.StorageRoot));
+        Assert.Single(Directory.GetFiles(factory.LibraryFolder));
     }
 
     [Fact]
@@ -388,7 +388,7 @@ public class MediaChangeFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ResponseMediaFile mediaFile = await UploadMediaFile(api, user, "One");
-        File.Delete(Directory.GetFiles(factory.StorageRoot).Single());
+        File.Delete(Directory.GetFiles(factory.LibraryFolder).Single());
 
         HttpResponseMessage response = await api.Delete(user.Token, mediaFile.ID);
 

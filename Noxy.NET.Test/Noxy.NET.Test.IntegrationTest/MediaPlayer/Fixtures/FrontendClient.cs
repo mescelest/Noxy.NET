@@ -44,7 +44,9 @@ public sealed class FrontendClient : IAsyncDisposable
         Reporter = new(Player, Queue, Remote, Hub, Store, NullLogger<PlaybackReporterService>.Instance);
         CommandHandler = new(Hub, Remote, Player, Queue, Reporter, NullLogger<RemoteCommandHandlerService>.Instance);
         Control = new(Player, Queue, Remote, Hub, Reporter, Device, new Delay(), NullLogger<PlaybackControlService>.Instance);
-        LocalDataOwner = new(Session, Store, Store, Store.Setting, FileStore, new DiskArtCacheStore(folder), Download, Player);
+        ArtCache = new(folder);
+        Art = new(Api, ArtCache, Store, MetadataSync);
+        LocalDataOwner = new(Session, Store, Store, Store.Setting, FileStore, ArtCache, Download, Player);
         Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, Queue, Reporter, CommandHandler, LocalDataOwner, Player, new Delay(), NullLogger<AppStartupService>.Instance);
     }
 
@@ -90,6 +92,10 @@ public sealed class FrontendClient : IAsyncDisposable
     public PlayerService Player { get; }
 
     public FileDeviceStore DeviceFile { get; }
+
+    public DiskArtCacheStore ArtCache { get; }
+
+    public ArtService Art { get; }
 
     public LocalDataOwnerService LocalDataOwner { get; }
 

@@ -6,15 +6,15 @@
 
 <Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
     <div class="header">
-        <h2>Servers</h2>
-        <Button class="add" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Success" IsIcon="true" disabled="@_isAdding" aria-label="Add server" title="Add server" @onclick="Add">
+        <h2>@AppTexts.ServerDialogTitle</h2>
+        <Button class="add" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Success" IsIcon="true" disabled="@_isAdding" aria-label="@AppTexts.ServerDialogAdd" title="@AppTexts.ServerDialogAdd" @onclick="Add">
             <MaterialIcon Icon="add" Size="var(--size-icon-sm)"/>
         </Button>
     </div>
 
     @if (_addressList.Count == 0 && !_isAdding)
     {
-        <p class="empty">No server saved yet.</p>
+        <p class="empty">@AppTexts.ServerDialogEmpty</p>
     }
     else
     {
@@ -24,11 +24,11 @@
                 <li @key="address" class="server" @onkeydown="HandleKeyDown">
                     @if (IsEditing(address))
                     {
-                        <Button class="cancel" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" IsIcon="true" aria-label="Cancel" title="Cancel" @onclick="Cancel">
+                        <Button class="cancel" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" IsIcon="true" aria-label="@AppTexts.CommonCancel" title="@AppTexts.CommonCancel" @onclick="Cancel">
                             <MaterialIcon Icon="arrow_back" Size="var(--size-icon-sm)"/>
                         </Button>
-                        <InputControlText class="address" Size="1" aria-label="Server address" autofocus="true" OnInputDelay="0" Value="@_draft" ValueChanged="ChangeDraft"/>
-                        <Button class="save" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" IsIcon="true" aria-label="Save" title="Save" @onclick="Save">
+                        <InputControlText class="address" Size="1" aria-label="@AppTexts.ServerDialogAddress" autofocus="true" OnInputDelay="0" Value="@_draft" ValueChanged="ChangeDraft"/>
+                        <Button class="save" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" IsIcon="true" aria-label="@AppTexts.CommonSave" title="@AppTexts.CommonSave" @onclick="Save">
                             <MaterialIcon Icon="check" Size="var(--size-icon-xs)"/>
                         </Button>
                     }
@@ -39,7 +39,7 @@
                             <MaterialIcon Icon="@DeleteIconOf(address)" Size="var(--size-icon-sm)"/>
                         </Button>
                         <span class="address">@address</span>
-                        <Button class="edit" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" IsIcon="true" aria-label="Edit" title="Edit" @onclick="() => Edit(address)">
+                        <Button class="edit" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" IsIcon="true" aria-label="@AppTexts.CommonEdit" title="@AppTexts.CommonEdit" @onclick="() => Edit(address)">
                             <MaterialIcon Icon="edit" Size="var(--size-icon-xs)"/>
                         </Button>
                     }
@@ -48,11 +48,11 @@
             @if (_isAdding)
             {
                 <li class="server" @onkeydown="HandleKeyDown">
-                    <Button class="cancel" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" IsIcon="true" aria-label="Cancel" title="Cancel" @onclick="Cancel">
+                    <Button class="cancel" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" IsIcon="true" aria-label="@AppTexts.CommonCancel" title="@AppTexts.CommonCancel" @onclick="Cancel">
                         <MaterialIcon Icon="arrow_back" Size="var(--size-icon-sm)"/>
                     </Button>
-                    <InputControlText class="address" Size="1" aria-label="Server address" placeholder="https://" autofocus="true" OnInputDelay="0" Value="@_draft" ValueChanged="ChangeDraft"/>
-                    <Button class="save" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" IsIcon="true" aria-label="Save" title="Save" @onclick="Save">
+                    <InputControlText class="address" Size="1" aria-label="@AppTexts.ServerDialogAddress" placeholder="https://" autofocus="true" OnInputDelay="0" Value="@_draft" ValueChanged="ChangeDraft"/>
+                    <Button class="save" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" IsIcon="true" aria-label="@AppTexts.CommonSave" title="@AppTexts.CommonSave" @onclick="Save">
                         <MaterialIcon Icon="check" Size="var(--size-icon-xs)"/>
                     </Button>
                 </li>
@@ -94,7 +94,7 @@
 
     private bool IsConfirming(string address) => _confirming == address;
 
-    private string DeleteLabelOf(string address) => IsConfirming(address) ? "Confirm delete" : "Delete";
+    private string DeleteLabelOf(string address) => IsConfirming(address) ? AppTexts.ServerDialogConfirmDelete : AppTexts.CommonDelete;
 
     // The first click is a quiet cross; the second, which removes the server, is a filled check.
     private ButtonAppearanceEnum DeleteAppearanceOf(string address) => IsConfirming(address) ? ButtonAppearanceEnum.Filled : ButtonAppearanceEnum.Ghost;

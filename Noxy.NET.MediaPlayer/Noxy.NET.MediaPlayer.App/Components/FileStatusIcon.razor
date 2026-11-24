@@ -27,10 +27,10 @@
 
     private string Label => State switch
     {
-        FileSyncStateEnum.OnDevice => "On this device",
-        FileSyncStateEnum.Downloading => "Downloading",
-        FileSyncStateEnum.Failed => "Download failed",
-        FileSyncStateEnum.NotDownloaded => "Not downloaded",
+            FileSyncStateEnum.OnDevice => AppTexts.FileStatusOnDevice,
+            FileSyncStateEnum.Downloading => AppTexts.FileStatusDownloading,
+            FileSyncStateEnum.Failed => AppTexts.FileStatusFailed,
+            FileSyncStateEnum.NotDownloaded => AppTexts.FileStatusNotDownloaded,
         _ => throw new InvalidEnumArgumentException(nameof(State), (int)State, typeof(FileSyncStateEnum))
     };
 

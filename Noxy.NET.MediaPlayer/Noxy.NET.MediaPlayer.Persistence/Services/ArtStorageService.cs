@@ -6,9 +6,6 @@ namespace Noxy.NET.MediaPlayer.Persistence.Services;
 
 public class ArtStorageService : IArtStorageService
 {
-    public const string ArtFolderName = "art";
-    public const string AlbumFolderName = "album";
-
     private const string PictureExtension = ".jpg";
     private const string TemporaryExtension = ".tmp";
 
@@ -16,7 +13,7 @@ public class ArtStorageService : IArtStorageService
 
     public ArtStorageService(IOptions<ConfigStorage> options)
     {
-        _albumFolder = Path.Combine(Path.GetFullPath(options.Value.RootPath), ArtFolderName, AlbumFolderName);
+        _albumFolder = Path.Combine(Path.GetFullPath(options.Value.RootPath), options.Value.AlbumArtFolderName);
         Directory.CreateDirectory(_albumFolder);
     }
 

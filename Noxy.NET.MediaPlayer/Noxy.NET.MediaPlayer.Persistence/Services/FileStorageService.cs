@@ -9,22 +9,21 @@ namespace Noxy.NET.MediaPlayer.Persistence.Services;
 
 public class FileStorageService : IFileStorageService
 {
-    public const string StagingFolderName = "staging";
-    public const string TemporaryFolderName = "temporary";
-
-    private readonly string _root;
+    private readonly string _library;
     private readonly string _staging;
     private readonly string _temporary;
     private readonly long _maxSizeBytes;
 
     public FileStorageService(IOptions<ConfigStorage> options)
     {
-        _root = Path.GetFullPath(options.Value.RootPath);
-        _staging = Path.Combine(_root, StagingFolderName);
-        _temporary = Path.Combine(_root, TemporaryFolderName);
+        string root = Path.GetFullPath(options.Value.RootPath);
+        _library = Path.Combine(root, options.Value.LibraryFolderName);
+        _staging = Path.Combine(root, options.Value.StagingFolderName);
+        _temporary = Path.Combine(root, options.Value.TemporaryFolderName);
         _maxSizeBytes = options.Value.MaxSizeBytes;
 
-        Directory.CreateDirectory(_root);
+        Directory.CreateDirectory(root);
+        Directory.CreateDirectory(_library);
         Directory.CreateDirectory(_staging);
         Directory.CreateDirectory(_temporary);
 
@@ -55,7 +54,7 @@ public class FileStorageService : IFileStorageService
     public void Promote(string fileName)
     {
         string staged = ResolvePath(_staging, fileName);
-        string target = ResolvePath(_root, fileName);
+        string target = ResolvePath(_library, fileName);
 
         if (!File.Exists(staged))
         {
@@ -80,17 +79,17 @@ public class FileStorageService : IFileStorageService
 
     public Stream OpenRead(string fileName)
     {
-        return new FileStream(ResolvePath(_root, fileName), FileMode.Open, FileAccess.Read, FileShare.Read, 81920, true);
+        return new FileStream(ResolvePath(_library, fileName), FileMode.Open, FileAccess.Read, FileShare.Read, 81920, true);
     }
 
     public void Delete(string fileName)
     {
-        File.Delete(ResolvePath(_root, fileName));
+        File.Delete(ResolvePath(_library, fileName));
     }
 
     public string CopyToTemporary(string fileName)
     {
-        string source = ResolvePath(_root, fileName);
+        string source = ResolvePath(_library, fileName);
         string copy = Path.Combine(_temporary, $"{Guid.CreateVersion7()}{Path.GetExtension(fileName)}");
 
         File.Copy(source, copy);

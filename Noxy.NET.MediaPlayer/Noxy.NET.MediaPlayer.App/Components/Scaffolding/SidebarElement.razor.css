@@ -20,9 +20,15 @@
     align-items: center;
     justify-content: space-between;
     height: var(--size-sidebar-header);
+    /* The text starts where the icons of the rows below it do: the rows' links are padded by --size-gap-xs. */
     padding: var(--size-gap-xxxs) var(--size-gap-tiny);
+    padding-inline-start: var(--size-gap-xs);
+    /* Room between the line under the heading and the first row, so the row's highlight does not touch it. */
+    margin-block-end: var(--size-gap-xxxs);
     border-bottom: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
     color: var(--color-muted);
+    font: var(--font-label);
+    text-transform: uppercase;
 }
 
 .link-list-header ::deep > .link-list-header-button {

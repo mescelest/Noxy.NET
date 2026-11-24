@@ -9,7 +9,7 @@ public class FileSaver : IFileSaver
     {
         string extension = Path.GetExtension(suggestedName);
         Windows.Storage.Pickers.FileSavePicker picker = new() { SuggestedFileName = Path.GetFileNameWithoutExtension(suggestedName) };
-        picker.FileTypeChoices.Add("Media file", [string.IsNullOrEmpty(extension) ? "." : extension]);
+        picker.FileTypeChoices.Add(AppTexts.FileSaverMediaFile, [string.IsNullOrEmpty(extension) ? "." : extension]);
 
         if (Microsoft.Maui.Controls.Application.Current?.Windows.FirstOrDefault()?.Handler?.PlatformView is not Microsoft.UI.Xaml.Window window)
         {

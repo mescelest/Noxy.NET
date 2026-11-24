@@ -1,6 +1,4 @@
 .PlaylistArt {
-    /* The hue of this playlist is set on the element itself; this one is for an element without it. */
-    --playlist-hue: 220;
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;

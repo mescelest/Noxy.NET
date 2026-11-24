@@ -2,14 +2,13 @@ using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 
 namespace Noxy.NET.MediaPlayer.Storage.Stores;
 
-public class DiskArtCacheStore(string baseFolder) : IArtCacheStore
+public class DiskArtCacheStore(string baseFolder, string folderName = StorageConstants.ArtCacheFolderName) : IArtCacheStore
 {
-    private const string ArtFolderName = "art";
     private const string PictureExtension = ".jpg";
     private const string TemporaryExtension = ".tmp";
     private const char VersionSeparator = '.';
 
-    private readonly string _artFolder = Path.Combine(Path.GetFullPath(baseFolder), ArtFolderName);
+    private readonly string _artFolder = Path.Combine(Path.GetFullPath(baseFolder), folderName);
 
     public async Task<byte[]?> Get(Guid albumID, DateTime version)
     {

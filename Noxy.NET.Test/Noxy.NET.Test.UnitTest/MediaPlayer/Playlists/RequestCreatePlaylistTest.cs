@@ -37,4 +37,30 @@ public class RequestCreatePlaylistTest
     {
         Assert.Equal(valid, Validate(new() { Name = new('a', length) }).Count == 0);
     }
+
+    [Fact]
+    public void WithNoArtHue_IsValid_AndTheHueIsNull()
+    {
+        RequestCreatePlaylist request = new() { Name = "Road trip" };
+
+        Assert.Empty(Validate(request));
+        Assert.Null(request.ArtHue);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(200)]
+    [InlineData(359)]
+    public void AnArtHueWithinTheWheel_IsValid(int hue)
+    {
+        Assert.Empty(Validate(new() { Name = "Mix", ArtHue = hue }));
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(360)]
+    public void AnArtHueOutsideTheWheel_IsInvalid(int hue)
+    {
+        Assert.NotEmpty(Validate(new() { Name = "Mix", ArtHue = hue }));
+    }
 }

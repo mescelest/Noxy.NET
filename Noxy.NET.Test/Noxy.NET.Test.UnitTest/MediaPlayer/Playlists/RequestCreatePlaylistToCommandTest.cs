@@ -16,4 +16,11 @@ public class RequestCreatePlaylistToCommandTest
         Assert.Equal("Road trip", command.Name);
         Assert.False(command.AllowDuplicates);
     }
+
+    [Fact]
+    public void ToCommand_CarriesTheArtHue_ThatMayBeNull()
+    {
+        Assert.Equal(200, new RequestCreatePlaylist { Name = "Mix", ArtHue = 200 }.ToCommand(UserID).ArtHue);
+        Assert.Null(new RequestCreatePlaylist { Name = "Mix" }.ToCommand(UserID).ArtHue);
+    }
 }

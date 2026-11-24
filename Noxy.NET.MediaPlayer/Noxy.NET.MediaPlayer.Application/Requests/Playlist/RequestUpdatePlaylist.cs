@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Noxy.NET.MediaPlayer.Application.Attributes;
 using Noxy.NET.MediaPlayer.Application.Commands.Playlist;
 using Noxy.NET.MediaPlayer.Application.Models;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 
 namespace Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 
@@ -15,7 +16,7 @@ public class RequestUpdatePlaylist
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<bool> AllowDuplicates { get; set; }
 
-    [OptionalRange(0, 359)]
+    [OptionalRange(PlaylistArtHue.Min, PlaylistArtHue.Max)]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<int?> ArtHue { get; set; }
 

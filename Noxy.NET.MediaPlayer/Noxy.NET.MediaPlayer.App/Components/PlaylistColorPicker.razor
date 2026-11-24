@@ -1,0 +1,37 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass" role="group" aria-label="@AppTexts.PlaylistColor">
+    <span class="label">@AppTexts.PlaylistColor</span>
+    <PlaylistArt class="preview" Hue="HueCurrent" Size="var(--size-control-xl)" IconSize="var(--size-icon-lg)"/>
+    <div class="choices" role="radiogroup" aria-label="@AppTexts.PlaylistColor">
+        @foreach (int hue in PlaylistArtHue.ChoiceList)
+        {
+            <button type="button" class="swatch" style="@HueStyle(hue)" role="radio" aria-checked="@IsChosen(hue)" aria-label="@HueLabel(hue)" title="@HueLabel(hue)" @onclick="() => ChooseHandler(hue)"></button>
+        }
+    </div>
+</div>
+
+@code {
+
+    // The chosen hue, or null while none is.
+    [Parameter]
+    public int? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> ValueChanged { get; set; }
+
+    // The hue the playlist has while none is chosen, which the preview shows. A playlist that is not made yet has none.
+    [Parameter]
+    public int? DefaultHue { get; set; }
+
+    private int HueCurrent => Value ?? DefaultHue ?? PlaylistArtHue.Min;
+
+    private bool IsChosen(int hue) => Value == hue;
+
+    private static string HueStyle(int hue) => $"--playlist-hue: {hue}";
+
+    private static string HueLabel(int hue) => string.Format(AppTexts.PlaylistColorHue, hue);
+
+    private Task ChooseHandler(int hue) => ValueChanged.InvokeAsync(hue);
+
+}

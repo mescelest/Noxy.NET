@@ -7,17 +7,17 @@
 
 <div class="@CssClass @FullscreenPageClass">
     <UploadMediaDropZone>
-        <MediaFileHeader Name="Library" EntryCount="Current.MediaList.Count" SelectedCount="Current.SelectedSet.Count">
+        <MediaFileHeader Name="@AppTexts.LibraryTitle" EntryCount="Current.MediaList.Count" SelectedCount="Current.SelectedSet.Count">
             <LibraryContextMenu @ref="_contextMenu" SelectedSet="Current.SelectedSet" SelectedKeyList="Current.SelectedIDList" ShowTrigger="@HasSelection"/>
         </MediaFileHeader>
 
-        <MediaFileTable RowList="RowList" IsEmpty="IsLibraryEmpty" EmptyTitle="Your library is empty"
-                        EmptyDescription="Upload music files from your computer to start your library. Once they are in, you can search and sort them, play them, and put them in playlists." StateMap="Current.StateMap" Sort="Current.Sort"
+        <MediaFileTable RowList="RowList" IsEmpty="IsLibraryEmpty" EmptyTitle="@AppTexts.LibraryEmptyTitle"
+                        EmptyDescription="@AppTexts.LibraryEmptyDescription" StateMap="Current.StateMap" Sort="Current.Sort"
                         Descending="Current.Descending" OnSortChanged="Sort"
                         SelectedSet="Current.SelectedSet" AllSelected="Current.AllVisibleSelected" OnToggleAll="ToggleAllVisibleSelected" OnToggleRow="ToggleSelected"
                         OnPlay="Play" OnContextMenu="OpenRowMenu">
             <ToolContent>
-                <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="Search the library" aria-label="Search the library" Value="@Current.Search" ValueChanged="ChangeSearch"/>
+                <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.LibrarySearch" aria-label="@AppTexts.LibrarySearch" Value="@Current.Search" ValueChanged="ChangeSearch"/>
                 <ButtonList>
                     <UploadMediaButton Appearance="ButtonAppearanceEnum.Outline"/>
                 </ButtonList>

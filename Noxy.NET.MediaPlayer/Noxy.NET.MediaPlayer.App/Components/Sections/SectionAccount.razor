@@ -1,7 +1,7 @@
 @inject ISessionService ServiceSession
 @inherits BaseComponentElement
 
-<Section @attributes="AdditionalAttributes" class="@CssClass" Title="Account">
+<Section @attributes="AdditionalAttributes" class="@CssClass" Title="@AppTexts.SectionAccountTitle">
     <HeaderContent>
         <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Error" title="@AppTexts.AccountSignOut" aria-label="@AppTexts.AccountSignOut" @onclick="ServiceSession.SignOut">
             <MaterialIcon Icon="logout" Size="var(--size-icon-sm)"/>
@@ -10,7 +10,7 @@
     <ChildContent>
         <div class="signed-in">
             <div class="text">
-                <span class="label">Signed in as</span>
+                <span class="label">@AppTexts.SectionAccountSignedInAs</span>
                 <span class="help">@MethodText</span>
             </div>
             <span class="email">@EmailText</span>
@@ -25,7 +25,7 @@
     private string? _email;
     private SignInMethodEnum? _method;
 
-    private const string TextUnknown = "Unknown";
+    private static string TextUnknown => AppTexts.SettingsUnknown;
 
     private string EmailText => _email ?? TextUnknown;
 

@@ -6,14 +6,6 @@ namespace Noxy.NET.Test.MediaPlayer.Presentation;
 public class FormModelEditPlaylistTest
 {
     [Fact]
-    public void HueList_IsTwelveHuesThirtyDegreesApart_WithinTheWheel()
-    {
-        Assert.Equal(12, FormModelEditPlaylist.HueList.Count);
-        Assert.Equal(Enumerable.Range(0, 12).Select(x => x * 30), FormModelEditPlaylist.HueList);
-        Assert.All(FormModelEditPlaylist.HueList, x => Assert.InRange(x, 0, 359));
-    }
-
-    [Fact]
     public void GetArtHueChange_WhenTheChoiceIsTheOneItStartedWith_IsLeftOut()
     {
         Assert.False(new FormModelEditPlaylist { ArtHue = 90 }.GetArtHueChange(90).HasValue);
