@@ -1,61 +1,54 @@
 @inject ISessionService ServiceSession
-@inject IFileStore StoreFile
 @inherits BaseComponentElement
 
 <Section @attributes="AdditionalAttributes" class="@CssClass" Title="Account">
+    <HeaderContent>
+        <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Error" title="@AppTexts.AccountSignOut" aria-label="@AppTexts.AccountSignOut" @onclick="ServiceSession.SignOut">
+            <MaterialIcon Icon="logout" Size="var(--size-icon-sm)"/>
+        </Button>
+    </HeaderContent>
+    <ChildContent>
+        <div class="signed-in">
+            <div class="text">
+                <span class="label">Signed in as</span>
+                <span class="help">@MethodText</span>
+            </div>
+            <span class="email">@EmailText</span>
+        </div>
 
-    <dl>
-        <dt>Signed in as</dt>
-        <dd>@EmailText</dd>
-
-        <dt>Stored on this device</dt>
-        <dd>@UsedText</dd>
-
-        <dt>Free space on this device</dt>
-        <dd>@FreeText</dd>
-    </dl>
-
-    <button type="button" class="sign-out" @onclick="ServiceSession.SignOut">Sign out</button>
+        <SettingList/>
+    </ChildContent>
 </Section>
 
 @code {
 
     private string? _email;
-    private StorageEstimate? _estimate;
+    private SignInMethodEnum? _method;
 
     private const string TextUnknown = "Unknown";
 
     private string EmailText => _email ?? TextUnknown;
-    private string UsedText => _estimate is null ? TextUnknown : Format(_estimate.UsedBytes);
-    private string FreeText => _estimate is null ? TextUnknown : Format(_estimate.FreeBytes);
+
+    // A session from before the way of signing in was kept has none until the next sign in: it says so.
+    private string MethodText
+    {
+        get
+        {
+            return _method switch
+            {
+                    null => AppTexts.AccountSignedInUnknown,
+                    SignInMethodEnum.Google => AppTexts.AccountSignedInWithGoogle,
+                    SignInMethodEnum.Password => AppTexts.AccountSignedInWithPassword,
+                    _ => throw new InvalidEnumArgumentException(nameof(_method), (int)_method.Value, typeof(SignInMethodEnum))
+            };
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         string? token = await ServiceSession.GetAccessToken();
         _email = token?.GetAccessTokenEmail();
-
-        try
-        {
-            _estimate = await StoreFile.GetEstimate();
-        }
-        catch (IOException)
-        {
-            _estimate = null;
-        }
-    }
-
-    private static string Format(long bytes)
-    {
-        string[] unitList = ["B", "KB", "MB", "GB", "TB"];
-        double value = bytes;
-        int unit = 0;
-        while (value >= 1024 && unit < unitList.Length - 1)
-        {
-            value /= 1024;
-            unit++;
-        }
-
-        return $"{value:0.#} {unitList[unit]}";
+        _method = await ServiceSession.GetSignInMethod();
     }
 
 }

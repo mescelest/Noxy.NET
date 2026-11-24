@@ -7,16 +7,19 @@
 
 <div class="@CssClass @FullscreenPageClass">
     <UploadMediaDropZone>
+        <MediaFileHeader Name="Library" EntryCount="Current.MediaList.Count" SelectedCount="Current.SelectedSet.Count">
+            <LibraryContextMenu @ref="_contextMenu" SelectedSet="Current.SelectedSet" SelectedKeyList="Current.SelectedIDList" HiddenSelectedCount="Current.HiddenSelectedCount" ShowTrigger="@HasSelection"/>
+        </MediaFileHeader>
+
         <MediaFileTable RowList="RowList" IsEmpty="IsLibraryEmpty" EmptyTitle="Your library is empty"
                         EmptyDescription="Upload music files from your computer to start your library. Once they are in, you can search and sort them, play them, and put them in playlists." StateMap="Current.StateMap" Sort="Current.Sort"
                         Descending="Current.Descending" OnSortChanged="Sort"
                         SelectedSet="Current.SelectedSet" AllSelected="Current.AllVisibleSelected" OnToggleAll="ToggleAllVisibleSelected" OnToggleRow="ToggleSelected"
                         OnPlay="Play" OnContextMenu="OpenRowMenu">
             <ToolContent>
-                <input type="search" class="search" placeholder="Search the library" aria-label="Search the library" value="@Current.Search" @oninput="OnSearchInput"/>
+                <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="Search the library" aria-label="Search the library" Value="@Current.Search" ValueChanged="ChangeSearch"/>
                 <ButtonList>
-                    <UploadMediaButton/>
-                    <LibraryContextMenu @ref="_contextMenu" SelectedSet="Current.SelectedSet" SelectedKeyList="Current.SelectedIDList" HiddenSelectedCount="Current.HiddenSelectedCount"/>
+                    <UploadMediaButton Appearance="ButtonAppearanceEnum.Outline"/>
                 </ButtonList>
             </ToolContent>
             <EmptyContent>
@@ -29,7 +32,6 @@
 @code {
 
     private LibraryContextMenu? _contextMenu;
-    private List<MediaFileTableRow> _rowList = [];
     private List<ResponseMediaFile>? _rowSource;
 
     private FeatureLibraryState Current => StateLibrary.Value;
@@ -39,12 +41,12 @@
     {
         get
         {
-            if (ReferenceEquals(_rowSource, Current.VisibleList)) return _rowList;
+            if (ReferenceEquals(_rowSource, Current.VisibleList)) return field;
 
             _rowSource = Current.VisibleList;
-            return _rowList = [.. _rowSource.Select(x => new MediaFileTableRow(x.ID, x))];
+            return field = [.. _rowSource.Select(x => new MediaFileTableRow(x.ID, x))];
         }
-    }
+    } = [];
 
     private async Task OpenRowMenu((MouseEventArgs Args, MediaFileTableRow Row) context)
     {
@@ -54,6 +56,8 @@
     }
 
     private bool IsLibraryEmpty => Current.MediaList.Count == 0;
+
+    private bool HasSelection => Current.SelectedSet.Count > 0;
 
     // The feature toggles: the new value of the box is already what the state will say once it is dispatched.
     private void ToggleAllVisibleSelected()
@@ -71,9 +75,9 @@
         Dispatcher.Dispatch(new ActionLibrarySortChanged(sort));
     }
 
-    private void OnSearchInput(ChangeEventArgs args)
+    private void ChangeSearch(string? search)
     {
-        Dispatcher.Dispatch(new ActionLibrarySearchChanged(args.Value?.ToString() ?? string.Empty));
+        Dispatcher.Dispatch(new ActionLibrarySearchChanged(search ?? string.Empty));
     }
 
     // The played list is exactly what the page shows: the same sort and search.

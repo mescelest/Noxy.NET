@@ -1,7 +1,10 @@
 @inherits BaseComponentElement
 
 <section @attributes="AdditionalAttributes" class="@CssClass">
-    <DynamicHTMLTag Tag="@LevelTag" class="title">@Title</DynamicHTMLTag>
+    <div class="head">
+        <DynamicHTMLTag Tag="@LevelTag" class="title">@Title</DynamicHTMLTag>
+        @HeaderContent
+    </div>
     @ChildContent
 </section>
 
@@ -14,6 +17,10 @@
     public HTMLHeaderLevelEnum? Level { get; set; }
     private HTMLHeaderLevelEnum LevelCurrent => Level ?? HTMLHeaderLevelEnum.H2;
     private string LevelTag => LevelCurrent.ToText();
+
+    // Beside the title, at the end of the row: what can be done with the whole section.
+    [Parameter]
+    public RenderFragment? HeaderContent { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

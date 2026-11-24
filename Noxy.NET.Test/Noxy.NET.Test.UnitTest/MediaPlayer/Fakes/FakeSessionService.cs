@@ -28,6 +28,13 @@ public sealed class FakeSessionService : ISessionService
         Changed?.Invoke();
     }
 
+    public SignInMethodEnum? SignInMethod { get; set; }
+
+    public Task<SignInMethodEnum?> GetSignInMethod()
+    {
+        return Task.FromResult(SignInMethod);
+    }
+
     public Task<string?> GetAccessToken()
     {
         return Task.FromResult(AccessToken);

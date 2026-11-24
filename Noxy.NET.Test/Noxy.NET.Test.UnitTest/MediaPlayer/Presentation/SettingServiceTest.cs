@@ -294,6 +294,37 @@ public class SettingServiceTest
         Assert.False(await _service.GetKeepQueuedItems());
     }
 
+    [Fact]
+    public async Task GetPrefetchCount_ReturnsTheStoredValueOrTheDefault()
+    {
+        Assert.Equal(3, await _service.GetPrefetchCount());
+
+        await Seed(Setting(SettingKey.PrefetchCount, 0, SettingValueTypeEnum.Integer));
+        Assert.Equal(0, await _service.GetPrefetchCount());
+
+        await Seed(Setting(SettingKey.PrefetchCount, 10, SettingValueTypeEnum.Integer));
+        Assert.Equal(10, await _service.GetPrefetchCount());
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(11)]
+    [InlineData(1000000)]
+    public async Task GetPrefetchCount_FallsBackToTheDefault_ForAStoredValueOutsideTheRange(int stored)
+    {
+        await Seed(Setting(SettingKey.PrefetchCount, stored, SettingValueTypeEnum.Integer));
+
+        Assert.Equal(3, await _service.GetPrefetchCount());
+    }
+
+    [Fact]
+    public async Task GetPrefetchCount_FallsBackToTheDefault_WhenTheKindIsWrong()
+    {
+        await Seed(Setting(SettingKey.PrefetchCount, "many", SettingValueTypeEnum.Integer));
+
+        Assert.Equal(3, await _service.GetPrefetchCount());
+    }
+
     #endregion -- Typed getters --
 
     #region -- Review fixes --

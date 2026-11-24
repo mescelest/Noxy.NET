@@ -4,5 +4,6 @@ public enum UploadFailureReasonEnum
 {
     LibraryFull,
     FileMissing,
-    Unknown
+    Unknown,
+    Duplicate
 }

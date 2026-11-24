@@ -7,6 +7,23 @@
     column-gap: var(--size-gap-md);
 }
 
+/* A little smaller than the icon buttons of the transport controls: it is a side control. */
+.MediaOutputControls ::deep > .queue {
+    min-width: var(--size-control-sm);
+    min-height: var(--size-control-sm);
+}
+
+/* The glyph sits a little high in its box; two pixels down puts it in the middle of the button. */
+.queue-icon {
+    position: relative;
+    top: var(--size-gap-tiny);
+}
+
+/* The filled part and the thumb of the slider take the theme colour, like the seek bar. */
+.volume input[type="range"] {
+    accent-color: var(--color-theme);
+}
+
 .volume {
     display: flex;
     flex: 0 0 auto;

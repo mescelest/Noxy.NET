@@ -30,10 +30,21 @@
     min-height: var(--size-control-xs);
 }
 
+/* The row is the element that lights up, so the "⋯" button is inside the highlight. */
 .playlist-row {
     display: flex;
     align-items: center;
     column-gap: var(--size-gap-tiny);
+    padding-inline-end: var(--size-gap-xxxs);
+    border-radius: var(--size-border-radius-md);
+}
+
+.playlist-row:hover, .playlist-row:focus-within, .playlist-row:has([data-popover-open]) {
+    background: var(--color-offset-primary-md);
+}
+
+.playlist-row:has(.active) {
+    background: var(--color-offset-primary-lg);
 }
 
 .playlist-row ::deep > .link {
@@ -49,7 +60,7 @@
     opacity: 0;
 }
 
-.playlist-row:hover ::deep > .more, .playlist-row:focus-within ::deep > .more {
+.playlist-row:hover ::deep > .more, .playlist-row:focus-within ::deep > .more, .playlist-row ::deep > .more[data-popover-open] {
     opacity: 1;
 }
 
@@ -80,11 +91,11 @@
     white-space: nowrap;
 }
 
-.link-list ::deep > .link:hover, .playlist-row ::deep > .link:hover {
+.link-list ::deep > .link:hover {
     background: var(--color-offset-primary-md);
 }
 
-.link-list ::deep > .link.active, .playlist-row ::deep > .link.active {
+.link-list ::deep > .link.active {
     background: var(--color-offset-primary-lg);
 }
 

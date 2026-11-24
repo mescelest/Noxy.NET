@@ -9,7 +9,10 @@ public static class SettingCatalog
     public static readonly SettingDeclarationBoolean MergeOnRename = new(SettingKey.MergeOnRename, false);
     public static readonly SettingDeclarationBoolean KeepQueuedItems = new(SettingKey.KeepQueuedItems, false);
 
-    public static readonly IReadOnlyList<SettingDeclaration> DeclarationList = [Shuffle, Repeat, MergeOnRename, KeepQueuedItems];
+    // How many queue entries after the current one have their files downloaded ahead of time; 0 turns it off.
+    public static readonly SettingDeclarationInteger PrefetchCount = new(SettingKey.PrefetchCount, 3, 0, 10);
+
+    public static readonly IReadOnlyList<SettingDeclaration> DeclarationList = [Shuffle, Repeat, MergeOnRename, KeepQueuedItems, PrefetchCount];
 
     // The key is exact: "shuffle" is not "Shuffle".
     public static SettingDeclaration? Find(string key)

@@ -1,25 +1,26 @@
-dl {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: var(--size-gap-xs) var(--size-gap-lg);
-    margin: 0 0 var(--size-gap-sm);
+/* Like a setting: what it is on the left, its value on the right. */
+.signed-in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--size-gap-md);
+    margin-bottom: var(--size-gap-sm);
 }
 
-dt {
+.text {
+    display: flex;
+    flex-flow: column;
+    min-width: 0;
+}
+
+.help {
     color: var(--color-muted);
+    font: var(--font-label);
 }
 
-dd {
-    margin: 0;
-}
-
-.sign-out {
-    min-height: var(--size-control-md);
-    padding: 0 var(--size-gap-sm);
-    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-md);
-    background: transparent;
-    color: var(--color-error);
-    font: var(--font-button);
-    cursor: pointer;
+.email {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

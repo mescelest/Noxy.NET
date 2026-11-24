@@ -24,9 +24,14 @@
 
     private async Task Report(UploadBatchResult result)
     {
-        if (result.SucceededCount > 0)
+        if (result.SucceededCount + result.ExistingAddedCount > 0)
         {
             ServiceToast.ShowSuccess(await SuccessMessageOf(result));
+        }
+
+        if (result.DuplicateCount > 0)
+        {
+            ServiceToast.ShowWarning(result.DuplicateCount.ToCountText(AppTexts.UploadDuplicateOne, AppTexts.UploadDuplicateMany));
         }
 
         foreach (UploadFailure failure in result.FailureList)
@@ -37,7 +42,7 @@
 
     private async Task<string> SuccessMessageOf(UploadBatchResult result)
     {
-        int count = result.SucceededCount;
+        int count = result.SucceededCount + result.ExistingAddedCount;
         if (result.PlaylistID is not { } playlistID) return count.ToCountText(AppTexts.UploadAddedLibraryOne, AppTexts.UploadAddedLibraryMany);
 
         string? name = (await StoreMetadata.GetPlaylistList()).Find(x => x.ID == playlistID)?.Name;

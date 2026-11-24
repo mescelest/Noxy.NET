@@ -365,7 +365,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-# Superpowers session scratch (brainstorm mockups, work ledgers); the specs and plans are versioned
-docs/superpowers/brainstorm/
-docs/superpowers/sdd/
-docs/superpowers/ledger-*.md
+# Superpowers session scratch (brainstorm mockups, work ledgers); the specs, plans and handoffs are versioned
+docs/temp/brainstorm/
+docs/temp/sdd/
+docs/temp/ledger-*.md
+.superpowers/

@@ -144,13 +144,42 @@ dialog[open] {
     row-gap: var(--size-gap-xs);
 }
 
-.ContextMenu, .ContextMenu .submenu {
-    min-width: var(--size-column);
+/* What opens from a button (the menus, the queue, the list of devices) shares one surface, one kind of row and one kind of small heading, so they look like parts of the same thing. */
+.ContextMenu, .ContextMenu .submenu, .PopoverSurface {
+    /* No wider than the smallest screen we plan for (320px, which is --size-column), and never wider than the window; what does not fit is cut off with an ellipsis. */
+    width: min(var(--size-column), calc(100vw - 2 * var(--popover-margin, var(--size-gap-xxs))));
     padding: var(--size-gap-xxxs);
     border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
     border-radius: var(--size-border-radius-lg);
     background: var(--color-primary);
     color: var(--color-complementary);
+}
+
+.PopoverRow {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--size-gap-xxs);
+    min-height: var(--size-control-sm);
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+    border: none;
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-complementary);
+    font: var(--font-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.PopoverRow:hover, .PopoverRow:focus-visible {
+    background: var(--color-offset-primary-md);
+}
+
+.PopoverLabel {
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+    color: var(--color-muted);
+    font: var(--font-label);
+    text-transform: uppercase;
 }
 
 .ContextMenu .item {

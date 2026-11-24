@@ -18,6 +18,9 @@ public interface ISettingService
 
     Task<bool> GetKeepQueuedItems();
 
+    // How many queue entries ahead of the current one are downloaded in advance. A stored value of the wrong kind or outside the range counts as no value.
+    Task<int> GetPrefetchCount();
+
     // Sends the stored ETag unless force is set or the local list is empty. A failed network call changes nothing.
     Task SyncSettingList(bool force = false);
 

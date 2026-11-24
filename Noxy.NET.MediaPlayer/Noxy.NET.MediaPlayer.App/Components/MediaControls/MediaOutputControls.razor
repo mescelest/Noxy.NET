@@ -1,4 +1,7 @@
+@inject NavigationManager Navigation
 @inherits BaseComponentElement
+@using System.Web
+@implements IDisposable
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <div class="duration">
@@ -10,8 +13,8 @@
         <input type="range" min="0" max="100" step="1" value="@VolumeCurrent" aria-label="Volume" @oninput="InputVolumeHandler" @onchange="ChangeVolumeHandler"/>
     </div>
 
-    <Button Type="@HTMLButtonTypeEnum.Button" class="queue" IsIcon="true" popovertarget="@QueuePanel.PopoverID" aria-label="Queue">
-        <MaterialIcon Icon="queue_music" Size="var(--size-icon-md)"/>
+    <Button Type="@HTMLButtonTypeEnum.Button" class="queue" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="Queue" aria-pressed="@QueuePressedValue" @onclick="ClickQueueHandler">
+        <MaterialIcon class="queue-icon" Icon="playlist_play" Size="var(--size-icon-sm)"/>
     </Button>
 
     <DevicePicker/>
@@ -29,6 +32,54 @@
     // The volume the slider was left at, in percent.
     [Parameter]
     public EventCallback<int> OnVolumeChanged { get; set; }
+
+    // The query parameter that carries the page the user was on when the queue button took them to the queue page.
+    private const string ReturnUrlParameter = nameof(ReturnUrl);
+
+    private string RelativePath => Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].TrimEnd('/');
+
+    private bool IsOnQueue => RelativePath == Queue.Route;
+
+    // Where the queue button goes back to: the page in the return url, or the start page when there is none or it points outside the app.
+    private string ReturnUrl
+    {
+        get
+        {
+            string? value = HttpUtility.ParseQueryString(new Uri(Navigation.Uri).Query)[ReturnUrlParameter];
+
+            return value is not null && Navigation.ToAbsoluteUri(value).ToString().StartsWith(Navigation.BaseUri, StringComparison.Ordinal) ? value : string.Empty;
+        }
+    }
+
+    private string QueuePressedValue => IsOnQueue.ToString().ToLowerInvariant();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    // On the queue page the button goes back to the return url; anywhere else it opens the queue page with the current page as the return url.
+    private void ClickQueueHandler()
+    {
+        if (IsOnQueue)
+        {
+            Navigation.NavigateTo(ReturnUrl);
+            return;
+        }
+
+        Navigation.NavigateTo($"{Queue.Route}?{ReturnUrlParameter}={Uri.EscapeDataString(Navigation.Uri)}");
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
 
     private int? _dragVolume;
     private int? _committedVolume;

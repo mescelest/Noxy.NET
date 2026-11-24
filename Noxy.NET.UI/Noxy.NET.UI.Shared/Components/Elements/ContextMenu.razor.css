@@ -17,6 +17,14 @@
     text-align: left;
 }
 
+/* A long text is cut off with an ellipsis, so an item never grows wider than its menu. */
+.item > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .item[aria-haspopup]::after {
     content: "›";
     margin-inline-start: auto;

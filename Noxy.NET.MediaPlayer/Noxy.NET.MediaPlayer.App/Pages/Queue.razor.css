@@ -1,0 +1,30 @@
+/* On the right of the header, and no taller than the header's own row, so the list below does not move when the button comes and goes. */
+.Queue ::deep .clear {
+    margin-inline-start: auto;
+    min-height: var(--size-control-sm);
+}
+
+/* With nothing in the queue the box fills what is left of the window. */
+.empty {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: var(--size-gap-sm);
+    min-height: 0;
+    margin: var(--size-gap-md);
+    padding: var(--size-gap-lg);
+    border: var(--size-border-width-md) dashed var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-lg);
+    text-align: center;
+    color: var(--color-muted);
+}
+
+.empty h2 {
+    color: var(--color-complementary);
+}
+
+.empty p {
+    max-width: var(--size-column);
+}

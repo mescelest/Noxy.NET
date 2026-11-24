@@ -4,7 +4,7 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <ContextMenu @ref="_menu" ID="@MenuID(Playlist.ID)" ItemList="ItemList" OnClose="CloseHandler"/>
+    <ContextMenu @ref="_menu" ID="@MenuID(Playlist.ID, Place)" ItemList="ItemList" OnClose="CloseHandler"/>
 
     <EditPlaylistDialog @bind-Open="_editing" PlaylistID="Playlist.ID"/>
 </div>
@@ -14,6 +14,13 @@
     [Parameter, EditorRequired]
     public required ResponsePlaylist Playlist { get; set; }
 
+    // Where the menu sits on the screen. The same playlist has a menu in the sidebar and one on its page, and an element ID may appear only once, or a trigger would open the first of them.
+    [Parameter, EditorRequired]
+    public required string Place { get; set; }
+
+    public const string PlaceSidebar = "sidebar";
+    public const string PlacePage = "page";
+
     private const string MenuIDPrefix = "playlist-menu-";
 
     private ContextMenu? _menu;
@@ -21,7 +28,7 @@
     private bool _confirmingDelete;
 
     // The playlist's "⋯" button puts this in its popovertarget attribute.
-    public static string MenuID(Guid playlistID) => MenuIDPrefix + playlistID.ToString("N");
+    public static string MenuID(Guid playlistID, string place) => $"{MenuIDPrefix}{place}-{playlistID:N}";
 
     // The first activation of Delete only asks again, and keeps the menu open; the second one deletes.
     private List<ContextMenuItem> ItemList =>

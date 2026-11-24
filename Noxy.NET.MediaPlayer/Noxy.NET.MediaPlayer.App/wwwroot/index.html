@@ -11,15 +11,29 @@
     }</script>
     <script>
         // A file dropped anywhere on the page would make the web view open it. Only a file input may take a drop: a drop zone puts one over itself while files are dragged across it.
+        const isFileDrag = e => e.dataTransfer !== null && e.dataTransfer.types.includes("Files");
+        const attributeFileDrag = "data-file-drag";
+
+        // While files are dragged over the window the root element says so, and the file inputs of the drop zones cover their zones at once. Waiting for the app to answer the first dragenter would leave the drag with "can't drop here" until then.
+        window.addEventListener("dragenter", e => {
+            if (isFileDrag(e)) document.documentElement.setAttribute(attributeFileDrag, "");
+        }, true);
+        window.addEventListener("dragleave", e => {
+            const isOutside = e.clientX <= 0 || e.clientY <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight;
+            if (isFileDrag(e) && isOutside) document.documentElement.removeAttribute(attributeFileDrag);
+        }, true);
+        window.addEventListener("dragend", () => document.documentElement.removeAttribute(attributeFileDrag), true);
+
         window.addEventListener("dragover", e => {
-            if (e.dataTransfer.types.includes("Files") && e.target.type !== "file") {
+            if (isFileDrag(e) && e.target.type !== "file") {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = "none";
             }
         });
         window.addEventListener("drop", e => {
-            if (e.dataTransfer.types.includes("Files") && e.target.type !== "file") e.preventDefault();
-        });
+            document.documentElement.removeAttribute(attributeFileDrag);
+            if (isFileDrag(e) && e.target.type !== "file") e.preventDefault();
+        }, true);
     </script>
     <link rel="stylesheet" href="css/app.css"/>
     <link rel="stylesheet" href="css/breakpoints.css"/>

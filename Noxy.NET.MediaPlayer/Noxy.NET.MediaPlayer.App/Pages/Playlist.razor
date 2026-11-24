@@ -20,34 +20,35 @@
     else
     {
         <UploadMediaDropZone PlaylistID="Id">
-            <PlaylistHeader Name="@_detail.Name" EntryCount="_detail.EntryList.Count" SelectedCount="_selectedSet.Count">
-                <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" aria-label="Play" @onclick="ClickPlayHandler">
-                    <MaterialIcon Icon="play_arrow" Size="var(--size-icon-md)"/>
-                    <span>Play</span>
-                </Button>
-                <UploadMediaButton PlaylistID="Id" Label="Upload to playlist"/>
-                @if (Summary is { } summary)
-                {
-                    <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="Playlist actions" aria-haspopup="menu" popovertarget="@PlaylistContextMenu.MenuID(summary.ID)">
-                        <MaterialIcon Icon="more_horiz" Size="var(--size-icon-md)"/>
-                    </Button>
-                    <PlaylistContextMenu Playlist="summary"/>
-                }
-            </PlaylistHeader>
+            <MediaFileHeader Name="@_detail.Name" EntryCount="_detail.EntryList.Count" SelectedCount="_selectedSet.Count">
+                <LibraryContextMenu @ref="_contextMenu" PlaylistID="Id" SelectedSet="_selectedSet" SelectedKeyList="SelectedKeyList" HiddenSelectedCount="HiddenSelectedCount"
+                                    MediaFileIDOf="MediaFileIDOf" OnPlaylistChanged="Load" ShowTrigger="@HasSelection"/>
+            </MediaFileHeader>
 
             <MediaFileTable RowList="_rowList" IsEmpty="IsPlaylistEmpty" EmptyTitle="This playlist is empty" EmptyDescription="Add media files from the Library." StateMap="StateLibrary.Value.StateMap" Sort="_sort" Descending="_descending"
                             OnSortChanged="ChangeSort"
                             SelectedSet="_selectedSet" AllSelected="IsAllSelected" OnToggleAll="ToggleAllShown" OnToggleRow="ToggleRow" OnPlay="Play" OnContextMenu="OpenRowMenu"
                             IsReorderable="CanReorder" ReorderHint="ReorderHint" OnMove="Move">
                 <ToolContent>
-                    <input type="search" class="search" placeholder="Search the playlist" aria-label="Search the playlist" value="@_search" @oninput="InputSearchHandler"/>
+                    <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="Search the playlist" aria-label="Search the playlist" Value="@_search" ValueChanged="ChangeSearch"/>
                     <ButtonList>
                         @if (_sort is not null)
                         {
-                            <Button Type="@HTMLButtonTypeEnum.Button" @onclick="ClickClearSortHandler">Clear sort</Button>
+                            <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="ClickClearSortHandler">Clear sort</Button>
                         }
-                        <LibraryContextMenu @ref="_contextMenu" PlaylistID="Id" SelectedSet="_selectedSet" SelectedKeyList="SelectedKeyList" HiddenSelectedCount="HiddenSelectedCount"
-                                            MediaFileIDOf="MediaFileIDOf" OnPlaylistChanged="Load"/>
+                        <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.Highlight" aria-label="Play" @onclick="ClickPlayHandler">
+                            <MaterialIcon Icon="play_arrow" Size="var(--size-icon-md)"/>
+                            <span>Play</span>
+                        </Button>
+                        <UploadMediaButton PlaylistID="Id" Appearance="ButtonAppearanceEnum.Outline"/>
+                        @if (Summary is { } summary)
+                        {
+                            <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="Playlist actions" aria-haspopup="menu"
+                                    popovertarget="@PlaylistContextMenu.MenuID(summary.ID, PlaylistContextMenu.PlacePage)">
+                                <MaterialIcon Icon="more_horiz" Size="var(--size-icon-md)"/>
+                            </Button>
+                            <PlaylistContextMenu Playlist="summary" Place="@PlaylistContextMenu.PlacePage"/>
+                        }
                     </ButtonList>
                 </ToolContent>
             </MediaFileTable>
@@ -76,6 +77,8 @@
     private ResponsePlaylist? Summary => StatePlaylistList.Value.PlaylistList.FirstOrDefault(x => x.ID == Id);
 
     private bool IsPlaylistEmpty => _detail is not null && _detail.EntryList.Count == 0;
+
+    private bool HasSelection => _selectedSet.Count > 0;
 
     private bool IsAllSelected => _rowList.Count > 0 && _rowList.All(x => _selectedSet.Contains(x.Key));
 
@@ -176,9 +179,9 @@
         RebuildRows();
     }
 
-    private void InputSearchHandler(ChangeEventArgs args)
+    private void ChangeSearch(string? search)
     {
-        _search = args.Value?.ToString() ?? string.Empty;
+        _search = search ?? string.Empty;
         RebuildRows();
     }
 

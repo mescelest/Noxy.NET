@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IRemoteCommandHandlerService, RemoteCommandHandlerService>();
             services.AddSingleton<IPlaybackControlService, PlaybackControlService>();
             services.AddSingleton<ILibraryActionService, LibraryActionService>();
+            services.AddSingleton<IQueueActionService, QueueActionService>();
             services.AddSingleton<IPlaylistService, PlaylistService>();
             services.AddSingleton<IHomeService, HomeService>();
             services.AddScoped<IStateBridgeService, StateBridgeService>();

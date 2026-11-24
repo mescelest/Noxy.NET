@@ -1,0 +1,199 @@
+@inject IState<FeaturePlaylistListState> StatePlaylistList
+@inject ILibraryActionService ServiceLibraryAction
+@inject IQueueActionService ServiceQueueAction
+@inject IPlaybackControlService ServiceControl
+@inject IToastService ServiceToast
+@inherits BaseComponentElementFluxor
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @if (ShowTrigger)
+    {
+        <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" disabled="@IsNothingTicked" aria-label="@AppTexts.LibraryActions" aria-haspopup="menu" popovertarget="@MenuID">
+            <MaterialIcon Icon="more_horiz" Size="var(--size-icon-sm)"/>
+        </Button>
+    }
+
+    <ContextMenu @ref="_menu" ID="@MenuID" ItemList="ItemList" Side="PlacementSideEnum.Bottom" Align="PlacementAlignEnum.End" OnClose="CloseHandler"/>
+
+    <ConfirmActionDialog Open="@IsConfirming" OpenChanged="CloseConfirm" Title="@_confirm?.Title" Message="@_confirm?.Message" AcceptText="@_confirm?.AcceptText" OnSubmit="SubmitConfirm"/>
+
+    <Dialog @bind-Open="_choosingPlaylist">
+        <h2>@AppTexts.LibraryAddToPlaylist</h2>
+        @if (StatePlaylistList.Value.PlaylistList.Count == 0)
+        {
+            <p>@AppTexts.ChooserNoPlaylists</p>
+        }
+        <div class="playlist-choice-list">
+            @foreach (ResponsePlaylist playlist in StatePlaylistList.Value.PlaylistList)
+            {
+                Guid playlistID = playlist.ID;
+                <button type="button" class="playlist-choice" @onclick="() => AddToPlaylist(playlistID)">@playlist.Name</button>
+            }
+        </div>
+        <div class="actions">
+            <button type="button" class="cancel" @onclick="() => _choosingPlaylist = false">@AppTexts.ChooserCancel</button>
+        </div>
+    </Dialog>
+</div>
+
+@code {
+
+    private sealed record ConfirmRequest(string Title, string Message, string AcceptText, Func<Task> Run);
+
+    // The item IDs of the ticked rows, and the same in the order of the list.
+    [Parameter, EditorRequired]
+    public required IReadOnlySet<Guid> SelectedSet { get; set; }
+
+    [Parameter, EditorRequired]
+    public required List<Guid> SelectedKeyList { get; set; }
+
+    // The row of an item, or null when it is not in the queue any more.
+    [Parameter, EditorRequired]
+    public required Func<Guid, QueueListRow?> RowOf { get; set; }
+
+    // The button for the ticked rows. The menu itself stays, for the right-click on a row, whether the button shows or not.
+    [Parameter]
+    public bool ShowTrigger { get; set; } = true;
+
+    private const string MenuID = "queue-context-menu";
+
+    private ContextMenu? _menu;
+    private LibraryMenuScope? _scope;
+    private ConfirmRequest? _confirm;
+    private List<Guid> _playlistTargetList = [];
+    private bool _choosingPlaylist;
+
+    private bool IsNothingTicked => SelectedSet.Count == 0;
+
+    private bool IsConfirming => _confirm is not null;
+
+    // A right-click on a row acts on that row (and its group, when it is one of several ticked); the button acts on the ticked rows.
+    private List<ContextMenuItem> ItemList => _scope is { } scope ? BuildRowItemList(scope) : BuildItemList(SelectedKeyList);
+
+    public async Task OpenAtAsync(MouseEventArgs args, Guid itemID)
+    {
+        if (_menu is null) return;
+
+        _scope = LibraryMenuScope.Of(itemID, SelectedSet, SelectedKeyList);
+        StateHasChanged();
+        await _menu.OpenAtAsync(args);
+    }
+
+    private Task CloseHandler()
+    {
+        _scope = null;
+        return Task.CompletedTask;
+    }
+
+    private List<ContextMenuItem> BuildRowItemList(LibraryMenuScope scope)
+    {
+        List<ContextMenuItem> list = BuildItemList([scope.ClickedID]);
+        if (scope.HasGroup)
+        {
+            list.Add(ContextMenuItem.Separator());
+            list.Add(ContextMenuItem.Submenu(string.Format(AppTexts.LibrarySelectedGroup, scope.GroupIDList.Count), BuildItemList(scope.GroupIDList)));
+        }
+
+        return list;
+    }
+
+    // The menu for these queue items: what the queue can do with them, then what the library can do with their files.
+    private List<ContextMenuItem> BuildItemList(List<Guid> itemIDList)
+    {
+        List<QueueListRow> rowList = [.. itemIDList.Select(RowOf).OfType<QueueListRow>()];
+        List<Guid> upcomingIDList = [.. rowList.Where(x => x.Kind.IsUpcoming).Select(x => x.Item?.ItemID).OfType<Guid>()];
+        List<Guid> mediaFileIDList = [.. rowList.Select(x => x.Item?.MediaFileID).OfType<Guid>()];
+        string? upcomingReason = upcomingIDList.Count == 0 ? AppTexts.QueueNothingRemovable : null;
+
+        List<ContextMenuItem> list = [];
+        if (rowList.Count == 1 && rowList[0].Item is { } only)
+        {
+            list.Add(ContextMenuItem.Item(AppTexts.QueuePlayNow, () => Run(() => ServiceControl.JumpTo(only.ItemID, true))));
+        }
+
+        list.Add(ContextMenuItem.Item(AppTexts.QueuePlayNext, () => Show(ServiceQueueAction.PlayNext(upcomingIDList)), upcomingReason is not null, upcomingReason));
+        list.Add(ContextMenuItem.Item(AppTexts.QueueRemove, () => Show(ServiceQueueAction.Remove(upcomingIDList)), upcomingReason is not null, upcomingReason, true));
+        list.Add(ContextMenuItem.Separator());
+        list.Add(ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(mediaFileIDList))));
+        list.Add(ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(mediaFileIDList))));
+        list.Add(ItemOf(LibraryActionEnum.AddToPlaylist, AppTexts.LibraryAddToPlaylist, () => ChoosePlaylist(mediaFileIDList)));
+        list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => ConfirmRemoveFromDevice(mediaFileIDList)));
+
+        return list;
+    }
+
+    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run)
+    {
+        string? reason = ServiceLibraryAction.GetDisabledReason(action);
+        return ContextMenuItem.Item(text, run, reason is not null, reason);
+    }
+
+    private async Task Run(Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
+    private async Task Show(Task<BulkResult> action)
+    {
+        BulkResult result;
+        try
+        {
+            result = await action;
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+            return;
+        }
+
+        if (result.FailedIDList.Count > 0)
+        {
+            ServiceToast.ShowWarning(string.Format(AppTexts.BulkFailed, result.FailedIDList.Count, result.Message).Trim());
+        }
+    }
+
+    private Task ConfirmRemoveFromDevice(List<Guid> mediaFileIDList)
+    {
+        string message = string.Format(AppTexts.ConfirmRemoveFromDeviceMessage, mediaFileIDList.Count.ToCountText(AppTexts.MediaFileCountOne, AppTexts.MediaFileCountMany));
+        _confirm = new(AppTexts.LibraryRemoveFromDevice, message, AppTexts.ConfirmRemoveAccept, () => Show(ServiceLibraryAction.RemoveFromDevice(mediaFileIDList)));
+
+        return Task.CompletedTask;
+    }
+
+    private Task CloseConfirm(bool open)
+    {
+        if (!open) _confirm = null;
+
+        return Task.CompletedTask;
+    }
+
+    private async Task SubmitConfirm(bool accepted)
+    {
+        ConfirmRequest? request = _confirm;
+        _confirm = null;
+        if (accepted && request is not null) await request.Run();
+    }
+
+    private Task ChoosePlaylist(List<Guid> mediaFileIDList)
+    {
+        _playlistTargetList = mediaFileIDList;
+        _choosingPlaylist = true;
+
+        return Task.CompletedTask;
+    }
+
+    private Task AddToPlaylist(Guid playlistID)
+    {
+        _choosingPlaylist = false;
+
+        return Show(ServiceLibraryAction.AddToPlaylist(playlistID, _playlistTargetList));
+    }
+
+}

@@ -4,26 +4,33 @@
 @using System.Text.Json
 @implements IDisposable
 
-<Section @attributes="AdditionalAttributes" class="@CssClass" Title="Synced settings">
+<div @attributes="AdditionalAttributes" class="@CssClass">
     @if (IsOffline)
     {
         <MessageBox MessageList="OfflineMessageList" Status="StatusEnum.None"/>
     }
-    @foreach (ResponseSetting setting in _settingList)
+    @foreach (ResponseSetting setting in ShownList)
     {
         <div class="setting" @key="(setting.Key, _resetCount)">
-            <span class="key">@setting.Key</span>
+            <div class="text">
+                <span class="label">@LabelOf(setting.Key)</span>
+                <span class="help">@HelpOf(setting.Key)</span>
+                @if (_errorMap.TryGetValue(setting.Key, out string? error))
+                {
+                    <span class="error">@error</span>
+                }
+            </div>
             @switch (setting.ValueType)
             {
                 case SettingValueTypeEnum.Boolean:
-                    <InputControlCheckbox Option="true" aria-label="@setting.Key" Disabled="@IsOffline" @bind-Value:get="@AsBool(setting)" @bind-Value:set="value => Save(setting, value)"/>
+                    <InputControlCheckbox Option="true" aria-label="@LabelOf(setting.Key)" Disabled="@IsOffline" @bind-Value:get="@AsBool(setting)" @bind-Value:set="value => Save(setting, value)"/>
                     break;
                 case SettingValueTypeEnum.Integer:
                     SettingDeclarationInteger? integer = SettingCatalog.Find(setting.Key) as SettingDeclarationInteger;
-                    <input type="number" min="@integer?.Minimum" max="@integer?.Maximum" value="@AsText(setting)" disabled="@IsOffline" @onchange="args => SaveInteger(setting, args.Value?.ToString())"/>
+                    <InputControlInteger class="integer" Size="2" Min="integer?.Minimum" Max="integer?.Maximum" Value="@AsInteger(setting)" ValueChanged="value => SaveInteger(setting, value)" disabled="@IsOffline" aria-label="@LabelOf(setting.Key)"/>
                     break;
                 case SettingValueTypeEnum.Enum:
-                    <select disabled="@IsOffline" @onchange="args => Save(setting, args.Value?.ToString() ?? string.Empty)">
+                    <select disabled="@IsOffline" aria-label="@LabelOf(setting.Key)" @onchange="args => Save(setting, args.Value?.ToString() ?? string.Empty)">
                         @foreach (string name in MemberNameList(setting.Key))
                         {
                             <option value="@name" selected="@IsSelected(setting, name)">@name</option>
@@ -33,13 +40,9 @@
                 default:
                     throw new InvalidEnumArgumentException(nameof(setting.ValueType), (int)setting.ValueType, typeof(SettingValueTypeEnum));
             }
-            @if (_errorMap.TryGetValue(setting.Key, out string? error))
-            {
-                <span class="error">@error</span>
-            }
         </div>
     }
-</Section>
+</div>
 
 @code {
 
@@ -48,6 +51,9 @@
 
     // Raised after a refused write so the inputs are drawn again with the value that is stored.
     private int _resetCount;
+
+    // Shuffle and repeat are set from the player bar, so they are not offered here.
+    private List<ResponseSetting> ShownList => [.. _settingList.Where(x => x.Key is not (SettingKey.Shuffle or SettingKey.Repeat))];
 
     private string? OfflineReason => ServiceSync.IsOffline ? PresentationTexts.ActionMessageOffline : null;
     private bool IsOffline => OfflineReason is not null;
@@ -91,19 +97,45 @@
         await Load();
     }
 
-    private Task SaveInteger(ResponseSetting setting, string? text)
+    // The field gives no number for text that is not one; the range is the server's to refuse.
+    private Task SaveInteger(ResponseSetting setting, int? number)
     {
-        if (!int.TryParse(text, out int number))
+        if (number is null)
         {
             _errorMap[setting.Key] = "Enter a whole number.";
             _resetCount++;
             return Task.CompletedTask;
         }
 
-        return Save(setting, number);
+        return Save(setting, number.Value);
+    }
+
+    // A setting the server has that this page has no text for is shown by its key, so it can still be changed.
+    private static string LabelOf(string key)
+    {
+        return key switch
+        {
+            SettingKey.MergeOnRename => AppTexts.SettingMergeOnRename,
+            SettingKey.KeepQueuedItems => AppTexts.SettingKeepQueuedItems,
+            SettingKey.PrefetchCount => AppTexts.SettingPrefetchCount,
+            _ => key
+        };
+    }
+
+    private static string? HelpOf(string key)
+    {
+        return key switch
+        {
+            SettingKey.MergeOnRename => AppTexts.SettingMergeOnRenameHelp,
+            SettingKey.KeepQueuedItems => AppTexts.SettingKeepQueuedItemsHelp,
+            SettingKey.PrefetchCount => AppTexts.SettingPrefetchCountHelp,
+            _ => null
+        };
     }
 
     private static bool AsBool(ResponseSetting setting) => setting.Value is JsonElement element ? element.ValueKind == JsonValueKind.True : setting.Value is true;
+
+    private static int? AsInteger(ResponseSetting setting) => int.TryParse(AsText(setting), NumberStyles.Integer, CultureInfo.InvariantCulture, out int number) ? number : null;
 
     private static bool IsSelected(ResponseSetting setting, string name) => name == AsText(setting);
 

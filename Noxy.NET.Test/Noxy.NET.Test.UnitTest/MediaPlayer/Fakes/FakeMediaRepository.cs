@@ -71,6 +71,13 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         return Task.FromResult(store.MediaFileList.Count(x => x.UserID == userID));
     }
 
+    public Task<EntityMediaFile?> FindMediaFileByHash(Guid userID, string contentHash, CancellationToken cancellationToken = default)
+    {
+        EntityMediaFile? found = store.MediaFileList.FirstOrDefault(x => x.UserID == userID && x.ContentHash == contentHash);
+
+        return Task.FromResult(found is null ? null : store.CopyMediaFile(found));
+    }
+
     public Task<List<Guid>> GetMediaFileIDListWithLegacyText(CancellationToken cancellationToken = default)
     {
         List<Guid> list = store.MediaFileList

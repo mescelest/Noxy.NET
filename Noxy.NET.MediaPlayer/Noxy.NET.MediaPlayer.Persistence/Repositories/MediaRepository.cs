@@ -30,6 +30,16 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
         return await context.MediaFile.CountAsync(x => x.UserID == userID, cancellationToken);
     }
 
+    public async Task<EntityMediaFile?> FindMediaFileByHash(Guid userID, string contentHash, CancellationToken cancellationToken = default)
+    {
+        TableMediaFile? table = await context.MediaFile.AsNoTracking()
+            .IncludeLinks()
+            .OrderBy(x => x.TimeCreated)
+            .FirstOrDefaultAsync(x => x.UserID == userID && x.ContentHash == contentHash, cancellationToken);
+
+        return table is null ? null : mapperT2E.Map(table);
+    }
+
     public async Task<List<Guid>> GetMediaFileIDListWithLegacyText(CancellationToken cancellationToken = default)
     {
         return await context.MediaFile.AsNoTracking()

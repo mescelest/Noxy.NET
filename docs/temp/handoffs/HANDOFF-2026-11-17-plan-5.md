@@ -1,11 +1,11 @@
 # Handoff, 2026-11-17: plan 5 (frontend screens), all 17 tasks code-complete, awaiting the user manual checks, code review and commit
 
-Start a new context and say: "Read `docs/superpowers/HANDOFF-2026-11-17-plan-5.md` and continue." Plan 4 (the live queue and remote playback) is built, reviewed and committed; its plan file `plans/2026-11-16-frontend-remote-playback.md` may be deleted once the user says so (ask).
+Start a new context and say: "Read `docs/temp/handoffs/HANDOFF-2026-11-17-plan-5.md` and continue." Plan 4 (the live queue and remote playback) is built, reviewed and committed; its plan file `plans/2026-11-16-frontend-remote-playback.md` may be deleted once the user says so (ask).
 
 ## How to continue
 
 1. `git status`: Tasks 1 to 5 of plan 5 may be uncommitted (new files are staged with `git add -N`). Build the solution and run both test exes: expect **1961 unit, 615 integration, 0 warnings**. Ask the user whether they committed Tasks 1 to 3; if not, carry on but keep that work separate.
-2. Plan: `plans/2026-11-16-frontend-screens.md` (Tasks 1 to 17 and 14a). Spec: `specs/2026-11-15-frontend-screens-design.md`. Native `superpowers:executing-plans`, no subagents. Next is **Task 6** (the shell: layout, header, sidebar, routing), then Task 7 (sign-in), and so on.
+2. Plan: `docs/temp/plans/2026-11-16-frontend-screens.md` (Tasks 1 to 17 and 14a). Spec: `docs/specs/2026-11-15-frontend-screens-design.md`. Native `superpowers:executing-plans`, no subagents. Next is **Task 6** (the shell: layout, header, sidebar, routing), then Task 7 (sign-in), and so on.
 3. A component task ends with a manual check list the user runs; the executor starts the app (`bin/Debug/net10.0-windows10.0.19041.0/win-x64/Noxy.NET.MediaPlayer.App.exe`) to confirm it launches and stays responsive (`Start-Process`, wait 12 s, `Responding`, close), and never claims a component works from the build alone.
 4. After the plan: `/code-review high` (the user runs it), fix the real findings test-first, ask about committing. At the very end ask whether the finished plan files can be deleted.
 

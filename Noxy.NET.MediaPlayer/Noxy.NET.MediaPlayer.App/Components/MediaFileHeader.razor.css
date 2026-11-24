@@ -1,0 +1,4 @@
+.counts {
+    color: var(--color-muted);
+    font: var(--font-label);
+}

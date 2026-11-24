@@ -84,14 +84,17 @@ public sealed class FakePlayerService : IPlayerService
         return Task.CompletedTask;
     }
 
-    public Task Resume()
+    // When set, a resume does not show as playing at once, as the real player that is still starting.
+    public bool ResumeIsSlow { get; set; }
+
+    public Task<bool> Resume()
     {
         CallList.Add("Resume");
-        if (IsLoaded) IsPlaying = Current is not null;
+        if (IsLoaded && !ResumeIsSlow) IsPlaying = Current is not null;
 
         Changed?.Invoke();
 
-        return Task.CompletedTask;
+        return Task.FromResult(IsLoaded);
     }
 
     public Task Seek(TimeSpan position)

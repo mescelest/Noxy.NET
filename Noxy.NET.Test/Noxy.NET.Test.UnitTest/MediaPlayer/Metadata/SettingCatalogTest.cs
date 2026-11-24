@@ -7,10 +7,20 @@ namespace Noxy.NET.Test.MediaPlayer.Metadata;
 public class SettingCatalogTest
 {
     [Fact]
-    public void TheFourSettingsAreDeclaredInOrder_WithTheirKeys()
+    public void TheFiveSettingsAreDeclaredInOrder_WithTheirKeys()
     {
-        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
-        Assert.Equal(["Shuffle", "Repeat", "MergeOnRename", "KeepQueuedItems"], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
+        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems, SettingKey.PrefetchCount], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
+        Assert.Equal(["Shuffle", "Repeat", "MergeOnRename", "KeepQueuedItems", "PrefetchCount"], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
+    }
+
+    [Fact]
+    public void PrefetchCount_IsAnIntegerFromZeroToTen_DefaultThree()
+    {
+        Assert.Equal(SettingValueTypeEnum.Integer, SettingCatalog.PrefetchCount.ValueType);
+        Assert.Equal((3, 0, 10), (SettingCatalog.PrefetchCount.Default, SettingCatalog.PrefetchCount.Minimum, SettingCatalog.PrefetchCount.Maximum));
+        Assert.Equal(7, SettingCatalog.PrefetchCount.ParseValue(JsonSerializer.SerializeToElement(7)));
+        Assert.ThrowsAny<Exception>(() => SettingCatalog.PrefetchCount.ParseValue(JsonSerializer.SerializeToElement(11)));
+        Assert.ThrowsAny<Exception>(() => SettingCatalog.PrefetchCount.ParseValue(JsonSerializer.SerializeToElement(-1)));
     }
 
     [Fact]

@@ -1,10 +1,11 @@
 @page "/settings"
 @inherits BaseComponentPage
 
-<div class="@CssClass">
-    <SectionAccount/>
-    <SectionTheme/>
-    <SectionDevice/>
-    <SectionLibrary/>
-    <SectionSetting/>
+<div class="@CssClass @FullscreenPageClass">
+    <PageHeader Name="Settings"/>
+
+    <div class="cards">
+        <SectionAccount/>
+        <SectionDevice/>
+    </div>
 </div>

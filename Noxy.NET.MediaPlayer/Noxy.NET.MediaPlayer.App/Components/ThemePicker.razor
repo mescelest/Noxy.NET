@@ -1,0 +1,37 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <ThemeToggle class="group" TType="ThemeEnum" Label="Theme">
+        <Template Context="theme">
+            <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusOf(IsChosen(theme.Value, theme.Service))" aria-pressed="@PressedValue(theme.Value, theme.Service)"
+                    @onclick="() => theme.Service.SetTheme(theme.Value)">
+                <MaterialIcon Icon="@IconOf(theme.Value, IsChosen(theme.Value, theme.Service))" Size="var(--size-icon-sm)"/>
+                @theme.Value
+            </Button>
+        </Template>
+    </ThemeToggle>
+</div>
+
+@code {
+
+    private static bool IsChosen(ThemeEnum theme, IThemeService<ThemeEnum> service) => service.GetTheme() == theme;
+
+    private static string PressedValue(ThemeEnum theme, IThemeService<ThemeEnum> service) => IsChosen(theme, service).ToString().ToLowerInvariant();
+
+    // The chosen theme shows a tick where the other shows its own icon.
+    private static string IconOf(ThemeEnum theme, bool isChosen)
+    {
+        if (isChosen) return "check";
+
+        return theme switch
+        {
+                ThemeEnum.Light => "light_mode",
+                ThemeEnum.Dark => "dark_mode",
+                _ => throw new InvalidEnumArgumentException(nameof(theme), (int)theme, typeof(ThemeEnum))
+        };
+    }
+
+    // The chosen theme is outlined in the highlight colour, the other in the neutral one.
+    private static StatusEnum StatusOf(bool isChosen) => isChosen ? StatusEnum.Highlight : StatusEnum.None;
+
+}

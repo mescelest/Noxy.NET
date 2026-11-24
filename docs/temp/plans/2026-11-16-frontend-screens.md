@@ -8,7 +8,7 @@
 
 **Tech Stack:** .NET 10, .NET MAUI Blazor Hybrid (Windows first), Blazor `Virtualize`, Fluxor 6.11.0 (`Fluxor` in `Presentation`, `Fluxor.Blazor.Web` in the App), the `Noxy.NET.UI` Razor libraries, xunit v3.
 
-**Spec:** `docs/superpowers/specs/2026-11-15-frontend-screens-design.md` (outline approved 2026-11-16; the look is explicitly open, see "Styling through variables") with `2026-11-15-frontend-maui-design.md` for the platform. Previous plans (done): the frontend foundation, `2026-11-15-frontend-downloads-player.md`, `2026-11-16-frontend-sync-settings-metadata-session.md`.
+**Spec:** `docs/specs/2026-11-15-frontend-screens-design.md` (outline approved 2026-11-16; the look is explicitly open, see "Styling through variables") with `2026-11-15-frontend-maui-design.md` for the platform. Previous plans (done): the frontend foundation, `2026-11-15-frontend-downloads-player.md`, `2026-11-16-frontend-sync-settings-metadata-session.md`.
 
 ## Global Constraints
 

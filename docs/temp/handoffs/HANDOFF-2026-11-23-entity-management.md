@@ -4,7 +4,7 @@ Written so a new session on another machine can carry on without the old convers
 
 ## Do this first
 
-1. **Nothing from this session is committed.** The working tree has 780 deleted files, 22 modified and 55 new (untracked) paths on `main` (HEAD `e126186`). Before leaving this PC, commit and push, or the work exists only here. A suggested split is under "Suggested commits".
+1. **Everything is committed** (the original work, then the context query, the contract check and the `em-contract` program in the later commit `ca5eb9c`). Push before leaving this PC if it is not pushed yet. "Suggested commits" below is only history now.
 2. The old EntityManagement project was **moved out of the repository** to `C:\Projects\Noxy.NET.EntityManagement.Old` (a plain folder next to the repo, not in git). It is still in git history at `e126186` and before, so on the new PC get it with `git worktree add ../Noxy.NET.OldCheckout e126186` (a full checkout of the repository at that commit; the old project is then in its `Noxy.NET.EntityManagement` folder; remove it with `git worktree remove ../Noxy.NET.OldCheckout`), or read single files with `git show e126186:<path>`. Read it only to copy things out (authentication, the JWT service, the `Presentation` features). Delete it when nothing is left to copy.
 3. The assistant's memory (`C:\Users\<user>\.claude\projects\...\memory`) does **not** travel with the repository. What matters from it is in this file, under "How to work with the user".
 
@@ -23,11 +23,14 @@ Written so a new session on another machine can carry on without the old convers
 - **Prefer framework built-ins** over custom code (for example `[Required]`, `[MaxLength]`).
 - **Start slowly, one library at a time**, and show the result before the next one. They like that each step builds and is tested before the next.
 - **Naming is family first, then the thing:** `DefinitionElement`, `DataElement`, `HistoryElement`. Constants go in a `Constants` folder, and only the definition file itself is in the root of the demo project.
+- **Developer tools are programs, not tests.** A test only checks. Anything that changes a file (the contract lock) is a small console program. When it needs paths, with no arguments it asks, offering a default, so it can be started from PowerShell or by double-click.
+- **Product names, not the developer's.** User-visible names (the command `em-contract`, prompts, settings folder `%LOCALAPPDATA%\EntityManagement`) say EntityManagement/`em-`, never Noxy. The namespaces and packages stay `Noxy.NET.EntityManagement.*`; that is not to be renamed.
+- **Do not pick the "plumbing" for them, but do say the rule.** Example: they set the rule "nothing changes by accident, but it is easy on purpose" and the add/accept split came from that.
 - Windows + Git Bash gotchas: shell quoting of backticks and backslashes goes wrong inside `node -e` and `sed`, so write a script file and run it. Many repository files have CRLF line endings; the `Edit` tool handles single-line edits fine, but multi-line replacements in a script should normalise `\r\n` first.
 
 ## EntityManagement: what it is and what was decided
 
-The full design is in `docs/superpowers/specs/2026-11-23-entity-management-libraries-design.md`. Read it. In short:
+The full design is in `docs/specs/2026-11-23-entity-management-libraries-design.md`. Read it. In short:
 
 - **A set of libraries, not an application.** An implementer writes a definition library (the schema in code), an API host and a frontend; the libraries supply everything normal. The casework/investigation system (cases, persons, vehicles, weapons, locations) is only a **demo** built on the libraries from outside.
 - **The schema is code**, written as a file of `Add...` calls run at startup (like the old seeds), with identifiers as constants. Nothing about the schema is in the database.
@@ -43,23 +46,30 @@ The full design is in `docs/superpowers/specs/2026-11-23-entity-management-libra
 
 | Project | State |
 |---|---|
-| `Noxy.NET.EntityManagement.Definitions` | Done for now: the builder (`AddTextParameter`, `AddProperty`, `AddElement`, `AddRelation`, `AddContext`), `DefinitionRegistry`, `DefinitionTextBuilder`/`DefinitionTextRegistry`, culture and identifier rules, `DefinitionException` listing every problem. Range constraints are not built (only required and maximum length). |
+| `Noxy.NET.EntityManagement.Definitions` | Done for now: the builder (`AddTextParameter`, `AddProperty`, `AddElement`, `AddRelation`, `AddContext`), `DefinitionRegistry`, `DefinitionTextBuilder`/`DefinitionTextRegistry`, culture and identifier rules, `DefinitionException` listing every problem. Range constraints are not built (only required and maximum length). **The contract:** `GetContractLineList()` (extension), `DefinitionContractFile` (`Check`, `Update(registry, acceptBreaks)`, `Verify`), `DefinitionContractResult`, `DefinitionContractException`. See "The contract" below. |
+| `Noxy.NET.EntityManagement.Contract` (builds `em-contract.exe`, tool command `em-contract`) | A small console program that writes the contract file: `check`, `add`, `accept`. With no arguments it asks for the command, the definition assembly and the contract file, with defaults (the last answers, else the newest built `*.Definitions.dll` under the current folder and `Contract.txt` in its project folder); with arguments it runs at once and returns exit code 0, 1 (differs) or 2 (could not run). Loads the assembly with its own dependencies; the Definitions library is shared with the program. Run with `dotnet run --project Noxy.NET.EntityManagement/Noxy.NET.EntityManagement.Contract`. |
 | `Noxy.NET.EntityManagement.Domain` | Plain classes: `DataElement`, `DataProperty*` (Boolean, DateTime, Decimal, Image, Integer, String), `DataRelation`, `DataTextParameter`, their `History*` twins, and the repository contracts `IDataRepository`, `IRelationRepository`, `ITextRepository`. |
 | `Noxy.NET.EntityManagement.Persistence` | EF Core + SQLite: 18 tables (9 current, 9 history), unique indexes, no foreign keys between data tables, the `Initial` migration, `DataRepository`, `RelationRepository`, `TextRepository`, `AddEntityManagementPersistence(...)` and `MigrateEntityManagementAsync()`. |
-| `Noxy.NET.EntityManagement.Application` | `ITextService`, `IElementService`, `IRelationService` with validation against the definitions; `AddEntityManagementApplication(options => ...)` runs and checks the definitions and texts at startup. |
+| `Noxy.NET.EntityManagement.Application` | `ITextService`, `IElementService`, `IRelationService` with validation against the definitions; `AddEntityManagementApplication(options => ...)` runs and checks the definitions and texts at startup. **`IContextService`** (done): `GetElementPage(context, kind, skip, take)` and `GetContext(context, elementID)`, which returns the starting element and a group per relation and direction (`Forward` or `Inverse`) with the related elements of the context's kinds, in three queries (needs `IDataRepository.GetElementList(idList)`). A group is there when the definition allows it, also when empty; two relations between the same kinds are two groups; an element of a kind outside the context throws `DataValidationException` with `WrongElement`. |
 | `Noxy.NET.EntityManagement.Demo.Definitions` (folder `Noxy.NET.EntityManagement.Demo`) | The demo schema: person, case, `person-involved-in-case` (required role, optional note), contexts `people` and `case-file`, English texts. |
 
-Tests (all in `Noxy.NET.Test/Noxy.NET.Test.UnitTest/EntityManagement`): Definitions 98, Persistence 95, Application 145. The whole suite is **2,696 tests, all passing**, 0 build errors, 0 warnings (apart from one old unrelated `CS2002` about a duplicated MediaPlayer designer file when building incrementally).
+Tests (all in `Noxy.NET.Test/Noxy.NET.Test.UnitTest/EntityManagement`): Definitions 114, Persistence 96, Application 158, Contract 11. These namespaces pass; the whole suite was last run in full before the context query and the contract work (2,696 tests then), so run it once on the new PC.
+
+### The contract (done)
+
+The rule "definitions only grow" is enforced by a contract file of locked lines, one per fact stored data depends on (every identifier, the kind of each property and text, the properties of each element and relation, what a relation joins and its cardinality; titles, order, required and maximum length are not in it). The demo's file is `Noxy.NET.EntityManagement.Demo/Noxy.NET.EntityManagement.Demo.Definitions/Contract.txt`, and `CaseworkContractTest` fails when the definitions differ from it.
+
+- **A test only checks and never writes.** Writing is the `em-contract` program: `add` locks new lines and refuses a removal or change; `accept` makes the file the definitions as they are (use only when the data that uses the old identifier can go, there is no migration).
+- Do not suggest "run the test with a flag to update the lock". The user wants a small program, with prompts and defaults, not a test.
+- The README of the Definitions library has the workflow.
 
 ### Not built yet, in the order I would do it
 
-1. **The context query** (Application): the rule above, in a fixed small number of queries. Needs a result model (the starting element, then a group per relation with the relation's attributes and the related elements with their values).
-2. **The contract/snapshot test** that locks every identifier and property kind, so a rename or retype fails the build (the "definitions only grow" rule).
-3. **The API library** (`Noxy.NET.EntityManagement.Api`, a library, not a host): standard endpoints (sign-in, contract, elements, relations, history, context query, texts) with one method to register and one to map, plus a small demo API host. Decide controllers or minimal endpoints then.
-4. **Authentication**: not built in the new libraries. The old project had JWT and authentication tables and services (look in `.Old`: `Application/Services/JWTService.cs`, `Persistence/Tables/Authentication`). `CreatedByUserID` has no user table behind it yet.
-5. **The Administration, rebuilt** (generic, reads the contract from the API): contract view, data browser and editor with an input per property kind, history and as-of view, a live context preview, editing text values. This is the user's stated priority.
-6. **The demo frontend**, then the rest of the demo schema (vehicles, weapons, locations).
-7. **A client library** (`Presentation`) with generic components, when the Administration needs it.
+1. **The API library** (`Noxy.NET.EntityManagement.Api`, a library, not a host): standard endpoints (sign-in, contract, elements, relations, history, context query, texts) with one method to register and one to map, plus a small demo API host. Decide controllers or minimal endpoints then.
+2. **Authentication**: not built in the new libraries. The old project had JWT and authentication tables and services (look in `.Old`: `Application/Services/JWTService.cs`, `Persistence/Tables/Authentication`). `CreatedByUserID` has no user table behind it yet.
+3. **The Administration, rebuilt** (generic, reads the contract from the API): contract view, data browser and editor with an input per property kind, history and as-of view, a live context preview, editing text values. This is the user's stated priority.
+4. **The demo frontend**, then the rest of the demo schema (vehicles, weapons, locations).
+5. **A client library** (`Presentation`) with generic components, when the Administration needs it.
 
 ### Open decisions (also in the spec under "Still open")
 
@@ -112,7 +122,12 @@ A test (`TheMigrations_MatchTheModel`) fails if the model changed and the migrat
 
 ## Where things are
 
-- Spec (read first): `docs/superpowers/specs/2026-11-23-entity-management-libraries-design.md`.
+- Spec (read first): `docs/specs/2026-11-23-entity-management-libraries-design.md`.
 - Each library has a README that explains its rules: `Noxy.NET.EntityManagement/*/README.md`.
 - Shared UI notes: `Noxy.NET.UI/Noxy.NET.UI.Shared/README.md` (colours, the Wizard, the variables file).
-- Older handover and plans (the MediaPlayer app, not this work): `docs/superpowers/HANDOFF-2026-11-17-plan-5.md` and `docs/superpowers/plans`.
+- Older handover and plans (the MediaPlayer app, not this work): `docs/temp/handoffs/HANDOFF-2026-11-17-plan-5.md` and `docs/temp/plans`.
+
+## Outside EntityManagement, since the first handover
+
+- A review of the `::deep` CSS selectors found two dead rules (`.show .visual` in `BlockEditor`, `.new-playlist` in `SidebarElement`); both were removed. The ones left are fine on purpose: `::deep + input` in the two `InputVisual` components, and the descendant selectors after `::deep > child` in `InputControlComposite`.
+- The user was about to work on the **MediaPlayer** next (the Dialog, `UploadMediaDropZone` and `Button.razor.css` changes were in progress, uncommitted at the time this was written; check `git status`).

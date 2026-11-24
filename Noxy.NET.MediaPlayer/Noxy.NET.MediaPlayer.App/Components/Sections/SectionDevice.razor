@@ -1,21 +1,109 @@
 @inject IDeviceResetService ServiceDeviceReset
+@inject ISyncService ServiceSync
+@inject IMetadataStore StoreMetadata
+@inject IFileStore StoreFile
 @inject IToastService ServiceToast
 @inherits BaseComponentElement
+@implements IDisposable
 
 <Section @attributes="AdditionalAttributes" class="@CssClass" Title="Device">
-    <DeviceNameField/>
-    <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="AskResetPreferences">@AppTexts.ResetPreferencesButton</Button>
-    <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="AskDeleteAllData">@AppTexts.DeleteAllDataButton</Button>
+    <HeaderContent>
+        <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" disabled="@IsOffline" title="@RefreshTitle" aria-label="@AppTexts.DeviceRefreshLibrary" @onclick="RefreshLibrary">
+            <MaterialIcon Icon="refresh" Size="var(--size-icon-sm)"/>
+        </Button>
+    </HeaderContent>
+    <ChildContent>
+        <DeviceNameField/>
 
-    <ConfirmActionDialog Open="_isResettingPreferences" OpenChanged="CloseResetPreferences" Title="@AppTexts.ResetPreferencesButton" Message="@AppTexts.ResetPreferencesMessage" AcceptText="@AppTexts.ResetPreferencesAccept" OnSubmit="SubmitResetPreferences"/>
-    <ConfirmActionDialog Open="_isDeletingAllData" OpenChanged="CloseDeleteAllData" Title="@AppTexts.DeleteAllDataButton" Message="@AppTexts.DeleteAllDataMessage" Detail="@AppTexts.DeleteAllDataDetail" AcceptText="@AppTexts.DeleteAllDataAccept"
-                         OnSubmit="SubmitDeleteAllData"/>
+        <dl>
+            <dt>Media files on this device</dt>
+            <dd>@OnDeviceText</dd>
+
+            <dt>Stored on this device</dt>
+            <dd>@UsedText</dd>
+
+            <dt>Free space on this device</dt>
+            <dd>@FreeText</dd>
+        </dl>
+
+        <div class="theme">
+            <span class="theme-label">Theme</span>
+            <ThemePicker/>
+        </div>
+
+        <div class="danger">
+            <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Filled" Status="StatusEnum.Warning" @onclick="AskResetPreferences">
+                <MaterialIcon Icon="restart_alt" Size="var(--size-icon-sm)"/>
+                @AppTexts.ResetPreferencesButton
+            </Button>
+            <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Filled" Status="StatusEnum.Error" @onclick="AskDeleteAllData">
+                <MaterialIcon Icon="delete_forever" Size="var(--size-icon-sm)"/>
+                @AppTexts.DeleteAllDataButton
+            </Button>
+        </div>
+
+        <ConfirmActionDialog Open="_isResettingPreferences" OpenChanged="CloseResetPreferences" Title="@AppTexts.ResetPreferencesButton" Message="@AppTexts.ResetPreferencesMessage" AcceptText="@AppTexts.ResetPreferencesAccept"
+                             OnSubmit="SubmitResetPreferences"/>
+        <ConfirmActionDialog Open="_isDeletingAllData" OpenChanged="CloseDeleteAllData" Title="@AppTexts.DeleteAllDataButton" Message="@AppTexts.DeleteAllDataMessage" Detail="@AppTexts.DeleteAllDataDetail" AcceptText="@AppTexts.DeleteAllDataAccept"
+                             OnSubmit="SubmitDeleteAllData"/>
+    </ChildContent>
 </Section>
 
 @code {
 
+    private const string TextUnknown = "Unknown";
+
     private bool _isResettingPreferences;
     private bool _isDeletingAllData;
+    private int _mediaCount;
+    private int _onDeviceCount;
+    private StorageEstimate? _estimate;
+
+    private string? OfflineReason => ServiceSync.IsOffline ? PresentationTexts.ActionMessageOffline : null;
+    private bool IsOffline => OfflineReason is not null;
+    private string RefreshTitle => OfflineReason ?? AppTexts.DeviceRefreshLibrary;
+
+    private string OnDeviceText => $"{_onDeviceCount} of {_mediaCount}";
+    private string UsedText => _estimate is null ? TextUnknown : Format(_estimate.UsedBytes);
+    private string FreeText => _estimate is null ? TextUnknown : Format(_estimate.FreeBytes);
+
+    protected override async Task OnInitializedAsync()
+    {
+        ServiceSync.Changed += OnChanged;
+        await Load();
+    }
+
+    private void OnChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await Load();
+            StateHasChanged();
+        });
+    }
+
+    private async Task Load()
+    {
+        _mediaCount = (await StoreMetadata.GetMediaFileList()).Count;
+        _onDeviceCount = (await StoreMetadata.GetFileStateList()).Count(x => x.State == FileSyncStateEnum.OnDevice);
+        try
+        {
+            _estimate = await StoreFile.GetEstimate();
+        }
+        catch (IOException)
+        {
+            _estimate = null;
+        }
+    }
+
+    private async Task RefreshLibrary()
+    {
+        await Run(async () =>
+        {
+            await ServiceSync.SyncLibrary(true);
+            await ServiceSync.SyncPlaylistList(true);
+        });
+    }
 
     private void AskResetPreferences()
     {
@@ -61,6 +149,25 @@
         {
             ServiceToast.ShowError(exception.ToActionMessage());
         }
+    }
+
+    private static string Format(long bytes)
+    {
+        string[] unitList = ["B", "KB", "MB", "GB", "TB"];
+        double value = bytes;
+        int unit = 0;
+        while (value >= 1024 && unit < unitList.Length - 1)
+        {
+            value /= 1024;
+            unit++;
+        }
+
+        return $"{value:0.#} {unitList[unit]}";
+    }
+
+    public void Dispose()
+    {
+        ServiceSync.Changed -= OnChanged;
     }
 
 }

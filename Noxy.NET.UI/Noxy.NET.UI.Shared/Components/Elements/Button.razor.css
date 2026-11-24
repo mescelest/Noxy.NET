@@ -38,15 +38,14 @@
     outline-offset: var(--size-gap-tiny, 2px);
 }
 
-/* The light changes, nothing moves: hover brightens the fill and adds a soft glow, press brightens it further. */
+/* Nothing moves and nothing glows: hover and press shift the fill a few percent towards the text colour of the theme, which is a little lighter in the dark theme and a little darker in the light one. */
 .Button:not(:disabled):hover {
-    background-color: var(--color-button-hover, color-mix(in srgb, var(--color-button, #4D4AD3) 85%, var(--color-light, #FFFFFF)));
-    box-shadow: 0 0 var(--size-gap-xs, 0.75rem) color-mix(in srgb, var(--color-button, #4D4AD3) 55%, transparent);
+    background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 92%, var(--color-complementary, #000000));
 }
 
-.Button:not(:disabled):active {
-    background-color: var(--color-button-active, color-mix(in srgb, var(--color-button, #4D4AD3) 70%, var(--color-light, #FFFFFF)));
-    box-shadow: 0 0 0 transparent;
+/* A button that opens a popover (a menu, a list) stays pressed while it is open; the popover component sets data-popover-open on it. A toggle button says it is on with aria-pressed="true". */
+.Button:not(:disabled):active, .Button[data-popover-open], .Button[aria-pressed="true"] {
+    background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 84%, var(--color-complementary, #000000));
 }
 
 .Button:disabled:not(.loading) {
@@ -67,7 +66,7 @@
 /* The neutral colours, for a button that should not draw the eye. */
 .Button[data-status="none"] {
     --color-button: var(--color-complementary, #000000);
-    --color-button-border: var(--color-offset-primary-lg, #767676);
+    --color-button-border: var(--color-complementary, #000000);
     --color-on-button: var(--color-surface, #FFFFFF);
 }
 
@@ -84,6 +83,11 @@
     border-color: transparent;
 }
 
+/* The neutral colour is for what should not draw the eye: its outline is as muted as the border of an input or a checkbox. */
+.Button[data-status="none"][data-appearance="outline"] {
+    border-color: var(--color-border, var(--color-complementary, #000000));
+}
+
 .Button[data-appearance="outline"]:not(:disabled):hover, .Button[data-appearance="ghost"]:not(:disabled):hover {
     background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 8%, transparent);
     box-shadow: 0 0 0 transparent;
@@ -91,6 +95,13 @@
 
 .Button[data-appearance="outline"]:not(:disabled):active, .Button[data-appearance="ghost"]:not(:disabled):active {
     background-color: color-mix(in srgb, var(--color-button, #4D4AD3) 16%, transparent);
+}
+
+/* Open (a popover) or on (a toggle): the text takes the highlight colour and the fill stays out of it. */
+.Button[data-appearance="outline"][data-popover-open], .Button[data-appearance="ghost"][data-popover-open],
+.Button[data-appearance="outline"][aria-pressed="true"], .Button[data-appearance="ghost"][aria-pressed="true"] {
+    background-color: transparent;
+    color: var(--color-highlight, #0073EC);
 }
 
 .Button[data-appearance="outline"]:disabled:not(.loading), .Button[data-appearance="ghost"]:disabled:not(.loading) {

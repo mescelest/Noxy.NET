@@ -6,9 +6,12 @@
 @inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" disabled="@IsNothingTicked" aria-label="@AppTexts.LibraryActions" aria-haspopup="menu" popovertarget="@MenuID">
-        <MaterialIcon Icon="more_horiz" Size="var(--size-icon-md)"/>
-    </Button>
+    @if (ShowTrigger)
+    {
+        <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" disabled="@IsNothingTicked" aria-label="@AppTexts.LibraryActions" aria-haspopup="menu" popovertarget="@MenuID">
+            <MaterialIcon Icon="more_horiz" Size="var(--size-icon-sm)"/>
+        </Button>
+    }
 
     <ContextMenu @ref="_menu" ID="@MenuID" ItemList="ItemList" Side="PlacementSideEnum.Bottom" Align="PlacementAlignEnum.End" OnClose="CloseHandler"/>
 
@@ -46,6 +49,10 @@
 
     [Parameter]
     public int HiddenSelectedCount { get; set; }
+
+    // The button for the ticked rows. The menu itself stays, for the right-click on a row, whether the button shows or not.
+    [Parameter]
+    public bool ShowTrigger { get; set; } = true;
 
     // Turns a row key into the media file it stands for. Unset, the key is the media file's ID, as in the Library.
     [Parameter]

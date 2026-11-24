@@ -53,6 +53,21 @@ public class SettingService : ISettingService
         return (bool)SettingCatalog.KeepQueuedItems.DefaultValue;
     }
 
+    public async Task<int> GetPrefetchCount()
+    {
+        ResponseSetting? setting = await _settingList.Find(SettingKey.PrefetchCount);
+        try
+        {
+            if (setting is not null && setting.GetInteger() is var stored && stored >= SettingCatalog.PrefetchCount.Minimum && stored <= SettingCatalog.PrefetchCount.Maximum) return stored;
+        }
+        catch (InvalidOperationException)
+        {
+            // Not a number: the default below.
+        }
+
+        return SettingCatalog.PrefetchCount.Default;
+    }
+
     public async Task SyncSettingList(bool force = false)
     {
         await _settingList.Sync(force);

@@ -1,0 +1,33 @@
+@inherits BaseComponentElement
+
+<PageHeader @attributes="AdditionalAttributes" class="@CssClass" Name="@Name">
+    <span class="counts">@Counts</span>
+    @ChildContent
+</PageHeader>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required string Name { get; set; }
+
+    [Parameter]
+    public int EntryCount { get; set; }
+
+    [Parameter]
+    public int SelectedCount { get; set; }
+
+    // Next to the counts: what can be done with the selected files.
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string Counts
+    {
+        get
+        {
+            string entries = $"{EntryCount} {(EntryCount == 1 ? "file" : "files")}";
+
+            return SelectedCount > 0 ? $"{entries} · {SelectedCount} selected" : entries;
+        }
+    }
+
+}

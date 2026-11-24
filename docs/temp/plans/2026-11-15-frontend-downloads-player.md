@@ -8,7 +8,7 @@
 
 **Tech Stack:** .NET 10, .NET MAUI (Windows and Android), `System.Security.Cryptography` for SHA-256, xunit v3.
 
-**Spec:** `docs/superpowers/specs/2026-11-15-frontend-maui-design.md` (storage, hashing, playback) and `docs/superpowers/specs/2026-11-15-frontend-sync-player-design.md` (file sync per media file, integrity, the player, the replaceable store, "Calls made while writing this" for hash, resume, playback and stale-hash decisions). Previous plan: `2026-11-15-frontend-foundation.md`.
+**Spec:** `docs/specs/2026-11-15-frontend-maui-design.md` (storage, hashing, playback) and `docs/specs/2026-11-15-frontend-sync-player-design.md` (file sync per media file, integrity, the player, the replaceable store, "Calls made while writing this" for hash, resume, playback and stale-hash decisions). Previous plan: `2026-11-15-frontend-foundation.md`.
 
 ## Global Constraints
 

@@ -5,6 +5,7 @@ const defaultMargin = 8;
 const propertyGap = "--popover-gap";
 const propertyMargin = "--popover-margin";
 const attributePlaced = "data-placed";
+const attributeInvokerOpen = "data-popover-open";
 
 export function Show(panel) {
     if (!panel.matches(":popover-open")) panel.showPopover();
@@ -46,6 +47,7 @@ export function Watch(panel, dotNetReference, openedMethod, closedMethod) {
         if (event.newState === "open") {
             Reset(panel);
             AddResizeClose(panel);
+            MarkInvoker(panel, true);
             dotNetReference.invokeMethodAsync(openedMethod).catch(() => {
             });
             return;
@@ -53,6 +55,7 @@ export function Watch(panel, dotNetReference, openedMethod, closedMethod) {
 
         RemoveResizeClose(panel);
         Reset(panel);
+        MarkInvoker(panel, false);
         dotNetReference.invokeMethodAsync(closedMethod).catch(() => {
         });
     });
@@ -62,6 +65,15 @@ function FindInvoker(panel) {
     if (!panel.id) return null;
 
     return document.querySelector(`[popovertarget="${CSS.escape(panel.id)}"]`);
+}
+
+// The trigger that points at the panel says the panel is open for as long as it is, so it can be drawn pressed.
+function MarkInvoker(panel, isOpen) {
+    const invoker = FindInvoker(panel);
+    if (!invoker) return;
+
+    if (isOpen) invoker.setAttribute(attributeInvokerOpen, "");
+    else invoker.removeAttribute(attributeInvokerOpen);
 }
 
 function Reset(panel) {

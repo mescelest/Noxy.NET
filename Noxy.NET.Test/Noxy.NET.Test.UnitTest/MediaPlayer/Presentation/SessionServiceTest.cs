@@ -98,6 +98,58 @@ public class SessionServiceTest
     }
 
     [Fact]
+    public async Task SignIn_AndSignUp_RememberThatTheUserSignedInWithAPassword()
+    {
+        await _service.SignIn("a@example.com", "pw");
+        Assert.Equal(SignInMethodEnum.Password, await _service.GetSignInMethod());
+
+        _storageSession.SignInMethod = null;
+        await _service.SignUp("b@example.com", "a-long-enough-password");
+        Assert.Equal(SignInMethodEnum.Password, await _service.GetSignInMethod());
+    }
+
+    [Fact]
+    public async Task SignInWithGoogle_RemembersThatTheUserSignedInWithGoogle()
+    {
+        _serviceGoogleSignIn.IdToken = "google-token";
+
+        await _service.SignInWithGoogle(TestContext.Current.CancellationToken);
+
+        Assert.Equal(SignInMethodEnum.Google, await _service.GetSignInMethod());
+    }
+
+    [Fact]
+    public async Task TryRestore_KeepsTheRememberedWayOfSigningIn()
+    {
+        _storageSession.RefreshToken = "stored-refresh";
+        _storageSession.SignInMethod = SignInMethodEnum.Google;
+
+        await _service.TryRestore();
+
+        Assert.Equal(SignInMethodEnum.Google, await _service.GetSignInMethod());
+    }
+
+    [Fact]
+    public async Task SignOut_ForgetsTheWayOfSigningIn()
+    {
+        await _service.SignIn("a@example.com", "pw");
+
+        await _service.SignOut();
+
+        Assert.Null(await _service.GetSignInMethod());
+    }
+
+    [Fact]
+    public async Task SignIn_WhenTheServerRejectsIt_RemembersNothing()
+    {
+        _clientAuthApi.Failure = FakeAuthApiClient.Rejected();
+
+        await Assert.ThrowsAsync<ApiException>(() => _service.SignIn("a@example.com", "wrong"));
+
+        Assert.Null(await _service.GetSignInMethod());
+    }
+
+    [Fact]
     public async Task TryRestore_WithAStoredRefreshToken_SignsIn_AndRotatesTheStoredToken()
     {
         _storageSession.RefreshToken = "stored-refresh";

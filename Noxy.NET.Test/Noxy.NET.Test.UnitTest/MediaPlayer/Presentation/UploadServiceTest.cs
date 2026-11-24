@@ -1,6 +1,7 @@
 using System.Net;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.MediaPlayer.Presentation.Services;
@@ -12,12 +13,13 @@ public class UploadServiceTest
 {
     private readonly FakeApiClient _api = new();
     private readonly FakeSyncService _sync = new();
+    private readonly FakeMetadataStore _storeMetadata = new();
     private readonly UploadService _service;
     private readonly List<UploadBatchResult> _completedList = [];
 
     public UploadServiceTest()
     {
-        _service = new(_api, _sync);
+        _service = new(_api, _sync, _storeMetadata);
         _service.BatchCompleted += _completedList.Add;
     }
 
@@ -98,6 +100,22 @@ public class UploadServiceTest
         Assert.Equal(2, result.SucceededCount);
         Assert.Empty(result.FailureList);
         Assert.Null(result.PlaylistID);
+    }
+
+    [Fact]
+    public async Task FilesTheLibraryAlreadyHolds_AreCountedApart_NeitherAsAddedNorAsFailures()
+    {
+        await _service.Upload([File("a.mp3"), File("b.mp3"), File("c.mp3"), File("d.mp3"), File("e.mp3")]);
+        Report(0, "a");
+        _sync.RaiseUploadResult(Failed(_api.UploadCallList[1].JobID, "b", UploadFailureReasonEnum.Duplicate));
+        Report(2, "c");
+        _sync.RaiseUploadResult(Failed(_api.UploadCallList[3].JobID, "d", UploadFailureReasonEnum.Duplicate));
+        Report(4, "e");
+
+        UploadBatchResult result = Assert.Single(_completedList);
+        Assert.Equal(3, result.SucceededCount);
+        Assert.Equal(2, result.DuplicateCount);
+        Assert.Empty(result.FailureList);
     }
 
     #endregion
@@ -217,6 +235,70 @@ public class UploadServiceTest
         Assert.Equal([first.ID, second.ID], _api.AddEntryCallList.SelectMany(x => x.Request.MediaFileIDList));
         UploadBatchResult result = Assert.Single(_completedList);
         Assert.Equal((playlistID, 2), (result.PlaylistID, result.SucceededCount));
+    }
+
+    private async Task<Guid> AddPlaylist(bool allowDuplicates, params Guid[] mediaFileIDList)
+    {
+        Guid playlistID = Guid.NewGuid();
+        List<ResponsePlaylistEntry> entryList = [];
+        foreach (Guid mediaFileID in mediaFileIDList) entryList.Add(new() { ID = Guid.NewGuid(), MediaFileID = mediaFileID, Position = entryList.Count, MediaFile = Media("held") });
+
+        await _storeMetadata.SavePlaylistDetail(new()
+        {
+            ID = playlistID, Name = "List", AllowDuplicates = allowDuplicates, EntryCount = entryList.Count, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null, EntryList = entryList
+        });
+
+        return playlistID;
+    }
+
+    // The server's answer for a file the library already holds: it names that file.
+    private void ReportDuplicate(int index, ResponseMediaFile existing)
+    {
+        _sync.RaiseUploadResult(new() { JobID = _api.UploadCallList[index].JobID, Title = existing.Title, Succeeded = false, Reason = UploadFailureReasonEnum.Duplicate, Media = existing });
+    }
+
+    [Fact]
+    public async Task AFileTheLibraryAlreadyHolds_SentToAPlaylist_GoesIntoThePlaylistAndNotIntoTheLibraryAgain()
+    {
+        ResponseMediaFile existing = Media("held");
+        Guid playlistID = await AddPlaylist(true);
+        await _service.Upload([File("new.mp3"), File("held.mp3")], playlistID);
+
+        ResponseMediaFile added = Report(0, "new");
+        ReportDuplicate(1, existing);
+
+        Assert.Equal([added.ID, existing.ID], _api.AddEntryCallList.SelectMany(x => x.Request.MediaFileIDList));
+        UploadBatchResult result = Assert.Single(_completedList);
+        Assert.Equal((1, 1, 1), (result.SucceededCount, result.DuplicateCount, result.ExistingAddedCount));
+        Assert.Empty(result.FailureList);
+    }
+
+    [Fact]
+    public async Task AFileTheLibraryAlreadyHolds_SentToAPlaylistThatAlreadyHasItAndTakesNoDuplicates_IsLeftOutWithAReason()
+    {
+        ResponseMediaFile existing = Media("held");
+        Guid playlistID = await AddPlaylist(false, existing.ID);
+        await _service.Upload([File("held.mp3")], playlistID);
+
+        ReportDuplicate(0, existing);
+
+        Assert.Empty(_api.AddEntryCallList);
+        UploadBatchResult result = Assert.Single(_completedList);
+        Assert.Equal((0, 0, 0), (result.SucceededCount, result.DuplicateCount, result.ExistingAddedCount));
+        Assert.Equal(PresentationTexts.UploadMessageAlreadyInPlaylist, Assert.Single(result.FailureList).Message);
+    }
+
+    [Fact]
+    public async Task AFileTheLibraryAlreadyHolds_SentToAPlaylistThatTakesDuplicates_IsAddedEvenIfTheListHasIt()
+    {
+        ResponseMediaFile existing = Media("held");
+        Guid playlistID = await AddPlaylist(true, existing.ID);
+        await _service.Upload([File("held.mp3")], playlistID);
+
+        ReportDuplicate(0, existing);
+
+        Assert.Equal([existing.ID], _api.AddEntryCallList.SelectMany(x => x.Request.MediaFileIDList));
+        Assert.Equal(1, Assert.Single(_completedList).ExistingAddedCount);
     }
 
     [Fact]

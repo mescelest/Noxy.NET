@@ -212,7 +212,11 @@
 
 /* What the form controls read for their lines and fills. */
 :root {
-    --color-border: var(--color-complementary);
+    --color-border: light-dark(var(--color-complementary), var(--color-faded));
     --color-border-focus: var(--color-highlight);
     --color-control: var(--color-complementary);
+
+    /* The colour of what is on or is the main thing: a ticked box, the progress of the seek bar and of the volume. Change it here and they all follow. */
+    --color-theme: var(--color-highlight);
+    --color-on-theme: var(--color-on-highlight);
 }

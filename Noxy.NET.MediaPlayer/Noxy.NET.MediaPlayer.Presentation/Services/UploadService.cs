@@ -1,9 +1,12 @@
 using System.ComponentModel;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
@@ -15,11 +18,14 @@ public sealed class UploadService : IUploadService, IDisposable
         public Guid? PlaylistID { get; } = playlistID;
         public int Remaining { get; set; } = total;
         public int SucceededCount { get; set; }
+        public int DuplicateCount { get; set; }
+        public int ExistingAddedCount { get; set; }
         public List<UploadFailure> FailureList { get; } = [];
     }
 
     private readonly IApiClient _clientApi;
     private readonly ISyncService _serviceSync;
+    private readonly IMetadataStore _storeMetadata;
     private readonly Lock _lock = new();
     private readonly Dictionary<Guid, Batch> _jobMap = [];
 
@@ -31,10 +37,11 @@ public sealed class UploadService : IUploadService, IDisposable
 
     public event Action<UploadBatchResult>? BatchCompleted;
 
-    public UploadService(IApiClient clientApi, ISyncService serviceSync)
+    public UploadService(IApiClient clientApi, ISyncService serviceSync, IMetadataStore storeMetadata)
     {
         _clientApi = clientApi;
         _serviceSync = serviceSync;
+        _storeMetadata = storeMetadata;
         _serviceSync.UploadResultReceived += OnUploadResultReceived;
     }
 
@@ -79,7 +86,7 @@ public sealed class UploadService : IUploadService, IDisposable
         }
         catch (Exception exception) when (exception is ApiException || exception.IsOfflineFailure)
         {
-            Finish(batch, null, new(file.Name, exception.ToActionMessage(PresentationTexts.ActionMessageUploadFailed)));
+            Finish(batch, UploadOutcomeEnum.Failed, new(file.Name, exception.ToActionMessage(PresentationTexts.ActionMessageUploadFailed)));
             return;
         }
 
@@ -113,39 +120,76 @@ public sealed class UploadService : IUploadService, IDisposable
 
     private async Task Handle(Batch batch, ResponseUploadResult result)
     {
-        if (!result.Succeeded || result.Media is null)
+        // A file the library already held is not a failure and is not stored again. Sent to a playlist it still goes into the playlist, by the rules of that playlist.
+        bool isDuplicate = result.Reason == UploadFailureReasonEnum.Duplicate;
+
+        if (!isDuplicate && (!result.Succeeded || result.Media is null))
         {
-            Finish(batch, null, new(result.Title, ReasonMessageOf(result.Reason)));
+            Finish(batch, UploadOutcomeEnum.Failed, new(result.Title, ReasonMessageOf(result.Reason)));
             return;
         }
 
-        if (batch.PlaylistID is { } playlistID)
+        if (batch.PlaylistID is not { } playlistID || result.Media is null)
         {
-            try
-            {
-                await _clientApi.AddPlaylistEntryList(playlistID, new() { MediaFileIDList = [result.Media.ID] });
-            }
-            catch (Exception exception) when (exception is ApiException || exception.IsOfflineFailure)
-            {
-                Finish(batch, null, new(result.Title, PresentationTexts.UploadMessageNotAddedToPlaylist));
-                return;
-            }
+            Finish(batch, isDuplicate ? UploadOutcomeEnum.AlreadyInLibrary : UploadOutcomeEnum.Added, null);
+            return;
         }
 
-        Finish(batch, true, null);
+        if (isDuplicate && await PlaylistRefuses(playlistID, result.Media.ID))
+        {
+            Finish(batch, UploadOutcomeEnum.Failed, new(result.Title, PresentationTexts.UploadMessageAlreadyInPlaylist));
+            return;
+        }
+
+        try
+        {
+            await _clientApi.AddPlaylistEntryList(playlistID, new() { MediaFileIDList = [result.Media.ID] });
+        }
+        catch (Exception exception) when (exception is ApiException || exception.IsOfflineFailure)
+        {
+            Finish(batch, UploadOutcomeEnum.Failed, new(result.Title, PresentationTexts.UploadMessageNotAddedToPlaylist));
+            return;
+        }
+
+        Finish(batch, isDuplicate ? UploadOutcomeEnum.AlreadyInLibraryAddedToPlaylist : UploadOutcomeEnum.Added, null);
     }
 
-    // One file of the batch has its final answer: it is in (succeeded), or it is not (failure). The batch is reported when the last one is in.
-    private void Finish(Batch batch, bool? succeeded, UploadFailure? failure)
+    // A playlist that does not take duplicates keeps its one entry of a media file, and the server then adds nothing; the app has to tell the user. The answer comes from the playlist as the device has it.
+    private async Task<bool> PlaylistRefuses(Guid playlistID, Guid mediaFileID)
+    {
+        ResponsePlaylistDetail? detail = await _storeMetadata.GetPlaylistDetail(playlistID);
+
+        return detail is { AllowDuplicates: false } && detail.EntryList.Any(x => x.MediaFileID == mediaFileID);
+    }
+
+    // One file of the batch has its final answer. The batch is reported when the last one is in.
+    private void Finish(Batch batch, UploadOutcomeEnum outcome, UploadFailure? failure)
     {
         UploadBatchResult? completed = null;
         lock (_lock)
         {
-            if (succeeded is true) batch.SucceededCount++;
+            switch (outcome)
+            {
+                case UploadOutcomeEnum.Added:
+                    batch.SucceededCount++;
+                    break;
+                case UploadOutcomeEnum.AlreadyInLibrary:
+                    batch.DuplicateCount++;
+                    break;
+                case UploadOutcomeEnum.AlreadyInLibraryAddedToPlaylist:
+                    batch.DuplicateCount++;
+                    batch.ExistingAddedCount++;
+                    break;
+                case UploadOutcomeEnum.Failed:
+                    break;
+                default:
+                    throw new InvalidEnumArgumentException(nameof(outcome), (int)outcome, typeof(UploadOutcomeEnum));
+            }
+
             if (failure is not null) batch.FailureList.Add(failure);
 
             batch.Remaining--;
-            if (batch.Remaining == 0) completed = new(batch.PlaylistID, batch.SucceededCount, [.. batch.FailureList]);
+            if (batch.Remaining == 0) completed = new(batch.PlaylistID, batch.SucceededCount, batch.DuplicateCount, batch.ExistingAddedCount, [.. batch.FailureList]);
         }
 
         if (completed is not null) BatchCompleted?.Invoke(completed);
@@ -158,6 +202,7 @@ public sealed class UploadService : IUploadService, IDisposable
             null or UploadFailureReasonEnum.Unknown => PresentationTexts.UploadMessageUnknown,
             UploadFailureReasonEnum.LibraryFull => PresentationTexts.UploadMessageLibraryFull,
             UploadFailureReasonEnum.FileMissing => PresentationTexts.UploadMessageFileMissing,
+            UploadFailureReasonEnum.Duplicate => PresentationTexts.UploadMessageDuplicate,
             _ => throw new InvalidEnumArgumentException(nameof(reason), (int)reason.Value, typeof(UploadFailureReasonEnum))
         };
     }

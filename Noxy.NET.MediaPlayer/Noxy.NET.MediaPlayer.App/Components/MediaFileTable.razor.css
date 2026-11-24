@@ -5,15 +5,19 @@
     min-height: 0;
 }
 
-.MediaFileTable ::deep > .table {
-    flex: 1 1 auto;
-    grid-template-columns: minmax(0px, max-content) minmax(0px, max-content) 1fr  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content);
-    align-content: flex-start;
+/* The table runs to the edges of the page, and the room is inside it: a row and the header keep their content away from the edge, and the stripes and the hover still reach it. */
+.MediaFileTable ::deep > .table > .header {
+    padding: var(--size-gap-sm) var(--size-gap-md);
 }
 
-/* The reorder handle is one more column in front of the rest. */
-.MediaFileTable ::deep > .table[data-grip] {
-    grid-template-columns: minmax(0px, max-content) minmax(0px, max-content) minmax(0px, max-content) 1fr  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content)  minmax(0px, max-content);
+.MediaFileTable ::deep > .table > .body > .row-menu > .row {
+    padding: var(--size-gap-sm) var(--size-gap-md);
+}
+
+.MediaFileTable ::deep > .table {
+    flex: 1 1 auto;
+    grid-template-columns: var(--table-columns-library);
+    align-content: flex-start;
 }
 
 .MediaFileTable ::deep > .table > .header > .header-row > .cell,
@@ -22,30 +26,38 @@
 }
 
 .MediaFileTable ::deep > .table > .header {
-    row-gap: var(--size-gap-xs);
+    row-gap: var(--size-gap-sm);
 }
 
-/* The wrapper only carries the right-click and the drop; the row inside it lays out as if it were the body's own child. */
+/* Title, artist and album share what is left and give way to each other; text that does not fit is cut with an ellipsis, like in the queue. */
+.MediaFileTable ::deep > .table > .body > .row-menu > .row > .cell.text {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The wrapper only carries the right-click and the drop; the row inside it lays out as if it were the body's own child. The text of a row is not for selecting: a press on it is the start of a drag. */
 .row-menu {
     display: contents;
+    user-select: none;
+}
+
+.MediaFileTable ::deep > .table > .body > .row-menu > .row[draggable="true"] {
+    cursor: grab;
 }
 
 .MediaFileTable ::deep > .table > .body > .row-menu > .row {
     align-items: center;
 }
 
+.MediaFileTable ::deep > .table > .body > .row-menu > .row:hover {
+    background-color: var(--color-offset-primary-md);
+}
+
 .MediaFileTable ::deep > .table > .body > .row-menu > .row[data-over] {
     border-top: var(--size-border-width-md) solid var(--color-highlight);
-}
-
-.MediaFileTable ::deep > .table > .body > .row-menu > .row > .grip {
-    color: var(--color-muted);
-    cursor: grab;
-}
-
-.MediaFileTable ::deep > .table > .body > .row-menu > .row > .grip[data-disabled] {
-    opacity: 0.4;
-    cursor: not-allowed;
 }
 
 .action-row {
@@ -53,6 +65,12 @@
     display: flex;
     flex-flow: row;
     justify-content: space-between;
+}
+
+/* The buttons sit close together on the right of the search box. */
+.action-row ::deep > .ButtonList {
+    column-gap: var(--size-gap-xxs);
+    margin-inline-start: auto;
 }
 
 /* With no media files the box takes the place of the rows and fills what is left of the window. */

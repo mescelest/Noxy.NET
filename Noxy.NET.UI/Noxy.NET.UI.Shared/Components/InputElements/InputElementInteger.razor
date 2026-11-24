@@ -4,9 +4,25 @@
 
 @code {
 
+    // The lowest and the highest number the field gives. A number outside them is brought to the nearest one, and the field shows that number.
+    [Parameter]
+    public int? Min { get; set; }
+
+    [Parameter]
+    public int? Max { get; set; }
+
     protected override int? GetParsedValue(string value)
     {
-        return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) ? parsed : null;
+        if (!int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed)) return null;
+
+        return Math.Clamp(parsed, Min ?? int.MinValue, Max ?? int.MaxValue);
+    }
+
+    protected override void HandleChange(string value)
+    {
+        int? parsed = GetParsedValue(value);
+        ValueInternal = parsed is null ? value : parsed.Value.ToString(CultureInfo.InvariantCulture);
+        NotifyChange(parsed);
     }
 
 }

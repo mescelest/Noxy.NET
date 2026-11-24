@@ -8,7 +8,7 @@
 
 **Tech Stack:** .NET 10, `Microsoft.Data.Sqlite`, `System.Text.Json`, SignalR client, xunit v3.
 
-**Spec:** `docs/superpowers/specs/2026-11-15-frontend-screens-design.md` ("Backend additions", "Everything the user changes syncs"), `2026-11-15-frontend-sync-player-design.md` and `2026-11-15-user-settings-design.md`. Previous plans (done): the frontend foundation and `2026-11-15-frontend-downloads-player.md`; and `2026-11-16-backend-session-removal-and-playlist-modes.md`.
+**Spec:** `docs/specs/2026-11-15-frontend-screens-design.md` ("Backend additions", "Everything the user changes syncs"), `2026-11-15-frontend-sync-player-design.md` and `2026-11-15-user-settings-design.md`. Previous plans (done): the frontend foundation and `2026-11-15-frontend-downloads-player.md`; and `2026-11-16-backend-session-removal-and-playlist-modes.md`.
 
 ## Global Constraints
 

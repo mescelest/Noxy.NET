@@ -3,7 +3,7 @@
 @implements IAsyncDisposable
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Button Type="@HTMLButtonTypeEnum.Button" Status="@Status" IsIcon="@IsIcon" Loading="@Loading" disabled="@DisabledCurrent" @onclick="OpenPicker">
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="@Status" Appearance="@Appearance" IsIcon="@IsIcon" Loading="@Loading" disabled="@DisabledCurrent" @onclick="OpenPicker">
         @ChildContent
     </Button>
     <InputFile @ref="_input" class="input" OnChange="SelectedHandler" multiple="@MultipleCurrent" accept="@Accept" tabindex="-1" aria-hidden="true"/>
@@ -35,6 +35,9 @@
 
     [Parameter]
     public StatusEnum? Status { get; set; }
+
+    [Parameter]
+    public ButtonAppearanceEnum? Appearance { get; set; }
 
     // The files that were picked, in the order the picker gave them. Nothing is read: the caller opens the ones it wants.
     [Parameter]

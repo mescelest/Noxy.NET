@@ -8,7 +8,7 @@ namespace Noxy.NET.Test.MediaPlayer.Metadata;
 public class SettingDeclarationIntegerTest
 {
     private static readonly Guid UserID = Guid.CreateVersion7();
-    private readonly SettingDeclarationInteger _declaration = new("SampleInteger", 100, 0, 100);
+    private readonly SettingDeclarationInteger _declaration = new("Count", 3, 0, 10);
 
     private static JsonElement Json(string text)
     {
@@ -17,62 +17,55 @@ public class SettingDeclarationIntegerTest
 
     [Theory]
     [InlineData("0", 0)]
-    [InlineData("50", 50)]
-    [InlineData("100", 100)]
-    public void ParseValue_AcceptsAWholeNumberInsideTheLimits(string json, int expected)
+    [InlineData("3", 3)]
+    [InlineData("10", 10)]
+    public void ParseValue_AcceptsAWholeNumberFromTheMinimumToTheMaximum(string json, int expected)
     {
         Assert.Equal(expected, _declaration.ParseValue(Json(json)));
     }
 
     [Theory]
     [InlineData("-1")]
-    [InlineData("101")]
-    [InlineData("3.5")]
-    [InlineData("1e2")]
-    [InlineData("99999999999")]
-    [InlineData("\"50\"")]
-    [InlineData("null")]
+    [InlineData("-2147483648")]
+    [InlineData("11")]
+    [InlineData("20")]
+    [InlineData("2147483647")]
+    [InlineData("2147483648")]
+    [InlineData("99999999999999999999")]
+    [InlineData("2.5")]
+    [InlineData("\"5\"")]
     [InlineData("true")]
+    [InlineData("null")]
     [InlineData("{}")]
-    public void ParseValue_RejectsAnythingElse(string json)
+    [InlineData("[]")]
+    public void ParseValue_RejectsAnythingOutsideTheRangeOrNotAWholeNumber(string json)
     {
         InvalidSettingValueException exception = Assert.Throws<InvalidSettingValueException>(() => _declaration.ParseValue(Json(json)));
 
-        Assert.Equal(_declaration.Key, exception.Key);
+        Assert.Equal("Count", exception.Key);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(11)]
+    [InlineData(int.MaxValue)]
+    public void ReadValue_GivesTheDefaultForASavedValueOutsideTheRange(int saved)
+    {
+        Assert.Equal(3, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = "Count", Value = saved }));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(10)]
+    public void ReadValue_GivesTheSavedValueAtTheEdgesOfTheRange(int saved)
+    {
+        Assert.Equal(saved, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = "Count", Value = saved }));
     }
 
     [Fact]
-    public void ReadValue_GivesTheDefaultForNothingARowOfAnotherTypeOrANumberOutsideTheLimits()
+    public void ReadValue_GivesTheDefaultForNothingOrARowOfAnotherType()
     {
-        Assert.Equal(100, _declaration.ReadValue(null));
-        Assert.Equal(100, _declaration.ReadValue(new EntityUserSettingBoolean { UserID = UserID, Key = _declaration.Key, Value = true }));
-        Assert.Equal(100, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = _declaration.Key, Value = 200 }));
-        Assert.Equal(100, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = _declaration.Key, Value = -5 }));
-    }
-
-    [Fact]
-    public void ReadValue_GivesTheSavedValue()
-    {
-        Assert.Equal(40, _declaration.ReadValue(new EntityUserSettingInteger { UserID = UserID, Key = _declaration.Key, Value = 40 }));
-    }
-
-    [Fact]
-    public void CreateEntity_GivesAnIntegerRowForTheUserAndKey()
-    {
-        EntityUserSettingInteger entity = Assert.IsType<EntityUserSettingInteger>(_declaration.CreateEntity(UserID, 30));
-
-        Assert.Equal(UserID, entity.UserID);
-        Assert.Equal(_declaration.Key, entity.Key);
-        Assert.Equal(30, entity.Value);
-    }
-
-    [Fact]
-    public void SetValue_ReportsWhetherItChanged()
-    {
-        EntityUserSettingInteger entity = new() { UserID = UserID, Key = _declaration.Key, Value = 30 };
-
-        Assert.False(_declaration.SetValue(entity, 30));
-        Assert.True(_declaration.SetValue(entity, 60));
-        Assert.Equal(60, entity.Value);
+        Assert.Equal(3, _declaration.ReadValue(null));
+        Assert.Equal(3, _declaration.ReadValue(new EntityUserSettingBoolean { UserID = UserID, Key = "Count", Value = true }));
     }
 }

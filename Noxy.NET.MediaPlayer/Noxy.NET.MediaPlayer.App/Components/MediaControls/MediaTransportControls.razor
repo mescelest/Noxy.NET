@@ -9,15 +9,15 @@
         }
     </Button>
 
-    <Button Type="@HTMLButtonTypeEnum.Button" class="icon" IsIcon="true" aria-label="Previous" @onclick="OnPrevious">
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" class="icon" IsIcon="true" aria-label="Previous" @onclick="OnPrevious">
         <MaterialIcon Icon="skip_previous" Size="var(--size-icon-md)"/>
     </Button>
 
-    <Button Type="@HTMLButtonTypeEnum.Button" class="icon primary" IsIcon="true" aria-label="@PlayingAriaLabel" @onclick="OnPlayPause">
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" class="icon primary" IsIcon="true" aria-label="@PlayingAriaLabel" @onclick="OnPlayPause">
         <MaterialIcon Icon="@PlayingIcon" Size="var(--size-icon-md)"/>
     </Button>
 
-    <Button Type="@HTMLButtonTypeEnum.Button" class="icon" IsIcon="true" aria-label="Next" @onclick="OnNext">
+    <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" class="icon" IsIcon="true" aria-label="Next" @onclick="OnNext">
         <MaterialIcon Icon="skip_next" Size="var(--size-icon-md)"/>
     </Button>
 

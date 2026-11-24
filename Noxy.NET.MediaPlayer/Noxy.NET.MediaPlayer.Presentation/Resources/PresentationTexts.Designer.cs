@@ -301,6 +301,24 @@ namespace Noxy.NET.MediaPlayer.Presentation.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to It is already in the playlist, which does not take duplicates..
+        /// </summary>
+        public static string UploadMessageAlreadyInPlaylist {
+            get {
+                return ResourceManager.GetString("UploadMessageAlreadyInPlaylist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It is already in your library..
+        /// </summary>
+        public static string UploadMessageDuplicate {
+            get {
+                return ResourceManager.GetString("UploadMessageDuplicate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The file was lost before it could be stored..
         /// </summary>
         public static string UploadMessageFileMissing {

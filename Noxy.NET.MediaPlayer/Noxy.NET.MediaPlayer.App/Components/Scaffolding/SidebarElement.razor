@@ -44,10 +44,11 @@
                 <NavLink class="link" href="@($"playlist/{row.ID}")" @onclick="OnNavigate">
                     <span>@row.Name</span>
                 </NavLink>
-                <Button class="more" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="@($"Actions for {row.Name}")" aria-haspopup="menu" popovertarget="@PlaylistContextMenu.MenuID(row.ID)">
+                <Button class="more" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="@($"Actions for {row.Name}")" aria-haspopup="menu"
+                        popovertarget="@PlaylistContextMenu.MenuID(row.ID, PlaylistContextMenu.PlaceSidebar)">
                     <MaterialIcon Icon="more_horiz" Size="var(--size-icon-sm)"/>
                 </Button>
-                <PlaylistContextMenu @ref="_menuMap[row.ID]" Playlist="row"/>
+                <PlaylistContextMenu @ref="_menuMap[row.ID]" Playlist="row" Place="@PlaylistContextMenu.PlaceSidebar"/>
             </div>
         }
     </div>

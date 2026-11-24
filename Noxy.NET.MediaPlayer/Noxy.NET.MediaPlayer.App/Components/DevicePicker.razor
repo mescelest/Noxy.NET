@@ -6,11 +6,13 @@
 @implements IAsyncDisposable
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" disabled="@IsOffline" title="@IsOfflineReason" aria-haspopup="listbox" aria-expanded="@_open" popovertarget="@PopoverID">
-        @ButtonLabel
+    <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" disabled="@IsOffline" title="@IsOfflineReason" aria-haspopup="listbox" aria-expanded="@_open" popovertarget="@PopoverID">
+        <span class="label">@DeviceLabel</span>
+        <MaterialIcon Icon="devices" Size="var(--size-icon-sm)"/>
     </Button>
 
-    <Popover @ref="_popover" ID="@PopoverID" @bind-Open="_open" Side="PlacementSideEnum.Top" Align="PlacementAlignEnum.End" class="list">
+    <Popover @ref="_popover" ID="@PopoverID" @bind-Open="_open" Side="PlacementSideEnum.Top" Align="PlacementAlignEnum.End" class="list PopoverSurface">
+        <div class="PopoverLabel">Choose device to play on</div>
         <ul class="devices" role="listbox">
             @foreach (ResponseDevice device in DeviceList)
             {
@@ -18,11 +20,11 @@
                 string name = chosen.DeviceID == _thisID ? $"{chosen.Name} (this device)" : chosen.Name;
 
                 <li>
-                    <button type="button" role="option" class="device" aria-selected="@chosen.IsActive" @onclick="() => Choose(chosen)">
-                        <span>@name</span>
+                    <button type="button" role="option" class="device PopoverRow" aria-selected="@chosen.IsActive" @onclick="() => Choose(chosen)">
+                        <span class="name">@name</span>
                         @if (chosen.IsActive)
                         {
-                            <span class="active">playing</span>
+                            <MaterialIcon class="active" Icon="graphic_eq" Size="var(--size-icon-xs)" title="Playing" aria-label="Playing"/>
                         }
                     </button>
                 </li>
@@ -51,7 +53,8 @@
     private bool IsOffline => StateSession.Value.IsOffline || !ServiceRemote.IsOnline;
     private string? IsOfflineReason => IsOffline ? "Offline" : null;
 
-    private string ButtonLabel => _movingTo is not null ? $"Moving playback to {_movingTo}…" : ServiceRemote.Role == PlaybackRoleEnum.Controller ? $"Playing on {ActiveName}" : "This device";
+    // Which device the music plays on, or that it is being moved.
+    private string DeviceLabel => _movingTo is not null ? $"Moving playback to {_movingTo}…" : ServiceRemote.Role == PlaybackRoleEnum.Controller ? $"Playing on {ActiveName}" : "This device";
 
     private string ActiveName => ServiceRemote.DeviceList.FirstOrDefault(x => x.DeviceID == ServiceRemote.ActiveDeviceID)?.Name ?? "another device";
 

@@ -375,6 +375,168 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Back to playing.
+        /// </summary>
+        public static string QueueBackToPlaying {
+            get {
+                return ResourceManager.GetString("QueueBackToPlaying", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear queue.
+        /// </summary>
+        public static string QueueClear {
+            get {
+                return ResourceManager.GetString("QueueClear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Album.
+        /// </summary>
+        public static string QueueColumnAlbum {
+            get {
+                return ResourceManager.GetString("QueueColumnAlbum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Artist.
+        /// </summary>
+        public static string QueueColumnArtist {
+            get {
+                return ResourceManager.GetString("QueueColumnArtist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Length.
+        /// </summary>
+        public static string QueueColumnDuration {
+            get {
+                return ResourceManager.GetString("QueueColumnDuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Title.
+        /// </summary>
+        public static string QueueColumnTitle {
+            get {
+                return ResourceManager.GetString("QueueColumnTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currently playing.
+        /// </summary>
+        public static string QueueDividerCurrent {
+            get {
+                return ResourceManager.GetString("QueueDividerCurrent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Queued from {0}.
+        /// </summary>
+        public static string QueueDividerSource {
+            get {
+                return ResourceManager.GetString("QueueDividerSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Next in queue.
+        /// </summary>
+        public static string QueueDividerUserQueue {
+            get {
+                return ResourceManager.GetString("QueueDividerUserQueue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Play a song from the Library or a playlist to fill it..
+        /// </summary>
+        public static string QueueEmptyDescription {
+            get {
+                return ResourceManager.GetString("QueueEmptyDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The queue is empty.
+        /// </summary>
+        public static string QueueEmptyTitle {
+            get {
+                return ResourceManager.GetString("QueueEmptyTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only songs that have not played yet can be moved or removed..
+        /// </summary>
+        public static string QueueNothingRemovable {
+            get {
+                return ResourceManager.GetString("QueueNothingRemovable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Play next.
+        /// </summary>
+        public static string QueuePlayNext {
+            get {
+                return ResourceManager.GetString("QueuePlayNext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Play now.
+        /// </summary>
+        public static string QueuePlayNow {
+            get {
+                return ResourceManager.GetString("QueuePlayNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove from queue.
+        /// </summary>
+        public static string QueueRemove {
+            get {
+                return ResourceManager.GetString("QueueRemove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Library.
+        /// </summary>
+        public static string QueueSourceLibrary {
+            get {
+                return ResourceManager.GetString("QueueSourceLibrary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown media file.
+        /// </summary>
+        public static string QueueUnknownMedia {
+            get {
+                return ResourceManager.GetString("QueueUnknownMedia", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Queue.
+        /// </summary>
+        public static string QueueTitle {
+            get {
+                return ResourceManager.GetString("QueueTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This server is already saved..
         /// </summary>
         public static string ServerAddressAlreadySaved {
@@ -419,6 +581,24 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to {0} files already exist in your library..
+        /// </summary>
+        public static string UploadDuplicateMany {
+            get {
+                return ResourceManager.GetString("UploadDuplicateMany", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} file already exists in your library..
+        /// </summary>
+        public static string UploadDuplicateOne {
+            get {
+                return ResourceManager.GetString("UploadDuplicateOne", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to {0} file added..
         /// </summary>
@@ -521,6 +701,72 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         public static string DeleteAllDataAccept {
             get {
                 return ResourceManager.GetString("DeleteAllDataAccept", resourceCulture);
+            }
+        }
+
+        public static string AccountSignOut {
+            get {
+                return ResourceManager.GetString("AccountSignOut", resourceCulture);
+            }
+        }
+
+        public static string AccountSignedInWithGoogle {
+            get {
+                return ResourceManager.GetString("AccountSignedInWithGoogle", resourceCulture);
+            }
+        }
+
+        public static string AccountSignedInWithPassword {
+            get {
+                return ResourceManager.GetString("AccountSignedInWithPassword", resourceCulture);
+            }
+        }
+
+        public static string AccountSignedInUnknown {
+            get {
+                return ResourceManager.GetString("AccountSignedInUnknown", resourceCulture);
+            }
+        }
+
+        public static string DeviceRefreshLibrary {
+            get {
+                return ResourceManager.GetString("DeviceRefreshLibrary", resourceCulture);
+            }
+        }
+
+        public static string SettingMergeOnRename {
+            get {
+                return ResourceManager.GetString("SettingMergeOnRename", resourceCulture);
+            }
+        }
+
+        public static string SettingMergeOnRenameHelp {
+            get {
+                return ResourceManager.GetString("SettingMergeOnRenameHelp", resourceCulture);
+            }
+        }
+
+        public static string SettingKeepQueuedItems {
+            get {
+                return ResourceManager.GetString("SettingKeepQueuedItems", resourceCulture);
+            }
+        }
+
+        public static string SettingKeepQueuedItemsHelp {
+            get {
+                return ResourceManager.GetString("SettingKeepQueuedItemsHelp", resourceCulture);
+            }
+        }
+
+        public static string SettingPrefetchCount {
+            get {
+                return ResourceManager.GetString("SettingPrefetchCount", resourceCulture);
+            }
+        }
+
+        public static string SettingPrefetchCountHelp {
+            get {
+                return ResourceManager.GetString("SettingPrefetchCountHelp", resourceCulture);
             }
         }
 

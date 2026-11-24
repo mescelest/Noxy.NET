@@ -1,0 +1,31 @@
+dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--size-gap-xs) var(--size-gap-lg);
+    margin: var(--size-gap-md) 0;
+}
+
+dt {
+    color: var(--color-muted);
+}
+
+dd {
+    margin: 0;
+}
+
+.theme {
+    display: flex;
+    flex-flow: column;
+    gap: var(--size-gap-xxs);
+    margin-bottom: var(--size-gap-md);
+}
+
+.theme-label {
+    color: var(--color-muted);
+}
+
+.danger {
+    display: flex;
+    flex-flow: row wrap;
+    gap: var(--size-gap-xs);
+}

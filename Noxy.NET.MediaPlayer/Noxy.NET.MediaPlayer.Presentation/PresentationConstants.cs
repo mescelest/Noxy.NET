@@ -5,6 +5,9 @@ public static class PresentationConstants
     // The key the refresh token is kept under in the platform's secure storage.
     public const string RefreshTokenKey = "refreshToken";
 
+    // The key the way the user signed in is kept under in the platform's secure storage.
+    public const string SignInMethodKey = "signInMethod";
+
     // The key the server address is kept under in the platform's preferences.
     public const string ServerAddressKey = "serverAddress";
     public const string ServerAddressListKey = "serverAddressList";
@@ -35,14 +38,14 @@ public static class PresentationConstants
     // The wait before the second try; it doubles for each try after that.
     public const int RetryBaseDelaySeconds = 2;
 
-    // The player asks for the files of this many queue entries after the current one to be downloaded ahead of time.
-    public const int PrefetchCount = 3;
-
     // A bulk download stops when the free space would not hold the next file plus this much.
     public const long StorageReserveBytes = 50L * 1024 * 1024;
 
     // A seek or a volume change made on a controller is sent this long after the last change of a burst.
     public const int RemoteDeferMilliseconds = 300;
+
+    // A shuffle or repeat mode changes on screen at once and is sent to the server this long after the last change.
+    public const int ModeSaveMilliseconds = 500;
 
     // The most items a source puts into the queue: the same as the most media files a library may hold (the server default), so a whole library fits. It keeps the saved queue and what is sent to the server small.
     public const int QueueMaxItemCount = 5000;

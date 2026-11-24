@@ -85,6 +85,7 @@ public class UploadProcessor(
 
     private async Task<ResponseUploadResult> Complete(EntityMediaUploadJob job, CancellationToken cancellationToken)
     {
+        await EnsureNotInLibrary(job, cancellationToken);
         await EnsureRoomInLibrary(job, cancellationToken);
 
         serviceFileStorage.Promote(job.StagedFileName);
@@ -177,6 +178,14 @@ public class UploadProcessor(
         return value is > 0 and <= MaxTagNumber ? value : null;
     }
 
+    // Jobs are worked one after the other, so a file sent twice in one go finds the first one already in the library.
+    private async Task EnsureNotInLibrary(EntityMediaUploadJob job, CancellationToken cancellationToken)
+    {
+        await using IUnitOfWork uow = factoryUnitOfWork.Create();
+
+        if (await uow.Media.FindMediaFileByHash(job.UserID, job.ContentHash, cancellationToken) is { } existing) throw new DuplicateMediaException(existing);
+    }
+
     private async Task EnsureRoomInLibrary(EntityMediaUploadJob job, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = factoryUnitOfWork.Create();
@@ -193,6 +202,7 @@ public class UploadProcessor(
         UploadFailureReasonEnum reason = exception switch
         {
             LibraryFullException => UploadFailureReasonEnum.LibraryFull,
+            DuplicateMediaException => UploadFailureReasonEnum.Duplicate,
             FileNotFoundException => UploadFailureReasonEnum.FileMissing,
             _ => UploadFailureReasonEnum.Unknown
         };
@@ -222,7 +232,9 @@ public class UploadProcessor(
             JobID = job.ID,
             Title = job.Title,
             Succeeded = false,
-            Reason = reason
+            Reason = reason,
+            // A duplicate names the file the library already holds, so an upload to a playlist can still put it there.
+            Media = exception is DuplicateMediaException duplicate ? duplicate.ExistingFile.ToResponse() : null
         };
     }
 

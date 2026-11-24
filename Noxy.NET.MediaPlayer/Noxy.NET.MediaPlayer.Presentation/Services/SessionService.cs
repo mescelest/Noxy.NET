@@ -27,12 +27,12 @@ public class SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService s
 
     public async Task SignUp(string email, string password)
     {
-        await Apply(await clientAuthApi.SignUp(email, password), true);
+        await Apply(await clientAuthApi.SignUp(email, password), true, SignInMethodEnum.Password);
     }
 
     public async Task SignIn(string email, string password)
     {
-        await Apply(await clientAuthApi.SignIn(email, password), true);
+        await Apply(await clientAuthApi.SignIn(email, password), true, SignInMethodEnum.Password);
     }
 
     public async Task<bool> SignInWithGoogle(CancellationToken cancellationToken = default)
@@ -40,7 +40,7 @@ public class SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService s
         string? idToken = await serviceGoogleSignIn.GetIdToken(cancellationToken);
         if (idToken is null) return false;
 
-        await Apply(await clientAuthApi.SignInGoogle(idToken), true);
+        await Apply(await clientAuthApi.SignInGoogle(idToken), true, SignInMethodEnum.Google);
         return true;
     }
 
@@ -88,8 +88,14 @@ public class SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService s
         bool hadOfflineSession = _hasOfflineSession;
         _hasOfflineSession = false;
         await storageSession.ClearRefreshToken();
+        await storageSession.ClearSignInMethod();
 
         if (wasSignedIn || hadOfflineSession) Changed?.Invoke();
+    }
+
+    public async Task<SignInMethodEnum?> GetSignInMethod()
+    {
+        return await storageSession.GetSignInMethod();
     }
 
     public async Task<string?> GetAccessToken()
@@ -138,12 +144,14 @@ public class SessionService(IAuthApiClient clientAuthApi, IGoogleSignInService s
         }
     }
 
-    private async Task Apply(ResponseAuthentication tokens, bool raiseChanged)
+    // The method is given by a sign in or a sign up, and not by a refresh: a refresh keeps the one that is saved.
+    private async Task Apply(ResponseAuthentication tokens, bool raiseChanged, SignInMethodEnum? method = null)
     {
         _accessToken = tokens.AccessToken;
         _accessTokenExpires = tokens.AccessToken.GetAccessTokenExpires();
         _hasOfflineSession = false;
         await storageSession.SetRefreshToken(tokens.RefreshToken);
+        if (method is not null) await storageSession.SetSignInMethod(method.Value);
 
         if (raiseChanged) Changed?.Invoke();
     }

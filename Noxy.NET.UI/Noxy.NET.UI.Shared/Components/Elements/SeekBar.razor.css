@@ -43,7 +43,7 @@
 .SeekBar .fill {
     width: var(--seek-progress);
     height: 100%;
-    background: var(--color-highlight, #0073EC);
+    background: var(--color-theme, var(--color-highlight, #0073EC));
 }
 
 /* The lane is as wide as the track plus one dot, so a share of its width is where the dot's left edge goes. */
@@ -63,7 +63,7 @@
     width: var(--seek-thumb);
     height: var(--seek-thumb);
     border-radius: 50%;
-    background: var(--color-highlight, #0073EC);
+    background: var(--color-theme, var(--color-highlight, #0073EC));
     transform: scale(0);
     transition: transform var(--animation-length-short, 150ms) ease-in-out;
 }

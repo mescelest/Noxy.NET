@@ -1,16 +1,12 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <Table class="table" data-empty="@IsEmpty" data-grip="@HasGrip" RowCount="RowList.Count">
+    <Table class="table" data-empty="@IsEmpty" RowCount="RowList.Count">
         <TableHeader class="header">
             <div class="action-row">
                 @ToolContent
             </div>
             <div class="header-row">
-                @if (HasGrip)
-                {
-                    <TableCell class="cell"></TableCell>
-                }
                 <TableCell class="cell">
                     <InputControlCheckbox Option="true" aria-label="Select all shown" @bind-Value:get="@AllSelected" @bind-Value:set="ChangeAllHandler"/>
                 </TableCell>
@@ -42,23 +38,17 @@
             <TableBodyVirtualize T="MediaFileTableRow" class="body" List="RowList" ItemSize="48" Context="entry">
                 <div @key="entry.Row.Key" class="row-menu" @oncontextmenu="args => ContextMenuHandler(args, entry.Row)" @oncontextmenu:preventDefault
                      @ondragover="() => DragOverHandler(entry.Row)" @ondragover:preventDefault @ondrop="() => DropHandler(entry.Row)" @ondrop:preventDefault>
-                    <TableRow class="row" Index="entry.Index" draggable="@DraggableValue" data-over="@IsOver(entry.Row)"
-                              @ondblclick="() => PlayHandler(entry.Row)" @ondragstart="() => DragStartHandler(entry.Row)">
-                        @if (HasGrip)
-                        {
-                            <TableCell class="cell grip" data-disabled="@IsGripDisabled" title="@ReorderHint" aria-hidden="true">
-                                <MaterialIcon Icon="drag_indicator" Size="var(--size-icon-md)"/>
-                            </TableCell>
-                        }
+                    <TableRow class="row" Index="entry.Index" draggable="@DraggableValue" data-over="@IsOver(entry.Row)" title="@RowTitle"
+                              @ondblclick="() => PlayHandler(entry.Row)" @ondragstart="() => DragStartHandler(entry.Row)" @ondragend="DragEndHandler">
                         <TableCell class="cell">
                             <InputControlCheckbox Option="true" aria-label="@SelectLabel(entry.Row)" @bind-Value:get="@IsSelected(entry.Row)" @bind-Value:set="_ => ChangeSelectedHandler(entry.Row)"/>
                         </TableCell>
                         <TableCell class="cell">
                             <FileStatusIcon State="StateOf(entry.Row)"/>
                         </TableCell>
-                        <TableCell class="cell" Kind="TableCellKindEnum.RowHeader">@entry.Row.MediaFile.Title</TableCell>
-                        <TableCell class="cell">@entry.Row.MediaFile.Artist</TableCell>
-                        <TableCell class="cell">@entry.Row.MediaFile.Album</TableCell>
+                        <TableCell class="cell text" Kind="TableCellKindEnum.RowHeader">@entry.Row.MediaFile.Title</TableCell>
+                        <TableCell class="cell text">@entry.Row.MediaFile.Artist</TableCell>
+                        <TableCell class="cell text">@entry.Row.MediaFile.Album</TableCell>
                         <TableCell class="cell">@entry.Row.MediaFile.Year</TableCell>
                         <TableCell class="cell">@entry.Row.MediaFile.TimeCreated.ToLocalTime().ToString("d")</TableCell>
                     </TableRow>
@@ -107,11 +97,11 @@
     [Parameter]
     public EventCallback<(MouseEventArgs Args, MediaFileTableRow Row)> OnContextMenu { get; set; }
 
-    // A grip column shows only when the host listens to OnMove. It is dimmed, and cannot start a drag, while this is false.
+    // Whether a row can be dragged to another place, by any part of the row. It only makes sense when the host listens to OnMove.
     [Parameter]
     public bool IsReorderable { get; set; }
 
-    // Why the rows cannot be dragged now, shown as the grip's tooltip.
+    // Why the rows cannot be dragged now, shown as the tooltip of a row when the host listens to OnMove and they cannot.
     [Parameter]
     public string? ReorderHint { get; set; }
 
@@ -139,11 +129,9 @@
     private Guid? _dragKey;
     private Guid? _overKey;
 
-    private bool HasGrip => OnMove.HasDelegate;
-
-    private bool IsGripDisabled => !IsReorderable;
-
     private string DraggableValue => IsReorderable.ToString().ToLowerInvariant();
+
+    private string? RowTitle => OnMove.HasDelegate && !IsReorderable ? ReorderHint : null;
 
     private bool IsOver(MediaFileTableRow row) => _overKey == row.Key;
 
@@ -176,6 +164,13 @@
         if (!IsReorderable) return;
 
         _dragKey = row.Key;
+    }
+
+    // A drag that ended anywhere but on a row (outside the table, or Escape) leaves nothing marked.
+    private void DragEndHandler()
+    {
+        _dragKey = null;
+        _overKey = null;
     }
 
     private void DragOverHandler(MediaFileTableRow row)

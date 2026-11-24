@@ -1,26 +1,19 @@
-.trigger, .device {
+/* One button: the label of the device and the icon are both its face, so the whole of it opens the list. */
+.DevicePicker ::deep > .trigger {
+    min-width: var(--size-control-sm);
     min-height: var(--size-control-sm);
-    padding: 0 var(--size-gap-xs);
-    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-md);
-    background: transparent;
-    color: var(--color-complementary);
+    padding: 0 var(--size-gap-xxs);
+}
+
+.label {
+    color: var(--color-muted);
     font: var(--font-label);
-    cursor: pointer;
+    white-space: nowrap;
 }
 
-.trigger:disabled {
-    color: var(--color-disabled);
-    cursor: default;
-}
-
-.list {
-    min-width: var(--size-column);
-    padding: var(--size-gap-xxxs);
-    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-lg);
-    background: var(--color-primary);
-    color: var(--color-complementary);
+/* While the list is open the label follows the button: the highlight colour instead of the muted one. */
+.DevicePicker:has(.trigger[data-popover-open]) .label {
+    color: inherit;
 }
 
 .devices {
@@ -30,15 +23,20 @@
 }
 
 .device {
-    display: flex;
-    justify-content: space-between;
     width: 100%;
-    border: none;
-    text-align: left;
+    justify-content: space-between;
+    font: var(--font-message);
 }
 
-.device:hover {
-    background: var(--color-offset-primary-md);
+.name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.active {
+    flex: 0 0 auto;
 }
 
 .device[aria-selected="true"] {
@@ -47,6 +45,7 @@
 
 .active {
     color: var(--color-success);
+    font: var(--font-label);
 }
 
 .none {

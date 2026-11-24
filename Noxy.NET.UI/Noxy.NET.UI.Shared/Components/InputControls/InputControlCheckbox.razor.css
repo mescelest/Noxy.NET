@@ -28,19 +28,33 @@
     justify-content: center;
     width: var(--size-control-choice, var(--size-control-xxs, 1.5rem));
     height: var(--size-control-choice, var(--size-control-xxs, 1.5rem));
-    font-size: 0.75rem;
-    line-height: 100%;
-    color: var(--color-muted, #767676);
+    color: var(--color-primary, #FFFFFF);
     border: var(--size-border-width-md, 2px) solid var(--color-border, var(--color-complementary, #000000));
-    border-radius: var(--size-border-radius-sm, 0.125rem);
+    border-radius: var(--size-border-radius-lg, 0.5rem);
     background-color: var(--color-primary, #FFFFFF);
     box-sizing: border-box;
 }
 
+/* The tick is drawn, not typed, so its ends can be round. It is there only while the box is checked. */
+.tick {
+    width: 0.3125rem;
+    height: 0.625rem;
+    margin-top: -0.125rem;
+    border: solid currentColor;
+    border-width: 0 var(--size-border-width-md, 2px) var(--size-border-width-md, 2px) 0;
+    border-radius: 1px;
+    opacity: 0;
+    transform: rotate(45deg);
+}
+
+.visual[data-checked] .tick {
+    opacity: 0.9;
+}
+
 .InputControlCheckbox:not([data-disabled]) .visual[data-checked] {
-    border-color: var(--color-highlight, #0073EC);
-    background-color: var(--color-highlight, #0073EC);
-    color: var(--color-primary, #FFFFFF);
+    border-color: var(--color-theme, var(--color-highlight, #0073EC));
+    background-color: var(--color-theme, var(--color-highlight, #0073EC));
+    color: var(--color-on-theme, var(--color-on-highlight, #FFFFFF));
 }
 
 .InputControlCheckbox:not([data-disabled]):focus-within .visual {

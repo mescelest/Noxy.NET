@@ -7,7 +7,7 @@
 <header @attributes="AdditionalAttributes" class="@CssClass">
 
     <div class="group left">
-        <Button IsIcon="true" aria-label="Show or hide the sidebar" aria-expanded="@SidebarOpen" @onclick="ToggleSidebar">
+        <Button IsIcon="true" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" aria-label="Show or hide the sidebar" aria-expanded="@SidebarOpen" @onclick="ToggleSidebar">
             <MaterialIcon Icon="menu" Size="var(--size-icon-sm)"/>
         </Button>
 

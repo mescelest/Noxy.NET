@@ -26,3 +26,8 @@
 .FileDropZone ::deep > .drop[data-active] {
     pointer-events: auto;
 }
+
+/* A page that sets data-file-drag on the root element while files are dragged over the window gets the input over the zone without waiting for the component to be told. A disabled input never takes a drop. */
+:root[data-file-drag] .FileDropZone ::deep > .drop:not(:disabled) {
+    pointer-events: auto;
+}

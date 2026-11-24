@@ -18,6 +18,8 @@ public sealed class FakeSettingService : ISettingService
 
     public bool KeepQueuedItems { get; set; }
 
+    public int PrefetchCount { get; set; } = 3;
+
     // Answers each Update call, or throws to script a failure. The default accepts it.
     public Func<string, JsonElement, Task> UpdateHandler { get; set; } = (_, _) => Task.CompletedTask;
 
@@ -56,6 +58,11 @@ public sealed class FakeSettingService : ISettingService
     public Task<bool> GetKeepQueuedItems()
     {
         return Task.FromResult(KeepQueuedItems);
+    }
+
+    public Task<int> GetPrefetchCount()
+    {
+        return Task.FromResult(PrefetchCount);
     }
 
     public Task SyncSettingList(bool force = false)

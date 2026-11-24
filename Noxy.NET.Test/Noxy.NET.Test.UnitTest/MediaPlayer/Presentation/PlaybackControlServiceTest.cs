@@ -178,6 +178,19 @@ public class PlaybackControlServiceTest
     }
 
     [Fact]
+    public async Task AsActiveOrLocal_PlayOnAPausedMedia_DoesNotStartItOver_WhenThePlayerIsNotPlayingYet()
+    {
+        _player.Current = new(Guid.NewGuid(), Guid.NewGuid());
+        _player.IsPlaying = false;
+        _player.IsLoaded = true;
+        _player.ResumeIsSlow = true;
+
+        await _control.Play();
+
+        Assert.Equal(["Resume"], _player.CallList);
+    }
+
+    [Fact]
     public async Task ANoActiveDeviceAnswer_RunsTheActionLocally_AndThisDeviceClaimsWhenItPlays()
     {
         AsController();

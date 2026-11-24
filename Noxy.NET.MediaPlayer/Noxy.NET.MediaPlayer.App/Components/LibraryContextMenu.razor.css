@@ -1,16 +1,12 @@
-.trigger {
-    min-height: var(--size-control-sm);
-    padding: 0 var(--size-gap-xs);
-    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-md);
-    background: transparent;
-    color: var(--color-complementary);
-    cursor: pointer;
+/* The wrapper holds the button, the menu and the dialogs; as a box it would be an item of its own next to the counts, with a gap, even when the button is not shown. */
+.LibraryContextMenu {
+    display: contents;
 }
 
-.trigger:disabled {
-    color: var(--color-disabled);
-    cursor: default;
+/* Smaller than the header's own height (see MediaFileHeader), so showing it never makes the header taller and moves the table. */
+.LibraryContextMenu ::deep > .trigger {
+    min-width: var(--size-control-xs);
+    min-height: var(--size-control-xs);
 }
 
 .playlist-choice {

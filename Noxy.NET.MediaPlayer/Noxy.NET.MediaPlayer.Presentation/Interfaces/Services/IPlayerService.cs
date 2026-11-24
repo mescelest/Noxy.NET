@@ -54,8 +54,8 @@ public interface IPlayerService
 
     Task Pause();
 
-    // Does nothing when nothing is loaded.
-    Task Resume();
+    // Does nothing when nothing is loaded. True when a loaded media file was resumed; the player may not report playing yet, so IsPlaying cannot tell.
+    Task<bool> Resume();
 
     Task Seek(TimeSpan position);
 

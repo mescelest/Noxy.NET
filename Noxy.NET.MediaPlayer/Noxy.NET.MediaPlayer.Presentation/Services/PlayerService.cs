@@ -24,6 +24,7 @@ public class PlayerService(
     IQueueSourceService serviceQueueSource,
     ISettingService serviceSetting,
     IApiClient clientApi,
+    IDelay delay,
     ILogger<PlayerService> logger) : IPlayerService
 {
     // Past this much of the current item, Previous starts it again instead of going back.
@@ -45,6 +46,10 @@ public class PlayerService(
     private int _repeatPassCount;
     private ShuffleModeEnum _shuffle = ShuffleModeEnum.Off;
     private RepeatModeEnum _repeat = RepeatModeEnum.No;
+
+    // A mode the user changed that the server has not been told of yet: what the screen shows is then the user's, not the stored one. Guarded by _lock.
+    private readonly PendingMode _shufflePending = new();
+    private readonly PendingMode _repeatPending = new();
 
     private Action? _changed;
 
@@ -194,12 +199,14 @@ public class PlayerService(
         _changed?.Invoke();
     }
 
-    public async Task Resume()
+    public async Task<bool> Resume()
     {
-        if (!IsLoaded) return;
+        if (!IsLoaded) return false;
 
         await playerAudio.Play();
         _changed?.Invoke();
+
+        return true;
     }
 
     public async Task Seek(TimeSpan position)
@@ -279,23 +286,80 @@ public class PlayerService(
         lock (_lock) return historyList.LastOrDefault(x => !_failedSet.Contains(x.ItemID));
     }
 
+    // The mode changes on screen and in the queue at once; the server hears of it after a pause, and only of the last change.
     public async Task SetShuffle(ShuffleModeEnum shuffle)
     {
         EnsureWired();
 
-        await serviceSetting.Update(SettingKey.Shuffle, JsonSerializer.SerializeToElement(shuffle.ToString()));
+        // The mode and the pending mark change together, or a refresh of the stored modes could slip in between and take the change back.
+        lock (_lock)
+        {
+            _shuffle = shuffle;
+            _shufflePending.IsPending = true;
+        }
 
-        await RefreshModes();
+        _changed?.Invoke();
+        SaveLater(_shufflePending, SettingKey.Shuffle, shuffle.ToString());
+
         await serviceQueue.Regenerate(shuffle);
     }
 
-    public async Task SetRepeat(RepeatModeEnum repeat)
+    public Task SetRepeat(RepeatModeEnum repeat)
     {
         EnsureWired();
 
-        await serviceSetting.Update(SettingKey.Repeat, JsonSerializer.SerializeToElement(repeat.ToString()));
+        lock (_lock)
+        {
+            _repeat = repeat;
+            _repeatPending.IsPending = true;
+        }
 
-        await RefreshModes();
+        _changed?.Invoke();
+        SaveLater(_repeatPending, SettingKey.Repeat, repeat.ToString());
+
+        return Task.CompletedTask;
+    }
+
+    // A later change of the same mode takes over: the earlier wait ends and sends nothing. When the newest one has been answered, the screen follows the stored value again, which also takes back a change the server refused.
+    private void SaveLater(PendingMode mode, string key, string value)
+    {
+        CancellationTokenSource source = new();
+        CancellationTokenSource? previous;
+        lock (_lock)
+        {
+            previous = mode.Source;
+            mode.Source = source;
+            mode.IsPending = true;
+        }
+
+        previous?.Cancel();
+
+        _ = Guard(async () =>
+        {
+            try
+            {
+                await delay.Wait(TimeSpan.FromMilliseconds(PresentationConstants.ModeSaveMilliseconds), source.Token);
+                await serviceSetting.Update(key, JsonSerializer.SerializeToElement(value));
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception exception)
+            {
+                // The type only: the message is not ours to log blindly.
+                logger.LogWarning("A player mode could not be saved on the server ({ExceptionType}).", exception.GetType().Name);
+            }
+
+            lock (_lock)
+            {
+                if (!ReferenceEquals(mode.Source, source)) return;
+
+                mode.IsPending = false;
+            }
+
+            await RefreshModes();
+        });
     }
 
     public async Task Clear()
@@ -527,12 +591,15 @@ public class PlayerService(
         return onDevice && version == _version ? await storeFile.GetPath(mediaFileID) : null;
     }
 
-    // The files of the next PrefetchCount items that are not on the device yet are asked for. Nothing beyond that window is started.
+    // The files of the next items (as many as the PrefetchCount setting says) that are not on the device yet are asked for. Nothing beyond that window is started.
     private async Task Prefetch()
     {
+        int count = await serviceSetting.GetPrefetchCount();
+        if (count <= 0) return;
+
         ResponseQueue queue = serviceQueue.GetSnapshot();
         List<Guid> windowList;
-        lock (_lock) windowList = queue.UserQueueList.Concat(queue.SourceList).Where(x => !_failedSet.Contains(x.ItemID)).Select(x => x.MediaFileID).Distinct().Take(PresentationConstants.PrefetchCount).ToList();
+        lock (_lock) windowList = queue.UserQueueList.Concat(queue.SourceList).Where(x => !_failedSet.Contains(x.ItemID)).Select(x => x.MediaFileID).Distinct().Take(count).ToList();
 
         List<Guid> missingList = [];
         foreach (Guid id in windowList)
@@ -567,12 +634,21 @@ public class PlayerService(
         ShuffleModeEnum shuffle = await serviceSetting.GetShuffle();
         RepeatModeEnum repeat = await serviceSetting.GetRepeat();
 
-        bool changed;
+        bool changed = false;
         lock (_lock)
         {
-            changed = shuffle != _shuffle || repeat != _repeat;
-            _shuffle = shuffle;
-            _repeat = repeat;
+            // A mode the server has not heard of yet is the user's and stays as it is.
+            if (!_shufflePending.IsPending)
+            {
+                changed |= shuffle != _shuffle;
+                _shuffle = shuffle;
+            }
+
+            if (!_repeatPending.IsPending)
+            {
+                changed |= repeat != _repeat;
+                _repeat = repeat;
+            }
         }
 
         if (changed) _changed?.Invoke();

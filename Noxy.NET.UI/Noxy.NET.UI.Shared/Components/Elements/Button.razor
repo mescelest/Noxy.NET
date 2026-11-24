@@ -1,7 +1,7 @@
 ﻿@inherits BaseComponentElement
 
 <button @attributes="AdditionalAttributes" class="@CssClass" type="@TypeString" disabled="@Disabled" data-loading="@LoadingCurrent" data-status="@StatusString" data-appearance="@AppearanceString" data-is-icon="@IsIcon">
-    <Loader Loading="LoadingCurrent">
+    <Loader Size="LoaderSizeCurrent" Loading="LoadingCurrent">
         @ChildContent
     </Loader>
 </button>
@@ -26,6 +26,10 @@
     [Parameter]
     public bool? Loading { get; set; }
     private bool LoadingCurrent => Loading ?? false;
+
+    [Parameter]
+    public int? LoaderSize { get; set; }
+    private int LoaderSizeCurrent => LoaderSize ?? 24;
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

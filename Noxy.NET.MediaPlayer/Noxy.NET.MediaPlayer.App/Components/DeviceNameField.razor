@@ -5,10 +5,7 @@
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <label for="device-name">Name of this device</label>
-    <div class="row">
-        <input id="device-name" type="text" maxlength="50" @bind="_name" @bind:event="oninput"/>
-        <button type="button" disabled="@IsSaveDisabled" @onclick="Save">Save</button>
-    </div>
+    <input id="device-name" type="text" maxlength="50" value="@_name" @onchange="ChangeHandler"/>
     <MessageBox MessageList="_messageList" Status="StatusEnum.Error"/>
 </div>
 
@@ -16,32 +13,27 @@
 
     private string _name = string.Empty;
     private List<string> _messageList = [];
-    private bool _busy;
-
-    private bool IsSaveDisabled => _busy || string.IsNullOrWhiteSpace(_name);
 
     protected override async Task OnInitializedAsync()
     {
         _name = await ServiceDevice.GetName();
     }
 
-    private async Task Save()
+    // The name is saved when the field is left or Enter is pressed, so there is nothing to press to save it.
+    private async Task ChangeHandler(ChangeEventArgs args)
     {
-        _busy = true;
+        string name = args.Value?.ToString() ?? string.Empty;
         try
         {
-            await ServiceDevice.SetName(_name);
+            await ServiceDevice.SetName(name);
             _name = await ServiceDevice.GetName();
             _messageList = [];
             ServiceToast.ShowSuccess(AppTexts.DeviceNameSaved);
         }
         catch (ArgumentException)
         {
+            _name = name;
             _messageList = [string.Format(AppTexts.DeviceNameInvalid, PresentationConstants.DeviceNameMaxLength)];
-        }
-        finally
-        {
-            _busy = false;
         }
     }
 

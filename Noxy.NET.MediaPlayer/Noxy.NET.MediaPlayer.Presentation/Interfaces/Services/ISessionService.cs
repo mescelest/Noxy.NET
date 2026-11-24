@@ -24,6 +24,9 @@ public interface ISessionService
 
     Task SignOut();
 
+    // How the user signed in on this device; null when it is not known (a session from before it was kept).
+    Task<SignInMethodEnum?> GetSignInMethod();
+
     // Null when signed out. Refreshes first when the token expires within the margin.
     Task<string?> GetAccessToken();
 

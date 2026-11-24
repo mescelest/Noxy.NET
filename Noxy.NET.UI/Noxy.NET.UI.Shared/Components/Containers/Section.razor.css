@@ -1,4 +1,13 @@
-.Section ::deep > .title {
+.head {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: var(--size-gap-sm, 1rem);
     margin: 0 0 var(--size-gap-sm, 1rem);
+}
+
+.head ::deep > .title {
+    margin: 0;
     font-size: var(--size-text-h5, 1.25rem);
 }

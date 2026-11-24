@@ -244,6 +244,24 @@ public class MediaRepositoryTest : IDisposable
     }
 
     [Fact]
+    public async Task FindMediaFileByHash_FindsOnlyTheUsersOwnFileWithThatHash()
+    {
+        EntityUser user = await CreateUser();
+        EntityUser other = await CreateUser("other@example.com");
+        EntityMediaFile mine = CreateMediaFile(user.ID);
+        mine.ContentHash = new('a', 64);
+        EntityMediaFile theirs = CreateMediaFile(other.ID);
+        theirs.ContentHash = new('f', 64);
+        await Add(mine, theirs);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+
+        Assert.Equal(mine.ID, (await uow.Media.FindMediaFileByHash(user.ID, new('a', 64), TestContext.Current.CancellationToken))?.ID);
+        Assert.Null(await uow.Media.FindMediaFileByHash(user.ID, new('f', 64), TestContext.Current.CancellationToken));
+        Assert.Null(await uow.Media.FindMediaFileByHash(user.ID, new('0', 64), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task CountAndSum_NoFiles_AreZero()
     {
         EntityUser user = await CreateUser();

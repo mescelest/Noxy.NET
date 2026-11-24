@@ -8,7 +8,7 @@
 
 **Tech Stack:** .NET 10, ASP.NET Core SignalR, Mediator, xunit v3, `TimeProvider` / `FakeTimeProvider`.
 
-**Spec:** `docs/superpowers/specs/2026-11-16-remote-playback-design.md` (all sections).
+**Spec:** `docs/specs/2026-11-16-remote-playback-design.md` (all sections).
 
 ## Global Constraints
 

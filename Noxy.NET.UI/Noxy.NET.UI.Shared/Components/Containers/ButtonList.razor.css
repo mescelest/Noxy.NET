@@ -19,6 +19,6 @@
     justify-content: flex-end;
 }
 
-.ButtonList ::deep > .Button {
+.ButtonList ::deep > .Button:not([data-is-icon]) {
     min-width: 7.5rem;
 }

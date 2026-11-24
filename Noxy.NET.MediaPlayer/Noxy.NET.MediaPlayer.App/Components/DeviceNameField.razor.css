@@ -5,13 +5,7 @@
     max-width: var(--size-page-sm);
 }
 
-.row {
-    display: flex;
-    gap: var(--size-gap-xxs);
-}
-
-.row input {
-    flex: 1 1 auto;
+input {
     height: var(--size-control-md);
     padding: 0 var(--size-gap-xs);
     border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
@@ -19,18 +13,4 @@
     background: transparent;
     color: var(--color-complementary);
     font: var(--font-body);
-}
-
-.row button {
-    padding: 0 var(--size-gap-sm);
-    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-md);
-    background: transparent;
-    color: var(--color-complementary);
-    cursor: pointer;
-}
-
-.row button:disabled {
-    color: var(--color-disabled);
-    cursor: default;
 }

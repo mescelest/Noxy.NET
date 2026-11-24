@@ -63,11 +63,11 @@
     --size-line-height-sm: 1rem;
     --size-card-width: 12.5rem;
     --size-card-height: 15rem;
-    --size-queue-panel: 23.75rem;
     --layout-narrow: 0;
     --layout-touch: 0;
     --table-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
-    --table-columns-library: var(--size-control-xs) var(--size-control-xs) minmax(10rem, 3fr) minmax(6.25rem, 2fr) minmax(6.25rem, 2fr) 4.5rem 8rem;
+    --table-columns-library: max-content max-content repeat(3, minmax(0, auto)) minmax(4.5rem, max-content) max-content;
+    --table-columns-queue: max-content max-content repeat(3, minmax(0, auto)) max-content;
 }
 
 :root {
@@ -125,8 +125,8 @@
     --color-on-info: #06202F;
     --color-success: #23883D;
     --color-on-success: #FFFFFF;
-    --color-warning: #D97F00;
-    --color-on-warning: #241400;
+    --color-warning: #CC5E00;
+    --color-on-warning: #FFFFFF;
     --color-notice: #A948DD;
     --color-on-notice: #FFFFFF;
     --color-error: #E42B21;
@@ -207,9 +207,13 @@
 
 /* What the shared UI libraries read for their controls. */
 :root {
-    --color-border: var(--color-complementary);
+    --color-border: light-dark(var(--color-complementary), var(--color-faded));
     --color-border-focus: var(--color-highlight);
     --color-control: var(--color-complementary);
+
+    /* The colour of what is on or is the main thing: a ticked box, the progress of the seek bar and of the volume. Change it here and they all follow. */
+    --color-theme: var(--color-highlight);
+    --color-on-theme: var(--color-on-highlight);
     --size-border-width: var(--size-border-width-sm);
     --size-border-radius: var(--size-border-radius-md);
     --size-control-input: var(--size-control-md);

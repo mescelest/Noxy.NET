@@ -2,10 +2,13 @@
 @implements IBaseInputTextual
 
 <TemplateInputControlTextual>
-    <InputElementText @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Size="Size" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+    <InputElementText @attributes="AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Type="Type" Size="Size" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
 </TemplateInputControlTextual>
 
 @code {
+
+    [Parameter]
+    public WebFormInputTextTypeEnum? Type { get; set; }
 
     [Parameter]
     public int? Size { get; set; }

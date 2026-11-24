@@ -1,0 +1,33 @@
+.SettingList {
+    display: flex;
+    flex-flow: column;
+    gap: var(--size-gap-sm);
+}
+
+.setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--size-gap-md);
+}
+
+/* A number lines up with its right edge, the one the checkboxes and the other values end at. */
+.setting ::deep > .TemplateInputControlTextual > .integer {
+    text-align: right;
+}
+
+.text {
+    display: flex;
+    flex-flow: column;
+    min-width: 0;
+}
+
+.help {
+    color: var(--color-muted);
+    font: var(--font-label);
+}
+
+.error {
+    color: var(--color-error);
+    font: var(--font-label);
+}

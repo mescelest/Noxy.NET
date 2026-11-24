@@ -41,9 +41,9 @@ public class SettingFlowTest
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Matches("^\"[0-9a-f]{64}\"$", response.GetETag());
-        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems], list.Select(x => x.Key).ToList());
-        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Boolean], list.Select(x => x.ValueType).ToList());
-        Assert.Equal(["Off", "No", "False", "False"], list.Select(x => Value(x).ToString()).ToList());
+        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems, SettingKey.PrefetchCount], list.Select(x => x.Key).ToList());
+        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Integer], list.Select(x => x.ValueType).ToList());
+        Assert.Equal(["Off", "No", "False", "False", "3"], list.Select(x => Value(x).ToString()).ToList());
         Assert.Contains("\"valueType\":\"Enum\"", body);
         Assert.All(list, x => Assert.Equal(DateTime.UnixEpoch, x.TimeModified));
     }
@@ -117,6 +117,11 @@ public class SettingFlowTest
     [InlineData(SettingKey.MergeOnRename, """{"value":1}""")]
     [InlineData(SettingKey.KeepQueuedItems, """{"value":"yes"}""")]
     [InlineData(SettingKey.KeepQueuedItems, """{"value":1}""")]
+    [InlineData(SettingKey.PrefetchCount, """{"value":-1}""")]
+    [InlineData(SettingKey.PrefetchCount, """{"value":11}""")]
+    [InlineData(SettingKey.PrefetchCount, """{"value":2147483648}""")]
+    [InlineData(SettingKey.PrefetchCount, """{"value":2.5}""")]
+    [InlineData(SettingKey.PrefetchCount, """{"value":"5"}""")]
     [InlineData(SettingKey.Shuffle, "{}")]
     [InlineData(SettingKey.Shuffle, "[]")]
     [InlineData(SettingKey.Shuffle, "40")]

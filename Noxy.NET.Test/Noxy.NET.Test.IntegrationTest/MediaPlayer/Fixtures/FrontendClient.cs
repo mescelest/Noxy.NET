@@ -39,7 +39,7 @@ public sealed class FrontendClient : IAsyncDisposable
         Queue = new(QueueSource, SettingService, QueueFile, Sync, Store, Time, NullLogger<QueueService>.Instance);
         DeviceFile = new(Path.Combine(folder, StorageConstants.DeviceFileName));
         Device = new(DeviceFile);
-        Player = new(Audio, Download, FileStore, Store, Sync, DeviceFile, Queue, QueueSource, SettingService, Api, NullLogger<PlayerService>.Instance);
+        Player = new(Audio, Download, FileStore, Store, Sync, DeviceFile, Queue, QueueSource, SettingService, Api, new Delay(), NullLogger<PlayerService>.Instance);
         Remote = new(Hub, Device, Queue, Time, NullLogger<RemotePlaybackService>.Instance);
         Reporter = new(Player, Queue, Remote, Hub, Store, NullLogger<PlaybackReporterService>.Instance);
         CommandHandler = new(Hub, Remote, Player, Queue, Reporter, NullLogger<RemoteCommandHandlerService>.Instance);

@@ -1,0 +1,162 @@
+@page "/queue"
+@inject IQueueService ServiceQueue
+@inject IPlayerService ServicePlayer
+@inject IPlaybackControlService ServiceControl
+@inject IState<FeatureLibraryState> StateLibrary
+@inject IState<FeaturePlaylistListState> StatePlaylistList
+@inject IToastService ServiceToast
+@inherits BaseComponentPageFluxor
+@implements IAsyncDisposable
+
+<div class="@CssClass @FullscreenPageClass">
+    <MediaFileHeader Name="@AppTexts.QueueTitle" EntryCount="ItemCount" SelectedCount="_selectedSet.Count">
+        <QueueContextMenu @ref="_menu" SelectedSet="_selectedSet" SelectedKeyList="SelectedKeyList" RowOf="RowOf" ShowTrigger="@HasSelection"/>
+        @if (!IsEmpty)
+        {
+            <Button Type="@HTMLButtonTypeEnum.Button" class="clear" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="ClickClearHandler">@AppTexts.QueueClear</Button>
+        }
+    </MediaFileHeader>
+
+    @if (IsEmpty)
+    {
+        <div class="empty">
+            <MaterialIcon Icon="playlist_play" Size="var(--size-icon-xxl)"/>
+            <h2>@AppTexts.QueueEmptyTitle</h2>
+            <p>@AppTexts.QueueEmptyDescription</p>
+        </div>
+    }
+    else
+    {
+        <QueueList Model="_model" SelectedSet="_selectedSet" AllSelected="IsAllSelected" MediaOf="MediaOf" StateOf="ServicePlayer.StateOf"
+                   OnToggleAll="ToggleAll" OnToggleRow="ToggleRow" OnJump="Jump" OnContextMenu="OpenRowMenu" OnMove="Move"/>
+    }
+</div>
+
+@code {
+
+    // The player bar's queue button goes here.
+    public const string Route = "queue";
+
+    private readonly HashSet<Guid> _selectedSet = [];
+    private readonly Dictionary<Guid, QueueListRow> _rowMap = [];
+    private QueueListModel _model = new([], -1);
+    private QueueContextMenu? _menu;
+    private Dictionary<Guid, ResponseMediaFile>? _mediaMap;
+    private List<ResponseMediaFile>? _mediaMapSource;
+
+    private int ItemCount => _rowMap.Count;
+
+    private bool IsEmpty => _rowMap.Count == 0;
+
+    private bool HasSelection => _selectedSet.Count > 0;
+
+    private bool IsAllSelected => _rowMap.Count > 0 && _selectedSet.Count == _rowMap.Count;
+
+    // The ticked items in the order of the list.
+    private List<Guid> SelectedKeyList => [.. _model.RowList.Select(x => x.Item).OfType<QueueItem>().Where(x => _selectedSet.Contains(x.ItemID)).Select(x => x.ItemID)];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        ServiceQueue.Changed += OnQueueChanged;
+        Rebuild();
+    }
+
+    private void OnQueueChanged()
+    {
+        _ = InvokeAsync(() =>
+        {
+            Rebuild();
+            StateHasChanged();
+        });
+    }
+
+    // The rows come from the queue as it is now; what was ticked and is no longer in the queue is dropped.
+    private void Rebuild()
+    {
+        ResponseQueue queue = ServiceQueue.GetSnapshot();
+        _model = queue.ToListModel(SourceNameOf(queue));
+
+        _rowMap.Clear();
+        foreach (QueueListRow row in _model.RowList)
+        {
+            if (row.Item is { } item) _rowMap[item.ItemID] = row;
+        }
+
+        _selectedSet.IntersectWith(_rowMap.Keys);
+    }
+
+    // A playlist source is named after its playlist; the library has no name here, and the list says "Library" for it.
+    private string? SourceNameOf(ResponseQueue queue)
+    {
+        if (queue.Source is not { Kind: QueueSourceKindEnum.Playlist, PlaylistID: { } playlistID }) return null;
+
+        return StatePlaylistList.Value.PlaylistList.FirstOrDefault(x => x.ID == playlistID)?.Name;
+    }
+
+    private QueueListRow? RowOf(Guid itemID) => _rowMap.GetValueOrDefault(itemID);
+
+    // Rebuilt only when the library list is another one.
+    private ResponseMediaFile? MediaOf(Guid mediaFileID)
+    {
+        if (_mediaMap is null || !ReferenceEquals(_mediaMapSource, StateLibrary.Value.MediaList))
+        {
+            _mediaMapSource = StateLibrary.Value.MediaList;
+            _mediaMap = _mediaMapSource.ToDictionary(x => x.ID);
+        }
+
+        return _mediaMap.GetValueOrDefault(mediaFileID);
+    }
+
+    private void ToggleRow(Guid itemID)
+    {
+        if (!_selectedSet.Remove(itemID))
+        {
+            _selectedSet.Add(itemID);
+        }
+    }
+
+    private void ToggleAll()
+    {
+        if (IsAllSelected)
+        {
+            _selectedSet.Clear();
+            return;
+        }
+
+        _selectedSet.UnionWith(_rowMap.Keys);
+    }
+
+    private async Task OpenRowMenu((MouseEventArgs Args, QueueListRow Row) context)
+    {
+        if (_menu is null || context.Row.Item is not { } item) return;
+
+        await _menu.OpenAtAsync(context.Args, item.ItemID);
+    }
+
+    private Task Jump(Guid itemID) => Run(() => ServiceControl.JumpTo(itemID, true));
+
+    private Task Move((Guid DragKey, Guid TargetKey) move) => Run(() => ServiceControl.MoveInQueue(move.DragKey, move.TargetKey));
+
+    private Task ClickClearHandler() => Run(ServicePlayer.Clear);
+
+    // A failure is raised as a toast.
+    private async Task Run(Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
+    public new async ValueTask DisposeAsync()
+    {
+        ServiceQueue.Changed -= OnQueueChanged;
+        await base.DisposeAsync();
+    }
+
+}

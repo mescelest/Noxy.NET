@@ -196,6 +196,86 @@
     <value>{0} files added.</value>
         <comment>The toast after an upload to a playlist that is not known any more; for any other number.</comment>
   </data>
+    <data name="UploadDuplicateOne" xml:space="preserve">
+    <value>{0} file already exists in your library.</value>
+        <comment>The warning after an upload when a file was already in the library and was not added; for exactly one.</comment>
+  </data>
+    <data name="UploadDuplicateMany" xml:space="preserve">
+    <value>{0} files already exist in your library.</value>
+        <comment>The warning after an upload when files were already in the library and were not added; for any other number.</comment>
+  </data>
+    <data name="QueueUnknownMedia" xml:space="preserve">
+    <value>Unknown media file</value>
+        <comment>The title of a row of the queue list whose media file is not in the library on this device.</comment>
+  </data>
+    <data name="QueueTitle" xml:space="preserve">
+    <value>Queue</value>
+        <comment>The title of the queue page.</comment>
+  </data>
+    <data name="QueueClear" xml:space="preserve">
+    <value>Clear queue</value>
+        <comment>The button on the queue page that empties the queue.</comment>
+  </data>
+    <data name="QueueBackToPlaying" xml:space="preserve">
+    <value>Back to playing</value>
+        <comment>The button on the queue page that scrolls back to the song that is playing, shown after the user scrolled away.</comment>
+  </data>
+    <data name="QueueDividerCurrent" xml:space="preserve">
+    <value>Currently playing</value>
+        <comment>The heading above the song that is playing, in the queue list.</comment>
+  </data>
+    <data name="QueueDividerUserQueue" xml:space="preserve">
+    <value>Next in queue</value>
+        <comment>The heading above the songs the user queued, in the queue list.</comment>
+  </data>
+    <data name="QueueDividerSource" xml:space="preserve">
+    <value>Queued from {0}</value>
+        <comment>The heading above the songs that come from a playlist or the library; {0} is its name.</comment>
+  </data>
+    <data name="QueueSourceLibrary" xml:space="preserve">
+    <value>Library</value>
+        <comment>The name of the source in the queue heading when the songs come from the library.</comment>
+  </data>
+    <data name="QueueEmptyTitle" xml:space="preserve">
+    <value>The queue is empty</value>
+        <comment>The title of the box on the queue page when there is nothing in the queue.</comment>
+  </data>
+    <data name="QueueEmptyDescription" xml:space="preserve">
+    <value>Play a song from the Library or a playlist to fill it.</value>
+        <comment>The explanation in the box on the queue page when there is nothing in the queue.</comment>
+  </data>
+    <data name="QueuePlayNow" xml:space="preserve">
+    <value>Play now</value>
+        <comment>The item of the queue menu that jumps to the song.</comment>
+  </data>
+    <data name="QueuePlayNext" xml:space="preserve">
+    <value>Play next</value>
+        <comment>The item of the queue menu that moves the songs to the front of the queue.</comment>
+  </data>
+    <data name="QueueRemove" xml:space="preserve">
+    <value>Remove from queue</value>
+        <comment>The item of the queue menu that takes the songs out of the queue.</comment>
+  </data>
+    <data name="QueueNothingRemovable" xml:space="preserve">
+    <value>Only songs that have not played yet can be moved or removed.</value>
+        <comment>Why Play next and Remove from queue are disabled when every chosen song has played or is playing.</comment>
+  </data>
+    <data name="QueueColumnTitle" xml:space="preserve">
+    <value>Title</value>
+        <comment>The column heading of the queue list.</comment>
+  </data>
+    <data name="QueueColumnArtist" xml:space="preserve">
+    <value>Artist</value>
+        <comment>The column heading of the queue list.</comment>
+  </data>
+    <data name="QueueColumnAlbum" xml:space="preserve">
+    <value>Album</value>
+        <comment>The column heading of the queue list.</comment>
+  </data>
+    <data name="QueueColumnDuration" xml:space="preserve">
+    <value>Length</value>
+        <comment>The column heading of the queue list for the length of a song.</comment>
+  </data>
     <data name="ServerAddressAlreadySaved" xml:space="preserve">
     <value>This server is already saved.</value>
         <comment>The server form, when the address is one that is already in the list.</comment>
@@ -227,6 +307,50 @@
     <data name="DeleteAllDataAccept" xml:space="preserve">
     <value>Delete all</value>
         <comment>The accept button of the delete all data confirmation.</comment>
+  </data>
+    <data name="AccountSignOut" xml:space="preserve">
+    <value>Sign out</value>
+        <comment>The title of the sign out icon button in the header of the account card on the settings page.</comment>
+  </data>
+    <data name="AccountSignedInWithGoogle" xml:space="preserve">
+    <value>You signed in with your Google account.</value>
+        <comment>The note under the signed in as row of the account card, when the user signed in with Google.</comment>
+  </data>
+    <data name="AccountSignedInWithPassword" xml:space="preserve">
+    <value>You signed in with your email and password.</value>
+        <comment>The note under the signed in as row of the account card, when the user signed in with a password.</comment>
+  </data>
+    <data name="AccountSignedInUnknown" xml:space="preserve">
+    <value>How you signed in is not known on this device.</value>
+        <comment>The note under the signed in as row of the account card, when the way of signing in was not saved (a session from before it was kept).</comment>
+  </data>
+    <data name="DeviceRefreshLibrary" xml:space="preserve">
+    <value>Refresh library and playlists from the server</value>
+        <comment>The title of the refresh icon button in the device card on the settings page.</comment>
+  </data>
+    <data name="SettingMergeOnRename" xml:space="preserve">
+    <value>Merge on rename</value>
+        <comment>The label of the merge on rename setting.</comment>
+  </data>
+    <data name="SettingMergeOnRenameHelp" xml:space="preserve">
+    <value>Renaming something to a name that is already taken merges the two instead of being refused.</value>
+        <comment>The explanation under the merge on rename setting.</comment>
+  </data>
+    <data name="SettingKeepQueuedItems" xml:space="preserve">
+    <value>Keep queued items</value>
+        <comment>The label of the keep queued items setting.</comment>
+  </data>
+    <data name="SettingKeepQueuedItemsHelp" xml:space="preserve">
+    <value>Starting something new to play keeps the songs you added to the queue yourself.</value>
+        <comment>The explanation under the keep queued items setting.</comment>
+  </data>
+    <data name="SettingPrefetchCount" xml:space="preserve">
+    <value>Download ahead</value>
+        <comment>The label of the prefetch count setting.</comment>
+  </data>
+    <data name="SettingPrefetchCountHelp" xml:space="preserve">
+    <value>How many songs after the current one in the queue are downloaded ahead of time. 0 turns it off.</value>
+        <comment>The explanation under the prefetch count setting.</comment>
   </data>
     <data name="ServerAddressNotSaved" xml:space="preserve">
     <value>The server address is not saved.</value>

@@ -4,7 +4,7 @@
 {
     <div @attributes="AdditionalAttributes" class="@CssClass" role="status" style="--loader-duration: @DurationString">
         <span class="visually-hidden">@LabelCurrent</span>
-        <svg class="spinner" width="@WidthCurrent" height="@HeightCurrent" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg class="spinner" width="@SizeCurrent" height="@SizeCurrent" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <g fill="none" fill-rule="evenodd" stroke-width="10">
                 <circle stroke-opacity=".5" cx="50" cy="50" r="45"/>
                 <path class="spinner-arc" d="M50,5 A45,45 270 0 1 95,50"/>
@@ -31,12 +31,8 @@ else
     private string LabelCurrent => Label ?? "Loading";
 
     [Parameter]
-    public int? Width { get; set; }
-    private int WidthCurrent => Width ?? 100;
-
-    [Parameter]
-    public int? Height { get; set; }
-    private int HeightCurrent => Height ?? 100;
+    public int? Size { get; set; }
+    private int SizeCurrent => Size ?? 100;
 
     [Parameter]
     public int? Duration { get; set; }

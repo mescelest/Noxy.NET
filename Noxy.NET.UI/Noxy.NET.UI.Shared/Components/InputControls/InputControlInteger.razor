@@ -2,7 +2,7 @@
 @implements IBaseInputTextual
 
 <TemplateInputControlTextual>
-    <InputElementInteger @attributes="@AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Size="Size" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
+    <InputElementInteger @attributes="@AdditionalAttributes" class="@CssClass" ID="@IDCurrent" Name="@GetName()" Size="Size" Min="Min" Max="Max" OnInputDelay="OnInputDelay" Value="@Value" ValueChanged="ValueChanged" ValueExpression="ValueExpression"/>
 </TemplateInputControlTextual>
 
 
@@ -13,6 +13,13 @@
 
     [Parameter]
     public int? OnInputDelay { get; set; }
+
+    // The lowest and the highest number the field gives; a number outside them becomes the nearest one.
+    [Parameter]
+    public int? Min { get; set; }
+
+    [Parameter]
+    public int? Max { get; set; }
 
 }
 

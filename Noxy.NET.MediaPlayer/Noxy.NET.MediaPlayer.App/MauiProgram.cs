@@ -35,6 +35,9 @@ public static class MauiProgram
 #if WINDOWS
         builder.Services.AddSingleton<IGoogleSignInService, GoogleSignInService>();
         builder.Services.AddSingleton<IAudioPlayer, AudioPlayer>();
+
+        // Windows refuses a file dragged in from outside the window (the "can't drop here" cursor) unless the WinUI web view allows drops; MAUI before 10.0.120 leaves it off.
+        BlazorWebViewHandler.BlazorWebViewMapper.AppendToMapping(nameof(Microsoft.UI.Xaml.UIElement.AllowDrop), (handler, _) => handler.PlatformView.AllowDrop = true);
 #else
         builder.Services.AddSingleton<IGoogleSignInService, UnavailableGoogleSignInService>();
 #endif

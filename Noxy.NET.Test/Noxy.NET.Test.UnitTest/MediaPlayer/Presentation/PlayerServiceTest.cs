@@ -21,6 +21,7 @@ public class PlayerServiceTest
     private readonly FakeSyncService _sync = new();
     private readonly FakeSettingService _serviceSetting = new();
     private readonly FakeApiClient _api = new();
+    private readonly FakeDelay _delay = new();
     private readonly FakeLocalQueueStore _storeLocalQueue = new();
     private readonly FakeLogger<PlayerService> _logger = new();
     private readonly QueueService _queue;
@@ -31,7 +32,7 @@ public class PlayerServiceTest
     {
         QueueSourceService serviceSource = new(_storeMetadata, new ShuffleService(new(31)), new(32));
         _queue = new(serviceSource, _serviceSetting, _storeLocalQueue, _sync, _storeMetadata, new FakeTimeProvider(), new FakeLogger<QueueService>()) { OwnsPlayback = true };
-        _player = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, serviceSource, _serviceSetting, _api, _logger);
+        _player = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, serviceSource, _serviceSetting, _api, _delay, _logger);
     }
 
     // A media file in the library, titled so that the Library's order is the order of creation; its bytes are on the device unless said otherwise.
@@ -717,6 +718,7 @@ public class PlayerServiceTest
         List<QueueItem> before = Snapshot().SourceList;
 
         await _player.SetShuffle(ShuffleModeEnum.Random);
+        await WaitUntil(() => _serviceSetting.UpdateRequestList.Count == 1);
 
         Assert.Equal("Shuffle", _serviceSetting.UpdateRequestList.Single().Key);
         Assert.Equal("Random", _serviceSetting.UpdateRequestList.Single().Value.GetString());
@@ -737,6 +739,7 @@ public class PlayerServiceTest
         await Start(idList[0]);
 
         await _player.SetShuffle(ShuffleModeEnum.SpreadArtists);
+        await WaitUntil(() => _serviceSetting.UpdateRequestList.Count == 1);
 
         Assert.Equal("Shuffle", _serviceSetting.UpdateRequestList.Single().Key);
         Assert.Equal("SpreadArtists", _serviceSetting.UpdateRequestList.Single().Value.GetString());
@@ -752,8 +755,10 @@ public class PlayerServiceTest
         await Start(idList[0]);
 
         await _player.SetRepeat(RepeatModeEnum.Forever);
+        await WaitUntil(() => _serviceSetting.UpdateRequestList.Count == 1);
         await _player.StartPlaylist(playlistID, entryList[0].ID);
         await _player.SetRepeat(RepeatModeEnum.Once);
+        await WaitUntil(() => _serviceSetting.UpdateRequestList.Count == 2);
 
         Assert.Equal(["Repeat", "Repeat"], _serviceSetting.UpdateRequestList.Select(x => x.Key));
         Assert.Equal(["Forever", "Once"], _serviceSetting.UpdateRequestList.Select(x => x.Value.GetString()));
@@ -761,19 +766,56 @@ public class PlayerServiceTest
     }
 
     [Fact]
-    public async Task AWriteThatFails_LeavesTheModeUnchanged_AndThrows()
+    public async Task AModeChange_ShowsAtOnce_BeforeTheServerHasHeardOfIt()
     {
         List<Guid> idList = await AddMedia(4);
         await Start(idList[0]);
-        List<QueueItem> before = Snapshot().SourceList;
+        _delay.IsManual = true;
+
+        await _player.SetShuffle(ShuffleModeEnum.Random);
+        await _player.SetRepeat(RepeatModeEnum.Forever);
+
+        Assert.Equal(ShuffleModeEnum.Random, _player.Shuffle);
+        Assert.Equal(RepeatModeEnum.Forever, _player.Repeat);
+        Assert.Empty(_serviceSetting.UpdateRequestList);
+
+        // Something else reading the stored modes in the meantime does not take the change back.
+        _serviceSetting.RaiseChanged();
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        Assert.Equal(ShuffleModeEnum.Random, _player.Shuffle);
+        Assert.Equal(RepeatModeEnum.Forever, _player.Repeat);
+    }
+
+    [Fact]
+    public async Task ChangesInARow_SendOnlyTheLastOne_AfterThePause()
+    {
+        List<Guid> idList = await AddMedia(4);
+        await Start(idList[0]);
+        _delay.IsManual = true;
+
+        await _player.SetRepeat(RepeatModeEnum.Forever);
+        await _player.SetRepeat(RepeatModeEnum.Once);
+        await _player.SetRepeat(RepeatModeEnum.No);
+        await WaitUntil(() => _delay.PendingCount == 1);
+        _delay.ReleaseAll();
+        await WaitUntil(() => _serviceSetting.UpdateRequestList.Count == 1);
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+
+        Assert.Equal("No", _serviceSetting.UpdateRequestList.Single().Value.GetString());
+        Assert.Equal(PresentationConstants.ModeSaveMilliseconds, _delay.DelayList.Last().TotalMilliseconds);
+    }
+
+    [Fact]
+    public async Task AWriteThatFails_ShowsTheStoredModeAgain()
+    {
+        List<Guid> idList = await AddMedia(4);
+        await Start(idList[0]);
         _serviceSetting.UpdateHandler = (_, _) => throw new HttpRequestException("Offline.");
 
-        await Assert.ThrowsAsync<HttpRequestException>(() => _player.SetShuffle(ShuffleModeEnum.Random));
-        await Assert.ThrowsAsync<HttpRequestException>(() => _player.SetRepeat(RepeatModeEnum.Forever));
+        await _player.SetShuffle(ShuffleModeEnum.Random);
+        await _player.SetRepeat(RepeatModeEnum.Forever);
 
-        Assert.Equal(ShuffleModeEnum.Off, _player.Shuffle);
-        Assert.Equal(RepeatModeEnum.No, _player.Repeat);
-        Assert.Equal(before, Snapshot().SourceList);
+        await WaitUntil(() => _player.Shuffle == ShuffleModeEnum.Off && _player.Repeat == RepeatModeEnum.No);
     }
 
     [Fact]
@@ -877,7 +919,31 @@ public class PlayerServiceTest
         await Start(idList[0]);
 
         List<Guid> requested = [.. _download.EnqueueCallList.SelectMany(x => x)];
-        Assert.Equal(idList.Skip(1).Take(PresentationConstants.PrefetchCount), requested);
+        Assert.Equal(idList.Skip(1).Take(3), requested);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(5)]
+    public async Task Prefetch_FollowsThePrefetchCountSetting(int count)
+    {
+        _serviceSetting.PrefetchCount = count;
+        List<Guid> idList = [await AddMedia(), .. await AddMedia(8, false)];
+
+        await Start(idList[0]);
+
+        Assert.Equal(idList.Skip(1).Take(count), _download.EnqueueCallList.SelectMany(x => x));
+    }
+
+    [Fact]
+    public async Task Prefetch_WithTheCountAtZero_AsksForNothing()
+    {
+        _serviceSetting.PrefetchCount = 0;
+        List<Guid> idList = [await AddMedia(), .. await AddMedia(4, false)];
+
+        await Start(idList[0]);
+
+        Assert.Empty(_download.EnqueueCallList);
     }
 
     [Fact]
@@ -1280,7 +1346,7 @@ public class PlayerServiceTest
     public async Task TheVolume_SurvivesARestart()
     {
         await _player.SetVolume(0.6);
-        PlayerService restarted = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, new QueueSourceService(_storeMetadata, new ShuffleService(new(1)), new(1)), _serviceSetting, _api, _logger);
+        PlayerService restarted = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, new QueueSourceService(_storeMetadata, new ShuffleService(new(1)), new(1)), _serviceSetting, _api, _delay, _logger);
 
         await restarted.LoadVolume();
 

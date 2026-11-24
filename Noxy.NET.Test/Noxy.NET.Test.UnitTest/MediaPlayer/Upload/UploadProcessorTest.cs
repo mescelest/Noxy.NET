@@ -32,7 +32,7 @@ public class UploadProcessorTest
     }
 
     // A job as Enqueue leaves it, with its file waiting in staging.
-    private EntityMediaUploadJob AddJob(Guid? userID = null, long size = 100, string title = "Media", DateTime? timeCreated = null, bool staged = true, bool titleWasSent = true)
+    private EntityMediaUploadJob AddJob(Guid? userID = null, long size = 100, string title = "Media", DateTime? timeCreated = null, bool staged = true, bool titleWasSent = true, string? hash = null)
     {
         EntityMediaUploadJob job = new()
         {
@@ -43,7 +43,7 @@ public class UploadProcessorTest
             TitleWasSent = titleWasSent,
             ContentType = "audio/mpeg",
             SizeBytes = size,
-            ContentHash = new('c', 64)
+            ContentHash = hash ?? $"{Guid.NewGuid():N}{Guid.NewGuid():N}"
         };
 
         _store.MediaUploadJobList.Add(job);
@@ -153,6 +153,54 @@ public class UploadProcessorTest
         Assert.Equal(2, _store.ArtistList.Count);
         Assert.Empty(_store.MediaUploadJobList);
         Assert.Equal(1, _store.CommitCount);
+    }
+
+    [Fact]
+    public async Task ProcessNext_AFileTheLibraryAlreadyHolds_IsRefusedAsADuplicate_AndNothingIsStored()
+    {
+        string hash = new('a', 64);
+        _store.MediaFileList.Add(new() { FilePath = "held.mp3", ContentType = "audio/mpeg", SizeBytes = 100, ContentHash = hash, UserID = UserID });
+        EntityMediaUploadJob job = AddJob(hash: hash);
+
+        await ProcessNext();
+
+        ResponseUploadResult result = Assert.Single(_publisher.GetList<NotificationUploadFailed>()).Result;
+        Assert.False(result.Succeeded);
+        Assert.Equal(UploadFailureReasonEnum.Duplicate, result.Reason);
+        Assert.Equal(job.ID, result.JobID);
+        Assert.Equal(_store.MediaFileList.Single().ID, result.Media?.ID);
+        Assert.Single(_store.MediaFileList);
+        Assert.Empty(_store.MediaUploadJobList);
+        Assert.Empty(_storage.Staged);
+        Assert.DoesNotContain(job.StagedFileName, _storage.Files.Keys);
+    }
+
+    [Fact]
+    public async Task ProcessNext_TheSameFileSentTwiceInOneGo_StoresTheFirstAndRefusesTheSecond()
+    {
+        string hash = new('b', 64);
+        AddJob(hash: hash);
+        AddJob(hash: hash);
+
+        await ProcessNext();
+        await ProcessNext();
+
+        Assert.Single(_store.MediaFileList);
+        Assert.Single(_publisher.GetList<NotificationUploadSucceeded>());
+        Assert.Equal(UploadFailureReasonEnum.Duplicate, Assert.Single(_publisher.GetList<NotificationUploadFailed>()).Result.Reason);
+    }
+
+    [Fact]
+    public async Task ProcessNext_AFileAnotherUserHolds_IsNotADuplicate()
+    {
+        string hash = new('e', 64);
+        _store.MediaFileList.Add(new() { FilePath = "theirs.mp3", ContentType = "audio/mpeg", SizeBytes = 100, ContentHash = hash, UserID = Guid.CreateVersion7() });
+        AddJob(hash: hash);
+
+        await ProcessNext();
+
+        Assert.Equal(2, _store.MediaFileList.Count);
+        Assert.Empty(_publisher.GetList<NotificationUploadFailed>());
     }
 
     [Fact]

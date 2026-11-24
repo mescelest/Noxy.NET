@@ -1,0 +1,4 @@
+/* The wrapper only holds the menu and its dialog, which take no room of their own. As a box it would still be one more item in a row of buttons, with a gap before it. */
+.PlaylistContextMenu {
+    display: contents;
+}

@@ -1,0 +1,5 @@
+.ThemePicker ::deep > .group {
+    display: flex;
+    flex-flow: row;
+    gap: var(--size-gap-xxs);
+}

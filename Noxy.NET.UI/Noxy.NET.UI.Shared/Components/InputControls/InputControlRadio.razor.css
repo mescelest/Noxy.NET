@@ -39,9 +39,9 @@
 }
 
 .InputControlRadio:not([data-disabled="True"]) .visual[data-checked="True"] {
-    border-color: var(--color-highlight, #0073EC);
-    background-color: var(--color-highlight, #0073EC);
-    color: var(--color-primary, #FFFFFF);
+    border-color: var(--color-theme, var(--color-highlight, #0073EC));
+    background-color: var(--color-theme, var(--color-highlight, #0073EC));
+    color: var(--color-on-theme, var(--color-on-highlight, #FFFFFF));
 }
 
 .InputControlRadio:not([data-disabled="True"]):focus-within .visual {

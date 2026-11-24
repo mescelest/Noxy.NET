@@ -56,6 +56,10 @@
     <value>Your library is full.</value>
         <comment>Why the server refused a file it had accepted.</comment>
   </data>
+    <data name="UploadMessageDuplicate" xml:space="preserve">
+    <value>It is already in your library.</value>
+        <comment>Why the server refused a file it had accepted.</comment>
+  </data>
     <data name="UploadMessageFileMissing" xml:space="preserve">
     <value>The file was lost before it could be stored.</value>
         <comment>Why the server refused a file it had accepted.</comment>
@@ -63,6 +67,10 @@
     <data name="UploadMessageUnknown" xml:space="preserve">
     <value>The server could not store the file.</value>
         <comment>Why the server refused a file it had accepted.</comment>
+  </data>
+    <data name="UploadMessageAlreadyInPlaylist" xml:space="preserve">
+    <value>It is already in the playlist, which does not take duplicates.</value>
+        <comment>Why a file that the library already held was not added to a playlist.</comment>
   </data>
     <data name="UploadMessageNotAddedToPlaylist" xml:space="preserve">
     <value>It is in your library, but it could not be added to the playlist.</value>

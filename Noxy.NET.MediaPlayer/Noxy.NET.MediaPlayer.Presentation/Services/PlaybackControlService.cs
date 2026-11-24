@@ -47,10 +47,9 @@ public class PlaybackControlService : IPlaybackControlService
     {
         await Route(new() { Command = PlayerCommandEnum.Play }, async () =>
         {
-            await _servicePlayer.Resume();
-
-            // Nothing is loaded yet (a queue that was restored from the local copy): it starts now.
-            if (!_servicePlayer.IsPlaying && !_servicePlayer.IsDisabled) await _servicePlayer.PlayCurrent();
+            // Nothing is loaded yet (a queue that was restored from the local copy): it starts now. A loaded file that was only paused must not start over, and the player does not report playing the instant it is resumed.
+            bool resumed = await _servicePlayer.Resume();
+            if (!resumed && !_servicePlayer.IsDisabled) await _servicePlayer.PlayCurrent();
         });
     }
 
