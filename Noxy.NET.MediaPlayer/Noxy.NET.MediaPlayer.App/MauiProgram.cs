@@ -5,6 +5,8 @@ using Noxy.NET.MediaPlayer.App.Stores;
 using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
+// ReSharper disable once RedundantUsingDirective
+using Microsoft.AspNetCore.Components.WebView.Maui;
 
 namespace Noxy.NET.MediaPlayer.App;
 
