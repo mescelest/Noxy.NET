@@ -19,23 +19,7 @@
 
     <EditMediaDialog @bind-Open="_isEditing" MediaFileID="_editingID"/>
 
-    <Dialog @bind-Open="_choosingPlaylist">
-        <h2>@AppTexts.LibraryAddToPlaylist</h2>
-        @if (StatePlaylistList.Value.PlaylistList.Count == 0)
-        {
-            <p>@AppTexts.ChooserNoPlaylists</p>
-        }
-        <div class="playlist-choice-list">
-            @foreach (ResponsePlaylist playlist in StatePlaylistList.Value.PlaylistList)
-            {
-                Guid playlistID = playlist.ID;
-                <button type="button" class="playlist-choice" @onclick="() => AddToPlaylist(playlistID)">@playlist.Name</button>
-            }
-        </div>
-        <div class="actions">
-            <button type="button" class="cancel" @onclick="() => _choosingPlaylist = false">@AppTexts.ChooserCancel</button>
-        </div>
-    </Dialog>
+    <AddToPlaylistDialog @bind-Open="_choosingPlaylist" OnChosen="AddToPlaylist"/>
 </div>
 
 @code {
@@ -176,10 +160,10 @@
         await OnPlaylistChanged.InvokeAsync();
     }
 
-    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run, string icon, bool isDestructive = false, string? confirmText = null)
+    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run, string icon, bool isDestructive = false, string? confirmText = null, RenderFragment? graphic = null)
     {
         string? reason = ServiceLibraryAction.GetDisabledReason(action);
-        return ContextMenuItem.Item(text, run, reason is not null, reason, isDestructive, icon, confirmText: confirmText);
+        return ContextMenuItem.Item(text, run, reason is not null, reason, isDestructive, icon, confirmText: confirmText, graphic: graphic);
     }
 
     private static string Count(int count) => count.ToCountText(AppTexts.MediaFileCountOne, AppTexts.MediaFileCountMany);
@@ -227,14 +211,19 @@
     {
         List<ContextMenuItem> list = [ItemOf(LibraryActionEnum.AddToPlaylist, AppTexts.LibraryPickPlaylist, () => ChoosePlaylist(mediaFileIDList), "playlist_add")];
         List<ResponsePlaylist> recentList = StatePlaylistList.Value.PlaylistList.TakeRecentlyPlayed(PresentationConstants.HomeRecentCount);
-        if (recentList.Count > 0)
+        if (recentList.Count <= 0)
         {
-            list.Add(ContextMenuItem.Separator());
-            list.AddRange(recentList.Select(playlist => ItemOf(LibraryActionEnum.AddToPlaylist, playlist.Name, () => AddToPlaylist(playlist.ID, mediaFileIDList), "playlist_add")));
+            return ContextMenuItem.Submenu(AppTexts.LibraryAddToPlaylist, list, "playlist_add");
         }
+        
+        list.Add(ContextMenuItem.Separator());
+        list.AddRange(recentList.Select(playlist => ItemOf(LibraryActionEnum.AddToPlaylist, playlist.Name, () => AddToPlaylist(playlist.ID, mediaFileIDList), "playlist_add", graphic: ArtOf(playlist))));
 
         return ContextMenuItem.Submenu(AppTexts.LibraryAddToPlaylist, list, "playlist_add");
     }
+
+    // The graphic of a playlist, the size of a menu icon.
+    private static RenderFragment ArtOf(ResponsePlaylist playlist) => @<PlaylistArt Playlist="playlist" Size="var(--size-icon-md)"/>;
 
     private Task AddToPlaylist(Guid playlistID, List<Guid> mediaFileIDList)
     {
@@ -243,8 +232,6 @@
 
     private Task AddToPlaylist(Guid playlistID)
     {
-        _choosingPlaylist = false;
-
         return Show(ServiceLibraryAction.AddToPlaylist(playlistID, _playlistTargetList));
     }
 

@@ -84,10 +84,6 @@
     <value>You have no playlists yet.</value>
         <comment>In the dialog that asks which playlist.</comment>
   </data>
-    <data name="ChooserCancel" xml:space="preserve">
-    <value>Cancel</value>
-        <comment>In the dialog that asks which playlist.</comment>
-  </data>
     <data name="PlaylistPlay" xml:space="preserve">
     <value>Play</value>
         <comment>The menu of a playlist.</comment>
@@ -360,5 +356,17 @@ Nothing is deleted from your library on the server.</value>
     <data name="LibraryPickPlaylist" xml:space="preserve">
     <value>Pick playlist…</value>
         <comment>The first item of the add to playlist sub-menu; it opens the list of all playlists.</comment>
+  </data>
+    <data name="AddToPlaylistSearch" xml:space="preserve">
+    <value>Search playlists</value>
+        <comment>The placeholder of the search field of the add to playlist dialog.</comment>
+  </data>
+    <data name="AddToPlaylistNoMatch" xml:space="preserve">
+    <value>No playlist matches.</value>
+        <comment>Shown in the add to playlist dialog when the search finds nothing.</comment>
+  </data>
+    <data name="NewPlaylistSuggestedName" xml:space="preserve">
+    <value>Playlist #{0}</value>
+        <comment>The name the new playlist dialog starts with; {0} is the number of playlists plus one.</comment>
   </data>
 </root>

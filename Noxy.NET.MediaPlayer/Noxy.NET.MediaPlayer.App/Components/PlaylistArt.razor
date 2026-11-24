@@ -1,0 +1,19 @@
+@inherits BaseComponentElement
+
+<span @attributes="AdditionalAttributes" class="@CssClass" style="@StyleCurrent" aria-hidden="true">
+    <MaterialIcon Icon="queue_music" Size="var(--size-icon-xs)"/>
+</span>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required ResponsePlaylist Playlist { get; set; }
+
+    // Every playlist has its own hue, which the colour in the stylesheet is worked out from.
+    // The size of the square, as a CSS length; unset, it is --size-playlist-art.
+    [Parameter]
+    public string? Size { get; set; }
+
+    private string StyleCurrent => Size is null ? $"--playlist-hue: {Playlist.ArtHue}" : $"--playlist-hue: {Playlist.ArtHue}; --size-playlist-art: {Size}";
+
+}

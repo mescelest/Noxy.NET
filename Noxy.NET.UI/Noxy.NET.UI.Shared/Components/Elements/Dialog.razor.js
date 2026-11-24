@@ -2,7 +2,8 @@ const backdropHandlerMap = new WeakMap();
 
 // The close button is marked by the component; everything else here is found by what a browser can focus.
 const closeSelector = "[data-dialog-close]";
-const focusableSelector = "a[href], button, input:not([type='hidden']), select, textarea, [tabindex]";
+const selectOnOpenSelector = "input:not([type]), input[type='text'], input[type='search']";
+const focusableSelector ="a[href], button, input:not([type='hidden']), select, textarea, [tabindex]";
 
 export function Show(element) {
     if (element.open) return;
@@ -28,7 +29,12 @@ export function FocusContent(element) {
     if (active !== element && element.contains(active) && !active.matches(closeSelector)) return;
 
     const target = Array.from(element.querySelectorAll(focusableSelector)).find(isFocusable);
-    if (target) target.focus();
+    if (!target) return;
+
+    target.focus();
+
+    // A text field that opens with a value, such as a suggested name, has it selected, so typing replaces it.
+    if (target instanceof HTMLInputElement && target.matches(selectOnOpenSelector)) target.select();
 }
 
 export function Close(element) {

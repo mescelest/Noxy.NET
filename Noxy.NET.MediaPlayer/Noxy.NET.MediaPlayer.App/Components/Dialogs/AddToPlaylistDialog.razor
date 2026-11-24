@@ -1,0 +1,72 @@
+@inject IState<FeaturePlaylistListState> StatePlaylistList
+@inherits BaseComponentElementFluxor
+
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
+    <h2>@AppTexts.LibraryAddToPlaylist</h2>
+    @if (StatePlaylistList.Value.PlaylistList.Count == 0)
+    {
+        <p class="empty">@AppTexts.ChooserNoPlaylists</p>
+    }
+    else
+    {
+        <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.AddToPlaylistSearch" aria-label="@AppTexts.AddToPlaylistSearch" Value="@_search" ValueChanged="ChangeSearch"/>
+        @if (ShownList.Count == 0)
+        {
+            <p class="empty">@AppTexts.AddToPlaylistNoMatch</p>
+        }
+        else
+        {
+            <div class="list">
+                @foreach (ResponsePlaylist playlist in ShownList)
+                {
+                    Guid playlistID = playlist.ID;
+                    <button @key="playlistID" type="button" class="playlist" @onclick="() => Choose(playlistID)">
+                        <PlaylistArt Playlist="playlist"/>
+                        <span class="name">@playlist.Name</span>
+                    </button>
+                }
+            </div>
+        }
+    }
+</Dialog>
+
+@code {
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    // The playlist that was chosen; the dialog closes itself first.
+    [Parameter]
+    public EventCallback<Guid> OnChosen { get; set; }
+
+    private string _search = string.Empty;
+
+    // All of them, in the order of the home page, narrowed by the search.
+    private List<ResponsePlaylist> ShownList => StatePlaylistList.Value.PlaylistList.OrderMostRecentFirst().FilterByName(_search);
+
+    private void ChangeSearch(string? search)
+    {
+        _search = search ?? string.Empty;
+    }
+
+    private Task HandleOpenChanged(bool open)
+    {
+        return open ? Task.CompletedTask : Close();
+    }
+
+    private async Task Close()
+    {
+        _search = string.Empty;
+        await OpenChanged.InvokeAsync(false);
+    }
+
+    private async Task Choose(Guid playlistID)
+    {
+        await Close();
+        await OnChosen.InvokeAsync(playlistID);
+    }
+
+}

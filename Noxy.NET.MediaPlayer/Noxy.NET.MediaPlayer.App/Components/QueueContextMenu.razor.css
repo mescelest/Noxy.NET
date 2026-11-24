@@ -8,25 +8,3 @@
     min-width: var(--size-control-xs);
     min-height: var(--size-control-xs);
 }
-
-.playlist-choice {
-    display: block;
-    width: 100%;
-    padding: var(--size-gap-xxs) var(--size-gap-xs);
-    border: none;
-    background: transparent;
-    color: var(--color-complementary);
-    font: var(--font-body);
-    text-align: left;
-    cursor: pointer;
-}
-
-.playlist-choice:hover {
-    background: var(--color-offset-primary-md);
-}
-
-.actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--size-gap-xs);
-}

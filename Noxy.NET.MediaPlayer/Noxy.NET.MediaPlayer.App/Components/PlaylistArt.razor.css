@@ -1,0 +1,13 @@
+.PlaylistArt {
+    /* The hue of this playlist is set on the element itself; this one is for an element without it. */
+    --playlist-hue: 220;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-playlist-art);
+    height: var(--size-playlist-art);
+    border-radius: var(--size-border-radius-md);
+    background: var(--color-playlist-art);
+    color: var(--color-on-playlist-art);
+}

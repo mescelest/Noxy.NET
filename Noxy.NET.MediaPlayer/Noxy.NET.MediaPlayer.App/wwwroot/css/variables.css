@@ -34,6 +34,8 @@
     --size-control-xl: 4rem;
     --size-control-xxl: 5.75rem;
     --size-dialog-margin: var(--size-gap-xs);
+    --size-dialog-list-height: 60dvh;
+    --size-playlist-art: var(--size-control-xs);
     --size-button-min-width: 6rem;
     --size-icon-xxs: 1rem;
     --size-icon-xs: 1.25rem;
@@ -143,6 +145,8 @@
     --color-surface: var(--color-primary);
     --color-on-surface: light-dark(#121212, #F2F2F2);
     --color-input: light-dark(#FFFFFF, #1E1E1E);
+    --color-playlist-art: light-dark(hsl(var(--playlist-hue, 220) 45% 45%), hsl(var(--playlist-hue, 220) 35% 38%));
+    --color-on-playlist-art: #FFFFFF;
     --color-on-input: light-dark(#121212, #EBEBEB);
 }
 

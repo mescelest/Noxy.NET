@@ -438,7 +438,11 @@
     }
 
     private RenderFragment RenderContent(int depth, int index, ContextMenuItem item) => @<text>
-                                                                                             @if (IconOf(depth, index, item) is { } icon)
+                                                                                             @if (item.Graphic is not null)
+                                                                                             {
+                                                                                                 @item.Graphic
+                                                                                             }
+                                                                                             else if (IconOf(depth, index, item) is { } icon)
                                                                                              {
                                                                                                  <MaterialIcon Icon="@icon" Size="var(--size-icon-md)"/>
                                                                                              }

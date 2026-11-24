@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Microsoft.AspNetCore.Components;
 using Noxy.NET.UI.Enums;
 
 namespace Noxy.NET.UI.Models;
@@ -13,7 +14,8 @@ public record ContextMenuItem(
     string? Icon = null,
     List<ContextMenuItem>? SubItemList = null,
     bool ClosesMenu = true,
-    string? ConfirmText = null)
+    string? ConfirmText = null,
+    RenderFragment? Graphic = null)
 {
     // A separator is never enabled, and a submenu is enabled only while something inside it can be chosen.
     public bool IsEnabled
@@ -30,9 +32,9 @@ public record ContextMenuItem(
         }
     }
 
-    public static ContextMenuItem Item(string text, Func<Task>? run = null, bool isDisabled = false, string? disabledReason = null, bool isDestructive = false, string? icon = null, bool closesMenu = true, string? confirmText = null)
+    public static ContextMenuItem Item(string text, Func<Task>? run = null, bool isDisabled = false, string? disabledReason = null, bool isDestructive = false, string? icon = null, bool closesMenu = true, string? confirmText = null, RenderFragment? graphic = null)
     {
-        return new(ContextMenuItemKindEnum.Item, text, run, isDisabled, disabledReason, isDestructive, icon, ClosesMenu: closesMenu, ConfirmText: confirmText);
+        return new(ContextMenuItemKindEnum.Item, text, run, isDisabled, disabledReason, isDestructive, icon, ClosesMenu: closesMenu, ConfirmText: confirmText, Graphic: graphic);
     }
 
     public static ContextMenuItem Separator()

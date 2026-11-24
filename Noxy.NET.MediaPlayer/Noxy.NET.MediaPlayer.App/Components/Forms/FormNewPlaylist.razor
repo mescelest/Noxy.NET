@@ -1,4 +1,5 @@
 @inject IPlaylistService ServicePlaylist
+@inject IState<FeaturePlaylistListState> StatePlaylistList
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -19,7 +20,14 @@
     [Parameter]
     public EventCallback<Guid> OnSubmit { get; set; }
 
-    private readonly WebFormContext<FormModelNewPlaylist> _context = new(new());
+    private WebFormContext<FormModelNewPlaylist> _context = new(new());
+
+    // The dialog builds the form each time it opens, so the number is the one of that moment.
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _context = new(new() { Name = string.Format(AppTexts.NewPlaylistSuggestedName, StatePlaylistList.Value.PlaylistList.Count + 1) });
+    }
 
     private async Task Submit(WebFormContext<FormModelNewPlaylist> context)
     {

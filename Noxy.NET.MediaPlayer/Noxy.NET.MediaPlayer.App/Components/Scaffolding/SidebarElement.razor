@@ -42,6 +42,7 @@
 
             <div @key="row.ID" class="playlist-row" @oncontextmenu="args => OpenPlaylistMenu(args, row.ID)" @oncontextmenu:preventDefault>
                 <NavLink class="link" href="@($"playlist/{row.ID}")" @onclick="OnNavigate">
+                    <PlaylistArt Playlist="row"/>
                     <span>@row.Name</span>
                 </NavLink>
                 <Button class="more" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="@($"Actions for {row.Name}")" aria-haspopup="menu"
@@ -61,7 +62,7 @@
     [Parameter]
     public EventCallback OnNavigate { get; set; }
 
-    private List<ResponsePlaylist> PlaylistList => StatePlaylistList.Value.PlaylistList.OrderMostRecentlyPlayedFirst();
+    private List<ResponsePlaylist> PlaylistList => StatePlaylistList.Value.PlaylistList.OrderNewestCreatedFirst();
 
     private bool _showNewPlaylistDialog;
     private readonly Dictionary<Guid, PlaylistContextMenu> _menuMap = [];

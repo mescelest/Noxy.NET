@@ -69,15 +69,6 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cancel.
-        /// </summary>
-        public static string ChooserCancel {
-            get {
-                return ResourceManager.GetString("ChooserCancel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to You have no playlists yet..
         /// </summary>
         public static string ChooserNoPlaylists {
@@ -783,6 +774,33 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         public static string LibraryPickPlaylist {
             get {
                 return ResourceManager.GetString("LibraryPickPlaylist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Search playlists.
+        /// </summary>
+        public static string AddToPlaylistSearch {
+            get {
+                return ResourceManager.GetString("AddToPlaylistSearch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No playlist matches..
+        /// </summary>
+        public static string AddToPlaylistNoMatch {
+            get {
+                return ResourceManager.GetString("AddToPlaylistNoMatch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Playlist #{0}.
+        /// </summary>
+        public static string NewPlaylistSuggestedName {
+            get {
+                return ResourceManager.GetString("NewPlaylistSuggestedName", resourceCulture);
             }
         }
     }

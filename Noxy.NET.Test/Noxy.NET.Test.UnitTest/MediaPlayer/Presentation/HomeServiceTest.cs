@@ -23,7 +23,7 @@ public class HomeServiceTest
 
     private async Task<ResponsePlaylist> AddPlaylist(string name, DateTime? played, DateTime? modified = null)
     {
-        ResponsePlaylist playlist = new() { ID = Guid.CreateVersion7(), Name = name, AllowDuplicates = true, EntryCount = 0, TimeCreated = Now, TimeModified = modified ?? Now, TimeLastPlayed = played };
+        ResponsePlaylist playlist = new() { ID = Guid.CreateVersion7(), Name = name, AllowDuplicates = true, EntryCount = 0, TimeCreated = modified ?? Now, TimeModified = modified ?? Now, TimeLastPlayed = played };
         await _store.SavePlaylist(playlist);
 
         return playlist;
@@ -42,7 +42,7 @@ public class HomeServiceTest
     }
 
     [Fact]
-    public async Task Get_WhenNothingWasPlayed_ListsThePlaylistsInTheSidebarOrder()
+    public async Task Get_WhenNothingWasPlayed_ListsTheNewestPlaylistsFirst()
     {
         await AddPlaylist("old", null, Now.AddDays(-2));
         await AddPlaylist("new", null, Now.AddDays(-1));

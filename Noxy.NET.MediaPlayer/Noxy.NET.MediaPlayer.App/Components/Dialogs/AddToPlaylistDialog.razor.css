@@ -1,0 +1,44 @@
+/* The list scrolls inside the dialog, so many playlists do not make the dialog as tall as the window. */
+.list {
+    display: flex;
+    flex-flow: column;
+    row-gap: var(--size-gap-tiny);
+    max-height: var(--size-dialog-list-height);
+    overflow-y: auto;
+}
+
+.playlist {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    column-gap: var(--size-gap-xs);
+    width: 100%;
+    padding: var(--size-gap-xxxs);
+    border: none;
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-complementary);
+    font: var(--font-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.playlist:hover {
+    background: var(--color-offset-primary-md);
+}
+
+.playlist:focus-visible {
+    outline: var(--size-border-width-md) solid var(--color-highlight);
+}
+
+.name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.empty {
+    margin: 0;
+    color: var(--color-muted);
+}

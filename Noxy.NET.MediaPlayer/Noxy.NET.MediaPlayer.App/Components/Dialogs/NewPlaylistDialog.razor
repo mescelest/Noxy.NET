@@ -3,7 +3,10 @@
 
 <Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
     <h2>New playlist</h2>
-    <FormNewPlaylist OnSubmit="Create"/>
+    @if (Open)
+    {
+        <FormNewPlaylist OnSubmit="Create"/>
+    }
 </Dialog>
 
 @code {
