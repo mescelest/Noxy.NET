@@ -3,3 +3,9 @@
     flex-flow: column;
     gap: var(--size-gap-xs);
 }
+
+/* The button sits at the right end of its own row, not across the whole form. */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}

@@ -87,3 +87,9 @@
     font: var(--font-label);
     cursor: pointer;
 }
+
+/* The button sits at the right end of its own row, not across the whole form. */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}

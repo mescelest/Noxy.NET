@@ -5,7 +5,7 @@
     <WebForm T="FormModelSignIn" Context="_context" OnSubmit="Submit" Disabled="Disabled">
         <InputGroupText @bind-Value="_context.Model.Email"/>
         <InputGroupPassword @bind-Value="_context.Model.Password"/>
-        <Button Type="@HTMLButtonTypeEnum.Submit" Loading="@LoadingCurrent">Sign in</Button>
+        <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Highlight" Loading="@LoadingCurrent">Sign in</Button>
     </WebForm>
 </div>
 

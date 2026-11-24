@@ -93,6 +93,14 @@
         await _module.InvokeVoidAsync(FunctionShow, _element);
     }
 
+    // Places an open panel again, at the Point or next to the anchor as they are now.
+    public async Task ReplaceAsync()
+    {
+        if (_disposed || _module is null || !_shown) return;
+
+        await PlaceAsync(_module);
+    }
+
     public async Task HideAsync()
     {
         if (_disposed || _module is null) return;

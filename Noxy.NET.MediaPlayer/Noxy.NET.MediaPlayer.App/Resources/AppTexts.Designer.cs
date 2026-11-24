@@ -294,15 +294,6 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} selected songs.
-        /// </summary>
-        public static string LibrarySelectedGroup {
-            get {
-                return ResourceManager.GetString("LibrarySelectedGroup", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} media files.
         /// </summary>
         public static string MediaFileCountMany {
@@ -326,15 +317,6 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         public static string PlaylistDelete {
             get {
                 return ResourceManager.GetString("PlaylistDelete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Click again to delete.
-        /// </summary>
-        public static string PlaylistDeleteConfirm {
-            get {
-                return ResourceManager.GetString("PlaylistDeleteConfirm", resourceCulture);
             }
         }
         
@@ -668,15 +650,10 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
             }
         }
 
-        public static string ResetPreferencesMessage {
-            get {
-                return ResourceManager.GetString("ResetPreferencesMessage", resourceCulture);
-            }
-        }
 
-        public static string ResetPreferencesAccept {
+        public static string ResetPreferencesConfirm {
             get {
-                return ResourceManager.GetString("ResetPreferencesAccept", resourceCulture);
+                return ResourceManager.GetString("ResetPreferencesConfirm", resourceCulture);
             }
         }
 
@@ -686,15 +663,27 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
             }
         }
 
-        public static string DeleteAllDataMessage {
+        public static string DeleteAllDataTitle {
             get {
-                return ResourceManager.GetString("DeleteAllDataMessage", resourceCulture);
+                return ResourceManager.GetString("DeleteAllDataTitle", resourceCulture);
+            }
+        }
+
+        public static string DeleteAllDataWarning {
+            get {
+                return ResourceManager.GetString("DeleteAllDataWarning", resourceCulture);
             }
         }
 
         public static string DeleteAllDataDetail {
             get {
                 return ResourceManager.GetString("DeleteAllDataDetail", resourceCulture);
+            }
+        }
+
+        public static string ConfirmActionAgain {
+            get {
+                return ResourceManager.GetString("ConfirmActionAgain", resourceCulture);
             }
         }
 
@@ -776,6 +765,51 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         public static string UploadStartedOne {
             get {
                 return ResourceManager.GetString("UploadStartedOne", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Edit….
+        /// </summary>
+        public static string LibraryEdit {
+            get {
+                return ResourceManager.GetString("LibraryEdit", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Edit song.
+        /// </summary>
+        public static string EditMediaTitle {
+            get {
+                return ResourceManager.GetString("EditMediaTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string EditMediaSave {
+            get {
+                return ResourceManager.GetString("EditMediaSave", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Separate several with ;.
+        /// </summary>
+        public static string EditMediaCreditHint {
+            get {
+                return ResourceManager.GetString("EditMediaCreditHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Pick playlist….
+        /// </summary>
+        public static string LibraryPickPlaylist {
+            get {
+                return ResourceManager.GetString("LibraryPickPlaylist", resourceCulture);
             }
         }
     }

@@ -1,6 +1,23 @@
 .Dialog {
     --dialog-close-size: var(--size-control-xxs, 1.5rem);
     --dialog-close-offset: var(--size-gap-tiny, 2px);
+
+    /* The padding is on the content, so the browser's own padding for a dialog is taken away. */
+    padding: 0;
+
+    /* The browser stops a modal dialog at calc(100% - 6px - 2em), which leaves about 19px at the edges. This keeps the gap to the edge of the window at --size-dialog-margin instead. */
+    max-width: calc(100% - 2 * var(--size-dialog-margin, var(--size-gap-xs, 0.75rem)));
+    max-height: calc(100% - 2 * var(--size-dialog-margin, var(--size-gap-xs, 0.75rem)));
+}
+
+/* Everything the dialog holds sits in one container, and the size is set on that: no narrower than one column (320px) and no wider than a column and a half (480px), unless the window itself is narrower. */
+.content {
+    display: flex;
+    flex-flow: column;
+    padding: var(--size-gap-lg, 1.5rem) var(--size-gap-sm, 1rem) var(--size-gap-sm, 1rem);
+    row-gap: var(--size-gap-xs, 0.75rem);
+    min-width: min(var(--size-column, 20rem), calc(100vw - 2 * var(--size-dialog-margin, var(--size-gap-xs, 0.75rem))));
+    max-width: min(calc(var(--size-column, 20rem) * 1.5), calc(100vw - 2 * var(--size-dialog-margin, var(--size-gap-xs, 0.75rem))));
 }
 
 /* A modal dialog is positioned, so the close button sits against the corner of its box. */
@@ -20,7 +37,22 @@
     outline-offset: calc(-1 * var(--size-border-width-md, 2px));
 }
 
-/* Whatever comes first, usually the title, keeps clear of the button however long it is. */
-.Dialog ::deep > .close + * {
-    padding-inline-end: calc(var(--dialog-close-size) + var(--dialog-close-offset));
+
+/* Wide: for a form or a list, a fixed width of one page-column, still never wider than the window. */
+.Dialog[data-size="wide"] .content {
+    width: min(var(--size-page-md, 45rem), calc(100vw - 2 * var(--size-dialog-margin, var(--size-gap-xs, 0.75rem))));
+    max-width: none;
+}
+
+/* Full: the whole window but for a margin, and what does not fit scrolls inside the dialog. */
+.Dialog[data-size="full"] {
+    max-width: none;
+    max-height: none;
+}
+
+.Dialog[data-size="full"] .content {
+    width: calc(100vw - 2 * var(--size-gap-md, 1.25rem));
+    max-width: none;
+    height: calc(100dvh - 2 * var(--size-gap-md, 1.25rem));
+    overflow: auto;
 }

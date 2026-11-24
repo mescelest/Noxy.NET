@@ -25,13 +25,36 @@
 .control ::deep > .InputElementSelect,
 .control ::deep > .InputElementText,
 .control ::deep > .InputElementTextArea {
+    /* A form can set --input-flex to 1 1 auto so its fields fill the width of their column; unset, a field keeps the width of its content. */
+    flex: var(--input-flex, 0 1 auto);
     max-width: 100%;
     min-height: var(--size-control-md, 2.625rem);
     margin: 0;
     padding: var(--size-gap-xxs, 0.5rem);
     border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
     border-radius: var(--size-border-radius-md, 0.25rem);
+    background-color: var(--color-input, #FFFFFF);
+    color: var(--color-on-input, #121212);
     font-size: var(--size-text-body, 1rem);
     font-family: inherit;
     box-sizing: border-box;
+}
+
+/* The second pixel of the border is drawn as a shadow, so the field does not grow or move when it gets focus. */
+.control ::deep > .InputElementDate:focus,
+.control ::deep > .InputElementDecimal:focus,
+.control ::deep > .InputElementInteger:focus,
+.control ::deep > .InputElementPassword:focus,
+.control ::deep > .InputElementSelect:focus,
+.control ::deep > .InputElementText:focus,
+.control ::deep > .InputElementTextArea:focus {
+    border-color: var(--color-highlight, #0073EC);
+    box-shadow: 0 0 0 1px var(--color-highlight, #0073EC);
+    outline: var(--size-border-width-md, 2px) solid transparent;
+}
+
+/* The description is a caption under the title: smaller and faded, so it reads as a hint and not as a second label. */
+.description {
+    color: var(--color-faded, inherit);
+    font-size: var(--size-text-label, 0.8125rem);
 }

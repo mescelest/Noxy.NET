@@ -335,6 +335,31 @@ public class ApiClientTest
     }
 
     [Fact]
+    public async Task UpdateMedia_PatchesTheMediaFile_AndReturnsItAsItIsNow()
+    {
+        ResponseMediaFile media = MediaFile("New");
+        _handler.Respond = _ => Ok(media);
+
+        ResponseMediaFile result = await _client.UpdateMedia(media.ID, new() { Title = new("New") });
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Patch, request.Method);
+        Assert.Equal($"https://server.example/Media/{media.ID}", request.Uri?.ToString());
+        Assert.Equal("New", result.Title);
+    }
+
+    [Fact]
+    public async Task UpdateMedia_SendsOnlyTheFieldsThatWereSet_AndNullForACleared()
+    {
+        ResponseMediaFile media = MediaFile();
+        _handler.Respond = _ => Ok(media);
+
+        await _client.UpdateMedia(media.ID, new() { Title = new("New"), Year = new(null) });
+
+        Assert.Equal("""{"title":"New","year":null}""", Single().Body);
+    }
+
+    [Fact]
     public async Task DeleteMedia_DeletesTheMediaFile_On204()
     {
         _handler.Respond = _ => new(HttpStatusCode.NoContent);

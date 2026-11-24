@@ -159,6 +159,7 @@ public class LibraryActionService(IDownloadService serviceDownload, IQueueServic
             case LibraryActionEnum.DeleteFromLibrary:
             case LibraryActionEnum.AddToPlaylist:
             case LibraryActionEnum.SaveAsFile:
+            case LibraryActionEnum.Edit:
                 return serviceSync.IsOffline ? PresentationTexts.ActionMessageOffline : null;
             case LibraryActionEnum.Download:
             case LibraryActionEnum.PlayNext:

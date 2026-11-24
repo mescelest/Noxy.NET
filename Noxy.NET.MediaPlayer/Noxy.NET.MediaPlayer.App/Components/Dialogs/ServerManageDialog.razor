@@ -5,45 +5,64 @@
 @implements IAsyncDisposable
 
 <Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
-    @if (_showForm)
+    <div class="header">
+        <h2>Servers</h2>
+        <Button class="add" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Success" IsIcon="true" disabled="@_isAdding" aria-label="Add server" title="Add server" @onclick="Add">
+            <MaterialIcon Icon="add" Size="var(--size-icon-sm)"/>
+        </Button>
+    </div>
+
+    @if (_addressList.Count == 0 && !_isAdding)
     {
-        <h2>@Title</h2>
-        <FormServerAddress Address="_editing" OnSubmit="Saved"/>
-        <div class="actions">
-            <button type="button" class="plain" @onclick="Back">Back</button>
-        </div>
+        <p class="empty">No server saved yet.</p>
     }
     else
     {
-        <h2>Servers</h2>
-        @if (_addressList.Count == 0)
-        {
-            <p class="empty">No server saved yet.</p>
-        }
-        else
-        {
-            <ul class="server-list">
-                @foreach (string address in _addressList)
-                {
-                    <li @key="address" class="server">
+        <ul class="server-list">
+            @foreach (string address in _addressList)
+            {
+                <li @key="address" class="server" @onkeydown="HandleKeyDown">
+                    @if (IsEditing(address))
+                    {
+                        <Button class="cancel" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" IsIcon="true" aria-label="Cancel" title="Cancel" @onclick="Cancel">
+                            <MaterialIcon Icon="arrow_back" Size="var(--size-icon-sm)"/>
+                        </Button>
+                        <InputControlText class="address" Size="1" aria-label="Server address" autofocus="true" OnInputDelay="0" Value="@_draft" ValueChanged="ChangeDraft"/>
+                        <Button class="save" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" IsIcon="true" aria-label="Save" title="Save" @onclick="Save">
+                            <MaterialIcon Icon="check" Size="var(--size-icon-xs)"/>
+                        </Button>
+                    }
+                    else
+                    {
+                        <Button class="delete" Type="@HTMLButtonTypeEnum.Button" Appearance="@DeleteAppearanceOf(address)" Status="StatusEnum.Error" IsIcon="true" data-confirming="@IsConfirming(address)"
+                                aria-label="@DeleteLabelOf(address)" title="@DeleteLabelOf(address)" @onclick="() => Delete(address)">
+                            <MaterialIcon Icon="@DeleteIconOf(address)" Size="var(--size-icon-sm)"/>
+                        </Button>
                         <span class="address">@address</span>
-                        @if (IsCurrent(address))
-                        {
-                            <span class="in-use">In use</span>
-                        }
-                        <button type="button" class="plain" @onclick="() => Edit(address)">Edit</button>
-                        <button type="button" class="plain delete" data-confirming="@IsConfirming(address)" @onclick="() => Delete(address)">
-                            @DeleteLabelOf(address)
-                        </button>
-                    </li>
-                }
-            </ul>
-        }
+                        <Button class="edit" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" IsIcon="true" aria-label="Edit" title="Edit" @onclick="() => Edit(address)">
+                            <MaterialIcon Icon="edit" Size="var(--size-icon-xs)"/>
+                        </Button>
+                    }
+                </li>
+            }
+            @if (_isAdding)
+            {
+                <li class="server" @onkeydown="HandleKeyDown">
+                    <Button class="cancel" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" IsIcon="true" aria-label="Cancel" title="Cancel" @onclick="Cancel">
+                        <MaterialIcon Icon="arrow_back" Size="var(--size-icon-sm)"/>
+                    </Button>
+                    <InputControlText class="address" Size="1" aria-label="Server address" placeholder="https://" autofocus="true" OnInputDelay="0" Value="@_draft" ValueChanged="ChangeDraft"/>
+                    <Button class="save" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" IsIcon="true" aria-label="Save" title="Save" @onclick="Save">
+                        <MaterialIcon Icon="check" Size="var(--size-icon-xs)"/>
+                    </Button>
+                </li>
+            }
+        </ul>
+    }
 
-        <div class="actions">
-            <button type="button" class="plain" @onclick="Add">Add server</button>
-            <button type="button" class="plain" @onclick="Close">Close</button>
-        </div>
+    @if (_error is not null)
+    {
+        <p class="error" role="alert">@_error</p>
     }
 </Dialog>
 
@@ -60,23 +79,27 @@
     public EventCallback OnChanged { get; set; }
 
     private List<string> _addressList = [];
-    private string? _current;
     private bool _wasOpen;
 
-    // The form is shown instead of the list: it edits the saved address, or adds a new one when that is null.
-    private bool _showForm;
+    // The saved address whose row is being edited in place, or null; a new server is typed into an extra row at the end of the list.
     private string? _editing;
+    private bool _isAdding;
+    private string _draft = string.Empty;
+    private string? _error;
 
     // The address whose delete button was clicked once: a second click removes it.
     private string? _confirming;
 
-    private string Title => _editing is null ? "Add server" : "Edit server";
-
-    private bool IsCurrent(string address) => address == _current;
+    private bool IsEditing(string address) => _editing == address;
 
     private bool IsConfirming(string address) => _confirming == address;
 
-    private string DeleteLabelOf(string address) => IsConfirming(address) ? "Confirm" : "Delete";
+    private string DeleteLabelOf(string address) => IsConfirming(address) ? "Confirm delete" : "Delete";
+
+    // The first click is a quiet cross; the second, which removes the server, is a filled check.
+    private ButtonAppearanceEnum DeleteAppearanceOf(string address) => IsConfirming(address) ? ButtonAppearanceEnum.Filled : ButtonAppearanceEnum.Ghost;
+
+    private string DeleteIconOf(string address) => IsConfirming(address) ? "check" : "close";
 
     private const string FunctionWatchOutsideClick = "WatchOutsideClick";
     private const string SelectorConfirming = "[data-confirming]";
@@ -161,16 +184,24 @@
         _wasOpen = Open;
         if (!Open) return;
 
-        _editing = null;
         _confirming = null;
         await Load();
-        _showForm = _addressList.Count == 0;
+
+        // Nothing saved yet: the first thing to do is to add a server.
+        StartEditing(null, _addressList.Count == 0);
+    }
+
+    private void StartEditing(string? address, bool isAdding)
+    {
+        _editing = address;
+        _isAdding = isAdding;
+        _draft = address ?? string.Empty;
+        _error = null;
     }
 
     private async Task Load()
     {
         _addressList = await StorageServerAddress.GetAddressList();
-        _current = await StorageServerAddress.GetAddress();
     }
 
     private Task HandleOpenChanged(bool open)
@@ -186,28 +217,62 @@
     private void Add()
     {
         _confirming = null;
-        _editing = null;
-        _showForm = true;
+        StartEditing(null, true);
     }
 
     private void Edit(string address)
     {
         _confirming = null;
-        _editing = address;
-        _showForm = true;
+        StartEditing(address, false);
     }
 
-    private async Task Back()
+    private void Cancel()
     {
-        _showForm = false;
-        await Load();
+        StartEditing(null, false);
     }
 
-    private async Task Saved(string address)
+    private void ChangeDraft(string? value)
     {
+        _draft = value ?? string.Empty;
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == KeyEnter)
+        {
+            await Save();
+        }
+    }
+
+    private const string KeyEnter = "Enter";
+
+    private async Task Save()
+    {
+        try
+        {
+            if (_editing is null)
+            {
+                await StorageServerAddress.SetAddress(_draft);
+            }
+            else
+            {
+                await StorageServerAddress.ReplaceAddress(_editing, _draft);
+            }
+        }
+        catch (ArgumentException)
+        {
+            _error = PresentationTexts.ServerAddressInvalid;
+            return;
+        }
+        catch (InvalidOperationException exception)
+        {
+            _error = exception.Message;
+            return;
+        }
+
+        StartEditing(null, false);
         await Load();
         await OnChanged.InvokeAsync();
-        _showForm = false;
     }
 
     private async Task Delete(string address)

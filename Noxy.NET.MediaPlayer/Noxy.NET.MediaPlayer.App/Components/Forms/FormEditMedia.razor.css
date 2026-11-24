@@ -1,0 +1,25 @@
+/* Two columns when the dialog is wide enough, one when it is not; what is wide spans them all. */
+.fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    column-gap: var(--size-gap-sm);
+    row-gap: var(--size-gap-sm);
+
+    /* The inputs take the width of their column instead of the width of their content. */
+    --input-flex: 1 1 auto;
+}
+
+.fields ::deep > .wide {
+    grid-column: 1 / -1;
+}
+
+.numbers {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--size-gap-sm);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}

@@ -33,6 +33,8 @@
     --size-control-lg: 3rem;
     --size-control-xl: 4rem;
     --size-control-xxl: 5.75rem;
+    --size-dialog-margin: var(--size-gap-xs);
+    --size-button-min-width: 6rem;
     --size-icon-xxs: 1rem;
     --size-icon-xs: 1.25rem;
     --size-icon-sm: 1.5rem;
@@ -66,8 +68,9 @@
     --layout-narrow: 0;
     --layout-touch: 0;
     --table-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
-    --table-columns-library: max-content max-content repeat(3, minmax(0, auto)) minmax(4.5rem, max-content) max-content;
-    --table-columns-queue: max-content max-content repeat(3, minmax(0, auto)) max-content;
+    /* The first two columns are one control wide. The rows and the header are subgrids with the page padding on their sides, and a subgrid adds its edge padding to the first column, so that one is the padding wider. */
+    --table-columns-library: calc(var(--size-control-xxs) + var(--size-gap-md)) var(--size-control-xxs) repeat(3, minmax(0, auto)) minmax(4.5rem, max-content) max-content;
+    --table-columns-queue: calc(var(--size-control-xxs) + var(--size-gap-md)) var(--size-control-xxs) repeat(3, minmax(0, auto)) max-content;
 }
 
 :root {

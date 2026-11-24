@@ -1,0 +1,63 @@
+@inject IMediaEditService ServiceMediaEdit
+@using Noxy.NET.MediaPlayer.Presentation.Exceptions
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <WebForm T="FormModelEditMedia" Context="_context" OnSubmit="Submit">
+        <div class="fields">
+            <InputGroupText class="wide" @bind-Value="_context.Model.Title"/>
+            <InputGroupText @bind-Value="_context.Model.Artist" Description="@AppTexts.EditMediaCreditHint"/>
+            <InputGroupText @bind-Value="_context.Model.AlbumArtist" Description="@AppTexts.EditMediaCreditHint"/>
+            <InputGroupText @bind-Value="_context.Model.Album"/>
+            <InputGroupText @bind-Value="_context.Model.Subtitle"/>
+            <InputGroupText class="wide" @bind-Value="_context.Model.Genre" Description="@AppTexts.EditMediaCreditHint"/>
+            <div class="wide numbers">
+                <InputGroupInteger @bind-Value="_context.Model.Year"/>
+                <InputGroupInteger @bind-Value="_context.Model.TrackNumber"/>
+                <InputGroupInteger @bind-Value="_context.Model.DiscNumber"/>
+            </div>
+            <InputGroupTextArea class="wide" @bind-Value="_context.Model.Comment"/>
+        </div>
+        <div class="actions">
+            <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">@AppTexts.EditMediaSave</Button>
+        </div>
+    </WebForm>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required ResponseMediaFile Media { get; set; }
+
+    [Parameter]
+    public bool? Loading { get; set; }
+    private bool LoadingCurrent => Loading ?? _context.IsSubmitting;
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private WebFormContext<FormModelEditMedia> _context = new(new());
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _context = new(FormModelEditMedia.From(Media));
+    }
+
+    private async Task Submit(WebFormContext<FormModelEditMedia> context)
+    {
+        try
+        {
+            await ServiceMediaEdit.Edit(Media, context.Model);
+        }
+        catch (Exception exception) when (exception is ApiException or HttpRequestException)
+        {
+            // A refusal, such as the song having been deleted on another device, belongs to the form.
+            context.HandleException(exception);
+            return;
+        }
+
+        await OnSubmit.InvokeAsync();
+    }
+
+}

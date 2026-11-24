@@ -2,7 +2,7 @@
 @inject IJSRuntime JS
 @inherits BaseComponentElement
 
-<dialog @ref="_element" @attributes="AdditionalAttributes" class="@CssClass">
+<dialog @ref="_element" @attributes="AdditionalAttributes" class="@CssClass" data-size="@SizeString">
     @if (!IsRequiredCurrent)
     {
         <Button Type="@HTMLButtonTypeEnum.Button" class="close" data-dialog-close IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="@CloseLabelCurrent" @onclick="CloseHandler">
@@ -16,7 +16,9 @@
             }
         </Button>
     }
-    @ChildContent
+    <div class="content">
+        @ChildContent
+    </div>
 </dialog>
 
 @code {
@@ -28,6 +30,12 @@
 
     [Parameter]
     public EventCallback<bool> OpenChanged { get; set; }
+
+    // How much room the dialog may take: the default is up to a column and a half, wide is for forms and lists, and full is for a document, the whole window with the content scrolling inside it.
+    [Parameter]
+    public DialogSizeEnum? Size { get; set; }
+    private DialogSizeEnum SizeCurrent => Size ?? DialogSizeEnum.Default;
+    private string SizeString => SizeCurrent.ToText();
 
     private const string FunctionShow = "Show";
     private const string FunctionClose = "Close";

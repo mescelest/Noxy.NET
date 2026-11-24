@@ -1,58 +1,76 @@
-.server-list {
+/* Wide enough for a normal address, and never wider than the window; a longer address is cut off with an ellipsis. */
+.ServerManageDialog ::deep > .content {
+    width: min(calc(var(--size-column) * 1.5), calc(100vw - 2 * var(--size-dialog-margin)));
+}
+
+.header {
     display: flex;
-    flex-flow: column;
-    gap: var(--size-gap-xxs);
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--size-gap-xs);
+}
+
+.header h2 {
+    margin: 0;
+}
+
+/* One grid for the whole list, so the columns line up from row to row: delete, address, edit. */
+.server-list {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    row-gap: var(--size-gap-xxs);
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
 .server {
-    display: flex;
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
     align-items: center;
-    gap: var(--size-gap-xs);
+    /* The height of the address field, so a row is the same size when it is being edited. */
+    min-height: var(--size-control-input);
+    column-gap: var(--size-gap-xs);
+    margin-left: calc(-1 * var(--size-gap-xxxs));
+}
+
+
+.header ::deep > .add, .server ::deep > .delete, .server ::deep > .cancel {
+    min-width: var(--size-control-xxs);
+    min-height: var(--size-control-xxs);
+}
+
+.server > ::deep .edit, .server > ::deep .save {
+    min-width: var(--size-control-xs);
+    min-height: var(--size-control-xs);
 }
 
 .address {
-    flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.in-use {
-    color: var(--color-muted);
-    font: var(--font-label);
-}
-
 .empty {
     color: var(--color-muted);
 }
 
-.actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--size-gap-xs);
+
+/* The address field takes the place of the address text, and the cell may shrink below the width of what is typed. */
+.server ::deep > .TemplateInputControlTextual {
+    min-width: 0;
+    /* The text starts after the border and the padding of the field, so both are taken back and its text lines up with the text of the other rows. */
+    margin-left: calc(-1 * var(--size-gap-xxs) - var(--size-border-width-sm));
 }
 
-.plain {
-    min-height: var(--size-control-sm);
-    padding: 0 var(--size-gap-xs);
-    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
-    border-radius: var(--size-border-radius-md);
-    background: transparent;
-    color: var(--color-complementary);
-    font: var(--font-button);
-    cursor: pointer;
+.server ::deep > .TemplateInputControlTextual > input {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
-.delete {
+.error {
+    margin: 0;
     color: var(--color-error);
-}
-
-.delete[data-confirming] {
-    border-color: var(--color-error);
-    background: var(--color-error);
-    color: var(--color-light);
 }

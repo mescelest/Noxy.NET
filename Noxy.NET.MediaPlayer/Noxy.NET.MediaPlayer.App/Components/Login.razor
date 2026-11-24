@@ -21,7 +21,7 @@
         </Divider>
 
         <div class="provider-list">
-            <Button class="provider" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Notice" Loading="@IsGoogleBusy" disabled="@IsBusy" @onclick="SignInGoogle">
+            <Button class="provider" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.Error" Loading="@IsGoogleBusy" disabled="@IsBusy" @onclick="SignInGoogle">
                 <MaterialIcon Icon="mail"/>
                 Sign in with Gmail
             </Button>

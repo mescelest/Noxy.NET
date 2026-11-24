@@ -179,6 +179,7 @@ public class LibraryActionServiceTest
     [InlineData(LibraryActionEnum.DeleteFromLibrary)]
     [InlineData(LibraryActionEnum.AddToPlaylist)]
     [InlineData(LibraryActionEnum.SaveAsFile)]
+    [InlineData(LibraryActionEnum.Edit)]
     public void GetDisabledReason_IsNullOnline_AndTheOfflineSentenceOffline(LibraryActionEnum action)
     {
         Assert.Null(_service.GetDisabledReason(action));

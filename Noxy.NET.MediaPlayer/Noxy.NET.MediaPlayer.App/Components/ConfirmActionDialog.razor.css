@@ -1,5 +1,18 @@
+h2, p {
+    margin: 0;
+}
+
 .actions {
     display: flex;
     justify-content: flex-end;
     gap: var(--size-gap-xs);
+}
+
+.warning {
+    color: var(--color-error);
+    font-weight: bold;
+}
+
+.detail {
+    white-space: pre-line;
 }

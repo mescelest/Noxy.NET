@@ -30,15 +30,15 @@ public class QueueActionServiceTest
     }
 
     [Fact]
-    public async Task Remove_RemovesUpcomingItems_AndSkipsHistoryAndTheCurrentOne()
+    public async Task Remove_RemovesEveryChosenItem_AndTheCurrentOneLast()
     {
         QueueItem played = Item(), current = Item(), queued = Item(), fromSource = Item();
         SetQueue([played], current, [queued], [fromSource]);
 
         BulkResult result = await _service.Remove([played.ItemID, current.ItemID, queued.ItemID, fromSource.ItemID]);
 
-        Assert.Equal([$"RemoveFromQueue {queued.ItemID}", $"RemoveFromQueue {fromSource.ItemID}"], _control.CallList);
-        Assert.Equal(2, result.SucceededCount);
+        Assert.Equal([$"RemoveFromQueue {played.ItemID}", $"RemoveFromQueue {queued.ItemID}", $"RemoveFromQueue {fromSource.ItemID}", $"RemoveFromQueue {current.ItemID}"], _control.CallList);
+        Assert.Equal(4, result.SucceededCount);
         Assert.Empty(result.FailedIDList);
     }
 

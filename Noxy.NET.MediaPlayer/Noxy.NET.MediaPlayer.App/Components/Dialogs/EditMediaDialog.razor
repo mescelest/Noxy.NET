@@ -1,0 +1,35 @@
+@inject IState<FeatureLibraryState> StateLibrary
+@inherits BaseComponentElementFluxor
+
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Size="DialogSizeEnum.Wide" Open="Open" OpenChanged="HandleOpenChanged">
+    <h2>@AppTexts.EditMediaTitle</h2>
+    @if (Open && Media is { } media)
+    {
+        <FormEditMedia Media="media" OnSubmit="Close"/>
+    }
+</Dialog>
+
+@code {
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid MediaFileID { get; set; }
+
+    private ResponseMediaFile? Media => StateLibrary.Value.MediaList.FirstOrDefault(x => x.ID == MediaFileID);
+
+    private Task HandleOpenChanged(bool open)
+    {
+        return open ? Task.CompletedTask : Close();
+    }
+
+    private async Task Close()
+    {
+        await OpenChanged.InvokeAsync(false);
+    }
+
+}

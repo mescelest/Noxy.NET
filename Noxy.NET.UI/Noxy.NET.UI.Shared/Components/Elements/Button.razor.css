@@ -23,6 +23,11 @@
     padding: 0;
 }
 
+/* A button with a label is never narrower than this, so a short word such as "OK" is not a small square; an icon button keeps the size of its control. */
+.Button:not([data-is-icon]) {
+    min-width: var(--size-button-min-width, 6rem);
+}
+
 .Button.loading ::deep > .Loader {
     stroke: var(--color-on-button, #FFFFFF);
 }

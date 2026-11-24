@@ -32,19 +32,24 @@
         </div>
 
         <div class="danger">
-            <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Filled" Status="StatusEnum.Warning" @onclick="AskResetPreferences">
-                <MaterialIcon Icon="restart_alt" Size="var(--size-icon-sm)"/>
-                @AppTexts.ResetPreferencesButton
-            </Button>
+            <ButtonConfirm Status="StatusEnum.Warning" OnConfirm="ResetPreferences">
+                <ChildContent>
+                    <MaterialIcon Icon="restart_alt" Size="var(--size-icon-sm)"/>
+                    @AppTexts.ResetPreferencesButton
+                </ChildContent>
+                <ConfirmContent>
+                    <MaterialIcon Icon="check" Size="var(--size-icon-sm)"/>
+                    @AppTexts.ResetPreferencesConfirm
+                </ConfirmContent>
+            </ButtonConfirm>
             <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Filled" Status="StatusEnum.Error" @onclick="AskDeleteAllData">
                 <MaterialIcon Icon="delete_forever" Size="var(--size-icon-sm)"/>
                 @AppTexts.DeleteAllDataButton
             </Button>
         </div>
 
-        <ConfirmActionDialog Open="_isResettingPreferences" OpenChanged="CloseResetPreferences" Title="@AppTexts.ResetPreferencesButton" Message="@AppTexts.ResetPreferencesMessage" AcceptText="@AppTexts.ResetPreferencesAccept"
-                             OnSubmit="SubmitResetPreferences"/>
-        <ConfirmActionDialog Open="_isDeletingAllData" OpenChanged="CloseDeleteAllData" Title="@AppTexts.DeleteAllDataButton" Message="@AppTexts.DeleteAllDataMessage" Detail="@AppTexts.DeleteAllDataDetail" AcceptText="@AppTexts.DeleteAllDataAccept"
+        <ConfirmActionDialog Open="_isDeletingAllData" OpenChanged="CloseDeleteAllData" Title="@AppTexts.DeleteAllDataTitle" Detail="@AppTexts.DeleteAllDataDetail" Warning="@AppTexts.DeleteAllDataWarning" AcceptText="@AppTexts.DeleteAllDataAccept"
+                             AcceptStatus="StatusEnum.Error"
                              OnSubmit="SubmitDeleteAllData"/>
     </ChildContent>
 </Section>
@@ -53,7 +58,6 @@
 
     private const string TextUnknown = "Unknown";
 
-    private bool _isResettingPreferences;
     private bool _isDeletingAllData;
     private int _mediaCount;
     private int _onDeviceCount;
@@ -105,19 +109,9 @@
         });
     }
 
-    private void AskResetPreferences()
-    {
-        _isResettingPreferences = true;
-    }
-
     private void AskDeleteAllData()
     {
         _isDeletingAllData = true;
-    }
-
-    private void CloseResetPreferences(bool open)
-    {
-        _isResettingPreferences = open;
     }
 
     private void CloseDeleteAllData(bool open)
@@ -125,10 +119,8 @@
         _isDeletingAllData = open;
     }
 
-    private async Task SubmitResetPreferences(bool accepted)
+    private async Task ResetPreferences()
     {
-        if (!accepted) return;
-
         await Run(ServiceDeviceReset.ResetPreferences);
     }
 

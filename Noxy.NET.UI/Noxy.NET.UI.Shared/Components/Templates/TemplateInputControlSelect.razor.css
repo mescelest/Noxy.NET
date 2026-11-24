@@ -11,6 +11,8 @@
     padding-right: var(--size-gap-xxl, 2rem);
     border: var(--size-border-width-sm, 1px) solid var(--color-border, var(--color-complementary, #000000));
     border-radius: var(--size-border-radius-md, 0.25rem);
+    background: var(--color-input, transparent);
+    color: var(--color-on-input, inherit);
     font-size: inherit;
     font-family: inherit;
     box-sizing: border-box;

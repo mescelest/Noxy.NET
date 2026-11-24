@@ -52,10 +52,6 @@
     <value>Delete {0} songs</value>
         <comment>The menu of the Library and of a playlist's entries. For a ticked group; {0} is how many.</comment>
   </data>
-    <data name="LibrarySelectedGroup" xml:space="preserve">
-    <value>{0} selected songs</value>
-        <comment>The sub-menu that repeats the actions for the whole ticked group; {0} is how many.</comment>
-  </data>
     <data name="MediaFileCountOne" xml:space="preserve">
     <value>{0} media file</value>
         <comment>A count inside a sentence, for exactly one.</comment>
@@ -123,10 +119,6 @@
     <data name="PlaylistDelete" xml:space="preserve">
     <value>Delete playlist</value>
         <comment>The menu of a playlist.</comment>
-  </data>
-    <data name="PlaylistDeleteConfirm" xml:space="preserve">
-    <value>Click again to delete</value>
-        <comment>The delete item of a playlist's menu, after the first click.</comment>
   </data>
     <data name="EditPlaylistTitle" xml:space="preserve">
     <value>Edit playlist</value>
@@ -284,28 +276,33 @@
     <value>Reset preferences</value>
         <comment>The button on the settings page that puts the preferences of this device back to their defaults.</comment>
   </data>
-    <data name="ResetPreferencesMessage" xml:space="preserve">
-    <value>Put the preferences of this device back to their defaults? You stay signed in and your downloads stay.</value>
-        <comment>The message of the reset preferences confirmation.</comment>
-  </data>
-    <data name="ResetPreferencesAccept" xml:space="preserve">
-    <value>Reset</value>
-        <comment>The accept button of the reset preferences confirmation.</comment>
+    <data name="ResetPreferencesConfirm" xml:space="preserve">
+    <value>Click again to reset</value>
+        <comment>What the reset preferences button says after its first click; a second click resets.</comment>
   </data>
     <data name="DeleteAllDataButton" xml:space="preserve">
-    <value>Delete all my data</value>
+    <value>Delete local data</value>
         <comment>The button on the settings page that removes everything this device holds.</comment>
   </data>
-    <data name="DeleteAllDataMessage" xml:space="preserve">
-    <value>Delete all your data from this device? This signs you out and removes your downloaded songs, saved queue, saved server addresses and preferences.</value>
-        <comment>The message of the delete all data confirmation.</comment>
+    <data name="DeleteAllDataTitle" xml:space="preserve">
+    <value>Delete the local data on this device?</value>
+        <comment>The title of the delete all data confirmation, a question.</comment>
   </data>
     <data name="DeleteAllDataDetail" xml:space="preserve">
-    <value>Nothing is deleted from your library on the server. This cannot be undone.</value>
-        <comment>The second sentence of the delete all data confirmation.</comment>
+    <value>This signs you out and removes your downloaded songs, saved queue, saved servers and preferences.
+Nothing is deleted from your library on the server.</value>
+        <comment>The lines under the message of the delete all data confirmation, one paragraph with a line break between the sentences.</comment>
+  </data>
+    <data name="DeleteAllDataWarning" xml:space="preserve">
+    <value>This cannot be undone.</value>
+        <comment>The line that stands out in the delete all data confirmation, under the rest of its text.</comment>
+  </data>
+    <data name="ConfirmActionAgain" xml:space="preserve">
+    <value>Confirm action?</value>
+        <comment>What the accept button of a confirmation says after its first click; a second click confirms.</comment>
   </data>
     <data name="DeleteAllDataAccept" xml:space="preserve">
-    <value>Delete all</value>
+    <value>Yes, delete local data</value>
         <comment>The accept button of the delete all data confirmation.</comment>
   </data>
     <data name="AccountSignOut" xml:space="preserve">
@@ -355,5 +352,25 @@
     <data name="ServerAddressNotSaved" xml:space="preserve">
     <value>The server address is not saved.</value>
         <comment>The server form, when the address being edited is no longer in the list.</comment>
+  </data>
+    <data name="LibraryEdit" xml:space="preserve">
+    <value>Edit…</value>
+        <comment>The edit item of a song's context menu.</comment>
+  </data>
+    <data name="EditMediaTitle" xml:space="preserve">
+    <value>Edit song</value>
+        <comment>The title of the edit song dialog.</comment>
+  </data>
+    <data name="EditMediaSave" xml:space="preserve">
+    <value>Save</value>
+        <comment>The button of the edit song form.</comment>
+  </data>
+    <data name="EditMediaCreditHint" xml:space="preserve">
+    <value>Separate several with ;</value>
+        <comment>The hint under the artist, album artist and genre fields.</comment>
+  </data>
+    <data name="LibraryPickPlaylist" xml:space="preserve">
+    <value>Pick playlist…</value>
+        <comment>The first item of the add to playlist sub-menu; it opens the list of all playlists.</comment>
   </data>
 </root>

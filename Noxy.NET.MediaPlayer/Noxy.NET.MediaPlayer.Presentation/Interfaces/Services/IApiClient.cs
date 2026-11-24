@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Noxy.NET.MediaPlayer.Application.Requests.Media;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -44,6 +45,9 @@ public interface IApiClient
     Task<ResponsePlaylist> UpdatePlaylist(Guid id, RequestUpdatePlaylist request);
 
     Task DeletePlaylist(Guid id);
+
+    // Changes the tags of a media file (PATCH /Media/{id}); only the fields that were set change, and the answer is the media file as it is now. The server pushes the change to every device.
+    Task<ResponseMediaFile> UpdateMedia(Guid id, RequestUpdateMedia request);
 
     // Deletes the media file from the library (DELETE /Media/{id}, 204). The server pushes the change to every device.
     Task DeleteMedia(Guid id);

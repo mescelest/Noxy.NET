@@ -40,7 +40,10 @@
 
 .separator {
     height: 0;
-    border-top: var(--size-border-width-sm, 1px) solid currentColor;
+    margin-block: var(--size-gap-xxxs, 0.25rem);
+    /* The menu has padding all round, and the line goes through it to the edge. */
+    margin-inline: calc(-1 * var(--size-gap-xxxs, 0.25rem));
+    border-top: var(--size-border-width-md, 2px) solid currentColor;
     opacity: 0.25;
 }
 
@@ -72,6 +75,28 @@
     color: var(--color-disabled, #7F7F7F);
 }
 
-.item[data-destructive] {
+.item[data-destructive]:not([aria-disabled="true"]) {
     color: var(--color-error, #E42B21);
+}
+
+/* An item that asks twice holds both of its texts in the same cell, so it is as wide as the longer one and does not change size when it is armed. */
+.faces {
+    display: grid;
+    min-width: 0;
+}
+
+.face {
+    grid-area: 1 / 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.face:not([data-active]) {
+    visibility: hidden;
+}
+
+.item[data-armed] {
+    background: var(--color-offset-primary-md, #E0E0E0);
 }

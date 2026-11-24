@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using Noxy.NET.MediaPlayer.Application.Requests.Media;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -157,6 +158,18 @@ public sealed class FakeApiClient : IApiClient
         UpdatePlaylistRequestList.Add((id, request));
         if (WriteFailure is not null) throw WriteFailure;
         return Task.FromResult(UpdatePlaylistHandler(id, request));
+    }
+
+    public Func<Guid, RequestUpdateMedia, ResponseMediaFile> UpdateMediaHandler { get; set; } =
+        (id, _) => new() { ID = id, Title = "Media", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = "h", TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
+
+    public List<(Guid ID, RequestUpdateMedia Request)> UpdateMediaRequestList { get; } = [];
+
+    public Task<ResponseMediaFile> UpdateMedia(Guid id, RequestUpdateMedia request)
+    {
+        UpdateMediaRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+        return Task.FromResult(UpdateMediaHandler(id, request));
     }
 
     public List<Guid> DeleteMediaList { get; } = [];

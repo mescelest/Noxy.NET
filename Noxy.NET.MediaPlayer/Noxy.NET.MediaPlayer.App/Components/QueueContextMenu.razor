@@ -3,6 +3,7 @@
 @inject IQueueActionService ServiceQueueAction
 @inject IPlaybackControlService ServiceControl
 @inject IToastService ServiceToast
+@using Noxy.NET.MediaPlayer.Presentation
 @inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -58,7 +59,7 @@
     private const string MenuID = "queue-context-menu";
 
     private ContextMenu? _menu;
-    private LibraryMenuScope? _scope;
+    private Guid? _clickedKey;
     private ConfirmRequest? _confirm;
     private List<Guid> _playlistTargetList = [];
     private bool _choosingPlaylist;
@@ -67,34 +68,22 @@
 
     private bool IsConfirming => _confirm is not null;
 
-    // A right-click on a row acts on that row (and its group, when it is one of several ticked); the button acts on the ticked rows.
-    private List<ContextMenuItem> ItemList => _scope is { } scope ? BuildRowItemList(scope) : BuildItemList(SelectedKeyList);
+    // A right-click on a row acts on that row; the button acts on the ticked rows.
+    private List<ContextMenuItem> ItemList => _clickedKey is { } key ? BuildItemList([key]) : BuildItemList(SelectedKeyList);
 
     public async Task OpenAtAsync(MouseEventArgs args, Guid itemID)
     {
         if (_menu is null) return;
 
-        _scope = LibraryMenuScope.Of(itemID, SelectedSet, SelectedKeyList);
+        _clickedKey = itemID;
         StateHasChanged();
         await _menu.OpenAtAsync(args);
     }
 
     private Task CloseHandler()
     {
-        _scope = null;
+        _clickedKey = null;
         return Task.CompletedTask;
-    }
-
-    private List<ContextMenuItem> BuildRowItemList(LibraryMenuScope scope)
-    {
-        List<ContextMenuItem> list = BuildItemList([scope.ClickedID]);
-        if (scope.HasGroup)
-        {
-            list.Add(ContextMenuItem.Separator());
-            list.Add(ContextMenuItem.Submenu(string.Format(AppTexts.LibrarySelectedGroup, scope.GroupIDList.Count), BuildItemList(scope.GroupIDList)));
-        }
-
-        return list;
     }
 
     // The menu for these queue items: what the queue can do with them, then what the library can do with their files.
@@ -102,30 +91,31 @@
     {
         List<QueueListRow> rowList = [.. itemIDList.Select(RowOf).OfType<QueueListRow>()];
         List<Guid> upcomingIDList = [.. rowList.Where(x => x.Kind.IsUpcoming).Select(x => x.Item?.ItemID).OfType<Guid>()];
+        List<Guid> itemIDChosenList = [.. rowList.Select(x => x.Item?.ItemID).OfType<Guid>()];
         List<Guid> mediaFileIDList = [.. rowList.Select(x => x.Item?.MediaFileID).OfType<Guid>()];
         string? upcomingReason = upcomingIDList.Count == 0 ? AppTexts.QueueNothingRemovable : null;
 
         List<ContextMenuItem> list = [];
         if (rowList.Count == 1 && rowList[0].Item is { } only)
         {
-            list.Add(ContextMenuItem.Item(AppTexts.QueuePlayNow, () => Run(() => ServiceControl.JumpTo(only.ItemID, true))));
+            list.Add(ContextMenuItem.Item(AppTexts.QueuePlayNow, () => Run(() => ServiceControl.JumpTo(only.ItemID, true)), icon: "play_arrow"));
         }
 
-        list.Add(ContextMenuItem.Item(AppTexts.QueuePlayNext, () => Show(ServiceQueueAction.PlayNext(upcomingIDList)), upcomingReason is not null, upcomingReason));
-        list.Add(ContextMenuItem.Item(AppTexts.QueueRemove, () => Show(ServiceQueueAction.Remove(upcomingIDList)), upcomingReason is not null, upcomingReason, true));
+        list.Add(ContextMenuItem.Item(AppTexts.QueuePlayNext, () => Show(ServiceQueueAction.PlayNext(upcomingIDList)), upcomingReason is not null, upcomingReason, icon: "playlist_play"));
+        list.Add(ContextMenuItem.Item(AppTexts.QueueRemove, () => Show(ServiceQueueAction.Remove(itemIDChosenList)), itemIDChosenList.Count == 0, null, true, "remove_circle_outline"));
         list.Add(ContextMenuItem.Separator());
-        list.Add(ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(mediaFileIDList))));
-        list.Add(ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(mediaFileIDList))));
-        list.Add(ItemOf(LibraryActionEnum.AddToPlaylist, AppTexts.LibraryAddToPlaylist, () => ChoosePlaylist(mediaFileIDList)));
-        list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => ConfirmRemoveFromDevice(mediaFileIDList)));
+        list.Add(ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(mediaFileIDList)), "download"));
+        list.Add(ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(mediaFileIDList)), "save_alt"));
+        list.Add(AddToPlaylistItem(mediaFileIDList));
+        list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => ConfirmRemoveFromDevice(mediaFileIDList), "delete_sweep"));
 
         return list;
     }
 
-    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run)
+    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run, string icon)
     {
         string? reason = ServiceLibraryAction.GetDisabledReason(action);
-        return ContextMenuItem.Item(text, run, reason is not null, reason);
+        return ContextMenuItem.Item(text, run, reason is not null, reason, icon: icon);
     }
 
     private async Task Run(Func<Task> action)
@@ -187,6 +177,25 @@
         _choosingPlaylist = true;
 
         return Task.CompletedTask;
+    }
+
+    // A sub-menu: pick a playlist in the dialog, or one of the playlists played most recently (the same short list as the home page) at once.
+    private ContextMenuItem AddToPlaylistItem(List<Guid> mediaFileIDList)
+    {
+        List<ContextMenuItem> list = [ItemOf(LibraryActionEnum.AddToPlaylist, AppTexts.LibraryPickPlaylist, () => ChoosePlaylist(mediaFileIDList), "playlist_add")];
+        List<ResponsePlaylist> recentList = StatePlaylistList.Value.PlaylistList.TakeRecentlyPlayed(PresentationConstants.HomeRecentCount);
+        if (recentList.Count > 0)
+        {
+            list.Add(ContextMenuItem.Separator());
+            list.AddRange(recentList.Select(playlist => ItemOf(LibraryActionEnum.AddToPlaylist, playlist.Name, () => AddToPlaylist(playlist.ID, mediaFileIDList), "playlist_add")));
+        }
+
+        return ContextMenuItem.Submenu(AppTexts.LibraryAddToPlaylist, list, "playlist_add");
+    }
+
+    private Task AddToPlaylist(Guid playlistID, List<Guid> mediaFileIDList)
+    {
+        return Show(ServiceLibraryAction.AddToPlaylist(playlistID, mediaFileIDList));
     }
 
     private Task AddToPlaylist(Guid playlistID)

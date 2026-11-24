@@ -1,8 +1,10 @@
 @inject IState<FeaturePlaylistListState> StatePlaylistList
+@inject IState<FeatureLibraryState> StateLibrary
 @inject IDispatcher Dispatcher
 @inject ILibraryActionService ServiceLibraryAction
 @inject IPlaylistService ServicePlaylist
 @inject IToastService ServiceToast
+@using Noxy.NET.MediaPlayer.Presentation
 @inherits BaseComponentElementFluxor
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
@@ -15,7 +17,7 @@
 
     <ContextMenu @ref="_menu" ID="@MenuID" ItemList="ItemList" Side="PlacementSideEnum.Bottom" Align="PlacementAlignEnum.End" OnClose="CloseHandler"/>
 
-    <ConfirmActionDialog Open="@IsConfirming" OpenChanged="CloseConfirm" Title="@_confirm?.Title" Message="@_confirm?.Message" Detail="@_confirm?.Detail" AcceptText="@_confirm?.AcceptText" OnSubmit="SubmitConfirm"/>
+    <EditMediaDialog @bind-Open="_isEditing" MediaFileID="_editingID"/>
 
     <Dialog @bind-Open="_choosingPlaylist">
         <h2>@AppTexts.LibraryAddToPlaylist</h2>
@@ -37,8 +39,6 @@
 </div>
 
 @code {
-
-    private sealed record ConfirmRequest(string Title, string Message, string? Detail, string AcceptText, Func<Task> Run);
 
     // The keys of the ticked rows, and the same in page order with the ones the search hides last. A key is what the page tells its rows apart by.
     [Parameter, EditorRequired]
@@ -68,71 +68,94 @@
     private const string MenuID = "library-context-menu";
 
     private ContextMenu? _menu;
-    private LibraryMenuScope? _scope;
-    private ConfirmRequest? _confirm;
+    private Guid? _clickedKey;
     private List<Guid> _playlistTargetList = [];
     private bool _choosingPlaylist;
+    private bool _isEditing;
+    private Guid _editingID;
 
     private bool IsNothingTicked => SelectedSet.Count == 0;
 
-    private bool IsConfirming => _confirm is not null;
-
     // A right-click on a row acts on that row; the Actions button acts on the ticked rows.
-    private List<ContextMenuItem> ItemList => _scope is { } scope ? BuildRowItemList(scope) : BuildItemList(SelectedKeyList, true);
+    private List<ContextMenuItem> ItemList => _clickedKey is { } key ? BuildItemList([key], false, true) : BuildItemList(SelectedKeyList, true);
 
-    // Opens at the pointer for the row that was clicked. A row in a ticked group also gets the group's actions in a sub-menu.
+    // Opens at the pointer for the row that was clicked.
     public async Task OpenAtAsync(MouseEventArgs args, Guid rowKey)
     {
         if (_menu is null) return;
 
-        _scope = LibraryMenuScope.Of(rowKey, SelectedSet, SelectedKeyList);
+        _clickedKey = rowKey;
         StateHasChanged();
         await _menu.OpenAtAsync(args);
     }
 
     private Task CloseHandler()
     {
-        _scope = null;
+        _clickedKey = null;
         return Task.CompletedTask;
     }
 
-    private List<ContextMenuItem> BuildRowItemList(LibraryMenuScope scope)
-    {
-        List<ContextMenuItem> list = BuildItemList([scope.ClickedID], false);
-        if (scope.HasGroup)
-        {
-            list.Add(ContextMenuItem.Separator());
-            list.Add(ContextMenuItem.Submenu(string.Format(AppTexts.LibrarySelectedGroup, scope.GroupIDList.Count), BuildItemList(scope.GroupIDList, true)));
-        }
-
-        return list;
-    }
-
     // The menu in its order: one more entry is one more item. isTicked is true when the list is the ticked rows.
-    private List<ContextMenuItem> BuildItemList(List<Guid> keyList, bool isTicked)
+    private List<ContextMenuItem> BuildItemList(List<Guid> keyList, bool isTicked, bool isRow = false)
     {
         List<Guid> idList = MediaFileIDListOf(keyList);
+        bool anyOnDevice = idList.Any(IsOnDevice);
+        bool anyMissing = idList.Any(x => !IsOnDevice(x));
+
         List<ContextMenuItem> list =
         [
-            ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(idList))),
-            ItemOf(LibraryActionEnum.PlayNext, AppTexts.LibraryPlayNext, () => Show(ServiceLibraryAction.PlayNext(idList))),
-            ItemOf(LibraryActionEnum.AddToQueue, AppTexts.LibraryAddToQueue, () => Show(ServiceLibraryAction.AddToQueue(idList))),
-            ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(idList))),
-            ItemOf(LibraryActionEnum.AddToPlaylist, AppTexts.LibraryAddToPlaylist, () => ChoosePlaylist(idList)),
-            ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => Confirm(AppTexts.LibraryRemoveFromDevice, string.Format(AppTexts.ConfirmRemoveFromDeviceMessage, Count(idList.Count)), AppTexts.ConfirmRemoveAccept, () => Show(ServiceLibraryAction.RemoveFromDevice(idList)), isTicked))
+            ItemOf(LibraryActionEnum.PlayNext, AppTexts.LibraryPlayNext, () => Show(ServiceLibraryAction.PlayNext(idList)), "playlist_play"),
+            ItemOf(LibraryActionEnum.AddToQueue, AppTexts.LibraryAddToQueue, () => Show(ServiceLibraryAction.AddToQueue(idList)), "queue_music"),
+            AddToPlaylistItem(idList)
         ];
+
+        // Only the menu of one song edits it: the Actions button and a group of ticked songs have no such item.
+        if (isRow)
+        {
+            list.Add(ItemOf(LibraryActionEnum.Edit, AppTexts.LibraryEdit, () => OpenEdit(idList[0]), "edit"));
+        }
+
+        // What the device holds decides what can be done with it: a file that is there can be saved or removed, one that is not can be downloaded.
+        if (anyOnDevice)
+        {
+            list.Add(ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(idList)), "save_alt"));
+        }
+
+        if (anyMissing)
+        {
+            list.Add(ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(idList)), "download"));
+        }
+
+        list.Add(ContextMenuItem.Separator());
+        if (anyOnDevice)
+        {
+            list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => Show(ServiceLibraryAction.RemoveFromDevice(idList)), "delete_sweep", true, AppTexts.ConfirmActionAgain));
+        }
 
         // The last item: on a playlist's page the entries leave the playlist, in the Library the media files leave the library.
         if (PlaylistID is { } playlistID)
         {
-            list.Add(ContextMenuItem.Item(AppTexts.LibraryRemoveFromPlaylist, () => Confirm(AppTexts.LibraryRemoveFromPlaylist, string.Format(AppTexts.ConfirmRemoveFromPlaylistMessage, Count(keyList.Count)), AppTexts.ConfirmRemoveAccept, () => RemoveFromPlaylist(playlistID, keyList), isTicked), isDestructive: true));
+            list.Add(ContextMenuItem.Item(AppTexts.LibraryRemoveFromPlaylist, () => RemoveFromPlaylist(playlistID, keyList), isDestructive: true, icon: "playlist_remove", confirmText: AppTexts.ConfirmActionAgain));
         }
         else
         {
-            list.Add(ItemOf(LibraryActionEnum.DeleteFromLibrary, DeleteText(idList.Count), () => Confirm(AppTexts.ConfirmDeleteTitle, string.Format(AppTexts.ConfirmDeleteMessage, Count(idList.Count)), AppTexts.ConfirmDeleteAccept, () => DeleteFromLibrary(idList, isTicked), isTicked), true));
+            list.Add(ItemOf(LibraryActionEnum.DeleteFromLibrary, DeleteText(idList.Count), () => DeleteFromLibrary(idList, isTicked), "delete", true, AppTexts.ConfirmActionAgain));
         }
 
         return list;
+    }
+
+    private bool IsOnDevice(Guid mediaFileID)
+    {
+        return StateLibrary.Value.StateMap.GetValueOrDefault(mediaFileID, FileSyncStateEnum.NotDownloaded) == FileSyncStateEnum.OnDevice;
+    }
+
+    private Task OpenEdit(Guid mediaFileID)
+    {
+        _editingID = mediaFileID;
+        _isEditing = true;
+
+        return Task.CompletedTask;
     }
 
     private List<Guid> MediaFileIDListOf(List<Guid> keyList)
@@ -156,10 +179,10 @@
         await OnPlaylistChanged.InvokeAsync();
     }
 
-    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run, bool isDestructive = false)
+    private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run, string icon, bool isDestructive = false, string? confirmText = null)
     {
         string? reason = ServiceLibraryAction.GetDisabledReason(action);
-        return ContextMenuItem.Item(text, run, reason is not null, reason, isDestructive);
+        return ContextMenuItem.Item(text, run, reason is not null, reason, isDestructive, icon, confirmText: confirmText);
     }
 
     private static string Count(int count) => count.ToCountText(AppTexts.MediaFileCountOne, AppTexts.MediaFileCountMany);
@@ -194,36 +217,31 @@
         }
     }
 
-    // Asks first with the real count, and for the ticked rows says how many of them the search hides.
-    private Task Confirm(string title, string message, string acceptText, Func<Task> run, bool isTicked)
-    {
-        int hidden = isTicked ? HiddenSelectedCount : 0;
-        string? detail = hidden > 0 ? hidden.ToCountText(AppTexts.ConfirmHiddenOne, AppTexts.ConfirmHiddenMany) : null;
-        _confirm = new(title, message, detail, acceptText, run);
-
-        return Task.CompletedTask;
-    }
-
-    private Task CloseConfirm(bool open)
-    {
-        if (!open) _confirm = null;
-
-        return Task.CompletedTask;
-    }
-
-    private async Task SubmitConfirm(bool accepted)
-    {
-        ConfirmRequest? request = _confirm;
-        _confirm = null;
-        if (accepted && request is not null) await request.Run();
-    }
-
     private Task ChoosePlaylist(List<Guid> idList)
     {
         _playlistTargetList = idList;
         _choosingPlaylist = true;
 
         return Task.CompletedTask;
+    }
+
+    // A sub-menu: pick a playlist in the dialog, or one of the playlists played most recently (the same short list as the home page) at once.
+    private ContextMenuItem AddToPlaylistItem(List<Guid> mediaFileIDList)
+    {
+        List<ContextMenuItem> list = [ItemOf(LibraryActionEnum.AddToPlaylist, AppTexts.LibraryPickPlaylist, () => ChoosePlaylist(mediaFileIDList), "playlist_add")];
+        List<ResponsePlaylist> recentList = StatePlaylistList.Value.PlaylistList.TakeRecentlyPlayed(PresentationConstants.HomeRecentCount);
+        if (recentList.Count > 0)
+        {
+            list.Add(ContextMenuItem.Separator());
+            list.AddRange(recentList.Select(playlist => ItemOf(LibraryActionEnum.AddToPlaylist, playlist.Name, () => AddToPlaylist(playlist.ID, mediaFileIDList), "playlist_add")));
+        }
+
+        return ContextMenuItem.Submenu(AppTexts.LibraryAddToPlaylist, list, "playlist_add");
+    }
+
+    private Task AddToPlaylist(Guid playlistID, List<Guid> mediaFileIDList)
+    {
+        return Show(ServiceLibraryAction.AddToPlaylist(playlistID, mediaFileIDList));
     }
 
     private Task AddToPlaylist(Guid playlistID)

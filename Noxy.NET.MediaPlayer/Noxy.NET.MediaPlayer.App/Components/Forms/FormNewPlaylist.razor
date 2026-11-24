@@ -4,7 +4,9 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="FormModelNewPlaylist" Context="_context" ResetAfterSubmit="true" OnSubmit="Submit">
         <InputGroupText @bind-Value="_context.Model.Name"/>
-        <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">Create</Button>
+        <div class="actions">
+            <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">Create</Button>
+        </div>
     </WebForm>
 </div>
 

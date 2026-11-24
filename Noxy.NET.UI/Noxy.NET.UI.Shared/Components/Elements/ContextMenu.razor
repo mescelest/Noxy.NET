@@ -46,6 +46,8 @@
     private const string KeyTab = "Tab";
 
     private readonly string _generatedID = IDPrefix + Guid.NewGuid().ToString("N");
+
+    // Blazor captures a reference once, when its element is created, and the elements stay from one open to the next: the maps are never emptied, or a sub-menu opened later would have nothing to sit next to.
     private readonly Dictionary<int, ElementReference> _menuRefMap = [];
     private readonly Dictionary<(int Depth, int Index), ElementReference> _itemRefMap = [];
 
@@ -57,7 +59,11 @@
     private bool _drillIn;
     private bool _open;
     private bool _focusPending;
+    private bool _replacePending;
     private bool _disposed;
+
+    // The item that was activated once and waits for its second activation: only an item with a ConfirmText can be armed.
+    private (int Depth, int Index)? _armed;
 
     private string IDCurrent => ID ?? _generatedID;
 
@@ -101,6 +107,12 @@
     {
         await base.OnAfterRenderAsync(firstRender);
 
+        if (_replacePending && _popover is not null && !_disposed)
+        {
+            _replacePending = false;
+            await _popover.ReplaceAsync();
+        }
+
         if (!_focusPending || _module is null || !_open || _disposed) return;
 
         _focusPending = false;
@@ -126,6 +138,17 @@
     public Task OpenAtAsync(double x, double y)
     {
         _point = new(x, y);
+
+        // Already open: the browser raises no event for that, so the menu starts over from the first level, and is placed at the new point once it has rendered.
+        if (_open)
+        {
+            _armed = null;
+            _navigator = null;
+            _navigatorSource = null;
+            _replacePending = true;
+            _focusPending = true;
+        }
+
         _open = true;
         StateHasChanged();
         return Task.CompletedTask;
@@ -152,11 +175,10 @@
     private async Task ClosedAsync()
     {
         ElementReference? trigger = Anchor;
+        _armed = null;
         _navigator = null;
         _navigatorSource = null;
         _point = null;
-        _menuRefMap.Clear();
-        _itemRefMap.Clear();
 
         if (_module is not null && !_disposed)
         {
@@ -181,8 +203,16 @@
         return Navigator.LevelList[depth];
     }
 
-    private async Task ChooseAsync(ContextMenuItem item)
+    private async Task ChooseAsync(ContextMenuItem item, int depth, int index)
     {
+        // The first activation of an item that asks twice only arms it, and the menu stays open; the second one does it.
+        if (item.ConfirmText is not null && _armed != (depth, index))
+        {
+            _armed = (depth, index);
+            return;
+        }
+
+        _armed = null;
         if (item.ClosesMenu)
         {
             await CloseAsync();
@@ -207,7 +237,7 @@
             return;
         }
 
-        await ChooseAsync(item);
+        await ChooseAsync(item, depth, index);
     }
 
     // The mouse over an item focuses it and closes what was open below it; over a sub-menu item it opens that too, unless the
@@ -217,6 +247,7 @@
         ContextMenuItem item = ListAt(depth)[index];
         if (!item.IsEnabled) return;
 
+        if (_armed != (depth, index)) _armed = null;
         Navigator.FocusAt(depth, index);
         if (item.Kind == ContextMenuItemKindEnum.Submenu && !_drillIn)
         {
@@ -240,6 +271,11 @@
 
     private async Task KeyDownHandler(KeyboardEventArgs args)
     {
+        if (args.Key is not (KeyEnter or KeySpace))
+        {
+            _armed = null;
+        }
+
         switch (args.Key)
         {
             case KeyArrowDown:
@@ -299,13 +335,23 @@
 
         if (Navigator.Choose() is { } item)
         {
-            await ChooseAsync(item);
+            await ChooseAsync(item, ActiveDepth, index);
         }
     }
 
     private static bool IsLetter(KeyboardEventArgs args)
     {
         return args.Key.Length == 1 && char.IsLetterOrDigit(args.Key[0]) && !args.CtrlKey && !args.AltKey && !args.MetaKey;
+    }
+
+    private bool IsArmed(int depth, int index)
+    {
+        return _armed == (depth, index);
+    }
+
+    private void LeaveItemHandler(int depth, int index)
+    {
+        if (_armed == (depth, index)) _armed = null;
     }
 
     private bool IsOpenSubmenu(int depth, int index)
@@ -359,8 +405,9 @@
                                                                                           {
                                                                                               <button type="button" class="item" role="menuitem" data-index="@index" aria-haspopup="menu" aria-expanded="@AriaValue(IsOpenSubmenu(depth, index))"
                                                                                                       aria-disabled="@AriaDisabled(item)" title="@DisabledTitle(item)"
-                                                                                                      @ref="_itemRefMap[(depth, index)]" @onclick="() => ClickItemHandler(depth, index)" @onmouseenter="() => HoverItemHandler(depth, index)">
-                                                                                                  @RenderContent(item)
+                                                                                                      @ref="_itemRefMap[(depth, index)]" @onclick="() => ClickItemHandler(depth, index)" @onmouseenter="() => HoverItemHandler(depth, index)"
+                                                                                                      @onmouseleave="() => LeaveItemHandler(depth, index)">
+                                                                                                  @RenderContent(depth, index, item)
                                                                                               </button>
 
                                                                                               @if (IsOpenSubmenu(depth, index))
@@ -373,21 +420,40 @@
                                                                                           }
                                                                                           else
                                                                                           {
-                                                                                              <button type="button" class="item" role="menuitem" data-index="@index" data-destructive="@item.IsDestructive" aria-disabled="@AriaDisabled(item)"
+                                                                                              <button type="button" class="item" role="menuitem" data-index="@index" data-destructive="@item.IsDestructive" data-armed="@IsArmed(depth, index)"
+                                                                                                      aria-disabled="@AriaDisabled(item)"
                                                                                                       title="@DisabledTitle(item)"
-                                                                                                      @onclick="() => ClickItemHandler(depth, index)" @onmouseenter="() => HoverItemHandler(depth, index)">
-                                                                                                  @RenderContent(item)
+                                                                                                      @onclick="() => ClickItemHandler(depth, index)" @onmouseenter="() => HoverItemHandler(depth, index)" @onmouseleave="() => LeaveItemHandler(depth, index)">
+                                                                                                  @RenderContent(depth, index, item)
                                                                                               </button>
                                                                                           }
                                                                                       </text>;
 
-    private RenderFragment RenderContent(ContextMenuItem item) => @<text>
-                                                                       @if (item.Icon is not null)
-                                                                       {
-                                                                           <MaterialIcon Icon="@item.Icon" Size="var(--size-icon-md)"/>
-                                                                       }
+    private const string IconArmed = "check";
 
-                                                                       <span>@item.Text</span>
+    // An item that waits for its second activation shows a check mark in place of its own icon.
+    private string? IconOf(int depth, int index, ContextMenuItem item)
+    {
+        return item.ConfirmText is not null && IsArmed(depth, index) ? IconArmed : item.Icon;
+    }
+
+    private RenderFragment RenderContent(int depth, int index, ContextMenuItem item) => @<text>
+                                                                                             @if (IconOf(depth, index, item) is { } icon)
+                                                                                             {
+                                                                                                 <MaterialIcon Icon="@icon" Size="var(--size-icon-md)"/>
+                                                                                             }
+
+                                                                                             @if (item.ConfirmText is null)
+                                                                                             {
+                                                                                                 <span>@item.Text</span>
+                                                                                             }
+                                                                                             else
+                                                                                             {
+                                                                                                 <span class="faces">
+                                                                               <span class="face" data-active="@(!IsArmed(depth, index))">@item.Text</span>
+                                                                               <span class="face" data-active="@IsArmed(depth, index)">@item.ConfirmText</span>
+                                                                           </span>
+                                                                                             }
                                                                    </text>;
 
     public async ValueTask DisposeAsync()

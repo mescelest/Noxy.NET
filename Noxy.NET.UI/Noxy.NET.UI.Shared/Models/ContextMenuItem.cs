@@ -12,7 +12,8 @@ public record ContextMenuItem(
     bool IsDestructive = false,
     string? Icon = null,
     List<ContextMenuItem>? SubItemList = null,
-    bool ClosesMenu = true)
+    bool ClosesMenu = true,
+    string? ConfirmText = null)
 {
     // A separator is never enabled, and a submenu is enabled only while something inside it can be chosen.
     public bool IsEnabled
@@ -29,9 +30,9 @@ public record ContextMenuItem(
         }
     }
 
-    public static ContextMenuItem Item(string text, Func<Task>? run = null, bool isDisabled = false, string? disabledReason = null, bool isDestructive = false, string? icon = null, bool closesMenu = true)
+    public static ContextMenuItem Item(string text, Func<Task>? run = null, bool isDisabled = false, string? disabledReason = null, bool isDestructive = false, string? icon = null, bool closesMenu = true, string? confirmText = null)
     {
-        return new(ContextMenuItemKindEnum.Item, text, run, isDisabled, disabledReason, isDestructive, icon, ClosesMenu: closesMenu);
+        return new(ContextMenuItemKindEnum.Item, text, run, isDisabled, disabledReason, isDestructive, icon, ClosesMenu: closesMenu, ConfirmText: confirmText);
     }
 
     public static ContextMenuItem Separator()
@@ -39,8 +40,8 @@ public record ContextMenuItem(
         return new(ContextMenuItemKindEnum.Separator, string.Empty);
     }
 
-    public static ContextMenuItem Submenu(string text, List<ContextMenuItem> subItemList)
+    public static ContextMenuItem Submenu(string text, List<ContextMenuItem> subItemList, string? icon = null)
     {
-        return new(ContextMenuItemKindEnum.Submenu, text, SubItemList: subItemList);
+        return new(ContextMenuItemKindEnum.Submenu, text, Icon: icon, SubItemList: subItemList);
     }
 }

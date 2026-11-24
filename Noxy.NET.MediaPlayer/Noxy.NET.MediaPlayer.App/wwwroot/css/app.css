@@ -130,7 +130,6 @@ h6 {
 }
 
 dialog {
-    padding: var(--size-gap-md);
     border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
     border-radius: var(--size-border-radius-lg);
     background: var(--color-primary);
@@ -200,7 +199,7 @@ dialog[open] {
     color: var(--color-disabled);
 }
 
-.ContextMenu .item[data-destructive] {
+.ContextMenu .item[data-destructive]:not([aria-disabled="true"]) {
     color: var(--color-error);
 }
 

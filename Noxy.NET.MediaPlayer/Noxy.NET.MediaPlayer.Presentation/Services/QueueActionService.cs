@@ -8,13 +8,15 @@ namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
 public class QueueActionService(IPlaybackControlService serviceControl, IQueueService serviceQueue) : IQueueActionService
 {
+    // Every chosen item leaves, the played ones and the upcoming ones first and the playing one last: removing it makes the device skip to what is left, or stop when nothing is, so it is done when the rest is gone and the player does not start songs that are about to be removed.
     public async Task<BulkResult> Remove(List<Guid> itemIDList)
     {
         HashSet<Guid> chosenSet = [.. itemIDList];
         ResponseQueue queue = serviceQueue.GetSnapshot();
-        List<QueueItem> upcomingList = [.. queue.UserQueueList.Concat(queue.SourceList).Where(x => chosenSet.Contains(x.ItemID))];
+        List<QueueItem> otherList = [.. queue.HistoryList.Concat(queue.UserQueueList).Concat(queue.SourceList).Where(x => chosenSet.Contains(x.ItemID))];
+        List<QueueItem> removeList = queue.Current is { } current && chosenSet.Contains(current.ItemID) ? [.. otherList, current] : otherList;
 
-        return await RunAll([.. upcomingList.Select(x => (x.ItemID, (Func<Task>)(() => serviceControl.RemoveFromQueue(x.ItemID))))]);
+        return await RunAll([.. removeList.Select(x => (x.ItemID, (Func<Task>)(() => serviceControl.RemoveFromQueue(x.ItemID))))]);
     }
 
     // Last first: each one goes to the front, so the one handled last is the first in the queue. A move takes an item of the source part into the user queue under its own ID, so nothing is queued twice.

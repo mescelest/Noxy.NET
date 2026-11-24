@@ -509,8 +509,8 @@ public class PlayerService(
         return fresh[0];
     }
 
-    // Plays the queue's current item: stops what was playing (so its file is released), gets the file onto the device if it is missing, loads it and plays. An item that cannot play is marked failed and the next one is tried.
-    private async Task StartCurrent(int version)
+    // Plays the queue's current item (or only loads it, paused, when play is false): stops what was playing (so its file is released), gets the file onto the device if it is missing, loads it and plays. An item that cannot play is marked failed and the next one is tried.
+    private async Task StartCurrent(int version, bool play = true)
     {
         while (true)
         {
@@ -566,7 +566,7 @@ public class PlayerService(
             }
 
             await playerAudio.SetVolume(await ResolveVolume());
-            await playerAudio.Play();
+            if (play) await playerAudio.Play();
             _changed?.Invoke();
 
             await Prefetch();
@@ -710,9 +710,10 @@ public class PlayerService(
         await StartCurrent(version);
     }
 
-    // The queue removed the item that was playing (a controller removed it): skip at once. It never enters history.
+    // The queue removed the item that was playing (a controller removed it): skip at once. It never enters history. What comes next is loaded and plays only if something was playing; a paused player stays paused.
     private async Task OnCurrentRemoved()
     {
+        bool wasPlaying = playerAudio.IsPlaying;
         int version;
         lock (_lock) version = BeginNewPlay();
 
@@ -724,7 +725,7 @@ public class PlayerService(
         }
 
         await serviceQueue.Apply(new() { Edit = QueueEditEnum.Advance, Item = next });
-        await StartCurrent(version);
+        await StartCurrent(version, wasPlaying);
     }
 
     private void EnsureWired()

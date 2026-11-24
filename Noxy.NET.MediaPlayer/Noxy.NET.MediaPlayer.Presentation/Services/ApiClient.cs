@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application;
+using Noxy.NET.MediaPlayer.Application.Requests.Media;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -92,6 +93,11 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     public async Task<ResponsePlaylist> UpdatePlaylist(Guid id, RequestUpdatePlaylist request)
     {
         return await Write<ResponsePlaylist>(HttpMethod.Patch, $"{PlaylistPath}/{id}", request);
+    }
+
+    public async Task<ResponseMediaFile> UpdateMedia(Guid id, RequestUpdateMedia request)
+    {
+        return await Write<ResponseMediaFile>(HttpMethod.Patch, $"{MediaPath}/{id}", request);
     }
 
     public async Task DeleteMedia(Guid id)

@@ -27,7 +27,7 @@
     }
     else
     {
-        <QueueList Model="_model" SelectedSet="_selectedSet" AllSelected="IsAllSelected" MediaOf="MediaOf" StateOf="ServicePlayer.StateOf"
+        <QueueList Model="_model" SelectedSet="_selectedSet" AllSelected="IsAllSelected" MediaOf="MediaOf" StateOf="StateOf"
                    OnToggleAll="ToggleAll" OnToggleRow="ToggleRow" OnJump="Jump" OnContextMenu="OpenRowMenu" OnMove="Move"/>
     }
 </div>
@@ -95,6 +95,13 @@
     }
 
     private QueueListRow? RowOf(Guid itemID) => _rowMap.GetValueOrDefault(itemID);
+
+    // Whether the file is on this device comes from the library state, which is loaded at start-up; the player only knows after it has played something. What failed to play is the player's to say.
+    private FileSyncStateEnum StateOf(QueueItem item)
+    {
+        FileSyncStateEnum played = ServicePlayer.StateOf(item);
+        return played == FileSyncStateEnum.Failed ? played : StateLibrary.Value.StateMap.GetValueOrDefault(item.MediaFileID, FileSyncStateEnum.NotDownloaded);
+    }
 
     // Rebuilt only when the library list is another one.
     private ResponseMediaFile? MediaOf(Guid mediaFileID)

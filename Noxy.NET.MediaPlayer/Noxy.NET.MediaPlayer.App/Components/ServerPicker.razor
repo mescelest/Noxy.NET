@@ -5,7 +5,7 @@
     <InputControlSelect TOption="string" ID="server-picker" Name="server" aria-label="Server" disabled="@IsSelectDisabled" OptionList="_optionList" @bind-Value:get="@CurrentOption" @bind-Value:set="Select">
         @OptionText(context)
     </InputControlSelect>
-    <Button class="manage" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" disabled="@Disabled" aria-label="Manage servers" @onclick="OpenDialog">
+    <Button class="manage" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" IsIcon="true" disabled="@Disabled" aria-label="Manage servers" @onclick="OpenDialog">
         <MaterialIcon Icon="settings" Size="var(--size-icon-sm)"/>
     </Button>
 

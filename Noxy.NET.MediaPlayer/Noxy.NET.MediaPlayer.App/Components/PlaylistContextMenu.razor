@@ -4,7 +4,7 @@
 @inherits BaseComponentElement
 
 <div @attributes="AdditionalAttributes" class="@CssClass">
-    <ContextMenu @ref="_menu" ID="@MenuID(Playlist.ID, Place)" ItemList="ItemList" OnClose="CloseHandler"/>
+    <ContextMenu @ref="_menu" ID="@MenuID(Playlist.ID, Place)" ItemList="ItemList"/>
 
     <EditPlaylistDialog @bind-Open="_editing" PlaylistID="Playlist.ID"/>
 </div>
@@ -25,20 +25,18 @@
 
     private ContextMenu? _menu;
     private bool _editing;
-    private bool _confirmingDelete;
 
     // The playlist's "⋯" button puts this in its popovertarget attribute.
     public static string MenuID(Guid playlistID, string place) => $"{MenuIDPrefix}{place}-{playlistID:N}";
 
-    // The first activation of Delete only asks again, and keeps the menu open; the second one deletes.
     private List<ContextMenuItem> ItemList =>
     [
-            ContextMenuItem.Item(AppTexts.PlaylistPlay, () => Run(() => ServicePlaylist.Play(Playlist.ID))),
-            ContextMenuItem.Item(AppTexts.PlaylistDownloadAll, () => Run(() => ServicePlaylist.DownloadAll(Playlist.ID))),
-            ContextMenuItem.Item(AppTexts.PlaylistEdit, Edit),
-            ContextMenuItem.Item(AppTexts.PlaylistRefresh, () => Run(() => ServicePlaylist.Refresh(Playlist.ID))),
+            ContextMenuItem.Item(AppTexts.PlaylistPlay, () => Run(() => ServicePlaylist.Play(Playlist.ID)), icon: "play_arrow"),
+            ContextMenuItem.Item(AppTexts.PlaylistDownloadAll, () => Run(() => ServicePlaylist.DownloadAll(Playlist.ID)), icon: "download"),
+            ContextMenuItem.Item(AppTexts.PlaylistEdit, Edit, icon: "edit"),
+            ContextMenuItem.Item(AppTexts.PlaylistRefresh, () => Run(() => ServicePlaylist.Refresh(Playlist.ID)), icon: "refresh"),
             ContextMenuItem.Separator(),
-            ContextMenuItem.Item(_confirmingDelete ? AppTexts.PlaylistDeleteConfirm : AppTexts.PlaylistDelete, Delete, isDestructive: true, closesMenu: _confirmingDelete)
+            ContextMenuItem.Item(AppTexts.PlaylistDelete, Delete, isDestructive: true, icon: "delete", confirmText: AppTexts.ConfirmActionAgain)
     ];
 
     public async Task OpenAtAsync(MouseEventArgs args)
@@ -46,13 +44,6 @@
         if (_menu is null) return;
 
         await _menu.OpenAtAsync(args);
-    }
-
-    // Closing the menu, however it happens, puts Delete back to its first step.
-    private Task CloseHandler()
-    {
-        _confirmingDelete = false;
-        return Task.CompletedTask;
     }
 
     private Task Edit()
@@ -63,12 +54,6 @@
 
     private async Task Delete()
     {
-        if (!_confirmingDelete)
-        {
-            _confirmingDelete = true;
-            return;
-        }
-
         bool isOnScreen = Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/') == $"playlist/{Playlist.ID}";
         if (!await Run(() => ServicePlaylist.Delete(Playlist.ID))) return;
 

@@ -46,4 +46,28 @@ public class ResponsePlaylistListExtensionTest
         Assert.Equal(["never", "played"], list.Select(x => x.Name));
         Assert.NotSame(list, ordered);
     }
+
+    [Fact]
+    public void TakeRecentlyPlayed_ReturnsOnlyThePlayedOnes_NewestFirst()
+    {
+        List<ResponsePlaylist> list = [Playlist("never", null, Now), Playlist("old", Now.AddDays(-2), Now), Playlist("new", Now.AddDays(-1), Now)];
+
+        Assert.Equal(["new", "old"], list.TakeRecentlyPlayed(6).Select(x => x.Name));
+    }
+
+    [Fact]
+    public void TakeRecentlyPlayed_WhenNoneWasPlayed_FallsBackToTheOrderedList()
+    {
+        List<ResponsePlaylist> list = [Playlist("old", null, Now.AddDays(-5)), Playlist("new", null, Now.AddDays(-1))];
+
+        Assert.Equal(["new", "old"], list.TakeRecentlyPlayed(6).Select(x => x.Name));
+    }
+
+    [Fact]
+    public void TakeRecentlyPlayed_CapsAtTheCount()
+    {
+        List<ResponsePlaylist> list = [Playlist("a", Now, Now), Playlist("b", Now.AddDays(-1), Now), Playlist("c", Now.AddDays(-2), Now)];
+
+        Assert.Equal(["a", "b"], list.TakeRecentlyPlayed(2).Select(x => x.Name));
+    }
 }

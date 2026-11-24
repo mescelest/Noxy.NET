@@ -76,7 +76,6 @@
 /* With no media files the box takes the place of the rows and fills what is left of the window. */
 .MediaFileTable ::deep > .table[data-empty] {
     grid-template-rows: auto 1fr;
-    align-content: stretch;
 }
 
 .header-row {

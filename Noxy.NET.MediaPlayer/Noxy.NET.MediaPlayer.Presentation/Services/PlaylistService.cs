@@ -19,7 +19,6 @@ public class PlaylistService(IApiClient clientApi, ISyncService serviceSync, IDo
     public async Task Open(Guid id)
     {
         await serviceSync.SyncPlaylistDetail(id);
-        await DownloadMissing(id);
     }
 
     public async Task Refresh(Guid id)

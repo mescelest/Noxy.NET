@@ -1,0 +1,16 @@
+/* Both faces sit in the same cell, so the button is as wide as the wider of the two and does not change size when it is armed; the one that is not shown only keeps its room. */
+.faces {
+    display: grid;
+}
+
+.face {
+    grid-area: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: var(--size-gap-xxs, 0.5rem);
+}
+
+.face:not([data-active]) {
+    visibility: hidden;
+}

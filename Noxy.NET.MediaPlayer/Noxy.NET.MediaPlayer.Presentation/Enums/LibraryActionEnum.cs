@@ -8,5 +8,6 @@ public enum LibraryActionEnum
     SaveAsFile,
     AddToPlaylist,
     RemoveFromDevice,
-    DeleteFromLibrary
+    DeleteFromLibrary,
+    Edit
 }

@@ -14,5 +14,14 @@ public static class ResponsePlaylistListExtension
 
             return [.. playedList, .. neverPlayedList];
         }
+
+        // What a short list of recent playlists shows: the played ones, newest first; when none was ever played, the first of the same order. At most count.
+        public List<ResponsePlaylist> TakeRecentlyPlayed(int count)
+        {
+            List<ResponsePlaylist> orderedList = playlistList.OrderMostRecentlyPlayedFirst();
+            bool anyPlayed = orderedList.Any(x => x.TimeLastPlayed is not null);
+
+            return [.. orderedList.Where(x => !anyPlayed || x.TimeLastPlayed is not null).Take(count)];
+        }
     }
 }

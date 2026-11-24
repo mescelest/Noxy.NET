@@ -1,15 +1,24 @@
 @inherits BaseComponentElement
 
-<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="OpenChanged" IsRequired="true">
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="OpenChanged">
     <h2>@Title</h2>
-    <p>@Message</p>
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <p>@Message</p>
+    }
     @if (!string.IsNullOrEmpty(Detail))
     {
         <p class="detail">@Detail</p>
     }
+    @if (!string.IsNullOrEmpty(Warning))
+    {
+        <p class="warning">@Warning</p>
+    }
     <div class="actions">
-        <button type="button" class="decline" @onclick="() => Decide(false)">Cancel</button>
-        <button type="button" class="accept" @onclick="() => Decide(true)">@AcceptText</button>
+        <ButtonConfirm Status="AcceptStatus" OnConfirm="Accept">
+            <ChildContent>@AcceptText</ChildContent>
+            <ConfirmContent>@AppTexts.ConfirmActionAgain</ConfirmContent>
+        </ButtonConfirm>
     </div>
 </Dialog>
 
@@ -27,19 +36,27 @@
     [Parameter]
     public string? Message { get; set; }
 
-    // The second sentence, for example how many of the rows are hidden by the search.
+    // What comes after the message, a new line in it is a line break, for example how many of the rows are hidden by the search.
     [Parameter]
     public string? Detail { get; set; }
+
+    // The line that must not be missed, after the rest and before the buttons: for example that it cannot be undone.
+    [Parameter]
+    public string? Warning { get; set; }
 
     [Parameter]
     public string? AcceptText { get; set; }
 
+    // The colour of the accept button: red for something that cannot be undone.
+    [Parameter]
+    public StatusEnum AcceptStatus { get; set; } = StatusEnum.Highlight;
+
     [Parameter]
     public EventCallback<bool> OnSubmit { get; set; }
 
-    private async Task Decide(bool accepted)
+    private async Task Accept()
     {
-        await OnSubmit.InvokeAsync(accepted);
+        await OnSubmit.InvokeAsync(true);
         await OpenChanged.InvokeAsync(false);
     }
 

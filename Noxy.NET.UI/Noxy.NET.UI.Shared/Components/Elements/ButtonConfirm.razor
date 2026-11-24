@@ -1,0 +1,52 @@
+@inherits BaseComponentElement
+
+<Button @attributes="AdditionalAttributes" class="@CssClass" Type="@HTMLButtonTypeEnum.Button" Status="Status" Appearance="Appearance" IsIcon="IsIcon" data-confirming="@_confirming" @onclick="Click" @onfocusout="Cancel" @onmouseleave="Cancel">
+    <span class="faces">
+        <span class="face" data-active="@(!_confirming)">@ChildContent</span>
+        <span class="face" data-active="@_confirming">@ConfirmContentCurrent</span>
+    </span>
+</Button>
+
+@code {
+
+    [Parameter]
+    public StatusEnum? Status { get; set; }
+
+    [Parameter]
+    public ButtonAppearanceEnum? Appearance { get; set; }
+
+    [Parameter]
+    public bool? IsIcon { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // What the button holds after the first click, for example "Click again to delete"; without it the button looks the same.
+    [Parameter]
+    public RenderFragment? ConfirmContent { get; set; }
+    private RenderFragment? ConfirmContentCurrent => ConfirmContent ?? ChildContent;
+
+    // Raised by the second click. The first click only arms the button, and it is disarmed again when the focus or the pointer leaves it.
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+
+    private bool _confirming;
+
+    private async Task Click()
+    {
+        if (!_confirming)
+        {
+            _confirming = true;
+            return;
+        }
+
+        _confirming = false;
+        await OnConfirm.InvokeAsync();
+    }
+
+    private void Cancel()
+    {
+        _confirming = false;
+    }
+
+}

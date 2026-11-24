@@ -58,32 +58,23 @@ public class PlaylistServiceTest
     }
 
     [Fact]
-    public async Task Open_SyncsTheDetail_ThenEnqueuesOnlyTheMissingMediaFiles()
+    public async Task Open_SyncsTheDetail_AndStartsNoDownload()
     {
-        (Guid id, List<ResponseMediaFile> mediaList) = await HoldDetail(3);
-        await _store.SaveFileState(new(mediaList[0].ID, FileSyncStateEnum.OnDevice, "h", null));
+        (Guid id, _) = await HoldDetail(3);
 
         await _service.Open(id);
 
         Assert.Equal([id], _sync.PlaylistDetailSyncList);
-        Assert.Equal([mediaList[1].ID, mediaList[2].ID], _download.QueueMissingList);
+        Assert.Empty(_download.QueueMissingList);
     }
 
     [Fact]
-    public async Task Open_WhenOffline_StillReturns_AndEnqueuesWhatTheStoredDetailListsMissing()
+    public async Task Open_WhenOffline_StillReturns_AndStartsNoDownload()
     {
         _sync.IsOffline = true;
-        (Guid id, List<ResponseMediaFile> mediaList) = await HoldDetail(2);
+        (Guid id, _) = await HoldDetail(2);
 
         await _service.Open(id);
-
-        Assert.Equal(mediaList.Select(x => x.ID), _download.QueueMissingList);
-    }
-
-    [Fact]
-    public async Task Open_OfAPlaylistTheServerNoLongerHas_StartsNoDownload()
-    {
-        await _service.Open(Guid.CreateVersion7());
 
         Assert.Empty(_download.QueueMissingList);
     }

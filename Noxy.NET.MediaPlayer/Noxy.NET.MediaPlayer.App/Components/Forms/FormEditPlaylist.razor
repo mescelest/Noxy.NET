@@ -8,7 +8,9 @@
         <InputControlCheckbox Option="true" @bind-Value="_context.Model.AllowDuplicates">
             <span>@AppTexts.EditPlaylistAllowDuplicates</span>
         </InputControlCheckbox>
-        <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">@AppTexts.EditPlaylistSave</Button>
+        <div class="actions">
+            <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">@AppTexts.EditPlaylistSave</Button>
+        </div>
     </WebForm>
 </div>
 
