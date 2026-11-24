@@ -48,6 +48,7 @@
 
     // A touch has to be held for this long before it starts a drag, so scrolling a list with a finger is not taken for one.
     private const int TouchHoldMilliseconds = 250;
+    private const int FallbackTolerancePixels = 4;
 
     protected override async Task OnAfterFirstRenderAsync()
     {
@@ -74,8 +75,11 @@
         }
 
         // The animation is off (see the script): the dragged row is put back before the owner renders the new order, so an animation would show the row jumping back.
+        // The library follows the mouse itself instead of using the browser's own drag-and-drop, which does not start inside an embedded web view such as the one of a Blazor Hybrid app. A press that moves less than the tolerance is a click.
         Dictionary<string, object?> options = new()
         {
+                { "forceFallback", true },
+                { "fallbackTolerance", FallbackTolerancePixels },
                 { "ghostClass", GhostClassCurrent },
                 { "draggable", $".{DragClassCurrent}" },
                 { "handle", $".{HandleClassCurrent}" },
