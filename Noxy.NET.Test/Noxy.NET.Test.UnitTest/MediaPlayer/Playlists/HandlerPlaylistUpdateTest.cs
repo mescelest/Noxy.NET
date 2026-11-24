@@ -214,4 +214,71 @@ public class HandlerPlaylistUpdateTest
 
         await Assert.ThrowsAsync<PlaylistNotFoundException>(() => _handler.Handle(new(Guid.CreateVersion7(), id, new("Stolen")), Token).AsTask());
     }
+
+    [Fact]
+    public async Task Update_AnArtHue_IsSaved_ChangesTheModifiedTime_AndIsInTheResponse()
+    {
+        Guid id = Create();
+        DateTime before = Stored(id).TimeModified;
+        Advance();
+
+        ResponsePlaylist response = await _handler.Handle(new(UserID, id, ArtHue: new(200)), Token);
+
+        Assert.Equal(200, Stored(id).ArtHue);
+        Assert.Equal(200, response.ArtHue);
+        Assert.True(Stored(id).TimeModified > before);
+        Assert.Single(_publisher.GetList<NotificationPlaylistUpdated>());
+    }
+
+    [Fact]
+    public async Task Update_ANullArtHue_ClearsIt()
+    {
+        Guid id = Create();
+        Stored(id).ArtHue = 90;
+        Advance();
+
+        ResponsePlaylist response = await _handler.Handle(new(UserID, id, ArtHue: new(null)), Token);
+
+        Assert.Null(Stored(id).ArtHue);
+        Assert.Null(response.ArtHue);
+    }
+
+    [Fact]
+    public async Task Update_LeavingTheArtHueOut_KeepsIt()
+    {
+        Guid id = Create();
+        Stored(id).ArtHue = 90;
+        Advance();
+
+        await _handler.Handle(new(UserID, id, new("Renamed")), Token);
+
+        Assert.Equal(90, Stored(id).ArtHue);
+    }
+
+    [Fact]
+    public async Task Update_TheSameArtHue_ChangesNothing()
+    {
+        Guid id = Create();
+        Stored(id).ArtHue = 90;
+        int commits = _store.CommitCount;
+        Advance();
+
+        await _handler.Handle(new(UserID, id, ArtHue: new(90)), Token);
+
+        Assert.Equal(commits, _store.CommitCount);
+        Assert.Empty(_publisher.PublishedList);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(360)]
+    public async Task Update_AnArtHueOutsideTheWheel_IsRefused_AndChangesNothing(int hue)
+    {
+        Guid id = Create();
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _handler.Handle(new(UserID, id, ArtHue: new(hue)), Token).AsTask());
+
+        Assert.Null(Stored(id).ArtHue);
+        Assert.Empty(_publisher.PublishedList);
+    }
 }

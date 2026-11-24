@@ -31,6 +31,8 @@ public class TablePlaylist : BaseTable
 
     public DateTime? TimeLastPlayed { get; set; }
 
+    public int? ArtHue { get; set; }
+
 
     public List<TablePlaylistEntry> EntryList { get; set; } = [];
 }

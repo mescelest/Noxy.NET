@@ -15,8 +15,12 @@ public class RequestUpdatePlaylist
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Optional<bool> AllowDuplicates { get; set; }
 
+    [OptionalRange(0, 359)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public Optional<int?> ArtHue { get; set; }
+
     public CommandPlaylistUpdate ToCommand(Guid userID, Guid id)
     {
-        return new(userID, id, Name, AllowDuplicates);
+        return new(userID, id, Name, AllowDuplicates, ArtHue);
     }
 }

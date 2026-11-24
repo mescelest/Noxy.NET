@@ -262,4 +262,75 @@ public class MediaTagReadingServiceTest : IDisposable
         Assert.Null(set.DiscNumber);
         Assert.Null(set.Year);
     }
+
+    private static Picture MakePicture(byte[] bytes, PictureType type)
+    {
+        return new(new ByteVector(bytes)) { Type = type, MimeType = "image/jpeg" };
+    }
+
+    [Fact]
+    public void Read_ReturnsTheFrontCover_WhenThereAreSeveralPictures()
+    {
+        string path = WriteFile(MediaFileFixture.CreateMp3(), "media.mp3");
+        Tag(path, tag => tag.Pictures = [MakePicture([1, 1, 1], PictureType.BackCover), MakePicture([2, 2, 2], PictureType.FrontCover), MakePicture([3, 3, 3], PictureType.Artist)]);
+
+        MediaTagSet set = _reader.Read(path);
+
+        Assert.Equal<byte[]?>([2, 2, 2], set.Picture);
+    }
+
+    [Fact]
+    public void Read_ReturnsTheFirstPicture_WhenNoneIsMarkedFrontCover()
+    {
+        string path = WriteFile(MediaFileFixture.CreateMp3(), "media.mp3");
+        Tag(path, tag => tag.Pictures = [MakePicture([1, 1, 1], PictureType.BackCover), MakePicture([2, 2, 2], PictureType.Artist)]);
+
+        MediaTagSet set = _reader.Read(path);
+
+        Assert.Equal<byte[]?>([1, 1, 1], set.Picture);
+    }
+
+    [Fact]
+    public void Read_ReturnsTheFrontCover_OfAFlacFile()
+    {
+        string path = WriteFile(MediaFileFixture.CreateFlac(), "media.flac");
+        Tag(path, tag => tag.Pictures = [MakePicture([4, 4], PictureType.FrontCover)]);
+
+        MediaTagSet set = _reader.Read(path);
+
+        Assert.Equal<byte[]?>([4, 4], set.Picture);
+    }
+
+    [Fact]
+    public void Read_ReturnsNoPicture_WhenTheFileHasNone()
+    {
+        string path = WriteFile(MediaFileFixture.CreateMp3(), "media.mp3");
+        Tag(path, tag => tag.Title = "Only a title");
+
+        MediaTagSet set = _reader.Read(path);
+
+        Assert.Null(set.Picture);
+    }
+
+    [Fact]
+    public void Read_StillReadsTheTags_WhenThePictureIsEmpty()
+    {
+        string path = WriteFile(MediaFileFixture.CreateMp3(), "media.mp3");
+        Tag(path, tag =>
+        {
+            tag.Title = "Title";
+            tag.Pictures = [new Picture(new ByteVector([])) { Type = PictureType.FrontCover }];
+        });
+
+        MediaTagSet set = _reader.Read(path);
+
+        Assert.Equal("Title", set.Title);
+        Assert.Null(set.Picture);
+    }
+
+    [Fact]
+    public void Read_AFileThatFails_HasNoPicture()
+    {
+        Assert.Null(_reader.Read(Path.Combine(_directory, "missing.mp3")).Picture);
+    }
 }

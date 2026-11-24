@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
@@ -8,9 +9,9 @@ namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
 public class PlaylistService(IApiClient clientApi, ISyncService serviceSync, IDownloadService serviceDownload, IMetadataStore storeMetadata, IPlaybackControlService serviceControl) : IPlaylistService
 {
-    public async Task<ResponsePlaylist> Create(string name)
+    public async Task<ResponsePlaylist> Create(string name, bool allowDuplicates = true)
     {
-        ResponsePlaylist playlist = await clientApi.CreatePlaylist(new() { Name = name.Trim() });
+        ResponsePlaylist playlist = await clientApi.CreatePlaylist(new() { Name = name.Trim(), AllowDuplicates = allowDuplicates });
         await serviceSync.ApplyPlaylistUpdated(playlist);
 
         return playlist;
@@ -46,9 +47,9 @@ public class PlaylistService(IApiClient clientApi, ISyncService serviceSync, IDo
         await Update(id, new() { AllowDuplicates = new(allow) });
     }
 
-    public async Task Edit(Guid id, string name, bool allowDuplicates)
+    public async Task Edit(Guid id, string name, bool allowDuplicates, Optional<int?> artHue = default)
     {
-        await Update(id, new() { Name = new(name.Trim()), AllowDuplicates = new(allowDuplicates) });
+        await Update(id, new() { Name = new(name.Trim()), AllowDuplicates = new(allowDuplicates), ArtHue = artHue });
     }
 
     public async Task RemoveEntryList(Guid id, List<Guid> entryIDList)

@@ -35,6 +35,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
             existing.AllowDuplicates = updated.AllowDuplicates;
             existing.TimeModified = updated.TimeModified;
             existing.TimeLastPlayed = updated.TimeLastPlayed;
+            existing.ArtHue = updated.ArtHue;
             existing.Position = updated.Position;
         }
 
@@ -102,7 +103,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
 
     public Task<List<PlaylistStamp>> GetPlaylistStampList(Guid userID, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.PlaylistList.Where(x => x.UserID == userID).Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed, x.Position)).ToList());
+        return Task.FromResult(store.PlaylistList.Where(x => x.UserID == userID).Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed, x.Position, x.ArtHue)).ToList());
     }
 
     public Task<List<PlaylistStamp>> GetEntryMediaFileStampList(Guid playlistID, Guid userID, CancellationToken cancellationToken = default)
@@ -178,6 +179,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
             Position = playlist.Position,
             TimeModified = playlist.TimeModified,
             TimeLastPlayed = playlist.TimeLastPlayed,
+            ArtHue = playlist.ArtHue,
             EntryList = withEntries ? [.. playlist.EntryList.OrderBy(x => x.Position).Select(Copy)] : []
         };
     }

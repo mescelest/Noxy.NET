@@ -36,6 +36,7 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     TitleKey = table.Column<string>(type: "TEXT", maxLength: 1024, nullable: false),
                     IdentityKey = table.Column<string>(type: "TEXT", maxLength: 4096, nullable: false),
                     TimeModified = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    TimeArtModified = table.Column<DateTime>(type: "TEXT", nullable: true),
                     TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -151,6 +152,7 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     Position = table.Column<int>(type: "INTEGER", nullable: false),
                     TimeModified = table.Column<DateTime>(type: "TEXT", nullable: false),
                     TimeLastPlayed = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    ArtHue = table.Column<int>(type: "INTEGER", nullable: true),
                     TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>

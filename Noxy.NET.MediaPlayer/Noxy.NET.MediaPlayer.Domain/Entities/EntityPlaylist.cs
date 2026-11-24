@@ -15,6 +15,9 @@ public class EntityPlaylist : BaseEntity
     public DateTime TimeModified { get; set; } = DateTime.UtcNow;
     public DateTime? TimeLastPlayed { get; set; }
 
+    // The hue the user chose for the tile, 0 to 359. Null means the hue made from the ID.
+    public int? ArtHue { get; set; }
+
 
     public List<EntityPlaylistEntry> EntryList { get; set; } = [];
 

@@ -32,6 +32,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IServerAddressStorage, PreferencesServerAddressStorage>();
         builder.Services.AddSingleton<IDevicePreferenceStorage, PreferencesDevicePreferenceStorage>();
         builder.Services.AddSingleton<IFileSaver, FileSaver>();
+        builder.Services.AddSingleton<IFolderOpener, FolderOpener>();
         builder.Services.AddNoxyNETUICommonServices();
         builder.Services.AddNoxyNETCommonServices();
 #if WINDOWS

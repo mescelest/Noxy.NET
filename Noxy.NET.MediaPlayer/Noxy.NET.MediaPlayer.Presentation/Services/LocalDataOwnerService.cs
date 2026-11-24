@@ -11,6 +11,7 @@ public class LocalDataOwnerService(
     IMetadataListStore storeMetadataList,
     IListStore<ResponseSetting, string> storeSetting,
     IFileStore storeFile,
+    IArtCacheStore storeArtCache,
     IDownloadService serviceDownload,
     IPlayerService servicePlayer) : ILocalDataOwnerService
 {
@@ -109,6 +110,8 @@ public class LocalDataOwnerService(
         foreach (Guid mediaFileID in await storeFile.GetPartialIDList()) await storeFile.DiscardPartial(mediaFileID);
 
         foreach (Guid mediaFileID in await storeFile.GetHeldIDList()) await storeFile.Delete(mediaFileID);
+
+        await storeArtCache.Clear();
 
         // Replacing the media list also drops every file state, and replacing the playlist list every held detail.
         await storeMetadata.ReplaceMediaFileList([]);

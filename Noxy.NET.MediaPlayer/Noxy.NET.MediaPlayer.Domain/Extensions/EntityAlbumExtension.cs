@@ -15,7 +15,8 @@ public static class EntityAlbumExtension
                 Title = album.Title,
                 ArtistIDList = [.. album.ArtistLinkList.OrderBy(x => x.Position).Select(x => x.ArtistID)],
                 MediaFileCount = mediaFileCount,
-                TimeModified = DateTime.SpecifyKind(album.TimeModified, DateTimeKind.Utc)
+                TimeModified = DateTime.SpecifyKind(album.TimeModified, DateTimeKind.Utc),
+                TimeArtModified = album.TimeArtModified is { } art ? DateTime.SpecifyKind(art, DateTimeKind.Utc) : null
             };
         }
     }

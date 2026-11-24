@@ -105,3 +105,8 @@
     transform: translateX(-50%);
     background-color: var(--color-primary);
 }
+
+/* The small picture before the title keeps its place when the title is cut. */
+.cell.text ::deep > .art {
+    margin-inline-end: var(--size-gap-sm);
+}

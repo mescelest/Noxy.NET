@@ -11,7 +11,8 @@ public record MediaTagSet(
     int? Year,
     string? Comment,
     string? Subtitle,
-    TimeSpan? Duration)
+    TimeSpan? Duration,
+    byte[]? Picture = null)
 {
     // What a file with no readable tags gives.
     public static MediaTagSet Empty => new(null, [], null, [], [], null, null, null, null, null, null);

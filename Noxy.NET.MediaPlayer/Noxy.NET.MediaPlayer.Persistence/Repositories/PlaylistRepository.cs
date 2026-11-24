@@ -62,7 +62,7 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
     {
         return await context.Playlist.AsNoTracking()
             .Where(x => x.UserID == userID)
-            .Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed, x.Position))
+            .Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed, x.Position, x.ArtHue))
             .ToListAsync(cancellationToken);
     }
 

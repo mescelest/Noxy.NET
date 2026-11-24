@@ -1,4 +1,5 @@
 @inject IState<FeaturePlaylistListState> StatePlaylistList
+@inject IState<FeatureLibraryState> StateLibrary
 @inject ILibraryActionService ServiceLibraryAction
 @inject IQueueActionService ServiceQueueAction
 @inject IPlaybackControlService ServiceControl
@@ -81,12 +82,40 @@
         list.Add(ContextMenuItem.Item(AppTexts.QueuePlayNext, () => Show(ServiceQueueAction.PlayNext(upcomingIDList)), upcomingReason is not null, upcomingReason, icon: "playlist_play"));
         list.Add(ContextMenuItem.Item(AppTexts.QueueRemove, () => Show(ServiceQueueAction.Remove(itemIDChosenList)), itemIDChosenList.Count == 0, null, true, "remove_circle_outline"));
         list.Add(ContextMenuItem.Separator());
-        list.Add(ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(mediaFileIDList)), "download"));
-        list.Add(ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(mediaFileIDList)), "save_alt"));
         list.Add(AddToPlaylistItem(mediaFileIDList));
-        list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => Show(ServiceLibraryAction.RemoveFromDevice(mediaFileIDList)), "delete_sweep", true, AppTexts.ConfirmActionAgain));
+
+        // What the device holds decides what can be done with it, as in the library menu: a file that is there is shown or saved and can be removed, one that is not can be downloaded.
+        bool anyOnDevice = mediaFileIDList.Any(IsOnDevice);
+        if (anyOnDevice)
+        {
+            list.Add(DeviceFileItem(mediaFileIDList));
+        }
+
+        if (mediaFileIDList.Any(x => !IsOnDevice(x)))
+        {
+            list.Add(ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(mediaFileIDList)), "download"));
+        }
+
+        if (anyOnDevice)
+        {
+            list.Add(ContextMenuItem.Separator());
+            list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => Show(ServiceLibraryAction.RemoveFromDevice(mediaFileIDList)), "delete_sweep", true, AppTexts.ConfirmActionAgain));
+        }
 
         return list;
+    }
+
+    // Where the platform has a file manager the file on the device is shown there; where it has none, a copy is saved.
+    private ContextMenuItem DeviceFileItem(List<Guid> mediaFileIDList)
+    {
+        return ServiceLibraryAction.CanOpenFolder
+                ? ItemOf(LibraryActionEnum.OpenFolder, AppTexts.LibraryOpenFolder, () => Show(ServiceLibraryAction.OpenContainingFolder(mediaFileIDList)), "folder_open")
+                : ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(mediaFileIDList)), "save_alt");
+    }
+
+    private bool IsOnDevice(Guid mediaFileID)
+    {
+        return StateLibrary.Value.StateMap.GetValueOrDefault(mediaFileID, FileSyncStateEnum.NotDownloaded) == FileSyncStateEnum.OnDevice;
     }
 
     private ContextMenuItem ItemOf(LibraryActionEnum action, string text, Func<Task> run, string icon, bool isDestructive = false, string? confirmText = null, RenderFragment? graphic = null)

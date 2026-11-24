@@ -157,6 +157,33 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
                 return ResourceManager.GetString("EditPlaylistSave", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Colour.
+        /// </summary>
+        public static string EditPlaylistColor {
+            get {
+                return ResourceManager.GetString("EditPlaylistColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default.
+        /// </summary>
+        public static string EditPlaylistColorDefault {
+            get {
+                return ResourceManager.GetString("EditPlaylistColorDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Colour at {0} degrees.
+        /// </summary>
+        public static string EditPlaylistColorHue {
+            get {
+                return ResourceManager.GetString("EditPlaylistColorHue", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Edit playlist.
@@ -801,6 +828,15 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         public static string NewPlaylistSuggestedName {
             get {
                 return ResourceManager.GetString("NewPlaylistSuggestedName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Open containing folder.
+        /// </summary>
+        public static string LibraryOpenFolder {
+            get {
+                return ResourceManager.GetString("LibraryOpenFolder", resourceCulture);
             }
         }
     }

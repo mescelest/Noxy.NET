@@ -46,10 +46,11 @@
         await _menu.OpenAtAsync(args);
     }
 
-    private Task Edit()
+    // The click is the menu's own event, so only the menu is drawn again after it; this component holds the dialog and has to ask for it.
+    private async Task Edit()
     {
         _editing = true;
-        return Task.CompletedTask;
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task Delete()

@@ -82,6 +82,7 @@ public sealed class FakeMetadataRepository(FakeStore store) : IMetadataRepositor
             existing.TitleKey = updated.TitleKey;
             existing.IdentityKey = updated.IdentityKey;
             existing.TimeModified = updated.TimeModified;
+            existing.TimeArtModified = updated.TimeArtModified;
         }
 
         _albumUpdateList.Clear();
@@ -303,8 +304,9 @@ public sealed class FakeMetadataRepository(FakeStore store) : IMetadataRepositor
 
     public Task<List<MetadataStamp>> GetAlbumStampList(Guid userID, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.AlbumList.Where(x => x.UserID == userID).Select(x => new MetadataStamp(x.ID, x.TimeModified, store.MediaFileList.Count(f => f.AlbumID == x.ID))).ToList());
+        return Task.FromResult(store.AlbumList.Where(x => x.UserID == userID).Select(x => new MetadataStamp(x.ID, x.TimeModified, store.MediaFileList.Count(f => f.AlbumID == x.ID), x.TimeArtModified)).ToList());
     }
+
 
     public void UpdateAlbum(EntityAlbum album)
     {

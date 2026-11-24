@@ -144,4 +144,12 @@
     <value>The server address must be an http or https address.</value>
         <comment>A server address that is not an absolute http or https address; the form shows it too.</comment>
   </data>
+    <data name="ActionMessageNotOnDevice" xml:space="preserve">
+    <value>The file is not on this device.</value>
+        <comment>The library actions, when the file to show is not on the device.</comment>
+  </data>
+    <data name="ActionMessageOpenFolderFailed" xml:space="preserve">
+    <value>The folder could not be opened.</value>
+        <comment>The library actions, when the file manager could not be started.</comment>
+  </data>
 </root>

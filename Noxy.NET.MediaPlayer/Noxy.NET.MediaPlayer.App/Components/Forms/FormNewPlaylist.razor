@@ -5,6 +5,9 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     <WebForm T="FormModelNewPlaylist" Context="_context" ResetAfterSubmit="true" OnSubmit="Submit">
         <InputGroupText @bind-Value="_context.Model.Name"/>
+        <InputControlCheckbox Option="true" @bind-Value="_context.Model.AllowDuplicates">
+            <span>@AppTexts.EditPlaylistAllowDuplicates</span>
+        </InputControlCheckbox>
         <div class="actions">
             <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@LoadingCurrent">Create</Button>
         </div>
@@ -31,7 +34,7 @@
 
     private async Task Submit(WebFormContext<FormModelNewPlaylist> context)
     {
-        ResponsePlaylist playlist = await ServicePlaylist.Create(context.Model.Name);
+        ResponsePlaylist playlist = await ServicePlaylist.Create(context.Model.Name, context.Model.AllowDuplicates);
         await OnSubmit.InvokeAsync(playlist.ID);
     }
 

@@ -15,8 +15,10 @@ public class AlbumController(IMediator mediator) : UserControllerBase
 {
     private const string IdRoute = "{id:guid}";
     private const string MediaFileListRoute = $"{IdRoute}/MediaFileList";
+    private const string ArtContentType = "image/jpeg";
 
     private static readonly string CacheControl = new CacheControlHeaderValue { Private = true, NoCache = true }.ToString();
+    private static readonly string ArtCacheControl = new CacheControlHeaderValue { Private = true }.ToString();
 
     // The albums of the user with their artists and file counts, for a device start-up diff. A matching If-None-Match gets a 304 and no body.
     [HttpGet]
@@ -30,6 +32,21 @@ public class AlbumController(IMediator mediator) : UserControllerBase
         if (library.ItemList is null) return StatusCode(StatusCodes.Status304NotModified);
 
         return library.ItemList;
+    }
+
+    // The album's thumbnail. A matching If-None-Match gets a 304 and no body; an unknown album, another user's album or an album with no picture gets a 404.
+    [HttpGet($"{IdRoute}/Art")]
+    public async Task<ActionResult> GetArt(Guid id, CancellationToken cancellationToken)
+    {
+        AlbumArtPicture? picture = await mediator.Send(new QueryAlbumArt(UserID, id, Request.Headers.IfNoneMatch.ToString()), cancellationToken);
+        if (picture is null) return NotFound();
+
+        Response.Headers.ETag = picture.ETag;
+        Response.Headers.CacheControl = ArtCacheControl;
+
+        if (picture.Bytes is null) return StatusCode(StatusCodes.Status304NotModified);
+
+        return File(picture.Bytes, ArtContentType);
     }
 
     [HttpPost]

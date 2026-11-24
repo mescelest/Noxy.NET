@@ -11,7 +11,7 @@ using Noxy.NET.MediaPlayer.Persistence;
 namespace Noxy.NET.MediaPlayer.Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261124172851_Initial")]
+    [Migration("20261124203241_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -289,6 +289,9 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                         .HasMaxLength(4096)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("TimeArtModified")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("TimeCreated")
                         .HasColumnType("TEXT");
 
@@ -476,6 +479,9 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("AllowDuplicates")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ArtHue")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")

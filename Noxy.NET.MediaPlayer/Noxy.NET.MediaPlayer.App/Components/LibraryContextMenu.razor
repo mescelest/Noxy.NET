@@ -99,7 +99,7 @@
         // What the device holds decides what can be done with it: a file that is there can be saved or removed, one that is not can be downloaded.
         if (anyOnDevice)
         {
-            list.Add(ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(idList)), "save_alt"));
+            list.Add(DeviceFileItem(idList));
         }
 
         if (anyMissing)
@@ -124,6 +124,14 @@
         }
 
         return list;
+    }
+
+    // Where the platform has a file manager the file on the device is shown there; where it has none, a copy is saved.
+    private ContextMenuItem DeviceFileItem(List<Guid> idList)
+    {
+        return ServiceLibraryAction.CanOpenFolder
+            ? ItemOf(LibraryActionEnum.OpenFolder, AppTexts.LibraryOpenFolder, () => Show(ServiceLibraryAction.OpenContainingFolder(idList)), "folder_open")
+            : ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(idList)), "save_alt");
     }
 
     private bool IsOnDevice(Guid mediaFileID)

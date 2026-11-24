@@ -21,6 +21,7 @@ public class UploadProcessor(
     IFileStorageService serviceFileStorage,
     IMediaTagReadingService serviceMediaTagReading,
     IMetadataResolutionService serviceMetadataResolution,
+    IAlbumArtService serviceAlbumArt,
     IPublisher publisher,
     IOptions<ConfigStorage> configStorage,
     ILogger<UploadProcessor> logger) : IUploadProcessor
@@ -93,7 +94,7 @@ public class UploadProcessor(
         MediaTagSet tags = ReadTags(job, cancellationToken);
 
         // One commit, so a crash can't leave a library entry without its job being consumed, or the other way round. Another upload may create the same artist first, and then the whole thing runs again and reuses it.
-        return await factoryUnitOfWork.RunWithKeyConflictRetry(async uow =>
+        ResponseUploadResult result = await factoryUnitOfWork.RunWithKeyConflictRetry(async uow =>
         {
             ResolvedMetadata resolved = await serviceMetadataResolution.Resolve(uow, job.UserID, tags, cancellationToken);
 
@@ -135,6 +136,25 @@ public class UploadProcessor(
                 Media = file.ToResponse()
             };
         }, cancellationToken);
+
+        // After the commit, so the file is in the library whatever happens to the picture.
+        await OfferPicture(job.UserID, result, tags.Picture, cancellationToken);
+        return result;
+    }
+
+    // A failed picture step never fails an upload: the album just has no picture.
+    private async Task OfferPicture(Guid userID, ResponseUploadResult result, byte[]? picture, CancellationToken cancellationToken)
+    {
+        if (picture is null || result.Media?.AlbumID is not { } albumID) return;
+
+        try
+        {
+            await serviceAlbumArt.Apply(userID, albumID, picture, cancellationToken);
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning(ex, "Could not store the picture of album {AlbumID}", albumID);
+        }
     }
 
     // The tags are best effort: a file whose tags cannot be read is still a library entry, titled from its file name.

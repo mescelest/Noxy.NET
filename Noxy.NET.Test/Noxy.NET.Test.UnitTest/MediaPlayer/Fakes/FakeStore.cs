@@ -90,6 +90,7 @@ public sealed class FakeStore
             TitleKey = album.TitleKey,
             IdentityKey = album.IdentityKey,
             TimeModified = album.TimeModified,
+            TimeArtModified = album.TimeArtModified,
             ArtistLinkList =
             [
                 .. album.ArtistLinkList.OrderBy(x => x.Position).Select(x => new EntityAlbumArtist

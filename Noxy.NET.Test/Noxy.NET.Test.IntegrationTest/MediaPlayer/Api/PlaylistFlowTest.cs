@@ -381,6 +381,31 @@ public class PlaylistFlowTest
     }
 
     [Fact]
+    public async Task Patch_ArtHue_IsSaved_ClearedByNull_KeptWhenLeftOut_AndRefusedOutsideTheWheel()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ResponsePlaylist playlist = await CreatePlaylist(api, user, "Hued");
+        Assert.Null(playlist.ArtHue);
+
+        ResponsePlaylist chosen = await Read<ResponsePlaylist>(await api.PatchPlaylist(user.Token, playlist.ID, """{"artHue":200}"""));
+        ResponsePlaylist renamed = await Read<ResponsePlaylist>(await api.PatchPlaylist(user.Token, playlist.ID, """{"name":"Renamed"}"""));
+        HttpResponseMessage tooHigh = await api.PatchPlaylist(user.Token, playlist.ID, """{"artHue":360}""");
+        HttpResponseMessage negative = await api.PatchPlaylist(user.Token, playlist.ID, """{"artHue":-1}""");
+        List<ResponsePlaylist> listed = await Read<List<ResponsePlaylist>>(await api.GetPlaylistLibrary(user.Token));
+        ResponsePlaylist cleared = await Read<ResponsePlaylist>(await api.PatchPlaylist(user.Token, playlist.ID, """{"artHue":null}"""));
+
+        Assert.Equal(200, chosen.ArtHue);
+        Assert.True(chosen.TimeModified > playlist.TimeModified);
+        Assert.Equal(200, renamed.ArtHue);
+        Assert.Equal(HttpStatusCode.BadRequest, tooHigh.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, negative.StatusCode);
+        Assert.Equal(200, Assert.Single(listed).ArtHue);
+        Assert.Null(cleared.ArtHue);
+    }
+
+    [Fact]
     public async Task Patch_DuplicatesOffWithDuplicates_Returns409_AndChangesNothing()
     {
         await using ApiFactory factory = new();

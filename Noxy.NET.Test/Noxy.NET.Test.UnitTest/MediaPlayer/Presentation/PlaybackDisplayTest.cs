@@ -123,4 +123,28 @@ public class PlaybackDisplayTest
         Assert.Equal(PresentationTexts.PlayerStatusOffline, PlaybackDisplay.Of(Snapshot(), null, TimeSpan.Zero, Library, null, true).Status);
         Assert.Equal(string.Empty, PlaybackDisplay.Of(Snapshot(), null, TimeSpan.Zero, Library, null, false).Status);
     }
+
+    [Fact]
+    public void Of_CarriesTheAlbumOfTheCurrentMedia_OnThisDevice_AndOnARemoteOne()
+    {
+        Guid albumID = Guid.CreateVersion7();
+
+        ResponseMediaFile? WithAlbum(Guid id) => Library(id) is { } media
+            ? new() { ID = media.ID, Title = media.Title, ContentType = media.ContentType, SizeBytes = 1, ContentHash = "h", TimeCreated = media.TimeCreated, TimeModified = media.TimeModified, AlbumID = albumID }
+            : null;
+
+        PlaybackDisplay local = PlaybackDisplay.Of(Snapshot(), null, TimeSpan.Zero, WithAlbum, null, false);
+        PlaybackDisplay remote = PlaybackDisplay.Of(Snapshot(), Remote(), TimeSpan.Zero, WithAlbum, "Phone", false);
+
+        Assert.Equal(albumID, local.AlbumID);
+        Assert.Equal(albumID, remote.AlbumID);
+    }
+
+    [Fact]
+    public void Of_WithNoCurrentMedia_OrOneWithNoAlbum_HasNoAlbum()
+    {
+        Assert.Null(PlaybackDisplay.Of(Snapshot(hasCurrent: false), null, TimeSpan.Zero, Library, null, false).AlbumID);
+        Assert.Null(PlaybackDisplay.Of(Snapshot(), null, TimeSpan.Zero, Library, null, false).AlbumID);
+        Assert.Null(PlaybackDisplay.Of(Snapshot(), Remote(currentItemID: Guid.CreateVersion7()), TimeSpan.Zero, Library, "Phone", false).AlbumID);
+    }
 }

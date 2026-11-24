@@ -9,4 +9,5 @@ public record CommandPlaylistUpdate(
     Guid UserID,
     Guid ID,
     Optional<string?> Name = default,
-    Optional<bool> AllowDuplicates = default) : ICommand<ResponsePlaylist>;
+    Optional<bool> AllowDuplicates = default,
+    Optional<int?> ArtHue = default) : ICommand<ResponsePlaylist>;

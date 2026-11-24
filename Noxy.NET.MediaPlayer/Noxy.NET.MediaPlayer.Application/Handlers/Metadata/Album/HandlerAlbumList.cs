@@ -19,6 +19,6 @@ public class HandlerAlbumList(IUnitOfWorkFactory factoryUnitOfWork, IETagService
     {
         List<AlbumSummary> summaryList = await uow.Metadata.GetAlbumSummaryList(userID, cancellationToken);
 
-        return [.. summaryList.Select(x => (new MetadataStamp(x.Album.ID, x.Album.TimeModified, x.MediaFileCount), x.Album.ToResponse(x.MediaFileCount)))];
+        return [.. summaryList.Select(x => (new MetadataStamp(x.Album.ID, x.Album.TimeModified, x.MediaFileCount, x.Album.TimeArtModified), x.Album.ToResponse(x.MediaFileCount)))];
     }
 }

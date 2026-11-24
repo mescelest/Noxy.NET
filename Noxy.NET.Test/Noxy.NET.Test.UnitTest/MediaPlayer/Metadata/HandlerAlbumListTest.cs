@@ -103,4 +103,45 @@ public class HandlerAlbumListTest
         Assert.NotNull(library.ItemList);
         Assert.Empty(library.ItemList);
     }
+
+    [Fact]
+    public async Task Handle_WhenOnlyTheArtTimeChanges_TheETagChanges_AndTheResponseCarriesIt()
+    {
+        EntityAlbum album = Seed("A");
+        string before = (await List()).ETag;
+
+        album.TimeArtModified = Start.AddDays(1);
+        MetadataLibrary<ResponseAlbum> library = await List();
+
+        Assert.NotEqual(before, library.ETag);
+        Assert.NotNull(library.ItemList);
+        Assert.Equal(Start.AddDays(1), library.ItemList.Single().TimeArtModified);
+
+        string afterFirst = library.ETag;
+        album.TimeArtModified = Start.AddDays(2);
+        Assert.NotEqual(afterFirst, (await List()).ETag);
+    }
+
+    [Fact]
+    public async Task Handle_AnAlbumWithNoPicture_HasNoArtTime()
+    {
+        Seed("A");
+
+        MetadataLibrary<ResponseAlbum> library = await List();
+
+        Assert.NotNull(library.ItemList);
+        Assert.Null(library.ItemList.Single().TimeArtModified);
+    }
+
+    [Fact]
+    public async Task Handle_AMatchingIfNoneMatch_IsStaleAfterTheArtTimeChanges()
+    {
+        EntityAlbum album = Seed("A");
+        string eTag = (await List()).ETag;
+
+        album.TimeArtModified = Start.AddDays(1);
+        MetadataLibrary<ResponseAlbum> library = await List(eTag);
+
+        Assert.NotNull(library.ItemList);
+    }
 }

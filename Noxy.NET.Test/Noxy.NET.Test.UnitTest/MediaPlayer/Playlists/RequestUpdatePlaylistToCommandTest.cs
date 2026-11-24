@@ -54,4 +54,17 @@ public class RequestUpdatePlaylistToCommandTest
 
         Assert.Equal("Road trip", command.Name.Value);
     }
+
+    [Fact]
+    public void ToCommand_CarriesTheArtHueAsSent_AndKeepsItAbsentWhenLeftOut()
+    {
+        CommandPlaylistUpdate chosen = new RequestUpdatePlaylist { ArtHue = new(200) }.ToCommand(UserID, ID);
+        CommandPlaylistUpdate cleared = new RequestUpdatePlaylist { ArtHue = new(null) }.ToCommand(UserID, ID);
+        CommandPlaylistUpdate untouched = new RequestUpdatePlaylist { Name = new("Mix") }.ToCommand(UserID, ID);
+
+        Assert.Equal(200, chosen.ArtHue.Value);
+        Assert.True(cleared.ArtHue.HasValue);
+        Assert.Null(cleared.ArtHue.Value);
+        Assert.False(untouched.ArtHue.HasValue);
+    }
 }

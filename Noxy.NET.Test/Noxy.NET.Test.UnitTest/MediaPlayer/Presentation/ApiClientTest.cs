@@ -797,4 +797,39 @@ public class ApiClientTest
     }
 
     #endregion -- Settings and metadata lists --
+
+    #region -- Album art --
+
+    [Fact]
+    public async Task GetAlbumArt_On200_ReturnsTheBytes_FromTheArtAddress_WithTheBearerToken()
+    {
+        Guid albumID = Guid.CreateVersion7();
+        _handler.Respond = _ => new(HttpStatusCode.OK) { Content = new ByteArrayContent([0xFF, 0xD8, 5]) };
+
+        byte[]? bytes = await _client.GetAlbumArt(albumID);
+
+        Assert.Equal<byte[]?>([0xFF, 0xD8, 5], bytes);
+        FakeHttpMessageHandler.RecordedRequest request = Assert.Single(_handler.RequestList);
+        Assert.Equal(HttpMethod.Get, request.Method);
+        Assert.Equal($"/Album/{albumID}/Art", request.Uri?.AbsolutePath);
+        Assert.StartsWith("Bearer ", request.Authorization);
+    }
+
+    [Fact]
+    public async Task GetAlbumArt_On404_ReturnsNull()
+    {
+        _handler.Respond = _ => FakeHttpMessageHandler.Problem(HttpStatusCode.NotFound, "Not found.");
+
+        Assert.Null(await _client.GetAlbumArt(Guid.CreateVersion7()));
+    }
+
+    [Fact]
+    public async Task GetAlbumArt_OnAServerError_Throws()
+    {
+        _handler.Respond = _ => FakeHttpMessageHandler.Problem(HttpStatusCode.InternalServerError, "Broken.");
+
+        await Assert.ThrowsAnyAsync<Exception>(() => _client.GetAlbumArt(Guid.CreateVersion7()));
+    }
+
+    #endregion -- Album art --
 }

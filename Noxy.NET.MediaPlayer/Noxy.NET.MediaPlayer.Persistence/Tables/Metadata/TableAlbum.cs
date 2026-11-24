@@ -31,5 +31,7 @@ public class TableAlbum : BaseTable
     [Required]
     public DateTime TimeModified { get; set; }
 
+    public DateTime? TimeArtModified { get; set; }
+
     public List<TableAlbumArtist> ArtistLinkList { get; set; } = [];
 }

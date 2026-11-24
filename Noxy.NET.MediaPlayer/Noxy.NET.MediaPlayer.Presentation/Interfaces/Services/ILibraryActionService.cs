@@ -18,6 +18,12 @@ public interface ILibraryActionService
     // Asks where to save each one and writes the tagged copy the server builds. A cancelled dialog is not a failure and ends the rest. Needs the server.
     Task<BulkResult> SaveAsFile(List<Guid> mediaFileIDList);
 
+    // Whether the platform can show a file in its file manager; where it cannot, the menu offers saving a copy instead.
+    bool CanOpenFolder { get; }
+
+    // Opens the folder of the first media file that is on the device, with its file selected. One window for the whole list: the files all live in the same folder. Works offline.
+    Task<BulkResult> OpenContainingFolder(List<Guid> mediaFileIDList);
+
     // Takes the files off this device; the library is not touched. A playing one stops first so its file is released.
     Task<BulkResult> RemoveFromDevice(List<Guid> mediaFileIDList);
 

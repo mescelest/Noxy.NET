@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IUploadService, UploadService>();
             services.AddSingleton<ISettingService, SettingService>();
             services.AddSingleton<IMetadataSyncService, MetadataSyncService>();
+            services.AddSingleton<IArtService, ArtService>();
             services.AddSingleton<IDeviceService, DeviceService>();
             services.AddSingleton<ILocalDataOwnerService, LocalDataOwnerService>();
             services.TryAddSingleton(Random.Shared);

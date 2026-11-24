@@ -226,9 +226,10 @@ public class MetadataRepository(DataContext context, IEntityToTableMapper mapper
     {
         return await context.Album.AsNoTracking()
             .Where(x => x.UserID == userID)
-            .Select(x => new MetadataStamp(x.ID, x.TimeModified, context.MediaFile.Count(f => f.AlbumID == x.ID)))
+            .Select(x => new MetadataStamp(x.ID, x.TimeModified, context.MediaFile.Count(f => f.AlbumID == x.ID), x.TimeArtModified))
             .ToListAsync(cancellationToken);
     }
+
 
     public void UpdateAlbum(EntityAlbum album)
     {

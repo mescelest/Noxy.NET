@@ -1,0 +1,19 @@
+.AlbumArt {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    vertical-align: middle;
+    width: var(--size-album-art);
+    height: var(--size-album-art);
+    border-radius: var(--size-border-radius-md);
+    background: var(--color-album-art);
+    color: var(--color-on-album-art);
+}
+
+.picture {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

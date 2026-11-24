@@ -21,6 +21,7 @@ public class UploadProcessorTest
     private readonly FakeFileStorageService _storage = new();
     private readonly FakePublisher _publisher = new();
     private readonly FakeMediaTagReadingService _tagReader = new();
+    private readonly FakeAlbumArtService _albumArt = new();
     private readonly UploadProcessor _processor;
 
     private List<(Guid UserID, ResponseUploadResult Result)> NotificationList => [.. _publisher.GetList<NotificationUploadSucceeded>().Select(x => (x.UserID, x.Result)), .. _publisher.GetList<NotificationUploadFailed>().Select(x => (x.UserID, x.Result))];
@@ -28,7 +29,7 @@ public class UploadProcessorTest
     public UploadProcessorTest()
     {
         NameKeyService serviceNameKey = new();
-        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _tagReader, new MetadataResolutionService(serviceNameKey, new CreditSplittingService(serviceNameKey)), _publisher, Options.Create(_config), NullLogger<UploadProcessor>.Instance);
+        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, _tagReader, new MetadataResolutionService(serviceNameKey, new CreditSplittingService(serviceNameKey)), _albumArt, _publisher, Options.Create(_config), NullLogger<UploadProcessor>.Instance);
     }
 
     // A job as Enqueue leaves it, with its file waiting in staging.
@@ -607,6 +608,72 @@ public class UploadProcessorTest
 
         Assert.Equal(job.StagedFileName, Assert.Single(_store.MediaFileList).FilePath);
         Assert.Empty(_store.MediaUploadJobList);
+        Assert.True(Assert.Single(NotificationList).Result.Succeeded);
+    }
+
+    [Fact]
+    public async Task ProcessNext_WithAPicture_GivesTheNewAlbumItsPicture()
+    {
+        AddJob();
+        byte[] picture = [7, 7, 7];
+        _tagReader.Result = _tagReader.Result with { Album = "OK Computer", Picture = picture };
+
+        await ProcessNext();
+
+        EntityAlbum album = Assert.Single(_store.AlbumList);
+        (Guid userID, Guid albumID, byte[] applied) = Assert.Single(_albumArt.ApplyList);
+        Assert.Equal(UserID, userID);
+        Assert.Equal(album.ID, albumID);
+        Assert.Equal(picture, applied);
+    }
+
+    [Fact]
+    public async Task ProcessNext_WithAPictureOfAnAlbumThatHasNone_OffersItToTheAlbum()
+    {
+        AddJob();
+        _tagReader.Result = _tagReader.Result with { Album = "OK Computer" };
+        await ProcessNext();
+        Assert.Empty(_albumArt.ApplyList);
+
+        AddJob();
+        _tagReader.Result = _tagReader.Result with { Picture = [1] };
+        await ProcessNext();
+
+        Assert.Equal(Assert.Single(_store.AlbumList).ID, Assert.Single(_albumArt.ApplyList).AlbumID);
+    }
+
+    [Fact]
+    public async Task ProcessNext_WithAPictureButNoAlbum_OffersNothing()
+    {
+        AddJob();
+        _tagReader.Result = _tagReader.Result with { Picture = [1] };
+
+        await ProcessNext();
+
+        Assert.Empty(_albumArt.ApplyList);
+    }
+
+    [Fact]
+    public async Task ProcessNext_WithNoPicture_OffersNothing()
+    {
+        AddJob();
+        _tagReader.Result = _tagReader.Result with { Album = "OK Computer" };
+
+        await ProcessNext();
+
+        Assert.Empty(_albumArt.ApplyList);
+    }
+
+    [Fact]
+    public async Task ProcessNext_WhenTheArtStepThrows_StillSucceeds()
+    {
+        AddJob();
+        _tagReader.Result = _tagReader.Result with { Album = "OK Computer", Picture = [1] };
+        _albumArt.Failure = new InvalidOperationException("The picture step failed.");
+
+        await ProcessNext();
+
+        Assert.Single(_store.MediaFileList);
         Assert.True(Assert.Single(NotificationList).Result.Succeeded);
     }
 }

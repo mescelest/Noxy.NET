@@ -35,6 +35,9 @@ public interface IApiClient
 
     Task<ApiResponse<List<ResponseAlbum>>> GetAlbumList(string? eTag);
 
+    // The album's thumbnail, or null when the album has none (404).
+    Task<byte[]?> GetAlbumArt(Guid id);
+
     Task<ApiResponse<List<ResponseGenre>>> GetGenreList(string? eTag);
 
     // Tells the server a playlist started playing. The server answers 204.

@@ -116,6 +116,18 @@
     <value>Save</value>
         <comment>The button of the edit playlist form.</comment>
   </data>
+    <data name="EditPlaylistColor" xml:space="preserve">
+    <value>Colour</value>
+        <comment>The label of the colour choice of the edit playlist form.</comment>
+  </data>
+    <data name="EditPlaylistColorDefault" xml:space="preserve">
+    <value>Default</value>
+        <comment>The choice that gives the playlist its own colour again.</comment>
+  </data>
+    <data name="EditPlaylistColorHue" xml:space="preserve">
+    <value>Colour at {0} degrees</value>
+        <comment>The name of one colour swatch for a screen reader; {0} is its place on the colour wheel.</comment>
+  </data>
     <data name="BulkFailed" xml:space="preserve">
     <value>{0} failed. {1}</value>
         <comment>The warning after a library action when some media files failed; {0} is how many, {1} the reason the server gave.</comment>
@@ -368,5 +380,9 @@ Nothing is deleted from your library on the server.</value>
     <data name="NewPlaylistSuggestedName" xml:space="preserve">
     <value>Playlist #{0}</value>
         <comment>The name the new playlist dialog starts with; {0} is the number of playlists plus one.</comment>
+  </data>
+    <data name="LibraryOpenFolder" xml:space="preserve">
+    <value>Open containing folder</value>
+        <comment>The library menu item that shows the file of a song in the file manager.</comment>
   </data>
 </root>

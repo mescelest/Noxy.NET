@@ -139,6 +139,38 @@ public class MetadataRepositoryTest : IDisposable
     }
 
     [Fact]
+    public async Task Album_RoundTripsItsArtTime_AndTheStampCarriesIt()
+    {
+        EntityUser user = await CreateUser();
+        EntityAlbum album = CreateAlbum(user.ID, "Pictured");
+        DateTime artTime = new(2026, 11, 24, 1, 2, 3, DateTimeKind.Utc);
+        album.TimeArtModified = artTime;
+        await Add(album);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        EntityAlbum? found = await uow.Metadata.FindAlbum(album.ID, user.ID, TestContext.Current.CancellationToken);
+        List<MetadataStamp> stampList = await uow.Metadata.GetAlbumStampList(user.ID, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(found);
+        Assert.Equal(artTime, found.TimeArtModified);
+        Assert.Equal(artTime, Assert.Single(stampList).TimeArtModified);
+    }
+
+    [Fact]
+    public async Task Album_WithNoPicture_HasNoArtTime()
+    {
+        EntityUser user = await CreateUser();
+        EntityAlbum album = CreateAlbum(user.ID);
+        await Add(album);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        EntityAlbum? found = await uow.Metadata.FindAlbum(album.ID, user.ID, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(found);
+        Assert.Null(found.TimeArtModified);
+    }
+
+    [Fact]
     public async Task AddAlbum_WithArtists_ThenFind_ReturnsItWithTheArtistsInOrder()
     {
         EntityUser user = await CreateUser();

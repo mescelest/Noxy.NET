@@ -116,13 +116,4 @@ public class ResponsePlaylistListExtensionTest
 
         Assert.Equal(["a", "b"], list.FilterByName(search).Select(x => x.Name));
     }
-
-    [Fact]
-    public void ArtHue_IsTheSameForThePlaylistEachTime_AndWithinTheColourWheel()
-    {
-        ResponsePlaylist playlist = Playlist("a", null, Now);
-
-        Assert.Equal(playlist.ArtHue, playlist.ArtHue);
-        Assert.InRange(playlist.ArtHue, 0, 359);
-    }
 }

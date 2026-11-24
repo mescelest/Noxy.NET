@@ -9,4 +9,5 @@ public class ResponseAlbum : BaseResponse
     public required List<Guid> ArtistIDList { get; init; }
     public required int MediaFileCount { get; init; }
     public required DateTime TimeModified { get; init; }
+    public DateTime? TimeArtModified { get; init; }
 }

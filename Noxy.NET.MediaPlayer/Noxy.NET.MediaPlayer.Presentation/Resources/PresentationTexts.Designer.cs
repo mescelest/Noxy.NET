@@ -85,11 +85,29 @@ namespace Noxy.NET.MediaPlayer.Presentation.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The file is not on this device..
+        /// </summary>
+        public static string ActionMessageNotOnDevice {
+            get {
+                return ResourceManager.GetString("ActionMessageNotOnDevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This needs the server, and it cannot be reached right now..
         /// </summary>
         public static string ActionMessageOffline {
             get {
                 return ResourceManager.GetString("ActionMessageOffline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The folder could not be opened..
+        /// </summary>
+        public static string ActionMessageOpenFolderFailed {
+            get {
+                return ResourceManager.GetString("ActionMessageOpenFolderFailed", resourceCulture);
             }
         }
         

@@ -33,7 +33,8 @@ public class MediaTagReadingService(ILogger<MediaTagReadingService> logger) : IM
                 ToNumber(tag.Year),
                 tag.Comment,
                 tag.Subtitle,
-                duration > TimeSpan.Zero ? duration : null);
+                duration > TimeSpan.Zero ? duration : null,
+                ToPicture(tag.Pictures));
         }
         catch (Exception exception)
         {
@@ -47,6 +48,13 @@ public class MediaTagReadingService(ILogger<MediaTagReadingService> logger) : IM
     private static List<string> ToValueList(string[] valueList, bool slashIsPartOfName)
     {
         return slashIsPartOfName && valueList.Length > 1 ? [string.Join(Id3V23Separator, valueList)] : [.. valueList];
+    }
+
+    // The front cover, else the first picture. A picture with no data counts as none.
+    private static byte[]? ToPicture(IPicture[] pictureList)
+    {
+        IPicture? picture = pictureList.FirstOrDefault(x => x.Type == PictureType.FrontCover && x.Data.Count > 0) ?? pictureList.FirstOrDefault(x => x.Data.Count > 0);
+        return picture?.Data.Data;
     }
 
     // The tag formats use zero for "not set".

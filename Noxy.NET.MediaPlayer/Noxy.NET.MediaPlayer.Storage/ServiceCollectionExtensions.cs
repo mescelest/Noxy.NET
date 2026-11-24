@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IDeviceStore>(provider => provider.GetRequiredService<FileDeviceStore>());
             services.AddSingleton<ILocalQueueStore>(_ => new FileLocalQueueStore(Path.Combine(dataFolder, StorageConstants.LocalQueueFileName)));
             services.AddSingleton<IFileStore>(_ => new DiskFileStore(dataFolder));
+            services.AddSingleton<IArtCacheStore>(_ => new DiskArtCacheStore(dataFolder));
 
             return services;
         }

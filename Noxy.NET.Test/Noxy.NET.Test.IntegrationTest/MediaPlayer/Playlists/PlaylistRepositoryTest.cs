@@ -154,6 +154,37 @@ public class PlaylistRepositoryTest : IDisposable
     }
 
     [Fact]
+    public async Task Playlist_RoundTripsItsArtHue_AndTheStampCarriesIt()
+    {
+        EntityUser user = await CreateUser();
+        EntityPlaylist playlist = CreatePlaylist(user.ID);
+        playlist.ArtHue = 275;
+        await Add(playlist);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        EntityPlaylist? found = await uow.Playlist.FindPlaylist(playlist.ID, user.ID, TestContext.Current.CancellationToken);
+        List<PlaylistStamp> stampList = await uow.Playlist.GetPlaylistStampList(user.ID, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(found);
+        Assert.Equal(275, found.ArtHue);
+        Assert.Equal(275, Assert.Single(stampList).ArtHue);
+    }
+
+    [Fact]
+    public async Task Playlist_WithNoChosenHue_HasNullArtHue()
+    {
+        EntityUser user = await CreateUser();
+        EntityPlaylist playlist = CreatePlaylist(user.ID);
+        await Add(playlist);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        EntityPlaylist? found = await uow.Playlist.FindPlaylist(playlist.ID, user.ID, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(found);
+        Assert.Null(found.ArtHue);
+    }
+
+    [Fact]
     public async Task GetPlaylistStampList_ReturnsIdAndModifiedTimeOfOnlyTheUsersPlaylists()
     {
         EntityUser user = await CreateUser();

@@ -32,7 +32,8 @@
                     <div class="cell">
                         <FileStatusIcon State="StateOf(ItemOf(row))"/>
                     </div>
-                    <div class="cell text">@TitleOf(row)</div>
+                    <div class="cell text">
+                        <AlbumArt class="art" AlbumID="AlbumIDOf(row)"/>@TitleOf(row)</div>
                     <div class="cell text">@MediaOf(MediaFileIDOf(row))?.Artist</div>
                     <div class="cell text">@MediaOf(MediaFileIDOf(row))?.Album</div>
                     <div class="cell">@DurationOf(row)</div>
@@ -231,6 +232,8 @@
     private string DraggableValue(QueueListRow row) => row.Kind.IsUpcoming.ToString().ToLowerInvariant();
 
     private string TitleOf(QueueListRow row) => MediaOf(MediaFileIDOf(row))?.Title ?? AppTexts.QueueUnknownMedia;
+
+    private Guid? AlbumIDOf(QueueListRow row) => MediaOf(MediaFileIDOf(row))?.AlbumID;
 
     private string SelectLabel(QueueListRow row) => $"Select {TitleOf(row)}";
 

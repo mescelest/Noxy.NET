@@ -14,4 +14,7 @@ public class ResponsePlaylist : BaseResponse
     public required DateTime TimeCreated { get; init; }
     public required DateTime TimeModified { get; init; }
     public required DateTime? TimeLastPlayed { get; init; }
+
+    // The hue the user chose for the tile, 0 to 359. Null means the one made from the ID.
+    public int? ArtHue { get; init; }
 }

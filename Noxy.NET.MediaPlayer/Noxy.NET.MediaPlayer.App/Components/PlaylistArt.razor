@@ -14,6 +14,6 @@
     [Parameter]
     public string? Size { get; set; }
 
-    private string StyleCurrent => Size is null ? $"--playlist-hue: {Playlist.ArtHue}" : $"--playlist-hue: {Playlist.ArtHue}; --size-playlist-art: {Size}";
+    private string StyleCurrent => Size is null ? $"--playlist-hue: {Playlist.ArtHueCurrent}" : $"--playlist-hue: {Playlist.ArtHueCurrent}; --size-playlist-art: {Size}";
 
 }

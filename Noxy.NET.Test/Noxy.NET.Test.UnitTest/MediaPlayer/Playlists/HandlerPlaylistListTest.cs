@@ -244,4 +244,43 @@ public class HandlerPlaylistListTest
 
         Assert.Equal(before, (await Library()).ETag);
     }
+
+    [Fact]
+    public async Task Handle_WhenOnlyTheArtHueChanges_TheETagChanges_AndTheResponseCarriesIt()
+    {
+        EntityPlaylist playlist = Seed();
+        string before = (await Library()).ETag;
+
+        playlist.ArtHue = 200;
+        PlaylistLibrary library = await Library();
+
+        Assert.NotEqual(before, library.ETag);
+        Assert.NotNull(library.PlaylistList);
+        Assert.Equal(200, library.PlaylistList.Single().ArtHue);
+
+        playlist.ArtHue = 201;
+        Assert.NotEqual(library.ETag, (await Library()).ETag);
+    }
+
+    [Fact]
+    public async Task Handle_AMatchingIfNoneMatch_IsStaleAfterTheArtHueChanges()
+    {
+        EntityPlaylist playlist = Seed();
+        string eTag = (await Library()).ETag;
+
+        playlist.ArtHue = 10;
+
+        Assert.NotNull((await Library(eTag)).PlaylistList);
+    }
+
+    [Fact]
+    public async Task Handle_APlaylistWithNoChosenHue_HasNullArtHue()
+    {
+        Seed();
+
+        PlaylistLibrary library = await Library();
+
+        Assert.NotNull(library.PlaylistList);
+        Assert.Null(library.PlaylistList.Single().ArtHue);
+    }
 }

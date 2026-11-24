@@ -115,6 +115,22 @@ public sealed class FakeApiClient : IApiClient
         return Task.FromResult(AlbumListHandler(eTag));
     }
 
+    // Decides the picture of an album, null for none. Throws to script a failure.
+    public Func<Guid, byte[]?> AlbumArtHandler { get; set; } = _ => null;
+
+    public List<Guid> AlbumArtRequestList { get; } = [];
+
+    // When set, a picture request waits for it, so a test can hold requests in flight.
+    public Task? AlbumArtGate { get; set; }
+
+    public async Task<byte[]?> GetAlbumArt(Guid id)
+    {
+        AlbumArtRequestList.Add(id);
+        if (AlbumArtGate is not null) await AlbumArtGate;
+
+        return AlbumArtHandler(id);
+    }
+
     public Task<ApiResponse<List<ResponseGenre>>> GetGenreList(string? eTag)
     {
         GenreListETagList.Add(eTag);

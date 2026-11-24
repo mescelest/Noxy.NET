@@ -46,7 +46,8 @@
                         <TableCell class="cell">
                             <FileStatusIcon State="StateOf(entry.Row)"/>
                         </TableCell>
-                        <TableCell class="cell text" Kind="TableCellKindEnum.RowHeader">@entry.Row.MediaFile.Title</TableCell>
+                        <TableCell class="cell text" Kind="TableCellKindEnum.RowHeader">
+                            <AlbumArt class="art" AlbumID="entry.Row.MediaFile.AlbumID"/>@entry.Row.MediaFile.Title</TableCell>
                         <TableCell class="cell text">@entry.Row.MediaFile.Artist</TableCell>
                         <TableCell class="cell text">@entry.Row.MediaFile.Album</TableCell>
                         <TableCell class="cell">@entry.Row.MediaFile.Year</TableCell>

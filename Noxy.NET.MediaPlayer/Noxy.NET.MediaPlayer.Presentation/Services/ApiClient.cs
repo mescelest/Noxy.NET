@@ -31,6 +31,7 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     private const string AlbumPath = "/Album";
     private const string GenrePath = "/Genre";
     private const string PlayedSegment = "Played";
+    private const string ArtSegment = "Art";
     private const string ValueProperty = "value";
 
     public async Task<ApiResponse<List<ResponseMediaFile>>> GetLibrary(string? eTag)
@@ -158,6 +159,15 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     public async Task<ApiResponse<List<ResponseAlbum>>> GetAlbumList(string? eTag)
     {
         return await Get<List<ResponseAlbum>>(AlbumPath, eTag);
+    }
+
+    public async Task<byte[]?> GetAlbumArt(Guid id)
+    {
+        using HttpResponseMessage response = await Send(HttpMethod.Get, $"{AlbumPath}/{id}/{ArtSegment}", null, null);
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+        await EnsureSuccess(response);
+        return await response.Content.ReadAsByteArrayAsync();
     }
 
     public async Task<ApiResponse<List<ResponseGenre>>> GetGenreList(string? eTag)

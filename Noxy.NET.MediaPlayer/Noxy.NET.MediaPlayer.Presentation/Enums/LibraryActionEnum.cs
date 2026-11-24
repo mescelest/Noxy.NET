@@ -9,5 +9,6 @@ public enum LibraryActionEnum
     AddToPlaylist,
     RemoveFromDevice,
     DeleteFromLibrary,
-    Edit
+    Edit,
+    OpenFolder
 }

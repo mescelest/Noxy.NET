@@ -14,6 +14,7 @@ public class LocalDataOwnerServiceTest
     private readonly FakeSessionService _session = new();
     private readonly FakeMetadataStore _storeMetadata = new();
     private readonly FakeFileStore _storeFile = new();
+    private readonly FakeArtCacheStore _storeArtCache = new();
     private readonly FakeDownloadService _download = new();
     private readonly FakePlayerService _player = new();
     private readonly LocalDataOwnerService _service;
@@ -22,7 +23,7 @@ public class LocalDataOwnerServiceTest
 
     public LocalDataOwnerServiceTest()
     {
-        _service = new(_session, _storeMetadata, _storeMetadata, _storeMetadata.Setting, _storeFile, _download, _player);
+        _service = new(_session, _storeMetadata, _storeMetadata, _storeMetadata.Setting, _storeFile, _storeArtCache, _download, _player);
     }
 
     private void SignInAs(Guid userID)
@@ -127,13 +128,13 @@ public class LocalDataOwnerServiceTest
         await _service.EnsureOwner();
         Assert.True(_service.IsVerified);
 
-        LocalDataOwnerService fresh = new(_session, _storeMetadata, _storeMetadata, _storeMetadata.Setting, _storeFile, _download, _player);
+        LocalDataOwnerService fresh = new(_session, _storeMetadata, _storeMetadata, _storeMetadata.Setting, _storeFile, _storeArtCache, _download, _player);
         _session.AccessToken = "garbage";
         await fresh.EnsureOwner();
         Assert.True(fresh.IsVerified);
 
         FakeMetadataStore empty = new();
-        LocalDataOwnerService noOwner = new(_session, empty, empty, empty.Setting, _storeFile, _download, _player);
+        LocalDataOwnerService noOwner = new(_session, empty, empty, empty.Setting, _storeFile, _storeArtCache, _download, _player);
         SignInAs(_newUser);
         await noOwner.EnsureOwner();
         Assert.True(noOwner.IsVerified);
@@ -277,5 +278,30 @@ public class LocalDataOwnerServiceTest
 
         Assert.Empty(_player.CallList);
         Assert.Equal(_newUser, await _storeMetadata.GetOwnerUserID());
+    }
+
+    [Fact]
+    public async Task EnsureOwner_ForADifferentUser_ClearsTheAlbumPictureCopies()
+    {
+        await LeaveAnAccountsData();
+        await _storeArtCache.Save(Guid.NewGuid(), DateTime.UtcNow, [1]);
+        SignInAs(_oldUser);
+        await _service.EnsureOwner();
+        SignInAs(_newUser);
+
+        await _service.EnsureOwner();
+
+        Assert.Equal(1, _storeArtCache.ClearCount);
+        Assert.Empty(_storeArtCache.CopyList);
+    }
+
+    [Fact]
+    public async Task WipeLocalData_ClearsTheAlbumPictureCopies()
+    {
+        await _storeArtCache.Save(Guid.NewGuid(), DateTime.UtcNow, [1]);
+
+        await _service.WipeLocalData();
+
+        Assert.Empty(_storeArtCache.CopyList);
     }
 }

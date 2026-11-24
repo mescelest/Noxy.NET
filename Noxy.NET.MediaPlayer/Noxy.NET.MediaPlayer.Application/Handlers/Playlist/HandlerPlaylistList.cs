@@ -9,6 +9,9 @@ namespace Noxy.NET.MediaPlayer.Application.Handlers.Playlist;
 
 public class HandlerPlaylistList(IUnitOfWorkFactory factoryUnitOfWork, IETagService serviceETag) : IQueryHandler<QueryPlaylistList, PlaylistLibrary>
 {
+    // A chosen hue is 0 to 359, so a playlist that has none stamps as one below it.
+    private const int NoArtHue = -1;
+
     public async ValueTask<PlaylistLibrary> Handle(QueryPlaylistList query, CancellationToken cancellationToken)
     {
         await using IUnitOfWork uow = factoryUnitOfWork.Create();
@@ -16,18 +19,19 @@ public class HandlerPlaylistList(IUnitOfWorkFactory factoryUnitOfWork, IETagServ
         if (!string.IsNullOrWhiteSpace(query.IfNoneMatch))
         {
             List<PlaylistStamp> stampList = await uow.Playlist.GetPlaylistStampList(query.UserID, cancellationToken);
-            string current = serviceETag.ComputeCounted(stampList.SelectMany(x => ETagStamps(x.ID, x.TimeModified, x.TimeLastPlayed, x.Position)));
+            string current = serviceETag.ComputeCounted(stampList.SelectMany(x => ETagStamps(x.ID, x.TimeModified, x.TimeLastPlayed, x.Position, x.ArtHue)));
             if (serviceETag.Matches(query.IfNoneMatch, current)) return new(current, null);
         }
 
         // The ETag comes from the list that is returned, so the two can never disagree.
         List<PlaylistSummary> summaryList = await uow.Playlist.GetPlaylistSummaryList(query.UserID, cancellationToken);
-        return new(serviceETag.ComputeCounted(summaryList.SelectMany(x => ETagStamps(x.Playlist.ID, x.Playlist.TimeModified, x.Playlist.TimeLastPlayed, x.Playlist.Position))), [.. summaryList.Select(x => x.Playlist.ToResponse(x.EntryCount))]);
+        return new(serviceETag.ComputeCounted(summaryList.SelectMany(x => ETagStamps(x.Playlist.ID, x.Playlist.TimeModified, x.Playlist.TimeLastPlayed, x.Playlist.Position, x.Playlist.ArtHue))),
+            [.. summaryList.Select(x => x.Playlist.ToResponse(x.EntryCount))]);
     }
 
     // A play moves the list ETag, so a device refetches the list for the new stamp, but it is not part of the detail ETag. So does a new position, carried as the count of the stamp.
-    private static List<(Guid ID, DateTime TimeModified, int Count)> ETagStamps(Guid id, DateTime timeModified, DateTime? timeLastPlayed, int position)
+    private static List<(Guid ID, DateTime TimeModified, int Count)> ETagStamps(Guid id, DateTime timeModified, DateTime? timeLastPlayed, int position, int? artHue)
     {
-        return [(id, timeModified, position), (id, timeLastPlayed ?? DateTime.MinValue, position)];
+        return [(id, timeModified, position), (id, timeLastPlayed ?? DateTime.MinValue, position), (id, DateTime.MinValue, artHue ?? NoArtHue)];
     }
 }

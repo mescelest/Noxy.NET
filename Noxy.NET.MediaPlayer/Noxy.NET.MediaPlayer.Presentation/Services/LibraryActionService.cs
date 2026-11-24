@@ -10,7 +10,16 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class LibraryActionService(IDownloadService serviceDownload, IQueueService serviceQueue, IPlaybackControlService serviceControl, IApiClient clientApi, ISyncService serviceSync, IMetadataStore storeMetadata, IFileSaver serviceFileSaver)
+public class LibraryActionService(
+    IDownloadService serviceDownload,
+    IQueueService serviceQueue,
+    IPlaybackControlService serviceControl,
+    IApiClient clientApi,
+    ISyncService serviceSync,
+    IMetadataStore storeMetadata,
+    IFileSaver serviceFileSaver,
+    IFileStore storeFile,
+    IFolderOpener serviceFolderOpener)
     : ILibraryActionService
 {
     public async Task<BulkResult> Download(List<Guid> mediaFileIDList)
@@ -35,6 +44,32 @@ public class LibraryActionService(IDownloadService serviceDownload, IQueueServic
         foreach (Guid id in mediaFileIDList) await serviceControl.AddToQueue(id);
 
         return new(mediaFileIDList.Count, [], null);
+    }
+
+    public bool CanOpenFolder => serviceFolderOpener.IsSupported;
+
+    public async Task<BulkResult> OpenContainingFolder(List<Guid> mediaFileIDList)
+    {
+        if (mediaFileIDList.Count == 0) return new(0, [], null);
+
+        foreach (Guid id in mediaFileIDList)
+        {
+            string? path = await storeFile.GetPath(id);
+            if (path is null) continue;
+
+            try
+            {
+                await serviceFolderOpener.Reveal(path);
+            }
+            catch (IOException)
+            {
+                return new(0, [.. mediaFileIDList], PresentationTexts.ActionMessageOpenFolderFailed);
+            }
+
+            return new(1, [], null);
+        }
+
+        return new(0, [.. mediaFileIDList], PresentationTexts.ActionMessageNotOnDevice);
     }
 
     public async Task<BulkResult> RemoveFromDevice(List<Guid> mediaFileIDList)
@@ -165,6 +200,7 @@ public class LibraryActionService(IDownloadService serviceDownload, IQueueServic
             case LibraryActionEnum.PlayNext:
             case LibraryActionEnum.AddToQueue:
             case LibraryActionEnum.RemoveFromDevice:
+            case LibraryActionEnum.OpenFolder:
                 return null;
             default:
                 throw new InvalidEnumArgumentException(nameof(action), (int)action, typeof(LibraryActionEnum));

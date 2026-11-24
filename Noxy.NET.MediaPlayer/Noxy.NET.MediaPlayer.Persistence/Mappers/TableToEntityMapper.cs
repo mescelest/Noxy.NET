@@ -128,6 +128,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             Position = table.Position,
             TimeModified = table.TimeModified,
             TimeLastPlayed = table.TimeLastPlayed,
+            ArtHue = table.ArtHue,
             EntryList = [.. table.EntryList.Select(Map)]
         };
     }
@@ -186,6 +187,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             TitleKey = table.TitleKey,
             IdentityKey = table.IdentityKey,
             TimeModified = table.TimeModified,
+            TimeArtModified = table.TimeArtModified,
             ArtistLinkList = [.. table.ArtistLinkList.OrderBy(x => x.Position).Select(Map)]
         };
     }

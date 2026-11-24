@@ -43,6 +43,11 @@ public static class ServiceCollectionExtensions
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            services.AddOptions<ConfigArt>()
+                .BindConfiguration(ConfigArt.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             services.AddOptions<ConfigPlayback>()
                 .BindConfiguration(ConfigPlayback.SectionName)
                 .ValidateDataAnnotations()
@@ -66,6 +71,8 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IETagService, ETagService>();
             services.AddSingleton<INameKeyService, NameKeyService>();
             services.AddSingleton<ICreditSplittingService, CreditSplittingService>();
+            services.AddSingleton<IThumbnailService, ThumbnailService>();
+            services.AddSingleton<IAlbumArtService, AlbumArtService>();
             services.AddSingleton<IMediaTagReadingService, MediaTagReadingService>();
             services.AddSingleton<IMetadataResolutionService, MetadataResolutionService>();
             services.AddSingleton<IMetadataChangeService, MetadataChangeService>();

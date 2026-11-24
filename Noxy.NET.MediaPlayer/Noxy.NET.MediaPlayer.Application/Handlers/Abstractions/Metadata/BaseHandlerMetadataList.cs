@@ -31,6 +31,7 @@ public abstract class BaseHandlerMetadataList<TQuery, TResponse>(IUnitOfWorkFact
 
     private string Compute(IEnumerable<MetadataStamp> stampList)
     {
-        return serviceETag.ComputeCounted(stampList.Select(x => (x.ID, x.TimeModified, x.MediaFileCount)));
+        // The art time rides along as a second stamp of the item, so a new picture moves the ETag.
+        return serviceETag.ComputeCounted(stampList.SelectMany(x => new[] { (x.ID, x.TimeModified, x.MediaFileCount), (x.ID, x.TimeArtModified ?? DateTime.MinValue, x.MediaFileCount) }));
     }
 }

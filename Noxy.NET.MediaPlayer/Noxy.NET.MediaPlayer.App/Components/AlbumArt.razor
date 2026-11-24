@@ -1,0 +1,66 @@
+@inject IArtService ServiceArt
+@inherits BaseComponentElement
+@implements IDisposable
+
+<span @attributes="AdditionalAttributes" class="@CssClass" style="@StyleCurrent" aria-hidden="true">
+    @if (_uri is null)
+    {
+        <MaterialIcon Icon="music_note" Size="var(--size-icon-xs)"/>
+    }
+    else
+    {
+        <img class="picture" src="@_uri" alt=""/>
+    }
+</span>
+
+@code {
+
+    // The album of the media file the picture is for; none shows the default tile.
+    [Parameter]
+    public Guid? AlbumID { get; set; }
+
+    // The size of the square, as a CSS length; unset, it is --size-album-art.
+    [Parameter]
+    public string? Size { get; set; }
+
+    private string? _uri;
+    private Guid? _loadedFor;
+
+    private string? StyleCurrent => Size is null ? null : $"--size-album-art: {Size}";
+
+    protected override void OnInitialized()
+    {
+        ServiceArt.Changed += ChangedHandler;
+    }
+
+    // The picture is asked for again only when the album is another one or the service says one changed, not at every render of the list the square is in.
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedFor == AlbumID) return;
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loadedFor = AlbumID;
+        _uri = AlbumID is { } id ? await ServiceArt.GetAlbumArtUri(id) : null;
+    }
+
+    private void ChangedHandler()
+    {
+        _ = InvokeAsync(ReloadAsync);
+    }
+
+    private async Task ReloadAsync()
+    {
+        await LoadAsync();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ServiceArt.Changed -= ChangedHandler;
+    }
+
+}

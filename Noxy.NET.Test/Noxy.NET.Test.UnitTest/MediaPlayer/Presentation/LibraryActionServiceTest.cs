@@ -18,11 +18,13 @@ public class LibraryActionServiceTest
     private readonly FakeSyncService _sync = new();
     private readonly FakeMetadataStore _store = new();
     private readonly FakeFileSaver _saver = new();
+    private readonly FakeFileStore _files = new();
+    private readonly FakeFolderOpener _folder = new();
     private readonly LibraryActionService _service;
 
     public LibraryActionServiceTest()
     {
-        _service = new(_download, _queue, _control, _api, _sync, _store, _saver);
+        _service = new(_download, _queue, _control, _api, _sync, _store, _saver, _files, _folder);
     }
 
     private static List<Guid> Ids(int count)
@@ -192,11 +194,73 @@ public class LibraryActionServiceTest
     [Theory]
     [InlineData(LibraryActionEnum.Download)]
     [InlineData(LibraryActionEnum.RemoveFromDevice)]
+    [InlineData(LibraryActionEnum.OpenFolder)]
     public void GetDisabledReason_IsNullOffline_ForTheLocalActions(LibraryActionEnum action)
     {
         _sync.IsOffline = true;
 
         Assert.Null(_service.GetDisabledReason(action));
+    }
+
+    [Fact]
+    public async Task OpenContainingFolder_ShowsTheFileOfTheFirstMediaFileThatIsOnTheDevice()
+    {
+        List<Guid> idList = Ids(3);
+        _files.Hold(idList[1], [1]);
+        _files.Hold(idList[2], [2]);
+
+        BulkResult result = await _service.OpenContainingFolder(idList);
+
+        Assert.Equal(await _files.GetPath(idList[1]), Assert.Single(_folder.RevealedList));
+        Assert.Equal(1, result.SucceededCount);
+        Assert.Empty(result.FailedIDList);
+    }
+
+    [Fact]
+    public async Task OpenContainingFolder_WithNothingOnTheDevice_ShowsNothing_AndFailsTheWholeList()
+    {
+        List<Guid> idList = Ids(2);
+
+        BulkResult result = await _service.OpenContainingFolder(idList);
+
+        Assert.Empty(_folder.RevealedList);
+        Assert.Equal(0, result.SucceededCount);
+        Assert.Equal(idList, result.FailedIDList);
+        Assert.Equal(PresentationTexts.ActionMessageNotOnDevice, result.Message);
+    }
+
+    [Fact]
+    public async Task OpenContainingFolder_WithAnEmptyList_DoesNothing()
+    {
+        BulkResult result = await _service.OpenContainingFolder([]);
+
+        Assert.Empty(_folder.RevealedList);
+        Assert.Equal(0, result.SucceededCount);
+        Assert.Empty(result.FailedIDList);
+    }
+
+    [Fact]
+    public async Task OpenContainingFolder_WhenTheFileManagerCannotBeOpened_FailsTheList_WithTheOpenMessage()
+    {
+        List<Guid> idList = Ids(1);
+        _files.Hold(idList[0], [1]);
+        _folder.Failure = new IOException("no explorer");
+
+        BulkResult result = await _service.OpenContainingFolder(idList);
+
+        Assert.Equal(0, result.SucceededCount);
+        Assert.Equal(idList, result.FailedIDList);
+        Assert.Equal(PresentationTexts.ActionMessageOpenFolderFailed, result.Message);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CanOpenFolder_FollowsWhetherThePlatformCanShowAFolder(bool supported)
+    {
+        _folder.IsSupported = supported;
+
+        Assert.Equal(supported, _service.CanOpenFolder);
     }
 
     [Fact]

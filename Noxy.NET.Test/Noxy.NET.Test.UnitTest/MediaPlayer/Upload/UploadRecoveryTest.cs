@@ -26,7 +26,7 @@ public class UploadRecoveryTest
     {
         ConfigStorage config = new() { RootPath = "x", AllowedExtensionList = ["mp3"] };
         NameKeyService serviceNameKey = new();
-        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, new FakeMediaTagReadingService(), new MetadataResolutionService(serviceNameKey, new CreditSplittingService(serviceNameKey)), _publisher, Options.Create(config),
+        _processor = new(new FakeUnitOfWorkFactory(_store), _storage, new FakeMediaTagReadingService(), new MetadataResolutionService(serviceNameKey, new CreditSplittingService(serviceNameKey)), new FakeAlbumArtService(), _publisher, Options.Create(config),
             NullLogger<UploadProcessor>.Instance);
     }
 

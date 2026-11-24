@@ -15,7 +15,8 @@ public sealed record PlaybackDisplay(
     RepeatModeEnum Repeat,
     string Title,
     string Artist,
-    string Status)
+    string Status,
+    Guid? AlbumID = null)
 {
     // remote is the active device's state when this device is a controller, otherwise null. position is read by the caller, since it differs between the two and moves on every tick.
     public static PlaybackDisplay Of(PlayerSnapshot snapshot, ResponsePlayerState? remote, TimeSpan position, Func<Guid, ResponseMediaFile?> mediaOf, string? activeDeviceName, bool isOffline)
@@ -25,12 +26,13 @@ public sealed record PlaybackDisplay(
             ResponseMediaFile? remoteMedia = remote.CurrentItemID is { } remoteID ? mediaOf(remoteID) : null;
             string status = string.Format(PresentationTexts.PlayerStatusPlayingOn, activeDeviceName ?? PresentationTexts.PlayerStatusAnotherDevice);
 
-            return new(true, remote.IsPlaying, position, remoteMedia?.Duration ?? TimeSpan.Zero, remote.Volume, remote.Shuffle, remote.Repeat, remote.Title ?? string.Empty, remote.Artist ?? string.Empty, status);
+            return new(true, remote.IsPlaying, position, remoteMedia?.Duration ?? TimeSpan.Zero, remote.Volume, remote.Shuffle, remote.Repeat, remote.Title ?? string.Empty, remote.Artist ?? string.Empty, status, remoteMedia?.AlbumID);
         }
 
         ResponseMediaFile? media = snapshot.Current is { } current ? mediaOf(current.MediaFileID) : null;
 
-        return new(false, snapshot.IsPlaying, position, snapshot.Duration, (int)Math.Round(snapshot.Volume * 100), snapshot.Shuffle, snapshot.Repeat, media?.Title ?? string.Empty, media?.Artist ?? string.Empty, LocalStatus(snapshot, isOffline));
+        return new(false, snapshot.IsPlaying, position, snapshot.Duration, (int)Math.Round(snapshot.Volume * 100), snapshot.Shuffle, snapshot.Repeat, media?.Title ?? string.Empty, media?.Artist ?? string.Empty, LocalStatus(snapshot, isOffline),
+            media?.AlbumID);
     }
 
     private static string LocalStatus(PlayerSnapshot snapshot, bool isOffline)

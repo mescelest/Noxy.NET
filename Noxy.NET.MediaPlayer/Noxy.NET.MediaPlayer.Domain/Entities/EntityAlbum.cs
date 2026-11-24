@@ -14,6 +14,9 @@ public class EntityAlbum : BaseEntity
 
     public DateTime TimeModified { get; set; } = DateTime.UtcNow;
 
+    // When the album got its picture: null means it has none. A picture is only ever put into an album that has none.
+    public DateTime? TimeArtModified { get; set; }
+
     // In position order.
     public List<EntityAlbumArtist> ArtistLinkList { get; set; } = [];
 

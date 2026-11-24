@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<ITableToEntityMapper, TableToEntityMapper>();
             services.AddSingleton<IUnitOfWorkFactory, UnitOfWorkFactory>();
             services.AddSingleton<IFileStorageService, FileStorageService>();
+            services.AddSingleton<IArtStorageService, ArtStorageService>();
 
             return services;
         }

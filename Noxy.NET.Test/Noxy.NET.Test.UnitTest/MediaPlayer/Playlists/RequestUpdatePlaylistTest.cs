@@ -81,4 +81,41 @@ public class RequestUpdatePlaylistTest
     {
         Assert.Throws<JsonException>(() => Read(json));
     }
+
+    [Fact]
+    public void ArtHue_IsWrittenWhenSent_IncludingNull_AndOmittedWhenLeftOut()
+    {
+        Assert.Equal("""{"artHue":200}""", JsonSerializer.Serialize(new RequestUpdatePlaylist { ArtHue = new(200) }, JsonSerializerOptions.Web));
+        Assert.Equal("""{"artHue":null}""", JsonSerializer.Serialize(new RequestUpdatePlaylist { ArtHue = new(null) }, JsonSerializerOptions.Web));
+        Assert.Equal("{}", JsonSerializer.Serialize(new RequestUpdatePlaylist(), JsonSerializerOptions.Web));
+    }
+
+    [Theory]
+    [InlineData("""{"artHue":0}""")]
+    [InlineData("""{"artHue":359}""")]
+    [InlineData("""{"artHue":null}""")]
+    [InlineData("{}")]
+    public void AnArtHueWithinTheWheel_OrNullOrLeftOut_IsValid(string json)
+    {
+        Assert.Empty(Validate(Read(json)));
+    }
+
+    [Theory]
+    [InlineData("""{"artHue":360}""")]
+    [InlineData("""{"artHue":-1}""")]
+    public void AnArtHueOutsideTheWheel_IsInvalid(string json)
+    {
+        Assert.NotEmpty(Validate(Read(json)));
+    }
+
+    [Fact]
+    public void ArtHue_ReadsAsPresentWhenSentNull_AndAbsentWhenLeftOut()
+    {
+        RequestUpdatePlaylist sentNull = Read("""{"artHue":null}""");
+        RequestUpdatePlaylist leftOut = Read("{}");
+
+        Assert.True(sentNull.ArtHue.HasValue);
+        Assert.Null(sentNull.ArtHue.Value);
+        Assert.False(leftOut.ArtHue.HasValue);
+    }
 }

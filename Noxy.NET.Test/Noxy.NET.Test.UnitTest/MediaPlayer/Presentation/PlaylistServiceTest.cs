@@ -57,6 +57,24 @@ public class PlaylistServiceTest
         Assert.Same(playlist, Assert.Single(_sync.PlaylistUpdatedList));
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Create_SendsTheDuplicatesRuleItWasGiven(bool allowDuplicates)
+    {
+        await _service.Create("Strict", allowDuplicates);
+
+        Assert.Equal(allowDuplicates, Assert.Single(_api.CreatePlaylistRequestList).AllowDuplicates);
+    }
+
+    [Fact]
+    public async Task Create_WithoutARule_AllowsTheSameSongTwice()
+    {
+        await _service.Create("Open");
+
+        Assert.True(Assert.Single(_api.CreatePlaylistRequestList).AllowDuplicates);
+    }
+
     [Fact]
     public async Task Open_SyncsTheDetail_AndStartsNoDownload()
     {
@@ -261,5 +279,34 @@ public class PlaylistServiceTest
         ApiException exception = await Assert.ThrowsAsync<ApiException>(() => _service.Create("x"));
 
         Assert.Equal("The playlist is full.", exception.Title);
+    }
+
+    [Fact]
+    public async Task Edit_SendsAnArtHue_WhenOneWasChosen()
+    {
+        await _service.Edit(Guid.CreateVersion7(), "Mix", true, new(200));
+
+        RequestUpdatePlaylist sent = Assert.Single(_api.UpdatePlaylistRequestList).Request;
+        Assert.True(sent.ArtHue.HasValue);
+        Assert.Equal(200, sent.ArtHue.Value);
+    }
+
+    [Fact]
+    public async Task Edit_WithTheDefaultChoice_SendsANullToClearIt()
+    {
+        await _service.Edit(Guid.CreateVersion7(), "Mix", true, new(null));
+
+        RequestUpdatePlaylist sent = Assert.Single(_api.UpdatePlaylistRequestList).Request;
+        Assert.True(sent.ArtHue.HasValue);
+        Assert.Null(sent.ArtHue.Value);
+    }
+
+    [Fact]
+    public async Task Edit_LeavesTheHueOutWhenItDidNotChange()
+    {
+        await _service.Edit(Guid.CreateVersion7(), "Mix", true);
+
+        RequestUpdatePlaylist sent = Assert.Single(_api.UpdatePlaylistRequestList).Request;
+        Assert.False(sent.ArtHue.HasValue);
     }
 }
