@@ -49,7 +49,8 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
     {
         var list = await context.Playlist.AsNoTracking()
             .Where(x => x.UserID == userID)
-            .OrderByDescending(x => x.TimeCreated)
+            .OrderBy(x => x.Position)
+            .ThenByDescending(x => x.TimeCreated)
             .ThenByDescending(x => x.ID)
             .Select(x => new { Table = x, EntryCount = x.EntryList.Count })
             .ToListAsync(cancellationToken);
@@ -61,7 +62,7 @@ public class PlaylistRepository(DataContext context, IEntityToTableMapper mapper
     {
         return await context.Playlist.AsNoTracking()
             .Where(x => x.UserID == userID)
-            .Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed))
+            .Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed, x.Position))
             .ToListAsync(cancellationToken);
     }
 

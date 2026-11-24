@@ -35,6 +35,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
             existing.AllowDuplicates = updated.AllowDuplicates;
             existing.TimeModified = updated.TimeModified;
             existing.TimeLastPlayed = updated.TimeLastPlayed;
+            existing.Position = updated.Position;
         }
 
         _pendingPlaylistUpdateList.Clear();
@@ -90,7 +91,8 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
     {
         List<PlaylistSummary> list = store.PlaylistList
             .Where(x => x.UserID == userID)
-            .OrderByDescending(x => x.TimeCreated)
+            .OrderBy(x => x.Position)
+            .ThenByDescending(x => x.TimeCreated)
             .ThenByDescending(x => x.ID)
             .Select(x => new PlaylistSummary(Copy(x, false), x.EntryList.Count))
             .ToList();
@@ -100,7 +102,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
 
     public Task<List<PlaylistStamp>> GetPlaylistStampList(Guid userID, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(store.PlaylistList.Where(x => x.UserID == userID).Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed)).ToList());
+        return Task.FromResult(store.PlaylistList.Where(x => x.UserID == userID).Select(x => new PlaylistStamp(x.ID, x.TimeModified, x.TimeLastPlayed, x.Position)).ToList());
     }
 
     public Task<List<PlaylistStamp>> GetEntryMediaFileStampList(Guid playlistID, Guid userID, CancellationToken cancellationToken = default)
@@ -173,6 +175,7 @@ public sealed class FakePlaylistRepository(FakeStore store) : IPlaylistRepositor
             UserID = playlist.UserID,
             Name = playlist.Name,
             AllowDuplicates = playlist.AllowDuplicates,
+            Position = playlist.Position,
             TimeModified = playlist.TimeModified,
             TimeLastPlayed = playlist.TimeLastPlayed,
             EntryList = withEntries ? [.. playlist.EntryList.OrderBy(x => x.Position).Select(Copy)] : []

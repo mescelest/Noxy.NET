@@ -217,6 +217,11 @@ public sealed class MediaApiClient(ApiFactory factory)
         return SendJson(HttpMethod.Post, $"{PlaylistPath}/{id}/{EntryListSegment}/Remove", token, json);
     }
 
+    public Task<HttpResponseMessage> MovePlaylist(string? token, Guid id, string json)
+    {
+        return SendJson(HttpMethod.Put, $"{PlaylistPath}/{id}/Position", token, json);
+    }
+
     public Task<HttpResponseMessage> MovePlaylistEntry(string? token, Guid id, Guid entryID, string json)
     {
         return SendJson(HttpMethod.Put, $"{PlaylistPath}/{id}/{EntrySegment}/{entryID}/Position", token, json);

@@ -335,6 +335,20 @@ public class ApiClientTest
     }
 
     [Fact]
+    public async Task MovePlaylist_PutsThePosition_AndReturnsTheListInTheNewOrder()
+    {
+        _handler.Respond = _ => Ok(new List<ResponsePlaylist> { Playlist() });
+
+        List<ResponsePlaylist> result = await _client.MovePlaylist(PlaylistID, new() { Position = 2 });
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Put, request.Method);
+        Assert.Equal($"https://server.example/Playlist/{PlaylistID}/Position", request.Uri?.ToString());
+        Assert.Equal("""{"position":2}""", request.Body);
+        Assert.Single(result);
+    }
+
+    [Fact]
     public async Task UpdateMedia_PatchesTheMediaFile_AndReturnsItAsItIsNow()
     {
         ResponseMediaFile media = MediaFile("New");

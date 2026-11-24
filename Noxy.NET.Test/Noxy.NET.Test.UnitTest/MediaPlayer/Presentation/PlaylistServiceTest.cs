@@ -173,6 +173,31 @@ public class PlaylistServiceTest
     }
 
     [Fact]
+    public async Task Move_SendsThePosition_AndAppliesTheAnswerAsTheOrder()
+    {
+        Guid id = Guid.CreateVersion7();
+        List<ResponsePlaylist> answer = [FakeApiClient.PlaylistFor(id, "Moved")];
+        _api.MovePlaylistHandler = (_, _) => answer;
+
+        await _service.Move(id, 2);
+
+        (Guid movedID, var request) = Assert.Single(_api.MovePlaylistCallList);
+        Assert.Equal(id, movedID);
+        Assert.Equal(2, request.Position);
+        Assert.Same(answer, Assert.Single(_sync.PlaylistOrderAppliedList));
+    }
+
+    [Fact]
+    public async Task Move_WhenTheServerRefuses_Throws_AndAppliesNothing()
+    {
+        _api.WriteFailure = new ApiException(HttpStatusCode.BadRequest, "Bad position.");
+
+        await Assert.ThrowsAsync<ApiException>(() => _service.Move(Guid.CreateVersion7(), 5));
+
+        Assert.Empty(_sync.PlaylistOrderAppliedList);
+    }
+
+    [Fact]
     public async Task Delete_DeletesOnTheServer_AndRemovesTheLocalPlaylist()
     {
         Guid id = Guid.CreateVersion7();

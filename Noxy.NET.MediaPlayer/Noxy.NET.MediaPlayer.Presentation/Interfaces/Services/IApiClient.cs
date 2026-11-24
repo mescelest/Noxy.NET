@@ -60,4 +60,7 @@ public interface IApiClient
     Task<ResponsePlaylistDetail> RemovePlaylistEntryList(Guid id, RequestRemovePlaylistEntry request);
 
     Task<ResponsePlaylistDetail> MovePlaylistEntry(Guid id, Guid entryID, RequestMovePlaylistEntry request);
+
+    // PUT /Playlist/{id}/Position; the answer is all the user's playlists in their new order.
+    Task<List<ResponsePlaylist>> MovePlaylist(Guid id, RequestMovePlaylist request);
 }

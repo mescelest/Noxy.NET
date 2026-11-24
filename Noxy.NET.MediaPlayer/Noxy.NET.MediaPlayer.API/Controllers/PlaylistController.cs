@@ -89,6 +89,12 @@ public class PlaylistController(IMediator mediator) : UserControllerBase
         return await mediator.Send(request.ToCommand(UserID, id), cancellationToken);
     }
 
+    [HttpPut($"{IdRoute}/Position")]
+    public async Task<ActionResult<List<ResponsePlaylist>>> Move(Guid id, RequestMovePlaylist request, CancellationToken cancellationToken)
+    {
+        return await mediator.Send(request.ToCommand(UserID, id), cancellationToken);
+    }
+
     [HttpPut($"{EntryRoute}/{{entryID:guid}}/Position")]
     public async Task<ActionResult<ResponsePlaylistDetail>> MoveEntry(Guid id, Guid entryID, RequestMovePlaylistEntry request, CancellationToken cancellationToken)
     {

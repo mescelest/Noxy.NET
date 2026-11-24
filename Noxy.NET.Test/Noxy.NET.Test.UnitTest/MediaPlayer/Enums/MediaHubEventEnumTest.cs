@@ -15,6 +15,7 @@ public class MediaHubEventEnumTest
             nameof(MediaHubEventEnum.MediaDeleted),
             nameof(MediaHubEventEnum.PlaylistUpdated),
             nameof(MediaHubEventEnum.PlaylistDeleted),
+            nameof(MediaHubEventEnum.PlaylistOrderChanged),
             nameof(MediaHubEventEnum.ArtistUpdated),
             nameof(MediaHubEventEnum.ArtistDeleted),
             nameof(MediaHubEventEnum.AlbumUpdated),

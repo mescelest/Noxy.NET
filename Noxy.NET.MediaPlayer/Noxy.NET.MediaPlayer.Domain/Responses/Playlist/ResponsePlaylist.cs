@@ -7,6 +7,9 @@ public class ResponsePlaylist : BaseResponse
     public required Guid ID { get; init; }
     public required string Name { get; init; }
     public required bool AllowDuplicates { get; init; }
+
+    // Where the playlist stands in the user's own order, 0 on top.
+    public int Position { get; init; }
     public required int EntryCount { get; init; }
     public required DateTime TimeCreated { get; init; }
     public required DateTime TimeModified { get; init; }

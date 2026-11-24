@@ -206,6 +206,10 @@
         {
             // Safe to ignore
         }
+        catch (JSException)
+        {
+            // The page was reloaded, so the object is gone.
+        }
 
         _refDotNet?.Dispose();
         _refDotNet = null;

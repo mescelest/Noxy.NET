@@ -125,6 +125,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             UserID = table.UserID,
             Name = table.Name,
             AllowDuplicates = table.AllowDuplicates,
+            Position = table.Position,
             TimeModified = table.TimeModified,
             TimeLastPlayed = table.TimeLastPlayed,
             EntryList = [.. table.EntryList.Select(Map)]

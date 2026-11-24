@@ -118,6 +118,18 @@ public class HandlerNotificationTest
     }
 
     [Fact]
+    public async Task PlaylistOrderChanged_PushesTheEventWithNoPayloadToThatUserOnly()
+    {
+        await new HandlerNotificationPlaylistOrderChanged(_hub, new FakeLogger<HandlerNotificationPlaylistOrderChanged>()).Handle(new(UserID), Token);
+
+        (string userID, string method, object?[] argumentList, CancellationToken token) = Assert.Single(_hub.SendList);
+        Assert.Equal(UserID.ToString(), userID);
+        Assert.Equal(nameof(MediaHubEventEnum.PlaylistOrderChanged), method);
+        Assert.Empty(argumentList);
+        Assert.Equal(Token, token);
+    }
+
+    [Fact]
     public async Task ArtistUpdated_PushesTheEventWithThePayloadToThatUserOnly()
     {
         ResponseArtist artist = new() { ID = Guid.CreateVersion7(), Name = "Artist", MediaFileCount = 1, TimeModified = DateTime.UtcNow };

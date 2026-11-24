@@ -110,4 +110,27 @@ public class HandlerPlaylistDeleteTest
         await Assert.ThrowsAsync<PlaylistNotFoundException>(() => _handler.Handle(new(Guid.CreateVersion7(), id), Token).AsTask());
         Assert.Single(_store.PlaylistList);
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public async Task Delete_ClosesTheGap_SoPositionsStayWhole(int positionToDelete)
+    {
+        List<EntityPlaylist> list = [];
+        for (int position = 0; position < 3; position++)
+        {
+            EntityPlaylist playlist = new() { UserID = UserID, Name = $"P{position}", Position = position, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
+            _store.PlaylistList.Add(playlist);
+            list.Add(playlist);
+        }
+
+        Guid otherUser = Guid.CreateVersion7();
+        _store.PlaylistList.Add(new() { UserID = otherUser, Name = "Theirs", Position = 1, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow });
+
+        await _handler.Handle(new(UserID, list[positionToDelete].ID), Token);
+
+        Assert.Equal([0, 1], _store.PlaylistList.Where(x => x.UserID == UserID).OrderBy(x => x.Position).Select(x => x.Position));
+        Assert.Equal(1, _store.PlaylistList.Single(x => x.UserID == otherUser).Position);
+    }
 }

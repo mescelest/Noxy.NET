@@ -21,6 +21,7 @@ public sealed class LibraryHubListener : IAsyncDisposable
     private readonly Channel<Guid> _deletedMessages = Channel.CreateUnbounded<Guid>();
     private readonly Channel<ResponsePlaylist> _playlistUpdatedMessages = Channel.CreateUnbounded<ResponsePlaylist>();
     private readonly Channel<Guid> _playlistDeletedMessages = Channel.CreateUnbounded<Guid>();
+    private readonly Channel<bool> _playlistOrderChangedMessages = Channel.CreateUnbounded<bool>();
     private readonly Channel<ResponseArtist> _artistUpdatedMessages = Channel.CreateUnbounded<ResponseArtist>();
     private readonly Channel<Guid> _artistDeletedMessages = Channel.CreateUnbounded<Guid>();
     private readonly Channel<ResponseAlbum> _albumUpdatedMessages = Channel.CreateUnbounded<ResponseAlbum>();
@@ -39,6 +40,7 @@ public sealed class LibraryHubListener : IAsyncDisposable
         connection.On<Guid>(nameof(MediaHubEventEnum.MediaDeleted), id => Receive(nameof(MediaHubEventEnum.MediaDeleted), () => _deletedMessages.Writer.TryWrite(id)));
         connection.On<ResponsePlaylist>(nameof(MediaHubEventEnum.PlaylistUpdated), playlist => Receive(nameof(MediaHubEventEnum.PlaylistUpdated), () => _playlistUpdatedMessages.Writer.TryWrite(playlist)));
         connection.On<Guid>(nameof(MediaHubEventEnum.PlaylistDeleted), id => Receive(nameof(MediaHubEventEnum.PlaylistDeleted), () => _playlistDeletedMessages.Writer.TryWrite(id)));
+        connection.On(nameof(MediaHubEventEnum.PlaylistOrderChanged), () => Receive(nameof(MediaHubEventEnum.PlaylistOrderChanged), () => _playlistOrderChangedMessages.Writer.TryWrite(true)));
         connection.On<ResponseArtist>(nameof(MediaHubEventEnum.ArtistUpdated), artist => Receive(nameof(MediaHubEventEnum.ArtistUpdated), () => _artistUpdatedMessages.Writer.TryWrite(artist)));
         connection.On<Guid>(nameof(MediaHubEventEnum.ArtistDeleted), id => Receive(nameof(MediaHubEventEnum.ArtistDeleted), () => _artistDeletedMessages.Writer.TryWrite(id)));
         connection.On<ResponseAlbum>(nameof(MediaHubEventEnum.AlbumUpdated), album => Receive(nameof(MediaHubEventEnum.AlbumUpdated), () => _albumUpdatedMessages.Writer.TryWrite(album)));
@@ -139,6 +141,11 @@ public sealed class LibraryHubListener : IAsyncDisposable
     public async Task<Guid> NextPlaylistDeleted()
     {
         return await Read(_playlistDeletedMessages);
+    }
+
+    public async Task NextPlaylistOrderChanged()
+    {
+        await Read(_playlistOrderChangedMessages);
     }
 
     private void Receive(string name, Action store)

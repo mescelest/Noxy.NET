@@ -106,6 +106,12 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
         Changed?.Invoke();
     }
 
+    public async Task ApplyPlaylistOrder(List<ResponsePlaylist> playlistList)
+    {
+        await storeMetadata.ReplacePlaylistList(playlistList);
+        Changed?.Invoke();
+    }
+
     public async Task ApplyUploadSucceeded(ResponseUploadResult result)
     {
         if (result.Media is not null)

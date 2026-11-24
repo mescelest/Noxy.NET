@@ -130,6 +130,11 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
         return await Write<ResponsePlaylistDetail>(HttpMethod.Post, $"{PlaylistPath}/{id}/EntryList/Remove", request);
     }
 
+    public async Task<List<ResponsePlaylist>> MovePlaylist(Guid id, RequestMovePlaylist request)
+    {
+        return await Write<List<ResponsePlaylist>>(HttpMethod.Put, $"{PlaylistPath}/{id}/Position", request);
+    }
+
     public async Task<ResponsePlaylistDetail> MovePlaylistEntry(Guid id, Guid entryID, RequestMovePlaylistEntry request)
     {
         return await Write<ResponsePlaylistDetail>(HttpMethod.Put, $"{PlaylistPath}/{id}/Entry/{entryID}/Position", request);

@@ -1,4 +1,7 @@
 @inject IState<FeaturePlaylistListState> StatePlaylistList
+@inject IPlaylistService ServicePlaylist
+@inject IToastService ServiceToast
+@using Noxy.NET.MediaPlayer.Presentation.Exceptions
 @inherits BaseComponentElementFluxor
 
 <nav @attributes="AdditionalAttributes" class="@CssClass" aria-label="Main">
@@ -36,11 +39,9 @@
             </Button>
         </div>
 
-        @foreach (ResponsePlaylist playlist in PlaylistList)
-        {
-            ResponsePlaylist row = playlist;
-
-            <div @key="row.ID" class="playlist-row" @oncontextmenu="args => OpenPlaylistMenu(args, row.ID)" @oncontextmenu:preventDefault>
+        <SortableList T="ResponsePlaylist" class="playlist-list" HandleClass="sortable-item" List="PlaylistList" OnUpdate="MoveHandler" Context="entry">
+            @{ ResponsePlaylist row = entry.Item; }
+            <div @key="row.ID" class="playlist-row sortable-item" @oncontextmenu="args => OpenPlaylistMenu(args, row.ID)" @oncontextmenu:preventDefault>
                 <NavLink class="link" href="@($"playlist/{row.ID}")" @onclick="OnNavigate">
                     <PlaylistArt Playlist="row"/>
                     <span>@row.Name</span>
@@ -51,7 +52,7 @@
                 </Button>
                 <PlaylistContextMenu @ref="_menuMap[row.ID]" Playlist="row" Place="@PlaylistContextMenu.PlaceSidebar"/>
             </div>
-        }
+        </SortableList>
     </div>
 
     <NewPlaylistDialog @bind-Open="_showNewPlaylistDialog"/>
@@ -62,8 +63,10 @@
     [Parameter]
     public EventCallback OnNavigate { get; set; }
 
-    private List<ResponsePlaylist> PlaylistList => StatePlaylistList.Value.PlaylistList.OrderNewestCreatedFirst();
+    // The order the user saved; while a drop is being saved, the order the user just made, so the row does not jump back.
+    private List<ResponsePlaylist> PlaylistList => _droppedList ?? StatePlaylistList.Value.PlaylistList.OrderByPosition();
 
+    private List<ResponsePlaylist>? _droppedList;
     private bool _showNewPlaylistDialog;
     private readonly Dictionary<Guid, PlaylistContextMenu> _menuMap = [];
 
@@ -73,6 +76,30 @@
         if (_menuMap.TryGetValue(playlistID, out PlaylistContextMenu? menu))
         {
             await menu.OpenAtAsync(args);
+        }
+    }
+
+    // A drop shows at once and is saved on the server. When the save fails (refused, or offline), the saved order comes back and the reason is shown.
+    private async Task MoveHandler((int IndexOld, int IndexNew) move)
+    {
+        List<ResponsePlaylist> list = PlaylistList;
+        ResponsePlaylist moved = list[move.IndexOld];
+        List<ResponsePlaylist> droppedList = [.. list];
+        droppedList.RemoveAt(move.IndexOld);
+        droppedList.Insert(move.IndexNew, moved);
+        _droppedList = droppedList;
+
+        try
+        {
+            await ServicePlaylist.Move(moved.ID, move.IndexNew);
+        }
+        catch (Exception exception) when (exception is ApiException or HttpRequestException)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+        finally
+        {
+            _droppedList = null;
         }
     }
 

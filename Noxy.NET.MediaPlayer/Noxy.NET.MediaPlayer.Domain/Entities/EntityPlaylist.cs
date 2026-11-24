@@ -9,6 +9,9 @@ public class EntityPlaylist : BaseEntity
     public required string Name { get; set; }
     public bool AllowDuplicates { get; set; } = true;
 
+    // Where the playlist stands in the user's own order: 0 is the top, and the positions of one user are 0 to n-1 with no gaps.
+    public int Position { get; set; }
+
     public DateTime TimeModified { get; set; } = DateTime.UtcNow;
     public DateTime? TimeLastPlayed { get; set; }
 

@@ -31,6 +31,10 @@ public class ThemeService<TType>(IJSRuntime runtime) : IThemeService<TType>, IAs
         {
             // The window is closing.
         }
+        catch (JSException)
+        {
+            // The page was reloaded, so the object is gone.
+        }
     }
 
     public async Task<TType?> LoadTheme()

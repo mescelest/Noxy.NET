@@ -48,12 +48,13 @@ public class PlaylistRepositoryTest : IDisposable
         return file;
     }
 
-    private static EntityPlaylist CreatePlaylist(Guid userID, string name = "Playlist", DateTime? timeCreated = null)
+    private static EntityPlaylist CreatePlaylist(Guid userID, string name = "Playlist", DateTime? timeCreated = null, int position = 0)
     {
         return new()
         {
             UserID = userID,
             Name = name,
+            Position = position,
             TimeCreated = timeCreated ?? DateTime.UtcNow
         };
     }
@@ -129,16 +130,16 @@ public class PlaylistRepositoryTest : IDisposable
     }
 
     [Fact]
-    public async Task GetPlaylistSummaryList_ReturnsOnlyTheUsersPlaylistsNewestFirstWithEntryCounts()
+    public async Task GetPlaylistSummaryList_ReturnsOnlyTheUsersPlaylistsInPositionOrderWithEntryCounts()
     {
         EntityUser user = await CreateUser();
         EntityUser other = await CreateUser("other@example.com");
         EntityMediaFile mediaFile = await CreateMediaFile(user.ID);
         DateTime now = DateTime.UtcNow;
-        EntityPlaylist older = CreatePlaylist(user.ID, "Older", now.AddMinutes(-5));
+        EntityPlaylist older = CreatePlaylist(user.ID, "Older", now.AddMinutes(-5), 0);
         older.EntryList.Add(CreateEntry(older, mediaFile, 0));
         older.EntryList.Add(CreateEntry(older, mediaFile, 1));
-        EntityPlaylist newer = CreatePlaylist(user.ID, "Newer", now);
+        EntityPlaylist newer = CreatePlaylist(user.ID, "Newer", now, 1);
         await Add(older);
         await Add(newer);
         await Add(CreatePlaylist(other.ID, "Not mine"));
@@ -146,8 +147,9 @@ public class PlaylistRepositoryTest : IDisposable
         await using IUnitOfWork uow = _fixture.UoWFactory.Create();
         List<PlaylistSummary> list = await uow.Playlist.GetPlaylistSummaryList(user.ID, TestContext.Current.CancellationToken);
 
-        Assert.Equal(["Newer", "Older"], list.Select(x => x.Playlist.Name));
-        Assert.Equal([0, 2], list.Select(x => x.EntryCount));
+        Assert.Equal(["Older", "Newer"], list.Select(x => x.Playlist.Name));
+        Assert.Equal([2, 0], list.Select(x => x.EntryCount));
+        Assert.Equal([0, 1], list.Select(x => x.Playlist.Position));
         Assert.All(list, x => Assert.Empty(x.Playlist.EntryList));
     }
 

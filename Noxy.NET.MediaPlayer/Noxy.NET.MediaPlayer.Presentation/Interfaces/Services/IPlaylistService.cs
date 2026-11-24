@@ -7,7 +7,7 @@ public interface IPlaylistService
 {
     Task<ResponsePlaylist> Create(string name);
 
-    // Syncs the playlist's detail, then starts the downloads of its media files that are not on the device. This is the only thing that downloads for a playlist. Offline it uses the stored detail. A playlist the server no longer has is removed locally.
+    // Syncs the playlist's detail. It downloads nothing: that is "Download all", or playing. Offline it uses the stored detail. A playlist the server no longer has is removed locally.
     Task Open(Guid id);
 
     // Syncs the detail again.
@@ -27,6 +27,9 @@ public interface IPlaylistService
     Task RemoveEntryList(Guid id, List<Guid> entryIDList);
 
     Task MoveEntry(Guid id, Guid entryID, int newPosition);
+
+    // Moves the playlist to the position in the user's own order and saves the answer, the whole list in its new order.
+    Task Move(Guid id, int newPosition);
 
     Task Delete(Guid id);
 }

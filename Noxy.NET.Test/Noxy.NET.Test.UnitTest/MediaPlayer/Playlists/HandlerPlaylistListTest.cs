@@ -44,13 +44,14 @@ public class HandlerPlaylistListTest
         return file;
     }
 
-    private EntityPlaylist Seed(string name = "Mix", bool allowDuplicates = true, Guid? userID = null, int entryCount = 0)
+    private EntityPlaylist Seed(string name = "Mix", bool allowDuplicates = true, Guid? userID = null, int entryCount = 0, int position = 0)
     {
         EntityPlaylist playlist = new()
         {
             UserID = userID ?? UserID,
             Name = name,
             AllowDuplicates = allowDuplicates,
+            Position = position,
             TimeCreated = _now,
             TimeModified = _now
         };
@@ -87,15 +88,29 @@ public class HandlerPlaylistListTest
     }
 
     [Fact]
-    public async Task Handle_IsNewestFirst()
+    public async Task Handle_IsInPositionOrder_WhateverWasCreatedFirst()
     {
-        Seed("Older");
+        Seed("Second", position: 1);
         Advance();
-        Seed("Newer");
+        Seed("First", position: 0);
+        Advance();
+        Seed("Third", position: 2);
 
         PlaylistLibrary library = await Library();
 
-        Assert.Equal(["Newer", "Older"], library.PlaylistList?.Select(x => x.Name) ?? []);
+        Assert.Equal(["First", "Second", "Third"], library.PlaylistList?.Select(x => x.Name) ?? []);
+    }
+
+    [Fact]
+    public async Task Handle_ETagChanges_WhenOnlyAPositionChanges()
+    {
+        EntityPlaylist first = Seed("First", position: 0);
+        Seed("Second", position: 1);
+        string before = (await Library()).ETag;
+
+        first.Position = 1;
+
+        Assert.NotEqual(before, (await Library()).ETag);
     }
 
     [Fact]

@@ -12,10 +12,10 @@ public static class ResponsePlaylistListExtension
             return [.. playlistList.OrderByDescending(x => x.TimeLastPlayed is { } played && played > x.TimeCreated ? played : x.TimeCreated)];
         }
 
-        // The order of the sidebar for now: the newest created first, whatever was played. A tie keeps the order of the input. The input list is not changed.
-        public List<ResponsePlaylist> OrderNewestCreatedFirst()
+        // The user's own order, the one the server saves: position 0 first. A tie keeps the order of the input. The input list is not changed.
+        public List<ResponsePlaylist> OrderByPosition()
         {
-            return [.. playlistList.OrderByDescending(x => x.TimeCreated)];
+            return [.. playlistList.OrderBy(x => x.Position)];
         }
 
         // The playlists whose name contains the text, ignoring case, in the order of the list; no text keeps them all.

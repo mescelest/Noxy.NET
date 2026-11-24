@@ -459,6 +459,56 @@ public class PlaylistFlowTest
         Assert.Equal(2, (await api.GetMediaFileList(user.Token)).Count);
     }
 
+    [Fact]
+    public async Task Create_PutsTheNewPlaylistOnTop_AndMovePlaylist_ReordersTheList_AndTheListETagFollows()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ResponsePlaylist first = await CreatePlaylist(api, user, "First");
+        ResponsePlaylist second = await CreatePlaylist(api, user, "Second");
+        ResponsePlaylist third = await CreatePlaylist(api, user, "Third");
+
+        HttpResponseMessage listResponse = await api.GetPlaylistLibrary(user.Token);
+        List<ResponsePlaylist> created = await Read<List<ResponsePlaylist>>(listResponse);
+        string eTag = listResponse.Headers.ETag?.Tag ?? string.Empty;
+        Assert.Equal([third.ID, second.ID, first.ID], created.Select(x => x.ID));
+        Assert.Equal([0, 1, 2], created.Select(x => x.Position));
+
+        List<ResponsePlaylist> moved = await Read<List<ResponsePlaylist>>(await api.MovePlaylist(user.Token, third.ID, """{"position":2}"""));
+
+        Assert.Equal([second.ID, first.ID, third.ID], moved.Select(x => x.ID));
+        Assert.Equal([second.ID, first.ID, third.ID], (await Read<List<ResponsePlaylist>>(await api.GetPlaylistLibrary(user.Token))).Select(x => x.ID));
+        Assert.Equal(HttpStatusCode.OK, (await api.GetPlaylistLibrary(user.Token, eTag)).StatusCode);
+    }
+
+    [Theory]
+    [InlineData("""{"position":-1}""")]
+    [InlineData("""{"position":3}""")]
+    [InlineData("""{"position":"first"}""")]
+    public async Task MovePlaylist_OutOfRangeOrWrongType_Returns400(string json)
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ResponsePlaylist playlist = await CreatePlaylist(api, user);
+        await CreatePlaylist(api, user, "Other");
+
+        Assert.Equal(HttpStatusCode.BadRequest, (await api.MovePlaylist(user.Token, playlist.ID, json)).StatusCode);
+    }
+
+    [Fact]
+    public async Task MovePlaylist_OfAnotherUsersPlaylist_Returns404()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount owner = await api.SignUp("a@example.com");
+        ApiAccount other = await api.SignUp("b@example.com");
+        ResponsePlaylist playlist = await CreatePlaylist(api, owner);
+
+        Assert.Equal(HttpStatusCode.NotFound, (await api.MovePlaylist(other.Token, playlist.ID, """{"position":0}""")).StatusCode);
+    }
+
     #endregion -- Create, patch and delete --
 
     #region -- Entries --
@@ -788,6 +838,30 @@ public class PlaylistFlowTest
 
         Assert.Equal(playlist.ID, await phone.NextPlaylistDeleted());
         Assert.Equal(playlist.ID, await computer.NextPlaylistDeleted());
+        Assert.True(await stranger.ReceivesNothingWithin(TimeSpan.FromSeconds(1)));
+    }
+
+    [Fact]
+    public async Task Push_MoveAndCreate_SendPlaylistOrderChanged_ToTheUsersDevicesOnly()
+    {
+        await using ApiFactory factory = new();
+        MediaApiClient api = new(factory);
+        ApiAccount user = await api.SignUp("a@example.com");
+        ApiAccount other = await api.SignUp("other@example.com");
+        ResponsePlaylist first = await CreatePlaylist(api, user, "First");
+        await CreatePlaylist(api, user, "Second");
+        await using LibraryHubListener phone = await LibraryHubListener.Connect(factory, user.Token);
+        await using LibraryHubListener stranger = await LibraryHubListener.Connect(factory, other.Token);
+
+        // The first one was made first, so the second one is above it: it is at position 1 already.
+        await api.MovePlaylist(user.Token, first.ID, """{"position":1}""");
+        Assert.True(await phone.ReceivesNothingWithin(TimeSpan.FromSeconds(1)));
+
+        await api.MovePlaylist(user.Token, first.ID, """{"position":0}""");
+        await phone.NextPlaylistOrderChanged();
+
+        await CreatePlaylist(api, user, "Third");
+        await phone.NextPlaylistOrderChanged();
         Assert.True(await stranger.ReceivesNothingWithin(TimeSpan.FromSeconds(1)));
     }
 

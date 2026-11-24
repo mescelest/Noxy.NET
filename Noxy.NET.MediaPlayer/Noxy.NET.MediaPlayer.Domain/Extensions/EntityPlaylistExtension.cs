@@ -14,6 +14,7 @@ public static class EntityPlaylistExtension
                 ID = playlist.ID,
                 Name = playlist.Name,
                 AllowDuplicates = playlist.AllowDuplicates,
+                Position = playlist.Position,
                 EntryCount = entryCount,
                 // Stored as UTC, but the database hands it back without a kind, which would serialize without a "Z".
                 TimeCreated = DateTime.SpecifyKind(playlist.TimeCreated, DateTimeKind.Utc),
@@ -29,6 +30,7 @@ public static class EntityPlaylistExtension
                 ID = playlist.ID,
                 Name = playlist.Name,
                 AllowDuplicates = playlist.AllowDuplicates,
+                Position = playlist.Position,
                 EntryCount = playlist.EntryList.Count,
                 TimeCreated = DateTime.SpecifyKind(playlist.TimeCreated, DateTimeKind.Utc),
                 TimeModified = DateTime.SpecifyKind(playlist.TimeModified, DateTimeKind.Utc),

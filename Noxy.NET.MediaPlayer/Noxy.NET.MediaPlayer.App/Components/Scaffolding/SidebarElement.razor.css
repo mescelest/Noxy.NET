@@ -99,3 +99,16 @@
     background: var(--color-offset-primary-lg);
 }
 
+
+/* The shared sortable list is the wrapper of the rows, so it takes the place of the list's own column. */
+.link-list ::deep > .playlist-list {
+    display: flex;
+    flex-flow: column;
+    row-gap: var(--size-gap-tiny);
+}
+
+/* The whole row is what is dragged (the links inside it are made undraggable by the list, so a drag from the name still moves the row), and a click still opens it. */
+.playlist-row.sortable-ghost {
+    opacity: 0.4;
+}
+

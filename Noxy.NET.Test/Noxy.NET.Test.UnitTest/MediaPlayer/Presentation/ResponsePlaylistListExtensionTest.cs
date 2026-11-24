@@ -7,9 +7,9 @@ public class ResponsePlaylistListExtensionTest
 {
     private static readonly DateTime Now = new(2026, 11, 17, 12, 0, 0, DateTimeKind.Utc);
 
-    private static ResponsePlaylist Playlist(string name, DateTime? played, DateTime created)
+    private static ResponsePlaylist Playlist(string name, DateTime? played, DateTime created, int position = 0)
     {
-        return new() { ID = Guid.CreateVersion7(), Name = name, AllowDuplicates = true, EntryCount = 0, TimeCreated = created, TimeModified = created, TimeLastPlayed = played };
+        return new() { ID = Guid.CreateVersion7(), Name = name, AllowDuplicates = true, Position = position, EntryCount = 0, TimeCreated = created, TimeModified = created, TimeLastPlayed = played };
     }
 
     [Fact]
@@ -64,14 +64,14 @@ public class ResponsePlaylistListExtensionTest
     }
 
     [Fact]
-    public void OrderNewestCreatedFirst_IgnoresWhenAPlaylistWasPlayed_AndKeepsTheInputOrderOnATie()
+    public void OrderByPosition_SortsAscending_IgnoringTimes_AndKeepsTheInputOrderOnATie()
     {
-        List<ResponsePlaylist> list = [Playlist("old-played", Now, Now.AddDays(-30)), Playlist("tie-a", null, Now.AddDays(-1)), Playlist("tie-b", null, Now.AddDays(-1)), Playlist("newest", null, Now)];
+        List<ResponsePlaylist> list = [Playlist("third", Now, Now, 2), Playlist("tie-a", null, Now.AddDays(-1), 1), Playlist("tie-b", null, Now.AddDays(-9), 1), Playlist("first", null, Now.AddDays(-30), 0)];
 
-        List<ResponsePlaylist> ordered = list.OrderNewestCreatedFirst();
+        List<ResponsePlaylist> ordered = list.OrderByPosition();
 
-        Assert.Equal(["newest", "tie-a", "tie-b", "old-played"], ordered.Select(x => x.Name));
-        Assert.Equal(["old-played", "tie-a", "tie-b", "newest"], list.Select(x => x.Name));
+        Assert.Equal(["first", "tie-a", "tie-b", "third"], ordered.Select(x => x.Name));
+        Assert.Equal(["third", "tie-a", "tie-b", "first"], list.Select(x => x.Name));
     }
 
     [Fact]

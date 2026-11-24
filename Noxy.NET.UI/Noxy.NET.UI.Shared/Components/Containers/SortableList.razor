@@ -44,22 +44,48 @@
     private IJSObjectReference? _refInstance;
     private DotNetObjectReference<SortableList<T>>? _refDotNet;
 
+    private bool _disposed;
+
+    // A touch has to be held for this long before it starts a drag, so scrolling a list with a finger is not taken for one.
+    private const int TouchHoldMilliseconds = 250;
+
     protected override async Task OnAfterFirstRenderAsync()
     {
         await base.OnAfterFirstRenderAsync();
 
-        await JS.InvokeAsync<IJSObjectReference>("import", $"./_content/{typeof(SortableList<>).Assembly.GetName().Name}/Sortable.min.js");
-        _componentModule = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(SortableList<>)));
+        IJSObjectReference library;
+        IJSObjectReference module;
+        try
+        {
+            library = await JS.InvokeAsync<IJSObjectReference>("import", $"./_content/{typeof(SortableList<>).Assembly.GetName().Name}/Sortable.min.js");
+            module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(SortableList<>)));
+        }
+        catch (JSDisconnectedException)
+        {
+            return;
+        }
 
+        // Disposed while the scripts loaded (a refresh of the page, or a list that went away at once): nothing is left to set up, and nobody else releases what was loaded.
+        if (_disposed)
+        {
+            await TryAsync(async () => await module.DisposeAsync());
+            await TryAsync(async () => await library.DisposeAsync());
+            return;
+        }
+
+        // The animation is off (see the script): the dragged row is put back before the owner renders the new order, so an animation would show the row jumping back.
         Dictionary<string, object?> options = new()
         {
-                { "animation", 150 },
                 { "ghostClass", GhostClassCurrent },
                 { "draggable", $".{DragClassCurrent}" },
-                { "handle", $".{HandleClassCurrent}" }
+                { "handle", $".{HandleClassCurrent}" },
+                { "delay", TouchHoldMilliseconds },
+                { "delayOnTouchOnly", true }
         };
+        _componentModule = module;
         _refDotNet = DotNetObjectReference.Create(this);
         _refInstance = await _componentModule.InvokeAsync<IJSObjectReference>("initSortable", _refElement, _refDotNet, options);
+        await TryAsync(async () => await library.DisposeAsync());
     }
 
     [JSInvokable]
@@ -71,26 +97,36 @@
         }
     }
 
+    // After a refresh of the page the objects on the JavaScript side are gone while this component is still being disposed, so every call into them can fail with a JSException; each one is tried on its own so the rest still goes.
     public async ValueTask DisposeAsync()
     {
-        try
+        _disposed = true;
+
+        if (_refInstance is not null)
         {
-            if (_refInstance is not null)
+            await TryAsync(async () =>
             {
                 await _refInstance.InvokeVoidAsync("destroy");
                 await _refInstance.DisposeAsync();
-            }
-
-            if (_componentModule is not null)
-            {
-                await _componentModule.DisposeAsync();
-            }
-
-            _refDotNet?.Dispose();
+            });
         }
-        catch (JSDisconnectedException)
+
+        if (_componentModule is not null)
         {
+            await TryAsync(async () => await _componentModule.DisposeAsync());
         }
+
+        _refDotNet?.Dispose();
+    }
+
+    private static async Task TryAsync(Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
     }
 
 }

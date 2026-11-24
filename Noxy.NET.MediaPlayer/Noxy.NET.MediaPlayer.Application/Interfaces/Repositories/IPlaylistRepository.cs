@@ -17,7 +17,7 @@ public interface IPlaylistRepository
     // The playlist with its entry count and no entries. Scoped to the owner: another user's playlist comes back as null.
     Task<PlaylistSummary?> FindPlaylistSummary(Guid id, Guid userID, CancellationToken cancellationToken = default);
 
-    // Newest first, without entries.
+    // In the order of the user's own positions, 0 first, without entries.
     Task<List<PlaylistSummary>> GetPlaylistSummaryList(Guid userID, CancellationToken cancellationToken = default);
 
     Task<List<PlaylistStamp>> GetPlaylistStampList(Guid userID, CancellationToken cancellationToken = default);

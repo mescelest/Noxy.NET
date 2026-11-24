@@ -16,18 +16,18 @@ public class HandlerPlaylistList(IUnitOfWorkFactory factoryUnitOfWork, IETagServ
         if (!string.IsNullOrWhiteSpace(query.IfNoneMatch))
         {
             List<PlaylistStamp> stampList = await uow.Playlist.GetPlaylistStampList(query.UserID, cancellationToken);
-            string current = serviceETag.Compute(stampList.SelectMany(x => ETagStamps(x.ID, x.TimeModified, x.TimeLastPlayed)));
+            string current = serviceETag.ComputeCounted(stampList.SelectMany(x => ETagStamps(x.ID, x.TimeModified, x.TimeLastPlayed, x.Position)));
             if (serviceETag.Matches(query.IfNoneMatch, current)) return new(current, null);
         }
 
         // The ETag comes from the list that is returned, so the two can never disagree.
         List<PlaylistSummary> summaryList = await uow.Playlist.GetPlaylistSummaryList(query.UserID, cancellationToken);
-        return new(serviceETag.Compute(summaryList.SelectMany(x => ETagStamps(x.Playlist.ID, x.Playlist.TimeModified, x.Playlist.TimeLastPlayed))), [.. summaryList.Select(x => x.Playlist.ToResponse(x.EntryCount))]);
+        return new(serviceETag.ComputeCounted(summaryList.SelectMany(x => ETagStamps(x.Playlist.ID, x.Playlist.TimeModified, x.Playlist.TimeLastPlayed, x.Playlist.Position))), [.. summaryList.Select(x => x.Playlist.ToResponse(x.EntryCount))]);
     }
 
-    // A play moves the list ETag, so a device refetches the list for the new stamp, but it is not part of the detail ETag.
-    private static List<(Guid ID, DateTime TimeModified)> ETagStamps(Guid id, DateTime timeModified, DateTime? timeLastPlayed)
+    // A play moves the list ETag, so a device refetches the list for the new stamp, but it is not part of the detail ETag. So does a new position, carried as the count of the stamp.
+    private static List<(Guid ID, DateTime TimeModified, int Count)> ETagStamps(Guid id, DateTime timeModified, DateTime? timeLastPlayed, int position)
     {
-        return [(id, timeModified), (id, timeLastPlayed ?? DateTime.MinValue)];
+        return [(id, timeModified, position), (id, timeLastPlayed ?? DateTime.MinValue, position)];
     }
 }

@@ -233,6 +233,18 @@ public sealed class FakeApiClient : IApiClient
 
     public List<(Guid ID, Guid EntryID, RequestMovePlaylistEntry Request)> MoveEntryCallList { get; } = [];
 
+    public Func<Guid, RequestMovePlaylist, List<ResponsePlaylist>> MovePlaylistHandler { get; set; } = (_, _) => [];
+
+    public List<(Guid ID, RequestMovePlaylist Request)> MovePlaylistCallList { get; } = [];
+
+    public Task<List<ResponsePlaylist>> MovePlaylist(Guid id, RequestMovePlaylist request)
+    {
+        MovePlaylistCallList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(MovePlaylistHandler(id, request));
+    }
+
     public Task<ResponsePlaylistDetail> MovePlaylistEntry(Guid id, Guid entryID, RequestMovePlaylistEntry request)
     {
         MoveEntryCallList.Add((id, entryID, request));

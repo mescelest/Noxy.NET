@@ -143,12 +143,16 @@
                 await _refJs.InvokeVoidAsync("dispose");
                 await _refJs.DisposeAsync();
             }
-
-            _refDotNet?.Dispose();
         }
         catch (JSDisconnectedException)
         {
         }
+        catch (JSException)
+        {
+            // The page was reloaded, so the object is gone.
+        }
+
+        _refDotNet?.Dispose();
     }
 
 }

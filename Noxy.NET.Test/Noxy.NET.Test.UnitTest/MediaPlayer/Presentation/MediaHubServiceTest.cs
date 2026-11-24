@@ -20,6 +20,7 @@ public class MediaHubServiceTest
             nameof(MediaHubEventEnum.MediaDeleted),
             nameof(MediaHubEventEnum.PlaylistUpdated),
             nameof(MediaHubEventEnum.PlaylistDeleted),
+            nameof(MediaHubEventEnum.PlaylistOrderChanged),
             nameof(MediaHubEventEnum.SettingUpdated),
             nameof(MediaHubEventEnum.ArtistUpdated),
             nameof(MediaHubEventEnum.ArtistDeleted),

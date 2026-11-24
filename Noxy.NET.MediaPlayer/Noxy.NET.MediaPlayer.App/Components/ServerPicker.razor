@@ -41,9 +41,6 @@
     protected override async Task OnInitializedAsync()
     {
         await Load();
-
-        // Nothing to pick yet: the first thing to do is to add a server.
-        _open = _addressList.Count == 0;
     }
 
     private async Task Load()

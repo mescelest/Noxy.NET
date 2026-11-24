@@ -63,6 +63,11 @@ public class PlaylistService(IApiClient clientApi, ISyncService serviceSync, IDo
         await Save(await clientApi.MovePlaylistEntry(id, entryID, new() { Position = newPosition }));
     }
 
+    public async Task Move(Guid id, int newPosition)
+    {
+        await serviceSync.ApplyPlaylistOrder(await clientApi.MovePlaylist(id, new() { Position = newPosition }));
+    }
+
     public async Task Delete(Guid id)
     {
         await clientApi.DeletePlaylist(id);

@@ -24,6 +24,7 @@ public class MediaHubService(ISyncService serviceSync, ISettingService serviceSe
         nameof(MediaHubEventEnum.MediaDeleted),
         nameof(MediaHubEventEnum.PlaylistUpdated),
         nameof(MediaHubEventEnum.PlaylistDeleted),
+        nameof(MediaHubEventEnum.PlaylistOrderChanged),
         nameof(MediaHubEventEnum.SettingUpdated),
         nameof(MediaHubEventEnum.ArtistUpdated),
         nameof(MediaHubEventEnum.ArtistDeleted),
@@ -168,6 +169,8 @@ public class MediaHubService(ISyncService serviceSync, ISettingService serviceSe
         connection.On<Guid>(nameof(MediaHubEventEnum.MediaDeleted), x => Run(nameof(MediaHubEventEnum.MediaDeleted), () => serviceSync.ApplyMediaDeleted(x)));
         connection.On<ResponsePlaylist>(nameof(MediaHubEventEnum.PlaylistUpdated), x => Run(nameof(MediaHubEventEnum.PlaylistUpdated), () => serviceSync.ApplyPlaylistUpdated(x)));
         connection.On<Guid>(nameof(MediaHubEventEnum.PlaylistDeleted), x => Run(nameof(MediaHubEventEnum.PlaylistDeleted), () => serviceSync.ApplyPlaylistDeleted(x)));
+        // Positions moved, which a single playlist does not say: the list is read again, past the ETag.
+        connection.On(nameof(MediaHubEventEnum.PlaylistOrderChanged), () => Run(nameof(MediaHubEventEnum.PlaylistOrderChanged), () => serviceSync.SyncPlaylistList(true)));
         connection.On<ResponseSetting>(nameof(MediaHubEventEnum.SettingUpdated), x => Run(nameof(MediaHubEventEnum.SettingUpdated), () => serviceSetting.ApplySettingUpdated(x)));
         connection.On<ResponseArtist>(nameof(MediaHubEventEnum.ArtistUpdated), x => Run(nameof(MediaHubEventEnum.ArtistUpdated), () => serviceMetadataSync.ApplyArtistUpdated(x)));
         connection.On<Guid>(nameof(MediaHubEventEnum.ArtistDeleted), x => Run(nameof(MediaHubEventEnum.ArtistDeleted), () => serviceMetadataSync.ApplyArtistDeleted(x)));

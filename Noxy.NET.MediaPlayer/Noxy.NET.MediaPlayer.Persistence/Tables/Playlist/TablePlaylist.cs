@@ -24,6 +24,9 @@ public class TablePlaylist : BaseTable
     public bool AllowDuplicates { get; set; }
 
     [Required]
+    public int Position { get; set; }
+
+    [Required]
     public DateTime TimeModified { get; set; }
 
     public DateTime? TimeLastPlayed { get; set; }

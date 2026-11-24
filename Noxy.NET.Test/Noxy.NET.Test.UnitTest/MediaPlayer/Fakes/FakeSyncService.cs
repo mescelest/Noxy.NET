@@ -18,6 +18,8 @@ public sealed class FakeSyncService : ISyncService
 
     public List<Guid> PlaylistDeletedList { get; } = [];
 
+    public List<List<ResponsePlaylist>> PlaylistOrderAppliedList { get; } = [];
+
     // Thrown by SyncLibrary, after it is recorded, when set.
     public Exception? SyncLibraryException { get; set; }
 
@@ -86,6 +88,13 @@ public sealed class FakeSyncService : ISyncService
     {
         CallList.Add(nameof(ApplyPlaylistDeleted));
         PlaylistDeletedList.Add(id);
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyPlaylistOrder(List<ResponsePlaylist> playlistList)
+    {
+        CallList.Add(nameof(ApplyPlaylistOrder));
+        PlaylistOrderAppliedList.Add(playlistList);
         return Task.CompletedTask;
     }
 

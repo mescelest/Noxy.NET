@@ -39,6 +39,9 @@ public interface ISyncService
 
     Task ApplyPlaylistDeleted(Guid id);
 
+    // The user's whole playlist list in its new order, from the answer of a move; it replaces the stored list and writes no ETag.
+    Task ApplyPlaylistOrder(List<ResponsePlaylist> playlistList);
+
     // A failed upload carries no media: nothing changes.
     Task ApplyUploadSucceeded(ResponseUploadResult result);
 

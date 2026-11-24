@@ -480,6 +480,9 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Position")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("TimeCreated")
                         .HasColumnType("TEXT");
 

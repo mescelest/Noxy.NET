@@ -616,6 +616,20 @@ public class SyncServiceTest
     }
 
     [Fact]
+    public async Task ApplyPlaylistOrder_ReplacesTheStoredList_AndRaisesChanged()
+    {
+        await _storeMetadata.SavePlaylist(Playlist("Old"));
+        int changed = 0;
+        _serviceSync.Changed += () => changed++;
+        List<ResponsePlaylist> newList = [Playlist("B"), Playlist("A")];
+
+        await _serviceSync.ApplyPlaylistOrder(newList);
+
+        Assert.Equal(["B", "A"], (await _storeMetadata.GetPlaylistList()).Select(x => x.Name));
+        Assert.Equal(1, changed);
+    }
+
+    [Fact]
     public async Task APush_NeverWritesAnETag()
     {
         await _storeMetadata.SetLibraryETag("\"v1\"");
