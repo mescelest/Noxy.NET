@@ -32,7 +32,8 @@ public record ContextMenuItem(
         }
     }
 
-    public static ContextMenuItem Item(string text, Func<Task>? run = null, bool isDisabled = false, string? disabledReason = null, bool isDestructive = false, string? icon = null, bool closesMenu = true, string? confirmText = null, RenderFragment? graphic = null)
+    public static ContextMenuItem Item(string text, Func<Task>? run = null, bool isDisabled = false, string? disabledReason = null, bool isDestructive = false, string? icon = null, bool closesMenu = true, string? confirmText = null,
+        RenderFragment? graphic = null)
     {
         return new(ContextMenuItemKindEnum.Item, text, run, isDisabled, disabledReason, isDestructive, icon, ClosesMenu: closesMenu, ConfirmText: confirmText, Graphic: graphic);
     }

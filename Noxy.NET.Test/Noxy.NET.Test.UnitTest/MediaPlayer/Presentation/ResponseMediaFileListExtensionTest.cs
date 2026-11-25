@@ -8,7 +8,8 @@ public class ResponseMediaFileListExtensionTest
 {
     private static readonly DateTime Start = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
-    private static ResponseMediaFile Media(string title, string? artist = null, string? album = null, string? albumArtist = null, string? genre = null, int? year = null, int hoursOld = 0)
+    private static ResponseMediaFile Media(string title, string? artist = null, string? album = null, string? albumArtist = null, string? genre = null, int? year = null, int hoursOld = 0, List<Guid>? artistIDList = null, Guid? albumID = null,
+        List<Guid>? genreIDList = null)
     {
         return new()
         {
@@ -23,7 +24,10 @@ public class ResponseMediaFileListExtensionTest
             Album = album,
             AlbumArtist = albumArtist,
             Genre = genre,
-            Year = year
+            Year = year,
+            ArtistIDList = artistIDList ?? [],
+            AlbumID = albumID,
+            GenreIDList = genreIDList ?? []
         };
     }
 
@@ -181,5 +185,61 @@ public class ResponseMediaFileListExtensionTest
         list.Sort(LibrarySortEnum.Title, false);
 
         Assert.Equal(["b", "a"], Titles(list));
+    }
+
+    [Fact]
+    public void FilterByMetadata_AllNull_ReturnsEveryFile_AsANewList()
+    {
+        List<ResponseMediaFile> list = [Media("a"), Media("b", artistIDList: [Guid.CreateVersion7()])];
+
+        List<ResponseMediaFile> result = list.FilterByMetadata(null, null, null);
+
+        Assert.Equal(["a", "b"], Titles(result));
+        Assert.NotSame(list, result);
+    }
+
+    [Fact]
+    public void FilterByMetadata_Artist_KeepsFilesWithThatArtistAmongSeveral()
+    {
+        Guid artist = Guid.CreateVersion7();
+        List<ResponseMediaFile> list = [Media("solo", artistIDList: [artist]), Media("duo", artistIDList: [Guid.CreateVersion7(), artist]), Media("other", artistIDList: [Guid.CreateVersion7()])];
+
+        Assert.Equal(["solo", "duo"], Titles(list.FilterByMetadata(artist, null, null)));
+    }
+
+    [Fact]
+    public void FilterByMetadata_Album_And_Genre_Combine()
+    {
+        Guid album = Guid.CreateVersion7();
+        Guid genre = Guid.CreateVersion7();
+        List<ResponseMediaFile> list =
+        [
+            Media("both", albumID: album, genreIDList: [genre]),
+            Media("albumOnly", albumID: album),
+            Media("genreOnly", genreIDList: [genre])
+        ];
+
+        Assert.Equal(["both"], Titles(list.FilterByMetadata(null, album, genre)));
+        Assert.Equal(["both", "albumOnly"], Titles(list.FilterByMetadata(null, album, null)));
+    }
+
+    [Fact]
+    public void FilterByMetadata_AFileWithNoArtist_MatchesNoArtistFilter_AndIsKeptWhenNotFiltering()
+    {
+        List<ResponseMediaFile> list = [Media("none")];
+
+        Assert.Empty(list.FilterByMetadata(Guid.CreateVersion7(), null, null));
+        Assert.Empty(list.FilterByMetadata(null, Guid.CreateVersion7(), null));
+        Assert.Empty(list.FilterByMetadata(null, null, Guid.CreateVersion7()));
+        Assert.Single(list.FilterByMetadata(null, null, null));
+    }
+
+    [Fact]
+    public void Sort_ByGenre_OrdersByTheGenreText_BlankLast()
+    {
+        List<ResponseMediaFile> list = [Media("none"), Media("rock", genre: "Rock"), Media("blues", genre: "blues")];
+
+        Assert.Equal(["blues", "rock", "none"], Titles(list.Sort(LibrarySortEnum.Genre, false)));
+        Assert.Equal(["rock", "blues", "none"], Titles(list.Sort(LibrarySortEnum.Genre, true)));
     }
 }

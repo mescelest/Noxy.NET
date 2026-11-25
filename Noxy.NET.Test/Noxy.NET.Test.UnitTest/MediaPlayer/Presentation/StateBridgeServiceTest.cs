@@ -22,11 +22,12 @@ public class StateBridgeServiceTest
     private readonly FakeAppStartupService _startup = new();
     private readonly FakeLocalDataOwnerService _owner = new();
     private readonly FakeMetadataStore _storeMetadata = new();
+    private readonly FakeMetadataSyncService _syncMetadata = new();
     private readonly StateBridgeService _bridge;
 
     public StateBridgeServiceTest()
     {
-        _bridge = new(_dispatcher, _sync, _session, _download, _player, _startup, _owner, _storeMetadata, new FakeLogger<StateBridgeService>());
+        _bridge = new(_dispatcher, _sync, _session, _download, _player, _startup, _owner, _storeMetadata, _storeMetadata, _syncMetadata, new FakeLogger<StateBridgeService>());
     }
 
     private static async Task WaitUntil(Func<bool> condition)
@@ -183,7 +184,7 @@ public class StateBridgeServiceTest
     {
         FakeLogger<StateBridgeService> logger = new();
         _storeMetadata.MediaFileListGate = Task.FromException(new InvalidOperationException("secret detail"));
-        StateBridgeService bridge = new(_dispatcher, _sync, _session, _download, _player, _startup, _owner, _storeMetadata, logger);
+        StateBridgeService bridge = new(_dispatcher, _sync, _session, _download, _player, _startup, _owner, _storeMetadata, _storeMetadata, _syncMetadata, logger);
         bridge.Start();
 
         _sync.RaiseChanged();
@@ -246,5 +247,31 @@ public class StateBridgeServiceTest
         Assert.Single(_dispatcher.Of<ActionSessionChanged>());
         Assert.Single(_dispatcher.Of<ActionDownloadChanged>());
         Assert.Single(_dispatcher.Of<ActionPlayerChanged>());
+    }
+
+    [Fact]
+    public async Task AChangeRaisedByTheMetadataSyncService_DispatchesTheMetadataListsAsStored()
+    {
+        _bridge.Start();
+        await WaitUntil(() => _dispatcher.Of<ActionLibraryStateLoaded>().Count == 1);
+        Guid artistID = Guid.CreateVersion7();
+        await _storeMetadata.Artist.Save(FakeApiClient.ArtistFor(artistID, "Artist"));
+        _dispatcher.Clear();
+
+        _syncMetadata.RaiseChanged();
+        await WaitUntil(() => _dispatcher.Of<ActionMetadataListLoaded>().Count == 1);
+
+        ActionMetadataListLoaded loaded = Assert.Single(_dispatcher.Of<ActionMetadataListLoaded>());
+        Assert.Equal(artistID, Assert.Single(loaded.ArtistList).ID);
+        Assert.Empty(loaded.AlbumList);
+        Assert.Empty(loaded.GenreList);
+    }
+
+    [Fact]
+    public async Task Start_DispatchesTheMetadataLists()
+    {
+        _bridge.Start();
+
+        await WaitUntil(() => _dispatcher.Of<ActionMetadataListLoaded>().Count == 1);
     }
 }

@@ -832,4 +832,105 @@ public class ApiClientTest
     }
 
     #endregion -- Album art --
+
+    [Fact]
+    public async Task CreateArtist_PostsTheName()
+    {
+        Guid id = Guid.CreateVersion7();
+        _handler.Respond = _ => Ok(FakeApiClient.ArtistFor(id, "Björk"));
+
+        ResponseArtist result = await _client.CreateArtist(new() { Name = "Björk" });
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Post, request.Method);
+        Assert.Equal("https://server.example/Artist", request.Uri?.ToString());
+        Assert.Equal("Bearer token-1", request.Authorization);
+        Assert.Equal("Björk", JsonDocument.Parse(request.Body ?? "{}").RootElement.GetProperty("name").GetString());
+        Assert.Equal(id, result.ID);
+    }
+
+    [Fact]
+    public async Task CreateAlbum_PostsTheTitleAndTheArtistIDList()
+    {
+        Guid artist = Guid.CreateVersion7();
+        _handler.Respond = _ => Ok(FakeApiClient.AlbumFor(Guid.CreateVersion7(), "Homogenic", [artist]));
+
+        await _client.CreateAlbum(new() { Title = "Homogenic", ArtistIDList = [artist] });
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Post, request.Method);
+        Assert.Equal("https://server.example/Album", request.Uri?.ToString());
+        JsonElement body = JsonDocument.Parse(request.Body ?? "{}").RootElement;
+        Assert.Equal("Homogenic", body.GetProperty("title").GetString());
+        Assert.Equal(artist, body.GetProperty("artistIDList")[0].GetGuid());
+    }
+
+    [Fact]
+    public async Task UpdateAlbum_PatchesTheAlbum()
+    {
+        Guid id = Guid.CreateVersion7();
+        _handler.Respond = _ => Ok(FakeApiClient.AlbumFor(id, "Renamed"));
+
+        await _client.UpdateAlbum(id, new() { Title = new("Renamed") });
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Patch, request.Method);
+        Assert.Equal($"https://server.example/Album/{id}", request.Uri?.ToString());
+        Assert.Equal("""{"title":"Renamed"}""", request.Body);
+    }
+
+    [Fact]
+    public async Task DeleteGenre_DeletesTheGenre_On204()
+    {
+        Guid id = Guid.CreateVersion7();
+        _handler.Respond = _ => new(HttpStatusCode.NoContent);
+
+        await _client.DeleteGenre(id);
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Delete, request.Method);
+        Assert.Equal($"https://server.example/Genre/{id}", request.Uri?.ToString());
+        Assert.Equal("Bearer token-1", request.Authorization);
+    }
+
+    [Fact]
+    public async Task AddArtistMediaFileList_PostsTheMediaFileIDList()
+    {
+        Guid id = Guid.CreateVersion7();
+        Guid media = Guid.CreateVersion7();
+        _handler.Respond = _ => Ok(FakeApiClient.ArtistFor(id, "Artist"));
+
+        await _client.AddArtistMediaFileList(id, new() { MediaFileIDList = [media] });
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Post, request.Method);
+        Assert.Equal($"https://server.example/Artist/{id}/MediaFileList", request.Uri?.ToString());
+        Assert.Equal(media, JsonDocument.Parse(request.Body ?? "{}").RootElement.GetProperty("mediaFileIDList")[0].GetGuid());
+    }
+
+    [Fact]
+    public async Task RemoveArtistMediaFileList_PostsTheMediaFileIDList_ToTheRemovePath()
+    {
+        Guid id = Guid.CreateVersion7();
+        Guid media = Guid.CreateVersion7();
+        _handler.Respond = _ => Ok(FakeApiClient.ArtistFor(id, "Artist"));
+
+        await _client.RemoveArtistMediaFileList(id, new() { MediaFileIDList = [media] });
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Post, request.Method);
+        Assert.Equal($"https://server.example/Artist/{id}/MediaFileList/Remove", request.Uri?.ToString());
+        Assert.Equal(media, JsonDocument.Parse(request.Body ?? "{}").RootElement.GetProperty("mediaFileIDList")[0].GetGuid());
+    }
+
+    [Fact]
+    public async Task AMetadataWriteThatTheServerRefuses_ThrowsApiExceptionWithItsTitle()
+    {
+        _handler.Respond = _ => FakeHttpMessageHandler.Problem(HttpStatusCode.Conflict, "An artist with that name exists.");
+
+        ApiException exception = await Assert.ThrowsAsync<ApiException>(() => _client.CreateArtist(new() { Name = "Dup" }));
+
+        Assert.Equal(HttpStatusCode.Conflict, exception.Status);
+        Assert.Equal("An artist with that name exists.", exception.Title);
+    }
 }

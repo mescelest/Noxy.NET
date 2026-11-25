@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application.Requests.Media;
+using Noxy.NET.MediaPlayer.Application.Requests.Metadata;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -158,7 +159,7 @@ public sealed class FakeApiClient : IApiClient
             : throw WriteFailure;
     }
 
-    // Thrown by every playlist write, after it is recorded, when set.
+    // Thrown by every write (playlist, artist, album, genre), after it is recorded, when set.
     public Exception? WriteFailure { get; set; }
 
     public static ResponsePlaylist PlaylistFor(Guid id, string name) => new() { ID = id, Name = name, AllowDuplicates = true, EntryCount = 0, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow, TimeLastPlayed = null };
@@ -267,5 +268,185 @@ public sealed class FakeApiClient : IApiClient
         if (WriteFailure is not null) throw WriteFailure;
 
         return Task.FromResult(DetailFor(id));
+    }
+
+    public static ResponseArtist ArtistFor(Guid id, string name) => new() { ID = id, Name = name, MediaFileCount = 0, TimeModified = DateTime.UtcNow };
+
+    public static ResponseAlbum AlbumFor(Guid id, string title, List<Guid>? artistIDList = null) => new() { ID = id, Title = title, ArtistIDList = artistIDList ?? [], MediaFileCount = 0, TimeModified = DateTime.UtcNow };
+
+    public static ResponseGenre GenreFor(Guid id, string name) => new() { ID = id, Name = name, MediaFileCount = 0, TimeModified = DateTime.UtcNow };
+
+    public List<RequestCreateArtist> CreateArtistRequestList { get; } = [];
+
+    public Func<RequestCreateArtist, ResponseArtist> CreateArtistHandler { get; set; } = request => ArtistFor(Guid.CreateVersion7(), request.Name);
+
+    public Task<ResponseArtist> CreateArtist(RequestCreateArtist request)
+    {
+        CreateArtistRequestList.Add(request);
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(CreateArtistHandler(request));
+    }
+
+    public List<(Guid ID, RequestUpdateArtist Request)> UpdateArtistRequestList { get; } = [];
+
+    public Func<Guid, RequestUpdateArtist, ResponseArtist> UpdateArtistHandler { get; set; } = (id, _) => ArtistFor(id, "Artist");
+
+    public Task<ResponseArtist> UpdateArtist(Guid id, RequestUpdateArtist request)
+    {
+        UpdateArtistRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(UpdateArtistHandler(id, request));
+    }
+
+    public List<Guid> DeleteArtistList { get; } = [];
+
+    public Task DeleteArtist(Guid id)
+    {
+        DeleteArtistList.Add(id);
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.CompletedTask;
+    }
+
+    public List<(Guid ID, RequestAddMediaFileList Request)> AddArtistMediaFileListRequestList { get; } = [];
+
+    public Func<Guid, RequestAddMediaFileList, ResponseArtist> AddArtistMediaFileListHandler { get; set; } = (id, _) => ArtistFor(id, "Artist");
+
+    public Task<ResponseArtist> AddArtistMediaFileList(Guid id, RequestAddMediaFileList request)
+    {
+        AddArtistMediaFileListRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(AddArtistMediaFileListHandler(id, request));
+    }
+
+    public List<(Guid ID, RequestRemoveMediaFileList Request)> RemoveArtistMediaFileListRequestList { get; } = [];
+
+    public Func<Guid, RequestRemoveMediaFileList, ResponseArtist> RemoveArtistMediaFileListHandler { get; set; } = (id, _) => ArtistFor(id, "Artist");
+
+    public Task<ResponseArtist> RemoveArtistMediaFileList(Guid id, RequestRemoveMediaFileList request)
+    {
+        RemoveArtistMediaFileListRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(RemoveArtistMediaFileListHandler(id, request));
+    }
+
+    public List<RequestCreateAlbum> CreateAlbumRequestList { get; } = [];
+
+    public Func<RequestCreateAlbum, ResponseAlbum> CreateAlbumHandler { get; set; } = request => AlbumFor(Guid.CreateVersion7(), request.Title, request.ArtistIDList);
+
+    public Task<ResponseAlbum> CreateAlbum(RequestCreateAlbum request)
+    {
+        CreateAlbumRequestList.Add(request);
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(CreateAlbumHandler(request));
+    }
+
+    public List<(Guid ID, RequestUpdateAlbum Request)> UpdateAlbumRequestList { get; } = [];
+
+    public Func<Guid, RequestUpdateAlbum, ResponseAlbum> UpdateAlbumHandler { get; set; } = (id, _) => AlbumFor(id, "Album");
+
+    public Task<ResponseAlbum> UpdateAlbum(Guid id, RequestUpdateAlbum request)
+    {
+        UpdateAlbumRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(UpdateAlbumHandler(id, request));
+    }
+
+    public List<Guid> DeleteAlbumList { get; } = [];
+
+    public Task DeleteAlbum(Guid id)
+    {
+        DeleteAlbumList.Add(id);
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.CompletedTask;
+    }
+
+    public List<(Guid ID, RequestAddMediaFileList Request)> AddAlbumMediaFileListRequestList { get; } = [];
+
+    public Func<Guid, RequestAddMediaFileList, ResponseAlbum> AddAlbumMediaFileListHandler { get; set; } = (id, _) => AlbumFor(id, "Album");
+
+    public Task<ResponseAlbum> AddAlbumMediaFileList(Guid id, RequestAddMediaFileList request)
+    {
+        AddAlbumMediaFileListRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(AddAlbumMediaFileListHandler(id, request));
+    }
+
+    public List<(Guid ID, RequestRemoveMediaFileList Request)> RemoveAlbumMediaFileListRequestList { get; } = [];
+
+    public Func<Guid, RequestRemoveMediaFileList, ResponseAlbum> RemoveAlbumMediaFileListHandler { get; set; } = (id, _) => AlbumFor(id, "Album");
+
+    public Task<ResponseAlbum> RemoveAlbumMediaFileList(Guid id, RequestRemoveMediaFileList request)
+    {
+        RemoveAlbumMediaFileListRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(RemoveAlbumMediaFileListHandler(id, request));
+    }
+
+    public List<RequestCreateGenre> CreateGenreRequestList { get; } = [];
+
+    public Func<RequestCreateGenre, ResponseGenre> CreateGenreHandler { get; set; } = request => GenreFor(Guid.CreateVersion7(), request.Name);
+
+    public Task<ResponseGenre> CreateGenre(RequestCreateGenre request)
+    {
+        CreateGenreRequestList.Add(request);
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(CreateGenreHandler(request));
+    }
+
+    public List<(Guid ID, RequestUpdateGenre Request)> UpdateGenreRequestList { get; } = [];
+
+    public Func<Guid, RequestUpdateGenre, ResponseGenre> UpdateGenreHandler { get; set; } = (id, _) => GenreFor(id, "Genre");
+
+    public Task<ResponseGenre> UpdateGenre(Guid id, RequestUpdateGenre request)
+    {
+        UpdateGenreRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(UpdateGenreHandler(id, request));
+    }
+
+    public List<Guid> DeleteGenreList { get; } = [];
+
+    public Task DeleteGenre(Guid id)
+    {
+        DeleteGenreList.Add(id);
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.CompletedTask;
+    }
+
+    public List<(Guid ID, RequestAddMediaFileList Request)> AddGenreMediaFileListRequestList { get; } = [];
+
+    public Func<Guid, RequestAddMediaFileList, ResponseGenre> AddGenreMediaFileListHandler { get; set; } = (id, _) => GenreFor(id, "Genre");
+
+    public Task<ResponseGenre> AddGenreMediaFileList(Guid id, RequestAddMediaFileList request)
+    {
+        AddGenreMediaFileListRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(AddGenreMediaFileListHandler(id, request));
+    }
+
+    public List<(Guid ID, RequestRemoveMediaFileList Request)> RemoveGenreMediaFileListRequestList { get; } = [];
+
+    public Func<Guid, RequestRemoveMediaFileList, ResponseGenre> RemoveGenreMediaFileListHandler { get; set; } = (id, _) => GenreFor(id, "Genre");
+
+    public Task<ResponseGenre> RemoveGenreMediaFileList(Guid id, RequestRemoveMediaFileList request)
+    {
+        RemoveGenreMediaFileListRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(RemoveGenreMediaFileListHandler(id, request));
     }
 }
