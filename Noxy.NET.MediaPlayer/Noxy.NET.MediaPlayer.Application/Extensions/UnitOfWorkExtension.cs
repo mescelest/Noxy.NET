@@ -1,6 +1,8 @@
 using Noxy.NET.MediaPlayer.Application.Interfaces;
+using Noxy.NET.MediaPlayer.Application.Models.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
+using Noxy.NET.MediaPlayer.Domain.Extensions;
 
 namespace Noxy.NET.MediaPlayer.Application.Extensions;
 
@@ -52,5 +54,51 @@ public static class UnitOfWorkExtension
 
             return true;
         }
+
+        // Puts into the change set the items the file joined or left with their new file counts, so devices learn of new items and changed counts. The count is the committed one, which does not include this change yet, and an item that is new has none. Call it before the commit. The artists of an album the file has now are included, since one may be new and without any file.
+        public async Task AddItemCountList(MetadataChangeSet changeSet, Guid userID, EntityMediaFile file, MediaFileItemSet before, CancellationToken cancellationToken)
+        {
+            MediaFileItemSet after = MediaFileItemSet.Of(file);
+
+            // Album artists first: an artist that is also one of the file's artists is then replaced by the entry with the right count.
+            foreach (EntityArtist artist in (after.Album?.ArtistLinkList ?? []).Select(x => x.Artist).OfType<EntityArtist>())
+            {
+                int count = (await uow.Metadata.GetMediaFileListByArtist(userID, artist.ID, cancellationToken)).Count;
+                changeSet.AddUpdated(artist.ToResponse(count));
+            }
+
+            foreach ((EntityArtist artist, int delta) in GetMembershipChangeList(before.ArtistList, after.ArtistList, x => x.ID))
+            {
+                int count = (await uow.Metadata.GetMediaFileListByArtist(userID, artist.ID, cancellationToken)).Count;
+                changeSet.AddUpdated(artist.ToResponse(Math.Max(0, count + delta)));
+            }
+
+            foreach ((EntityGenre genre, int delta) in GetMembershipChangeList(before.GenreList, after.GenreList, x => x.ID))
+            {
+                int count = (await uow.Metadata.GetMediaFileListByGenre(userID, genre.ID, cancellationToken)).Count;
+                changeSet.AddUpdated(genre.ToResponse(Math.Max(0, count + delta)));
+            }
+
+            List<EntityAlbum> albumBeforeList = before.Album is null ? [] : [before.Album];
+            List<EntityAlbum> albumAfterList = after.Album is null ? [] : [after.Album];
+            foreach ((EntityAlbum album, int delta) in GetMembershipChangeList(albumBeforeList, albumAfterList, x => x.ID))
+            {
+                int count = (await uow.Metadata.GetMediaFileListByAlbum(userID, album.ID, cancellationToken)).Count;
+                changeSet.AddUpdated(album.ToResponse(Math.Max(0, count + delta)));
+            }
+        }
+    }
+
+    // +1 for an item only in after, -1 for one only in before; an item in both is not listed.
+    private static List<(TItem Item, int Delta)> GetMembershipChangeList<TItem>(List<TItem> beforeList, List<TItem> afterList, Func<TItem, Guid> getID)
+    {
+        HashSet<Guid> beforeSet = [.. beforeList.Select(getID)];
+        HashSet<Guid> afterSet = [.. afterList.Select(getID)];
+
+        List<(TItem Item, int Delta)> result = [];
+        result.AddRange(afterList.Where(x => !beforeSet.Contains(getID(x))).Select(x => (x, 1)));
+        result.AddRange(beforeList.Where(x => !afterSet.Contains(getID(x))).Select(x => (x, -1)));
+
+        return result;
     }
 }

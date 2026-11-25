@@ -3,12 +3,10 @@ using Noxy.NET.MediaPlayer.Application.Extensions;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Models.Metadata;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
-using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
-using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Abstractions.Metadata;
 
@@ -76,12 +74,7 @@ public abstract class BaseHandlerMetadataChange<TCommand, TResponse>(IUnitOfWork
     // Items first, then the files whose text changed with them.
     protected async Task PublishChangeSet(Guid userID, MetadataChangeSet changeSet, IEnumerable<ResponseMediaFile> mediaResponseList, CancellationToken cancellationToken)
     {
-        foreach (ResponseArtist artist in changeSet.ArtistUpdatedList) await Publisher.Publish(new NotificationArtistUpdated(userID, artist), cancellationToken);
-        foreach (ResponseGenre genre in changeSet.GenreUpdatedList) await Publisher.Publish(new NotificationGenreUpdated(userID, genre), cancellationToken);
-        foreach (ResponseAlbum album in changeSet.AlbumUpdatedList) await Publisher.Publish(new NotificationAlbumUpdated(userID, album), cancellationToken);
-        foreach (Guid id in changeSet.ArtistDeletedIDList) await Publisher.Publish(new NotificationArtistDeleted(userID, id), cancellationToken);
-        foreach (Guid id in changeSet.GenreDeletedIDList) await Publisher.Publish(new NotificationGenreDeleted(userID, id), cancellationToken);
-        foreach (Guid id in changeSet.AlbumDeletedIDList) await Publisher.Publish(new NotificationAlbumDeleted(userID, id), cancellationToken);
+        await Publisher.PublishItemList(userID, changeSet, cancellationToken);
 
         await PublishFileUpdatedList(userID, mediaResponseList, cancellationToken);
     }

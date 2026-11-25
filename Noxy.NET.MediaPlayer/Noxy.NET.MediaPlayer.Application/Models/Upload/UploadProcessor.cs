@@ -94,7 +94,7 @@ public class UploadProcessor(
         MediaTagSet tags = ReadTags(job, cancellationToken);
 
         // One commit, so a crash can't leave a library entry without its job being consumed, or the other way round. Another upload may create the same artist first, and then the whole thing runs again and reuses it.
-        ResponseUploadResult result = await factoryUnitOfWork.RunWithKeyConflictRetry(async uow =>
+        (ResponseUploadResult result, MetadataChangeSet changeSet) = await factoryUnitOfWork.RunWithKeyConflictRetry(async uow =>
         {
             ResolvedMetadata resolved = await serviceMetadataResolution.Resolve(uow, job.UserID, tags, cancellationToken);
 
@@ -126,16 +126,24 @@ public class UploadProcessor(
             foreach (EntityMediaFileArtist link in file.ArtistLinkList) uow.Metadata.AddMediaFileArtist(link);
             foreach (EntityMediaFileGenre link in file.GenreLinkList) uow.Metadata.AddMediaFileGenre(link);
             uow.Media.RemoveMediaUploadJob(job);
+
+            // The items the file brings, new ones included, are told to the devices before the file.
+            MetadataChangeSet itemChangeSet = new();
+            await uow.AddItemCountList(itemChangeSet, job.UserID, file, MediaFileItemSet.Empty, cancellationToken);
             await uow.Commit(cancellationToken);
 
-            return new ResponseUploadResult
+            ResponseUploadResult uploadResult = new()
             {
                 JobID = job.ID,
                 Title = job.Title,
                 Succeeded = true,
                 Media = file.ToResponse()
             };
+
+            return (uploadResult, itemChangeSet);
         }, cancellationToken);
+
+        await publisher.PublishItemList(job.UserID, changeSet, cancellationToken);
 
         // After the commit, so the file is in the library whatever happens to the picture.
         await OfferPicture(job.UserID, result, tags.Picture, cancellationToken);

@@ -4,10 +4,12 @@ using Noxy.NET.MediaPlayer.Application.Configurations;
 using Noxy.NET.MediaPlayer.Application.Models.Metadata;
 using Noxy.NET.MediaPlayer.Application.Models.Upload;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
+using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Upload;
@@ -202,6 +204,63 @@ public class UploadProcessorTest
 
         Assert.Equal(2, _store.MediaFileList.Count);
         Assert.Empty(_publisher.GetList<NotificationUploadFailed>());
+    }
+
+    [Fact]
+    public async Task ProcessNext_ATaggedFile_PushesItsNewItemsWithOneFileEach()
+    {
+        AddJob();
+        _tagReader.Result = Tags(artist: ["Main"], album: "OK Computer", albumArtist: ["Main", "Band"], genre: ["Rock"]);
+
+        await ProcessNext();
+
+        List<ResponseArtist> artistList = [.. _publisher.GetList<NotificationArtistUpdated>().Select(x => x.Artist)];
+        Assert.Equal(1, artistList.Single(x => x.Name == "Main").MediaFileCount);
+        Assert.Equal(0, artistList.Single(x => x.Name == "Band").MediaFileCount);
+        Assert.Equal(1, Assert.Single(_publisher.GetList<NotificationGenreUpdated>()).Genre.MediaFileCount);
+        Assert.Equal(1, Assert.Single(_publisher.GetList<NotificationAlbumUpdated>()).Album.MediaFileCount);
+        Assert.All(_publisher.GetList<NotificationAlbumUpdated>(), x => Assert.Equal(UserID, x.UserID));
+    }
+
+    [Fact]
+    public async Task ProcessNext_ASecondTrackOfTheSameAlbum_PushesTheItemsWithTheirNewCounts()
+    {
+        AddJob();
+        _tagReader.Result = Tags(artist: ["Main"], album: "OK Computer", albumArtist: ["Main"], genre: ["Rock"]);
+        await ProcessNext();
+        _publisher.PublishedList.Clear();
+        AddJob();
+
+        await ProcessNext();
+
+        Assert.Equal(2, _publisher.GetList<NotificationArtistUpdated>().Single(x => x.Artist.Name == "Main").Artist.MediaFileCount);
+        Assert.Equal(2, Assert.Single(_publisher.GetList<NotificationGenreUpdated>()).Genre.MediaFileCount);
+        Assert.Equal(2, Assert.Single(_publisher.GetList<NotificationAlbumUpdated>()).Album.MediaFileCount);
+    }
+
+    [Fact]
+    public async Task ProcessNext_ItemsArePushedBeforeTheUploadResult()
+    {
+        AddJob();
+        _tagReader.Result = Tags(artist: ["Main"]);
+
+        await ProcessNext();
+
+        int artistIndex = _publisher.PublishedList.FindIndex(x => x is NotificationArtistUpdated);
+        int resultIndex = _publisher.PublishedList.FindIndex(x => x is NotificationUploadSucceeded);
+        Assert.InRange(artistIndex, 0, resultIndex - 1);
+    }
+
+    [Fact]
+    public async Task ProcessNext_AFileWithoutTags_PushesNoItems()
+    {
+        AddJob();
+
+        await ProcessNext();
+
+        Assert.Empty(_publisher.GetList<NotificationArtistUpdated>());
+        Assert.Empty(_publisher.GetList<NotificationGenreUpdated>());
+        Assert.Empty(_publisher.GetList<NotificationAlbumUpdated>());
     }
 
     [Fact]

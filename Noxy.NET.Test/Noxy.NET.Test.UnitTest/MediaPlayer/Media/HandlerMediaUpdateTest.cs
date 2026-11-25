@@ -608,6 +608,19 @@ public class HandlerMediaUpdateTest
     }
 
     [Fact]
+    public async Task Update_ANewAlbumArtist_PushesItBeforeTheAlbumThatListsIt()
+    {
+        EntityMediaFile file = Seed();
+
+        await Update(file, Changes() with { Album = new("Album"), AlbumArtist = new("Band") });
+
+        Guid bandID = _store.ArtistList.Single(x => x.Name == "Band").ID;
+        Assert.Equal(0, _publisher.GetList<NotificationArtistUpdated>().Single(x => x.Artist.ID == bandID).Artist.MediaFileCount);
+        Assert.Equal(1, Assert.Single(_publisher.GetList<NotificationAlbumUpdated>()).Album.MediaFileCount);
+        Assert.True(_publisher.PublishedList.FindIndex(x => x is NotificationArtistUpdated) < _publisher.PublishedList.FindIndex(x => x is NotificationAlbumUpdated));
+    }
+
+    [Fact]
     public async Task Update_OnlyTheTitle_PushesNoItems()
     {
         EntityArtist artist = SeedArtist("Artist");
