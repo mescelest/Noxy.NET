@@ -2,10 +2,12 @@ using System.Security.Cryptography;
 using Noxy.NET.MediaPlayer.Application.Commands.Media;
 using Noxy.NET.MediaPlayer.Application.Handlers.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Media;
+using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
@@ -525,6 +527,110 @@ public class HandlerMediaUpdateTest
         Assert.Equal(response.ArtistIDList, pushed.MediaFile.ArtistIDList);
         Assert.Equal("A; B", pushed.MediaFile.Artist);
         Assert.Equal("Rock", pushed.MediaFile.Genre);
+    }
+
+    [Fact]
+    public async Task Update_ANewArtist_PushesItWithOneFile_AndTheOldArtistWithItsNewCount()
+    {
+        EntityArtist old = SeedArtist("Artist");
+        EntityMediaFile file = Seed();
+        Link(file, [old]);
+
+        await Update(file, Changes() with { Artist = new("Artist2") });
+
+        Guid newID = _store.ArtistList.Single(x => x.Name == "Artist2").ID;
+        List<ResponseArtist> pushedList = [.. _publisher.GetList<NotificationArtistUpdated>().Select(x => x.Artist)];
+        Assert.Equal(1, pushedList.Single(x => x.ID == newID).MediaFileCount);
+        Assert.Equal(0, pushedList.Single(x => x.ID == old.ID).MediaFileCount);
+        Assert.Equal(2, pushedList.Count);
+        Assert.All(_publisher.GetList<NotificationArtistUpdated>(), x => Assert.Equal(UserID, x.UserID));
+    }
+
+    [Fact]
+    public async Task Update_AnArtistAnotherFileKeeps_IsPushedWithTheRemainingCount()
+    {
+        EntityArtist old = SeedArtist("Artist");
+        EntityMediaFile file = Seed();
+        EntityMediaFile other = Seed();
+        Link(file, [old]);
+        Link(other, [old]);
+
+        await Update(file, Changes() with { Artist = new("Artist2") });
+
+        ResponseArtist pushed = _publisher.GetList<NotificationArtistUpdated>().Select(x => x.Artist).Single(x => x.ID == old.ID);
+        Assert.Equal(1, pushed.MediaFileCount);
+    }
+
+    [Fact]
+    public async Task Update_AnExistingArtistTheFileJoins_IsPushedWithOneMoreFile()
+    {
+        EntityArtist target = SeedArtist("Target");
+        EntityMediaFile member = Seed();
+        Link(member, [target]);
+        EntityMediaFile file = Seed();
+
+        await Update(file, Changes() with { Artist = new("Target") });
+
+        ResponseArtist pushed = Assert.Single(_publisher.GetList<NotificationArtistUpdated>()).Artist;
+        Assert.Equal(target.ID, pushed.ID);
+        Assert.Equal(2, pushed.MediaFileCount);
+    }
+
+    [Fact]
+    public async Task Update_ANewGenre_PushesItAndTheOldGenre()
+    {
+        EntityGenre old = SeedGenre("Rock");
+        EntityMediaFile file = Seed();
+        Link(file, genreList: [old]);
+
+        await Update(file, Changes() with { Genre = new("Jazz") });
+
+        Guid newID = _store.GenreList.Single(x => x.Name == "Jazz").ID;
+        List<ResponseGenre> pushedList = [.. _publisher.GetList<NotificationGenreUpdated>().Select(x => x.Genre)];
+        Assert.Equal(1, pushedList.Single(x => x.ID == newID).MediaFileCount);
+        Assert.Equal(0, pushedList.Single(x => x.ID == old.ID).MediaFileCount);
+    }
+
+    [Fact]
+    public async Task Update_ANewAlbum_PushesItAndTheOldAlbum()
+    {
+        EntityArtist artist = SeedArtist("Artist");
+        EntityAlbum old = SeedAlbum("Old album", artist);
+        EntityMediaFile file = Seed();
+        Link(file, [artist], album: old);
+
+        await Update(file, Changes() with { Album = new("New album") });
+
+        Guid newID = _store.AlbumList.Single(x => x.Title == "New album").ID;
+        List<ResponseAlbum> pushedList = [.. _publisher.GetList<NotificationAlbumUpdated>().Select(x => x.Album)];
+        Assert.Equal(1, pushedList.Single(x => x.ID == newID).MediaFileCount);
+        Assert.Equal(0, pushedList.Single(x => x.ID == old.ID).MediaFileCount);
+    }
+
+    [Fact]
+    public async Task Update_OnlyTheTitle_PushesNoItems()
+    {
+        EntityArtist artist = SeedArtist("Artist");
+        EntityMediaFile file = Seed();
+        Link(file, [artist]);
+
+        await Update(file, Changes() with { Title = new("Changed") });
+
+        Assert.Empty(_publisher.GetList<NotificationArtistUpdated>());
+        Assert.Empty(_publisher.GetList<NotificationGenreUpdated>());
+        Assert.Empty(_publisher.GetList<NotificationAlbumUpdated>());
+    }
+
+    [Fact]
+    public async Task Update_SameArtistsInAnotherSpelling_PushesNoItems()
+    {
+        EntityArtist artist = SeedArtist("Artist");
+        EntityMediaFile file = Seed();
+        Link(file, [artist]);
+
+        await Update(file, Changes() with { Artist = new("artist") });
+
+        Assert.Empty(_publisher.GetList<NotificationArtistUpdated>());
     }
 
     [Fact]

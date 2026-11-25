@@ -1,11 +1,11 @@
 using Mediator;
 using Noxy.NET.MediaPlayer.Application.Commands.Media;
 using Noxy.NET.MediaPlayer.Application.Extensions;
+using Noxy.NET.MediaPlayer.Application.Handlers.Abstractions.Metadata;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Application.Models;
 using Noxy.NET.MediaPlayer.Application.Models.Metadata;
-using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
@@ -13,24 +13,26 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Media;
 
-public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataResolutionService serviceMetadataResolution, IPublisher publisher, TimeProvider time) : ICommandHandler<CommandMediaUpdate, ResponseMediaFile>
+public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataResolutionService serviceMetadataResolution, IPublisher publisher, TimeProvider time)
+    : BaseHandlerMetadataChange<CommandMediaUpdate, ResponseMediaFile>(factoryUnitOfWork, publisher, time)
 {
-    // Changes only the fields that were sent. Artists, album, album artists and genres can be sent as text (resolved to items exactly like an upload) or as item IDs. Throws MediaNotFoundException for an unknown media file or another user's media file, and MetadataItemNotFoundException for an unknown or another user's item ID.
-    public async ValueTask<ResponseMediaFile> Handle(CommandMediaUpdate command, CancellationToken cancellationToken)
+    // Changes only the fields that were sent. Artists, album, album artists and genres can be sent as text (resolved to items exactly like an upload) or as item IDs. Items the file joined or left are pushed with their new file counts, a new one included, before the file itself. Throws MediaNotFoundException for an unknown media file or another user's media file, and MetadataItemNotFoundException for an unknown or another user's item ID.
+    public override async ValueTask<ResponseMediaFile> Handle(CommandMediaUpdate command, CancellationToken cancellationToken)
     {
         ThrowIfConflicting(command);
 
         // Another request may create the same new artist first: then this whole edit runs again and reuses it.
-        (ResponseMediaFile response, bool changed) = await factoryUnitOfWork.RunWithKeyConflictRetry(uow => Apply(uow, command, cancellationToken), cancellationToken);
-
-        if (changed) await publisher.Publish(new NotificationMediaUpdated(command.UserID, response), cancellationToken);
-        return response;
+        return await Execute(command.UserID, uow => Apply(uow, command, cancellationToken), cancellationToken);
     }
 
-    private async Task<(ResponseMediaFile Response, bool Changed)> Apply(IUnitOfWork uow, CommandMediaUpdate command, CancellationToken cancellationToken)
+    private async Task<MetadataChangeResult<ResponseMediaFile>> Apply(IUnitOfWork uow, CommandMediaUpdate command, CancellationToken cancellationToken)
     {
         EntityMediaFile file = await uow.Media.FindMediaFile(command.ID, command.UserID, cancellationToken) ?? throw new MediaNotFoundException();
         EntityMediaFileMetadata metadata = file.Metadata ?? throw new MediaNotFoundException();
+
+        List<EntityArtist> artistBeforeList = [.. file.ArtistLinkList.Select(x => x.Artist ?? throw new InvalidOperationException($"The media file {file.ID} was loaded without its artists."))];
+        List<EntityGenre> genreBeforeList = [.. file.GenreLinkList.Select(x => x.Genre ?? throw new InvalidOperationException($"The media file {file.ID} was loaded without its genres."))];
+        EntityAlbum? albumBefore = file.Album;
 
         bool changed = false;
         if (command.Title.HasValue)
@@ -48,13 +50,57 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataR
         changed |= await ApplyItems(uow, command, file, metadata, cancellationToken);
 
         // An edit that changes nothing leaves the modified time alone, so it can't change the library ETag or push anything.
-        if (!changed) return (file.ToResponse(), false);
+        if (!changed) return new(file.ToResponse(), false, new(), []);
 
-        file.TimeModified = time.GetUtcNow().UtcDateTime;
+        MetadataChangeSet changeSet = new();
+        await AddItemCountList(uow, command.UserID, file, artistBeforeList, genreBeforeList, albumBefore, changeSet, cancellationToken);
+
+        file.TimeModified = Now;
         uow.Media.UpdateMediaFile(file);
         await uow.Commit(cancellationToken);
 
-        return (file.ToResponse(), true);
+        ResponseMediaFile response = file.ToResponse();
+        return new(response, true, changeSet, [response]);
+    }
+
+    // The items the file joined or left have one file more or less. The count is the committed one, which does not include this edit yet, and an item that is new has none.
+    private static async Task AddItemCountList(IUnitOfWork uow, Guid userID, EntityMediaFile file, List<EntityArtist> artistBeforeList, List<EntityGenre> genreBeforeList, EntityAlbum? albumBefore, MetadataChangeSet changeSet,
+        CancellationToken cancellationToken)
+    {
+        List<EntityArtist> artistAfterList = [.. file.ArtistLinkList.Select(x => x.Artist ?? throw new InvalidOperationException($"The media file {file.ID} was loaded without its artists."))];
+        foreach ((EntityArtist artist, int delta) in GetMembershipChangeList(artistBeforeList, artistAfterList, x => x.ID))
+        {
+            int count = (await uow.Metadata.GetMediaFileListByArtist(userID, artist.ID, cancellationToken)).Count;
+            changeSet.AddUpdated(artist.ToResponse(Math.Max(0, count + delta)));
+        }
+
+        List<EntityGenre> genreAfterList = [.. file.GenreLinkList.Select(x => x.Genre ?? throw new InvalidOperationException($"The media file {file.ID} was loaded without its genres."))];
+        foreach ((EntityGenre genre, int delta) in GetMembershipChangeList(genreBeforeList, genreAfterList, x => x.ID))
+        {
+            int count = (await uow.Metadata.GetMediaFileListByGenre(userID, genre.ID, cancellationToken)).Count;
+            changeSet.AddUpdated(genre.ToResponse(Math.Max(0, count + delta)));
+        }
+
+        List<EntityAlbum> albumBeforeList = albumBefore is null ? [] : [albumBefore];
+        List<EntityAlbum> albumAfterList = file.Album is null ? [] : [file.Album];
+        foreach ((EntityAlbum album, int delta) in GetMembershipChangeList(albumBeforeList, albumAfterList, x => x.ID))
+        {
+            int count = (await uow.Metadata.GetMediaFileListByAlbum(userID, album.ID, cancellationToken)).Count;
+            changeSet.AddUpdated(album.ToResponse(Math.Max(0, count + delta)));
+        }
+    }
+
+    // +1 for an item only in after, -1 for one only in before; an item in both is not listed.
+    private static List<(TItem Item, int Delta)> GetMembershipChangeList<TItem>(List<TItem> beforeList, List<TItem> afterList, Func<TItem, Guid> getID)
+    {
+        HashSet<Guid> beforeSet = [.. beforeList.Select(getID)];
+        HashSet<Guid> afterSet = [.. afterList.Select(getID)];
+
+        List<(TItem Item, int Delta)> result = [];
+        result.AddRange(afterList.Where(x => !beforeSet.Contains(getID(x))).Select(x => (x, 1)));
+        result.AddRange(beforeList.Where(x => !afterSet.Contains(getID(x))).Select(x => (x, -1)));
+
+        return result;
     }
 
     private async Task<bool> ApplyItems(IUnitOfWork uow, CommandMediaUpdate command, EntityMediaFile file, EntityMediaFileMetadata metadata, CancellationToken cancellationToken)
