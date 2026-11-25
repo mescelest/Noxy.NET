@@ -201,6 +201,12 @@
         StateHasChanged();
     }
 
+    // Draws the tab list again: a page's title changed.
+    public void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
     public void RemovePage(TabPage page)
     {
         int index = _pages.IndexOf(page);

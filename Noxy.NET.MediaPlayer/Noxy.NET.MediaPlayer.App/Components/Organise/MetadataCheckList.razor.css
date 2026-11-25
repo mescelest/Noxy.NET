@@ -1,0 +1,47 @@
+/* The list scrolls inside its dialog, so many items do not make the dialog as tall as the window. */
+.MetadataCheckList {
+    display: flex;
+    flex-flow: column;
+    row-gap: var(--size-gap-tiny);
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.row {
+    display: flex;
+    flex: 0 0 auto;
+    border-radius: var(--size-border-radius-md);
+}
+
+.row:hover {
+    background: var(--color-offset-primary-md);
+}
+
+/* The whole row is the checkbox, so the whole row is what the highlight promises: the padding is the checkbox's, and a long name is cut with an ellipsis before the count. */
+.row ::deep > .InputControlCheckbox {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+    box-sizing: border-box;
+}
+
+.name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.count {
+    flex: 0 0 auto;
+    color: var(--color-muted);
+    font: var(--font-label);
+}
+
+.empty {
+    margin: 0;
+    color: var(--color-muted);
+}

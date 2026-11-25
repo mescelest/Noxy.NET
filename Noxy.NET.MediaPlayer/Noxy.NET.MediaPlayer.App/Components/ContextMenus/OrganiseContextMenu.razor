@@ -1,0 +1,73 @@
+@inherits BaseComponentElementFluxor
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <LibraryContextMenu @ref="_menu" SelectedSet="SelectedSet" SelectedKeyList="SelectedKeyList" ShowTrigger="ShowTrigger" ExtraItemFactory="BuildMetadataItemList"/>
+
+    <MetadataSetDialog @bind-Open="_isSetting" Kind="_settingKind" MediaFileIDList="_settingTargetList"/>
+</div>
+
+@code {
+
+    // The keys of the ticked rows, and the same in page order. On this page a key is a media file's ID.
+    [Parameter, EditorRequired]
+    public required IReadOnlySet<Guid> SelectedSet { get; set; }
+
+    [Parameter, EditorRequired]
+    public required List<Guid> SelectedKeyList { get; set; }
+
+    [Parameter]
+    public bool ShowTrigger { get; set; } = true;
+
+    private static readonly List<MetadataKindEnum> KindList = [MetadataKindEnum.Artist, MetadataKindEnum.Album, MetadataKindEnum.Genre];
+
+    private LibraryContextMenu? _menu;
+    private bool _isSetting;
+    private MetadataKindEnum _settingKind;
+    private List<Guid> _settingTargetList = [];
+
+    // Opens at the pointer for the row that was clicked.
+    public Task OpenAtAsync(MouseEventArgs args, Guid rowKey)
+    {
+        return _menu is null ? Task.CompletedTask : _menu.OpenAtAsync(args, rowKey);
+    }
+
+    // One entry for each kind, ahead of the media file actions: each opens the dialog that sets it.
+    private List<ContextMenuItem> BuildMetadataItemList(List<Guid> mediaFileIDList)
+    {
+        return [.. KindList.Select(kind => ContextMenuItem.Item(TextOf(kind), () => OpenDialog(kind, mediaFileIDList), icon: IconOf(kind)))];
+    }
+
+    private static string TextOf(MetadataKindEnum kind)
+    {
+        return kind switch
+        {
+                MetadataKindEnum.Artist => AppTexts.MetadataMenuSetArtist,
+                MetadataKindEnum.Album => AppTexts.MetadataMenuSetAlbum,
+                MetadataKindEnum.Genre => AppTexts.MetadataMenuSetGenre,
+                _ => throw new InvalidEnumArgumentException(nameof(kind), (int)kind, typeof(MetadataKindEnum))
+        };
+    }
+
+    private static string IconOf(MetadataKindEnum kind)
+    {
+        return kind switch
+        {
+                MetadataKindEnum.Artist => "person",
+                MetadataKindEnum.Album => "album",
+                MetadataKindEnum.Genre => "category",
+                _ => throw new InvalidEnumArgumentException(nameof(kind), (int)kind, typeof(MetadataKindEnum))
+        };
+    }
+
+    // The menu runs this from its own event, so this component is not drawn again unless it asks to be.
+    private Task OpenDialog(MetadataKindEnum kind, List<Guid> mediaFileIDList)
+    {
+        _settingKind = kind;
+        _settingTargetList = mediaFileIDList;
+        _isSetting = true;
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+}

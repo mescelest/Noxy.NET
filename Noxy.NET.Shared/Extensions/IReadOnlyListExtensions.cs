@@ -1,5 +1,6 @@
 namespace Noxy.NET.Extensions;
 
+// ReSharper disable once InconsistentNaming
 public static class IReadOnlyListExtensions
 {
     extension<TValue>(IReadOnlyList<TValue> list)

@@ -36,7 +36,7 @@ public class ThumbnailServiceTest
     [Fact]
     public void CreateThumbnail_ShrinksALargeImage_ToTheLongestSide_KeepingTheAspect()
     {
-        byte[]? thumbnail = Create(300).CreateThumbnail(MakePng(1000, 500));
+        byte[]? thumbnail = Create().CreateThumbnail(MakePng(1000, 500));
 
         Assert.NotNull(thumbnail);
         using SKBitmap bitmap = Decode(thumbnail);
@@ -47,7 +47,7 @@ public class ThumbnailServiceTest
     [Fact]
     public void CreateThumbnail_ShrinksATallImage_ByItsHeight()
     {
-        byte[]? thumbnail = Create(300).CreateThumbnail(MakePng(500, 1000));
+        byte[]? thumbnail = Create().CreateThumbnail(MakePng(500, 1000));
 
         Assert.NotNull(thumbnail);
         using SKBitmap bitmap = Decode(thumbnail);
@@ -58,7 +58,7 @@ public class ThumbnailServiceTest
     [Fact]
     public void CreateThumbnail_DoesNotEnlargeASmallImage()
     {
-        byte[]? thumbnail = Create(300).CreateThumbnail(MakePng(100, 50));
+        byte[]? thumbnail = Create().CreateThumbnail(MakePng(100, 50));
 
         Assert.NotNull(thumbnail);
         using SKBitmap bitmap = Decode(thumbnail);

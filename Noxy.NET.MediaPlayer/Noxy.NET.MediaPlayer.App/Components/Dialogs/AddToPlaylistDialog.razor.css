@@ -1,9 +1,9 @@
-/* The list scrolls inside the dialog, so many playlists do not make the dialog as tall as the window. */
 .list {
     display: flex;
+    flex: 1 1 auto;
     flex-flow: column;
     row-gap: var(--size-gap-tiny);
-    max-height: var(--size-dialog-list-height);
+    min-height: 0;
     overflow-y: auto;
 }
 

@@ -48,25 +48,41 @@ export function Watch(element, dotNetReference, methodName) {
     });
 }
 
-// The backdrop is the dialog element itself, so a click counts as outside when it is not inside the dialog's box.
+// The backdrop is the dialog element itself, so a point counts as outside when it is not inside the dialog's box.
+function isOutsideBox(element, event) {
+    const box = element.getBoundingClientRect();
+    const isInside = event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
+
+    return !isInside;
+}
+
+// A click is reported on the element both ends of it share, so a press inside the dialog (selecting text in an input) that is let go on the backdrop would look like a click on the backdrop. Only a click that also began on the backdrop closes the dialog.
 export function SetBackdropClose(element, enabled) {
     const registered = backdropHandlerMap.has(element);
     if (enabled === registered) return;
 
     if (!enabled) {
-        element.removeEventListener("click", backdropHandlerMap.get(element));
+        const handlers = backdropHandlerMap.get(element);
+        element.removeEventListener("pointerdown", handlers.down);
+        element.removeEventListener("click", handlers.click);
         backdropHandlerMap.delete(element);
         return;
     }
 
-    const handler = (event) => {
-        if (event.target !== element) return;
+    let pressedOnBackdrop = false;
 
-        const box = element.getBoundingClientRect();
-        const isInside = event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
-        if (!isInside) element.close();
+    const down = (event) => {
+        pressedOnBackdrop = event.target === element && isOutsideBox(element, event);
     };
 
-    element.addEventListener("click", handler);
-    backdropHandlerMap.set(element, handler);
+    const click = (event) => {
+        const began = pressedOnBackdrop;
+        pressedOnBackdrop = false;
+
+        if (began && event.target === element && isOutsideBox(element, event)) element.close();
+    };
+
+    element.addEventListener("pointerdown", down);
+    element.addEventListener("click", click);
+    backdropHandlerMap.set(element, {down, click});
 }

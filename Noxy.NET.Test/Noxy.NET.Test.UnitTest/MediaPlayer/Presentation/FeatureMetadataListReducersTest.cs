@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Presentation.Features.MetadataList;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Presentation;

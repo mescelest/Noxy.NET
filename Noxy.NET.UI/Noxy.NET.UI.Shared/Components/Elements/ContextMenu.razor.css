@@ -100,3 +100,8 @@
 .item[data-armed] {
     background: var(--color-offset-primary-md, #E0E0E0);
 }
+
+/* A sub-menu opens with its top edge level with the item it belongs to, and its own border and padding sit above its first item: moved up by both, the first item is level with the item that opened it. */
+.submenu {
+    translate: 0 calc(-1 * (var(--size-gap-xxxs, 0.25rem) + var(--size-border-width-sm, 1px)));
+}

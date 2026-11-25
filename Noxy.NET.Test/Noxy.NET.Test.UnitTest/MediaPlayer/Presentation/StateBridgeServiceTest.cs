@@ -2,6 +2,7 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Features.Download;
 using Noxy.NET.MediaPlayer.Presentation.Features.Library;
+using Noxy.NET.MediaPlayer.Presentation.Features.MetadataList;
 using Noxy.NET.MediaPlayer.Presentation.Features.Player;
 using Noxy.NET.MediaPlayer.Presentation.Features.PlaylistList;
 using Noxy.NET.MediaPlayer.Presentation.Features.Session;

@@ -1,0 +1,56 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @if (ArtistName is not null)
+    {
+        <span class="badge">
+            <span>@TextOf(AppTexts.OrganiseFilterArtist, ArtistName)</span>
+            <button type="button" class="remove" aria-label="@RemoveLabelOf(AppTexts.OrganiseFilterArtist, ArtistName)" @onclick="() => OnClear.InvokeAsync(MetadataKindEnum.Artist)">@RemoveGlyph</button>
+        </span>
+    }
+    @if (AlbumName is not null)
+    {
+        <span class="badge">
+            <span>@TextOf(AppTexts.OrganiseFilterAlbum, AlbumName)</span>
+            <button type="button" class="remove" aria-label="@RemoveLabelOf(AppTexts.OrganiseFilterAlbum, AlbumName)" @onclick="() => OnClear.InvokeAsync(MetadataKindEnum.Album)">@RemoveGlyph</button>
+        </span>
+    }
+    @if (GenreName is not null)
+    {
+        <span class="badge">
+            <span>@TextOf(AppTexts.OrganiseFilterGenre, GenreName)</span>
+            <button type="button" class="remove" aria-label="@RemoveLabelOf(AppTexts.OrganiseFilterGenre, GenreName)" @onclick="() => OnClear.InvokeAsync(MetadataKindEnum.Genre)">@RemoveGlyph</button>
+        </span>
+    }
+    @if (FilterCount > 1)
+    {
+        <button type="button" class="clear-all" @onclick="OnClearAll">@AppTexts.OrganiseFilterClearAll</button>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public string? ArtistName { get; set; }
+
+    [Parameter]
+    public string? AlbumName { get; set; }
+
+    [Parameter]
+    public string? GenreName { get; set; }
+
+    [Parameter]
+    public EventCallback<MetadataKindEnum> OnClear { get; set; }
+
+    [Parameter]
+    public EventCallback OnClearAll { get; set; }
+
+    private const string RemoveGlyph = "✕";
+
+    private int FilterCount => new[] { ArtistName, AlbumName, GenreName }.Count(x => x is not null);
+
+    private static string TextOf(string format, string name) => string.Format(format, name);
+
+    private static string RemoveLabelOf(string format, string name) => string.Format(AppTexts.OrganiseFilterRemove, TextOf(format, name));
+
+}

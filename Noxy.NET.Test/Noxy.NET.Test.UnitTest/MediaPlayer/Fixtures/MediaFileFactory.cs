@@ -4,7 +4,8 @@ namespace Noxy.NET.Test.MediaPlayer.Fixtures;
 
 public static class MediaFileFactory
 {
-    public static ResponseMediaFile Create(string title = "Media", string? artist = null, string? album = null, int? year = null, DateTime? timeCreated = null, Guid? id = null)
+    public static ResponseMediaFile Create(string title = "Media", string? artist = null, string? album = null, int? year = null, DateTime? timeCreated = null, Guid? id = null, List<Guid>? artistIDList = null, Guid? albumID = null,
+        List<Guid>? genreIDList = null)
     {
         return new()
         {
@@ -17,7 +18,10 @@ public static class MediaFileFactory
             SizeBytes = 3,
             ContentHash = new('a', 64),
             TimeCreated = timeCreated ?? DateTime.UtcNow,
-            TimeModified = DateTime.UtcNow
+            TimeModified = DateTime.UtcNow,
+            ArtistIDList = artistIDList ?? [],
+            AlbumID = albumID,
+            GenreIDList = genreIDList ?? []
         };
     }
 }

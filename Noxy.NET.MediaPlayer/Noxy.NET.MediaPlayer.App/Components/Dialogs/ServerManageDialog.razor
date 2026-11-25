@@ -4,7 +4,7 @@
 @using Noxy.NET.UI.Extensions
 @implements IAsyncDisposable
 
-<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Size="DialogSizeEnum.Medium" Open="Open" OpenChanged="HandleOpenChanged">
     <div class="header">
         <h2>@AppTexts.ServerDialogTitle</h2>
         <Button class="add" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Success" IsIcon="true" disabled="@_isAdding" aria-label="@AppTexts.ServerDialogAdd" title="@AppTexts.ServerDialogAdd" @onclick="Add">
@@ -27,7 +27,7 @@
                         <Button class="cancel" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" IsIcon="true" aria-label="@AppTexts.CommonCancel" title="@AppTexts.CommonCancel" @onclick="Cancel">
                             <MaterialIcon Icon="arrow_back" Size="var(--size-icon-sm)"/>
                         </Button>
-                        <InputControlText class="address" Size="1" aria-label="@AppTexts.ServerDialogAddress" autofocus="true" OnInputDelay="0" Value="@_draft" ValueChanged="ChangeDraft"/>
+                        <InputControlText class="address" Size="1" aria-label="@AppTexts.ServerDialogAddress" autofocus="true" OnInputDelay="0" @bind-Value:get="_draft" @bind-Value:set="ChangeDraft"/>
                         <Button class="save" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" IsIcon="true" aria-label="@AppTexts.CommonSave" title="@AppTexts.CommonSave" @onclick="Save">
                             <MaterialIcon Icon="check" Size="var(--size-icon-xs)"/>
                         </Button>
@@ -51,7 +51,7 @@
                     <Button class="cancel" Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" IsIcon="true" aria-label="@AppTexts.CommonCancel" title="@AppTexts.CommonCancel" @onclick="Cancel">
                         <MaterialIcon Icon="arrow_back" Size="var(--size-icon-sm)"/>
                     </Button>
-                    <InputControlText class="address" Size="1" aria-label="@AppTexts.ServerDialogAddress" placeholder="https://" autofocus="true" OnInputDelay="0" Value="@_draft" ValueChanged="ChangeDraft"/>
+                    <InputControlText class="address" Size="1" aria-label="@AppTexts.ServerDialogAddress" placeholder="https://" autofocus="true" OnInputDelay="0" @bind-Value:get="_draft" @bind-Value:set="ChangeDraft"/>
                     <Button class="save" Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" IsIcon="true" aria-label="@AppTexts.CommonSave" title="@AppTexts.CommonSave" @onclick="Save">
                         <MaterialIcon Icon="check" Size="var(--size-icon-xs)"/>
                     </Button>

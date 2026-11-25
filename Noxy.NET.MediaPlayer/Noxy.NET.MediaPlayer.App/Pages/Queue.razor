@@ -10,25 +10,29 @@
 
 <div class="@CssClass @FullscreenPageClass">
     <MediaFileHeader Name="@AppTexts.QueueTitle" EntryCount="ItemCount" SelectedCount="_selectedSet.Count">
-        <QueueContextMenu @ref="_menu" SelectedSet="_selectedSet" SelectedKeyList="SelectedKeyList" RowOf="RowOf" ShowTrigger="@HasSelection"/>
-        @if (!IsEmpty)
-        {
-            <Button Type="@HTMLButtonTypeEnum.Button" class="clear" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="ClickClearHandler">@AppTexts.QueueClear</Button>
-        }
+        <ChildContent>
+            <QueueContextMenu @ref="_menu" SelectedSet="_selectedSet" SelectedKeyList="SelectedKeyList" RowOf="RowOf" ShowTrigger="@HasSelection"/>
+        </ChildContent>
+        <EndContent>
+            @if (!IsEmpty)
+            {
+                <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="ClickClearHandler">@AppTexts.QueueClear</Button>
+            }
+        </EndContent>
     </MediaFileHeader>
 
     @if (IsEmpty)
     {
-        <div class="empty">
-            <MaterialIcon Icon="playlist_play" Size="var(--size-icon-xxl)"/>
-            <h2>@AppTexts.QueueEmptyTitle</h2>
-            <p>@AppTexts.QueueEmptyDescription</p>
-        </div>
+        <EmptyState Title="@AppTexts.QueueEmptyTitle" Description="@AppTexts.QueueEmptyDescription">
+            <Graphic>
+                <MaterialIcon Icon="playlist_play" Size="var(--size-icon-xxl)"/>
+            </Graphic>
+        </EmptyState>
     }
     else
     {
         <QueueList Model="_model" SelectedSet="_selectedSet" AllSelected="IsAllSelected" MediaOf="MediaOf" StateOf="StateOf"
-                   OnToggleAll="ToggleAll" OnToggleRow="ToggleRow" OnJump="Jump" OnContextMenu="OpenRowMenu" OnMove="Move"/>
+                   OnToggleAll="ToggleAll" OnToggleRow="ToggleRow" RowSelect="RowSelectEnum.Ctrl" OnJump="Jump" OnContextMenu="OpenRowMenu" OnMove="Move"/>
     }
 </div>
 

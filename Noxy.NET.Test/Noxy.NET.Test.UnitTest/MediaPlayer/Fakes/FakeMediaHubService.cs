@@ -19,7 +19,16 @@ public sealed class FakeMediaHubService : IMediaHubService
     public bool IsConnected { get => _isConnected ?? StartCount > 0; set => _isConnected = value; }
 
     // Every Invoke and Send, in order: the method and its argument.
-    public List<(MediaHubMethodEnum Method, object? Argument)> CallList { get; } = [];
+    private readonly List<(MediaHubMethodEnum Method, object? Argument)> _callList = [];
+
+    // A copy taken under the lock: calls come in from other threads while a test reads, and the list must not change under it.
+    public List<(MediaHubMethodEnum Method, object? Argument)> CallList
+    {
+        get
+        {
+            lock (_callLock) return [.. _callList];
+        }
+    }
 
     // Answers each Invoke, or throws to script a failure. The default answers nothing, as an unconnected hub would.
     public Func<MediaHubMethodEnum, object?, object?> InvokeHandler { get; set; } = (_, _) => null;
@@ -68,7 +77,7 @@ public sealed class FakeMediaHubService : IMediaHubService
 
     public async Task<T?> Invoke<T>(MediaHubMethodEnum method, object? argument)
     {
-        lock (_callLock) CallList.Add((method, argument));
+        lock (_callLock) _callList.Add((method, argument));
         await Enter();
         try
         {
@@ -89,7 +98,7 @@ public sealed class FakeMediaHubService : IMediaHubService
 
     public async Task Send(MediaHubMethodEnum method, object? argument)
     {
-        lock (_callLock) CallList.Add((method, argument));
+        lock (_callLock) _callList.Add((method, argument));
         await Enter();
         try
         {

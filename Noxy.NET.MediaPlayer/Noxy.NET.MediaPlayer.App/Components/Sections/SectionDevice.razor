@@ -6,53 +6,55 @@
 @inherits BaseComponentElement
 @implements IDisposable
 
-<Section @attributes="AdditionalAttributes" class="@CssClass" Title="@AppTexts.SectionDeviceTitle">
-    <HeaderContent>
-        <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" disabled="@IsOffline" title="@RefreshTitle" aria-label="@AppTexts.DeviceRefreshLibrary" @onclick="RefreshLibrary">
-            <MaterialIcon Icon="refresh" Size="var(--size-icon-sm)"/>
-        </Button>
-    </HeaderContent>
-    <ChildContent>
-        <DeviceNameField/>
-
-        <dl>
-            <dt>@AppTexts.SectionDeviceMediaFiles</dt>
-            <dd>@OnDeviceText</dd>
-
-            <dt>@AppTexts.SectionDeviceStored</dt>
-            <dd>@UsedText</dd>
-
-            <dt>@AppTexts.SectionDeviceFree</dt>
-            <dd>@FreeText</dd>
-        </dl>
-
-        <div class="theme">
-            <span class="theme-label">@AppTexts.SettingsTheme</span>
-            <ThemePicker/>
-        </div>
-
-        <div class="danger">
-            <ButtonConfirm Status="StatusEnum.Warning" OnConfirm="ResetPreferences">
-                <ChildContent>
-                    <MaterialIcon Icon="restart_alt" Size="var(--size-icon-sm)"/>
-                    @AppTexts.ResetPreferencesButton
-                </ChildContent>
-                <ConfirmContent>
-                    <MaterialIcon Icon="check" Size="var(--size-icon-sm)"/>
-                    @AppTexts.ResetPreferencesConfirm
-                </ConfirmContent>
-            </ButtonConfirm>
-            <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Filled" Status="StatusEnum.Error" @onclick="AskDeleteAllData">
-                <MaterialIcon Icon="delete_forever" Size="var(--size-icon-sm)"/>
-                @AppTexts.DeleteAllDataButton
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Section Title="@AppTexts.SectionDeviceTitle">
+        <HeaderContent>
+            <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" disabled="@IsOffline" title="@RefreshTitle" aria-label="@AppTexts.DeviceRefreshLibrary" @onclick="RefreshLibrary">
+                <MaterialIcon Icon="refresh" Size="var(--size-icon-sm)"/>
             </Button>
-        </div>
+        </HeaderContent>
+        <ChildContent>
+            <DeviceNameField/>
 
-        <ConfirmActionDialog Open="_isDeletingAllData" OpenChanged="CloseDeleteAllData" Title="@AppTexts.DeleteAllDataTitle" Detail="@AppTexts.DeleteAllDataDetail" Warning="@AppTexts.DeleteAllDataWarning" AcceptText="@AppTexts.DeleteAllDataAccept"
-                             AcceptStatus="StatusEnum.Error"
-                             OnSubmit="SubmitDeleteAllData"/>
-    </ChildContent>
-</Section>
+            <dl>
+                <dt>@AppTexts.SectionDeviceMediaFiles</dt>
+                <dd>@OnDeviceText</dd>
+
+                <dt>@AppTexts.SectionDeviceStored</dt>
+                <dd>@UsedText</dd>
+
+                <dt>@AppTexts.SectionDeviceFree</dt>
+                <dd>@FreeText</dd>
+            </dl>
+
+            <div class="theme">
+                <span class="theme-label">@AppTexts.SettingsTheme</span>
+                <ThemePicker/>
+            </div>
+
+            <div class="danger">
+                <ButtonConfirm Status="StatusEnum.Warning" OnConfirm="ResetPreferences">
+                    <ChildContent>
+                        <MaterialIcon Icon="restart_alt" Size="var(--size-icon-sm)"/>
+                        @AppTexts.ResetPreferencesButton
+                    </ChildContent>
+                    <ConfirmContent>
+                        <MaterialIcon Icon="check" Size="var(--size-icon-sm)"/>
+                        @AppTexts.ResetPreferencesConfirm
+                    </ConfirmContent>
+                </ButtonConfirm>
+                <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Filled" Status="StatusEnum.Error" @onclick="AskDeleteAllData">
+                    <MaterialIcon Icon="delete_forever" Size="var(--size-icon-sm)"/>
+                    @AppTexts.DeleteAllDataButton
+                </Button>
+            </div>
+
+            <ConfirmActionDialog Open="_isDeletingAllData" OpenChanged="CloseDeleteAllData" Title="@AppTexts.DeleteAllDataTitle" Detail="@AppTexts.DeleteAllDataDetail" Warning="@AppTexts.DeleteAllDataWarning" AcceptText="@AppTexts.DeleteAllDataAccept"
+                                 AcceptStatus="StatusEnum.Error"
+                                 OnSubmit="SubmitDeleteAllData"/>
+        </ChildContent>
+    </Section>
+</div>
 
 @code {
 

@@ -66,7 +66,7 @@ public class ResponsePlaylistListExtensionTest
     [Fact]
     public void OrderByPosition_SortsAscending_IgnoringTimes_AndKeepsTheInputOrderOnATie()
     {
-        List<ResponsePlaylist> list = [Playlist("third", Now, Now, 2), Playlist("tie-a", null, Now.AddDays(-1), 1), Playlist("tie-b", null, Now.AddDays(-9), 1), Playlist("first", null, Now.AddDays(-30), 0)];
+        List<ResponsePlaylist> list = [Playlist("third", Now, Now, 2), Playlist("tie-a", null, Now.AddDays(-1), 1), Playlist("tie-b", null, Now.AddDays(-9), 1), Playlist("first", null, Now.AddDays(-30))];
 
         List<ResponsePlaylist> ordered = list.OrderByPosition();
 

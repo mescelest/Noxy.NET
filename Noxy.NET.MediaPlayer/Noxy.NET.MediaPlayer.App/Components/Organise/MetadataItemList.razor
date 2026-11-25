@@ -1,0 +1,201 @@
+@inject IState<FeatureMetadataListState> StateMetadataList
+@inject IState<FeatureOrganiseState> StateOrganise
+@inject IDispatcher Dispatcher
+@inject IMetadataActionService ServiceMetadataAction
+@inject IToastService ServiceToast
+@inherits BaseComponentElementFluxor
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="tool-row">
+        <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@SearchText" aria-label="@SearchText" @bind-Value:get="_search" @bind-Value:set="ChangeSearch"/>
+        <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Success" aria-label="@AddText" title="@AddText" @onclick="ClickAddHandler">
+            <MaterialIcon Icon="add" Size="var(--size-icon-sm)"/>
+        </Button>
+    </div>
+
+    @if (AllList.Count == 0)
+    {
+        <p class="note">@AppTexts.OrganiseNoItems</p>
+    }
+    else if (ShownList.Count == 0)
+    {
+        <p class="note">@AppTexts.OrganiseNoItemMatch</p>
+    }
+    else
+    {
+        <div class="list">
+            @foreach (MetadataItem item in ShownList)
+            {
+                MetadataItem row = item;
+                <div @key="row.ID" class="item" data-item-id="@row.ID" data-filtered="@IsFiltered(row)" @oncontextmenu="args => OpenRowMenu(args, row)" @oncontextmenu:preventDefault>
+                    <button type="button" class="name" title="@FilterText(row)" @onclick="() => ClickFilterHandler(row)">@row.Name</button>
+                    <span class="count">@CountText(row)</span>
+                    <Button class="more" Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" aria-label="@MoreText(row)" title="@MoreText(row)" aria-haspopup="menu"
+                            @onclick="args => OpenRowMenu(args, row)">
+                        <MaterialIcon Icon="more_horiz" Size="var(--size-icon-sm)"/>
+                    </Button>
+                </div>
+            }
+        </div>
+    }
+
+    <ContextMenu @ref="_menu" ID="@MenuID" ItemList="MenuItemList" OnClose="CloseMenuHandler"/>
+
+    <MetadataItemDialog @bind-Open="_isEditing" Kind="Kind" ItemID="_editingID"/>
+
+    <MetadataMergeDialog @bind-Open="_isMerging" Kind="Kind" SourceID="_mergingID"/>
+
+    <MetadataMergeOthersDialog @bind-Open="_isMergingOthers" Kind="Kind" TargetID="_mergingOthersID"/>
+
+    <ConfirmActionDialog @bind-Open="_isDeleting" Title="@DeleteTitle" Message="@DeleteMessage" AcceptText="@AppTexts.MetadataDeleteAccept" AcceptStatus="StatusEnum.Error" OnSubmit="DeleteConfirmed"/>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public MetadataKindEnum Kind { get; set; }
+
+    private string _search = string.Empty;
+    private bool _isEditing;
+    private Guid? _editingID;
+    private bool _isDeleting;
+    private MetadataItem? _deletingItem;
+    private bool _isMerging;
+    private Guid? _mergingID;
+    private bool _isMergingOthers;
+    private Guid? _mergingOthersID;
+    private ContextMenu? _menu;
+    private MetadataItem? _menuItem;
+
+    private string MenuID => $"metadata-item-menu-{Kind}";
+
+    private List<MetadataItem> AllList => StateMetadataList.Value.ItemListOf(Kind);
+
+    private List<MetadataItem> ShownList => AllList.FilterByName(_search);
+
+    private string KindWord => Kind switch
+    {
+            MetadataKindEnum.Artist => AppTexts.OrganiseKindArtist,
+            MetadataKindEnum.Album => AppTexts.OrganiseKindAlbum,
+            MetadataKindEnum.Genre => AppTexts.OrganiseKindGenre,
+            _ => throw new InvalidEnumArgumentException(nameof(Kind), (int)Kind, typeof(MetadataKindEnum))
+    };
+
+    private string SearchText => Kind switch
+    {
+            MetadataKindEnum.Artist => AppTexts.OrganiseSearchArtist,
+            MetadataKindEnum.Album => AppTexts.OrganiseSearchAlbum,
+            MetadataKindEnum.Genre => AppTexts.OrganiseSearchGenre,
+            _ => throw new InvalidEnumArgumentException(nameof(Kind), (int)Kind, typeof(MetadataKindEnum))
+    };
+
+    private string AddText => string.Format(AppTexts.OrganiseItemAdd, KindWord);
+
+    private static string MoreText(MetadataItem item) => string.Format(AppTexts.OrganiseItemMore, item.Name);
+
+    private static string FilterText(MetadataItem item) => string.Format(AppTexts.OrganiseItemFilter, item.Name);
+
+    private static string CountText(MetadataItem item) => item.MediaFileCount.ToCountText(AppTexts.OrganiseItemCountOne, AppTexts.OrganiseItemCount);
+
+    private string? DeleteTitle => _deletingItem is null ? null : string.Format(AppTexts.MetadataDeleteTitle, _deletingItem.Name);
+
+    private string? DeleteMessage => _deletingItem is null ? null : _deletingItem.MediaFileCount.ToCountText(AppTexts.MetadataDeleteMessageOne, AppTexts.MetadataDeleteMessageMany, KindWord);
+
+    private bool IsFiltered(MetadataItem item) => StateOrganise.Value.FilterOf(Kind) == item.ID;
+
+    private void ChangeSearch(string? search)
+    {
+        _search = search ?? string.Empty;
+    }
+
+    private void ClickFilterHandler(MetadataItem item)
+    {
+        Dispatcher.Dispatch(new ActionOrganiseFilterToggled(Kind, item.ID));
+    }
+
+    private void ClickAddHandler()
+    {
+        _editingID = null;
+        _isEditing = true;
+    }
+
+    // The menu of an item: opened at the pointer by a right-click on the row or by the button of the row.
+    private List<ContextMenuItem> MenuItemList => _menuItem is not { } item
+            ? []
+            :
+            [
+                    ContextMenuItem.Item(AppTexts.MetadataMenuEdit, () => Edit(item), icon: "edit"),
+                    ContextMenuItem.Item(AppTexts.MetadataMenuMerge, () => Merge(item), isDisabled: AllList.Count < 2, icon: "call_merge"),
+                    ContextMenuItem.Item(AppTexts.MetadataMenuMergeOthers, () => MergeOthers(item), isDisabled: AllList.Count < 2, icon: "call_merge"),
+                    ContextMenuItem.Separator(),
+                    ContextMenuItem.Item(AppTexts.MetadataMenuDelete, () => Delete(item), isDestructive: true, icon: "delete")
+            ];
+
+    private async Task OpenRowMenu(MouseEventArgs args, MetadataItem item)
+    {
+        if (_menu is null) return;
+
+        _menuItem = item;
+        StateHasChanged();
+        await _menu.OpenAtAsync(args);
+    }
+
+    private Task CloseMenuHandler()
+    {
+        _menuItem = null;
+        return Task.CompletedTask;
+    }
+
+    // The entries are the menu's own events, so this component is not drawn again unless it asks to be.
+    private Task Edit(MetadataItem item)
+    {
+        _editingID = item.ID;
+        _isEditing = true;
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+    private Task Merge(MetadataItem item)
+    {
+        _mergingID = item.ID;
+        _isMerging = true;
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+    private Task MergeOthers(MetadataItem item)
+    {
+        _mergingOthersID = item.ID;
+        _isMergingOthers = true;
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+    private Task Delete(MetadataItem item)
+    {
+        _deletingItem = item;
+        _isDeleting = true;
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+    // The media files stay, the tag leaves them; the lists and the filter follow from the hub event.
+    private async Task DeleteConfirmed(bool accepted)
+    {
+        if (_deletingItem is not { } item) return;
+
+        try
+        {
+            await ServiceMetadataAction.Delete(Kind, item.ID);
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
+}

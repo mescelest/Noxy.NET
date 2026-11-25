@@ -29,3 +29,15 @@ dd {
     flex-flow: row wrap;
     gap: var(--size-gap-xs);
 }
+
+/* The card: a line sets the header of the section apart from what is in it, as the header of the library table is. */
+.SectionDevice {
+    padding: var(--size-gap-md);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    border-radius: var(--size-border-radius-lg);
+}
+
+.SectionDevice ::deep > .Section > .head {
+    padding-bottom: var(--size-gap-sm);
+    border-bottom: var(--size-border-width-md) solid var(--color-offset-primary-lg);
+}

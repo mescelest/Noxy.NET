@@ -1,8 +1,3 @@
-/* Wide enough for a normal address, and never wider than the window; a longer address is cut off with an ellipsis. */
-.ServerManageDialog ::deep > .content {
-    width: min(calc(var(--size-column) * 1.5), calc(100vw - 2 * var(--size-dialog-margin)));
-}
-
 .header {
     display: flex;
     align-items: center;

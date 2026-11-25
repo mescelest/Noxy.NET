@@ -276,6 +276,44 @@ public sealed class FakeApiClient : IApiClient
 
     public static ResponseGenre GenreFor(Guid id, string name) => new() { ID = id, Name = name, MediaFileCount = 0, TimeModified = DateTime.UtcNow };
 
+    public List<(Guid ID, byte[] Picture, string ContentType)> SetAlbumArtRequestList { get; } = [];
+
+    public Task SetAlbumArt(Guid id, byte[] picture, string contentType)
+    {
+        SetAlbumArtRequestList.Add((id, picture, contentType));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.CompletedTask;
+    }
+
+    public List<(Guid ID, RequestMergeItem Request)> MergeArtistRequestList { get; } = [];
+    public List<(Guid ID, RequestMergeItem Request)> MergeAlbumRequestList { get; } = [];
+    public List<(Guid ID, RequestMergeItem Request)> MergeGenreRequestList { get; } = [];
+
+    public Task<ResponseArtist> MergeArtist(Guid id, RequestMergeItem request)
+    {
+        MergeArtistRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(ArtistFor(request.TargetID, "Artist"));
+    }
+
+    public Task<ResponseAlbum> MergeAlbum(Guid id, RequestMergeItem request)
+    {
+        MergeAlbumRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(AlbumFor(request.TargetID, "Album"));
+    }
+
+    public Task<ResponseGenre> MergeGenre(Guid id, RequestMergeItem request)
+    {
+        MergeGenreRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(GenreFor(request.TargetID, "Genre"));
+    }
+
     public List<RequestCreateArtist> CreateArtistRequestList { get; } = [];
 
     public Func<RequestCreateArtist, ResponseArtist> CreateArtistHandler { get; set; } = request => ArtistFor(Guid.CreateVersion7(), request.Name);

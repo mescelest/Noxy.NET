@@ -1,0 +1,83 @@
+/* The wrapper is only what the rules hang off, it has no box of its own: the fields of the form fill its width, and the form takes the height that is left so the list can scroll. */
+.form {
+    --input-flex: 1 1 auto;
+    display: contents;
+}
+
+.form ::deep > .WebForm {
+    row-gap: var(--size-gap-sm);
+    min-height: 0;
+}
+
+/* The form wraps its fields in a fieldset, which is as tall as its content unless it is let shrink: without this the list pushes the dialog taller instead of scrolling. */
+.form ::deep > .WebForm > fieldset {
+    min-height: 0;
+}
+
+.artists {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-xxs);
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+
+/* The picture on the left, the name beside it, centred on the picture. */
+.identity {
+    display: flex;
+    align-items: center;
+    column-gap: var(--size-gap-sm);
+}
+
+.fields {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    min-width: 0;
+}
+
+/* The picture is a button: a click on it picks a picture, and a small pencil in its corner says so. */
+.picture {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+    padding: 0;
+    border: none;
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    cursor: pointer;
+}
+
+.picture:focus-visible {
+    outline: var(--size-border-width-md) solid var(--color-highlight);
+}
+
+.edit {
+    position: absolute;
+    right: var(--size-gap-xxxs);
+    bottom: var(--size-gap-xxxs);
+    display: flex;
+    padding: var(--size-gap-tiny);
+    border: var(--size-border-width-sm) solid var(--color-offset-primary-lg);
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-complementary);
+}
+
+/* On hover or focus the pencil takes the accent colour: a light fill would be see-through over the picture, and the accent is what says "press here" elsewhere in the app. */
+.picture:hover .edit,
+.picture:focus-visible .edit {
+    border-color: var(--color-highlight);
+    background: var(--color-highlight);
+    color: var(--color-on-highlight);
+}

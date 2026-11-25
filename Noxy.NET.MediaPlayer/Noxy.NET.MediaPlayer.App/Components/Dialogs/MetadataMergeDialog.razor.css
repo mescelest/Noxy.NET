@@ -1,0 +1,52 @@
+/* The list takes what is left of the fixed height of the dialog and scrolls. */
+.list {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-tiny);
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.row {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    column-gap: var(--size-gap-xs);
+    width: 100%;
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+    border: none;
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-complementary);
+    font: var(--font-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.row:hover {
+    background: var(--color-offset-primary-md);
+}
+
+.row:focus-visible {
+    outline: var(--size-border-width-md) solid var(--color-highlight);
+}
+
+.name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.count {
+    flex: 0 0 auto;
+    color: var(--color-muted);
+    font: var(--font-label);
+}
+
+.empty {
+    margin: 0;
+    color: var(--color-muted);
+}

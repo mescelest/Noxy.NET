@@ -1,0 +1,22 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <div class="main">
+        @ChildContent
+    </div>
+    <div class="side">
+        @SideContent
+    </div>
+</div>
+
+@code {
+
+    // The table.
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // The column beside it; in a narrow window it comes below.
+    [Parameter]
+    public RenderFragment? SideContent { get; set; }
+
+}

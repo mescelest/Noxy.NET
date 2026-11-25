@@ -1,0 +1,9 @@
+/* As many columns as fit; a card is as high as what it holds. */
+.CardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--size-column, 20rem)), 1fr));
+    align-items: start;
+    gap: var(--size-gap-md, 1.25rem);
+    padding: var(--size-gap-md, 1.25rem);
+    overflow: auto;
+}

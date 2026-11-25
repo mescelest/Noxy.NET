@@ -2,6 +2,7 @@ using Fluxor;
 using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.Presentation.Features.Download;
 using Noxy.NET.MediaPlayer.Presentation.Features.Library;
+using Noxy.NET.MediaPlayer.Presentation.Features.MetadataList;
 using Noxy.NET.MediaPlayer.Presentation.Features.Player;
 using Noxy.NET.MediaPlayer.Presentation.Features.PlaylistList;
 using Noxy.NET.MediaPlayer.Presentation.Features.Session;
@@ -19,6 +20,8 @@ public class StateBridgeService(
     IAppStartupService serviceStartup,
     ILocalDataOwnerService serviceLocalDataOwner,
     IMetadataStore storeMetadata,
+    IMetadataListStore storeMetadataList,
+    IMetadataSyncService serviceMetadataSync,
     ILogger<StateBridgeService> logger) : IStateBridgeService, IDisposable
 {
     private const string ListKey = "List";
@@ -42,6 +45,7 @@ public class StateBridgeService(
         }
 
         serviceSync.Changed += OnSyncChanged;
+        serviceMetadataSync.Changed += OnMetadataChanged;
         serviceDownload.Changed += OnDownloadChanged;
         servicePlayer.Changed += DispatchPlayer;
         serviceSession.Changed += DispatchSession;
@@ -63,6 +67,7 @@ public class StateBridgeService(
         }
 
         serviceSync.Changed -= OnSyncChanged;
+        serviceMetadataSync.Changed -= OnMetadataChanged;
         serviceDownload.Changed -= OnDownloadChanged;
         servicePlayer.Changed -= DispatchPlayer;
         serviceSession.Changed -= DispatchSession;
@@ -80,6 +85,11 @@ public class StateBridgeService(
     private void OnSyncChanged()
     {
         DispatchSession();
+        _ = Coalesce(ListKey, LoadLists);
+    }
+
+    private void OnMetadataChanged()
+    {
         _ = Coalesce(ListKey, LoadLists);
     }
 
@@ -102,6 +112,7 @@ public class StateBridgeService(
     {
         dispatcher.Dispatch(new ActionLibraryMediaLoaded(await storeMetadata.GetMediaFileList()));
         dispatcher.Dispatch(new ActionPlaylistListLoaded(await storeMetadata.GetPlaylistList()));
+        dispatcher.Dispatch(new ActionMetadataListLoaded(await storeMetadataList.Artist.GetList(), await storeMetadataList.Album.GetList(), await storeMetadataList.Genre.GetList()));
     }
 
     private async Task LoadFileStates()

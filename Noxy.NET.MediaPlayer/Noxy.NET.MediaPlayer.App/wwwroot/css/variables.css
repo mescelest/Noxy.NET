@@ -35,6 +35,9 @@
     --size-control-xxl: 5.75rem;
     --size-dialog-margin: var(--size-gap-xs);
     --size-dialog-list-height: 60dvh;
+    /* The height of a dialog that keeps one height: that of a list that is searched, so the dialog does not move while the list gets shorter and longer. */
+    --size-dialog-fixed-height: min(40rem, calc(100dvh - 2 * var(--size-dialog-margin)));
+    /* A dialog with a list that is searched: as tall as this whatever the search finds, and never taller than the window leaves room for. */
     --size-playlist-art: var(--size-control-xs);
     --playlist-color-columns: 6;
     --size-album-art: var(--size-control-xs);
@@ -74,6 +77,11 @@
     --table-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
     /* The first two columns are one control wide. The rows and the header are subgrids with the page padding on their sides, and a subgrid adds its edge padding to the first column, so that one is the padding wider. */
     --table-columns-library: calc(var(--size-control-xxs) + var(--size-gap-md)) var(--size-control-xxs) repeat(3, minmax(0, auto)) minmax(4.5rem, max-content) max-content;
+    --table-track-select: calc(var(--size-control-xxs) + var(--size-gap-md));
+    --table-track-state: var(--size-control-xxs);
+    --table-track-text: minmax(0, auto);
+    --table-track-year: minmax(4.5rem, max-content);
+    --table-track-added: max-content;
     --table-columns-queue: calc(var(--size-control-xxs) + var(--size-gap-md)) var(--size-control-xxs) repeat(3, minmax(0, auto)) max-content;
 }
 

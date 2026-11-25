@@ -1,0 +1,42 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @foreach (MetadataItem item in ItemList)
+    {
+        Guid itemID = item.ID;
+        <div @key="itemID" class="row">
+            <InputControlCheckbox Option="true" IsMixed="IsMixed(itemID)" @bind-Value:get="@IsChecked(itemID)" @bind-Value:set="_ => ToggleHandler(itemID)">
+                <span class="name">@item.Name</span>
+                <span class="count">@CountText(item)</span>
+            </InputControlCheckbox>
+        </div>
+    }
+    @if (ItemList.Count == 0)
+    {
+        <p class="empty">@AppTexts.MetadataPickerNoMatch</p>
+    }
+</div>
+
+@code {
+
+    // The items to list, in the order to show them.
+    [Parameter, EditorRequired]
+    public required List<MetadataItem> ItemList { get; set; }
+
+    // What each box shows: ticked, dashed for some, or empty.
+    [Parameter, EditorRequired]
+    public required Func<Guid, MetadataCheckStateEnum> StateOf { get; set; }
+
+    // An item was pressed anywhere on its row; the owner decides what that changes.
+    [Parameter]
+    public EventCallback<Guid> OnToggle { get; set; }
+
+    private bool IsChecked(Guid itemID) => StateOf(itemID) == MetadataCheckStateEnum.Checked;
+
+    private bool IsMixed(Guid itemID) => StateOf(itemID) == MetadataCheckStateEnum.Mixed;
+
+    private static string CountText(MetadataItem item) => item.MediaFileCount.ToCountText(AppTexts.OrganiseItemCountOne, AppTexts.OrganiseItemCount);
+
+    private Task ToggleHandler(Guid itemID) => OnToggle.InvokeAsync(itemID);
+
+}

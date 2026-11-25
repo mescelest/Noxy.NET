@@ -44,6 +44,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IQueueActionService, QueueActionService>();
             services.AddSingleton<IPlaylistService, PlaylistService>();
             services.AddSingleton<IMediaEditService, MediaEditService>();
+            services.AddSingleton<IMetadataActionService, MetadataActionService>();
             services.AddSingleton<IHomeService, HomeService>();
             services.AddScoped<IStateBridgeService, StateBridgeService>();
             services.AddSingleton<IDeviceResetService, DeviceResetService>();

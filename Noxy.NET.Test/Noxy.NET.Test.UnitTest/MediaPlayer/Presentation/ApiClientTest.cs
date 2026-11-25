@@ -933,4 +933,69 @@ public class ApiClientTest
         Assert.Equal(HttpStatusCode.Conflict, exception.Status);
         Assert.Equal("An artist with that name exists.", exception.Title);
     }
+
+    [Fact]
+    public async Task SetAlbumArt_PutsThePictureBytes_ToTheArtPath()
+    {
+        Guid id = Guid.CreateVersion7();
+        _handler.Respond = _ => new(HttpStatusCode.NoContent);
+
+        await _client.SetAlbumArt(id, "abc"u8.ToArray(), "image/png");
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Put, request.Method);
+        Assert.Equal($"https://server.example/Album/{id}/Art", request.Uri?.ToString());
+        Assert.Equal("Bearer token-1", request.Authorization);
+        Assert.Equal("abc", request.Body);
+    }
+
+    [Fact]
+    public async Task SetAlbumArt_WhenTheServerRefuses_ThrowsApiExceptionWithItsTitle()
+    {
+        _handler.Respond = _ => FakeHttpMessageHandler.Problem(HttpStatusCode.BadRequest, "The picture is not an image that can be used.");
+
+        ApiException exception = await Assert.ThrowsAsync<ApiException>(() => _client.SetAlbumArt(Guid.CreateVersion7(), [1], "image/png"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, exception.Status);
+    }
+
+    [Fact]
+    public async Task MergeAlbum_PostsTheTargetID_ToTheMergePath()
+    {
+        Guid id = Guid.CreateVersion7();
+        Guid target = Guid.CreateVersion7();
+        _handler.Respond = _ => Ok(FakeApiClient.AlbumFor(target, "Target"));
+
+        ResponseAlbum result = await _client.MergeAlbum(id, new() { TargetID = target });
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Post, request.Method);
+        Assert.Equal($"https://server.example/Album/{id}/Merge", request.Uri?.ToString());
+        Assert.Equal("Bearer token-1", request.Authorization);
+        Assert.Equal(target, JsonDocument.Parse(request.Body ?? "{}").RootElement.GetProperty("targetID").GetGuid());
+        Assert.Equal(target, result.ID);
+    }
+
+    [Fact]
+    public async Task MergeArtist_AndMergeGenre_PostToTheirOwnMergePaths()
+    {
+        Guid id = Guid.CreateVersion7();
+        Guid target = Guid.CreateVersion7();
+        _handler.Respond = request => request.Uri?.AbsolutePath.StartsWith("/Artist") == true ? Ok(FakeApiClient.ArtistFor(target, "Target")) : Ok(FakeApiClient.GenreFor(target, "Target"));
+
+        await _client.MergeArtist(id, new() { TargetID = target });
+        await _client.MergeGenre(id, new() { TargetID = target });
+
+        Assert.Equal([$"https://server.example/Artist/{id}/Merge", $"https://server.example/Genre/{id}/Merge"], _handler.RequestList.Select(x => x.Uri?.ToString()));
+    }
+
+    [Fact]
+    public async Task AMergeThatTheServerRefuses_ThrowsApiExceptionWithItsTitle()
+    {
+        _handler.Respond = _ => FakeHttpMessageHandler.Problem(HttpStatusCode.BadRequest, "An album cannot be merged into itself.");
+
+        ApiException exception = await Assert.ThrowsAsync<ApiException>(() => _client.MergeAlbum(Guid.CreateVersion7(), new() { TargetID = Guid.CreateVersion7() }));
+
+        Assert.Equal("An album cannot be merged into itself.", exception.Title);
+    }
 }

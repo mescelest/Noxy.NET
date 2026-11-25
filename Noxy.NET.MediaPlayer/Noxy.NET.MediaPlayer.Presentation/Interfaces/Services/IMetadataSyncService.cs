@@ -15,7 +15,7 @@ public interface IMetadataSyncService
 
     Task SyncGenreList(bool force = false);
 
-    // The push handlers. A push never writes an ETag, and an older or equal TimeModified never overwrites the local copy.
+    // The push handlers. A push never writes an ETag, and an older TimeModified never overwrites the local copy; an equal one does, since a count of media files changes without the item row changing.
     Task ApplyArtistUpdated(ResponseArtist artist);
 
     // An ID that is not held is harmless.

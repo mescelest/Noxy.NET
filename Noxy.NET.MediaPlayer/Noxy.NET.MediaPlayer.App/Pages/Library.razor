@@ -15,9 +15,9 @@
                         EmptyDescription="@AppTexts.LibraryEmptyDescription" StateMap="Current.StateMap" Sort="Current.Sort"
                         Descending="Current.Descending" OnSortChanged="Sort"
                         SelectedSet="Current.SelectedSet" AllSelected="Current.AllVisibleSelected" OnToggleAll="ToggleAllVisibleSelected" OnToggleRow="ToggleSelected"
-                        OnPlay="Play" OnContextMenu="OpenRowMenu">
+                        OnPlay="Play" RowSelect="RowSelectEnum.Ctrl" OnContextMenu="OpenRowMenu">
             <ToolContent>
-                <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.LibrarySearch" aria-label="@AppTexts.LibrarySearch" Value="@Current.Search" ValueChanged="ChangeSearch"/>
+                <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.LibrarySearch" aria-label="@AppTexts.LibrarySearch" @bind-Value:get="Current.Search" @bind-Value:set="ChangeSearch"/>
                 <ButtonList>
                     <UploadMediaButton Appearance="ButtonAppearanceEnum.Outline"/>
                 </ButtonList>

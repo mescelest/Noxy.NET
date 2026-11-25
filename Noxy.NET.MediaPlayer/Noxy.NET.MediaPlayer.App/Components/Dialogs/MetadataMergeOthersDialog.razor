@@ -1,0 +1,126 @@
+@inject IState<FeatureMetadataListState> StateMetadataList
+@inject IMetadataActionService ServiceMetadataAction
+@inject IToastService ServiceToast
+@inherits BaseComponentElementFluxor
+
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Height="DialogHeightEnum.Fixed" Open="Open" OpenChanged="HandleOpenChanged">
+    <h2>@AppTexts.MetadataMenuMergeOthers</h2>
+    @if (Open)
+    {
+        <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@SearchText" aria-label="@SearchText" @bind-Value:get="_search" @bind-Value:set="ChangeSearch"/>
+        <MetadataCheckList ItemList="ShownList" StateOf="StateOf" OnToggle="ToggleItem"/>
+        <div class="actions">
+            <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" disabled="@IsMergeDisabled" Loading="@ServiceMetadataAction.IsBusy" @onclick="ClickMergeHandler">@AppTexts.MetadataMergeAccept</Button>
+        </div>
+    }
+
+    <ConfirmActionDialog @bind-Open="_isConfirming" Title="@AppTexts.MetadataMergeConfirmTitle" Message="@ConfirmMessage" Detail="@ConfirmDetail" AcceptText="@AppTexts.MetadataMergeConfirm" AcceptStatus="StatusEnum.Warning" OnSubmit="MergeConfirmed"/>
+</Dialog>
+
+@code {
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter, EditorRequired]
+    public MetadataKindEnum Kind { get; set; }
+
+    // The item the ticked ones are merged into: it stays, with its own name and artists.
+    [Parameter]
+    public Guid? TargetID { get; set; }
+
+    private string _search = string.Empty;
+    private bool _isConfirming;
+    private bool _wasOpen;
+    private readonly HashSet<Guid> _tickedSet = [];
+
+    private MetadataItem? Target => TargetID is { } id ? StateMetadataList.Value.ItemListOf(Kind).FirstOrDefault(x => x.ID == id) : null;
+
+    // Every item of the kind but the one the others are merged into.
+    private List<MetadataItem> ShownList => StateMetadataList.Value.ItemListOf(Kind).Where(x => x.ID != TargetID).ToList().FilterByName(_search);
+
+    private bool IsMergeDisabled => _tickedSet.Count == 0 || ServiceMetadataAction.IsBusy;
+
+    // The first line says what is merged into what, like "3 Albums → Name"; the line under it says what that does.
+    private string? ConfirmMessage => Target is { } target ? string.Format(AppTexts.MetadataMergeOthersMessage, _tickedSet.Count, KindNameOf(_tickedSet.Count), target.Name) : null;
+
+    private string ConfirmDetail => _tickedSet.Count.ToCountText(AppTexts.MetadataMergeOthersDetailOne, AppTexts.MetadataMergeOthersDetailMany);
+
+    private string KindNameOf(int count)
+    {
+        return Kind switch
+        {
+                MetadataKindEnum.Artist => count == 1 ? AppTexts.MetadataKindNameArtist : AppTexts.OrganiseTabArtist,
+                MetadataKindEnum.Album => count == 1 ? AppTexts.MetadataKindNameAlbum : AppTexts.OrganiseTabAlbum,
+                MetadataKindEnum.Genre => count == 1 ? AppTexts.MetadataKindNameGenre : AppTexts.OrganiseTabGenre,
+                _ => throw new InvalidEnumArgumentException(nameof(Kind), (int)Kind, typeof(MetadataKindEnum))
+        };
+    }
+
+    private string SearchText => Kind switch
+    {
+            MetadataKindEnum.Artist => AppTexts.OrganiseSearchArtist,
+            MetadataKindEnum.Album => AppTexts.OrganiseSearchAlbum,
+            MetadataKindEnum.Genre => AppTexts.OrganiseSearchGenre,
+            _ => throw new InvalidEnumArgumentException(nameof(Kind), (int)Kind, typeof(MetadataKindEnum))
+    };
+
+    // The ticks start empty each time the dialog opens.
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Open && !_wasOpen) _tickedSet.Clear();
+
+        _wasOpen = Open;
+    }
+
+    private MetadataCheckStateEnum StateOf(Guid itemID) => _tickedSet.Contains(itemID) ? MetadataCheckStateEnum.Checked : MetadataCheckStateEnum.Unchecked;
+
+    private void ChangeSearch(string? search)
+    {
+        _search = search ?? string.Empty;
+    }
+
+    private void ToggleItem(Guid itemID)
+    {
+        if (!_tickedSet.Remove(itemID)) _tickedSet.Add(itemID);
+    }
+
+    private void ClickMergeHandler()
+    {
+        _isConfirming = true;
+    }
+
+    // The merges are sent once they are confirmed; the lists and the counts follow from the pushes, and a refusal is a toast.
+    private async Task MergeConfirmed(bool accepted)
+    {
+        if (TargetID is not { } targetID) return;
+
+        try
+        {
+            await ServiceMetadataAction.MergeList(Kind, [.. _tickedSet], targetID);
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+            return;
+        }
+
+        await Close();
+    }
+
+    private Task HandleOpenChanged(bool open)
+    {
+        return open ? Task.CompletedTask : Close();
+    }
+
+    private async Task Close()
+    {
+        _search = string.Empty;
+        await OpenChanged.InvokeAsync(false);
+    }
+
+}

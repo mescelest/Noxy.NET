@@ -1,0 +1,191 @@
+@inject IState<FeatureMetadataListState> StateMetadataList
+@inject IMetadataActionService ServiceMetadataAction
+@inject IToastService ServiceToast
+@inject IPicturePicker ServicePicturePicker
+@using Noxy.NET.MediaPlayer.Presentation.Exceptions
+@inherits BaseComponentElementFluxor
+
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Height="HeightCurrent" Open="Open" OpenChanged="HandleOpenChanged">
+    <h2>@TitleText</h2>
+    @if (Open)
+    {
+        <div class="form">
+            <WebForm T="FormModelMetadataItem" Context="_context" OnSubmit="Submit">
+                @if (Kind == MetadataKindEnum.Album)
+                {
+                    <div class="identity">
+                        <button type="button" class="picture" title="@AppTexts.MetadataDialogChangePicture" aria-label="@AppTexts.MetadataDialogChangePicture" @onclick="ClickPictureHandler">
+                            <AlbumArt AlbumID="ItemID" PreviewUri="@_previewUri" Size="var(--size-control-xxl)"/>
+                            <span class="edit"><MaterialIcon Icon="edit" Size="var(--size-icon-xs)"/></span>
+                        </button>
+                        <div class="fields">
+                            <InputGroupText @bind-Value="_context.Model.Name"/>
+                        </div>
+                    </div>
+                    <div class="artists">
+                        <InputGroupText DisplayName="@AppTexts.MetadataDialogArtists" Type="WebFormInputTextTypeEnum.Search" InputAttributes="ArtistSearchAttributeMap" @bind-Value="_artistSearch"/>
+                        <MetadataCheckList ItemList="ShownArtistList" StateOf="ArtistStateOf" OnToggle="ToggleArtist"/>
+                    </div>
+                }
+                else
+                {
+                    <InputGroupText @bind-Value="_context.Model.Name"/>
+                }
+                <div class="actions">
+                    <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@_context.IsSubmitting">@AppTexts.MetadataDialogSave</Button>
+                </div>
+            </WebForm>
+        </div>
+    }
+</Dialog>
+
+@code {
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter, EditorRequired]
+    public MetadataKindEnum Kind { get; set; }
+
+    // The item to edit; unset, the dialog creates one.
+    [Parameter]
+    public Guid? ItemID { get; set; }
+
+    // The ID of the item that was created or saved; the dialog closes itself first.
+    [Parameter]
+    public EventCallback<Guid> OnSaved { get; set; }
+
+    private WebFormContext<FormModelMetadataItem> _context = new(new());
+    private bool _wasOpen;
+
+    private string _artistSearch = string.Empty;
+
+    // The search box of the artists is a field like the name: its own attributes say what it is for and that it follows every key.
+    private Dictionary<string, object> ArtistSearchAttributeMap => new() { ["placeholder"] = AppTexts.OrganiseSearchArtist, ["aria-label"] = AppTexts.OrganiseSearchArtist, ["OnInputDelay"] = 0 };
+
+    private List<MetadataItem> ShownArtistList => StateMetadataList.Value.ItemListOf(MetadataKindEnum.Artist).FilterByName(_artistSearch);
+
+    // An album has artists to search through, and its dialog keeps one height whatever the search finds.
+    private DialogHeightEnum HeightCurrent => Kind == MetadataKindEnum.Album ? DialogHeightEnum.Fixed : DialogHeightEnum.Auto;
+
+    private string TitleText => string.Format(ItemID is null ? AppTexts.MetadataDialogNew : AppTexts.MetadataDialogEdit, KindWord);
+
+    private string KindWord => Kind switch
+    {
+        MetadataKindEnum.Artist => AppTexts.OrganiseKindArtist,
+        MetadataKindEnum.Album => AppTexts.OrganiseKindAlbum,
+        MetadataKindEnum.Genre => AppTexts.OrganiseKindGenre,
+        _ => throw new InvalidEnumArgumentException(nameof(Kind), (int)Kind, typeof(MetadataKindEnum))
+    };
+
+    // The form is built each time the dialog opens, from the item it edits.
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Open && !_wasOpen)
+        {
+            _context = new(BuildModel());
+            _picture = null;
+            _previewUri = null;
+        }
+
+        _wasOpen = Open;
+    }
+
+    private FormModelMetadataItem BuildModel()
+    {
+        if (ItemID is not { } id) return new();
+
+        FormModelMetadataItem model = new() { Name = StateMetadataList.Value.ItemListOf(Kind).FirstOrDefault(x => x.ID == id)?.Name ?? string.Empty };
+        if (Kind == MetadataKindEnum.Album && StateMetadataList.Value.AlbumList.FirstOrDefault(x => x.ID == id) is { } album)
+        {
+            model.ArtistIDSet = [.. album.ArtistIDList];
+        }
+
+        return model;
+    }
+
+    private MetadataCheckStateEnum ArtistStateOf(Guid artistID) => _context.Model.ArtistIDSet.Contains(artistID) ? MetadataCheckStateEnum.Checked : MetadataCheckStateEnum.Unchecked;
+
+
+    private void ToggleArtist(Guid artistID)
+    {
+        if (!_context.Model.ArtistIDSet.Remove(artistID)) _context.Model.ArtistIDSet.Add(artistID);
+    }
+
+    private Task HandleOpenChanged(bool open)
+    {
+        return open ? Task.CompletedTask : Close();
+    }
+
+    private Task Close() => OpenChanged.InvokeAsync(false);
+
+    // The picture the user chose and has not saved yet, with the address that shows it in the dialog. It goes to the server with the rest of the form.
+    private PickedPicture? _picture;
+    private string? _previewUri;
+
+    // The picture is chosen in the dialog of the platform, not the file chooser of the web view, which brings the app down from inside a dialog.
+    private async Task ClickPictureHandler()
+    {
+        try
+        {
+            if (await ServicePicturePicker.Pick() is not { } picture) return;
+
+            _picture = picture;
+            _previewUri = $"data:{picture.ContentType};base64,{Convert.ToBase64String(picture.Bytes)}";
+        }
+        catch (IOException exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
+    // The item is saved by now, so a picture that cannot be sent is a toast and not a failed form: the dialog closes, and the picture can be changed again from the edit dialog.
+    private async Task SendPicture(Guid albumID)
+    {
+        if (Kind != MetadataKindEnum.Album || _picture is not { } picture) return;
+
+        try
+        {
+            await ServiceMetadataAction.SetAlbumArt(albumID, picture.Bytes, picture.ContentType);
+        }
+        catch (Exception exception) when (exception is ApiException or HttpRequestException)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
+    private async Task Submit(WebFormContext<FormModelMetadataItem> context)
+    {
+        string name = context.Model.Name.Trim();
+        List<Guid>? albumArtistIDList = Kind == MetadataKindEnum.Album ? [.. context.Model.ArtistIDSet] : null;
+        Guid id;
+
+        try
+        {
+            if (ItemID is { } existingID)
+            {
+                await ServiceMetadataAction.Rename(Kind, existingID, name, albumArtistIDList);
+                id = existingID;
+            }
+            else
+            {
+                id = await ServiceMetadataAction.Create(Kind, name, albumArtistIDList);
+            }
+        }
+        catch (Exception exception) when (exception is ApiException or HttpRequestException)
+        {
+            // A refusal, such as a name another item already has, belongs to the form and the dialog stays open.
+            context.HandleException(exception);
+            return;
+        }
+
+        await SendPicture(id);
+        await Close();
+        await OnSaved.InvokeAsync(id);
+    }
+
+}

@@ -64,7 +64,7 @@ public class ArtStorageServiceTest : IDisposable
 
         await service.SaveAlbumArt(albumID, [9, 8], TestContext.Current.CancellationToken);
 
-        Assert.Equal<byte[]>([9, 8], ReadAll(service.OpenAlbumArt(albumID)));
+        Assert.Equal([9, 8], ReadAll(service.OpenAlbumArt(albumID)));
     }
 
     [Fact]
@@ -117,7 +117,7 @@ public class ArtStorageServiceTest : IDisposable
         Assert.Null(service.OpenAlbumArt(albumID));
 
         await service.SaveAlbumArt(albumID, [5, 6], TestContext.Current.CancellationToken);
-        Assert.Equal<byte[]>([5, 6], ReadAll(service.OpenAlbumArt(albumID)));
+        Assert.Equal([5, 6], ReadAll(service.OpenAlbumArt(albumID)));
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class ArtStorageServiceTest : IDisposable
         using Stream? reader = service.OpenAlbumArt(albumID);
         await service.SaveAlbumArt(albumID, [3, 4], TestContext.Current.CancellationToken);
 
-        Assert.Equal<byte[]>([3, 4], ReadAll(service.OpenAlbumArt(albumID)));
+        Assert.Equal([3, 4], ReadAll(service.OpenAlbumArt(albumID)));
     }
 
     [Fact]

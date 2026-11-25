@@ -64,8 +64,39 @@ public class HandlerAlbumMediaFileListAddTest
         Assert.Equal(_time.Now.UtcDateTime, Stored(replaced).TimeModified);
         Assert.Equal(2, _publisher.GetList<NotificationMediaUpdated>().Count);
         Assert.All(_publisher.GetList<NotificationMediaUpdated>(), x => Assert.Equal("Target", x.MediaFile.Album));
-        Assert.Equal(album.ID, Assert.Single(_publisher.GetList<NotificationAlbumUpdated>()).Album.ID);
+        List<NotificationAlbumUpdated> updatedList = _publisher.GetList<NotificationAlbumUpdated>();
+        Assert.Equal(2, updatedList.Count);
+        Assert.Equal(2, updatedList.Single(x => x.Album.ID == album.ID).Album.MediaFileCount);
+        Assert.Equal(0, updatedList.Single(x => x.Album.ID == previous.ID).Album.MediaFileCount);
         Assert.Equal(1, _store.CommitCount);
+    }
+
+    [Fact]
+    public async Task Add_ReportsTheAlbumTheFilesLeft_WithTheFilesItKeeps()
+    {
+        EntityAlbum album = SeedAlbum("Target");
+        EntityAlbum previous = SeedAlbum("Previous");
+        EntityMediaFile moved = SeedFile("Moved", previous);
+        SeedFile("Stays", previous);
+        SeedFile("AlsoStays", previous);
+
+        await _handler.Handle(new(UserID, album.ID, [moved.ID]), Token);
+
+        NotificationAlbumUpdated leftNotification = _publisher.GetList<NotificationAlbumUpdated>().Single(x => x.Album.ID == previous.ID);
+        Assert.Equal(2, leftNotification.Album.MediaFileCount);
+    }
+
+    [Fact]
+    public async Task Add_FilesFromTheSameAlbum_ReportThatAlbumOnce()
+    {
+        EntityAlbum album = SeedAlbum("Target");
+        EntityAlbum previous = SeedAlbum("Previous");
+        EntityMediaFile first = SeedFile("One", previous);
+        EntityMediaFile second = SeedFile("Two", previous);
+
+        await _handler.Handle(new(UserID, album.ID, [first.ID, second.ID]), Token);
+
+        Assert.Equal(0, Assert.Single(_publisher.GetList<NotificationAlbumUpdated>(), x => x.Album.ID == previous.ID).Album.MediaFileCount);
     }
 
     [Fact]

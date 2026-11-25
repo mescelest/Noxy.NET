@@ -1,5 +1,7 @@
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Presentation;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
+using Noxy.NET.MediaPlayer.Presentation.Features.Organise;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 

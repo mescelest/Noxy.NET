@@ -191,3 +191,9 @@ The components render the roles of the table, its header row, the body (`rowgrou
 sits: a column header inside `TableHeader`, a cell inside `TableRow`. Set `Kind="TableCellKindEnum.RowHeader"` on the cell that names the row. `TableHeaderCellSort` is a column header.
 
 `SortableTable` rows can be reordered with the keyboard: focus a row and press Alt with the up or down arrow.
+
+## Containers
+
+- `EmptyState`: a centred box that fills what is left of its container, for a list or page with nothing in it. The caller passes the `Graphic`, `Title`, `Description` and what can be done about it (`ChildContent`).
+- `CardGrid`: a grid that makes as many columns as fit (`--size-column` wide at least); each card is as high as what it holds.
+- `PageContent`: the body of a fullscreen page, whose own padding is none: its children are stacked with room around them and it scrolls when too tall.

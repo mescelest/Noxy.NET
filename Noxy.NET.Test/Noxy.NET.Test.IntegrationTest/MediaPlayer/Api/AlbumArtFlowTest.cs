@@ -74,7 +74,7 @@ public class AlbumArtFlowTest
         Assert.Matches("^\"[0-9a-f]{64}\"$", response.GetETag());
         Assert.Contains("private", response.Headers.CacheControl?.ToString());
         byte[] bytes = await response.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken);
-        Assert.Equal<byte[]>([0xFF, 0xD8], bytes[..2]);
+        Assert.Equal([0xFF, 0xD8], bytes[..2]);
     }
 
     [Fact]

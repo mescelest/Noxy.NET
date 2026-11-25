@@ -1,0 +1,31 @@
+/* The side runs the full height of the page, beside the header and the table, with one line between them. */
+.OrganiseLayout {
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1fr) var(--size-column);
+    min-height: 0;
+}
+
+.main, .side {
+    display: flex;
+    flex-flow: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.side {
+    border-inline-start: var(--size-border-width-sm) solid var(--color-offset-primary-md);
+}
+
+/* In a narrow window the column comes below the table. */
+@container style(--layout-narrow: 1) {
+    .OrganiseLayout {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
+    }
+
+    .side {
+        border-inline-start: none;
+        border-block-start: var(--size-border-width-sm) solid var(--color-offset-primary-md);
+    }
+}

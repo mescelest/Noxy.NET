@@ -1,0 +1,135 @@
+/* The rows run from edge to edge of the column; only the tool row and the notes carry their own padding. */
+.MetadataItemList {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    min-height: 0;
+}
+
+/* The search and the add button sit on a lighter band. */
+.tool-row {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    column-gap: var(--size-gap-xxs);
+    padding: var(--size-gap-xs) var(--size-gap-sm);
+    background-color: var(--color-offset-primary-sm);
+}
+
+.tool-row ::deep > .Button {
+    min-width: var(--size-control-xs);
+    min-height: var(--size-control-xs);
+}
+
+/* The input sits inside the wrapper of its control: the wrapper takes what is left of the row, and the input fills it. */
+.tool-row ::deep > .TemplateInputControlTextual {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tool-row ::deep > .TemplateInputControlTextual > .search {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.list {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* The row of the filtered item carries an accent bar on its left and the accent colour. */
+.item {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    column-gap: var(--size-gap-xxs);
+    padding-inline: var(--size-gap-sm);
+    border-inline-start: var(--size-border-width-md) solid transparent;
+}
+
+.item:hover {
+    background-color: var(--color-offset-primary-md);
+}
+
+.item[data-filtered] {
+    border-inline-start-color: var(--color-highlight);
+    background-color: var(--color-highlight-subtle);
+    color: var(--color-highlight);
+}
+
+.name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    padding: var(--size-gap-xxs) 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: var(--font-body);
+    text-align: start;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.count {
+    flex: 0 0 auto;
+    color: var(--color-muted);
+    font: var(--font-label);
+}
+
+.note {
+    margin: 0;
+    padding: var(--size-gap-sm);
+    color: var(--color-muted);
+}
+
+/* The name, the count and the button of the row are apart. */
+.item {
+    column-gap: var(--size-gap-sm);
+}
+
+/* The name button covers the whole row, so a click anywhere up to the button filters; the button sits above it. */
+.item {
+    position: relative;
+}
+
+.name::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+/* Hidden until the row is hovered or has focus inside, but never removed, so a keyboard or screen reader still reaches it. */
+.item ::deep > .more {
+    position: relative;
+    flex: 0 0 auto;
+    min-width: var(--size-control-xxs);
+    min-height: var(--size-control-xxs);
+    opacity: 0;
+}
+
+.item:hover ::deep > .more, .item:focus-within ::deep > .more, .item ::deep > .more[data-popover-open] {
+    opacity: 1;
+}
+
+/* The button's own hover is a faint wash that cannot be seen against the hovered row behind it, so it gets a fill of its own: the stronger offset, a step above the row's. */
+.item ::deep > .more:not(:disabled):hover {
+    background-color: var(--color-offset-primary-lg);
+}
+
+/* With no hover to reveal it (touch) or no room to hover over (narrow), it is always shown. */
+@container style(--layout-narrow: 1) {
+    .item ::deep > .more {
+        opacity: 1;
+    }
+}
+
+@container style(--layout-touch: 1) {
+    .item ::deep > .more {
+        opacity: 1;
+    }
+}

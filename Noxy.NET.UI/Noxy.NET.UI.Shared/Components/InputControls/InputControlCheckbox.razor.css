@@ -72,3 +72,19 @@
     width: 0;
     height: 0;
 }
+
+/* A mixed box is filled like a ticked one, with a dash in place of the tick. */
+.InputControlCheckbox:not([data-disabled]) .visual[data-mixed] {
+    border-color: var(--color-theme, var(--color-highlight, #0073EC));
+    background-color: var(--color-theme, var(--color-highlight, #0073EC));
+    color: var(--color-on-theme, var(--color-on-highlight, #FFFFFF));
+}
+
+.visual[data-mixed] .tick {
+    width: 0.625rem;
+    height: 0;
+    margin-top: 0;
+    border-width: 0 0 var(--size-border-width-md, 2px) 0;
+    opacity: 0.9;
+    transform: none;
+}

@@ -1,0 +1,25 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <h1>@Name</h1>
+    @ChildContent
+    @if (EndContent is not null)
+    {
+        <div class="end">@EndContent</div>
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required string Name { get; set; }
+
+    // Next to the name: what belongs to the page as a whole.
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // At the end of the row, as high as a control, so the page below does not move when it comes and goes.
+    [Parameter]
+    public RenderFragment? EndContent { get; set; }
+
+}

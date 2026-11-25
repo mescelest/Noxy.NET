@@ -1,6 +1,8 @@
-using System.Collections;
 using System.ComponentModel;
-using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
+using Noxy.NET.MediaPlayer.Presentation.Extensions;
+using Noxy.NET.MediaPlayer.Presentation.Features.MetadataList;
+using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Presentation;
@@ -46,9 +48,9 @@ public class FeatureMetadataListStateExtensionTest
     {
         List<MetadataItem> itemList = State().ItemListOf(MetadataKindEnum.Artist);
 
-        Assert.Equal(["bravo"], Enumerable.Select<ResponsePlaylist, string>(itemList.FilterByName(" RAV "), x => x.Name));
+        Assert.Equal(["bravo"], itemList.FilterByName(" RAV ").Select(x => x.Name));
         Assert.Equal(2, itemList.FilterByName("  ").Count);
         Assert.Equal(2, itemList.FilterByName(null).Count);
-        Assert.Empty((IEnumerable)itemList.FilterByName("zzz"));
+        Assert.Empty(itemList.FilterByName("zzz"));
     }
 }

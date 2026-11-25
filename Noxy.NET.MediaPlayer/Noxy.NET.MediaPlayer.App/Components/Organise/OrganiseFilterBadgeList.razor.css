@@ -1,0 +1,29 @@
+.OrganiseFilterBadgeList {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: var(--size-gap-xxs);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    column-gap: var(--size-gap-xxs);
+    padding: var(--size-gap-xxxs) var(--size-gap-xs);
+    border: var(--size-border-width-sm) solid var(--color-highlight-border);
+    border-radius: var(--size-border-radius-md);
+    background-color: var(--color-highlight-subtle);
+    font: var(--font-label);
+}
+
+.remove, .clear-all {
+    border: none;
+    background: transparent;
+    color: var(--color-muted);
+    font: var(--font-label);
+    cursor: pointer;
+}
+
+.remove:hover, .clear-all:hover {
+    color: var(--color-complementary);
+}

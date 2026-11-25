@@ -1,0 +1,26 @@
+/* It fills what is left of its container. */
+.EmptyState {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--size-gap-sm, 1rem);
+    min-height: 0;
+    margin: var(--size-gap-sm, 1rem);
+    padding: var(--size-gap-lg, 2rem);
+    border: var(--size-border-width-md, 2px) dashed var(--color-offset-primary-lg, currentColor);
+    border-radius: var(--size-border-radius-lg, 0.5rem);
+    text-align: center;
+    color: var(--color-muted, inherit);
+}
+
+.title {
+    margin: 0;
+    color: var(--color-complementary, inherit);
+}
+
+.description {
+    margin: 0;
+    max-width: var(--size-column, 20rem);
+}

@@ -753,4 +753,268 @@ Nothing is deleted from your library on the server.</value>
     <value>{0} They are read-only until the server can be reached.</value>
         <comment>The note on the settings when the server cannot be reached; {0} is the offline message.</comment>
   </data>
+    <data name="CountsOfTotal" xml:space="preserve">
+    <value>{0} of {1} files</value>
+        <comment>The counts of a page when a search or a filter narrows it; {0} is how many are shown, {1} how many there are.</comment>
+  </data>
+    <data name="CountsSelectedHidden" xml:space="preserve">
+    <value>{0} selected ({1} hidden)</value>
+        <comment>The selected count when the search or a filter hides some of the selected files; {0} is the selected count, {1} how many of them are hidden.</comment>
+  </data>
+    <data name="LibraryColumnGenre" xml:space="preserve">
+    <value>Genre</value>
+        <comment>The heading of the genre column.</comment>
+  </data>
+    <data name="SidebarOrganise" xml:space="preserve">
+    <value>Organise</value>
+        <comment>The sidebar link to the Organise page.</comment>
+  </data>
+    <data name="OrganiseTitle" xml:space="preserve">
+    <value>Organise</value>
+        <comment>The heading of the Organise page.</comment>
+  </data>
+    <data name="OrganiseSearch" xml:space="preserve">
+    <value>Search media files</value>
+        <comment>The placeholder and label of the search box on the Organise page.</comment>
+  </data>
+    <data name="OrganiseSelectionLimit" xml:space="preserve">
+    <value>Only the first {0} media files were selected. Please narrow your search.</value>
+        <comment>The warning when a selection would pass the limit; {0} is the limit.</comment>
+  </data>
+    <data name="OrganiseFilterArtist" xml:space="preserve">
+    <value>Artist: {0}</value>
+        <comment>The badge of an artist filter; {0} is the artist.</comment>
+  </data>
+    <data name="OrganiseFilterAlbum" xml:space="preserve">
+    <value>Album: {0}</value>
+        <comment>The badge of an album filter; {0} is the album.</comment>
+  </data>
+    <data name="OrganiseFilterGenre" xml:space="preserve">
+    <value>Genre: {0}</value>
+        <comment>The badge of a genre filter; {0} is the genre.</comment>
+  </data>
+    <data name="OrganiseFilterRemove" xml:space="preserve">
+    <value>Remove the filter {0}</value>
+        <comment>The label of the button that removes one filter; {0} is the badge text.</comment>
+  </data>
+    <data name="OrganiseFilterClearAll" xml:space="preserve">
+    <value>Clear all</value>
+        <comment>The button that removes every filter.</comment>
+  </data>
+    <data name="OrganiseNoMatchTitle" xml:space="preserve">
+    <value>No media files match</value>
+        <comment>The heading of the table when the filters leave nothing.</comment>
+  </data>
+    <data name="OrganiseNoMatchDescription" xml:space="preserve">
+    <value>No media file has everything you filtered for. Remove a filter to see more.</value>
+        <comment>The text under the heading when the filters leave nothing.</comment>
+  </data>
+    <data name="OrganiseClearFilters" xml:space="preserve">
+    <value>Clear filters</value>
+        <comment>The button that removes the filters when they leave nothing.</comment>
+  </data>
+    <data name="OrganiseTabArtist" xml:space="preserve">
+    <value>Artists</value>
+        <comment>The tab of the artists.</comment>
+  </data>
+    <data name="OrganiseTabAlbum" xml:space="preserve">
+    <value>Albums</value>
+        <comment>The tab of the albums.</comment>
+  </data>
+    <data name="OrganiseTabGenre" xml:space="preserve">
+    <value>Genres</value>
+        <comment>The tab of the genres.</comment>
+  </data>
+    <data name="OrganiseKindArtist" xml:space="preserve">
+    <value>artist</value>
+        <comment>The word for one artist, used in the titles of dialogs.</comment>
+  </data>
+    <data name="OrganiseKindAlbum" xml:space="preserve">
+    <value>album</value>
+        <comment>The word for one album, used in the titles of dialogs.</comment>
+  </data>
+    <data name="OrganiseKindGenre" xml:space="preserve">
+    <value>genre</value>
+        <comment>The word for one genre, used in the titles of dialogs.</comment>
+  </data>
+    <data name="OrganiseSearchArtist" xml:space="preserve">
+    <value>Search artists</value>
+        <comment>The placeholder of the artist search.</comment>
+  </data>
+    <data name="OrganiseSearchAlbum" xml:space="preserve">
+    <value>Search albums</value>
+        <comment>The placeholder of the album search.</comment>
+  </data>
+    <data name="OrganiseSearchGenre" xml:space="preserve">
+    <value>Search genres</value>
+        <comment>The placeholder of the genre search.</comment>
+  </data>
+    <data name="OrganiseItemAdd" xml:space="preserve">
+    <value>Add {0}</value>
+        <comment>The label of the plus button; {0} is the kind word.</comment>
+  </data>
+    <data name="OrganiseItemCount" xml:space="preserve">
+    <value>{0} files</value>
+        <comment>The number of media files an item has; {0} is the number.</comment>
+  </data>
+    <data name="OrganiseItemFilter" xml:space="preserve">
+    <value>Filter by {0}</value>
+        <comment>The tooltip of the name of an item; {0} is the name.</comment>
+  </data>
+    <data name="OrganiseNoItems" xml:space="preserve">
+    <value>Nothing here yet.</value>
+        <comment>The text of a list with no items.</comment>
+  </data>
+    <data name="OrganiseNoItemMatch" xml:space="preserve">
+    <value>Nothing matches your search.</value>
+        <comment>The text of a list the search leaves empty.</comment>
+  </data>
+    <data name="MetadataDialogNew" xml:space="preserve">
+    <value>Add {0}</value>
+        <comment>The title of the dialog that creates an item; {0} is the kind word.</comment>
+  </data>
+    <data name="MetadataDialogEdit" xml:space="preserve">
+    <value>Edit {0}</value>
+        <comment>The title of the dialog that edits an item; {0} is the kind word.</comment>
+  </data>
+    <data name="MetadataDialogArtists" xml:space="preserve">
+    <value>Artists</value>
+        <comment>The label of the artists of an album in its dialog.</comment>
+  </data>
+    <data name="MetadataDialogSave" xml:space="preserve">
+    <value>Save</value>
+        <comment>The button that saves the dialog.</comment>
+  </data>
+    <data name="MetadataDeleteTitle" xml:space="preserve">
+    <value>Delete {0}</value>
+        <comment>The title of the delete confirmation; {0} is the name.</comment>
+  </data>
+    <data name="MetadataDeleteAccept" xml:space="preserve">
+    <value>Delete</value>
+        <comment>The button that deletes an item.</comment>
+  </data>
+    <data name="MetadataPickerNoMatch" xml:space="preserve">
+    <value>Nothing matches your search.</value>
+        <comment>The text of the picker when the search leaves nothing.</comment>
+  </data>
+    <data name="MetadataDialogChangePicture" xml:space="preserve">
+    <value>Change picture</value>
+        <comment>The button that picks a new picture for an album.</comment>
+  </data>
+    <data name="MetadataMenuSetArtist" xml:space="preserve">
+    <value>Set artist…</value>
+        <comment>The menu entry that opens the dialog to set the artists of media files.</comment>
+  </data>
+    <data name="MetadataMenuSetAlbum" xml:space="preserve">
+    <value>Set album…</value>
+        <comment>The menu entry that opens the dialog to set the album of media files.</comment>
+  </data>
+    <data name="MetadataMenuSetGenre" xml:space="preserve">
+    <value>Set genre…</value>
+        <comment>The menu entry that opens the dialog to set the genres of media files.</comment>
+  </data>
+    <data name="MetadataSetTitle" xml:space="preserve">
+    <value>Set {0}</value>
+        <comment>The title of the dialog that sets the artists, album or genres of media files; {0} is the kind word.</comment>
+  </data>
+    <data name="MetadataSetSave" xml:space="preserve">
+    <value>Save</value>
+        <comment>The button that saves the dialog.</comment>
+  </data>
+    <data name="MetadataSetNoAlbum" xml:space="preserve">
+    <value>[No album]</value>
+        <comment>The row that takes the album off the media files.</comment>
+  </data>
+    <data name="OrganiseItemCountOne" xml:space="preserve">
+    <value>{0} file</value>
+        <comment>The number of media files an item has, for exactly one.</comment>
+  </data>
+    <data name="MetadataDeleteMessageOne" xml:space="preserve">
+    <value>The {1} is taken off {0} media file. The media file stays.</value>
+        <comment>The delete confirmation for an item that has one media file; {0} is the number, {1} the kind word.</comment>
+  </data>
+    <data name="MetadataDeleteMessageMany" xml:space="preserve">
+    <value>The {1} is taken off {0} media files. The media files stay.</value>
+        <comment>The delete confirmation for an item that has another number of media files; {0} is the number, {1} the kind word.</comment>
+  </data>
+    <data name="MetadataSetSavedOne" xml:space="preserve">
+    <value>Updated {0} media file.</value>
+        <comment>The toast after the dialog was saved for one media file.</comment>
+  </data>
+    <data name="MetadataSetSavedMany" xml:space="preserve">
+    <value>Updated {0} media files.</value>
+        <comment>The toast after the dialog was saved; {0} is the number of media files.</comment>
+  </data>
+    <data name="PicturePickerTitle" xml:space="preserve">
+    <value>Choose a picture</value>
+        <comment>The title of the dialog of the platform that picks a picture.</comment>
+  </data>
+    <data name="PicturePickerTooLarge" xml:space="preserve">
+    <value>The picture is larger than 10 MB.</value>
+        <comment>The error when the chosen picture is too large to send.</comment>
+  </data>
+    <data name="MetadataMenuEdit" xml:space="preserve">
+    <value>Edit</value>
+        <comment>The menu entry that edits an artist, album or genre in the column.</comment>
+  </data>
+    <data name="MetadataMenuMerge" xml:space="preserve">
+    <value>Merge into…</value>
+        <comment>The menu entry that merges an artist, album or genre into another.</comment>
+  </data>
+    <data name="MetadataMenuDelete" xml:space="preserve">
+    <value>Delete</value>
+        <comment>The menu entry that deletes an artist, album or genre.</comment>
+  </data>
+    <data name="OrganiseItemMore" xml:space="preserve">
+    <value>More actions for {0}</value>
+        <comment>The label of the button that opens the menu of an item; {0} is the name.</comment>
+  </data>
+    <data name="MetadataMergeAccept" xml:space="preserve">
+    <value>Merge</value>
+        <comment>The button that confirms a merge.</comment>
+  </data>
+    <data name="MetadataMenuMergeOthers" xml:space="preserve">
+    <value>Merge others into this…</value>
+        <comment>The menu entry that merges other items of the kind into this one.</comment>
+  </data>
+    <data name="MetadataMergeMessage" xml:space="preserve">
+    <value>{0} → {1}</value>
+        <comment>The first line of the confirmation of a merge into one item; {0} is the item that is merged, {1} the item it is merged into.</comment>
+  </data>
+    <data name="MetadataMergeDetail" xml:space="preserve">
+    <value>Its media files move over. The target keeps its name and artists.</value>
+        <comment>The line under the first line of the confirmation of a merge into one item.</comment>
+  </data>
+    <data name="MetadataMergeOthersMessage" xml:space="preserve">
+    <value>{0} {1} → {2}</value>
+        <comment>The first line of the confirmation of a merge of other items into one; {0} is the number, {1} the kind (Albums), {2} the item they are merged into.</comment>
+  </data>
+    <data name="MetadataMergeOthersDetailOne" xml:space="preserve">
+    <value>Its media files move over. The target keeps its name and artists.</value>
+        <comment>The line under the first line of the confirmation of a merge of one item into another.</comment>
+  </data>
+    <data name="MetadataMergeOthersDetailMany" xml:space="preserve">
+    <value>Their media files move over. The target keeps its name and artists.</value>
+        <comment>The line under the first line of the confirmation of a merge of several items into one.</comment>
+  </data>
+    <data name="MetadataKindNameArtist" xml:space="preserve">
+    <value>Artist</value>
+        <comment>The name of one artist, as a heading, for the count of the items of a merge.</comment>
+  </data>
+    <data name="MetadataKindNameAlbum" xml:space="preserve">
+    <value>Album</value>
+        <comment>The name of one album, as a heading, for the count of the items of a merge.</comment>
+  </data>
+    <data name="MetadataKindNameGenre" xml:space="preserve">
+    <value>Genre</value>
+        <comment>The name of one genre, as a heading, for the count of the items of a merge.</comment>
+  </data>
+    <data name="MetadataMergeConfirmTitle" xml:space="preserve">
+    <value>Confirm merge</value>
+        <comment>The title of the confirmation of a merge.</comment>
+  </data>
+    <data name="MetadataMergeConfirm" xml:space="preserve">
+    <value>Confirm</value>
+        <comment>The button that confirms a merge, in the confirmation.</comment>
+  </data>
 </root>

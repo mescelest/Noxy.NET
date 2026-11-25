@@ -1,4 +1,6 @@
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
+// ReSharper disable once RedundantUsingDirective
+using Noxy.NET.MediaPlayer.App.Resources;
 
 namespace Noxy.NET.MediaPlayer.App.Services;
 

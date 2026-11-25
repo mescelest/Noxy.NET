@@ -1,0 +1,175 @@
+@inject IState<FeatureMetadataListState> StateMetadataList
+@inject IState<FeatureLibraryState> StateLibrary
+@inject IMetadataActionService ServiceMetadataAction
+@inject IToastService ServiceToast
+@inherits BaseComponentElementFluxor
+
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Height="DialogHeightEnum.Fixed" Open="Open" OpenChanged="HandleOpenChanged">
+    <h2>@TitleText</h2>
+    @if (Open)
+    {
+        <div class="tool-row">
+            <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@SearchText" aria-label="@SearchText" @bind-Value:get="_search" @bind-Value:set="ChangeSearch"/>
+            <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Success" aria-label="@AddText" title="@AddText" @onclick="ClickNewHandler">
+                <MaterialIcon Icon="add" Size="var(--size-icon-sm)"/>
+            </Button>
+        </div>
+        @if (Kind == MetadataKindEnum.Album)
+        {
+            <div class="list">
+                <button type="button" class="row album" data-selected="@_model.IsNoAlbumChosen" aria-pressed="@_model.IsNoAlbumChosen" @onclick="ClickNoAlbumHandler">
+                    <AlbumArt Size="var(--size-control-lg)"/>
+                    <span class="name">@AppTexts.MetadataSetNoAlbum</span>
+                </button>
+                @foreach (MetadataItem item in ShownList)
+                {
+                    Guid itemID = item.ID;
+                    <button @key="itemID" type="button" class="row album" data-selected="@IsChecked(itemID)" aria-pressed="@IsChecked(itemID)" @onclick="() => ClickAlbumHandler(itemID)">
+                        <AlbumArt AlbumID="itemID" Size="var(--size-control-lg)"/>
+                        <span class="name">@item.Name</span>
+                        <span class="count">@CountText(item)</span>
+                    </button>
+                }
+            </div>
+            @if (ShownList.Count == 0)
+            {
+                <p class="empty">@AppTexts.MetadataPickerNoMatch</p>
+            }
+        }
+        else
+        {
+            <MetadataCheckList ItemList="ShownList" StateOf="_model.StateOf" OnToggle="ToggleItem"/>
+        }
+
+        <div class="actions">
+            <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Success" disabled="@IsSaveDisabled" Loading="@ServiceMetadataAction.IsBusy" @onclick="ClickSaveHandler">@AppTexts.MetadataSetSave</Button>
+        </div>
+
+        <MetadataItemDialog @bind-Open="_isCreating" Kind="Kind" OnSaved="Created"/>
+    }
+</Dialog>
+
+@code {
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter, EditorRequired]
+    public MetadataKindEnum Kind { get; set; }
+
+    // The media files the dialog sets the artists, the album or the genres of.
+    [Parameter, EditorRequired]
+    public List<Guid> MediaFileIDList { get; set; } = [];
+
+    private string _search = string.Empty;
+    private bool _isCreating;
+    private bool _wasOpen;
+    private MetadataSetModel _model = new(MetadataKindEnum.Artist, []);
+
+    private List<MetadataItem> ShownList => StateMetadataList.Value.ItemListOf(Kind).FilterByName(_search);
+
+    private bool IsSaveDisabled => !_model.HasChange || ServiceMetadataAction.IsBusy;
+
+    private string SearchText => Kind switch
+    {
+            MetadataKindEnum.Artist => AppTexts.OrganiseSearchArtist,
+            MetadataKindEnum.Album => AppTexts.OrganiseSearchAlbum,
+            MetadataKindEnum.Genre => AppTexts.OrganiseSearchGenre,
+            _ => throw new InvalidEnumArgumentException(nameof(Kind), (int)Kind, typeof(MetadataKindEnum))
+    };
+
+    private string AddText => string.Format(AppTexts.OrganiseItemAdd, KindWord);
+
+    private string TitleText => string.Format(AppTexts.MetadataSetTitle, KindWord);
+
+    private string KindWord => Kind switch
+    {
+            MetadataKindEnum.Artist => AppTexts.OrganiseKindArtist,
+            MetadataKindEnum.Album => AppTexts.OrganiseKindAlbum,
+            MetadataKindEnum.Genre => AppTexts.OrganiseKindGenre,
+            _ => throw new InvalidEnumArgumentException(nameof(Kind), (int)Kind, typeof(MetadataKindEnum))
+    };
+
+    // The model is built each time the dialog opens, from the media files as they are then.
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Open && !_wasOpen) _model = BuildModel();
+
+        _wasOpen = Open;
+    }
+
+    private MetadataSetModel BuildModel()
+    {
+        HashSet<Guid> idSet = [.. MediaFileIDList];
+
+        return new(Kind, [.. StateLibrary.Value.MediaList.Where(x => idSet.Contains(x.ID))]);
+    }
+
+    private static string CountText(MetadataItem item) => item.MediaFileCount.ToCountText(AppTexts.OrganiseItemCountOne, AppTexts.OrganiseItemCount);
+
+    private bool IsChecked(Guid itemID) => _model.StateOf(itemID) == MetadataCheckStateEnum.Checked;
+
+    private void ChangeSearch(string? search)
+    {
+        _search = search ?? string.Empty;
+    }
+
+    private void ToggleItem(Guid itemID)
+    {
+        _model.Toggle(itemID);
+    }
+
+    private void ClickAlbumHandler(Guid albumID)
+    {
+        _model.Choose(albumID);
+    }
+
+    private void ClickNoAlbumHandler()
+    {
+        _model.Choose(null);
+    }
+
+    private void ClickNewHandler()
+    {
+        _isCreating = true;
+    }
+
+    // The item that was just made is chosen at once: ticked, or the album.
+    private void Created(Guid itemID)
+    {
+        if (Kind == MetadataKindEnum.Album) _model.Choose(itemID);
+        else if (_model.StateOf(itemID) != MetadataCheckStateEnum.Checked) _model.Toggle(itemID);
+    }
+
+    private async Task ClickSaveHandler()
+    {
+        try
+        {
+            await ServiceMetadataAction.Apply(Kind, _model.GetChangeList());
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+            return;
+        }
+
+        ServiceToast.ShowSuccess(MediaFileIDList.Count.ToCountText(AppTexts.MetadataSetSavedOne, AppTexts.MetadataSetSavedMany));
+        await Close();
+    }
+
+    private Task HandleOpenChanged(bool open)
+    {
+        return open ? Task.CompletedTask : Close();
+    }
+
+    private async Task Close()
+    {
+        _search = string.Empty;
+        await OpenChanged.InvokeAsync(false);
+    }
+
+}

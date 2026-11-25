@@ -11,32 +11,34 @@
 <div class="@CssClass @FullscreenPageClass">
     <PageHeader Name="@AppTexts.HomeTitle"/>
 
-    @if (_model is not null)
-    {
-        @if (_model.Continue is not null)
+    <PageContent>
+        @if (_model is not null)
         {
-            <Section Title="@AppTexts.ContinueTitle">
-                <ContinueCard Info="_model.Continue" OnContinue="Continue"/>
+            @if (_model.Continue is not null)
+            {
+                <Section Title="@AppTexts.ContinueTitle">
+                    <ContinueCard Info="_model.Continue" OnContinue="Continue"/>
+                </Section>
+            }
+
+            <Section Title="@AppTexts.HomeRecentlyPlayed">
+                @if (_model.HasPlaylists)
+                {
+                    <ButtonList>
+                        @foreach (ResponsePlaylist playlist in _model.RecentList)
+                        {
+                            Guid id = playlist.ID;
+                            <PlaylistCard Playlist="playlist" OnPlay="() => Run(() => ServicePlaylist.Play(id))"/>
+                        }
+                    </ButtonList>
+                }
+                else
+                {
+                    <MessageBox MessageList="@([AppTexts.HomeNoPlaylists])" Status="StatusEnum.Info"/>
+                }
             </Section>
         }
-
-        <Section Title="@AppTexts.HomeRecentlyPlayed">
-            @if (_model.HasPlaylists)
-            {
-                <ButtonList>
-                    @foreach (ResponsePlaylist playlist in _model.RecentList)
-                    {
-                        Guid id = playlist.ID;
-                        <PlaylistCard Playlist="playlist" OnPlay="() => Run(() => ServicePlaylist.Play(id))"/>
-                    }
-                </ButtonList>
-            }
-            else
-            {
-                <MessageBox MessageList="@([AppTexts.HomeNoPlaylists])" Status="StatusEnum.Info"/>
-            }
-        </Section>
-    }
+    </PageContent>
 </div>
 
 @code {

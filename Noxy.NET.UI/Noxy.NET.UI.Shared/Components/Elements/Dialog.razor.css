@@ -38,6 +38,11 @@
 }
 
 
+/* Medium: always a column and a half wide, still never wider than the window. */
+.Dialog[data-size="medium"] .content {
+    width: min(calc(var(--size-column, 20rem) * 1.5), calc(100vw - 2 * var(--size-dialog-margin, var(--size-gap-xs, 0.75rem))));
+}
+
 /* Wide: for a form or a list, a fixed width of one page-column, still never wider than the window. */
 .Dialog[data-size="wide"] .content {
     width: min(var(--size-page-md, 45rem), calc(100vw - 2 * var(--size-dialog-margin, var(--size-gap-xs, 0.75rem))));
@@ -55,4 +60,10 @@
     max-width: none;
     height: calc(100dvh - 2 * var(--size-gap-md, 1.25rem));
     overflow: auto;
+}
+
+/* Fixed: the same height whatever the content is, and no taller than the window leaves room for. */
+.content[data-height="fixed"] {
+    box-sizing: border-box;
+    height: var(--size-dialog-fixed-height, min(40rem, calc(100dvh - 2 * var(--size-dialog-margin, var(--size-gap-xs, 0.75rem)))));
 }

@@ -1667,5 +1667,599 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
                 return ResourceManager.GetString("SettingOfflineReadOnly", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} of {1} files.
+        /// </summary>
+        public static string CountsOfTotal {
+            get {
+                return ResourceManager.GetString("CountsOfTotal", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} selected ({1} hidden).
+        /// </summary>
+        public static string CountsSelectedHidden {
+            get {
+                return ResourceManager.GetString("CountsSelectedHidden", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Genre.
+        /// </summary>
+        public static string LibraryColumnGenre {
+            get {
+                return ResourceManager.GetString("LibraryColumnGenre", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Organise.
+        /// </summary>
+        public static string SidebarOrganise {
+            get {
+                return ResourceManager.GetString("SidebarOrganise", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Organise.
+        /// </summary>
+        public static string OrganiseTitle {
+            get {
+                return ResourceManager.GetString("OrganiseTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Search media files.
+        /// </summary>
+        public static string OrganiseSearch {
+            get {
+                return ResourceManager.GetString("OrganiseSearch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Only the first {0} media files were selected. Please narrow your search..
+        /// </summary>
+        public static string OrganiseSelectionLimit {
+            get {
+                return ResourceManager.GetString("OrganiseSelectionLimit", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Artist: {0}.
+        /// </summary>
+        public static string OrganiseFilterArtist {
+            get {
+                return ResourceManager.GetString("OrganiseFilterArtist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Album: {0}.
+        /// </summary>
+        public static string OrganiseFilterAlbum {
+            get {
+                return ResourceManager.GetString("OrganiseFilterAlbum", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Genre: {0}.
+        /// </summary>
+        public static string OrganiseFilterGenre {
+            get {
+                return ResourceManager.GetString("OrganiseFilterGenre", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Remove the filter {0}.
+        /// </summary>
+        public static string OrganiseFilterRemove {
+            get {
+                return ResourceManager.GetString("OrganiseFilterRemove", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Clear all.
+        /// </summary>
+        public static string OrganiseFilterClearAll {
+            get {
+                return ResourceManager.GetString("OrganiseFilterClearAll", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No media files match.
+        /// </summary>
+        public static string OrganiseNoMatchTitle {
+            get {
+                return ResourceManager.GetString("OrganiseNoMatchTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No media file has everything you filtered for. Remove a filter to see more..
+        /// </summary>
+        public static string OrganiseNoMatchDescription {
+            get {
+                return ResourceManager.GetString("OrganiseNoMatchDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Clear filters.
+        /// </summary>
+        public static string OrganiseClearFilters {
+            get {
+                return ResourceManager.GetString("OrganiseClearFilters", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Artists.
+        /// </summary>
+        public static string OrganiseTabArtist {
+            get {
+                return ResourceManager.GetString("OrganiseTabArtist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Albums.
+        /// </summary>
+        public static string OrganiseTabAlbum {
+            get {
+                return ResourceManager.GetString("OrganiseTabAlbum", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Genres.
+        /// </summary>
+        public static string OrganiseTabGenre {
+            get {
+                return ResourceManager.GetString("OrganiseTabGenre", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to artist.
+        /// </summary>
+        public static string OrganiseKindArtist {
+            get {
+                return ResourceManager.GetString("OrganiseKindArtist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to album.
+        /// </summary>
+        public static string OrganiseKindAlbum {
+            get {
+                return ResourceManager.GetString("OrganiseKindAlbum", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to genre.
+        /// </summary>
+        public static string OrganiseKindGenre {
+            get {
+                return ResourceManager.GetString("OrganiseKindGenre", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Search artists.
+        /// </summary>
+        public static string OrganiseSearchArtist {
+            get {
+                return ResourceManager.GetString("OrganiseSearchArtist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Search albums.
+        /// </summary>
+        public static string OrganiseSearchAlbum {
+            get {
+                return ResourceManager.GetString("OrganiseSearchAlbum", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Search genres.
+        /// </summary>
+        public static string OrganiseSearchGenre {
+            get {
+                return ResourceManager.GetString("OrganiseSearchGenre", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Add {0}.
+        /// </summary>
+        public static string OrganiseItemAdd {
+            get {
+                return ResourceManager.GetString("OrganiseItemAdd", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} files.
+        /// </summary>
+        public static string OrganiseItemCount {
+            get {
+                return ResourceManager.GetString("OrganiseItemCount", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Filter by {0}.
+        /// </summary>
+        public static string OrganiseItemFilter {
+            get {
+                return ResourceManager.GetString("OrganiseItemFilter", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing here yet..
+        /// </summary>
+        public static string OrganiseNoItems {
+            get {
+                return ResourceManager.GetString("OrganiseNoItems", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing matches your search..
+        /// </summary>
+        public static string OrganiseNoItemMatch {
+            get {
+                return ResourceManager.GetString("OrganiseNoItemMatch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Add {0}.
+        /// </summary>
+        public static string MetadataDialogNew {
+            get {
+                return ResourceManager.GetString("MetadataDialogNew", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Edit {0}.
+        /// </summary>
+        public static string MetadataDialogEdit {
+            get {
+                return ResourceManager.GetString("MetadataDialogEdit", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Artists.
+        /// </summary>
+        public static string MetadataDialogArtists {
+            get {
+                return ResourceManager.GetString("MetadataDialogArtists", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string MetadataDialogSave {
+            get {
+                return ResourceManager.GetString("MetadataDialogSave", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Delete {0}.
+        /// </summary>
+        public static string MetadataDeleteTitle {
+            get {
+                return ResourceManager.GetString("MetadataDeleteTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string MetadataDeleteAccept {
+            get {
+                return ResourceManager.GetString("MetadataDeleteAccept", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing matches your search..
+        /// </summary>
+        public static string MetadataPickerNoMatch {
+            get {
+                return ResourceManager.GetString("MetadataPickerNoMatch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Change picture.
+        /// </summary>
+        public static string MetadataDialogChangePicture {
+            get {
+                return ResourceManager.GetString("MetadataDialogChangePicture", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Set artist….
+        /// </summary>
+        public static string MetadataMenuSetArtist {
+            get {
+                return ResourceManager.GetString("MetadataMenuSetArtist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Set album….
+        /// </summary>
+        public static string MetadataMenuSetAlbum {
+            get {
+                return ResourceManager.GetString("MetadataMenuSetAlbum", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Set genre….
+        /// </summary>
+        public static string MetadataMenuSetGenre {
+            get {
+                return ResourceManager.GetString("MetadataMenuSetGenre", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Set {0}.
+        /// </summary>
+        public static string MetadataSetTitle {
+            get {
+                return ResourceManager.GetString("MetadataSetTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string MetadataSetSave {
+            get {
+                return ResourceManager.GetString("MetadataSetSave", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [No album].
+        /// </summary>
+        public static string MetadataSetNoAlbum {
+            get {
+                return ResourceManager.GetString("MetadataSetNoAlbum", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} file.
+        /// </summary>
+        public static string OrganiseItemCountOne {
+            get {
+                return ResourceManager.GetString("OrganiseItemCountOne", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The {1} is taken off {0} media file. The media file stays..
+        /// </summary>
+        public static string MetadataDeleteMessageOne {
+            get {
+                return ResourceManager.GetString("MetadataDeleteMessageOne", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The {1} is taken off {0} media files. The media files stay..
+        /// </summary>
+        public static string MetadataDeleteMessageMany {
+            get {
+                return ResourceManager.GetString("MetadataDeleteMessageMany", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Updated {0} media file..
+        /// </summary>
+        public static string MetadataSetSavedOne {
+            get {
+                return ResourceManager.GetString("MetadataSetSavedOne", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Updated {0} media files..
+        /// </summary>
+        public static string MetadataSetSavedMany {
+            get {
+                return ResourceManager.GetString("MetadataSetSavedMany", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Choose a picture.
+        /// </summary>
+        public static string PicturePickerTitle {
+            get {
+                return ResourceManager.GetString("PicturePickerTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The picture is larger than 10 MB..
+        /// </summary>
+        public static string PicturePickerTooLarge {
+            get {
+                return ResourceManager.GetString("PicturePickerTooLarge", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
+        public static string MetadataMenuEdit {
+            get {
+                return ResourceManager.GetString("MetadataMenuEdit", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Merge into….
+        /// </summary>
+        public static string MetadataMenuMerge {
+            get {
+                return ResourceManager.GetString("MetadataMenuMerge", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string MetadataMenuDelete {
+            get {
+                return ResourceManager.GetString("MetadataMenuDelete", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to More actions for {0}.
+        /// </summary>
+        public static string OrganiseItemMore {
+            get {
+                return ResourceManager.GetString("OrganiseItemMore", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Merge.
+        /// </summary>
+        public static string MetadataMergeAccept {
+            get {
+                return ResourceManager.GetString("MetadataMergeAccept", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Merge others into this….
+        /// </summary>
+        public static string MetadataMenuMergeOthers {
+            get {
+                return ResourceManager.GetString("MetadataMenuMergeOthers", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} → {1}..
+        /// </summary>
+        public static string MetadataMergeMessage {
+            get {
+                return ResourceManager.GetString("MetadataMergeMessage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Its media files move over. The target keeps its name and artists..
+        /// </summary>
+        public static string MetadataMergeDetail {
+            get {
+                return ResourceManager.GetString("MetadataMergeDetail", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} {1} → {2}.
+        /// </summary>
+        public static string MetadataMergeOthersMessage {
+            get {
+                return ResourceManager.GetString("MetadataMergeOthersMessage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Its media files move over. The target keeps its name and artists..
+        /// </summary>
+        public static string MetadataMergeOthersDetailOne {
+            get {
+                return ResourceManager.GetString("MetadataMergeOthersDetailOne", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Their media files move over. The target keeps its name and artists..
+        /// </summary>
+        public static string MetadataMergeOthersDetailMany {
+            get {
+                return ResourceManager.GetString("MetadataMergeOthersDetailMany", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Artist.
+        /// </summary>
+        public static string MetadataKindNameArtist {
+            get {
+                return ResourceManager.GetString("MetadataKindNameArtist", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Album.
+        /// </summary>
+        public static string MetadataKindNameAlbum {
+            get {
+                return ResourceManager.GetString("MetadataKindNameAlbum", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Genre.
+        /// </summary>
+        public static string MetadataKindNameGenre {
+            get {
+                return ResourceManager.GetString("MetadataKindNameGenre", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm merge.
+        /// </summary>
+        public static string MetadataMergeConfirmTitle {
+            get {
+                return ResourceManager.GetString("MetadataMergeConfirmTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm.
+        /// </summary>
+        public static string MetadataMergeConfirm {
+            get {
+                return ResourceManager.GetString("MetadataMergeConfirm", resourceCulture);
+            }
+        }
     }
 }

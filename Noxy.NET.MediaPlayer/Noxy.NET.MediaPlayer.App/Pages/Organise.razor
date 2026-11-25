@@ -1,0 +1,166 @@
+@page "/organise"
+@inject IState<FeatureLibraryState> StateLibrary
+@inject IState<FeatureOrganiseState> StateOrganise
+@inject IState<FeatureMetadataListState> StateMetadataList
+@inject IDispatcher Dispatcher
+@inject IToastService ServiceToast
+@inherits BaseComponentPageFluxor
+@using Noxy.NET.MediaPlayer.Presentation
+@implements IAsyncDisposable
+
+<div class="@CssClass @FullscreenPageClass">
+    <OrganiseLayout>
+        <ChildContent>
+            <MediaFileHeader Name="@AppTexts.OrganiseTitle" EntryCount="VisibleList.Count" TotalCount="StateLibrary.Value.MediaList.Count" SelectedCount="Current.SelectedSet.Count" HiddenSelectedCount="HiddenSelectedCount">
+                <OrganiseContextMenu @ref="_contextMenu" SelectedSet="Current.SelectedSet" SelectedKeyList="SelectedKeyList" ShowTrigger="@HasSelection"/>
+            </MediaFileHeader>
+            <MediaFileTable RowList="RowList" ColumnList="ColumnList" IsEmpty="IsEmpty" EmptyTitle="@AppTexts.OrganiseNoMatchTitle" EmptyDescription="@AppTexts.OrganiseNoMatchDescription"
+                            Sort="Current.Sort" Descending="Current.Descending" OnSortChanged="Sort"
+                            SelectedSet="Current.SelectedSet" AllSelected="IsAllVisibleSelected" OnToggleAll="ToggleAllVisibleSelected" OnToggleRow="ToggleSelected" RowSelect="RowSelectEnum.Click" OnContextMenu="OpenRowMenu">
+                <ToolContent>
+                    <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.OrganiseSearch" aria-label="@AppTexts.OrganiseSearch" @bind-Value:get="Current.Search" @bind-Value:set="ChangeSearch"/>
+                    <OrganiseFilterBadgeList ArtistName="@NameOf(MetadataKindEnum.Artist)" AlbumName="@NameOf(MetadataKindEnum.Album)" GenreName="@NameOf(MetadataKindEnum.Genre)" OnClear="ClearFilter" OnClearAll="ClearAllFilterList"/>
+                </ToolContent>
+                <EmptyContent>
+                    @if (IsFilterLeftEmpty)
+                    {
+                        <Button Type="@HTMLButtonTypeEnum.Button" Appearance="ButtonAppearanceEnum.Outline" Status="StatusEnum.None" @onclick="ClearAllFilterList">@AppTexts.OrganiseClearFilters</Button>
+                    }
+                </EmptyContent>
+            </MediaFileTable>
+        </ChildContent>
+        <SideContent>
+            <OrganiseSidebar/>
+        </SideContent>
+    </OrganiseLayout>
+</div>
+
+@code {
+
+    private static readonly List<MediaFileTableColumnEnum> ColumnList =
+            [MediaFileTableColumnEnum.Select, MediaFileTableColumnEnum.Title, MediaFileTableColumnEnum.Artist, MediaFileTableColumnEnum.Album, MediaFileTableColumnEnum.Genre];
+
+    private OrganiseContextMenu? _contextMenu;
+
+    // The visible list and its rows are rebuilt only when what they come from changed.
+    private FeatureOrganiseState? _filterSource;
+    private List<ResponseMediaFile> _visibleList = [];
+    private List<MediaFileTableRow> _rowList = [];
+
+    private FeatureOrganiseState Current => StateOrganise.Value;
+
+    private List<ResponseMediaFile> VisibleList
+    {
+        get
+        {
+            FeatureOrganiseState state = Current;
+            if (ReferenceEquals(field, StateLibrary.Value.MediaList) && IsSameView(state)) return _visibleList;
+
+            field = StateLibrary.Value.MediaList;
+            _filterSource = state;
+            _visibleList = field.Filter(state.Search).FilterByMetadata(state.ArtistFilterID, state.AlbumFilterID, state.GenreFilterID).Sort(state.Sort, state.Descending);
+            _rowList = [.. _visibleList.Select(x => new MediaFileTableRow(x.ID, x))];
+
+            return _visibleList;
+        }
+    }
+
+    // The selection and the tab do not change what is shown.
+    private bool IsSameView(FeatureOrganiseState state)
+    {
+        return _filterSource is { } source
+               && source.Search == state.Search
+               && source.Sort == state.Sort
+               && source.Descending == state.Descending
+               && source.ArtistFilterID == state.ArtistFilterID
+               && source.AlbumFilterID == state.AlbumFilterID
+               && source.GenreFilterID == state.GenreFilterID;
+    }
+
+    private List<MediaFileTableRow> RowList
+    {
+        get
+        {
+            _ = VisibleList;
+            return _rowList;
+        }
+    }
+
+    private bool IsEmpty => VisibleList.Count == 0;
+
+    private bool IsFilterLeftEmpty => IsEmpty && Current.HasFilter && StateLibrary.Value.MediaList.Count > 0;
+
+    private bool HasSelection => Current.SelectedSet.Count > 0;
+
+    private bool IsAllVisibleSelected => VisibleList.Count > 0 && VisibleList.All(x => Current.SelectedSet.Contains(x.ID));
+
+    private int HiddenSelectedCount => Current.SelectedSet.Count - VisibleList.Count(x => Current.SelectedSet.Contains(x.ID));
+
+    // The ticked media files in the order of the table, the ones a filter hides after them.
+    private List<Guid> SelectedKeyList => [.. VisibleList.Where(x => Current.SelectedSet.Contains(x.ID)).Select(x => x.ID), .. Current.SelectedSet.Except(VisibleList.Select(x => x.ID))];
+
+    // The name of the item a filter is set to, or nothing.
+    private string? NameOf(MetadataKindEnum kind)
+    {
+        Guid? id = Current.FilterOf(kind);
+
+        return id is null ? null : StateMetadataList.Value.ItemListOf(kind).FirstOrDefault(x => x.ID == id)?.Name;
+    }
+
+    private async Task OpenRowMenu((MouseEventArgs Args, MediaFileTableRow Row) context)
+    {
+        if (_contextMenu is null) return;
+
+        await _contextMenu.OpenAtAsync(context.Args, context.Row.Key);
+    }
+
+    // Select all ticks what is shown and fits; the rest stays unticked and the user is told.
+    private void ToggleAllVisibleSelected()
+    {
+        List<Guid> idList = [.. VisibleList.Select(x => x.ID)];
+        bool isAllSelected = IsAllVisibleSelected;
+        if (!isAllSelected && !Current.AllFit(idList)) WarnLimit();
+
+        Dispatcher.Dispatch(new ActionOrganiseVisibleSelected(idList, isAllSelected));
+    }
+
+    private void ToggleSelected(Guid id)
+    {
+        if (!Current.SelectedSet.Contains(id) && Current.SelectionRoom == 0) WarnLimit();
+
+        Dispatcher.Dispatch(new ActionOrganiseSelectionToggled(id));
+    }
+
+    private void WarnLimit()
+    {
+        ServiceToast.ShowWarning(string.Format(AppTexts.OrganiseSelectionLimit, PresentationConstants.OrganiseSelectionLimit));
+    }
+
+    private void Sort(LibrarySortEnum sort)
+    {
+        Dispatcher.Dispatch(new ActionOrganiseSortChanged(sort));
+    }
+
+    private void ChangeSearch(string? search)
+    {
+        Dispatcher.Dispatch(new ActionOrganiseSearchChanged(search ?? string.Empty));
+    }
+
+    private void ClearFilter(MetadataKindEnum kind)
+    {
+        Dispatcher.Dispatch(new ActionOrganiseFilterCleared(kind));
+    }
+
+    private void ClearAllFilterList()
+    {
+        Dispatcher.Dispatch(new ActionOrganiseFilterCleared(null));
+    }
+
+    // Leaving the page puts the filters, the search and the ticks back to the start.
+    public new async ValueTask DisposeAsync()
+    {
+        Dispatcher.Dispatch(new ActionOrganiseReset());
+        await base.DisposeAsync();
+    }
+
+}

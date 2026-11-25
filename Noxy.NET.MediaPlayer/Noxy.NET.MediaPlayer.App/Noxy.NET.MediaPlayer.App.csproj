@@ -86,7 +86,8 @@
 
     <ItemGroup>
         <None Include="Components\Dialogs\ServerManageDialog.razor.js"/>
-        <None Include="Components\NarrowWatcher.razor.js"/>
+        <None Include="Components\Layouts\NarrowWatcher.razor.js"/>
+        <None Include="Components\Layouts\CtrlKeyWatcher.razor.js"/>
     </ItemGroup>
 
 </Project>

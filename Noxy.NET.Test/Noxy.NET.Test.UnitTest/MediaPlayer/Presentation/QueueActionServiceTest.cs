@@ -42,15 +42,17 @@ public class QueueActionServiceTest
         Assert.Empty(result.FailedIDList);
     }
 
+    private static void ThrowWhenGone(Guid id, Guid goneID)
+    {
+        if (id == goneID) throw new InvalidOperationException("Gone.");
+    }
+
     [Fact]
     public async Task Remove_ACallThatThrows_IsAFailureAndTheRestStillRun()
     {
         QueueItem first = Item(), second = Item();
         SetQueue([], Item(), [first, second], []);
-        _control.RemoveFromQueueHandler = id =>
-        {
-            if (id == first.ItemID) throw new InvalidOperationException("Gone.");
-        };
+        _control.RemoveFromQueueHandler = id => ThrowWhenGone(id, first.ItemID);
 
         BulkResult result = await _service.Remove([first.ItemID, second.ItemID]);
 

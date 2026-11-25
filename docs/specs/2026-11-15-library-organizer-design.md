@@ -1,6 +1,6 @@
 # Library organiser: genres, artists and albums as things you can sort files into
 
-Status: the panel and drag-and-drop UI are a future idea, not planned. The data layer (the items, upload linking, the endpoints and the migration) has moved into `2026-11-15-metadata-entities-design.md`, which supersedes the data and endpoint parts of this doc and answers its questions about several artists per file, splitting credits and manual editing. Written from the user's description on 2026-11-15 so nothing built now blocks it. Everything marked *(my proposal)* is a suggestion, not a decision. The questions at the end are the user's to answer before this can be planned.
+Status: the panel and drag-and-drop UI became the Organise page, see `2026-11-24-organise-page-design.md` (drag and drop is still not built). The data layer (the items, upload linking, the endpoints and the migration) has moved into `2026-11-15-metadata-entities-design.md`, which supersedes the data and endpoint parts of this doc and answers its questions about several artists per file, splitting credits and manual editing. Written from the user's description on 2026-11-15 so nothing built now blocks it. Everything marked *(my proposal)* is a suggestion, not a decision. The questions at the end are the user's to answer before this can be planned.
 
 ## Intent
 

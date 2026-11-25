@@ -1,0 +1,40 @@
+.OrganiseSidebar {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    min-height: 0;
+}
+
+.OrganiseSidebar ::deep > .organise-tab-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+}
+
+/* The tabs are the ones of the sign-in screen: a line under each, the chosen one in the strong colour. */
+.OrganiseSidebar ::deep > .organise-tab-list > .tab-list > .tab {
+    flex: 1 1 0;
+    min-width: 0;
+    border-bottom: var(--size-border-width-sm) solid var(--color-muted);
+}
+
+.OrganiseSidebar ::deep > .organise-tab-list > .tab-list > .tab[data-selected] {
+    border-bottom: var(--size-border-width-sm) solid var(--color-complementary);
+}
+
+.OrganiseSidebar ::deep > .organise-tab-list > .tab-list > .tab[data-selected] > button {
+    color: var(--color-complementary);
+}
+
+.OrganiseSidebar ::deep > .organise-tab-list > .tab-list > .tab > button {
+    padding: var(--size-gap-xxs);
+    color: var(--color-muted);
+    font: var(--font-divider);
+}
+
+/* Every tab is as wide as the others; a long name (a filtered tab) wraps instead of widening its tab. */
+.OrganiseSidebar ::deep > .organise-tab-list > .tab-list > .tab > button {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: normal;
+}

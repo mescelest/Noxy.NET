@@ -35,6 +35,12 @@ public static class PresentationConstants
     // How many playlist cards the Home page shows.
     public const int HomeRecentCount = 6;
 
+    // The most media files one Organise action works on; it is also what the server accepts in one request.
+    public const int OrganiseSelectionLimit = 1000;
+
+    // The largest picture the server takes for an album (10 MB); a bigger one is not read.
+    public const long AlbumArtMaxBytes = 10 * 1024 * 1024;
+
     // The wait before the second try; it doubles for each try after that.
     public const int RetryBaseDelaySeconds = 2;
 

@@ -1,6 +1,6 @@
 # Organise page: sorting media files into artists, albums and genres
 
-Status: design, written 2026-11-24 from the conversation with the user. It is the frontend of `2026-11-15-library-organizer-design.md` (whose panel and drag-and-drop idea it replaces with a page) on top of the backend in `2026-11-15-metadata-entities-design.md`, which is built. Lines marked *(my call)* are decisions made without asking.
+Status: implemented 2026-11-25 (not yet checked by running the app; see "How it ended up"). Design written 2026-11-24 from the conversation with the user. It is the frontend of `2026-11-15-library-organizer-design.md` (whose panel and drag-and-drop idea it replaces with a page) on top of the backend in `2026-11-15-metadata-entities-design.md`, which is built. Lines marked *(my call)* are decisions made without asking.
 
 ## Intent
 
@@ -111,3 +111,17 @@ In a narrow window the column goes below the table *(my call, to be checked agai
 ## Left to the builder
 
 Names of the new classes and files, the exact shape of the state, how the column choice is expressed on the table, the preferences storage for last-assigned, texts, the icons, and the exact narrow-window layout.
+
+## How it ended up
+
+- The write calls, `MetadataActionService` and the Fluxor state (`FeatureMetadataListState`, `FeatureOrganiseState`) follow the design, with unit tests.
+- **The context menu does not have submenus.** `LibraryContextMenu` has a new optional `ExtraItemFactory` parameter; `OrganiseContextMenu` fills it with three entries, "Set artist…", "Set album…" and "Set genre…", which come first, then a line, then the media file actions. The Library page is unchanged.
+- **The "last assigned" lists were dropped.** Each entry opens `MetadataSetDialog` for the target media files: artists and genres are a searchable list of checkboxes (ticked when every media file has the item, a dash when only some do), an album is a list of cards with its picture and a "[No album]" card. Nothing is sent until Save, and then only the difference (`MetadataSetModel`, sent through `MetadataActionService.Apply`). A plus button next to the search makes a new item and ticks it.
+- `MetadataItemDialog` (create and edit) shows the album's picture and a "Change picture" button; for that the server got `PUT /Album/{id}/Art`. The artists of an album use the same `MetadataCheckList` as the Set dialog.
+- `MetadataItemDialog.OnSaved` carries the ID of the saved item (`EventCallback<Guid>`).
+- The create, edit and delete dialogs live in `MetadataItemList`, one set per tab, not in `OrganiseSidebar`.
+- The tabs have no event for a change, so `ActionOrganiseTabChanged` exists and is tested but the sidebar does not dispatch it; the tabs do not show that a filter is set (the highlighted row and the badge do).
+- `MediaFileTable` takes `ColumnList`; a table with its own columns sets its grid from `--table-track-*` variables, the default columns keep `--table-columns-library`.
+- The page and the table share the media file list of the Library state; nothing is loaded twice.
+- The shared `Dialog` got a `Height` option (`DialogHeightEnum.Fixed`, used by the dialogs with a searched list, so they do not move while the list gets shorter) and a `Medium` size.
+- Not done: drag and drop onto an item, and running the app to check the layout, the narrow window and the toasts.

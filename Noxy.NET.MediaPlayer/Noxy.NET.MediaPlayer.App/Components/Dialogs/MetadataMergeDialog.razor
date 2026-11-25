@@ -1,0 +1,112 @@
+@inject IState<FeatureMetadataListState> StateMetadataList
+@inject IMetadataActionService ServiceMetadataAction
+@inject IToastService ServiceToast
+@inherits BaseComponentElementFluxor
+
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Height="DialogHeightEnum.Fixed" Open="Open" OpenChanged="HandleOpenChanged">
+    <h2>@AppTexts.MetadataMenuMerge</h2>
+    @if (Open)
+    {
+        <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@SearchText" aria-label="@SearchText" @bind-Value:get="_search" @bind-Value:set="ChangeSearch"/>
+        <div class="list">
+            @foreach (MetadataItem item in ShownList)
+            {
+                MetadataItem target = item;
+                <button @key="target.ID" type="button" class="row" @onclick="() => ClickTargetHandler(target)">
+                    @if (Kind == MetadataKindEnum.Album)
+                    {
+                        <AlbumArt AlbumID="target.ID" Size="var(--size-control-lg)"/>
+                    }
+                    <span class="name">@target.Name</span>
+                    <span class="count">@CountText(target)</span>
+                </button>
+            }
+            @if (ShownList.Count == 0)
+            {
+                <p class="empty">@AppTexts.MetadataPickerNoMatch</p>
+            }
+        </div>
+    }
+
+    <ConfirmActionDialog @bind-Open="_isConfirming" Title="@AppTexts.MetadataMergeConfirmTitle" Message="@ConfirmMessage" Detail="@AppTexts.MetadataMergeDetail" AcceptText="@AppTexts.MetadataMergeConfirm" AcceptStatus="StatusEnum.Warning"
+                         OnSubmit="MergeConfirmed"/>
+</Dialog>
+
+@code {
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter, EditorRequired]
+    public MetadataKindEnum Kind { get; set; }
+
+    // The item that is merged into another and goes away.
+    [Parameter]
+    public Guid? SourceID { get; set; }
+
+    private string _search = string.Empty;
+    private bool _isConfirming;
+    private MetadataItem? _target;
+
+    private MetadataItem? Source => SourceID is { } id ? StateMetadataList.Value.ItemListOf(Kind).FirstOrDefault(x => x.ID == id) : null;
+
+    // Every item of the kind but the one that is merged: an item cannot be merged into itself.
+    private List<MetadataItem> ShownList => StateMetadataList.Value.ItemListOf(Kind).Where(x => x.ID != SourceID).ToList().FilterByName(_search);
+
+    private string? ConfirmMessage => Source is { } source && _target is { } target ? string.Format(AppTexts.MetadataMergeMessage, source.Name, target.Name) : null;
+
+    private string SearchText => Kind switch
+    {
+            MetadataKindEnum.Artist => AppTexts.OrganiseSearchArtist,
+            MetadataKindEnum.Album => AppTexts.OrganiseSearchAlbum,
+            MetadataKindEnum.Genre => AppTexts.OrganiseSearchGenre,
+            _ => throw new InvalidEnumArgumentException(nameof(Kind), (int)Kind, typeof(MetadataKindEnum))
+    };
+
+    private static string CountText(MetadataItem item) => item.MediaFileCount.ToCountText(AppTexts.OrganiseItemCountOne, AppTexts.OrganiseItemCount);
+
+    private void ChangeSearch(string? search)
+    {
+        _search = search ?? string.Empty;
+    }
+
+    private void ClickTargetHandler(MetadataItem target)
+    {
+        _target = target;
+        _isConfirming = true;
+    }
+
+    // The merge is sent once it is confirmed; the lists and the counts follow from the pushes, and a refusal is a toast.
+    private async Task MergeConfirmed(bool accepted)
+    {
+        if (SourceID is not { } sourceID || _target is not { } target) return;
+
+        try
+        {
+            await ServiceMetadataAction.Merge(Kind, sourceID, target.ID);
+        }
+        catch (Exception exception)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+            return;
+        }
+
+        await Close();
+    }
+
+    private Task HandleOpenChanged(bool open)
+    {
+        return open ? Task.CompletedTask : Close();
+    }
+
+    private async Task Close()
+    {
+        _search = string.Empty;
+        _target = null;
+        await OpenChanged.InvokeAsync(false);
+    }
+
+}

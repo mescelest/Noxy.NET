@@ -38,9 +38,10 @@ public class MetadataSyncService : IMetadataSyncService
         await _genreList.Sync(force);
     }
 
+    // An equal modified time takes the push too (equalOverwrites): the count of files of an item changes without the item changing, and the push is how a device learns it.
     public async Task ApplyArtistUpdated(ResponseArtist artist)
     {
-        await _artistList.ApplyUpdated(artist);
+        await _artistList.ApplyUpdated(artist, true);
     }
 
     public async Task ApplyArtistDeleted(Guid id)
@@ -50,7 +51,7 @@ public class MetadataSyncService : IMetadataSyncService
 
     public async Task ApplyAlbumUpdated(ResponseAlbum album)
     {
-        await _albumList.ApplyUpdated(album);
+        await _albumList.ApplyUpdated(album, true);
     }
 
     public async Task ApplyAlbumDeleted(Guid id)
@@ -60,7 +61,7 @@ public class MetadataSyncService : IMetadataSyncService
 
     public async Task ApplyGenreUpdated(ResponseGenre genre)
     {
-        await _genreList.ApplyUpdated(genre);
+        await _genreList.ApplyUpdated(genre, true);
     }
 
     public async Task ApplyGenreDeleted(Guid id)

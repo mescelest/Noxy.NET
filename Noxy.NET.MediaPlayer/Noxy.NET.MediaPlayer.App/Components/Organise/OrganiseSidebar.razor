@@ -1,0 +1,15 @@
+@inherits BaseComponentElementFluxor
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <TabSet class="organise-tab-list">
+        <TabPage Title="@AppTexts.OrganiseTabArtist">
+            <MetadataItemList Kind="MetadataKindEnum.Artist"/>
+        </TabPage>
+        <TabPage Title="@AppTexts.OrganiseTabAlbum">
+            <MetadataItemList Kind="MetadataKindEnum.Album"/>
+        </TabPage>
+        <TabPage Title="@AppTexts.OrganiseTabGenre">
+            <MetadataItemList Kind="MetadataKindEnum.Genre"/>
+        </TabPage>
+    </TabSet>
+</div>

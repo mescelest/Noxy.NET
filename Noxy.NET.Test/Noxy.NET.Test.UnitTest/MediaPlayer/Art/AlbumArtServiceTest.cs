@@ -1,6 +1,7 @@
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
+using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Art;
@@ -122,5 +123,62 @@ public class AlbumArtServiceTest
         Assert.Equal(before.AddDays(1), album.TimeModified);
         NotificationAlbumUpdated notification = Assert.Single(_publisher.GetList<NotificationAlbumUpdated>());
         Assert.Equal(before.AddDays(1), notification.Album.TimeModified);
+    }
+
+    [Fact]
+    public async Task Replace_ForAnAlbumThatHasAPicture_StoresTheNewOne_AndMovesTheTimes()
+    {
+        DateTime had = _time.Now.UtcDateTime.AddDays(-1);
+        EntityAlbum album = Seed(timeArtModified: had);
+
+        await _service.Replace(UserID, album.ID, Picture, Token);
+
+        Assert.Equal(_thumbnail.Result, _storage.AlbumArtList[album.ID]);
+        Assert.Equal(_time.Now.UtcDateTime, album.TimeArtModified);
+        Assert.Equal(_time.Now.UtcDateTime, album.TimeModified);
+        NotificationAlbumUpdated notification = Assert.Single(_publisher.GetList<NotificationAlbumUpdated>());
+        Assert.Equal(_time.Now.UtcDateTime, notification.Album.TimeArtModified);
+    }
+
+    [Fact]
+    public async Task Replace_ForAnAlbumWithNoPicture_StoresIt()
+    {
+        EntityAlbum album = Seed();
+
+        await _service.Replace(UserID, album.ID, Picture, Token);
+
+        Assert.NotNull(album.TimeArtModified);
+        Assert.Single(_storage.AlbumArtList);
+    }
+
+    [Fact]
+    public async Task Replace_WithBytesThatAreNotAnImage_ThrowsAndChangesNothing()
+    {
+        DateTime had = _time.Now.UtcDateTime.AddDays(-1);
+        EntityAlbum album = Seed(timeArtModified: had);
+        _thumbnail.Result = null;
+
+        await Assert.ThrowsAsync<InvalidMetadataOperationException>(() => _service.Replace(UserID, album.ID, Picture, Token));
+
+        Assert.Equal(had, album.TimeArtModified);
+        Assert.Empty(_storage.AlbumArtList);
+        Assert.Empty(_publisher.PublishedList);
+    }
+
+    [Fact]
+    public async Task Replace_ForAnotherUsersAlbum_ThrowsNotFound_AndChangesNothing()
+    {
+        EntityAlbum album = Seed(Guid.CreateVersion7());
+
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _service.Replace(UserID, album.ID, Picture, Token));
+
+        Assert.Null(album.TimeArtModified);
+        Assert.Empty(_storage.AlbumArtList);
+    }
+
+    [Fact]
+    public async Task Replace_ForAnUnknownAlbum_ThrowsNotFound()
+    {
+        await Assert.ThrowsAsync<MetadataItemNotFoundException>(() => _service.Replace(UserID, Guid.CreateVersion7(), Picture, Token));
     }
 }

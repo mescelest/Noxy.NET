@@ -1,0 +1,32 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @Graphic
+    @if (Title is not null)
+    {
+        <h2 class="title">@Title</h2>
+    }
+    @if (Description is not null)
+    {
+        <p class="description">@Description</p>
+    }
+    @ChildContent
+</div>
+
+@code {
+
+    // The picture above the title; the caller passes it, the component has none of its own.
+    [Parameter]
+    public RenderFragment? Graphic { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    // What can be done about it.
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+}

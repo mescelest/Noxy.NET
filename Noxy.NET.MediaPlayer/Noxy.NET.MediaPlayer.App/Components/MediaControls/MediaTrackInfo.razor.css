@@ -19,6 +19,8 @@
 
 .artist {
     grid-area: artist;
+    color: var(--color-muted);
+    font: var(--font-label);
 }
 
 .status {

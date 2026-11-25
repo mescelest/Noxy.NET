@@ -151,7 +151,7 @@ public class MetadataSyncServiceTest
     }
 
     [Fact]
-    public async Task ApplyArtistUpdated_WithAnOlderOrEqualTimeModified_IsIgnored()
+    public async Task ApplyArtistUpdated_WithAnOlderTimeModified_IsIgnored()
     {
         ResponseArtist existing = MakeArtist("Current");
         await _store.Artist.ReplaceList([existing]);
@@ -159,7 +159,6 @@ public class MetadataSyncServiceTest
         _service.Changed += () => changed++;
 
         await _service.ApplyArtistUpdated(MakeArtist("Older", existing.ID, Start.AddMinutes(-1)));
-        await _service.ApplyArtistUpdated(MakeArtist("Equal", existing.ID, Start));
 
         Assert.Equal(["Current"], (await _store.Artist.GetList()).Select(Label));
         Assert.Equal(0, changed);
@@ -283,7 +282,7 @@ public class MetadataSyncServiceTest
     }
 
     [Fact]
-    public async Task ApplyAlbumUpdated_WithAnOlderOrEqualTimeModified_IsIgnored()
+    public async Task ApplyAlbumUpdated_WithAnOlderTimeModified_IsIgnored()
     {
         ResponseAlbum existing = MakeAlbum("Current");
         await _store.Album.ReplaceList([existing]);
@@ -291,7 +290,6 @@ public class MetadataSyncServiceTest
         _service.Changed += () => changed++;
 
         await _service.ApplyAlbumUpdated(MakeAlbum("Older", existing.ID, Start.AddMinutes(-1)));
-        await _service.ApplyAlbumUpdated(MakeAlbum("Equal", existing.ID, Start));
 
         Assert.Equal(["Current"], (await _store.Album.GetList()).Select(Label));
         Assert.Equal(0, changed);
@@ -415,7 +413,7 @@ public class MetadataSyncServiceTest
     }
 
     [Fact]
-    public async Task ApplyGenreUpdated_WithAnOlderOrEqualTimeModified_IsIgnored()
+    public async Task ApplyGenreUpdated_WithAnOlderTimeModified_IsIgnored()
     {
         ResponseGenre existing = MakeGenre("Current");
         await _store.Genre.ReplaceList([existing]);
@@ -423,7 +421,6 @@ public class MetadataSyncServiceTest
         _service.Changed += () => changed++;
 
         await _service.ApplyGenreUpdated(MakeGenre("Older", existing.ID, Start.AddMinutes(-1)));
-        await _service.ApplyGenreUpdated(MakeGenre("Equal", existing.ID, Start));
 
         Assert.Equal(["Current"], (await _store.Genre.GetList()).Select(Label));
         Assert.Equal(0, changed);
@@ -481,4 +478,47 @@ public class MetadataSyncServiceTest
     }
 
     #endregion -- Independence and failures --
+
+    // A count changes without the item row changing, so a push with the same modified time is the way a device learns the new count.
+    [Fact]
+    public async Task ApplyArtistUpdated_WithTheSameTimeModified_TakesIt()
+    {
+        ResponseArtist existing = MakeArtist("Current");
+        await _store.Artist.ReplaceList([existing]);
+        int changed = 0;
+        _service.Changed += () => changed++;
+
+        await _service.ApplyArtistUpdated(new() { ID = existing.ID, Name = "Current", MediaFileCount = 7, TimeModified = Start });
+
+        Assert.Equal(7, Assert.Single(await _store.Artist.GetList()).MediaFileCount);
+        Assert.Equal(1, changed);
+    }
+
+    [Fact]
+    public async Task ApplyAlbumUpdated_WithTheSameTimeModified_TakesIt()
+    {
+        ResponseAlbum existing = MakeAlbum("Current");
+        await _store.Album.ReplaceList([existing]);
+        int changed = 0;
+        _service.Changed += () => changed++;
+
+        await _service.ApplyAlbumUpdated(new() { ID = existing.ID, Title = "Current", ArtistIDList = existing.ArtistIDList, MediaFileCount = 7, TimeModified = Start });
+
+        Assert.Equal(7, Assert.Single(await _store.Album.GetList()).MediaFileCount);
+        Assert.Equal(1, changed);
+    }
+
+    [Fact]
+    public async Task ApplyGenreUpdated_WithTheSameTimeModified_TakesIt()
+    {
+        ResponseGenre existing = MakeGenre("Current");
+        await _store.Genre.ReplaceList([existing]);
+        int changed = 0;
+        _service.Changed += () => changed++;
+
+        await _service.ApplyGenreUpdated(new() { ID = existing.ID, Name = "Current", MediaFileCount = 7, TimeModified = Start });
+
+        Assert.Equal(7, Assert.Single(await _store.Genre.GetList()).MediaFileCount);
+        Assert.Equal(1, changed);
+    }
 }

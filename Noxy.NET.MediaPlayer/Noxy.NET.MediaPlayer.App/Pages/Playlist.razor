@@ -27,10 +27,10 @@
 
             <MediaFileTable RowList="_rowList" IsEmpty="IsPlaylistEmpty" EmptyTitle="@AppTexts.PlaylistEmptyTitle" EmptyDescription="@AppTexts.PlaylistEmptyDescription" StateMap="StateLibrary.Value.StateMap" Sort="_sort" Descending="_descending"
                             OnSortChanged="ChangeSort"
-                            SelectedSet="_selectedSet" AllSelected="IsAllSelected" OnToggleAll="ToggleAllShown" OnToggleRow="ToggleRow" OnPlay="Play" OnContextMenu="OpenRowMenu"
+                            SelectedSet="_selectedSet" AllSelected="IsAllSelected" OnToggleAll="ToggleAllShown" OnToggleRow="ToggleRow" OnPlay="Play" RowSelect="RowSelectEnum.Ctrl" OnContextMenu="OpenRowMenu"
                             IsReorderable="CanReorder" ReorderHint="ReorderHint" OnMove="Move">
                 <ToolContent>
-                    <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.PlaylistSearch" aria-label="@AppTexts.PlaylistSearch" Value="@_search" ValueChanged="ChangeSearch"/>
+                    <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.PlaylistSearch" aria-label="@AppTexts.PlaylistSearch" @bind-Value:get="_search" @bind-Value:set="ChangeSearch"/>
                     <ButtonList>
                         @if (_sort is not null)
                         {

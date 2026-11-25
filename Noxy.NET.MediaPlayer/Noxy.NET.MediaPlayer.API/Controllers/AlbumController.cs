@@ -16,6 +16,7 @@ public class AlbumController(IMediator mediator) : UserControllerBase
     private const string IdRoute = "{id:guid}";
     private const string MediaFileListRoute = $"{IdRoute}/MediaFileList";
     private const string ArtContentType = "image/jpeg";
+    private const int MaxArtBytes = 10 * 1024 * 1024;
 
     private static readonly string CacheControl = new CacheControlHeaderValue { Private = true, NoCache = true }.ToString();
     private static readonly string ArtCacheControl = new CacheControlHeaderValue { Private = true }.ToString();
@@ -47,6 +48,18 @@ public class AlbumController(IMediator mediator) : UserControllerBase
         if (picture.Bytes is null) return StatusCode(StatusCodes.Status304NotModified);
 
         return File(picture.Bytes, ArtContentType);
+    }
+
+    // Sets the album's picture from the body, an image of any kind the server can read (at most 10 MB). It replaces the one the album has and every device is told. An unknown album or another user's gets a 404, bytes that are not an image a 400.
+    [HttpPut($"{IdRoute}/Art")]
+    [RequestSizeLimit(MaxArtBytes)]
+    public async Task<IActionResult> SetArt(Guid id, CancellationToken cancellationToken)
+    {
+        using MemoryStream copy = new();
+        await Request.Body.CopyToAsync(copy, cancellationToken);
+        await mediator.Send(new CommandAlbumArtSet(UserID, id, copy.ToArray()), cancellationToken);
+
+        return NoContent();
     }
 
     [HttpPost]

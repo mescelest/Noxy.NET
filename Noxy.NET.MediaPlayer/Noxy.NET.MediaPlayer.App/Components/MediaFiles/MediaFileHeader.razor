@@ -1,0 +1,51 @@
+@inherits BaseComponentElement
+
+<PageHeader @attributes="AdditionalAttributes" class="@CssClass" Name="@Name" EndContent="EndContent">
+    <span class="counts">@Counts</span>
+    @ChildContent
+</PageHeader>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required string Name { get; set; }
+
+    [Parameter]
+    public int EntryCount { get; set; }
+
+    // When a search or a filter narrows the list: how many media files there are in all. The counts then read "N of M files".
+    [Parameter]
+    public int? TotalCount { get; set; }
+
+    [Parameter]
+    public int SelectedCount { get; set; }
+
+    // How many of the selected media files a search or a filter hides.
+    [Parameter]
+    public int HiddenSelectedCount { get; set; }
+
+    // Next to the counts: what can be done with the selected files.
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // At the end of the row of the header.
+    [Parameter]
+    public RenderFragment? EndContent { get; set; }
+
+    private string Counts
+    {
+        get
+        {
+            string entries = TotalCount is { } total && total != EntryCount
+                    ? string.Format(AppTexts.CountsOfTotal, EntryCount, total)
+                    : $"{EntryCount} {(EntryCount == 1 ? "file" : "files")}";
+
+            if (SelectedCount <= 0) return entries;
+
+            string selected = HiddenSelectedCount > 0 ? string.Format(AppTexts.CountsSelectedHidden, SelectedCount, HiddenSelectedCount) : $"{SelectedCount} selected";
+
+            return $"{entries} · {selected}";
+        }
+    }
+
+}

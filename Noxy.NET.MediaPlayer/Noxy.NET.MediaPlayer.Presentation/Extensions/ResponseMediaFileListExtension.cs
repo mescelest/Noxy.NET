@@ -19,6 +19,16 @@ public static class ResponseMediaFileListExtension
         {
             return SortBy(mediaFileList, sort, descending, x => x);
         }
+
+        // A null kind is not filtered; a file with no item of a filtered kind is dropped. Always a new list.
+        public List<ResponseMediaFile> FilterByMetadata(Guid? artistID, Guid? albumID, Guid? genreID)
+        {
+            return mediaFileList
+                .Where(x => artistID is null || x.ArtistIDList.Contains(artistID.Value))
+                .Where(x => albumID is null || x.AlbumID == albumID)
+                .Where(x => genreID is null || x.GenreIDList.Contains(genreID.Value))
+                .ToList();
+        }
     }
 
     // The same filter for any list whose items carry a media file, such as the entries of a playlist.
@@ -37,6 +47,7 @@ public static class ResponseMediaFileListExtension
             LibrarySortEnum.Title => SortByText(list, x => mediaFileOf(x).Title, descending),
             LibrarySortEnum.Artist => SortByText(list, x => mediaFileOf(x).Artist, descending),
             LibrarySortEnum.Album => SortByText(list, x => mediaFileOf(x).Album, descending),
+            LibrarySortEnum.Genre => SortByText(list, x => mediaFileOf(x).Genre, descending),
             LibrarySortEnum.Year => SortByNumber(list, x => mediaFileOf(x).Year, descending),
             LibrarySortEnum.TimeCreated => SortByNumber(list, x => mediaFileOf(x).TimeCreated.Ticks, descending),
             _ => throw new InvalidEnumArgumentException(nameof(sort), (int)sort, typeof(LibrarySortEnum))

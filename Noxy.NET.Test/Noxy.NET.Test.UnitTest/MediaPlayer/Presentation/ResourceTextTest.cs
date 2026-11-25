@@ -33,6 +33,18 @@ public partial class ResourceTextTest
         { PresentationProject, "PresentationTexts.resx", "PresentationTexts.Designer.cs" }
     };
 
+    public static TheoryData<string, string> ResxList => new()
+    {
+        { AppProject, "AppTexts.resx" },
+        { PresentationProject, "PresentationTexts.resx" }
+    };
+
+    public static TheoryData<string, string> DesignerList => new()
+    {
+        { AppProject, "AppTexts.Designer.cs" },
+        { PresentationProject, "PresentationTexts.Designer.cs" }
+    };
+
     [Theory]
     [MemberData(nameof(ResourceList))]
     public void EveryTextInTheResx_HasAPropertyInTheDesigner_AndTheOtherWayRound(string project, string resx, string designer)
@@ -45,15 +57,15 @@ public partial class ResourceTextTest
     }
 
     [Theory]
-    [MemberData(nameof(ResourceList))]
-    public void EveryDesignerProperty_ReadsTheTextOfItsOwnName(string project, string resx, string designer)
+    [MemberData(nameof(DesignerList))]
+    public void EveryDesignerProperty_ReadsTheTextOfItsOwnName(string project, string designer)
     {
         Assert.All(ReadDesignerList(PathOf(project, designer)), x => Assert.Equal(x.Property, x.Key));
     }
 
     [Theory]
-    [MemberData(nameof(ResourceList))]
-    public void NoTextIsListedTwice_AndNoTextIsEmpty(string project, string resx, string designer)
+    [MemberData(nameof(ResxList))]
+    public void NoTextIsListedTwice_AndNoTextIsEmpty(string project, string resx)
     {
         List<(string Key, string Value)> list = ReadResxList(PathOf(project, resx));
 

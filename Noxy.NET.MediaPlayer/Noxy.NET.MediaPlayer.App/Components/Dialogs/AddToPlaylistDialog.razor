@@ -1,7 +1,7 @@
 @inject IState<FeaturePlaylistListState> StatePlaylistList
 @inherits BaseComponentElementFluxor
 
-<Dialog @attributes="AdditionalAttributes" class="@CssClass" Open="Open" OpenChanged="HandleOpenChanged">
+<Dialog @attributes="AdditionalAttributes" class="@CssClass" Height="HeightCurrent" Open="Open" OpenChanged="HandleOpenChanged">
     <h2>@AppTexts.LibraryAddToPlaylist</h2>
     @if (StatePlaylistList.Value.PlaylistList.Count == 0)
     {
@@ -9,7 +9,7 @@
     }
     else
     {
-        <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.AddToPlaylistSearch" aria-label="@AppTexts.AddToPlaylistSearch" Value="@_search" ValueChanged="ChangeSearch"/>
+        <InputControlText class="search" Type="WebFormInputTextTypeEnum.Search" OnInputDelay="0" placeholder="@AppTexts.AddToPlaylistSearch" aria-label="@AppTexts.AddToPlaylistSearch" @bind-Value:get="_search" @bind-Value:set="ChangeSearch"/>
         @if (ShownList.Count == 0)
         {
             <p class="empty">@AppTexts.AddToPlaylistNoMatch</p>
@@ -41,6 +41,9 @@
     // The playlist that was chosen; the dialog closes itself first.
     [Parameter]
     public EventCallback<Guid> OnChosen { get; set; }
+
+    // With playlists to search through, the dialog keeps one height whatever the search finds.
+    private DialogHeightEnum HeightCurrent => StatePlaylistList.Value.PlaylistList.Count > 0 ? DialogHeightEnum.Fixed : DialogHeightEnum.Auto;
 
     private string _search = string.Empty;
 

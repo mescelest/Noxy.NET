@@ -1,24 +1,26 @@
 @inject ISessionService ServiceSession
 @inherits BaseComponentElement
 
-<Section @attributes="AdditionalAttributes" class="@CssClass" Title="@AppTexts.SectionAccountTitle">
-    <HeaderContent>
-        <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Error" title="@AppTexts.AccountSignOut" aria-label="@AppTexts.AccountSignOut" @onclick="ServiceSession.SignOut">
-            <MaterialIcon Icon="logout" Size="var(--size-icon-sm)"/>
-        </Button>
-    </HeaderContent>
-    <ChildContent>
-        <div class="signed-in">
-            <div class="text">
-                <span class="label">@AppTexts.SectionAccountSignedInAs</span>
-                <span class="help">@MethodText</span>
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Section Title="@AppTexts.SectionAccountTitle">
+        <HeaderContent>
+            <Button Type="@HTMLButtonTypeEnum.Button" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.Error" title="@AppTexts.AccountSignOut" aria-label="@AppTexts.AccountSignOut" @onclick="ServiceSession.SignOut">
+                <MaterialIcon Icon="logout" Size="var(--size-icon-sm)"/>
+            </Button>
+        </HeaderContent>
+        <ChildContent>
+            <div class="signed-in">
+                <div class="text">
+                    <span class="label">@AppTexts.SectionAccountSignedInAs</span>
+                    <span class="help">@MethodText</span>
+                </div>
+                <span class="email">@EmailText</span>
             </div>
-            <span class="email">@EmailText</span>
-        </div>
 
-        <SettingList/>
-    </ChildContent>
-</Section>
+            <SettingList/>
+        </ChildContent>
+    </Section>
+</div>
 
 @code {
 

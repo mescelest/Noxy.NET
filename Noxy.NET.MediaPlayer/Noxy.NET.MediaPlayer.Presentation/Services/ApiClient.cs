@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application;
 using Noxy.NET.MediaPlayer.Application.Requests.Media;
+using Noxy.NET.MediaPlayer.Application.Requests.Metadata;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -33,6 +34,9 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     private const string PlayedSegment = "Played";
     private const string ArtSegment = "Art";
     private const string ValueProperty = "value";
+    private const string MediaFileListSegment = "MediaFileList";
+    private const string RemoveSegment = "Remove";
+    private const string MergeSegment = "Merge";
 
     public async Task<ApiResponse<List<ResponseMediaFile>>> GetLibrary(string? eTag)
     {
@@ -175,6 +179,105 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
         return await Get<List<ResponseGenre>>(GenrePath, eTag);
     }
 
+    public async Task<ResponseArtist> MergeArtist(Guid id, RequestMergeItem request)
+    {
+        return await Write<ResponseArtist>(HttpMethod.Post, $"{ArtistPath}/{id}/{MergeSegment}", request);
+    }
+
+    public async Task<ResponseAlbum> MergeAlbum(Guid id, RequestMergeItem request)
+    {
+        return await Write<ResponseAlbum>(HttpMethod.Post, $"{AlbumPath}/{id}/{MergeSegment}", request);
+    }
+
+    public async Task<ResponseGenre> MergeGenre(Guid id, RequestMergeItem request)
+    {
+        return await Write<ResponseGenre>(HttpMethod.Post, $"{GenrePath}/{id}/{MergeSegment}", request);
+    }
+
+    public async Task<ResponseArtist> CreateArtist(RequestCreateArtist request)
+    {
+        return await Write<ResponseArtist>(HttpMethod.Post, ArtistPath, request);
+    }
+
+    public async Task<ResponseArtist> UpdateArtist(Guid id, RequestUpdateArtist request)
+    {
+        return await Write<ResponseArtist>(HttpMethod.Patch, $"{ArtistPath}/{id}", request);
+    }
+
+    public async Task DeleteArtist(Guid id)
+    {
+        using HttpResponseMessage response = await Send(HttpMethod.Delete, $"{ArtistPath}/{id}", null, null);
+        await EnsureSuccess(response);
+    }
+
+    public async Task<ResponseArtist> AddArtistMediaFileList(Guid id, RequestAddMediaFileList request)
+    {
+        return await Write<ResponseArtist>(HttpMethod.Post, $"{ArtistPath}/{id}/{MediaFileListSegment}", request);
+    }
+
+    public async Task<ResponseArtist> RemoveArtistMediaFileList(Guid id, RequestRemoveMediaFileList request)
+    {
+        return await Write<ResponseArtist>(HttpMethod.Post, $"{ArtistPath}/{id}/{MediaFileListSegment}/{RemoveSegment}", request);
+    }
+
+    public async Task<ResponseAlbum> CreateAlbum(RequestCreateAlbum request)
+    {
+        return await Write<ResponseAlbum>(HttpMethod.Post, AlbumPath, request);
+    }
+
+    public async Task<ResponseAlbum> UpdateAlbum(Guid id, RequestUpdateAlbum request)
+    {
+        return await Write<ResponseAlbum>(HttpMethod.Patch, $"{AlbumPath}/{id}", request);
+    }
+
+    public async Task DeleteAlbum(Guid id)
+    {
+        using HttpResponseMessage response = await Send(HttpMethod.Delete, $"{AlbumPath}/{id}", null, null);
+        await EnsureSuccess(response);
+    }
+
+    public async Task<ResponseAlbum> AddAlbumMediaFileList(Guid id, RequestAddMediaFileList request)
+    {
+        return await Write<ResponseAlbum>(HttpMethod.Post, $"{AlbumPath}/{id}/{MediaFileListSegment}", request);
+    }
+
+    public async Task<ResponseAlbum> RemoveAlbumMediaFileList(Guid id, RequestRemoveMediaFileList request)
+    {
+        return await Write<ResponseAlbum>(HttpMethod.Post, $"{AlbumPath}/{id}/{MediaFileListSegment}/{RemoveSegment}", request);
+    }
+
+    public async Task<ResponseGenre> CreateGenre(RequestCreateGenre request)
+    {
+        return await Write<ResponseGenre>(HttpMethod.Post, GenrePath, request);
+    }
+
+    public async Task<ResponseGenre> UpdateGenre(Guid id, RequestUpdateGenre request)
+    {
+        return await Write<ResponseGenre>(HttpMethod.Patch, $"{GenrePath}/{id}", request);
+    }
+
+    public async Task DeleteGenre(Guid id)
+    {
+        using HttpResponseMessage response = await Send(HttpMethod.Delete, $"{GenrePath}/{id}", null, null);
+        await EnsureSuccess(response);
+    }
+
+    public async Task<ResponseGenre> AddGenreMediaFileList(Guid id, RequestAddMediaFileList request)
+    {
+        return await Write<ResponseGenre>(HttpMethod.Post, $"{GenrePath}/{id}/{MediaFileListSegment}", request);
+    }
+
+    public async Task<ResponseGenre> RemoveGenreMediaFileList(Guid id, RequestRemoveMediaFileList request)
+    {
+        return await Write<ResponseGenre>(HttpMethod.Post, $"{GenrePath}/{id}/{MediaFileListSegment}/{RemoveSegment}", request);
+    }
+
+    public async Task SetAlbumArt(Guid id, byte[] picture, string contentType)
+    {
+        using HttpResponseMessage response = await Send(HttpMethod.Put, $"{AlbumPath}/{id}/{ArtSegment}", null, null, contentFactory: () => BuildPictureContent(picture, contentType));
+        await EnsureSuccess(response);
+    }
+
     public async Task MarkPlaylistPlayed(Guid id)
     {
         using HttpResponseMessage response = await Send(HttpMethod.Post, $"{PlaylistPath}/{id}/{PlayedSegment}", null, null);
@@ -240,6 +343,14 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
         using CancellationTokenSource timeoutSource = new(timeout ?? TimeSpan.FromSeconds(PresentationConstants.HttpTimeoutSeconds));
 
         return await client.SendAsync(request, completion, timeoutSource.Token);
+    }
+
+    private static ByteArrayContent BuildPictureContent(byte[] picture, string contentType)
+    {
+        ByteArrayContent content = new(picture);
+        content.Headers.ContentType = new(contentType);
+
+        return content;
     }
 
     private static MultipartFormDataContent BuildUploadContent(string fileName, string? contentType, Func<Stream> openContent)

@@ -136,7 +136,7 @@ public class PlaylistRepositoryTest : IDisposable
         EntityUser other = await CreateUser("other@example.com");
         EntityMediaFile mediaFile = await CreateMediaFile(user.ID);
         DateTime now = DateTime.UtcNow;
-        EntityPlaylist older = CreatePlaylist(user.ID, "Older", now.AddMinutes(-5), 0);
+        EntityPlaylist older = CreatePlaylist(user.ID, "Older", now.AddMinutes(-5));
         older.EntryList.Add(CreateEntry(older, mediaFile, 0));
         older.EntryList.Add(CreateEntry(older, mediaFile, 1));
         EntityPlaylist newer = CreatePlaylist(user.ID, "Newer", now, 1);

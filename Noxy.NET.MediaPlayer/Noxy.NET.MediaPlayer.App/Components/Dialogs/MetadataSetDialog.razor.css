@@ -1,0 +1,93 @@
+.list {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: column;
+    row-gap: var(--size-gap-tiny);
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.row {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: var(--size-gap-xs);
+    width: 100%;
+    padding: var(--size-gap-xxs) var(--size-gap-xs);
+    border: none;
+    border-radius: var(--size-border-radius-md);
+    background: transparent;
+    color: var(--color-complementary);
+    font: var(--font-body);
+    text-align: left;
+}
+
+.row:hover {
+    background: var(--color-offset-primary-md);
+}
+
+button.row {
+    cursor: pointer;
+}
+
+button.row:focus-visible {
+    outline: var(--size-border-width-md) solid var(--color-highlight);
+}
+
+/* An album is a card with its picture; the chosen one carries the accent colour and a bar on its left, like the filtered item of the column. */
+.album {
+    justify-content: flex-start;
+    border-inline-start: var(--size-border-width-md) solid transparent;
+}
+
+.album[data-selected] {
+    border-inline-start-color: var(--color-highlight);
+    background: var(--color-highlight-subtle);
+    color: var(--color-highlight);
+}
+
+.name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.album .name {
+    flex: 1 1 auto;
+}
+
+.count {
+    flex: 0 0 auto;
+    color: var(--color-muted);
+    font: var(--font-label);
+}
+
+.empty {
+    margin: 0;
+    color: var(--color-muted);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* The search and the plus button share a row, as in the column of the page. */
+.tool-row {
+    display: flex;
+    align-items: center;
+    column-gap: var(--size-gap-xxs);
+}
+
+.tool-row ::deep > .TemplateInputControlTextual {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tool-row ::deep > .TemplateInputControlTextual > .search {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+

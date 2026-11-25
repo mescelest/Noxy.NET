@@ -10,5 +10,6 @@ public enum LibrarySortEnum
     Artist,
     Album,
     Year,
-    TimeCreated
+    TimeCreated,
+    Genre
 }

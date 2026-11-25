@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Noxy.NET.MediaPlayer.Application.Requests.Media;
+using Noxy.NET.MediaPlayer.Application.Requests.Metadata;
 using Noxy.NET.MediaPlayer.Application.Requests.Playlist;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
@@ -66,4 +67,45 @@ public interface IApiClient
 
     // PUT /Playlist/{id}/Position; the answer is all the user's playlists in their new order.
     Task<List<ResponsePlaylist>> MovePlaylist(Guid id, RequestMovePlaylist request);
+
+    // The writes of the three metadata kinds. Each answer is the item as it is now, and the server pushes the change to every device. A Delete answers 204. Add and Remove take at most 1000 media files; on an album, Add replaces its album.
+    // PUT /Album/{id}/Art: the picture becomes the album's (any image the server can read, at most 10 MB); every device is told by the hub. A refusal is thrown (ApiException).
+    Task SetAlbumArt(Guid id, byte[] picture, string contentType);
+
+    // POST /{kind}/{id}/Merge: every media file of the item goes to the target and the item is removed; the target keeps its own name and artists. The answer is the target as it is now.
+    Task<ResponseArtist> MergeArtist(Guid id, RequestMergeItem request);
+
+    Task<ResponseAlbum> MergeAlbum(Guid id, RequestMergeItem request);
+
+    Task<ResponseGenre> MergeGenre(Guid id, RequestMergeItem request);
+
+    Task<ResponseArtist> CreateArtist(RequestCreateArtist request);
+
+    Task<ResponseArtist> UpdateArtist(Guid id, RequestUpdateArtist request);
+
+    Task DeleteArtist(Guid id);
+
+    Task<ResponseArtist> AddArtistMediaFileList(Guid id, RequestAddMediaFileList request);
+
+    Task<ResponseArtist> RemoveArtistMediaFileList(Guid id, RequestRemoveMediaFileList request);
+
+    Task<ResponseAlbum> CreateAlbum(RequestCreateAlbum request);
+
+    Task<ResponseAlbum> UpdateAlbum(Guid id, RequestUpdateAlbum request);
+
+    Task DeleteAlbum(Guid id);
+
+    Task<ResponseAlbum> AddAlbumMediaFileList(Guid id, RequestAddMediaFileList request);
+
+    Task<ResponseAlbum> RemoveAlbumMediaFileList(Guid id, RequestRemoveMediaFileList request);
+
+    Task<ResponseGenre> CreateGenre(RequestCreateGenre request);
+
+    Task<ResponseGenre> UpdateGenre(Guid id, RequestUpdateGenre request);
+
+    Task DeleteGenre(Guid id);
+
+    Task<ResponseGenre> AddGenreMediaFileList(Guid id, RequestAddMediaFileList request);
+
+    Task<ResponseGenre> RemoveGenreMediaFileList(Guid id, RequestRemoveMediaFileList request);
 }

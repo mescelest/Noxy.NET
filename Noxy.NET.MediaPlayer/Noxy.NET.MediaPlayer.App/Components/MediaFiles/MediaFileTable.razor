@@ -1,0 +1,286 @@
+@inherits BaseComponentElement
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    <Table class="table" style="@GridStyle" data-empty="@IsEmpty" RowCount="RowList.Count">
+        <TableHeader class="header">
+            <div class="action-row">
+                @ToolContent
+            </div>
+            <div class="header-row">
+                @foreach (MediaFileTableColumnEnum column in ColumnCurrentList)
+                {
+                    @switch (column)
+                    {
+                        case MediaFileTableColumnEnum.Select:
+                            <TableCell class="cell">
+                                <InputControlCheckbox Option="true" aria-label="@AppTexts.SelectAllShown" @bind-Value:get="@AllSelected" @bind-Value:set="ChangeAllHandler"/>
+                            </TableCell>
+                            break;
+                        case MediaFileTableColumnEnum.State:
+                            <TableCell class="cell">
+                                <MaterialIcon Icon="download_for_offline" Size="var(--size-icon-sm)"/>
+                            </TableCell>
+                            break;
+                        case MediaFileTableColumnEnum.Title:
+                            <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Title)" OnClick="() => ClickSortHandler(LibrarySortEnum.Title)"><strong>@AppTexts.LibraryColumnTitle</strong></SortHeaderCell>
+                            break;
+                        case MediaFileTableColumnEnum.Artist:
+                            <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Artist)" OnClick="() => ClickSortHandler(LibrarySortEnum.Artist)"><strong>@AppTexts.LibraryColumnArtist</strong></SortHeaderCell>
+                            break;
+                        case MediaFileTableColumnEnum.Album:
+                            <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Album)" OnClick="() => ClickSortHandler(LibrarySortEnum.Album)"><strong>@AppTexts.LibraryColumnAlbum</strong></SortHeaderCell>
+                            break;
+                        case MediaFileTableColumnEnum.Genre:
+                            <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Genre)" OnClick="() => ClickSortHandler(LibrarySortEnum.Genre)"><strong>@AppTexts.LibraryColumnGenre</strong></SortHeaderCell>
+                            break;
+                        case MediaFileTableColumnEnum.Year:
+                            <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.Year)" OnClick="() => ClickSortHandler(LibrarySortEnum.Year)"><strong>@AppTexts.LibraryColumnYear</strong></SortHeaderCell>
+                            break;
+                        case MediaFileTableColumnEnum.Added:
+                            <SortHeaderCell class="cell sort" Direction="DirectionOf(LibrarySortEnum.TimeCreated)" OnClick="() => ClickSortHandler(LibrarySortEnum.TimeCreated)"><strong>@AppTexts.LibraryColumnAdded</strong></SortHeaderCell>
+                            break;
+                        default:
+                            throw new InvalidEnumArgumentException(nameof(column), (int)column, typeof(MediaFileTableColumnEnum));
+                    }
+                }
+            </div>
+        </TableHeader>
+
+        @if (IsEmpty)
+        {
+            <EmptyState class="empty" Title="@EmptyTitle" Description="@EmptyDescription">
+                <Graphic>
+                    <MaterialIcon Icon="library_music" Size="var(--size-icon-xxl)"/>
+                </Graphic>
+                <ChildContent>@EmptyContent</ChildContent>
+            </EmptyState>
+        }
+        else
+        {
+            <TableBodyVirtualize T="MediaFileTableRow" class="body" List="RowList" ItemSize="48" Context="entry">
+                <div @key="entry.Row.Key" class="row-menu" @oncontextmenu="args => ContextMenuHandler(args, entry.Row)" @oncontextmenu:preventDefault
+                     @ondragover="() => DragOverHandler(entry.Row)" @ondragover:preventDefault @ondrop="() => DropHandler(entry.Row)" @ondrop:preventDefault>
+                    <TableRow class="row" Index="entry.Index" draggable="@DraggableValue" data-over="@IsOver(entry.Row)" data-select="@RowSelectText" title="@RowTitle"
+                              @onclick="args => ClickRowHandler(args, entry.Row)" @ondblclick="args => PlayHandler(args, entry.Row)" @ondragstart="() => DragStartHandler(entry.Row)" @ondragend="DragEndHandler">
+                        @foreach (MediaFileTableColumnEnum column in ColumnCurrentList)
+                        {
+                            @switch (column)
+                            {
+                                case MediaFileTableColumnEnum.Select:
+                                    <TableCell class="cell">
+                                        <span class="select" @onclick="IgnoreClick" @onclick:stopPropagation>
+                                            <InputControlCheckbox Option="true" aria-label="@SelectLabel(entry.Row)" @bind-Value:get="@IsSelected(entry.Row)" @bind-Value:set="_ => ChangeSelectedHandler(entry.Row)"/>
+                                        </span>
+                                    </TableCell>
+                                    break;
+                                case MediaFileTableColumnEnum.State:
+                                    <TableCell class="cell">
+                                        <FileStatusIcon State="StateOf(entry.Row)"/>
+                                    </TableCell>
+                                    break;
+                                case MediaFileTableColumnEnum.Title:
+                                    <TableCell class="cell title" Kind="TableCellKindEnum.RowHeader">
+                                        <AlbumArt class="art" AlbumID="entry.Row.MediaFile.AlbumID"/>
+                                        <span class="name">@entry.Row.MediaFile.Title</span>
+                                    </TableCell>
+                                    break;
+                                case MediaFileTableColumnEnum.Artist:
+                                    <TableCell class="cell text">@entry.Row.MediaFile.Artist</TableCell>
+                                    break;
+                                case MediaFileTableColumnEnum.Album:
+                                    <TableCell class="cell text">@entry.Row.MediaFile.Album</TableCell>
+                                    break;
+                                case MediaFileTableColumnEnum.Genre:
+                                    <TableCell class="cell text">@entry.Row.MediaFile.Genre</TableCell>
+                                    break;
+                                case MediaFileTableColumnEnum.Year:
+                                    <TableCell class="cell">@entry.Row.MediaFile.Year</TableCell>
+                                    break;
+                                case MediaFileTableColumnEnum.Added:
+                                    <TableCell class="cell">@entry.Row.MediaFile.TimeCreated.ToLocalTime().ToString("d")</TableCell>
+                                    break;
+                                default:
+                                    throw new InvalidEnumArgumentException(nameof(column), (int)column, typeof(MediaFileTableColumnEnum));
+                            }
+                        }
+                    </TableRow>
+                </div>
+            </TableBodyVirtualize>
+        }
+    </Table>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public required List<MediaFileTableRow> RowList { get; set; }
+
+    // The state of each media file on this device, by media file ID.
+    [Parameter]
+    public Dictionary<Guid, FileSyncStateEnum> StateMap { get; set; } = [];
+
+    // The column the rows are sorted by, or none.
+    [Parameter]
+    public LibrarySortEnum? Sort { get; set; }
+
+    [Parameter]
+    public bool Descending { get; set; }
+
+    [Parameter]
+    public EventCallback<LibrarySortEnum> OnSortChanged { get; set; }
+
+    // The keys of the ticked rows.
+    [Parameter]
+    public IReadOnlySet<Guid> SelectedSet { get; set; } = new HashSet<Guid>();
+
+    [Parameter]
+    public bool AllSelected { get; set; }
+
+    [Parameter]
+    public EventCallback OnToggleAll { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnToggleRow { get; set; }
+
+    // A double-click on a row.
+    [Parameter]
+    public EventCallback<MediaFileTableRow> OnPlay { get; set; }
+
+    // What a click on a row, away from its tick box, does: nothing, tick it only while ctrl is held, or always. The table calls OnToggleRow for it.
+    [Parameter]
+    public RowSelectEnum RowSelect { get; set; } = RowSelectEnum.CheckboxOnly;
+
+    private string RowSelectText => RowSelect.ToText();
+    [Parameter]
+    public EventCallback<(MouseEventArgs Args, MediaFileTableRow Row)> OnContextMenu { get; set; }
+
+    // Whether a row can be dragged to another place, by any part of the row. It only makes sense when the host listens to OnMove.
+    [Parameter]
+    public bool IsReorderable { get; set; }
+
+    // Why the rows cannot be dragged now, shown as the tooltip of a row when the host listens to OnMove and they cannot.
+    [Parameter]
+    public string? ReorderHint { get; set; }
+
+    // The dragged row's key, then the key of the row it was dropped on.
+    [Parameter]
+    public EventCallback<(Guid DragKey, Guid TargetKey)> OnMove { get; set; }
+
+    // The action row above the column headers: the search box and the buttons.
+    [Parameter]
+    public RenderFragment? ToolContent { get; set; }
+
+    // When IsEmpty a box takes the place of the rows: what is empty, a short explanation, and what can be done about it.
+    [Parameter]
+    public string? EmptyTitle { get; set; }
+
+    [Parameter]
+    public string? EmptyDescription { get; set; }
+
+    [Parameter]
+    public RenderFragment? EmptyContent { get; set; }
+
+    [Parameter]
+    public bool IsEmpty { get; set; }
+
+    // The columns, left to right. Unset, they are the ones of the Library, so Library, Queue and Playlist stay as they were.
+    [Parameter]
+    public List<MediaFileTableColumnEnum>? ColumnList { get; set; }
+
+    private static readonly List<MediaFileTableColumnEnum> DefaultColumnList =
+    [
+            MediaFileTableColumnEnum.Select, MediaFileTableColumnEnum.State, MediaFileTableColumnEnum.Title, MediaFileTableColumnEnum.Artist, MediaFileTableColumnEnum.Album, MediaFileTableColumnEnum.Year, MediaFileTableColumnEnum.Added
+    ];
+
+    private List<MediaFileTableColumnEnum> ColumnCurrentList => ColumnList ?? DefaultColumnList;
+
+    // Only a table with its own columns sets its grid; the stylesheet has the one of the default columns.
+    private string? GridStyle => ColumnList is null ? null : $"grid-template-columns: {string.Join(' ', ColumnList.Select(TrackOf))}";
+
+    private static string TrackOf(MediaFileTableColumnEnum column)
+    {
+        return column switch
+        {
+                MediaFileTableColumnEnum.Select => "var(--table-track-select)",
+                MediaFileTableColumnEnum.State => "var(--table-track-state)",
+                MediaFileTableColumnEnum.Title or MediaFileTableColumnEnum.Artist or MediaFileTableColumnEnum.Album or MediaFileTableColumnEnum.Genre => "var(--table-track-text)",
+                MediaFileTableColumnEnum.Year => "var(--table-track-year)",
+                MediaFileTableColumnEnum.Added => "var(--table-track-added)",
+                _ => throw new InvalidEnumArgumentException(nameof(column), (int)column, typeof(MediaFileTableColumnEnum))
+        };
+    }
+
+    private Guid? _dragKey;
+    private Guid? _overKey;
+
+    private string DraggableValue => IsReorderable.ToString().ToLowerInvariant();
+
+    private string? RowTitle => OnMove.HasDelegate && !IsReorderable ? ReorderHint : null;
+
+    private bool IsOver(MediaFileTableRow row) => _overKey == row.Key;
+
+    private static string SelectLabel(MediaFileTableRow row) => string.Format(AppTexts.SelectRow, row.MediaFile.Title);
+
+    private bool IsSelected(MediaFileTableRow row) => SelectedSet.Contains(row.Key);
+
+    private FileSyncStateEnum StateOf(MediaFileTableRow row) => StateMap.GetValueOrDefault(row.MediaFile.ID, FileSyncStateEnum.NotDownloaded);
+
+    private SortDirectionEnum DirectionOf(LibrarySortEnum column)
+    {
+        if (Sort != column) return SortDirectionEnum.None;
+
+        return Descending ? SortDirectionEnum.Descending : SortDirectionEnum.Ascending;
+    }
+
+    private Task ClickSortHandler(LibrarySortEnum column) => OnSortChanged.InvokeAsync(column);
+
+    // The host toggles: the new value of the box is already what its state will say once it has changed.
+    private Task ChangeAllHandler(bool selected) => OnToggleAll.InvokeAsync();
+
+    private Task ChangeSelectedHandler(MediaFileTableRow row) => OnToggleRow.InvokeAsync(row.Key);
+
+    // Ctrl is held to tick rows, and a double-click while it is held is two ticks, not a request to play.
+    private Task PlayHandler(MouseEventArgs args, MediaFileTableRow row) => args.CtrlKey ? Task.CompletedTask : OnPlay.InvokeAsync(row);
+
+    private Task ClickRowHandler(MouseEventArgs args, MediaFileTableRow row)
+    {
+        return RowSelect.IsToggledBy(args.CtrlKey) ? OnToggleRow.InvokeAsync(row.Key) : Task.CompletedTask;
+    }
+
+    // The tick box has its own click: it must not also count as a click on the row, or one press would tick and untick.
+    private static void IgnoreClick() { }
+
+    private Task ContextMenuHandler(MouseEventArgs args, MediaFileTableRow row) => OnContextMenu.InvokeAsync((args, row));
+
+    private void DragStartHandler(MediaFileTableRow row)
+    {
+        if (!IsReorderable) return;
+
+        _dragKey = row.Key;
+    }
+
+    // A drag that ended anywhere but on a row (outside the table, or Escape) leaves nothing marked.
+    private void DragEndHandler()
+    {
+        _dragKey = null;
+        _overKey = null;
+    }
+
+    private void DragOverHandler(MediaFileTableRow row)
+    {
+        if (_dragKey is null) return;
+
+        _overKey = row.Key;
+    }
+
+    private async Task DropHandler(MediaFileTableRow target)
+    {
+        Guid? dragged = _dragKey;
+        _dragKey = null;
+        _overKey = null;
+        if (dragged is null || dragged == target.Key || !IsReorderable) return;
+
+        await OnMove.InvokeAsync((dragged.Value, target.Key));
+    }
+
+}
