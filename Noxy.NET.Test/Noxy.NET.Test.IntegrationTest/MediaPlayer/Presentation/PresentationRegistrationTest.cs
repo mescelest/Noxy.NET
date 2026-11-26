@@ -20,6 +20,7 @@ public class PresentationRegistrationTest
         services.AddSingleton<IAudioPlayer>(new FakeAudioPlayer());
         services.AddSingleton<IDevicePreferenceStorage>(new FakeDevicePreferenceStorage());
         services.AddSingleton<IFileSaver>(new FakeFileSaver());
+        services.AddSingleton<IFolderOpener>(new FakeFolderOpener());
         services.AddFluxor(options => options.ScanAssemblies(typeof(PresentationAssemblyMarker).Assembly));
         services.AddPresentation();
         services.AddStorage(Path.Combine(Path.GetTempPath(), $"registration-{Guid.CreateVersion7()}"));

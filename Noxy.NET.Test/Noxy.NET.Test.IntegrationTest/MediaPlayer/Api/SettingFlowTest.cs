@@ -60,14 +60,18 @@ public class SettingFlowTest
         HttpResponseMessage shuffle = await Patch(api, user, SettingKey.Shuffle, """{"value":"SpreadArtists"}""");
         HttpResponseMessage merge = await Patch(api, user, SettingKey.MergeOnRename, """{"value":true}""");
         HttpResponseMessage keep = await Patch(api, user, SettingKey.KeepQueuedItems, """{"value":true}""");
+        HttpResponseMessage prefetch = await Patch(api, user, SettingKey.PrefetchCount, """{"value":5}""");
+        HttpResponseMessage update = await Patch(api, user, SettingKey.UpdateFileMetadata, """{"value":true}""");
         HttpResponseMessage listResponse = await api.GetPath(user.Token, "/Settings");
         List<ResponseSetting> list = await listResponse.ReadJson<List<ResponseSetting>>();
 
-        Assert.All([repeat, shuffle, merge, keep], x => Assert.Equal(HttpStatusCode.OK, x.StatusCode));
+        Assert.All([repeat, shuffle, merge, keep, prefetch, update], x => Assert.Equal(HttpStatusCode.OK, x.StatusCode));
         Assert.Equal("SpreadArtists", Value(list.Single(x => x.Key == SettingKey.Shuffle)).GetString());
         Assert.Equal("Forever", Value(list.Single(x => x.Key == SettingKey.Repeat)).GetString());
         Assert.True(Value(list.Single(x => x.Key == SettingKey.KeepQueuedItems)).GetBoolean());
         Assert.True(Value(list.Single(x => x.Key == SettingKey.MergeOnRename)).GetBoolean());
+        Assert.Equal(5, Value(list.Single(x => x.Key == SettingKey.PrefetchCount)).GetInt32());
+        Assert.True(Value(list.Single(x => x.Key == SettingKey.UpdateFileMetadata)).GetBoolean());
         Assert.All(list, x => Assert.True(x.TimeModified > DateTime.UnixEpoch));
         Assert.NotEqual(defaultETag, listResponse.GetETag());
     }

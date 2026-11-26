@@ -53,6 +53,9 @@ public static class PresentationConstants
     // A shuffle or repeat mode changes on screen at once and is sent to the server this long after the last change.
     public const int ModeSaveMilliseconds = 500;
 
+    // Picked files are copied to a folder of the temp path with this name and a unique ending until they are sent.
+    public const string UploadStagingFolderPrefix = "noxy-upload-";
+
     // The most items a source puts into the queue: the same as the most media files a library may hold (the server default), so a whole library fits. It keeps the saved queue and what is sent to the server small.
     public const int QueueMaxItemCount = 5000;
 

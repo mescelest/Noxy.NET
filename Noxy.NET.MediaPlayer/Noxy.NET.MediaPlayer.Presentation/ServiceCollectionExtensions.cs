@@ -51,7 +51,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IMetadataActionService, MetadataActionService>();
             services.AddSingleton<IHomeService, HomeService>();
             services.AddScoped<IStateBridgeService, StateBridgeService>();
-            services.AddSingleton<IDeviceResetService, DeviceResetService>();
+            services.AddScoped<IDeviceResetService, DeviceResetService>();
             services.AddSingleton<IAppStartupService, AppStartupService>();
 
             return services;

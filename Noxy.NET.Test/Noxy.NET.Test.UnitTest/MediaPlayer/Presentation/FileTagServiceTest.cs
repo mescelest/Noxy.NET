@@ -320,9 +320,7 @@ public class FileTagServiceTest
     {
         ResponseMediaFile media = await Held();
         ResponseMediaFile edited = new() { ID = media.ID, Title = "Edited", ContentType = media.ContentType, SizeBytes = media.SizeBytes, TimeCreated = media.TimeCreated, TimeModified = Second };
-#pragma warning disable xUnit1031
         _writer.BeforeWrite = _ => _storeMetadata.SaveMediaFile(edited).Wait(TestContext.Current.CancellationToken);
-#pragma warning restore xUnit1031
 
         await _service.Update([media.ID]);
         _writer.BeforeWrite = null;
@@ -404,23 +402,23 @@ public class FileTagServiceTest
     public async Task Update_AndCheckFiles_AtOnce_DoNotTouchTheSameFileConcurrently()
     {
         ResponseMediaFile media = await Held();
-        using ManualResetEventSlim entered = new();
-        using ManualResetEventSlim release = new();
+        TaskCompletionSource entered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource release = new(TaskCreationOptions.RunContinuationsAsynchronously);
         _writer.BeforeWrite = _ =>
         {
-            entered.Set();
-            release.Wait(TestContext.Current.CancellationToken);
+            entered.TrySetResult();
+            release.Task.Wait(TestContext.Current.CancellationToken);
         };
 
         Task update = _service.Update([media.ID]);
-        await Task.Run(() => entered.Wait(TestContext.Current.CancellationToken), TestContext.Current.CancellationToken);
+        await entered.Task;
         Task check = _service.CheckFiles();
         await Task.Delay(100, TestContext.Current.CancellationToken);
 
         Assert.False(check.IsCompleted);
         Assert.Empty(_reader.ReadList);
 
-        release.Set();
+        release.SetResult();
         await Task.WhenAll(update, check);
     }
 

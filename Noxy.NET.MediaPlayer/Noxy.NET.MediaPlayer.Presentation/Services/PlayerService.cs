@@ -156,7 +156,9 @@ public class PlayerService(
     {
         EnsureWired();
 
-        ShuffleModeEnum shuffle = await serviceSetting.GetShuffle();
+        // The mode the user chose, also while the server has not heard of it yet: the stored setting can still be the old one.
+        await RefreshModes();
+        ShuffleModeEnum shuffle = Shuffle;
         if (!await serviceQueue.StartSource(source, startID, shuffle)) return false;
 
         int version;

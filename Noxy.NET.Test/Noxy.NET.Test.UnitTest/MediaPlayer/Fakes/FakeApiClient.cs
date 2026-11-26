@@ -222,12 +222,19 @@ public sealed class FakeApiClient : IApiClient
 
     public List<(string FileName, string? ContentType, Guid JobID)> UploadCallList { get; } = [];
 
-    public Task<ResponseUploadAccepted> UploadMedia(string fileName, string? contentType, Func<Stream> openContent)
+    // The bytes of every file sent, read from the stream UploadMedia was given, in the order of the calls.
+    public List<byte[]> UploadContentList { get; } = [];
+
+    public async Task<ResponseUploadAccepted> UploadMedia(string fileName, string? contentType, Func<Stream> openContent)
     {
         ResponseUploadAccepted accepted = UploadHandler(fileName);
+        await using Stream content = openContent();
+        using MemoryStream copy = new();
+        await content.CopyToAsync(copy);
+        UploadContentList.Add(copy.ToArray());
         UploadCallList.Add((fileName, contentType, accepted.JobID));
 
-        return Task.FromResult(accepted);
+        return accepted;
     }
 
     public Task<ResponsePlaylistDetail> AddPlaylistEntryList(Guid id, RequestAddPlaylistEntry request)

@@ -786,6 +786,21 @@ public class PlayerServiceTest
         Assert.Equal(RepeatModeEnum.Forever, _player.Repeat);
     }
 
+
+    [Fact]
+    public async Task StartingASource_WhileAShuffleChangeIsStillPending_UsesTheModeTheUserChose()
+    {
+        List<Guid> idList = await AddMedia(4);
+        await Start(idList[0]);
+        _delay.IsManual = true;
+        await _player.SetShuffle(ShuffleModeEnum.Random);
+
+        await Start(idList[1]);
+
+        // Shuffled, every other media file is in the queue; in order, only the ones after the started one are.
+        Assert.Equal(3, Snapshot().SourceList.Count);
+    }
+
     [Fact]
     public async Task ChangesInARow_SendOnlyTheLastOne_AfterThePause()
     {

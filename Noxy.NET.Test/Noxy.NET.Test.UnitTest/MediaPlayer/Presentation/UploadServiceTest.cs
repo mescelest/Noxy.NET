@@ -2,6 +2,7 @@ using System.Net;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.MediaPlayer.Presentation.Services;
@@ -60,6 +61,78 @@ public class UploadServiceTest
 
         Assert.Equal(["a.mp3", "b.mp3", "c.mp3"], _api.UploadCallList.Select(x => x.FileName));
         Assert.All(_api.UploadCallList, x => Assert.Equal("audio/mpeg", x.ContentType));
+    }
+
+
+    [Fact]
+    public async Task Upload_ReadsEveryPickedFile_BeforeSendingTheFirst()
+    {
+        List<string> orderList = [];
+
+        UploadFile Picked(string name) => new(name, "audio/mpeg", () =>
+        {
+            orderList.Add($"read {name}");
+            return new MemoryStream([1]);
+        });
+
+        _api.UploadHandler = name =>
+        {
+            orderList.Add($"send {name}");
+            return new() { JobID = Guid.NewGuid() };
+        };
+
+        await _service.Upload([Picked("a"), Picked("b"), Picked("c")]);
+
+        Assert.Equal(["read a", "read b", "read c", "send a", "send b", "send c"], orderList);
+    }
+
+    [Fact]
+    public async Task Upload_SendsTheBytesOfEachFile()
+    {
+        await _service.Upload([new("a", "audio/mpeg", () => new MemoryStream([1, 2, 3])), new("b", "audio/mpeg", () => new MemoryStream([4, 5]))]);
+
+        Assert.Equal([[1, 2, 3], [4, 5]], _api.UploadContentList);
+    }
+
+    [Fact]
+    public async Task Upload_WhenAPickedFileCannotBeRead_ReportsIt_AndSendsTheRest()
+    {
+        UploadFile broken = new("b", "audio/mpeg", () => throw new IOException("The file is gone."));
+
+        await _service.Upload([File("a"), broken, File("c")]);
+        Report(0, "a");
+        Report(1, "c");
+
+        UploadBatchResult result = Assert.Single(_completedList);
+        Assert.Equal(2, result.SucceededCount);
+        UploadFailure failure = Assert.Single(result.FailureList);
+        Assert.Equal("b", failure.Name);
+        Assert.Equal(["a", "c"], _api.UploadCallList.Select(x => x.FileName));
+    }
+
+    [Fact]
+    public async Task Upload_WhenASendFailsUnexpectedly_ReportsIt_AndSendsTheRest()
+    {
+        _api.UploadHandler = name => name == "b" ? throw new IOException("The connection was reset.") : new() { JobID = Guid.NewGuid() };
+
+        await _service.Upload([File("a"), File("b"), File("c")]);
+        Report(0, "a");
+        Report(1, "c");
+
+        UploadBatchResult result = Assert.Single(_completedList);
+        Assert.Equal(2, result.SucceededCount);
+        Assert.Equal("b", Assert.Single(result.FailureList).Name);
+    }
+
+    [Fact]
+    public async Task Upload_RemovesItsTemporaryFiles_WhenDone()
+    {
+        string pattern = $"{PresentationConstants.UploadStagingFolderPrefix}*";
+        int before = Directory.GetDirectories(Path.GetTempPath(), pattern).Length;
+
+        await _service.Upload([File("a"), File("b")]);
+
+        Assert.Equal(before, Directory.GetDirectories(Path.GetTempPath(), pattern).Length);
     }
 
     [Fact]

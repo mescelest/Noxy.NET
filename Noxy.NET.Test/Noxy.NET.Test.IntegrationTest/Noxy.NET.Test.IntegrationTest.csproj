@@ -49,6 +49,7 @@
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeAudioPlayer.cs" Link="MediaPlayer\Fakes\FakeAudioPlayer.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeDevicePreferenceStorage.cs" Link="MediaPlayer\Fakes\FakeDevicePreferenceStorage.cs"/>
         <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeFileSaver.cs" Link="MediaPlayer\Fakes\FakeFileSaver.cs"/>
+        <Compile Include="..\Noxy.NET.Test.UnitTest\MediaPlayer\Fakes\FakeFolderOpener.cs" Link="MediaPlayer\Fakes\FakeFolderOpener.cs"/>
     </ItemGroup>
 
 </Project>

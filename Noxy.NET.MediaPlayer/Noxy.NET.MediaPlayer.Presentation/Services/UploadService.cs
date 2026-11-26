@@ -33,6 +33,8 @@ public sealed class UploadService : IUploadService, IDisposable
     private readonly Dictionary<Guid, ResponseUploadResult> _earlyMap = [];
     private int _activeCount;
 
+    private const int BufferSize = 81920;
+
     public event Action<int>? Started;
 
     public event Action<UploadBatchResult>? BatchCompleted;
@@ -53,15 +55,20 @@ public sealed class UploadService : IUploadService, IDisposable
         Started?.Invoke(fileList.Count);
         lock (_lock) _activeCount++;
 
+        string folder = Path.Combine(Path.GetTempPath(), $"{PresentationConstants.UploadStagingFolderPrefix}{Guid.CreateVersion7()}");
         try
         {
-            foreach (UploadFile file in fileList)
+            // Every picked file is read before the first one is sent. A picked file can only be read while the page that offered it is still there, and the first file that arrives changes the page.
+            List<UploadFile> stagedList = await Stage(batch, fileList, folder);
+            foreach (UploadFile file in stagedList)
             {
                 await Send(batch, file);
             }
         }
         finally
         {
+            DeleteFolder(folder);
+
             lock (_lock)
             {
                 _activeCount--;
@@ -77,6 +84,42 @@ public sealed class UploadService : IUploadService, IDisposable
         _serviceSync.UploadResultReceived -= OnUploadResultReceived;
     }
 
+    // Copies each picked file into the folder and returns the files as they are read from there. A file that cannot be read is a failure of its own and does not stop the others.
+    private async Task<List<UploadFile>> Stage(Batch batch, List<UploadFile> fileList, string folder)
+    {
+        List<UploadFile> stagedList = [];
+        foreach (UploadFile file in fileList)
+        {
+            string path = Path.Combine(folder, Guid.CreateVersion7().ToString());
+            try
+            {
+                Directory.CreateDirectory(folder);
+                await using Stream source = file.OpenContent();
+                await using FileStream target = new(path, FileMode.CreateNew, FileAccess.Write, FileShare.None, BufferSize, true);
+                await source.CopyToAsync(target);
+            }
+            catch (Exception)
+            {
+                Finish(batch, UploadOutcomeEnum.Failed, new(file.Name, PresentationTexts.ActionMessageUploadFailed));
+                continue;
+            }
+
+            stagedList.Add(file with { OpenContent = () => new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, true) });
+        }
+
+        return stagedList;
+    }
+
+    // A temporary folder that cannot be removed now is left to the system.
+    private static void DeleteFolder(string folder)
+    {
+        try
+        {
+            if (Directory.Exists(folder)) Directory.Delete(folder, true);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException) { }
+    }
+
     private async Task Send(Batch batch, UploadFile file)
     {
         ResponseUploadAccepted accepted;
@@ -87,6 +130,12 @@ public sealed class UploadService : IUploadService, IDisposable
         catch (Exception exception) when (exception is ApiException || exception.IsOfflineFailure)
         {
             Finish(batch, UploadOutcomeEnum.Failed, new(file.Name, exception.ToActionMessage(PresentationTexts.ActionMessageUploadFailed)));
+            return;
+        }
+        catch (Exception)
+        {
+            // Any other failure of one file is that file's own: the rest of the batch is still sent, and the batch still ends.
+            Finish(batch, UploadOutcomeEnum.Failed, new(file.Name, PresentationTexts.ActionMessageUploadFailed));
             return;
         }
 
