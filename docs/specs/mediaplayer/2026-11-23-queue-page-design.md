@@ -1,10 +1,8 @@
-# Queue page instead of the queue popup: design
-
-Status: built (the `/queue` page, `QueueList` and `QueueContextMenu`; the popup `QueuePanel` is deleted).
+# Queue page: design
 
 ## Intent
 
-The queue is a small popup opened from the player bar. It is hard to navigate and gives no overview, and while it was being tried it closed on every click inside it. The user wants a dedicated page for the queue, laid out like the playlist and Library pages, where the whole queue is one scrollable list: what was played above the current song, what is coming below it. The popup goes away completely.
+The queue is a page, laid out like the playlist and Library pages, where the whole queue is one scrollable list: what was played above the current song, what is coming below it. It gives an overview and is easy to navigate.
 
 ## Goals
 
@@ -14,7 +12,7 @@ The queue is a small popup opened from the player bar. It is hard to navigate an
 - The same header as the Library and playlist pages (`MediaFileHeader`): the title "Queue", the count line, "N selected" and the actions button when rows are selected, and an outlined "Clear" button on the right of the tool row.
 - Rows can be selected (a checkbox on each row, one in the header row for all), and a context menu offers actions that fit a queue. The actions differ for one row and for several.
 - Rows are draggable by the whole row to reorder, as on the playlist page. Double-click jumps to the song. Text in rows is not selectable.
-- The player-bar queue button goes to the page. The popup panel (`QueuePanel`) and its styles are deleted.
+- The player-bar queue button goes to the page.
 
 ## Non-goals
 
@@ -63,11 +61,11 @@ The user picked 2, and asked for multi-select with its own context options.
 - *Play now* (one row only): jump to it.
 - *Play next*: put the rows at the front of the user queue, in their order in the list.
 - *Remove from queue*: for upcoming rows (history and the current row are skipped; if none of the chosen rows can be removed the item is disabled with a reason).
-- The library actions: Download, Save as file, Add to playlist, Remove from device (through `ILibraryActionService`, on the media file IDs of the rows).
+- The library actions: Download, Manage file (update file metadata, save file as, open containing folder), Add to playlist, Remove from device (through `ILibraryActionService`, on the media file IDs of the rows).
 
 Removing several rows is several `RemoveFromQueue` calls in a row; a failure for one is reported like the Library does with a bulk result toast.
 
-**Player bar.** The queue button becomes a link to `/queue` (an `<a>`-based or `NavigationManager` button, one of the existing patterns). `QueuePanel.razor`, its CSS, `FooterElement`'s use of it and the `PopoverID` constant are removed. The `PopoverSurface` rows and labels stay: the device list uses them.
+**Player bar.** The queue button is a link to `/queue` (an `<a>`-based or `NavigationManager` button, one of the existing patterns). The `PopoverSurface` rows and labels are used by the device list.
 
 **Texts and style.** New texts in `AppTexts.resx` and its designer file, with the count helper for singular and plural. Colours and sizes from `variables.css` only; the selected and current colours use `--color-theme`.
 

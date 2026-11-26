@@ -1,7 +1,5 @@
 # Context menu and popover: design
 
-Status: agreed in conversation with the user on 2026-11-21 (approach chosen, behaviour decided where marked). Built: `ContextMenu` and `Popover` are in `Noxy.NET.UI.Shared`, and the Library, playlist and queue menus use them.
-
 ## Intent
 
 The app has three hand-made pop-ups: the Library **Actions** menu, the player bar's **device picker** and the **queue panel**. Each has its own backdrop element and fixed placement, none checks the window edges, and each closes in its own way. The user wants two reusable shared components so that anything that pops out of a click behaves the same way and stays inside the window:
@@ -20,7 +18,7 @@ The context menu is built on the popover.
 - **Keyboard and screen reader support** for the menu: arrow keys, Enter and Space, Right and Left for sub-menus, Escape, Home and End; menu roles and expanded states; focus goes back to what opened it.
 - **No backdrop element.** Clicking away closes the panel through the browser's own light dismiss.
 - **The queue panel closes when you click away** (the user's decision). The device picker does too.
-- **A "⋯" context button on each playlist in the sidebar** (the user's request, added to this design on 2026-11-21): it appears when the pointer is over the playlist, uses the wireframe `None` button style, and opens a menu of playlist actions (see "Where the app uses them").
+- **A "⋯" context button on each playlist in the sidebar** (the user's request): it appears when the pointer is over the playlist, uses the wireframe `None` button style, and opens a menu of playlist actions (see "Where the app uses them").
 
 ## Non-goals
 
@@ -104,8 +102,8 @@ Failures even if it technically works:
    - **The menu** (user-facing wording, my proposal, built from what the playlist services already do):
      - **Play:** starts the playlist.
      - **Download all:** downloads every song of the playlist to this device.
-     - **Edit…:** opens an "Edit playlist" dialog with the name field and the "Allow the same song twice" option (a checkbox), in the style of the "New playlist" dialog, and saves both in one update. A dialog rather than separate menu items so that it can take more playlist settings later (the user's decision, 2026-11-21). The server refuses to turn the duplicates rule off while the playlist has duplicates; the refusal is shown inside the dialog as a form error, since it belongs to the form.
-     - **Refresh:** syncs the playlist from the server again (moved here from the playlist page; see `2026-11-21-playlist-page-design.md`).
+     - **Edit…:** opens an "Edit playlist" dialog with the name field and the "Allow the same song twice" option (a checkbox), in the style of the "New playlist" dialog, and saves both in one update. A dialog rather than separate menu items so that it can take more playlist settings later (the user's decision). The server refuses to turn the duplicates rule off while the playlist has duplicates; the refusal is shown inside the dialog as a form error, since it belongs to the form.
+     - **Refresh:** syncs the playlist from the server again (moved here from the playlist page; see `../mediaplayer/2026-11-21-playlist-page-design.md`).
      - A separator.
      - **Delete playlist:** the destructive item, last. The first activation turns it into "Click again to delete" and keeps the menu open; the second deletes. Closing the menu or moving to another item puts it back. *(my call, in the spirit of the click-twice delete the user asked for on the server list; a confirmation dialog would also do)* If the deleted playlist is the one on screen, the app goes back to Home.
    - **Left out on purpose:** "Upload to playlist" (it needs a file picker, which a menu item cannot open reliably; it stays on the playlist page). "Add to queue" is a later change (see the non-goals).

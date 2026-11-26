@@ -1,6 +1,6 @@
 # Metadata entities: artists, albums and genres, filled in on upload
 
-Status: implemented (backend only), checked against the code on 2026-11-15. The build was done from an implementation plan that has since been deleted; the calls made during it are in the "How it ended up" section below. It takes the data layer out of `2026-11-15-library-organizer-design.md` (which stays the description of the later panel and drag-and-drop UI). Where the build differs from the draft the text says so. Lines marked *(my call)* are decisions made without asking.
+Lines marked *(my call)* are decisions made without asking. The data layer of `2026-11-15-library-organizer-design.md` is described here, and the calls made during the build are in the "Implementation notes" section below.
 
 ## Intent
 
@@ -59,7 +59,6 @@ A media file's artist, album, album artist and genre are free text today, and an
 - **EntityArtist, EntityGenre:** ID, owner, `Name`, `NameKey` (the normalised name, unique per user), created and modified times.
 - **EntityAlbum:** ID, owner, `Title`, `TitleKey`, the set of its artists, and an `IdentityKey` (title key plus the sorted artist IDs) that is unique per user and recomputed when its artists change.
 - **Links:** file to artist (ordered, so "A; B" keeps its order), file to genre, album to artist (ordered), and an optional album on the file.
-- The existing text columns on the file metadata are kept until the backfill has run, then dropped in a later migration *(my call)*.
 
 ### Upload
 
@@ -74,7 +73,7 @@ A media file's artist, album, album artist and genre are free text today, and an
 - `POST` to create, `PATCH /{id}` to rename (and for an album, to set its artists), `DELETE /{id}` (clears that link from its files; files are never deleted). A rename that collides with another item depends on the user setting `MergeOnRename` (see "User settings"): off (the default), it is a `409` that names the other item so a client can offer a merge; on, the renamed item is merged into the existing one and the existing one keeps its name. The user chose this.
 - `POST /{kind}/{id}/MediaFileList` and `.../Remove`: assign or clear the item on a list of files. For an album, assigning replaces the file's album.
 - `POST /{kind}/{id}/Merge` (into another item) and, for artists and genres, `POST /{kind}/{id}/Split` with the names to split into (existing items are reused, new ones created).
-- `ResponseMediaFile` gains `artistIDList`, `albumID`, `albumArtistIDList`, `genreIDList` next to the existing text fields. `PATCH /Media/{id}` accepts the same ID fields.
+- `ResponseMediaFile` carries `artistIDList`, `albumID`, `albumArtistIDList`, `genreIDList` next to the joined artist, album, album artist and genre text. `PATCH /Media/{id}` accepts the same ID fields.
 - Hub: one pair of events per kind, an updated one with the item and a deleted one with the ID; files changed by an assignment, rename, merge, split or delete are pushed with the existing `MediaUpdated`.
 
 ### User settings
@@ -83,21 +82,21 @@ Replaced by `2026-11-15-user-settings-design.md`: typed settings, one value per 
 
 ### Migration
 
-A schema migration adds the tables and links. An idempotent, resumable start-up step then reads each file's existing text, applies the same split and matching rules per user, creates and links the items, and marks the file done. Nothing is dropped until every file is done. A test proves the step can run twice with the same result.
+A schema migration adds the tables and links.
 
 ### Tests
 
-Unit tests with the fakes for the splitting service (each separator, no split on `&`, `,` or `/`, names kept intact, duplicates inside one credit), the key normalisation, upload linking (album created once for a whole album, the second track reuses artists and album, concurrent uploads of the same artist make one), title order, unreadable tags, every manual operation (create, rename collision with the setting on and off, merge, split, assign, delete that clears the links), the settings record (defaults, PATCH, ETag, push, ownership), and ETag changes after each. Repository integration tests for the unique keys and cascades, the migration step, and end-to-end tests through HTTP and the hub, including `PATCH` with text and with IDs.
+Unit tests with the fakes for the splitting service (each separator, no split on `&`, `,` or `/`, names kept intact, duplicates inside one credit), the key normalisation, upload linking (album created once for a whole album, the second track reuses artists and album, concurrent uploads of the same artist make one), title order, unreadable tags, every manual operation (create, rename collision with the setting on and off, merge, split, assign, delete that clears the links), the settings record (defaults, PATCH, ETag, push, ownership), and ETag changes after each. Repository integration tests for the unique keys and cascades, and end-to-end tests through HTTP and the hub, including `PATCH` with text and with IDs.
 
 ## Left to the builder
 
-Table and class shapes, the exact normalisation (including which Unicode form), the tag reading mechanics and which TagLib properties map to which fields, how multi-value artists are written back into a downloaded file, batch sizes for the backfill, and the response class shapes.
+Table and class shapes, the exact normalisation (including which Unicode form), the tag reading mechanics and which TagLib properties map to which fields, how multi-value artists are written back into a downloaded file, and the response class shapes.
 
 ## Questions that could still change the design
 
 None open. Decided by the user: a rename that collides is controlled by the synced `MergeOnRename` setting (default off); deleting an artist, album or genre clears the link from its files and keeps the files; labels are left for later; credits are split only where it is unambiguous.
 
-## How it ended up
+## Implementation notes
 
 Calls made while building, beyond the design above :
 
@@ -107,4 +106,3 @@ Calls made while building, beyond the design above :
 - **Album identity follows its artists.** Deleting, merging or splitting an artist replaces it in every album artist list, recomputes the identity key, and merges two albums that become the same.
 - **IDs and text for the same field, or `albumID` with album text, are a `400`** on `PATCH /Media/{id}`; a file belongs to the album with a given title and artist set, so changing the album artists moves it to the matching album.
 - **ID3v2.2 and 2.3 have no list of values**, and TagLib splits their text frames on "/". The reader puts the pieces back together so "AC/DC" stays one artist; the writer writes ID3v2.4 so several artists are separate values.
-- **Legacy text** stays in the old columns until the start-up backfill has linked it and cleared it; a response shows the legacy text only for a kind the file has no items of. Album artist text with no album keeps its legacy text.

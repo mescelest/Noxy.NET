@@ -1,6 +1,6 @@
 # Entity management as a set of libraries: schema in code, data with history, relations: design
 
-Status: direction agreed with the user on 2026-11-23 (decisions below). Built so far: the Definitions, Domain, Persistence, Application and Contract libraries and the demo definitions (the API and Presentation libraries and the Administration are not built yet). The detailed shape of each phase is to be confirmed before it starts. Priority: the rebuilt Administration, as the way to test the data in real time.
+Priority: the rebuilt Administration, as the way to test the data in real time. The detailed shape of each phase is confirmed before it starts.
 
 ## Intent
 
@@ -155,4 +155,4 @@ The Administration is the test bed for everything, so the first pass is a thin s
 6. **Demo implementation:** the full investigation definitions and the demo frontend, built only on the libraries. Anything that turns out to be missing from the libraries is added to them.
 7. **Cleanup:** delete `C:\Projects\Noxy.NET.EntityManagement.Old` when nothing is left to copy from it.
 
-Each phase builds and tests on its own. The repository keeps building throughout, because the old code is no longer part of it.
+Each phase builds and tests on its own, and the repository builds throughout.

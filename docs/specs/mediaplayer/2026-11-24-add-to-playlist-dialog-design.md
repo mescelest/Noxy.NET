@@ -1,7 +1,5 @@
 # Add to playlist dialog and playlist graphic
 
-Status: implemented 2026-11-24.
-
 ## Intent
 
 The "Add to playlist" dialog is a plain list of text buttons, copied into the library and queue menus, and it does not look like the rest of the app. Playlists also have no graphic.

@@ -1,6 +1,6 @@
 # Library organiser: genres, artists and albums as things you can sort files into
 
-Status: the panel and drag-and-drop UI became the Organise page, see `2026-11-24-organise-page-design.md` (drag and drop is still not built). The data layer (the items, upload linking, the endpoints and the migration) has moved into `2026-11-15-metadata-entities-design.md`, which supersedes the data and endpoint parts of this doc and answers its questions about several artists per file, splitting credits and manual editing. Written from the user's description on 2026-11-15 so nothing built now blocks it. Everything marked *(my proposal)* is a suggestion, not a decision. The questions at the end are the user's to answer before this can be planned.
+The Organise page (`2026-11-24-organise-page-design.md`) is the UI for this; drag and drop is not built. The data layer (the items, upload linking and the endpoints) is in `2026-11-15-metadata-entities-design.md`, which also answers the questions about several artists per file, splitting credits and manual editing. Everything marked *(my proposal)* is a suggestion, not a decision. The questions at the end are the user to answer before this can be planned.
 
 ## Intent
 
@@ -13,7 +13,7 @@ Today a media file's artist, album, album artist and genre are free text. The sa
 - **Drag to assign:** the user ticks library rows (or drags one), drops them onto a folder, and that genre, artist or album is added to those files.
 - **Existing text tags carry over.** On first use, the distinct values already typed into files become items, with no tag lost and no file changed in a way the user did not ask for.
 - **Everything syncs like playlists do:** each list has an ETag and a hub push, and every device sees an assignment or a rename without a reload.
-- **A saved or downloaded file still carries the right tags,** written from the item names at download time, as the "Save as file" copy does today.
+- **A saved or downloaded file still carries the right tags,** written from the item names at download time, as the "Save file as" copy does.
 - *(my proposal)* Renaming an item changes it on all its files at once, and two items can be merged.
 
 ## Non-goals

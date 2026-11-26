@@ -1,10 +1,6 @@
 # Frontend screens: shell, library, home, playlists and login: design
 
-Status: the outline (shell, header, sidebar sections, pages, sign-in) is approved by the user as of 2026-11-16; the look (colours, gaps, fonts and so on) is explicitly **not decided**, see "Styling through variables". Written 2026-11-15 from the brainstorming conversation. It sits on top of `2026-11-15-frontend-sync-player-design.md` (sync, stores, downloads, player) and changes it in two places: Google sign-in is now in scope, and two backend additions are needed (see "Backend additions"). Lines marked *(my proposal)* are my suggestions, not decisions. The mockups the user reacted to are in `docs/temp/brainstorm/` (`shell-layout-v2.html`, `library-view-v2.html`, `login-screen-v2.html`).
-
-Built (2026-11-17, Windows): the shell, sign-in and server address, the virtualized Library page and its actions (including Save as file), playlists, Home with Continue, the player bar, device picker, Account and Settings with the theme. The queue panel was later replaced by the `/queue` page (`2026-11-23-queue-page-design.md`). Not tried: Android and every on-screen manual check, which the user runs. Left out on purpose: the browse-by-genre/artist/album section, cover art, and the YouTube and Bandcamp integrations (empty pages).
-
-Backend status (2026-11-16): the saved session is gone, the `KeepQueuedItems` setting exists, and the live session, device registry and remote commands are built on the hub (see `2026-11-16-remote-playback-design.md`).
+The outline (shell, header, sidebar sections, pages, sign-in) is approved. The look (colours, gaps, fonts and so on) is **not decided**, see "Styling through variables". It sits on top of `2026-11-15-frontend-sync-player-design.md` (sync, stores, downloads, player). Lines marked *(my proposal)* are my suggestions, not decisions.
 
 ## Intent
 
@@ -16,23 +12,23 @@ The app is a sync-and-play music player. This design is the part the user sees: 
 - **Header:** a button that hides and shows the sidebar, the logo, a search bar, and room on the right for more (sync status, the user). It can be extended.
 - **Sidebar in sections:**
   1. *Your music:* Home, Library, Account, Settings and other fixed places.
-  2. *Integrations:* YouTube (to find and download files; only an empty page for now) and Bandcamp (a placeholder).
+  2. *Integrations:* YouTube (to find and download files; only an empty page) and Bandcamp (a placeholder).
   3. *Playlists:* a "New playlist" button at the top of the section, then the user's playlists, in an order of the user's own, set by dragging a playlist by its grip and saved on the server; a new playlist is always on top *(the user's call, 2026-11-24; it was most recently played first, then newest created first)*. See `2026-11-24-playlist-order-design.md`.
-  4. A section for browsing by genre, artist or album became the Organise page (`2026-11-24-organise-page-design.md`).
+  4. *Organise:* the page for the artists, albums and genres (`2026-11-24-organise-page-design.md`).
 - **Home page:** a stack of sections that can grow. First section: the playlists played most recently, as cards. Second: "Continue", which resumes the listening session (see below).
-- **Library page:** a frosted-glass panel pinned to the top of the centre while the list scrolls. Row 1: the title, file and selection counts, an **Actions** button (three dots, opens a menu, disabled until at least one row is ticked), the search box, and later a button that opens the organiser sidebar. Row 2: the column headers with a select-all tick box. Clicking a header sorts by it; clicking again reverses. Under the panel: one detailed row per file with a tick box, the on-device status icon (on this device, downloading, not downloaded), and the columns. Right-clicking a file opens a context menu with the same actions as the Actions menu, acting on that file; when the file is one of two or more ticked, a sub-menu "N selected songs" repeats the actions for the whole group (see `2026-11-21-context-menu-and-popover-design.md`).
+- **Library page:** a frosted-glass panel pinned to the top of the centre while the list scrolls. Row 1: the title, file and selection counts, an **Actions** button (three dots, opens a menu, disabled until at least one row is ticked), the search box, and later a button that opens the organiser sidebar. Row 2: the column headers with a select-all tick box. Clicking a header sorts by it; clicking again reverses. Under the panel: one detailed row per file with a tick box, the on-device status icon (on this device, downloading, not downloaded), and the columns. Right-clicking a file opens a context menu with the same actions as the Actions menu, acting on that file; when the file is one of two or more ticked, a sub-menu "N selected songs" repeats the actions for the whole group (see `../shared/2026-11-21-context-menu-and-popover-design.md`).
 - **Pop-ups are shared components:** the Actions menu, the Library right-click menu, the playlist "⋯" menu, the device picker and the queue page all use the shared `Popover` and `ContextMenu` (browser popover, click-away close, kept inside the window); none draws its own backdrop or placement.
 - **Playlist "⋯" menu (sidebar):** each playlist row has a "⋯" button, shown on hover or focus (always on touch or a narrow window), and a right-click on the row opens the same menu: Play, Download all, Edit… (name and "Allow the same song twice" in one dialog), Refresh, and Delete playlist (first click asks "Click again to delete").
-- **Actions menu items:** download to this device, save as file, add to playlist, remove from this device, delete from library (last, in red) *(the items are my proposal)*. The list is built from one place so items can be added.
+- **Actions menu items:** download to this device, manage file (update its metadata, save a copy, show it in the file manager), add to playlist, remove from this device, delete from library (last, in red) *(the items are my proposal)*. The list is built from one place so items can be added.
 - **Sign-in screen:** no shell while signed out. One card with the logo, then the sign-in providers as a list of buttons (Google first), a divider, then tabs for *Sign in* and *Create account* with email and password. A failed attempt shows the server's message in the form. More providers later are one more button in the list.
 - **Forms use the existing WebForm components** (`WebForm`, `WebFormContext`, the input groups), which validate with the request classes' data annotations and place labels and errors. Styling is done on top of them for this app.
 - **Everything the user changes syncs** across their devices: playlists and their order, media files, the last-played time of a playlist. The listening queue is not synced as a record: each device keeps its own local copy (see "Listening session and queue").
 
 ## Non-goals
 
-- The browse-by-genre/artist/album sidebar and treating those as entities (its own design, later).
-- Playing a media file straight from the server, cover art, sharing, and editing tags from the UI in the first version.
-- The YouTube integration itself (finding and downloading). Only its place in the sidebar and an empty page now. Bandcamp is a placeholder.
+- The browse-by-genre/artist/album sidebar (its own design).
+- Playing a media file straight from the server, and sharing.
+- The YouTube integration itself (finding and downloading). Only its place in the sidebar and an empty page. Bandcamp is a placeholder.
 - A per-song "continue playing": a song always continues through the playlist or queue it was started from.
 
 ## Anti-goals
@@ -102,22 +98,18 @@ The app is a sync-and-play music player. This design is the part the user sees: 
 
 ### Styling through variables
 
-The user approved the outline on 2026-11-16 but is not sure about the colours, gaps and fonts, and wants them easy to change. So **no look is decided here**, and every visual value is a CSS custom property:
+The user is not sure about the colours, gaps and fonts, and wants them easy to change. So **no look is decided here**, and every visual value is a CSS custom property:
 
 - **One file.** The App's `wwwroot/css/variables.css` defines every value once, in `:root`. Its names and groups follow `Noxy.NET.EntityManagement.Administration/wwwroot/css/variables.css`, which the shared `Noxy.NET.UI` components already read (for example `SortableTable` uses `--size-gap-*` and `--color-offset-*`): text sizes (`--size-text-*`), gaps (`--size-gap-*`), border widths and radii (`--size-border-*`), control and icon sizes (`--size-control-*`, `--size-icon-*`), page and column widths, animation lengths (`--animation-length-*`), fonts (`--font-family-primary` and one shorthand per role: label, body, button), the semantic colours (`--color-muted`, `-highlight`, `-info`, `-success`, `-warning`, `-notice`, `-error`, `-disabled`) and the light/dark pair `--color-primary` and `--color-complementary` with their `color-mix` offsets. Using the same names is what lets the shared components look right with no extra work.
 - **App tokens in the same style.** What this app adds is also a variable, in the same file: the sidebar width, header height and player-bar height, the glass panel (blur, opacity, border colour), the library row height, the card sizes of the Home page, the queue panel width, and so on.
 - **The rule.** Component CSS (`*.razor.css` and any page style) contains no literal colour, font family, duration or size: only `var(...)`. A literal belongs in `variables.css` and nowhere else (0 and `100%` aside). A test scans the App's style files for colour literals, `font-family` values and durations outside `variables.css`, so the rule cannot erode.
 - **Changing the look** means editing that one file (or adding a theme block under `:root[theme="..."]`, as the `ThemeToggle` already switches). The defaults are the entity management project's values until the user chooses: they are placeholders, as are the mockups' colours.
 
-### Backend additions (needed before the Home page is complete)
+### Backend additions
 
-- **Last played.** `EntityPlaylist` gains a nullable `TimeLastPlayed`; `ResponsePlaylist` carries it; `POST /Playlist/{id}/Played` sets it to now and returns `204`. It is **not** the modified time: a play must not change the playlist's detail ETag or make devices refetch its entries. The playlist list ETag includes it, and the change is pushed as `PlaylistUpdated`. Another user's playlist is a `404`. The client calls it when playback starts from a playlist. *Built:* a second call within `Playback:PlayedWindowSeconds` (default 10) of the stored time changes and pushes nothing, so a double click or two devices count as one play; the pushed `PlaylistUpdated` carries the new stamp with the unchanged `timeModified`.
-- **Live session instead of a saved session.** The earlier `GET`/`PUT`/`DELETE /PlaybackSession` endpoints, the ETag and the `PlaybackSessionUpdated` and `PlaybackSessionCleared` pushes are **removed** (nothing was deployed). The live queue, the device registry, queue edits and commands go through the hub as described in `2026-11-16-remote-playback-design.md`; the "Continue" card resumes the device's own local copy of the queue.
+- **Last played.** `EntityPlaylist` has a nullable `TimeLastPlayed`; `ResponsePlaylist` carries it; `POST /Playlist/{id}/Played` sets it to now and returns `204`. It is **not** the modified time: a play must not change the playlist's detail ETag or make devices refetch its entries. The playlist list ETag includes it, and the change is pushed as `PlaylistUpdated`. Another user's playlist is a `404`. The client calls it when playback starts from a playlist. A second call within `Playback:PlayedWindowSeconds` (default 10) of the stored time changes and pushes nothing, so a double click or two devices count as one play; the pushed `PlaylistUpdated` carries the new stamp with the unchanged `timeModified`.
+- **Live session, not a saved session.** The live queue, the device registry, queue edits and commands go through the hub as described in `2026-11-16-remote-playback-design.md`; the "Continue" card resumes the device's own local copy of the queue.
 - **Sign-in with Google** needs only the existing endpoint plus the client IDs in the API's `Google:ClientIdList` setting (one per app: Android, Windows), which the user must create in Google Cloud Console.
-
-### Changes to the earlier frontend design
-
-Google sign-in moves from non-goal to goal; the metadata sync gains the last-played time (the playback session was dropped again: the live session of the remote playback design replaces it); the screens follow this design. The foundation and downloads plans cover everything below the screens; a backend plan for the two additions and a screens plan follow once this design is approved.
 
 ### Existing components to reuse (from `Noxy.NET.UI`)
 
@@ -131,7 +123,7 @@ The user pointed out the library has buttons and more besides the form component
 | Actions menu (three dots) | built from `Button` plus a small menu component; new if nothing in the library fits |
 | Login tabs (Sign in / Create account) | `TabSet` and `TabPage` |
 | Login and every form | `WebForm`, `WebFormContext`, and the input groups (`InputGroupText`, `InputGroupPassword`, ...); the form's built-in message box shows the server's error |
-| New playlist, confirm delete, save as file | `ModalDialog`, `BooleanDialog` and `DialogViewer` |
+| New playlist, confirm delete, save file as | `Dialog` |
 | Loading and sync-in-progress states | `Loader` |
 | Offline, failed download, empty states | `MessageBox` |
 | Library list | `Table` / `SortableTable` if they can do what the library needs (below), otherwise extend them |

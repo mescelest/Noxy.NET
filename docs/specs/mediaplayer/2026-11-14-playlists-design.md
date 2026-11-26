@@ -1,7 +1,5 @@
 # Playlists: design
 
-Status: implemented (backend). Checked against the code on 2026-11-15. Two parts of this doc were overtaken by later designs and are marked where they appear: the routes were renamed and each entry now carries its media file's data (`2026-11-15-sync-backend-design.md`), and the service layer became commands, queries and handlers (`2026-11-15-backend-cqrs-design.md`).
-
 ## Intent
 
 A user can group their library media files into named, ordered playlists. Playlists live on the server and sync to every device the way the library does: a cheap start-up diff, plus a live push when something changes. A device lists the playlists first and loads a playlist's media files only when the user opens it.
@@ -33,7 +31,7 @@ A user can group their library media files into named, ordered playlists. Playli
 
 ## Constraints
 
-- Follow the existing layering and conventions: API controller, a command or query and a handler per use case (originally a single `IPlaylistService`), repository on the unit of work, fakes in unit tests, EF in integration tests, `WebApplicationFactory` end to end. One class per file; no comment above a class; collections and list-returning methods use the `List` style (`EntryList`, `GetPlaylistList`); no `yield`; no magic strings (constants or `nameof`; hub events are members of `MediaHubEventEnum`); interfaces in an `Interfaces` folder; `is null`; no `Where(... == null)` in EF is the only exception.
+- Follow the existing layering and conventions: API controller, a command or query and a handler per use case, repository on the unit of work, fakes in unit tests, EF in integration tests, `WebApplicationFactory` end to end. One class per file; no comment above a class; collections and list-returning methods use the `List` style (`EntryList`, `GetPlaylistList`); no `yield`; no magic strings (constants or `nameof`; hub events are members of `MediaHubEventEnum`); interfaces in an `Interfaces` folder; `is null`; no `Where(... == null)` in EF is the only exception.
 - The `AddMediaFile` migration had not been applied anywhere, so the new tables were added by regenerating it (there is no separate playlist migration).
 - The library cap is 5000 media files per user, so a playlist can never need to reference more media files than that.
 
@@ -56,7 +54,7 @@ A user can group their library media files into named, ordered playlists. Playli
 
 ### Endpoints (all need a signed-in user; another user's playlist or media file is always a 404)
 
-The paths below are the original ones. They are now `/Playlist`, `/Playlist/{id}/EntryList`, `/Playlist/{id}/EntryList/Remove` and `/Playlist/{id}/Entry/{entryId}/Position`, and each entry in a response also carries its media file's data (see `2026-11-15-sync-backend-design.md`). Everything else below still holds.
+The paths are `/Playlist`, `/Playlist/{id}/EntryList`, `/Playlist/{id}/EntryList/Remove` and `/Playlist/{id}/Entry/{entryId}/Position`, and each entry in a response also carries its media file data (see `2026-11-15-sync-backend-design.md`).
 
 - `GET /Playlists`: every playlist of the user, newest first, as playlist objects only: `id, name, allowDuplicates, entryCount, timeCreated, timeModified`. Strong ETag over each playlist's ID and modified time, `If-None-Match` gives a 304, gzip when asked (the same machinery as `GET /Media/Library`).
 - `GET /Playlists/{id}`: the playlist object plus its entries, ordered by position, each as `id, mediaFileID, position` (now with the media file's data too). The ETag comes from the playlist's ID and modified time and, since entries carry media file data, from each entry's media file modified time; a matching `If-None-Match` gives a 304.

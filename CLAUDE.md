@@ -4,7 +4,7 @@
 
 These override the superpowers skills' defaults. Never create `docs/superpowers/`.
 
-- Specs: `docs/specs/YYYY-MM-DD-<topic>-design.md`, committed. `docs/UI-GUIDE.md` stays in the `docs/` root, not in `specs/`.
+- Specs: `docs/specs/<project>/YYYY-MM-DD-<topic>-design.md`, committed, with `<project>` one of `mediaplayer`, `entitymanagement` or `shared` (the shared libraries, such as `Noxy.NET.UI.Shared`). `docs/UI-GUIDE.md` stays in the `docs/` root, not in `specs/`.
 - Plans: `docs/temp/plans/YYYY-MM-DD-<feature-name>.md`, committed until the work is done.
 - Handoffs: `docs/temp/handoffs/HANDOFF-YYYY-MM-DD-<topic>.md`.
 - Subagent-driven-development ledgers: `docs/temp/sdd/<plan-basename>/` (git-ignored).

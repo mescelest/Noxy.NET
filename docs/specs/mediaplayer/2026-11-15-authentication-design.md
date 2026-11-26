@@ -1,6 +1,6 @@
 # Authentication: design
 
-Status: implemented (backend). Written afterwards from the code and its tests, not before the build. Lines marked *(inferred)* are reasons I read out of the code; nobody recorded them at the time, so check them.
+Lines marked *(inferred)* are reasons read out of the code, so check them.
 
 ## Intent
 

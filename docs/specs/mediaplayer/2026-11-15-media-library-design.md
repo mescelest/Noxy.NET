@@ -1,6 +1,6 @@
 # Media library and upload: design
 
-Status: implemented (backend). Written afterwards from the code and its tests, not before the build. Lines marked *(inferred)* are reasons I read out of the code; nobody recorded them at the time, so check them.
+Lines marked *(inferred)* are reasons read out of the code, so check them.
 
 ## Intent
 
@@ -14,7 +14,7 @@ A user's media files live on the server. They upload audio, edit its tags, delet
 - **A library list a device can diff cheaply:** `GET /Media/Library` returns every media file of the user with a strong ETag; a matching `If-None-Match` gets a `304` with no body.
 - **Tag editing** with `PATCH /Media/{id}`: change only the fields sent; the stored file is never rewritten.
 - **Delete** a media file with its stored file, and take it out of every playlist in the same commit.
-- **Sync download** `GET /Media/{id}/File`: the raw stored file, strong ETag equal to the quoted `ContentHash`, range requests, so a device can resume a download against the same bytes only.
+- **Sync download** `GET /Media/{id}/File`: the raw stored file, strong ETag, range requests, so a device can resume a download against the same bytes only. The ETag is the `ContentHash`; the hash is not part of `ResponseMediaFile`, so a device sees the ETag only as an opaque value that it stores and sends back in `If-Range`.
 - **Save as file** `GET /Media/{id}/Download`: a copy carrying the current tags, named after the title (details in `2026-11-15-sync-backend-design.md`).
 - **Live changes:** after a change is saved the user's connected devices are told (`MediaUpdated`, `MediaDeleted`, `UploadSucceeded`, `UploadFailed`).
 

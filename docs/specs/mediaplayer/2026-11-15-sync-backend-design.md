@@ -1,6 +1,6 @@
 # Sync backend: design
 
-Status: implemented (backend). Checked against the code on 2026-11-15: the renamed routes, the file ETag, the tagged download and its `download` rate limit (10 per 60 seconds) are all in place. The media file side of this is described in `2026-11-15-media-library-design.md`.
+The media file side of this is described in `2026-11-15-media-library-design.md`.
 
 ## Intent
 
@@ -9,9 +9,9 @@ Devices sync media files from the server to local storage and play them from the
 ## Goals
 
 - Rename the playlist routes so no list endpoint ends in an "s": `Playlists` becomes `Playlist`, and `Entries` becomes `EntryList`.
-- A playlist entry carries the media file's metadata (title, artist, album, album artist, subtitle, comment, genre, track, disc, year, duration, size, content hash, content type, media file modified time), so `GET /Playlist/{id}` alone is enough to display and sync a playlist.
+- A playlist entry carries the media file's metadata (title, artist, album, album artist, subtitle, comment, genre, track, disc, year, duration, size, content type, media file modified time), so `GET /Playlist/{id}` alone is enough to display and sync a playlist.
 - The stored file is never rewritten after upload. `ContentHash` and `SizeBytes` describe it for good, and a metadata edit changes only the database and `TimeModified`.
-- `GET /Media/{id}/File` is the raw stored file, used for sync. It returns a strong ETag taken from `ContentHash` and honours `If-Range`, so a resumed download cannot join two versions of a file.
+- `GET /Media/{id}/File` is the raw stored file, used for sync. It returns a strong ETag taken from `ContentHash` and honours `If-Range`, so a resumed download cannot join two versions of a file. The hash is not in `ResponseMediaFile`; the server keeps it for upload de-duplication and as this ETag.
 - A new `GET /Media/{id}/Download` returns a copy of the file with the media file's current metadata written into its tags, in its original format, named after the title with the stored extension.
 - MediaFile deletes are already pushed on the hub (`MediaDeleted`, plus `PlaylistUpdated` for each affected playlist). Keep that and cover it with a test if it is not.
 

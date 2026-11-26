@@ -1,6 +1,6 @@
 # Organise page: sorting media files into artists, albums and genres
 
-Status: implemented 2026-11-25 (not yet checked by running the app; see "How it ended up"). Design written 2026-11-24 from the conversation with the user. It is the frontend of `2026-11-15-library-organizer-design.md` (whose panel and drag-and-drop idea it replaces with a page) on top of the backend in `2026-11-15-metadata-entities-design.md`, which is built. Lines marked *(my call)* are decisions made without asking.
+The frontend of the data layer in `2026-11-15-metadata-entities-design.md`, built on the ideas of `2026-11-15-library-organizer-design.md`. Lines marked *(my call)* are decisions made without asking.
 
 ## Intent
 
@@ -19,17 +19,15 @@ Artists, albums and genres are real items on the server (rename, delete, merge, 
   2. the chosen item in the column is highlighted (accent colour and a bar on its left edge);
   3. a dot on the tab of a kind that has a filter.
   The header count reads "12 of 340 files" while a filter or the search narrows the table. When nothing matches, the table says so and offers "Clear filters" instead of showing blank space.
-- **Assign through the context menu,** on one file (right-click) or on the ticked files. New items in the menu:
-  - **Artist** and **Genre** (a file can have several): *Add* and *Remove*.
-  - **Album** (a file has at most one): *Set* and *Remove*.
-  - Each of the three is a submenu: the first entry opens a picker dialog (search field, a "New…" option), then a separator, then the last few the user assigned *(my call: five per kind)*. This is the shape of "Add to playlist" in the Library menu. "Recent" here means last assigned to, because items have no played date.
-- **Every action in the Library's context menu is also in this one** (play next, add to playlist, edit, delete from library), *tried as an experiment at the user's request*: the user's gut feeling is that it does not belong on a page about something different, but wants to queue an album right after organising it. If it does not feel right, the Library actions are removed from this menu.
+- **Assign through the context menu,** on one file (right-click) or on the ticked files. Three entries come first: *Set artist…*, *Set album…* and *Set genre…*. Each opens a dialog for the target files: artists and genres are a searchable list of checkboxes (ticked when every file has the item, a dash when only some do), an album is a list of cards with its picture and a "[No album]" card. Nothing is sent until Save, and then only the difference. A plus button next to the search makes a new item and ticks it.
+- **Every action in the Library context menu is also in this one** (play next, add to playlist, edit, delete from library), so an album can be queued right after organising it.
+- **Merge.** Each row of the column has a "⋯" menu and a right-click menu: Edit, Merge into…, Merge others into this…, Delete. Merge uses the merge calls the server has, and asks for confirmation naming "Source → Target".
 - **Changes show everywhere without reloading:** the three item lists and the files are already kept in step with the server and pushed by the hub; the page reads them like the rest of the app.
 
 ## Non-goals
 
 - Drag-and-drop from the table onto the column (the user's intended next step; nothing here may make it harder, see "Later").
-- Merge and split of items (the server has them; the rename that collides with another item follows the existing `MergeOnRename` setting and, when it is off, shows the server's message that names the other item).
+- Split of items (the server has it; the rename that collides with another item follows the existing `MergeOnRename` setting and, when it is off, shows the server message that names the other item).
 - Tag lookup online, nested genres, sharing items between users, editing the stored audio file.
 - Changing the Library, Queue or Playlist pages.
 
@@ -43,8 +41,7 @@ Artists, albums and genres are real items on the server (rename, delete, merge, 
 ## Constraints
 
 - MAUI Blazor Hybrid, `Noxy.NET.UI.Shared` components first, styling only through the shared CSS variables; the page follows `docs/UI-GUIDE.md` and the repository's conventions (one class per file, `Entity`/`Response` naming, handlers, no inline logic in markup, texts in `AppTexts`).
-- The file response already has `ArtistIDList`, `AlbumID` and `GenreIDList` next to the text names; the client already syncs `ResponseArtist`, `ResponseAlbum` and `ResponseGenre` lists (`MetadataSyncService`, with `MediaFileCount`). The client has only the **read** calls today.
-- The current-device "last assigned" lists are not synced between devices.
+- The file response already has `ArtistIDList`, `AlbumID` and `GenreIDList` next to the text names; the client already syncs `ResponseArtist`, `ResponseAlbum` and `ResponseGenre` lists (`MetadataSyncService`, with `MediaFileCount`).
 
 ## Approaches considered
 
@@ -63,9 +60,8 @@ Artists, albums and genres are real items on the server (rename, delete, merge, 
 - **State (`FeatureOrganiseState` and its actions and reducers):** the open tab, the search text of the table, the filter (an artist ID, an album ID and a genre ID, each possibly none), the selection, and the sort. The files and item lists come from the existing Library and metadata state and are not loaded again. The selection and filter are kept only while the page is open: leaving the page clears the filter *(my call, so the user never returns to a short table without knowing why)*. Deleting the item that is the current filter clears that filter.
 - **The visible list:** the files that match the table's search, then the filters (a file is shown when it has the chosen artist, has the chosen album and has the chosen genre; kinds with no filter do not count). "Select all" ticks only what is shown, and ticked files that a filter hides stay ticked, like the Library search today; the count says how many are hidden.
 - **Right column (`OrganiseSidebar` and one list component per tab, or one list component given the kind; the builder decides):** `TabSet` with the three kinds, a search field and the + button, the list with counts, the highlight on the filtered item, edit and delete icons.
-- **Dialogs:** create and edit an item (a name; an album also picks its artists), confirm delete (names the item and the number of files), and the picker for the context menu. The picker is a dialog like `AddToPlaylistDialog` (a search field, the items in name order, "New…" which creates and assigns in one step).
-- **Context menu:** a menu for this page that builds on `LibraryContextMenu`: the Library items plus Artist, Album and Genre. The builder decides whether it is the same component with a parameter or a small component that composes it; the Library page itself must not change behaviour.
-- **Last assigned:** a short list per kind kept on the device (settings or preferences storage; the builder decides), newest first, at most five, with items that no longer exist dropped when read.
+- **Dialogs:** create and edit an item (a name; an album also has a picture and picks its artists), confirm delete (names the item and the number of files), the merge dialogs, and the Set dialog for the context menu.
+- **Context menu:** `OrganiseContextMenu` builds on `LibraryContextMenu` through its `ExtraItemFactory` parameter: the three Set entries first, then a line, then the Library items. The Library page itself does not change behaviour.
 - **Client calls and service:** the API client gets the write calls the server already has (create, rename or update, delete, assign a list of files, remove a list of files, for each of the three kinds); a service on top of them (for example `IMetadataActionService`) is what the page and menu use, raises a toast on failure like the other services, and does not apply changes itself: the hub events and the sync already update the lists and files.
 
 ### What the user sees
@@ -82,16 +78,17 @@ Organise                                              12 of 340 files
 Right-click on a file or the ticked rows:
 
 ```
+Set artist…
+Set album…
+Set genre…
+─────
 Play next
 Add to playlist ▸
-Artist ▸   Choose artist…  /  ─────  /  last assigned…  /  Remove ▸
-Album  ▸   Choose album…   /  ─────  /  last assigned…  /  Remove
-Genre  ▸   Choose genre…   /  ─────  /  last assigned…  /  Remove ▸
 Edit…
 Delete from library
 ```
 
-In a narrow window the column goes below the table *(my call, to be checked against how the Queue panel behaves in a narrow window)*.
+In a narrow window the column goes below the table *(my call, to be checked against how the Queue page behaves in a narrow window)*.
 
 ### Edge cases
 
@@ -106,17 +103,16 @@ In a narrow window the column goes below the table *(my call, to be checked agai
 ## Later (not built now, must not be made harder)
 
 - **Drag a file (or the ticked files) onto an item in the column** to assign it. The column's rows must therefore be real drop targets later (one element per item, a stable item ID on it); the assignment goes through the same service call as the menu.
-- Merge and split in the column; a way to see files with no artist, album or genre.
+- Split in the column; a way to see files with no artist, album or genre.
 
 ## Left to the builder
 
 Names of the new classes and files, the exact shape of the state, how the column choice is expressed on the table, the preferences storage for last-assigned, texts, the icons, and the exact narrow-window layout.
 
-## How it ended up
+## Implementation notes
 
-- The write calls, `MetadataActionService` and the Fluxor state (`FeatureMetadataListState`, `FeatureOrganiseState`) follow the design, with unit tests.
-- **The context menu does not have submenus.** `LibraryContextMenu` has a new optional `ExtraItemFactory` parameter; `OrganiseContextMenu` fills it with three entries, "Set artist…", "Set album…" and "Set genre…", which come first, then a line, then the media file actions. The Library page is unchanged.
-- **The "last assigned" lists were dropped.** Each entry opens `MetadataSetDialog` for the target media files: artists and genres are a searchable list of checkboxes (ticked when every media file has the item, a dash when only some do), an album is a list of cards with its picture and a "[No album]" card. Nothing is sent until Save, and then only the difference (`MetadataSetModel`, sent through `MetadataActionService.Apply`). A plus button next to the search makes a new item and ticks it.
+- **Extra items.** `LibraryContextMenu` has an optional `ExtraItemFactory` parameter; `OrganiseContextMenu` fills it with three entries, "Set artist…", "Set album…" and "Set genre…", which come first, then a line, then the media file actions. The Library page is unchanged.
+- **Set dialogs.** Each entry opens `MetadataSetDialog` for the target media files: artists and genres are a searchable list of checkboxes (ticked when every media file has the item, a dash when only some do), an album is a list of cards with its picture and a "[No album]" card. Nothing is sent until Save, and then only the difference (`MetadataSetModel`, sent through `MetadataActionService.Apply`). A plus button next to the search makes a new item and ticks it.
 - `MetadataItemDialog` (create and edit) shows the album's picture and a "Change picture" button; for that the server got `PUT /Album/{id}/Art`. The artists of an album use the same `MetadataCheckList` as the Set dialog.
 - `MetadataItemDialog.OnSaved` carries the ID of the saved item (`EventCallback<Guid>`).
 - The create, edit and delete dialogs live in `MetadataItemList`, one set per tab, not in `OrganiseSidebar`.

@@ -1,7 +1,5 @@
 # Album art and playlist colour
 
-Status: approved in conversation 2026-11-24 (SkiaSharp, the places the picture shows, and a configurable thumbnail size); not yet built.
-
 ## Intent
 
 Songs and playlists have no pictures except the placeholder tile. Audio files often carry an embedded cover. The user wants: a cover on each album, taken from the file the first time the album is made; a default picture when there is none; and a colour of their own choice for a playlist's tile. Editing artists, albums and genres (including their pictures) comes later, with the library organiser (`2026-11-15-library-organizer-design.md`).
@@ -42,7 +40,6 @@ Songs and playlists have no pictures except the placeholder tile. Audio files of
 - `MediaTagSet` carries the embedded picture (the front cover, else the first picture) from `MediaTagReadingService`.
 - `EntityAlbum.TimeArtModified` (nullable): set when a picture is saved; null means none. `ResponseAlbum` carries it, so a device knows when its copy is old.
 - When an album is created from an upload, or an upload names an album that has no picture, and the file has an embedded picture, the thumbnail is saved and `TimeArtModified` set; the existing `AlbumUpdated` push tells the devices. An album that has a picture is never touched.
-- `MetadataBackfillService` runs the same step for albums with no picture, from the first of their media files that has one.
 - `GET /Album/{id}/Art`: the JPEG, with an ETag; 404 when there is none; the user's own albums only.
 - A migration adds the column.
 - `EntityPlaylist.ArtHue` (int 0 to 359, nullable; null means the colour made from the ID). `ResponsePlaylist.ArtHue`. `PATCH /Playlist/{id}` takes `artHue` like its other optional fields (null clears it); the update does not need the playlist's modified time to change more than any other edit does.
@@ -57,7 +54,7 @@ Songs and playlists have no pictures except the placeholder tile. Audio files of
 
 - Choosing the cover when a file has several pictures; the exact cache file layout on the device; throttling many pictures asked for at once in a long list.
 - The migration's name and its snapshot, which need the EF tool and so the API stopped.
-- Tests: the thumbnail service (size, format, a broken image), the storage service, the album rule (create, fill an empty one, never replace), the backfill, the endpoint (404, 304, another user), the client cache (hit, stale, failure), and the hue edit (range, clear).
+- Tests: the thumbnail service (size, format, a broken image), the storage service, the album rule (create, fill an empty one, never replace), the endpoint (404, 304, another user), the client cache (hit, stale, failure), and the hue edit (range, clear).
 
 ## Decided with the user
 

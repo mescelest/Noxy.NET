@@ -1,7 +1,5 @@
 # Edit media file dialog
 
-Status: implemented 2026-11-24 (with the "Add to playlist" sub-menu and no group sub-menu, see the plan).
-
 ## Intent
 
 The server already edits a media file's tags (`PATCH /media/{id}`, `RequestUpdateMedia`), and the frontend sync spec left the screen for later. This adds the screen: a dialog to correct the tags of one song, opened from the context menu of a row in the Library and on a playlist's page.

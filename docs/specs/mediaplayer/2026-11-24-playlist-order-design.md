@@ -1,10 +1,8 @@
 # Playlist order: drag the sidebar playlists into your own order
 
-Status: implemented 2026-11-24.
-
 ## Intent
 
-The sidebar lists playlists newest created first, which is a stand-in (`2026-11-15-frontend-screens-design.md`). The user wants an order of their own, set by dragging, saved on the server so every device shows the same one, and working like the entries of a playlist.
+The sidebar lists the playlists in an order of the user's own, set by dragging, saved on the server so every device shows the same one, and working like the entries of a playlist.
 
 ## Goals
 
@@ -30,7 +28,7 @@ One sensible way, the user's choice: do what the entries of a playlist do. Each 
 
 ## Design
 
-- **Data:** `EntityPlaylist` gets `Position` (int, per user, 0 is the top). `ResponsePlaylist` carries it. The migration (folded into a new Initial on 2026-11-24, with the old ones removed) has the column; the database was empty, so no existing playlists needed a backfill.
+- **Data:** `EntityPlaylist` gets `Position` (int, per user, 0 is the top). `ResponsePlaylist` carries it. The migration has the column.
 - **Create:** the new playlist gets position 0 and every other playlist of the user moves down by one, in the same save.
 - **Delete:** the playlists below it move up by one, so positions stay whole.
 - **Move:** `PUT /Playlist/{id}/Position` with `{ "position": n }`, like the entry move. The playlist goes to `n` (clamped to the list) and the others shift to make room. The answer is the user's whole playlist list in its new order. A move does not touch `TimeModified`.
