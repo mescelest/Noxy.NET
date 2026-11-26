@@ -30,7 +30,7 @@ public class UploadServiceTest
 
     private static ResponseMediaFile Media(string title)
     {
-        return new() { ID = Guid.CreateVersion7(), Title = title, ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = "h", TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
+        return new() { ID = Guid.CreateVersion7(), Title = title, ContentType = "audio/mpeg", SizeBytes = 1, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
     }
 
     private static ResponseUploadResult Succeeded(Guid jobID, ResponseMediaFile media)

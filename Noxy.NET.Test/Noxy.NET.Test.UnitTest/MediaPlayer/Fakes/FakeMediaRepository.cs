@@ -78,17 +78,6 @@ public sealed class FakeMediaRepository(FakeStore store) : IMediaRepository
         return Task.FromResult(found is null ? null : store.CopyMediaFile(found));
     }
 
-    public Task<List<Guid>> GetMediaFileIDListWithLegacyText(CancellationToken cancellationToken = default)
-    {
-        List<Guid> list = store.MediaFileList
-            .Where(x => x.Metadata is { } metadata && (metadata.Artist is not null || metadata.Album is not null || metadata.AlbumArtist is not null || metadata.Genre is not null))
-            .OrderBy(x => x.ID)
-            .Select(x => x.ID)
-            .ToList();
-
-        return Task.FromResult(list);
-    }
-
     public Task<List<EntityMediaFile>> GetMediaFileListByID(List<Guid> idList, CancellationToken cancellationToken = default)
     {
         List<EntityMediaFile> list = store.MediaFileList

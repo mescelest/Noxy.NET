@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
 using Noxy.NET.MediaPlayer.API.Configurations;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -9,6 +10,12 @@ namespace Noxy.NET.Test.MediaPlayer.Api;
 
 public class MediaDownloadFlowTest
 {
+    // The server uses the hash of the stored bytes as the ETag of the file; the response no longer carries it.
+    private static string ETagOf(byte[] content)
+    {
+        return $"\"{Convert.ToHexStringLower(SHA256.HashData(content))}\"";
+    }
+
     private static async Task<ResponseMediaFile> UploadMediaFile(MediaApiClient api, ApiAccount user, byte[] content, string title = "My Media")
     {
         HttpResponseMessage response = await api.Upload(user.Token, content, "media.mp3", title);
@@ -23,12 +30,13 @@ public class MediaDownloadFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, MediaApiClient.Mp3(500));
+        byte[] content = MediaApiClient.Mp3(500);
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, content);
 
         HttpResponseMessage response = await api.Download(user.Token, mediaFile.ID);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal($"\"{mediaFile.ContentHash}\"", response.GetETag());
+        Assert.Equal(ETagOf(content), response.GetETag());
         Assert.NotNull(response.Headers.ETag);
         Assert.False(response.Headers.ETag.IsWeak);
         Assert.Contains("bytes", response.Headers.AcceptRanges);
@@ -40,9 +48,10 @@ public class MediaDownloadFlowTest
         await using ApiFactory factory = new();
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
-        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, MediaApiClient.Mp3(500));
+        byte[] content = MediaApiClient.Mp3(500);
+        ResponseMediaFile mediaFile = await UploadMediaFile(api, user, content);
 
-        HttpResponseMessage response = await api.Download(user.Token, mediaFile.ID, ifNoneMatch: $"\"{mediaFile.ContentHash}\"");
+        HttpResponseMessage response = await api.Download(user.Token, mediaFile.ID, ifNoneMatch: ETagOf(content));
 
         Assert.Equal(HttpStatusCode.NotModified, response.StatusCode);
     }
@@ -56,7 +65,7 @@ public class MediaDownloadFlowTest
         byte[] content = MediaApiClient.Mp3(500);
         ResponseMediaFile mediaFile = await UploadMediaFile(api, user, content);
 
-        HttpResponseMessage response = await api.Download(user.Token, mediaFile.ID, ifRangeETag: $"\"{mediaFile.ContentHash}\"", rangeFrom: 100, rangeTo: 199);
+        HttpResponseMessage response = await api.Download(user.Token, mediaFile.ID, ifRangeETag: ETagOf(content), rangeFrom: 100, rangeTo: 199);
 
         Assert.Equal(HttpStatusCode.PartialContent, response.StatusCode);
         Assert.Equal(content[100..200], await response.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken));
@@ -152,14 +161,16 @@ public class MediaDownloadFlowTest
         MediaApiClient api = new(factory);
         ApiAccount user = await api.SignUp("a@example.com");
         ResponseMediaFile mediaFile = await UploadWav(api, user);
-        byte[] before = await (await api.Download(user.Token, mediaFile.ID)).Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken);
+        HttpResponseMessage first = await api.Download(user.Token, mediaFile.ID);
+        byte[] before = await first.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken);
+        string fileETag = first.GetETag();
         string libraryETag = (await api.GetLibrary(user.Token)).GetETag();
 
         Assert.Equal(HttpStatusCode.OK, (await api.DownloadTagged(user.Token, mediaFile.ID)).StatusCode);
 
         HttpResponseMessage file = await api.Download(user.Token, mediaFile.ID);
         Assert.Equal(before, await file.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken));
-        Assert.Equal($"\"{mediaFile.ContentHash}\"", file.GetETag());
+        Assert.Equal(fileETag, file.GetETag());
         Assert.Equal(libraryETag, (await api.GetLibrary(user.Token)).GetETag());
     }
 

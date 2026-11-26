@@ -84,33 +84,39 @@
         list.Add(ContextMenuItem.Separator());
         list.Add(AddToPlaylistItem(mediaFileIDList));
 
-        // What the device holds decides what can be done with it, as in the library menu: a file that is there is shown or saved and can be removed, one that is not can be downloaded.
+        // What the device holds decides what can be done with it, as in the library menu: a file that is there can have its metadata written, be shown and removed, one that is not can be downloaded, and a copy can be saved either way.
         bool anyOnDevice = mediaFileIDList.Any(IsOnDevice);
-        if (anyOnDevice)
-        {
-            list.Add(DeviceFileItem(mediaFileIDList));
-        }
+        list.Add(ManageFileItem(mediaFileIDList, anyOnDevice));
 
         if (mediaFileIDList.Any(x => !IsOnDevice(x)))
         {
             list.Add(ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(mediaFileIDList)), "download"));
         }
 
-        if (anyOnDevice)
-        {
-            list.Add(ContextMenuItem.Separator());
-            list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => Show(ServiceLibraryAction.RemoveFromDevice(mediaFileIDList)), "delete_sweep", true, AppTexts.ConfirmActionAgain));
-        }
+        if (!anyOnDevice) return list;
+
+        list.Add(ContextMenuItem.Separator());
+        list.Add(ItemOf(LibraryActionEnum.RemoveFromDevice, AppTexts.LibraryRemoveFromDevice, () => Show(ServiceLibraryAction.RemoveFromDevice(mediaFileIDList)), "delete_sweep", true, AppTexts.ConfirmActionAgain));
 
         return list;
     }
 
-    // Where the platform has a file manager the file on the device is shown there; where it has none, a copy is saved.
-    private ContextMenuItem DeviceFileItem(List<Guid> mediaFileIDList)
+    // What can be done with the files themselves: write the metadata into the copies on the device, save a copy (the server's, so it works for songs that are not on the device too), and show the file in the file manager where the platform has one.
+    private ContextMenuItem ManageFileItem(List<Guid> mediaFileIDList, bool anyOnDevice)
     {
-        return ServiceLibraryAction.CanOpenFolder
-                ? ItemOf(LibraryActionEnum.OpenFolder, AppTexts.LibraryOpenFolder, () => Show(ServiceLibraryAction.OpenContainingFolder(mediaFileIDList)), "folder_open")
-                : ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(mediaFileIDList)), "save_alt");
+        List<ContextMenuItem> list = [];
+        if (anyOnDevice)
+        {
+            list.Add(ItemOf(LibraryActionEnum.UpdateFileMetadata, AppTexts.LibraryUpdateFileMetadata, () => Show(ServiceLibraryAction.UpdateFileMetadata(mediaFileIDList)), "edit_note"));
+        }
+
+        list.Add(ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(mediaFileIDList)), "save_alt"));
+        if (anyOnDevice && ServiceLibraryAction.CanOpenFolder)
+        {
+            list.Add(ItemOf(LibraryActionEnum.OpenFolder, AppTexts.LibraryOpenFolder, () => Show(ServiceLibraryAction.OpenContainingFolder(mediaFileIDList)), "folder_open"));
+        }
+
+        return ContextMenuItem.Submenu(AppTexts.LibraryManageFile, list, "description");
     }
 
     private bool IsOnDevice(Guid mediaFileID)

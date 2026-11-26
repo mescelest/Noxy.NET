@@ -11,6 +11,7 @@ public class DiskFileStore(string baseFolder) : IFileStore
     private const string FilesFolderName = "files";
     private const string PartialFolderName = "partial";
     private const int BufferSize = 81920;
+    private const string RewriteMarker = ".rewrite";
 
     private readonly string _filesFolder = Path.Combine(Path.GetFullPath(baseFolder), FilesFolderName);
     private readonly string _partialFolder = Path.Combine(Path.GetFullPath(baseFolder), PartialFolderName);
@@ -72,14 +73,6 @@ public class DiskFileStore(string baseFolder) : IFileStore
         }
     }
 
-    public Task<Stream> OpenPartial(Guid mediaFileID)
-    {
-        string path = PartialPath(mediaFileID);
-        if (!File.Exists(path)) throw new InvalidOperationException("There is no partial file.");
-
-        return Task.FromResult<Stream>(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, true));
-    }
-
     public Task DiscardPartial(Guid mediaFileID)
     {
         File.Delete(PartialPath(mediaFileID));
@@ -103,6 +96,35 @@ public class DiskFileStore(string baseFolder) : IFileStore
         File.Move(partialPath, heldPath, true);
 
         foreach (string other in FindHeldPathList(mediaFileID).Where(x => !string.Equals(x, heldPath, StringComparison.Ordinal))) File.Delete(other);
+
+        return Task.CompletedTask;
+    }
+
+
+    // The copy lives in the partial folder under a name that is not a GUID, so it is never listed. Moving it onto the held file is a rename on one volume, so the held file is the old file, then the new one.
+    public Task Rewrite(Guid mediaFileID, Action<string> write)
+    {
+        string heldPath = FindHeldPathList(mediaFileID).FirstOrDefault() ?? throw new InvalidOperationException("The file is not held.");
+        string copyPath = Path.Combine(_partialFolder, $"{mediaFileID}{RewriteMarker}{Path.GetExtension(heldPath)}");
+
+        try
+        {
+            try
+            {
+                File.Copy(heldPath, copyPath, true);
+            }
+            catch (IOException exception) when (exception.IsDiskFull)
+            {
+                throw new StorageFullException(exception);
+            }
+
+            write(copyPath);
+            File.Move(copyPath, heldPath, true);
+        }
+        finally
+        {
+            File.Delete(copyPath);
+        }
 
         return Task.CompletedTask;
     }

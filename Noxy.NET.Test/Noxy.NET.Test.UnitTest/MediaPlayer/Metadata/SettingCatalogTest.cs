@@ -7,10 +7,10 @@ namespace Noxy.NET.Test.MediaPlayer.Metadata;
 public class SettingCatalogTest
 {
     [Fact]
-    public void TheFiveSettingsAreDeclaredInOrder_WithTheirKeys()
+    public void TheSixSettingsAreDeclaredInOrder_WithTheirKeys()
     {
-        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems, SettingKey.PrefetchCount], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
-        Assert.Equal(["Shuffle", "Repeat", "MergeOnRename", "KeepQueuedItems", "PrefetchCount"], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
+        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems, SettingKey.PrefetchCount, SettingKey.UpdateFileMetadata], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
+        Assert.Equal(["Shuffle", "Repeat", "MergeOnRename", "KeepQueuedItems", "PrefetchCount", "UpdateFileMetadata"], SettingCatalog.DeclarationList.Select(x => x.Key).ToList());
     }
 
     [Fact]
@@ -60,6 +60,16 @@ public class SettingCatalogTest
         Assert.Equal(SettingValueTypeEnum.Boolean, SettingCatalog.KeepQueuedItems.ValueType);
         Assert.Equal(false, SettingCatalog.KeepQueuedItems.DefaultValue);
         Assert.Equal("KeepQueuedItems", SettingKey.KeepQueuedItems);
+    }
+
+
+    [Fact]
+    public void Catalog_ContainsUpdateFileMetadata_DefaultFalse()
+    {
+        Assert.Contains(SettingCatalog.UpdateFileMetadata, SettingCatalog.DeclarationList);
+        Assert.Equal(SettingValueTypeEnum.Boolean, SettingCatalog.UpdateFileMetadata.ValueType);
+        Assert.Equal(false, SettingCatalog.UpdateFileMetadata.DefaultValue);
+        Assert.Equal("UpdateFileMetadata", SettingKey.UpdateFileMetadata);
     }
 
     [Fact]

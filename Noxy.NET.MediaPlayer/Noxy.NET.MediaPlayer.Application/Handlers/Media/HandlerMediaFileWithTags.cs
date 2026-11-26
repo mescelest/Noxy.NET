@@ -57,7 +57,7 @@ public class HandlerMediaFileWithTags(IUnitOfWorkFactory factoryUnitOfWork, IFil
     {
         try
         {
-            serviceMediaTagWriting.Write(path, mediaFile);
+            serviceMediaTagWriting.Write(path, mediaFile.ToTagValues());
             return true;
         }
         catch (Exception ex)

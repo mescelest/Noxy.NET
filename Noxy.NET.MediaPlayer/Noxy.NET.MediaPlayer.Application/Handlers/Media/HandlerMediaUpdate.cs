@@ -45,7 +45,7 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataR
         changed |= ApplyNumber(command.TrackNumber, metadata.TrackNumber, value => metadata.TrackNumber = value);
         changed |= ApplyNumber(command.DiscNumber, metadata.DiscNumber, value => metadata.DiscNumber = value);
         changed |= ApplyNumber(command.Year, metadata.Year, value => metadata.Year = value);
-        changed |= await ApplyItems(uow, command, file, metadata, cancellationToken);
+        changed |= await ApplyItems(uow, command, file, cancellationToken);
 
         // An edit that changes nothing leaves the modified time alone, so it can't change the library ETag or push anything.
         if (!changed) return new(file.ToResponse(), false, new(), []);
@@ -61,7 +61,7 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataR
         return new(response, true, changeSet, [response]);
     }
 
-    private async Task<bool> ApplyItems(IUnitOfWork uow, CommandMediaUpdate command, EntityMediaFile file, EntityMediaFileMetadata metadata, CancellationToken cancellationToken)
+    private async Task<bool> ApplyItems(IUnitOfWork uow, CommandMediaUpdate command, EntityMediaFile file, CancellationToken cancellationToken)
     {
         bool artistGiven = command.Artist.HasValue || command.ArtistIDList.HasValue;
         bool genreGiven = command.Genre.HasValue || command.GenreIDList.HasValue;
@@ -90,15 +90,6 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataR
         if (genreGiven) changed |= uow.SetGenreList(file, command.Genre.HasValue ? resolved.GenreList : genreByIDList ?? []);
         if (albumGiven) changed |= ApplyAlbum(file, albumByTitleGiven ? resolved.Album : albumByID);
 
-        // The old free text is replaced by the items, so it must not come back when the items are later removed.
-        if (artistGiven) changed |= ClearLegacy(metadata.Artist, () => metadata.Artist = null);
-        if (genreGiven) changed |= ClearLegacy(metadata.Genre, () => metadata.Genre = null);
-        if (albumGiven)
-        {
-            changed |= ClearLegacy(metadata.Album, () => metadata.Album = null);
-            changed |= ClearLegacy(metadata.AlbumArtist, () => metadata.AlbumArtist = null);
-        }
-
         return changed;
     }
 
@@ -108,14 +99,6 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataR
 
         file.AlbumID = desired?.ID;
         file.Album = desired;
-        return true;
-    }
-
-    private static bool ClearLegacy(string? current, Action clear)
-    {
-        if (current is null) return false;
-
-        clear();
         return true;
     }
 

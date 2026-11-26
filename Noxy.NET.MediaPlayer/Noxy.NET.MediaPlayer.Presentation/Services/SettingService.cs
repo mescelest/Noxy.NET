@@ -53,6 +53,21 @@ public class SettingService : ISettingService
         return (bool)SettingCatalog.KeepQueuedItems.DefaultValue;
     }
 
+    public async Task<bool> GetUpdateFileMetadata()
+    {
+        ResponseSetting? setting = await _settingList.Find(SettingKey.UpdateFileMetadata);
+        try
+        {
+            if (setting is not null) return setting.GetBoolean();
+        }
+        catch (InvalidOperationException)
+        {
+            // Not a boolean: the default below.
+        }
+
+        return (bool)SettingCatalog.UpdateFileMetadata.DefaultValue;
+    }
+
     public async Task<int> GetPrefetchCount()
     {
         ResponseSetting? setting = await _settingList.Find(SettingKey.PrefetchCount);

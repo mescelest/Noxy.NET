@@ -25,7 +25,7 @@ public class PlaylistServiceTest
 
     private static ResponseMediaFile Media()
     {
-        return new() { ID = Guid.CreateVersion7(), Title = "Media", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = "h", TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
+        return new() { ID = Guid.CreateVersion7(), Title = "Media", ContentType = "audio/mpeg", SizeBytes = 1, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
     }
 
     private async Task<(Guid ID, List<ResponseMediaFile> MediaList)> HoldDetail(int count)
@@ -113,7 +113,7 @@ public class PlaylistServiceTest
     public async Task DownloadAll_QueuesEveryEntryNotOnTheDevice()
     {
         (Guid id, List<ResponseMediaFile> mediaList) = await HoldDetail(3);
-        await _store.SaveFileState(new(mediaList[2].ID, FileSyncStateEnum.OnDevice, "h", null));
+        await _store.SaveFileState(new(mediaList[2].ID, FileSyncStateEnum.OnDevice, null));
 
         await _service.DownloadAll(id);
 

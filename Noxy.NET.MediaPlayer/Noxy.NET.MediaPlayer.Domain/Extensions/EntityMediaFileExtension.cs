@@ -1,4 +1,5 @@
 using Noxy.NET.MediaPlayer.Domain.Entities;
+using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Domain.Extensions;
@@ -34,28 +35,15 @@ public static class EntityMediaFileExtension
             return [.. mediaFile.Album.ArtistLinkList.OrderBy(x => x.Position).Select(x => x.Artist?.Name ?? throw new InvalidOperationException($"The media file {mediaFile.ID} was loaded without the artists of its album."))];
         }
 
-        // What the file shows for each kind: the linked names, or for a file that has none of that kind yet (the library is filled in at start-up) the single text it had before items existed.
-        public List<string> GetEffectiveArtistNameList()
+        // The tags the media file's metadata stands for, with its artists, album, album artists and genres loaded. Throws when the media file has no metadata.
+        public MediaTagValues ToTagValues()
         {
-            return WithLegacy(mediaFile.GetArtistNameList(), mediaFile.Metadata?.Artist);
+            EntityMediaFileMetadata metadata = mediaFile.Metadata ?? throw new ArgumentException($"The media file {mediaFile.ID} has no metadata.", nameof(mediaFile));
+
+            return new(metadata.Title, mediaFile.GetArtistNameList(), mediaFile.Album?.Title, mediaFile.GetAlbumArtistNameList(), metadata.Subtitle, metadata.Comment, mediaFile.GetGenreNameList(), metadata.TrackNumber, metadata.DiscNumber, metadata.Year);
         }
 
-        public List<string> GetEffectiveAlbumArtistNameList()
-        {
-            return WithLegacy(mediaFile.GetAlbumArtistNameList(), mediaFile.Metadata?.AlbumArtist);
-        }
-
-        public List<string> GetEffectiveGenreNameList()
-        {
-            return WithLegacy(mediaFile.GetGenreNameList(), mediaFile.Metadata?.Genre);
-        }
-
-        public string? GetEffectiveAlbumTitle()
-        {
-            return mediaFile.Album?.Title ?? mediaFile.Metadata?.Album;
-        }
-
-        // The text comes from the linked items. A file that has none of a kind yet (the library is filled in at start-up) still shows the text it had before items existed.
+        // The text comes from the linked items.
         public ResponseMediaFile ToResponse()
         {
             return new()
@@ -64,16 +52,15 @@ public static class EntityMediaFileExtension
                 Title = mediaFile.Metadata?.Title ?? mediaFile.FilePath,
                 ContentType = mediaFile.ContentType,
                 SizeBytes = mediaFile.SizeBytes,
-                ContentHash = mediaFile.ContentHash,
                 // Stored as UTC, but the database hands it back without a kind, which would serialize without a "Z".
                 TimeCreated = DateTime.SpecifyKind(mediaFile.TimeCreated, DateTimeKind.Utc),
                 TimeModified = DateTime.SpecifyKind(mediaFile.TimeModified, DateTimeKind.Utc),
-                Artist = Join(mediaFile.GetEffectiveArtistNameList()),
-                Album = mediaFile.GetEffectiveAlbumTitle(),
-                AlbumArtist = Join(mediaFile.GetEffectiveAlbumArtistNameList()),
+                Artist = Join(mediaFile.GetArtistNameList()),
+                Album = mediaFile.Album?.Title,
+                AlbumArtist = Join(mediaFile.GetAlbumArtistNameList()),
                 Subtitle = mediaFile.Metadata?.Subtitle,
                 Comment = mediaFile.Metadata?.Comment,
-                Genre = Join(mediaFile.GetEffectiveGenreNameList()),
+                Genre = Join(mediaFile.GetGenreNameList()),
                 TrackNumber = mediaFile.Metadata?.TrackNumber,
                 DiscNumber = mediaFile.Metadata?.DiscNumber,
                 Year = mediaFile.Metadata?.Year,
@@ -84,11 +71,6 @@ public static class EntityMediaFileExtension
                 GenreIDList = [.. mediaFile.GenreLinkList.OrderBy(x => x.Position).Select(x => x.GenreID)]
             };
         }
-    }
-
-    private static List<string> WithLegacy(List<string> nameList, string? legacy)
-    {
-        return nameList.Count > 0 || legacy is null ? nameList : [legacy];
     }
 
     private static string? Join(List<string> nameList)

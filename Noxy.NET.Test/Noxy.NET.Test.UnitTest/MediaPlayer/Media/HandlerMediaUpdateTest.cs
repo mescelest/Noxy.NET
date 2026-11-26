@@ -457,38 +457,6 @@ public class HandlerMediaUpdateTest
     }
 
     [Fact]
-    public async Task Update_SettingItemsClearsTheLegacyTextOfThatKind()
-    {
-        EntityMediaFile file = Seed();
-        StoredMetadata(file).Artist = "Legacy artist";
-        StoredMetadata(file).Genre = "Legacy genre";
-        StoredMetadata(file).Album = "Legacy album";
-        StoredMetadata(file).AlbumArtist = "Legacy album artist";
-
-        ResponseMediaFile response = await Update(file, Changes() with { Artist = new(null) });
-
-        Assert.Null(response.Artist);
-        Assert.Null(Stored(file).Metadata?.Artist);
-        Assert.Equal("Legacy genre", response.Genre);
-        Assert.Equal("Legacy album", response.Album);
-        Assert.Equal("Legacy album artist", response.AlbumArtist);
-    }
-
-    [Fact]
-    public async Task Update_AnAlbumEditClearsBothLegacyAlbumTexts()
-    {
-        EntityMediaFile file = Seed();
-        StoredMetadata(file).Album = "Legacy album";
-        StoredMetadata(file).AlbumArtist = "Legacy album artist";
-
-        ResponseMediaFile response = await Update(file, Changes() with { Album = new("New album") });
-
-        Assert.Equal("New album", response.Album);
-        Assert.Null(response.AlbumArtist);
-        Assert.Null(Stored(file).Metadata?.AlbumArtist);
-    }
-
-    [Fact]
     public async Task Update_AKeyConflictOnCommit_RunsAgainAndStillSucceeds()
     {
         EntityMediaFile file = Seed();

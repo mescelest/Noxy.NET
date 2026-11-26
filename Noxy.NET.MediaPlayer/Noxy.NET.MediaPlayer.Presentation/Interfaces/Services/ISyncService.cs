@@ -10,7 +10,7 @@ public interface ISyncService
     // Raised after the local copy changed, and when IsOffline changed.
     event Action? Changed;
 
-    // Raised after the library changed, when at least one media file was added, removed or got other bytes (a new ContentHash). Not raised for a change that only touches metadata.
+    // Raised after the library changed, when at least one media file was added or removed. Not raised for a change that only touches metadata.
     event Action<LibraryDiff>? LibraryDiffApplied;
 
     // Raised for every upload result the hub reports for this user, from this device or another, after the library has been updated.

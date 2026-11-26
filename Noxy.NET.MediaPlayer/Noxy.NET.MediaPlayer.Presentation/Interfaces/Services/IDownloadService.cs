@@ -2,13 +2,13 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 
-// Puts media files on the device. A file counts as on the device only when its bytes are in the file store and their SHA-256 equals the contentHash of the library entry they were downloaded for. Nothing here ever throws for a failed download: the state of the media file says what happened.
+// Puts media files on the device. A file counts as on the device when its state says so and its bytes are in the file store; a finished download is checked by its size. Nothing here ever throws for a failed download: the state of the media file says what happened.
 public interface IDownloadService
 {
     // Raised after the file state of any media file changed.
     event Action? Changed;
 
-    // Downloads the media file if it is not already on the device with the current hash, and returns true when it is verified on the device. A second call for a media file that is downloading waits for that download. False for an unknown media file, a failed download and a cancelled one.
+    // Downloads the media file if it is not already on the device, and returns true when it is on the device. A second call for a media file that is downloading waits for that download. False for an unknown media file, a failed download and a cancelled one.
     Task<bool> EnsureOnDevice(Guid mediaFileID);
 
     // Starts the downloads and returns: it does not wait for them. At most PresentationConstants.MaxParallelDownloads run at once.

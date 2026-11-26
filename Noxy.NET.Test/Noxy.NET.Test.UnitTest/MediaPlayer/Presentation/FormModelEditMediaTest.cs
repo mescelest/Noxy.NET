@@ -64,7 +64,7 @@ public class FormModelEditMediaTest
     {
         ResponseMediaFile media = new()
         {
-            ID = Guid.CreateVersion7(), Title = "Title", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = "h", TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow,
+            ID = Guid.CreateVersion7(), Title = "Title", ContentType = "audio/mpeg", SizeBytes = 1, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow,
             Artist = "Artist", Album = "Album", AlbumArtist = "Album artist", Subtitle = "Sub", Comment = "Note", Genre = "Rock", TrackNumber = 3, DiscNumber = 1, Year = 2021
         };
 

@@ -32,7 +32,7 @@
                         </span>
                     </div>
                     <div class="cell">
-                        <FileStatusIcon State="StateOf(ItemOf(row))"/>
+                        <FileStatusIcon State="StateOf(ItemOf(row))" IsOutdated="IsOutdated(row)"/>
                     </div>
                     <div class="cell title">
                         <AlbumArt class="art" AlbumID="AlbumIDOf(row)"/>
@@ -69,6 +69,10 @@
 
     [Parameter, EditorRequired]
     public required Func<QueueItem, FileSyncStateEnum> StateOf { get; set; }
+
+    // The media files that are on this device with tags that differ from their metadata.
+    [Parameter]
+    public IReadOnlySet<Guid> OutdatedSet { get; set; } = new HashSet<Guid>();
 
     [Parameter]
     public EventCallback OnToggleAll { get; set; }
@@ -228,6 +232,8 @@
     private static QueueItem ItemOf(QueueListRow row) => row.Item ?? throw new InvalidOperationException("A heading row has no queue item.");
 
     private static Guid ItemIDOf(QueueListRow row) => ItemOf(row).ItemID;
+
+    private bool IsOutdated(QueueListRow row) => OutdatedSet.Contains(ItemOf(row).MediaFileID);
 
     private static Guid MediaFileIDOf(QueueListRow row) => ItemOf(row).MediaFileID;
 

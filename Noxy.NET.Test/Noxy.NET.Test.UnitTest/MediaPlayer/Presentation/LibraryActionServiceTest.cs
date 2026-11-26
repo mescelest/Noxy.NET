@@ -20,11 +20,12 @@ public class LibraryActionServiceTest
     private readonly FakeFileSaver _saver = new();
     private readonly FakeFileStore _files = new();
     private readonly FakeFolderOpener _folder = new();
+    private readonly FakeFileTagService _fileTag = new();
     private readonly LibraryActionService _service;
 
     public LibraryActionServiceTest()
     {
-        _service = new(_download, _queue, _control, _api, _sync, _store, _saver, _files, _folder);
+        _service = new(_download, _queue, _control, _api, _sync, _store, _saver, _files, _folder, _fileTag);
     }
 
     private static List<Guid> Ids(int count)
@@ -195,6 +196,7 @@ public class LibraryActionServiceTest
     [InlineData(LibraryActionEnum.Download)]
     [InlineData(LibraryActionEnum.RemoveFromDevice)]
     [InlineData(LibraryActionEnum.OpenFolder)]
+    [InlineData(LibraryActionEnum.UpdateFileMetadata)]
     public void GetDisabledReason_IsNullOffline_ForTheLocalActions(LibraryActionEnum action)
     {
         _sync.IsOffline = true;
@@ -297,7 +299,7 @@ public class LibraryActionServiceTest
     private async Task<Guid> AddMedia(string title, string contentType = "audio/mpeg")
     {
         Guid id = Guid.CreateVersion7();
-        await _store.SaveMediaFile(new() { ID = id, Title = title, ContentType = contentType, SizeBytes = 1, ContentHash = "h", TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow });
+        await _store.SaveMediaFile(new() { ID = id, Title = title, ContentType = contentType, SizeBytes = 1, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow });
         _api.TaggedFileHandler = file => Task.FromResult(new ApiFileResponse(HttpStatusCode.OK, new MemoryStream(file.ToByteArray()), null, 16));
 
         return id;
@@ -386,5 +388,37 @@ public class LibraryActionServiceTest
         Assert.Empty(_download.RemoveList);
         Assert.Empty(_api.DeleteMediaList);
         Assert.Empty(_api.AddEntryCallList);
+    }
+
+    [Fact]
+    public async Task UpdateFileMetadata_ReturnsTheResultOfTheFileTagService()
+    {
+        Guid id = Guid.CreateVersion7();
+        _fileTag.Result = new(1, [], null);
+
+        BulkResult result = await _service.UpdateFileMetadata([id]);
+
+        Assert.Equal(1, result.SucceededCount);
+        Assert.Equal([[id]], _fileTag.UpdateList);
+    }
+
+    [Fact]
+    public async Task UpdateFileMetadata_OfAnEmptyList_DoesNothing()
+    {
+        BulkResult result = await _service.UpdateFileMetadata([]);
+
+        Assert.Equal(0, result.SucceededCount);
+        Assert.Empty(_fileTag.UpdateList);
+    }
+
+    [Fact]
+    public async Task UpdateAllFiles_UpdatesTheOutdatedFiles()
+    {
+        _fileTag.Result = new(4, [], null);
+
+        BulkResult result = await _service.UpdateAllFiles();
+
+        Assert.Equal(4, result.SucceededCount);
+        Assert.Equal(1, _fileTag.UpdateOutdatedCount);
     }
 }

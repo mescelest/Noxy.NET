@@ -85,6 +85,15 @@ namespace Noxy.NET.MediaPlayer.Presentation.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The metadata of this song has not been loaded yet..
+        /// </summary>
+        public static string ActionMessageMetadataNotLoaded {
+            get {
+                return ResourceManager.GetString("ActionMessageMetadataNotLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The file is not on this device..
         /// </summary>
         public static string ActionMessageNotOnDevice {
@@ -130,6 +139,15 @@ namespace Noxy.NET.MediaPlayer.Presentation.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The metadata could not be written to the file..
+        /// </summary>
+        public static string ActionMessageUpdateFileFailed {
+            get {
+                return ResourceManager.GetString("ActionMessageUpdateFileFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The file could not be uploaded..
         /// </summary>
         public static string ActionMessageUploadFailed {
@@ -166,15 +184,6 @@ namespace Noxy.NET.MediaPlayer.Presentation.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The downloaded file did not match its hash..
-        /// </summary>
-        public static string DownloadHashMismatch {
-            get {
-                return ResourceManager.GetString("DownloadHashMismatch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The download was interrupted..
         /// </summary>
         public static string DownloadInterrupted {
@@ -189,6 +198,15 @@ namespace Noxy.NET.MediaPlayer.Presentation.Resources {
         public static string DownloadNotOnServer {
             get {
                 return ResourceManager.GetString("DownloadNotOnServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The downloaded file is not the size it should be..
+        /// </summary>
+        public static string DownloadSizeMismatch {
+            get {
+                return ResourceManager.GetString("DownloadSizeMismatch", resourceCulture);
             }
         }
         

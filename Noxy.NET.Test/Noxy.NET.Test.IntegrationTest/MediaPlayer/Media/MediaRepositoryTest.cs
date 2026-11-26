@@ -136,7 +136,6 @@ public class MediaRepositoryTest : IDisposable
         EntityUser user = await CreateUser();
         EntityMediaFile file = CreateMediaFile(user.ID, "My Media");
         Assert.NotNull(file.Metadata);
-        file.Metadata.Artist = "An Artist";
         file.Metadata.Year = 1999;
         file.Metadata.Duration = TimeSpan.FromSeconds(215);
         await Add(file);
@@ -150,10 +149,8 @@ public class MediaRepositoryTest : IDisposable
         Assert.Equal(1234, found.SizeBytes);
         Assert.NotNull(found.Metadata);
         Assert.Equal("My Media", found.Metadata.Title);
-        Assert.Equal("An Artist", found.Metadata.Artist);
         Assert.Equal(1999, found.Metadata.Year);
         Assert.Equal(TimeSpan.FromSeconds(215), found.Metadata.Duration);
-        Assert.Null(found.Metadata.Album);
     }
 
     [Fact]
@@ -515,7 +512,6 @@ public class MediaRepositoryTest : IDisposable
             EntityMediaFile loaded = await uow.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
             Assert.NotNull(loaded.Metadata);
             loaded.Metadata.Title = "After";
-            loaded.Metadata.Artist = "Someone";
             loaded.Metadata.Year = 2001;
             loaded.TimeModified = new(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             uow.Media.UpdateMediaFile(loaded);
@@ -525,7 +521,6 @@ public class MediaRepositoryTest : IDisposable
         await using IUnitOfWork check = _fixture.UoWFactory.Create();
         EntityMediaFile saved = await check.Media.FindMediaFile(file.ID, user.ID, TestContext.Current.CancellationToken) ?? throw new InvalidOperationException("The media file was not found.");
         Assert.Equal("After", saved.Metadata?.Title);
-        Assert.Equal("Someone", saved.Metadata?.Artist);
         Assert.Equal(2001, saved.Metadata?.Year);
         Assert.Equal(new(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc), saved.TimeModified);
         Assert.Equal(file.FilePath, saved.FilePath);

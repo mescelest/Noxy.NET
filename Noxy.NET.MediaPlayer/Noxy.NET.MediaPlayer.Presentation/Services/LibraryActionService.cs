@@ -19,7 +19,8 @@ public class LibraryActionService(
     IMetadataStore storeMetadata,
     IFileSaver serviceFileSaver,
     IFileStore storeFile,
-    IFolderOpener serviceFolderOpener)
+    IFolderOpener serviceFolderOpener,
+    IFileTagService serviceFileTag)
     : ILibraryActionService
 {
     public async Task<BulkResult> Download(List<Guid> mediaFileIDList)
@@ -70,6 +71,18 @@ public class LibraryActionService(
         }
 
         return new(0, [.. mediaFileIDList], PresentationTexts.ActionMessageNotOnDevice);
+    }
+
+    public async Task<BulkResult> UpdateFileMetadata(List<Guid> mediaFileIDList)
+    {
+        if (mediaFileIDList.Count == 0) return new(0, [], null);
+
+        return await serviceFileTag.Update(mediaFileIDList);
+    }
+
+    public async Task<BulkResult> UpdateAllFiles()
+    {
+        return await serviceFileTag.UpdateOutdated();
     }
 
     public async Task<BulkResult> RemoveFromDevice(List<Guid> mediaFileIDList)
@@ -201,6 +214,7 @@ public class LibraryActionService(
             case LibraryActionEnum.AddToQueue:
             case LibraryActionEnum.RemoveFromDevice:
             case LibraryActionEnum.OpenFolder:
+            case LibraryActionEnum.UpdateFileMetadata:
                 return null;
             default:
                 throw new InvalidEnumArgumentException(nameof(action), (int)action, typeof(LibraryActionEnum));

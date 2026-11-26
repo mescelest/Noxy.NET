@@ -25,7 +25,8 @@
                                     MediaFileIDOf="MediaFileIDOf" OnPlaylistChanged="Load" ShowTrigger="@HasSelection"/>
             </MediaFileHeader>
 
-            <MediaFileTable RowList="_rowList" IsEmpty="IsPlaylistEmpty" EmptyTitle="@AppTexts.PlaylistEmptyTitle" EmptyDescription="@AppTexts.PlaylistEmptyDescription" StateMap="StateLibrary.Value.StateMap" Sort="_sort" Descending="_descending"
+            <MediaFileTable RowList="_rowList" IsEmpty="IsPlaylistEmpty" EmptyTitle="@AppTexts.PlaylistEmptyTitle" EmptyDescription="@AppTexts.PlaylistEmptyDescription" StateMap="StateLibrary.Value.StateMap" OutdatedSet="StateLibrary.Value.OutdatedSet"
+                            Sort="_sort" Descending="_descending"
                             OnSortChanged="ChangeSort"
                             SelectedSet="_selectedSet" AllSelected="IsAllSelected" OnToggleAll="ToggleAllShown" OnToggleRow="ToggleRow" OnPlay="Play" RowSelect="RowSelectEnum.Ctrl" OnContextMenu="OpenRowMenu"
                             IsReorderable="CanReorder" ReorderHint="ReorderHint" OnMove="Move">

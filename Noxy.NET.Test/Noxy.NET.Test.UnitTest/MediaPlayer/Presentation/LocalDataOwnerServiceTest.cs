@@ -44,7 +44,7 @@ public class LocalDataOwnerServiceTest
         await _storeMetadata.SavePlaylistDetail(detail);
         await _storeMetadata.SetLibraryETag("\"lib\"");
         await _storeMetadata.SetPlaylistListETag("\"pl\"");
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, new('a', 64), null));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, null));
         await _storeMetadata.Setting.ReplaceList([new() { Key = "Shuffle", ValueType = SettingValueTypeEnum.Enum, Value = JsonSerializer.SerializeToElement("Random"), TimeModified = DateTime.UtcNow }]);
         await _storeMetadata.Setting.SetETag("\"set\"");
         await _storeMetadata.Artist.ReplaceList([new() { ID = Guid.NewGuid(), Name = "Old artist", MediaFileCount = 1, TimeModified = DateTime.UtcNow }]);

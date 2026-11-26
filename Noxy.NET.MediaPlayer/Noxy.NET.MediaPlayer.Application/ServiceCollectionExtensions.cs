@@ -84,7 +84,6 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IGoogleTokenService, GoogleTokenService>();
             services.AddHostedService<CleanupService>();
             services.AddHostedService<UploadWorker>();
-            services.AddHostedService<MetadataBackfillService>();
         }
     }
 }

@@ -267,7 +267,7 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Save as file.
+        ///   Looks up a localized string similar to Save file as.
         /// </summary>
         public static string LibrarySaveAsFile {
             get {
@@ -275,6 +275,33 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
             }
         }
         
+
+        /// <summary>
+        ///   Looks up a localized string similar to Manage file.
+        /// </summary>
+        public static string LibraryManageFile {
+            get {
+                return ResourceManager.GetString("LibraryManageFile", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Update file metadata.
+        /// </summary>
+        public static string LibraryUpdateFileMetadata {
+            get {
+                return ResourceManager.GetString("LibraryUpdateFileMetadata", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Update all files ({0}).
+        /// </summary>
+        public static string LibraryUpdateAllFiles {
+            get {
+                return ResourceManager.GetString("LibraryUpdateAllFiles", resourceCulture);
+            }
+        }
         /// <summary>
         ///   Looks up a localized string similar to {0} media files.
         /// </summary>
@@ -726,6 +753,18 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         public static string SettingKeepQueuedItemsHelp {
             get {
                 return ResourceManager.GetString("SettingKeepQueuedItemsHelp", resourceCulture);
+            }
+        }
+
+        public static string SettingUpdateFileMetadata {
+            get {
+                return ResourceManager.GetString("SettingUpdateFileMetadata", resourceCulture);
+            }
+        }
+
+        public static string SettingUpdateFileMetadataHelp {
+            get {
+                return ResourceManager.GetString("SettingUpdateFileMetadataHelp", resourceCulture);
             }
         }
 
@@ -1488,6 +1527,15 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
             }
         }
 
+
+        /// <summary>
+        ///   Looks up a localized string similar to On this device, metadata out of date.
+        /// </summary>
+        public static string FileStatusOnDeviceOutdated {
+            get {
+                return ResourceManager.GetString("FileStatusOnDeviceOutdated", resourceCulture);
+            }
+        }
         /// <summary>
         ///   Looks up a localized string similar to Downloading.
         /// </summary>

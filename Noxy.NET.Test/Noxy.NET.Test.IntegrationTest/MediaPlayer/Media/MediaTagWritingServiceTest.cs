@@ -1,5 +1,6 @@
 using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
+using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
@@ -38,24 +39,16 @@ public class MediaTagWritingServiceTest : IDisposable
         };
     }
 
-    // A file as it was before items existed: the text is in the metadata row.
+    // Every tag the writer writes, with the artists, album, album artists and genre as items.
     private static EntityMediaFile Full()
     {
-        EntityMediaFile file = NewFile();
-        file.Metadata = new()
-        {
-            Title = "Title",
-            Artist = "Artist",
-            Album = "Album",
-            AlbumArtist = "Album Artist",
-            Subtitle = "Subtitle",
-            Comment = "Comment",
-            Genre = "Genre",
-            TrackNumber = 3,
-            DiscNumber = 2,
-            Year = 1999,
-            MediaFileID = file.ID
-        };
+        EntityMediaFile file = Linked("Title", ["Artist"], "Album", ["Album Artist"], ["Genre"]);
+        EntityMediaFileMetadata metadata = file.Metadata ?? throw new InvalidOperationException("The media file has no metadata.");
+        metadata.Subtitle = "Subtitle";
+        metadata.Comment = "Comment";
+        metadata.TrackNumber = 3;
+        metadata.DiscNumber = 2;
+        metadata.Year = 1999;
 
         return file;
     }
@@ -91,7 +84,7 @@ public class MediaTagWritingServiceTest : IDisposable
     {
         string path = WriteFile(name.EndsWith(".mp3") ? MediaFileFixture.CreateMp3() : MediaFileFixture.CreateFlac(), name);
 
-        _writer.Write(path, Linked("Title", ["Main", "Guest"], "OK Computer", ["Main"], ["Rock", "Pop"]));
+        _writer.Write(path, Linked("Title", ["Main", "Guest"], "OK Computer", ["Main"], ["Rock", "Pop"]).ToTagValues());
 
         using TagLib.File file = TagLib.File.Create(path);
         Assert.Equal(["Main", "Guest"], file.Tag.Performers);
@@ -105,7 +98,7 @@ public class MediaTagWritingServiceTest : IDisposable
     {
         string path = WriteFile(MediaFileFixture.CreateMp3(), "media.mp3");
 
-        _writer.Write(path, Linked("Title", ["AC/DC", "Guest"], null, [], ["R&B/Soul"]));
+        _writer.Write(path, Linked("Title", ["AC/DC", "Guest"], null, [], ["R&B/Soul"]).ToTagValues());
 
         using TagLib.File file = TagLib.File.Create(path);
         Assert.Equal(["AC/DC", "Guest"], file.Tag.Performers);
@@ -119,19 +112,19 @@ public class MediaTagWritingServiceTest : IDisposable
         string path = WriteFile(MediaFileFixture.CreateWav());
         (mediaFile.ArtistLinkList[0].Artist ?? throw new InvalidOperationException("The link has no artist.")).Name = "New";
 
-        _writer.Write(path, mediaFile);
+        _writer.Write(path, mediaFile.ToTagValues());
 
         using TagLib.File file = TagLib.File.Create(path);
         Assert.Equal("New", Assert.Single(file.Tag.Performers));
     }
 
     [Fact]
-    public void Write_AFileWithoutLinksOrLegacyText_ClearsTheKinds()
+    public void Write_AFileWithoutLinks_ClearsTheKinds()
     {
         string path = WriteFile(MediaFileFixture.CreateWav());
-        _writer.Write(path, Full());
+        _writer.Write(path, Full().ToTagValues());
 
-        _writer.Write(path, TitleOnly());
+        _writer.Write(path, TitleOnly().ToTagValues());
 
         using TagLib.File file = TagLib.File.Create(path);
         Assert.Empty(file.Tag.Performers);
@@ -141,19 +134,11 @@ public class MediaTagWritingServiceTest : IDisposable
     }
 
     [Fact]
-    public void Write_AFileWithoutMetadata_Throws()
-    {
-        string path = WriteFile(MediaFileFixture.CreateWav());
-
-        Assert.Throws<ArgumentException>(() => _writer.Write(path, NewFile()));
-    }
-
-    [Fact]
     public void Write_SetsEveryTagAndReadingItBackGivesThem()
     {
         string path = WriteFile(MediaFileFixture.CreateWav());
 
-        _writer.Write(path, Full());
+        _writer.Write(path, Full().ToTagValues());
 
         using TagLib.File file = TagLib.File.Create(path);
         Assert.Equal("Title", file.Tag.Title);
@@ -172,9 +157,9 @@ public class MediaTagWritingServiceTest : IDisposable
     public void Write_NullFields_ClearExistingTags()
     {
         string path = WriteFile(MediaFileFixture.CreateWav());
-        _writer.Write(path, Full());
+        _writer.Write(path, Full().ToTagValues());
 
-        _writer.Write(path, TitleOnly());
+        _writer.Write(path, TitleOnly().ToTagValues());
 
         using TagLib.File file = TagLib.File.Create(path);
         Assert.Equal("Only", file.Tag.Title);
@@ -190,7 +175,7 @@ public class MediaTagWritingServiceTest : IDisposable
     {
         string path = WriteFile("RIFF-not-really-a-wave-file"u8.ToArray());
 
-        Assert.ThrowsAny<Exception>(() => _writer.Write(path, Full()));
+        Assert.ThrowsAny<Exception>(() => _writer.Write(path, Full().ToTagValues()));
     }
 
     [Fact]
@@ -199,7 +184,7 @@ public class MediaTagWritingServiceTest : IDisposable
         byte[] pattern = MediaFileFixture.Pattern();
         string path = WriteFile(MediaFileFixture.CreateWav());
 
-        _writer.Write(path, Full());
+        _writer.Write(path, Full().ToTagValues());
 
         Assert.True(File.ReadAllBytes(path).AsSpan().IndexOf(pattern) >= 0);
     }

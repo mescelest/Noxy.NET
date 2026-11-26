@@ -10,5 +10,6 @@ public enum LibraryActionEnum
     RemoveFromDevice,
     DeleteFromLibrary,
     Edit,
-    OpenFolder
+    OpenFolder,
+    UpdateFileMetadata
 }

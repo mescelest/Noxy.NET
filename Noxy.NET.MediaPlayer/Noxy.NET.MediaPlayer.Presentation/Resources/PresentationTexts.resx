@@ -120,8 +120,8 @@
     <value>Repeat: the queue forever</value>
         <comment>The tooltip of the repeat button in this mode.</comment>
   </data>
-    <data name="DownloadHashMismatch" xml:space="preserve">
-    <value>The downloaded file did not match its hash.</value>
+    <data name="DownloadSizeMismatch" xml:space="preserve">
+    <value>The downloaded file is not the size it should be.</value>
         <comment>Why a download failed; shown on the media file.</comment>
   </data>
     <data name="DownloadInterrupted" xml:space="preserve">
@@ -147,6 +147,14 @@
     <data name="ActionMessageNotOnDevice" xml:space="preserve">
     <value>The file is not on this device.</value>
         <comment>The library actions, when the file to show is not on the device.</comment>
+  </data>
+    <data name="ActionMessageUpdateFileFailed" xml:space="preserve">
+    <value>The metadata could not be written to the file.</value>
+        <comment>The library action that writes the metadata into the file on the device, when the file could not be changed.</comment>
+  </data>
+    <data name="ActionMessageMetadataNotLoaded" xml:space="preserve">
+    <value>The metadata of this song has not been loaded yet.</value>
+        <comment>The library action that writes the metadata into the file on the device, when the artists or genres of the song are not on the device yet.</comment>
   </data>
     <data name="ActionMessageOpenFolderFailed" xml:space="preserve">
     <value>The folder could not be opened.</value>

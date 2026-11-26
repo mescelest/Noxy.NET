@@ -10,7 +10,7 @@ using Noxy.NET.MediaPlayer.Presentation.Models;
 
 namespace Noxy.NET.MediaPlayer.Presentation.Services;
 
-public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashService serviceHash, IMetadataStore storeMetadata, IDelay delay, ILogger<DownloadService> logger) : IDownloadService
+public class DownloadService(IApiClient clientApi, IFileStore storeFile, IMetadataStore storeMetadata, IDelay delay, ILogger<DownloadService> logger) : IDownloadService
 {
     private readonly Lock _lock = new();
     private readonly Dictionary<Guid, (CancellationTokenSource Source, Task<bool> Task)> _jobMap = [];
@@ -257,14 +257,13 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
         FileState? state = (await storeMetadata.GetFileStateList()).FirstOrDefault(x => x.MediaFileID == media.ID);
 
         return state is { State: FileSyncStateEnum.OnDevice }
-               && string.Equals(state.VerifiedHash, media.ContentHash, StringComparison.OrdinalIgnoreCase)
                && await storeFile.GetPath(media.ID) is not null;
     }
 
     private async Task<bool> Download(ResponseMediaFile media, CancellationToken token)
     {
         Guid id = media.ID;
-        await SetState(new(id, FileSyncStateEnum.Downloading, null, null));
+        await SetState(new(id, FileSyncStateEnum.Downloading, null));
 
         // The ETag of the bytes in the partial file, set as soon as a response arrives so that a download cut off mid-stream can still resume with If-Range.
         StrongBox<string?> eTag = new();
@@ -278,7 +277,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
                 {
                     if (await TryDownload(media, eTag, token)) return true;
 
-                    error = PresentationTexts.DownloadHashMismatch;
+                    error = PresentationTexts.DownloadSizeMismatch;
                 }
                 catch (StorageFullException)
                 {
@@ -316,7 +315,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
         }
     }
 
-    // One request: resumes from the partial file when there is one the ETag vouches for, builds the partial file, and commits it only when its SHA-256 equals the library entry's contentHash.
+    // One request: resumes from the partial file when there is one the ETag vouches for, builds the partial file, and commits it only when its length equals the library entry's size.
     private async Task<bool> TryDownload(ResponseMediaFile media, StrongBox<string?> eTag, CancellationToken token)
     {
         Guid id = media.ID;
@@ -339,10 +338,13 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
         await storeFile.AppendPartial(id, response.Content);
         token.ThrowIfCancellationRequested();
 
-        string hash;
-        await using (Stream stream = await storeFile.OpenPartial(id)) hash = await serviceHash.Sha256Hex(stream, token);
+        long length = await storeFile.GetPartialLength(id);
 
-        if (!string.Equals(hash, media.ContentHash, StringComparison.OrdinalIgnoreCase))
+        // Shorter: the body ended early, so the partial stays and the next attempt resumes it with the same ETag.
+        if (length < media.SizeBytes) return false;
+
+        // Longer: these bytes cannot be the file, so start again from zero.
+        if (length > media.SizeBytes)
         {
             await storeFile.DiscardPartial(id);
             eTag.Value = null;
@@ -350,7 +352,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
         }
 
         await storeFile.Commit(id, media.ContentType);
-        await SetState(new(id, FileSyncStateEnum.OnDevice, hash, null));
+        await SetState(new(id, FileSyncStateEnum.OnDevice, null));
 
         return true;
     }
@@ -358,7 +360,7 @@ public class DownloadService(IApiClient clientApi, IFileStore storeFile, IHashSe
     private async Task<bool> Fail(Guid id, string error)
     {
         await storeFile.DiscardPartial(id);
-        await SetState(new(id, FileSyncStateEnum.Failed, null, error));
+        await SetState(new(id, FileSyncStateEnum.Failed, error));
 
         return false;
     }

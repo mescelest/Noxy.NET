@@ -12,7 +12,10 @@ public static class SettingCatalog
     // How many queue entries after the current one have their files downloaded ahead of time; 0 turns it off.
     public static readonly SettingDeclarationInteger PrefetchCount = new(SettingKey.PrefetchCount, 3, 0, 10);
 
-    public static readonly IReadOnlyList<SettingDeclaration> DeclarationList = [Shuffle, Repeat, MergeOnRename, KeepQueuedItems, PrefetchCount];
+    // Whether a device writes the current metadata into the files it holds when the metadata changes, and at start.
+    public static readonly SettingDeclarationBoolean UpdateFileMetadata = new(SettingKey.UpdateFileMetadata, false);
+
+    public static readonly IReadOnlyList<SettingDeclaration> DeclarationList = [Shuffle, Repeat, MergeOnRename, KeepQueuedItems, PrefetchCount, UpdateFileMetadata];
 
     // The key is exact: "shuffle" is not "Shuffle".
     public static SettingDeclaration? Find(string key)

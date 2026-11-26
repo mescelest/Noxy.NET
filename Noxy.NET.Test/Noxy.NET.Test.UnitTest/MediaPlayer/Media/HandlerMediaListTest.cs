@@ -70,13 +70,12 @@ public class HandlerMediaListTest
     }
 
     [Fact]
-    public async Task Handle_ReturnsTheHashAndUtcTimes()
+    public async Task Handle_ReturnsUtcTimes()
     {
-        EntityMediaFile file = Seed(UserID, "media", new(2026, 1, 2, 3, 4, 5, DateTimeKind.Unspecified));
+        Seed(UserID, "media", new(2026, 1, 2, 3, 4, 5, DateTimeKind.Unspecified));
 
         ResponseMediaFile response = Assert.Single(await Handle(0, 10));
 
-        Assert.Equal(file.ContentHash, response.ContentHash);
         Assert.Equal(DateTimeKind.Utc, response.TimeCreated.Kind);
         Assert.Equal(DateTimeKind.Utc, response.TimeModified.Kind);
     }

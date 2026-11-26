@@ -21,7 +21,7 @@ public class SyncServiceTest
         _serviceSync = new(_clientApi, _storeMetadata);
     }
 
-    private static ResponseMediaFile MediaFile(string title, Guid? id = null, string? hash = null)
+    private static ResponseMediaFile MediaFile(string title, Guid? id = null)
     {
         return new()
         {
@@ -29,7 +29,6 @@ public class SyncServiceTest
             Title = title,
             ContentType = "audio/mpeg",
             SizeBytes = 1234,
-            ContentHash = hash ?? new string('a', 64),
             TimeCreated = Start,
             TimeModified = Start
         };
@@ -665,9 +664,6 @@ public class SyncServiceTest
 
     #region -- Library diffs --
 
-    private const string HashOne = "1111111111111111111111111111111111111111111111111111111111111111";
-    private const string HashTwo = "2222222222222222222222222222222222222222222222222222222222222222";
-
     private List<LibraryDiff> CollectDiffList()
     {
         List<LibraryDiff> diffList = [];
@@ -688,40 +684,35 @@ public class SyncServiceTest
 
         LibraryDiff diff = Assert.Single(diffList);
         Assert.Equal([one.ID, two.ID], diff.AddedList.Select(x => x.ID));
-        Assert.Empty(diff.ChangedList);
         Assert.Empty(diff.RemovedIDList);
     }
 
     [Fact]
-    public async Task SyncLibrary_On200_RaisesOneDiff_ListingAddedChangedAndRemoved()
+    public async Task SyncLibrary_On200_RaisesOneDiff_ListingAddedAndRemoved()
     {
-        ResponseMediaFile kept = MediaFile("Kept", null, HashOne);
-        ResponseMediaFile changedBefore = MediaFile("Changed", null, HashOne);
-        ResponseMediaFile gone = MediaFile("Gone", null, HashOne);
-        await _storeMetadata.ReplaceMediaFileList([kept, changedBefore, gone]);
+        ResponseMediaFile kept = MediaFile("Kept");
+        ResponseMediaFile gone = MediaFile("Gone");
+        await _storeMetadata.ReplaceMediaFileList([kept, gone]);
         await _storeMetadata.SetLibraryETag("\"v1\"");
-        ResponseMediaFile changedAfter = MediaFile("Changed", changedBefore.ID, HashTwo);
-        ResponseMediaFile added = MediaFile("Added", null, HashOne);
+        ResponseMediaFile added = MediaFile("Added");
         List<LibraryDiff> diffList = CollectDiffList();
-        _clientApi.LibraryHandler = _ => Ok(new List<ResponseMediaFile> { kept, changedAfter, added }, "\"v2\"");
+        _clientApi.LibraryHandler = _ => Ok(new List<ResponseMediaFile> { kept, added }, "\"v2\"");
 
         await _serviceSync.SyncLibrary();
 
         LibraryDiff diff = Assert.Single(diffList);
         Assert.Equal([added.ID], diff.AddedList.Select(x => x.ID));
-        Assert.Equal([changedAfter.ID], diff.ChangedList.Select(x => x.ID));
-        Assert.Equal(HashTwo, diff.ChangedList.Single().ContentHash);
         Assert.Equal([gone.ID], diff.RemovedIDList);
     }
 
     [Fact]
     public async Task SyncLibrary_AMetadataOnlyChange_RaisesNoDiff()
     {
-        ResponseMediaFile before = MediaFile("Before", null, HashOne);
+        ResponseMediaFile before = MediaFile("Before");
         await _storeMetadata.ReplaceMediaFileList([before]);
         await _storeMetadata.SetLibraryETag("\"v1\"");
         List<LibraryDiff> diffList = CollectDiffList();
-        _clientApi.LibraryHandler = _ => Ok(new List<ResponseMediaFile> { MediaFile("After", before.ID, HashOne) }, "\"v2\"");
+        _clientApi.LibraryHandler = _ => Ok(new List<ResponseMediaFile> { MediaFile("After", before.ID) }, "\"v2\"");
 
         await _serviceSync.SyncLibrary();
 
@@ -755,27 +746,13 @@ public class SyncServiceTest
     }
 
     [Fact]
-    public async Task ApplyMediaUpdated_WithADifferentHash_RaisesAChangedDiff()
+    public async Task ApplyMediaUpdated_AMetadataOnlyChange_RaisesNoDiff()
     {
-        ResponseMediaFile before = MediaFile("Media", null, HashOne);
+        ResponseMediaFile before = MediaFile("Before");
         await _storeMetadata.SaveMediaFile(before);
         List<LibraryDiff> diffList = CollectDiffList();
 
-        await _serviceSync.ApplyMediaUpdated(MediaFile("Media", before.ID, HashTwo));
-
-        LibraryDiff diff = Assert.Single(diffList);
-        Assert.Equal([before.ID], diff.ChangedList.Select(x => x.ID));
-        Assert.Empty(diff.AddedList);
-    }
-
-    [Fact]
-    public async Task ApplyMediaUpdated_WithTheSameHash_RaisesNoDiff()
-    {
-        ResponseMediaFile before = MediaFile("Before", null, HashOne);
-        await _storeMetadata.SaveMediaFile(before);
-        List<LibraryDiff> diffList = CollectDiffList();
-
-        await _serviceSync.ApplyMediaUpdated(MediaFile("After", before.ID, HashOne));
+        await _serviceSync.ApplyMediaUpdated(MediaFile("After", before.ID));
 
         Assert.Empty(diffList);
     }

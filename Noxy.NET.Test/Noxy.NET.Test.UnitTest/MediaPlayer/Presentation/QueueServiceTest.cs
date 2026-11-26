@@ -531,10 +531,10 @@ public class QueueServiceTest
         ResponseMediaFile d = await AddMedia("D");
         _editList.Clear();
 
-        _serviceSync.RaiseLibraryDiff(new([b], [], []));
+        _serviceSync.RaiseLibraryDiff(new([b], []));
         Assert.Equal([mediaList[2].ID], MediaOf(Snapshot().SourceList));
 
-        _serviceSync.RaiseLibraryDiff(new([d], [], []));
+        _serviceSync.RaiseLibraryDiff(new([d], []));
 
         Assert.Equal([d.ID, mediaList[2].ID], MediaOf(Snapshot().SourceList));
         Assert.Equal([QueueEditEnum.InsertSourceItem], _editList.Select(x => x.Edit));
@@ -549,12 +549,12 @@ public class QueueServiceTest
         ResponseMediaFile d = await AddMedia("D");
         _editList.Clear();
 
-        _serviceSync.RaiseLibraryDiff(new([d], [], []));
+        _serviceSync.RaiseLibraryDiff(new([d], []));
         Assert.Equal([mediaList[1].ID], MediaOf(Snapshot().SourceList));
 
         _service.OwnsPlayback = true;
         await _service.ReplaceWithSnapshot(Pushed(3, Item(), [], [], [], false), false);
-        _serviceSync.RaiseLibraryDiff(new([d], [], []));
+        _serviceSync.RaiseLibraryDiff(new([d], []));
 
         Assert.Empty(Snapshot().SourceList);
         Assert.Empty(_editList);
@@ -568,7 +568,7 @@ public class QueueServiceTest
         await _service.Apply(PlayNextEdit(mediaList[2].ID));
         _editList.Clear();
 
-        _serviceSync.RaiseLibraryDiff(new([], [], [mediaList[2].ID]));
+        _serviceSync.RaiseLibraryDiff(new([], [mediaList[2].ID]));
 
         ResponseQueue queue = Snapshot();
         Assert.Equal([mediaList[1].ID], MediaOf(queue.SourceList));
@@ -586,7 +586,7 @@ public class QueueServiceTest
         int removedCount = 0;
         _service.CurrentRemoved += () => removedCount++;
 
-        _serviceSync.RaiseLibraryDiff(new([], [], [mediaList[0].ID]));
+        _serviceSync.RaiseLibraryDiff(new([], [mediaList[0].ID]));
 
         Assert.Equal(ghost, Snapshot().Current);
         Assert.Equal(0, removedCount);

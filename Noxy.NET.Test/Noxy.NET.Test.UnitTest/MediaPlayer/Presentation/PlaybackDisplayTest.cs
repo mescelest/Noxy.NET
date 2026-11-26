@@ -20,7 +20,6 @@ public class PlaybackDisplayTest
             Duration = duration,
             ContentType = "audio/mpeg",
             SizeBytes = 1,
-            ContentHash = "h",
             TimeCreated = DateTime.UtcNow,
             TimeModified = DateTime.UtcNow
         };
@@ -130,7 +129,7 @@ public class PlaybackDisplayTest
         Guid albumID = Guid.CreateVersion7();
 
         ResponseMediaFile? WithAlbum(Guid id) => Library(id) is { } media
-            ? new() { ID = media.ID, Title = media.Title, ContentType = media.ContentType, SizeBytes = 1, ContentHash = "h", TimeCreated = media.TimeCreated, TimeModified = media.TimeModified, AlbumID = albumID }
+            ? new() { ID = media.ID, Title = media.Title, ContentType = media.ContentType, SizeBytes = 1, TimeCreated = media.TimeCreated, TimeModified = media.TimeModified, AlbumID = albumID }
             : null;
 
         PlaybackDisplay local = PlaybackDisplay.Of(Snapshot(), null, TimeSpan.Zero, WithAlbum, null, false);

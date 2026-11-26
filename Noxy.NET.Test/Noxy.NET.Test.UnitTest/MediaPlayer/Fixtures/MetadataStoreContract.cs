@@ -21,7 +21,6 @@ public abstract class MetadataStoreContract
             Title = title,
             ContentType = "audio/mpeg",
             SizeBytes = 1234,
-            ContentHash = new('a', 64),
             TimeCreated = Start,
             TimeModified = Start
         };
@@ -35,7 +34,6 @@ public abstract class MetadataStoreContract
             Title = "Title with ünïcödé and \"quotes\"",
             ContentType = "audio/flac",
             SizeBytes = 9_876_543_210,
-            ContentHash = new('b', 64),
             TimeCreated = Start,
             TimeModified = Start.AddMinutes(5),
             Artist = "Artist; Other",
@@ -386,9 +384,9 @@ public abstract class MetadataStoreContract
 
     #region -- File states --
 
-    private static FileState OnDevice(Guid id, string hash = "abc")
+    private static FileState OnDevice(Guid id)
     {
-        return new(id, FileSyncStateEnum.OnDevice, hash, null);
+        return new(id, FileSyncStateEnum.OnDevice, null);
     }
 
     [Fact]
@@ -406,19 +404,35 @@ public abstract class MetadataStoreContract
         Guid id = Guid.CreateVersion7();
         Guid other = Guid.CreateVersion7();
 
-        await store.SaveFileState(new(id, FileSyncStateEnum.Failed, null, "The hash did not match."));
-        await store.SaveFileState(OnDevice(other, "def"));
+        await store.SaveFileState(new(id, FileSyncStateEnum.Failed, "The hash did not match."));
+        await store.SaveFileState(OnDevice(other));
 
         List<FileState> list = await store.GetFileStateList();
         Assert.Equal(2, list.Count);
-        Assert.Equal(new(id, FileSyncStateEnum.Failed, null, "The hash did not match."), list.Single(x => x.MediaFileID == id));
-        Assert.Equal(OnDevice(other, "def"), list.Single(x => x.MediaFileID == other));
+        Assert.Equal(new(id, FileSyncStateEnum.Failed, "The hash did not match."), list.Single(x => x.MediaFileID == id));
+        Assert.Equal(OnDevice(other), list.Single(x => x.MediaFileID == other));
 
-        await store.SaveFileState(OnDevice(id, "ghi"));
+        await store.SaveFileState(OnDevice(id));
 
         list = await store.GetFileStateList();
         Assert.Equal(2, list.Count);
-        Assert.Equal(OnDevice(id, "ghi"), list.Single(x => x.MediaFileID == id));
+        Assert.Equal(OnDevice(id), list.Single(x => x.MediaFileID == id));
+    }
+
+    [Fact]
+    public async Task SaveFileState_StoresTheTagTimeModified_AndNullStaysNull()
+    {
+        IMetadataStore store = CreateStore();
+        Guid written = Guid.CreateVersion7();
+        Guid unwritten = Guid.CreateVersion7();
+        DateTime time = new(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+
+        await store.SaveFileState(new(written, FileSyncStateEnum.OnDevice, null, time));
+        await store.SaveFileState(OnDevice(unwritten));
+
+        List<FileState> list = await store.GetFileStateList();
+        Assert.Equal(time, list.Single(x => x.MediaFileID == written).TagTimeModified);
+        Assert.Null(list.Single(x => x.MediaFileID == unwritten).TagTimeModified);
     }
 
     [Fact]

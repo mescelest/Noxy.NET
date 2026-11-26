@@ -64,7 +64,7 @@ public class HomeServiceTest
     [Fact]
     public async Task Get_IncludesTheContinueInfo_AndTheTitleOfTheCurrentMediaFile()
     {
-        ResponseMediaFile media = new() { ID = Guid.CreateVersion7(), Title = "Song", Artist = "Band", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = "h", TimeCreated = Now, TimeModified = Now };
+        ResponseMediaFile media = new() { ID = Guid.CreateVersion7(), Title = "Song", Artist = "Band", ContentType = "audio/mpeg", SizeBytes = 1, TimeCreated = Now, TimeModified = Now };
         await _store.SaveMediaFile(media);
         await _queueStore.Save(new(new() { QueueRevision = 1, Source = null, HistoryList = [], Current = new(Guid.CreateVersion7(), media.ID), UserQueueList = [], SourceList = [] }, 42, Now));
         _control.CanContinue = true;

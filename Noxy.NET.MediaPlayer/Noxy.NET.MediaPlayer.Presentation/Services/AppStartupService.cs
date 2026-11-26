@@ -15,6 +15,8 @@ public class AppStartupService(
     IMetadataSyncService serviceMetadataSync,
     IMediaHubService serviceHub,
     IFileReconciler serviceFileReconciler,
+    IFileTagService serviceFileTag,
+    IDownloadService serviceDownload,
     IQueueService serviceQueue,
     IPlaybackReporterService serviceReporter,
     IRemoteCommandHandlerService serviceCommandHandler,
@@ -30,6 +32,9 @@ public class AppStartupService(
     private bool _isRetrying;
     private bool _hasRestored;
     private bool _connected;
+    private readonly Lock _tagLock = new();
+    private bool _isTagRunning;
+    private bool _isTagRerunRequested;
 
     public event Action? Changed;
 
@@ -54,6 +59,7 @@ public class AppStartupService(
         // A setting of this device, so it needs neither the session nor the server: the slider is right before the first media file plays.
         await servicePlayer.LoadVolume();
         await RepairFiles();
+        _ = RunFileTags();
         Subscribe();
         await LoadLocalQueue();
 
@@ -286,6 +292,51 @@ public class AppStartupService(
         }
     }
 
+
+    private void OnFilesMayHaveChanged()
+    {
+        _ = RunFileTags();
+    }
+
+    // Checks the tags of the held files and, with the setting on, writes the ones that differ. Runs do not overlap: an event that arrives during a run asks for one more run after it. Never throws.
+    private async Task RunFileTags()
+    {
+        lock (_tagLock)
+        {
+            if (_isTagRunning)
+            {
+                _isTagRerunRequested = true;
+                return;
+            }
+
+            _isTagRunning = true;
+        }
+
+        while (true)
+        {
+            try
+            {
+                await serviceFileTag.CheckFiles();
+                if (await serviceSetting.GetUpdateFileMetadata()) await serviceFileTag.UpdateOutdated();
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, "Checking the tags of the files on this device failed.");
+            }
+
+            lock (_tagLock)
+            {
+                if (!_isTagRerunRequested)
+                {
+                    _isTagRunning = false;
+                    return;
+                }
+
+                _isTagRerunRequested = false;
+            }
+        }
+    }
+
     // From here on every change to the library reaches the files on the device.
     private void Subscribe()
     {
@@ -293,6 +344,8 @@ public class AppStartupService(
 
         serviceSync.LibraryDiffApplied += OnLibraryDiffApplied;
         serviceSession.Changed += OnSessionChanged;
+        serviceSync.Changed += OnFilesMayHaveChanged;
+        serviceDownload.Changed += OnFilesMayHaveChanged;
         _subscribed = true;
     }
 

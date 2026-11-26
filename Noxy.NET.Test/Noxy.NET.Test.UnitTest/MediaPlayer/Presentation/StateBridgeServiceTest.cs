@@ -19,6 +19,7 @@ public class StateBridgeServiceTest
     private readonly FakeSyncService _sync = new();
     private readonly FakeSessionService _session = new();
     private readonly FakeDownloadService _download = new();
+    private readonly FakeFileTagService _fileTag = new();
     private readonly FakePlayerService _player = new();
     private readonly FakeAppStartupService _startup = new();
     private readonly FakeLocalDataOwnerService _owner = new();
@@ -28,7 +29,7 @@ public class StateBridgeServiceTest
 
     public StateBridgeServiceTest()
     {
-        _bridge = new(_dispatcher, _sync, _session, _download, _player, _startup, _owner, _storeMetadata, _storeMetadata, _syncMetadata, new FakeLogger<StateBridgeService>());
+        _bridge = new(_dispatcher, _sync, _session, _download, _fileTag, _player, _startup, _owner, _storeMetadata, _storeMetadata, _syncMetadata, new FakeLogger<StateBridgeService>());
     }
 
     private static async Task WaitUntil(Func<bool> condition)
@@ -46,7 +47,7 @@ public class StateBridgeServiceTest
     {
         ResponseMediaFile media = MediaFileFactory.Create("One");
         await _storeMetadata.SaveMediaFile(media);
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, "hash", null));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, null));
         _download.Progress = new(3, 1, 0, 100, null);
         _sync.IsOffline = true;
 
@@ -95,6 +96,37 @@ public class StateBridgeServiceTest
         Assert.Equal(5, Assert.Single(_dispatcher.Of<ActionDownloadChanged>()).Progress.Total);
         Assert.Equal(mediaReads, _storeMetadata.MediaFileListReadCount);
         Assert.Empty(_dispatcher.Of<ActionLibraryMediaLoaded>());
+    }
+
+
+    [Fact]
+    public async Task Start_LoadsTheOutdatedIDList_WithTheFileStates()
+    {
+        Guid id = Guid.CreateVersion7();
+        _fileTag.OutdatedIDList = [id];
+
+        _bridge.Start();
+        await WaitUntil(() => _dispatcher.Of<ActionLibraryOutdatedLoaded>().Count == 1);
+
+        Assert.Equal([id], Assert.Single(_dispatcher.Of<ActionLibraryOutdatedLoaded>()).IDList);
+    }
+
+    [Fact]
+    public async Task FileTagChanged_ReloadsTheFileStatesAndTheOutdatedIDList_NotTheMediaList()
+    {
+        _bridge.Start();
+        await WaitUntil(() => _dispatcher.Of<ActionLibraryOutdatedLoaded>().Count == 1);
+        _dispatcher.Clear();
+        int mediaReads = _storeMetadata.MediaFileListReadCount;
+        Guid id = Guid.CreateVersion7();
+        _fileTag.OutdatedIDList = [id];
+
+        _fileTag.RaiseChanged();
+        await WaitUntil(() => _dispatcher.Of<ActionLibraryOutdatedLoaded>().Count == 1);
+
+        Assert.Equal([id], Assert.Single(_dispatcher.Of<ActionLibraryOutdatedLoaded>()).IDList);
+        Assert.Single(_dispatcher.Of<ActionLibraryStateLoaded>());
+        Assert.Equal(mediaReads, _storeMetadata.MediaFileListReadCount);
     }
 
     [Fact]
@@ -185,7 +217,7 @@ public class StateBridgeServiceTest
     {
         FakeLogger<StateBridgeService> logger = new();
         _storeMetadata.MediaFileListGate = Task.FromException(new InvalidOperationException("secret detail"));
-        StateBridgeService bridge = new(_dispatcher, _sync, _session, _download, _player, _startup, _owner, _storeMetadata, _storeMetadata, _syncMetadata, logger);
+        StateBridgeService bridge = new(_dispatcher, _sync, _session, _download, _fileTag, _player, _startup, _owner, _storeMetadata, _storeMetadata, _syncMetadata, logger);
         bridge.Start();
 
         _sync.RaiseChanged();

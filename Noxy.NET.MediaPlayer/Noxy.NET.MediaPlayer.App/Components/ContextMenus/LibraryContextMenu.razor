@@ -10,7 +10,7 @@
 <div @attributes="AdditionalAttributes" class="@CssClass">
     @if (ShowTrigger)
     {
-        <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" disabled="@IsNothingTicked" aria-label="@AppTexts.LibraryActions" aria-haspopup="menu" popovertarget="@MenuID">
+        <Button Type="@HTMLButtonTypeEnum.Button" class="trigger" IsIcon="true" Appearance="ButtonAppearanceEnum.Ghost" Status="StatusEnum.None" disabled="@IsTriggerDisabled" aria-label="@AppTexts.LibraryActions" aria-haspopup="menu" popovertarget="@MenuID">
             <MaterialIcon Icon="more_horiz" Size="var(--size-icon-sm)"/>
         </Button>
     }
@@ -62,7 +62,7 @@
     private bool IsNothingTicked => SelectedSet.Count == 0;
 
     // A right-click on a row acts on that row; the Actions button acts on the ticked rows.
-    private List<ContextMenuItem> ItemList => _clickedKey is { } key ? BuildItemList([key], false, true) : BuildItemList(SelectedKeyList, true);
+    private List<ContextMenuItem> ItemList => _clickedKey is { } key ? BuildItemList([key], false, true) : ButtonItemList;
 
     // Opens at the pointer for the row that was clicked.
     public async Task OpenAtAsync(MouseEventArgs args, Guid rowKey)
@@ -104,15 +104,18 @@
             list.Add(ItemOf(LibraryActionEnum.Edit, AppTexts.LibraryEdit, () => OpenEdit(idList[0]), "edit"));
         }
 
-        // What the device holds decides what can be done with it: a file that is there can be saved or removed, one that is not can be downloaded.
-        if (anyOnDevice)
-        {
-            list.Add(DeviceFileItem(idList));
-        }
+        // What the device holds decides what can be done with it: a file that is there can have its metadata written, be shown and removed, one that is not can be downloaded, and a copy can be saved either way.
+        list.Add(ManageFileItem(idList, anyOnDevice));
 
         if (anyMissing)
         {
             list.Add(ItemOf(LibraryActionEnum.Download, AppTexts.LibraryDownload, () => Show(ServiceLibraryAction.Download(idList)), "download"));
+        }
+
+        // Only the Actions button of the Library itself, not the menu of one row: every file on the device whose tags differ from its metadata.
+        if (!isRow && HasUpdateAll)
+        {
+            list.Add(UpdateAllItem());
         }
 
         list.Add(ContextMenuItem.Separator());
@@ -134,13 +137,36 @@
         return list;
     }
 
-    // Where the platform has a file manager the file on the device is shown there; where it has none, a copy is saved.
-    private ContextMenuItem DeviceFileItem(List<Guid> idList)
+    // What can be done with the files themselves: write the metadata into the copies on the device, save a copy (the server's, so it works for songs that are not on the device too), and show the file in the file manager where the platform has one.
+    private ContextMenuItem ManageFileItem(List<Guid> idList, bool anyOnDevice)
     {
-        return ServiceLibraryAction.CanOpenFolder
-            ? ItemOf(LibraryActionEnum.OpenFolder, AppTexts.LibraryOpenFolder, () => Show(ServiceLibraryAction.OpenContainingFolder(idList)), "folder_open")
-            : ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(idList)), "save_alt");
+        List<ContextMenuItem> list = [];
+        if (anyOnDevice)
+        {
+            list.Add(ItemOf(LibraryActionEnum.UpdateFileMetadata, AppTexts.LibraryUpdateFileMetadata, () => Show(ServiceLibraryAction.UpdateFileMetadata(idList)), "edit_note"));
+        }
+
+        list.Add(ItemOf(LibraryActionEnum.SaveAsFile, AppTexts.LibrarySaveAsFile, () => Show(ServiceLibraryAction.SaveAsFile(idList)), "save_alt"));
+        if (anyOnDevice && ServiceLibraryAction.CanOpenFolder)
+        {
+            list.Add(ItemOf(LibraryActionEnum.OpenFolder, AppTexts.LibraryOpenFolder, () => Show(ServiceLibraryAction.OpenContainingFolder(idList)), "folder_open"));
+        }
+
+        return ContextMenuItem.Submenu(AppTexts.LibraryManageFile, list, "description");
     }
+
+    // The Library's own menu only: a playlist's page and a page that adds items of its own have no such action.
+    private bool HasUpdateAll => PlaylistID is null && ExtraItemFactory is null && StateLibrary.Value.OutdatedSet.Count > 0;
+
+    private ContextMenuItem UpdateAllItem()
+    {
+        return ItemOf(LibraryActionEnum.UpdateFileMetadata, string.Format(AppTexts.LibraryUpdateAllFiles, StateLibrary.Value.OutdatedSet.Count), () => Show(ServiceLibraryAction.UpdateAllFiles()), "edit_note");
+    }
+
+    private bool IsTriggerDisabled => IsNothingTicked && !HasUpdateAll;
+
+    // The Actions button with nothing ticked offers only what needs no ticked rows.
+    private List<ContextMenuItem> ButtonItemList => IsNothingTicked ? [UpdateAllItem()] : BuildItemList(SelectedKeyList, true);
 
     private bool IsOnDevice(Guid mediaFileID)
     {

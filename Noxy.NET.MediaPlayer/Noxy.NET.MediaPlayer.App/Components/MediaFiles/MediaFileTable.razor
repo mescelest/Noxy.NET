@@ -75,7 +75,7 @@
                                     break;
                                 case MediaFileTableColumnEnum.State:
                                     <TableCell class="cell">
-                                        <FileStatusIcon State="StateOf(entry.Row)"/>
+                                        <FileStatusIcon State="StateOf(entry.Row)" IsOutdated="IsOutdated(entry.Row)"/>
                                     </TableCell>
                                     break;
                                 case MediaFileTableColumnEnum.Title:
@@ -118,6 +118,10 @@
     // The state of each media file on this device, by media file ID.
     [Parameter]
     public Dictionary<Guid, FileSyncStateEnum> StateMap { get; set; } = [];
+
+    // The media files that are on this device with tags that differ from their metadata.
+    [Parameter]
+    public IReadOnlySet<Guid> OutdatedSet { get; set; } = new HashSet<Guid>();
 
     // The column the rows are sorted by, or none.
     [Parameter]
@@ -224,6 +228,8 @@
     private bool IsSelected(MediaFileTableRow row) => SelectedSet.Contains(row.Key);
 
     private FileSyncStateEnum StateOf(MediaFileTableRow row) => StateMap.GetValueOrDefault(row.MediaFile.ID, FileSyncStateEnum.NotDownloaded);
+
+    private bool IsOutdated(MediaFileTableRow row) => OutdatedSet.Contains(row.MediaFile.ID);
 
     private SortDirectionEnum DirectionOf(LibrarySortEnum column)
     {

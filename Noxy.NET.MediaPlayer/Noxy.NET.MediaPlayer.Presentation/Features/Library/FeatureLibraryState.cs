@@ -10,6 +10,10 @@ public record FeatureLibraryState
 {
     public List<ResponseMediaFile> MediaList { get; init; } = [];
     public Dictionary<Guid, FileSyncStateEnum> StateMap { get; init; } = [];
+
+    // The held media files whose tags were checked and differ from their metadata.
+    public HashSet<Guid> OutdatedSet { get; init; } = [];
+
     public string Search { get; init; } = string.Empty;
     public LibrarySortEnum Sort { get; init; } = LibrarySortEnum.Title;
     public bool Descending { get; init; }

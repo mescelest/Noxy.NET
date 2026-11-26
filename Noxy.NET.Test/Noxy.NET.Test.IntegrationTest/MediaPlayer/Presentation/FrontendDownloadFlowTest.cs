@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using Noxy.NET.MediaPlayer.Domain.Enums;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
@@ -63,12 +62,11 @@ public class FrontendDownloadFlowTest
         Assert.True(onDevice);
         FileState? state = await State(frontend, media.ID);
         Assert.Equal(FileSyncStateEnum.OnDevice, state?.State);
-        Assert.Equal(media.ContentHash, state?.VerifiedHash);
+        Assert.Null(state?.Error);
         string? path = await frontend.FileStore.GetPath(media.ID);
         Assert.NotNull(path);
         byte[] stored = await File.ReadAllBytesAsync(path, TestContext.Current.CancellationToken);
         Assert.Equal(bytes, stored);
-        Assert.Equal(media.ContentHash, Convert.ToHexStringLower(SHA256.HashData(stored)));
     }
 
     [Fact]
@@ -180,7 +178,7 @@ public class FrontendDownloadFlowTest
         string? path = await frontend.FileStore.GetPath(media.ID);
         Assert.NotNull(path);
         Assert.Equal(bytes, await File.ReadAllBytesAsync(path, TestContext.Current.CancellationToken));
-        Assert.Equal(media.ContentHash, (await State(frontend, media.ID))?.VerifiedHash);
+        Assert.Equal(FileSyncStateEnum.OnDevice, (await State(frontend, media.ID))?.State);
         Assert.Empty(await frontend.FileStore.GetPartialIDList());
     }
 

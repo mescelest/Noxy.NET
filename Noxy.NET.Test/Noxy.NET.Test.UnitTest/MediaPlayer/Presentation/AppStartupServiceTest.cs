@@ -16,6 +16,8 @@ public class AppStartupServiceTest
     private readonly FakeMetadataSyncService _serviceMetadataSync = new();
     private readonly FakeMediaHubService _serviceHub = new();
     private readonly FakeFileReconciler _serviceFileReconciler = new();
+    private readonly FakeFileTagService _serviceFileTag = new();
+    private readonly FakeDownloadService _serviceDownload = new();
     private readonly FakeQueueService _serviceQueue = new();
     private readonly FakePlaybackReporterService _serviceReporter = new();
     private readonly FakeRemoteCommandHandlerService _serviceCommandHandler = new();
@@ -27,7 +29,8 @@ public class AppStartupServiceTest
 
     public AppStartupServiceTest()
     {
-        _serviceStartup = new(_serviceSession, _serviceSync, _serviceSetting, _serviceMetadataSync, _serviceHub, _serviceFileReconciler, _serviceQueue, _serviceReporter, _serviceCommandHandler, _serviceLocalDataOwner, _servicePlayer, _delay, _logger);
+        _serviceStartup = new(_serviceSession, _serviceSync, _serviceSetting, _serviceMetadataSync, _serviceHub, _serviceFileReconciler, _serviceFileTag, _serviceDownload, _serviceQueue, _serviceReporter, _serviceCommandHandler, _serviceLocalDataOwner,
+            _servicePlayer, _delay, _logger);
     }
 
     [Fact]
@@ -49,6 +52,82 @@ public class AppStartupServiceTest
         Assert.Equal(["reporter", "handler", "copy"], startedBeforeTheHub);
         Assert.Empty(_serviceQueue.ApplyList);
         Assert.Empty(_serviceQueue.StartSourceList);
+    }
+
+    [Fact]
+    public async Task Start_ChecksTheFiles_AndWithTheSettingOffWritesNothing()
+    {
+        _serviceSetting.UpdateFileMetadata = false;
+
+        await _serviceStartup.Start();
+        await WaitUntil(() => _serviceFileTag.CheckCount == 1);
+
+        Assert.Equal(0, _serviceFileTag.UpdateOutdatedCount);
+    }
+
+    [Fact]
+    public async Task Start_WithTheSettingOn_UpdatesTheOutdatedFilesAfterTheCheck()
+    {
+        _serviceSetting.UpdateFileMetadata = true;
+
+        await _serviceStartup.Start();
+        await WaitUntil(() => _serviceFileTag.UpdateOutdatedCount == 1);
+
+        Assert.Equal(1, _serviceFileTag.CheckCount);
+    }
+
+    [Fact]
+    public async Task SyncChanged_ChecksTheFiles_AndWithTheSettingOnUpdatesThem()
+    {
+        await _serviceStartup.Start();
+        await WaitUntil(() => _serviceFileTag.CheckCount == 1);
+        _serviceSetting.UpdateFileMetadata = true;
+
+        _serviceSync.RaiseChanged();
+        await WaitUntil(() => _serviceFileTag.UpdateOutdatedCount == 1);
+
+        Assert.Equal(2, _serviceFileTag.CheckCount);
+    }
+
+    [Fact]
+    public async Task DownloadChanged_ChecksTheFiles()
+    {
+        await _serviceStartup.Start();
+        await WaitUntil(() => _serviceFileTag.CheckCount == 1);
+
+        _serviceDownload.RaiseChanged();
+        await WaitUntil(() => _serviceFileTag.CheckCount == 2);
+
+        Assert.Equal(0, _serviceFileTag.UpdateOutdatedCount);
+    }
+
+    [Fact]
+    public async Task EventsDuringARun_CauseOneMoreRun_NotAnOverlap()
+    {
+        _serviceFileTag.CheckGate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        await _serviceStartup.Start();
+        await WaitUntil(() => _serviceFileTag.CheckCount == 1);
+
+        _serviceSync.RaiseChanged();
+        _serviceSync.RaiseChanged();
+        _serviceDownload.RaiseChanged();
+        _serviceFileTag.CheckGate.SetResult();
+        await WaitUntil(() => _serviceFileTag.CheckCount == 2);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, _serviceFileTag.CheckCount);
+        Assert.Equal(1, _serviceFileTag.MaxActiveCount);
+    }
+
+    [Fact]
+    public async Task AFailingCheckOrUpdate_IsLogged_NotThrown()
+    {
+        _serviceFileTag.Failure = new IOException("The disk is not readable.");
+
+        await _serviceStartup.Start();
+        await WaitUntil(() => _logger.EntryList.Any(x => x.Level == LogLevel.Error));
+
+        Assert.Equal(1, _serviceFileTag.CheckCount);
     }
 
     [Theory]
@@ -385,7 +464,7 @@ public class AppStartupServiceTest
     public async Task Start_ForwardsEveryLibraryDiffToTheReconciler()
     {
         await _serviceStartup.Start();
-        LibraryDiff diff = new([], [], [Guid.CreateVersion7()]);
+        LibraryDiff diff = new([], [Guid.CreateVersion7()]);
 
         _serviceSync.RaiseLibraryDiff(diff);
 
@@ -398,7 +477,7 @@ public class AppStartupServiceTest
         await _serviceStartup.Start();
         await _serviceStartup.Start();
 
-        _serviceSync.RaiseLibraryDiff(new([], [], [Guid.CreateVersion7()]));
+        _serviceSync.RaiseLibraryDiff(new([], [Guid.CreateVersion7()]));
 
         Assert.Single(_serviceFileReconciler.ApplyList);
     }

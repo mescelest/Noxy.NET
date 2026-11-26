@@ -180,11 +180,24 @@ public class FeatureLibraryReducersTest
         List<ResponseMediaFile> mediaList = MediaList();
         FeatureLibraryState state = Loaded(mediaList);
 
-        state = FeatureLibraryReducers.ReduceStateLoaded(state, new([new(mediaList[0].ID, FileSyncStateEnum.OnDevice, "hash", null), new(mediaList[1].ID, FileSyncStateEnum.Downloading, null, null)]));
-        state = FeatureLibraryReducers.ReduceStateLoaded(state, new([new(mediaList[2].ID, FileSyncStateEnum.Failed, null, "x")]));
+        state = FeatureLibraryReducers.ReduceStateLoaded(state, new([new(mediaList[0].ID, FileSyncStateEnum.OnDevice, null), new(mediaList[1].ID, FileSyncStateEnum.Downloading, null)]));
+        state = FeatureLibraryReducers.ReduceStateLoaded(state, new([new(mediaList[2].ID, FileSyncStateEnum.Failed, "x")]));
 
         Assert.Equal([mediaList[2].ID], state.StateMap.Keys);
         Assert.Equal(FileSyncStateEnum.Failed, state.StateMap[mediaList[2].ID]);
+    }
+
+    [Fact]
+    public void OutdatedLoaded_ReplacesTheSet()
+    {
+        Guid first = Guid.CreateVersion7();
+        Guid second = Guid.CreateVersion7();
+        FeatureLibraryState state = new();
+
+        state = FeatureLibraryReducers.ReduceOutdatedLoaded(state, new([first]));
+        state = FeatureLibraryReducers.ReduceOutdatedLoaded(state, new([second]));
+
+        Assert.Equal([second], state.OutdatedSet);
     }
 
     [Fact]

@@ -18,6 +18,9 @@ public interface ISettingService
 
     Task<bool> GetKeepQueuedItems();
 
+    // Whether this device writes the current metadata into the files it holds by itself. A stored value of the wrong kind counts as no value.
+    Task<bool> GetUpdateFileMetadata();
+
     // How many queue entries ahead of the current one are downloaded in advance. A stored value of the wrong kind or outside the range counts as no value.
     Task<int> GetPrefetchCount();
 

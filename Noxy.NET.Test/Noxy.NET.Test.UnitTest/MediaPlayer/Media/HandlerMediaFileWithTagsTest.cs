@@ -4,6 +4,7 @@ using Noxy.NET.MediaPlayer.Application.Handlers.Media;
 using Noxy.NET.MediaPlayer.Application.Models.Media;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
+using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.Test.MediaPlayer.Fakes;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
@@ -43,7 +44,7 @@ public class HandlerMediaFileWithTagsTest
             ContentHash = Convert.ToHexStringLower(SHA256.HashData(bytes)),
             UserID = userID
         };
-        file.Metadata = new() { Title = title, Artist = "Someone", Album = "Album", MediaFileID = file.ID };
+        file.Metadata = new() { Title = title, MediaFileID = file.ID };
 
         _storage.Files[file.FilePath] = bytes;
         _store.MediaFileList.Add(file);
@@ -59,12 +60,10 @@ public class HandlerMediaFileWithTagsTest
 
         await using Stream stream = (await _handler.Handle(new(UserID, file.ID), Token)).Content;
 
-        (string path, EntityMediaFile written) = Assert.Single(_tagWriter.WriteList);
-        EntityMediaFileMetadata metadata = Assert.IsType<EntityMediaFileMetadata>(written.Metadata);
+        (string path, MediaTagValues values) = Assert.Single(_tagWriter.WriteList);
         Assert.NotEqual(file.FilePath, path);
         Assert.Contains(path, _storage.Temporary.Keys);
-        Assert.Equal("My Media", metadata.Title);
-        Assert.Equal("Someone", metadata.Artist);
+        Assert.Equal("My Media", values.Title);
         Assert.Equal(Mp3(), _storage.Files[file.FilePath]);
         Assert.Equal(hash, file.ContentHash);
         Assert.Equal(50, file.SizeBytes);
@@ -95,7 +94,7 @@ public class HandlerMediaFileWithTagsTest
         MediaDownload download = await _handler.Handle(new(UserID, file.ID), Token);
         await download.Content.DisposeAsync();
 
-        Assert.Equal("Renamed", Assert.Single(_tagWriter.WriteList).MediaFile.Metadata?.Title);
+        Assert.Equal("Renamed", Assert.Single(_tagWriter.WriteList).Values.Title);
         Assert.Equal("Renamed.mp3", download.FileName);
     }
 
@@ -189,11 +188,10 @@ public class HandlerMediaFileWithTagsTest
 
         await using Stream stream = (await _handler.Handle(new(UserID, file.ID), Token)).Content;
 
-        EntityMediaFileMetadata metadata = Assert.IsType<EntityMediaFileMetadata>(Assert.Single(_tagWriter.WriteList).MediaFile.Metadata);
-        Assert.Equal("Only", metadata.Title);
-        Assert.Null(metadata.Artist);
-        Assert.Null(metadata.Album);
-        Assert.Null(metadata.Genre);
-        Assert.Null(metadata.Year);
+        MediaTagValues values = Assert.Single(_tagWriter.WriteList).Values;
+        Assert.Equal("Only", values.Title);
+        Assert.Null(values.Year);
+        Assert.Null(values.Album);
+        Assert.Empty(values.ArtistNameList);
     }
 }

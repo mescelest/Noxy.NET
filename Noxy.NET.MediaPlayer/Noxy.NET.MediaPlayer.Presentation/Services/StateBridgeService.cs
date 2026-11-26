@@ -16,6 +16,7 @@ public class StateBridgeService(
     ISyncService serviceSync,
     ISessionService serviceSession,
     IDownloadService serviceDownload,
+    IFileTagService serviceFileTag,
     IPlayerService servicePlayer,
     IAppStartupService serviceStartup,
     ILocalDataOwnerService serviceLocalDataOwner,
@@ -47,6 +48,7 @@ public class StateBridgeService(
         serviceSync.Changed += OnSyncChanged;
         serviceMetadataSync.Changed += OnMetadataChanged;
         serviceDownload.Changed += OnDownloadChanged;
+        serviceFileTag.Changed += OnFileTagChanged;
         servicePlayer.Changed += DispatchPlayer;
         serviceSession.Changed += DispatchSession;
         serviceStartup.Changed += DispatchSession;
@@ -69,6 +71,7 @@ public class StateBridgeService(
         serviceSync.Changed -= OnSyncChanged;
         serviceMetadataSync.Changed -= OnMetadataChanged;
         serviceDownload.Changed -= OnDownloadChanged;
+        serviceFileTag.Changed -= OnFileTagChanged;
         servicePlayer.Changed -= DispatchPlayer;
         serviceSession.Changed -= DispatchSession;
         serviceStartup.Changed -= DispatchSession;
@@ -91,6 +94,12 @@ public class StateBridgeService(
     private void OnMetadataChanged()
     {
         _ = Coalesce(ListKey, LoadLists);
+    }
+
+
+    private void OnFileTagChanged()
+    {
+        _ = Coalesce(FileStateKey, LoadFileStates);
     }
 
     private void OnDownloadChanged()
@@ -118,6 +127,7 @@ public class StateBridgeService(
     private async Task LoadFileStates()
     {
         dispatcher.Dispatch(new ActionLibraryStateLoaded(await storeMetadata.GetFileStateList()));
+        dispatcher.Dispatch(new ActionLibraryOutdatedLoaded(await serviceFileTag.GetOutdatedIDList()));
     }
 
     private void DispatchSession()

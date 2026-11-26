@@ -37,7 +37,7 @@ public class HandlerMediaDeleteTest
             ContentHash = Convert.ToHexStringLower(SHA256.HashData(bytes)),
             UserID = userID ?? UserID
         };
-        file.Metadata = new() { Title = title, Artist = "Artist", Album = "Album", Genre = "Genre", Year = 1999, MediaFileID = file.ID };
+        file.Metadata = new() { Title = title, Year = 1999, MediaFileID = file.ID };
 
         _storage.Files[file.FilePath] = bytes;
         _store.MediaFileList.Add(file);

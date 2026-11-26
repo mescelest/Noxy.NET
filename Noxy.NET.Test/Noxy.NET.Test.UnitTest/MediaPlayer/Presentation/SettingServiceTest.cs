@@ -294,6 +294,19 @@ public class SettingServiceTest
         Assert.False(await _service.GetKeepQueuedItems());
     }
 
+
+    [Fact]
+    public async Task GetUpdateFileMetadata_DefaultsToFalse_ReadsAStoredTrue_AndIgnoresAWrongKind()
+    {
+        Assert.False(await _service.GetUpdateFileMetadata());
+
+        await Seed(Setting(SettingKey.UpdateFileMetadata, true, SettingValueTypeEnum.Boolean));
+        Assert.True(await _service.GetUpdateFileMetadata());
+
+        await Seed(Setting(SettingKey.UpdateFileMetadata, "yes", SettingValueTypeEnum.Boolean));
+        Assert.False(await _service.GetUpdateFileMetadata());
+    }
+
     [Fact]
     public async Task GetPrefetchCount_ReturnsTheStoredValueOrTheDefault()
     {

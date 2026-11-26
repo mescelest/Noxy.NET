@@ -29,8 +29,20 @@
         <comment>The menu of the Library and of a playlist's entries.</comment>
   </data>
     <data name="LibrarySaveAsFile" xml:space="preserve">
-    <value>Save as file</value>
-        <comment>The menu of the Library and of a playlist's entries.</comment>
+    <value>Save file as</value>
+        <comment>The Manage file menu of the Library, the queue and a playlist entries: saves a copy of the song.</comment>
+  </data>
+    <data name="LibraryManageFile" xml:space="preserve">
+    <value>Manage file</value>
+        <comment>The submenu of the song menus that holds what can be done with the file itself.</comment>
+  </data>
+    <data name="LibraryUpdateFileMetadata" xml:space="preserve">
+    <value>Update file metadata</value>
+        <comment>The Manage file item that writes the current metadata into the file on this device.</comment>
+  </data>
+    <data name="LibraryUpdateAllFiles" xml:space="preserve">
+    <value>Update all files ({0})</value>
+        <comment>The Library Actions item that writes the metadata into every file on this device that differs from it; {0} is how many.</comment>
   </data>
     <data name="LibraryAddToPlaylist" xml:space="preserve">
     <value>Add to playlist</value>
@@ -332,6 +344,14 @@ Nothing is deleted from your library on the server.</value>
     <data name="SettingKeepQueuedItemsHelp" xml:space="preserve">
     <value>Starting something new to play keeps the songs you added to the queue yourself.</value>
         <comment>The explanation under the keep queued items setting.</comment>
+  </data>
+    <data name="SettingUpdateFileMetadata" xml:space="preserve">
+    <value>Update file metadata automatically</value>
+        <comment>The label of the update file metadata setting.</comment>
+  </data>
+    <data name="SettingUpdateFileMetadataHelp" xml:space="preserve">
+    <value>The songs on this device are rewritten when their metadata changes, so the files carry the same artist, album and genre. This uses disk and battery.</value>
+        <comment>The explanation under the update file metadata setting.</comment>
   </data>
     <data name="SettingPrefetchCount" xml:space="preserve">
     <value>Download ahead</value>
@@ -672,6 +692,10 @@ Nothing is deleted from your library on the server.</value>
     <data name="FileStatusOnDevice" xml:space="preserve">
     <value>On this device</value>
         <comment>The state of a file that is downloaded.</comment>
+  </data>
+    <data name="FileStatusOnDeviceOutdated" xml:space="preserve">
+    <value>On this device, metadata out of date</value>
+        <comment>The state of a file that is downloaded when the tags in the file differ from the metadata.</comment>
   </data>
     <data name="FileStatusDownloading" xml:space="preserve">
     <value>Downloading</value>

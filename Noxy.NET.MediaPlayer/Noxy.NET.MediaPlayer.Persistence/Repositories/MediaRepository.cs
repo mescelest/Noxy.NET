@@ -40,15 +40,6 @@ public class MediaRepository(DataContext context, IEntityToTableMapper mapperE2T
         return table is null ? null : mapperT2E.Map(table);
     }
 
-    public async Task<List<Guid>> GetMediaFileIDListWithLegacyText(CancellationToken cancellationToken = default)
-    {
-        return await context.MediaFile.AsNoTracking()
-            .Where(x => x.Metadata != null && (x.Metadata.Artist != null || x.Metadata.Album != null || x.Metadata.AlbumArtist != null || x.Metadata.Genre != null))
-            .OrderBy(x => x.ID)
-            .Select(x => x.ID)
-            .ToListAsync(cancellationToken);
-    }
-
     public async Task<List<EntityMediaFile>> GetMediaFileListByID(List<Guid> idList, CancellationToken cancellationToken = default)
     {
         List<TableMediaFile> list = await context.MediaFile.AsNoTracking()

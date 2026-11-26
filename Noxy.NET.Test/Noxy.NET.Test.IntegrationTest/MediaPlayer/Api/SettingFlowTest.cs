@@ -41,9 +41,9 @@ public class SettingFlowTest
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Matches("^\"[0-9a-f]{64}\"$", response.GetETag());
-        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems, SettingKey.PrefetchCount], list.Select(x => x.Key).ToList());
-        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Integer], list.Select(x => x.ValueType).ToList());
-        Assert.Equal(["Off", "No", "False", "False", "3"], list.Select(x => Value(x).ToString()).ToList());
+        Assert.Equal([SettingKey.Shuffle, SettingKey.Repeat, SettingKey.MergeOnRename, SettingKey.KeepQueuedItems, SettingKey.PrefetchCount, SettingKey.UpdateFileMetadata], list.Select(x => x.Key).ToList());
+        Assert.Equal([SettingValueTypeEnum.Enum, SettingValueTypeEnum.Enum, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Boolean, SettingValueTypeEnum.Integer, SettingValueTypeEnum.Boolean], list.Select(x => x.ValueType).ToList());
+        Assert.Equal(["Off", "No", "False", "False", "3", "False"], list.Select(x => Value(x).ToString()).ToList());
         Assert.Contains("\"valueType\":\"Enum\"", body);
         Assert.All(list, x => Assert.Equal(DateTime.UnixEpoch, x.TimeModified));
     }

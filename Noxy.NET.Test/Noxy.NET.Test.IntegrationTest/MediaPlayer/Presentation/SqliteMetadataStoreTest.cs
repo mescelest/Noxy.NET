@@ -1,7 +1,10 @@
+using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Domain.Responses.Playlist;
+using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
+using Noxy.NET.MediaPlayer.Presentation.Models;
 using Noxy.NET.MediaPlayer.Storage.Stores;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
 
@@ -33,7 +36,6 @@ public class SqliteMetadataStoreTest : MetadataStoreContract, IDisposable
             Title = title,
             ContentType = "audio/mpeg",
             SizeBytes = 1,
-            ContentHash = new('a', 64),
             TimeCreated = DateTime.UtcNow,
             TimeModified = DateTime.UtcNow
         };
@@ -69,6 +71,31 @@ public class SqliteMetadataStoreTest : MetadataStoreContract, IDisposable
         Assert.Equal([file.ID], (await second.GetMediaFileList()).Select(x => x.ID));
         Assert.Equal([playlist.ID], (await second.GetPlaylistList()).Select(x => x.ID));
         Assert.Equal("\"etag\"", await second.GetLibraryETag());
+    }
+
+    [Fact]
+    public async Task Seed_AnOldFileStateRowWithAVerifiedHash_StillLoads()
+    {
+        IMetadataStore store = CreateStore();
+        await store.GetFileStateList();
+        Guid id = Guid.CreateVersion7();
+        string json = JsonSerializer.Serialize(new FileState(id, FileSyncStateEnum.OnDevice, null), JsonSerializerOptions.Web);
+        string oldJson = json[..^1] + ",\"verifiedHash\":\"abc123\"}";
+        Assert.Contains("verifiedHash", oldJson);
+
+        await using (SqliteConnection connection = new($"Data Source={DatabasePath}"))
+        {
+            await connection.OpenAsync(TestContext.Current.CancellationToken);
+            await using SqliteCommand command = connection.CreateCommand();
+            command.CommandText = "INSERT INTO FileState (ID, Json) VALUES ($id, $json)";
+            command.Parameters.AddWithValue("$id", id.ToString());
+            command.Parameters.AddWithValue("$json", oldJson);
+            await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        }
+
+        SqliteConnection.ClearAllPools();
+
+        Assert.Equal(new(id, FileSyncStateEnum.OnDevice, null), Assert.Single(await store.GetFileStateList()));
     }
 
     [Fact]

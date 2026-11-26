@@ -85,7 +85,7 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
         await storeMetadata.DeleteMediaFile(id);
         Changed?.Invoke();
 
-        if (before is not null) RaiseLibraryDiff(new([], [], [id]));
+        if (before is not null) RaiseLibraryDiff(new([], [id]));
     }
 
     public async Task ApplyPlaylistUpdated(ResponsePlaylist playlist)
@@ -129,17 +129,16 @@ public class SyncService(IApiClient clientApi, IMetadataStore storeMetadata) : I
         return Task.CompletedTask;
     }
 
-    // Compares by ID and by ContentHash: a change that only touches metadata leaves the bytes on the device right, so it is not a change here.
+    // Compares by ID: the bytes behind an ID never change, so a change that only touches metadata is not a change here.
     private static LibraryDiff Diff(List<ResponseMediaFile> before, List<ResponseMediaFile> after)
     {
-        Dictionary<Guid, ResponseMediaFile> beforeMap = before.ToDictionary(x => x.ID);
+        HashSet<Guid> beforeSet = [.. before.Select(x => x.ID)];
         HashSet<Guid> afterSet = [.. after.Select(x => x.ID)];
 
-        List<ResponseMediaFile> addedList = after.Where(x => !beforeMap.ContainsKey(x.ID)).ToList();
-        List<ResponseMediaFile> changedList = after.Where(x => beforeMap.TryGetValue(x.ID, out ResponseMediaFile? old) && !string.Equals(old.ContentHash, x.ContentHash, StringComparison.OrdinalIgnoreCase)).ToList();
+        List<ResponseMediaFile> addedList = after.Where(x => !beforeSet.Contains(x.ID)).ToList();
         List<Guid> removedIDList = before.Where(x => !afterSet.Contains(x.ID)).Select(x => x.ID).ToList();
 
-        return new(addedList, changedList, removedIDList);
+        return new(addedList, removedIDList);
     }
 
     private void RaiseLibraryDiff(LibraryDiff diff)

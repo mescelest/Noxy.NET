@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -77,7 +76,6 @@ public class MediaUploadFlowTest
         HttpResponseMessage download = await api.Download(user.Token, result.Media.ID);
 
         Assert.Equal(content, await download.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken));
-        Assert.Equal(Convert.ToHexStringLower(SHA256.HashData(content)), result.Media.ContentHash);
         Assert.Equal("My Media.mp3", download.Content.Headers.ContentDisposition?.FileNameStar ?? download.Content.Headers.ContentDisposition?.FileName);
     }
 

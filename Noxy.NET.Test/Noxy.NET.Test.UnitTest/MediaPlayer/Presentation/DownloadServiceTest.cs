@@ -1,5 +1,4 @@
 using System.Net;
-using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 using Noxy.NET.MediaPlayer.Presentation;
@@ -24,7 +23,7 @@ public class DownloadServiceTest
 
     public DownloadServiceTest()
     {
-        _serviceDownload = new(_clientApi, _storeFile, new HashService(), _storeMetadata, _delay, _logger);
+        _serviceDownload = new(_clientApi, _storeFile, _storeMetadata, _delay, _logger);
     }
 
     private static byte[] Bytes(int length, byte seed = 1)
@@ -35,11 +34,6 @@ public class DownloadServiceTest
         return bytes;
     }
 
-    private static string Hash(byte[] bytes)
-    {
-        return Convert.ToHexStringLower(SHA256.HashData(bytes));
-    }
-
     private async Task<ResponseMediaFile> AddMedia(byte[] bytes, string contentType = "audio/mpeg")
     {
         ResponseMediaFile media = new()
@@ -48,7 +42,6 @@ public class DownloadServiceTest
             Title = "Media",
             ContentType = contentType,
             SizeBytes = bytes.Length,
-            ContentHash = Hash(bytes),
             TimeCreated = DateTime.UtcNow,
             TimeModified = DateTime.UtcNow
         };
@@ -79,7 +72,7 @@ public class DownloadServiceTest
     }
 
     [Fact]
-    public async Task EnsureOnDevice_DownloadsVerifiesAndStores_ThenStateIsOnDeviceWithTheVerifiedHash()
+    public async Task EnsureOnDevice_DownloadsChecksTheSizeAndStores_ThenStateIsOnDevice()
     {
         byte[] bytes = Bytes(10_000);
         ResponseMediaFile media = await AddMedia(bytes, "audio/flac");
@@ -88,7 +81,7 @@ public class DownloadServiceTest
         bool result = await _serviceDownload.EnsureOnDevice(media.ID);
 
         Assert.True(result);
-        Assert.Equal(new(media.ID, FileSyncStateEnum.OnDevice, media.ContentHash, null), await State(media.ID));
+        Assert.Equal(new(media.ID, FileSyncStateEnum.OnDevice, null), await State(media.ID));
         string? path = await _storeFile.GetPath(media.ID);
         Assert.NotNull(path);
         Assert.EndsWith(".flac", path);
@@ -98,12 +91,24 @@ public class DownloadServiceTest
     }
 
     [Fact]
-    public async Task EnsureOnDevice_WhenAlreadyOnDeviceWithTheSameHash_DoesNotDownload()
+    public async Task EnsureOnDevice_AfterADownload_HasNoTagTimeRecorded()
+    {
+        byte[] bytes = Bytes(500);
+        ResponseMediaFile media = await AddMedia(bytes);
+        _clientApi.FileHandler = (_, _, _) => Whole(bytes);
+
+        await _serviceDownload.EnsureOnDevice(media.ID);
+
+        Assert.Null((await State(media.ID))?.TagTimeModified);
+    }
+
+    [Fact]
+    public async Task EnsureOnDevice_WhenAlreadyOnDevice_DoesNotDownload()
     {
         byte[] bytes = Bytes(500);
         ResponseMediaFile media = await AddMedia(bytes);
         _storeFile.Hold(media.ID, bytes);
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, media.ContentHash, null));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, null));
 
         bool result = await _serviceDownload.EnsureOnDevice(media.ID);
 
@@ -112,29 +117,11 @@ public class DownloadServiceTest
     }
 
     [Fact]
-    public async Task EnsureOnDevice_WhenOnDeviceWithADifferentHash_DownloadsAgain()
-    {
-        byte[] oldBytes = Bytes(500);
-        byte[] newBytes = Bytes(600, 7);
-        ResponseMediaFile media = await AddMedia(newBytes);
-        _storeFile.Hold(media.ID, oldBytes);
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, Hash(oldBytes), null));
-        _clientApi.FileHandler = (_, _, _) => Whole(newBytes);
-
-        bool result = await _serviceDownload.EnsureOnDevice(media.ID);
-
-        Assert.True(result);
-        Assert.Single(_clientApi.FileRequestList);
-        Assert.Equal(media.ContentHash, (await State(media.ID))?.VerifiedHash);
-        Assert.Equal(newBytes, _storeFile.ReadPath(await _storeFile.GetPath(media.ID) ?? string.Empty));
-    }
-
-    [Fact]
     public async Task EnsureOnDevice_WhenTheStateSaysOnDeviceButTheFileIsGone_DownloadsAgain()
     {
         byte[] bytes = Bytes(500);
         ResponseMediaFile media = await AddMedia(bytes);
-        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, media.ContentHash, null));
+        await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, null));
         _clientApi.FileHandler = (_, _, _) => Whole(bytes);
 
         bool result = await _serviceDownload.EnsureOnDevice(media.ID);
@@ -145,10 +132,10 @@ public class DownloadServiceTest
     }
 
     [Fact]
-    public async Task EnsureOnDevice_WhenTheHashDoesNotMatch_StoresNothing_DiscardsThePartial_AndEndsFailedAfterMaxAttempts()
+    public async Task EnsureOnDevice_WhenTheSizeDoesNotMatch_StoresNothing_DiscardsThePartial_AndEndsFailedAfterMaxAttempts()
     {
         ResponseMediaFile media = await AddMedia(Bytes(1000));
-        _clientApi.FileHandler = (_, _, _) => Whole(Bytes(1000, 99));
+        _clientApi.FileHandler = (_, _, _) => Whole(Bytes(1001));
 
         bool result = await _serviceDownload.EnsureOnDevice(media.ID);
 
@@ -159,16 +146,15 @@ public class DownloadServiceTest
         FileState? state = await State(media.ID);
         Assert.Equal(FileSyncStateEnum.Failed, state?.State);
         Assert.False(string.IsNullOrWhiteSpace(state?.Error));
-        Assert.Null(state.VerifiedHash);
     }
 
     [Fact]
-    public async Task EnsureOnDevice_WhenTheHashMatchesOnTheSecondTry_EndsOnDevice()
+    public async Task EnsureOnDevice_WhenTheSizeMatchesOnTheSecondTry_EndsOnDevice()
     {
         byte[] bytes = Bytes(1000);
         ResponseMediaFile media = await AddMedia(bytes);
         int calls = 0;
-        _clientApi.FileHandler = (_, _, _) => ++calls == 1 ? Whole(Bytes(1000, 99)) : Whole(bytes);
+        _clientApi.FileHandler = (_, _, _) => ++calls == 1 ? Whole(Bytes(1001)) : Whole(bytes);
 
         bool result = await _serviceDownload.EnsureOnDevice(media.ID);
 
@@ -262,6 +248,38 @@ public class DownloadServiceTest
         Assert.True(result);
         Assert.Equal(3000, _clientApi.FileRequestList[1].RangeStart);
         Assert.Equal(newBytes, _storeFile.ReadPath(await _storeFile.GetPath(media.ID) ?? string.Empty));
+    }
+
+    [Fact]
+    public async Task EnsureOnDevice_WhenARangedRequestReturns200_ChecksTheFreshBodyAgainstTheSize()
+    {
+        byte[] newBytes = Bytes(8000, 42);
+        ResponseMediaFile media = await AddMedia(newBytes);
+        int calls = 0;
+        _clientApi.FileHandler = (_, _, _) => ++calls == 1 ? Interrupted(Bytes(3000), new HttpRequestException("The connection was cut.")) : Whole(newBytes, "\"file-v2\"");
+
+        bool result = await _serviceDownload.EnsureOnDevice(media.ID);
+
+        Assert.True(result);
+        Assert.Equal(new(media.ID, FileSyncStateEnum.OnDevice, null), await State(media.ID));
+        Assert.Empty(await _storeFile.GetPartialIDList());
+    }
+
+    [Fact]
+    public async Task EnsureOnDevice_WhenTheBodyEndsShort_KeepsThePartialAndResumesWithIfRange_ThenCommits()
+    {
+        byte[] bytes = Bytes(10_000);
+        ResponseMediaFile media = await AddMedia(bytes);
+        int calls = 0;
+        _clientApi.FileHandler = (_, from, _) => ++calls == 1 ? Whole(bytes[..4000]) : Rest(bytes, from ?? 0);
+
+        bool result = await _serviceDownload.EnsureOnDevice(media.ID);
+
+        Assert.True(result);
+        Assert.Equal([(media.ID, null, null), (media.ID, 4000L, ETag)], _clientApi.FileRequestList);
+        Assert.Equal([media.ID], await _storeFile.GetHeldIDList());
+        Assert.Equal(bytes, _storeFile.ReadPath(await _storeFile.GetPath(media.ID) ?? string.Empty));
+        Assert.Equal(new(media.ID, FileSyncStateEnum.OnDevice, null), await State(media.ID));
     }
 
     [Fact]
@@ -528,7 +546,7 @@ public class DownloadServiceTest
     {
         (List<ResponseMediaFile> mediaList, TaskCompletionSource gate) = await AddMediaAndServe(3);
         _storeFile.Hold(mediaList[0].ID, Bytes(500));
-        await _storeMetadata.SaveFileState(new(mediaList[0].ID, FileSyncStateEnum.OnDevice, mediaList[0].ContentHash, null));
+        await _storeMetadata.SaveFileState(new(mediaList[0].ID, FileSyncStateEnum.OnDevice, null));
         gate.SetResult();
 
         await _serviceDownload.QueueMissing([.. mediaList.Select(x => x.ID)]);

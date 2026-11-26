@@ -1,4 +1,5 @@
 .FileStatusIcon {
+    position: relative;
     display: inline-flex;
     color: var(--color-muted);
 }
@@ -13,4 +14,14 @@
 
 .FileStatusIcon[data-state="Failed"] {
     color: var(--color-warning);
+}
+
+.FileStatusIcon .badge {
+    position: absolute;
+    inset-block-start: calc(var(--size-gap-xxxs) * -1);
+    inset-inline-end: calc(var(--size-gap-xxxs) * -1);
+    display: inline-flex;
+    border-radius: var(--size-border-radius-lg);
+    background: var(--color-warning);
+    color: var(--color-on-warning);
 }

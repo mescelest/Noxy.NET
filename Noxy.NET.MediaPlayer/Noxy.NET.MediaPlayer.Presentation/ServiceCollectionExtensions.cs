@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Services;
@@ -30,9 +32,11 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IShuffleService, ShuffleService>();
             services.AddSingleton<IQueueSourceService, QueueSourceService>();
             services.AddSingleton<IDelay, Delay>();
-            services.AddSingleton<IHashService, HashService>();
             services.AddSingleton<IDownloadService, DownloadService>();
             services.AddSingleton<IFileReconciler, FileReconciler>();
+            services.AddSingleton<IFileTagService, FileTagService>();
+            services.AddSingleton<IMediaTagReadingService, MediaTagReadingService>();
+            services.AddSingleton<IMediaTagWritingService, MediaTagWritingService>();
             services.AddSingleton<IQueueService, QueueService>();
             services.AddSingleton<IPlayerService, PlayerService>();
             services.AddSingleton<IMediaHubService, MediaHubService>();

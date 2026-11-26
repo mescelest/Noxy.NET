@@ -32,7 +32,7 @@ public class HandlerMediaLibraryTest
             ContentHash = Convert.ToHexStringLower(SHA256.HashData(bytes)),
             UserID = userID ?? UserID
         };
-        file.Metadata = new() { Title = title, Artist = "Artist", Album = "Album", Genre = "Genre", Year = 1999, MediaFileID = file.ID };
+        file.Metadata = new() { Title = title, Year = 1999, MediaFileID = file.ID };
 
         _store.MediaFileList.Add(file);
         return file;
@@ -162,7 +162,6 @@ public class HandlerMediaLibraryTest
 
         Assert.NotNull(library.MediaFileList);
         Assert.Equal(["Newer", "Older"], library.MediaFileList.Select(x => x.Title));
-        Assert.Equal("Artist", library.MediaFileList[0].Artist);
         Assert.Equal(1999, library.MediaFileList[0].Year);
     }
 }

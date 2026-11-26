@@ -21,6 +21,12 @@ public static class FeatureLibraryReducers
     }
 
     [ReducerMethod]
+    public static FeatureLibraryState ReduceOutdatedLoaded(FeatureLibraryState state, ActionLibraryOutdatedLoaded action)
+    {
+        return state with { OutdatedSet = [.. action.IDList] };
+    }
+
+    [ReducerMethod]
     public static FeatureLibraryState ReduceSearchChanged(FeatureLibraryState state, ActionLibrarySearchChanged action)
     {
         return Rebuild(state with { Search = action.Search });

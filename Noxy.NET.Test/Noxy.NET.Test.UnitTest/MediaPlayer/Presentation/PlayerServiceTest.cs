@@ -535,7 +535,7 @@ public class PlayerServiceTest
         Guid third = start.SourceList[1].MediaFileID;
         await _player.Next();
 
-        _sync.RaiseLibraryDiff(new([], [], [second]));
+        _sync.RaiseLibraryDiff(new([], [second]));
         await _player.Next();
 
         Assert.Equal(third, _player.Current?.MediaFileID);
@@ -553,7 +553,7 @@ public class PlayerServiceTest
         await Start(idList[0]);
         await _player.Next();
         await _storeMetadata.DeleteMediaFile(idList[1]);
-        _sync.RaiseLibraryDiff(new([], [], [idList[1]]));
+        _sync.RaiseLibraryDiff(new([], [idList[1]]));
         _audio.CallList.Clear();
 
         await _player.Previous();
@@ -995,7 +995,7 @@ public class PlayerServiceTest
         List<Guid> idList = await AddMedia(3);
         await Start(idList[0]);
 
-        _sync.RaiseLibraryDiff(new([], [], [idList[1]]));
+        _sync.RaiseLibraryDiff(new([], [idList[1]]));
         Assert.True(_audio.IsPlaying);
         Assert.Equal(idList[0], _player.Current?.MediaFileID);
 
@@ -1013,7 +1013,7 @@ public class PlayerServiceTest
         await Start(idList[0]);
         int callsBefore = _audio.CallList.Count;
 
-        _sync.RaiseLibraryDiff(new([], [], [idList[0]]));
+        _sync.RaiseLibraryDiff(new([], [idList[0]]));
 
         Assert.Equal(callsBefore, _audio.CallList.Count);
         Assert.True(_audio.IsPlaying);
@@ -1026,27 +1026,6 @@ public class PlayerServiceTest
     }
 
     [Fact]
-    public async Task AChangedHash_ForTheCurrentMediaFile_FinishesPlaying_ThenIsReDownloadedOnNextPlay()
-    {
-        Guid id = await AddMedia();
-        await Start(id);
-        ResponseMediaFile changed = (await _storeMetadata.GetMediaFile(id)) ?? throw new InvalidOperationException("Missing.");
-
-        // What the reconciler does for a changed hash: the old bytes go.
-        await _storeFile.Delete(id);
-        _sync.RaiseLibraryDiff(new([], [changed], []));
-
-        Assert.True(_audio.IsPlaying);
-        Assert.Empty(_download.EnsureList);
-
-        DownloadsSucceed();
-        await Start(id);
-
-        Assert.Equal([id], _download.EnsureList);
-        Assert.True(_audio.IsPlaying);
-    }
-
-    [Fact]
     public async Task TheItemState_FollowsTheFileState()
     {
         Guid id = await AddMedia();
@@ -1054,11 +1033,11 @@ public class PlayerServiceTest
         QueueItem item = _player.Current ?? throw new InvalidOperationException("No current.");
         Assert.Equal(FileSyncStateEnum.NotDownloaded, _player.StateOf(item));
 
-        await _storeMetadata.SaveFileState(new(id, FileSyncStateEnum.Downloading, null, null));
+        await _storeMetadata.SaveFileState(new(id, FileSyncStateEnum.Downloading, null));
         _download.RaiseChanged();
         await WaitUntil(() => _player.StateOf(item) == FileSyncStateEnum.Downloading);
 
-        await _storeMetadata.SaveFileState(new(id, FileSyncStateEnum.OnDevice, new('a', 64), null));
+        await _storeMetadata.SaveFileState(new(id, FileSyncStateEnum.OnDevice, null));
         _download.RaiseChanged();
         await WaitUntil(() => _player.StateOf(item) == FileSyncStateEnum.OnDevice);
     }

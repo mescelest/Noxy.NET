@@ -89,13 +89,6 @@ public sealed class FakeFileStore : IFileStore
         }
     }
 
-    public Task<Stream> OpenPartial(Guid mediaFileID)
-    {
-        if (!_partialMap.TryGetValue(mediaFileID, out MemoryStream? partial)) throw new InvalidOperationException("There is no partial file.");
-
-        return Task.FromResult<Stream>(new MemoryStream(partial.ToArray(), false));
-    }
-
     public Task DiscardPartial(Guid mediaFileID)
     {
         _partialMap.TryRemove(mediaFileID, out _);
@@ -113,6 +106,26 @@ public sealed class FakeFileStore : IFileStore
         if (!_partialMap.TryRemove(mediaFileID, out MemoryStream? partial)) throw new InvalidOperationException("There is no partial file.");
 
         _heldMap[mediaFileID] = (partial.ToArray(), contentType.GetFileExtension());
+
+        return Task.CompletedTask;
+    }
+
+    // The fake path is a real temporary file, so a test can write to it like a caller would.
+    public Task Rewrite(Guid mediaFileID, Action<string> write)
+    {
+        if (!_heldMap.TryGetValue(mediaFileID, out (byte[] Bytes, string Extension) held)) throw new InvalidOperationException("The file is not held.");
+
+        string path = Path.Combine(Path.GetTempPath(), $"{Guid.CreateVersion7()}{held.Extension}");
+        try
+        {
+            File.WriteAllBytes(path, held.Bytes);
+            write(path);
+            _heldMap[mediaFileID] = (File.ReadAllBytes(path), held.Extension);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
 
         return Task.CompletedTask;
     }

@@ -23,16 +23,12 @@ public class EntityMediaFileExtensionTest
     }
 
     [Fact]
-    public void ToResponse_CopiesEveryTagFromTheMetadata()
+    public void ToResponse_CopiesTheTextTagsFromTheMetadata()
     {
         EntityMediaFile file = CreateFile();
         Assert.NotNull(file.Metadata);
-        file.Metadata.Artist = "Artist";
-        file.Metadata.Album = "Album";
-        file.Metadata.AlbumArtist = "Album Artist";
         file.Metadata.Subtitle = "Subtitle";
         file.Metadata.Comment = "Comment";
-        file.Metadata.Genre = "Genre";
         file.Metadata.TrackNumber = 3;
         file.Metadata.DiscNumber = 2;
         file.Metadata.Year = 1999;
@@ -41,12 +37,8 @@ public class EntityMediaFileExtensionTest
         ResponseMediaFile response = file.ToResponse();
 
         Assert.Equal("Media", response.Title);
-        Assert.Equal("Artist", response.Artist);
-        Assert.Equal("Album", response.Album);
-        Assert.Equal("Album Artist", response.AlbumArtist);
         Assert.Equal("Subtitle", response.Subtitle);
         Assert.Equal("Comment", response.Comment);
-        Assert.Equal("Genre", response.Genre);
         Assert.Equal(3, response.TrackNumber);
         Assert.Equal(2, response.DiscNumber);
         Assert.Equal(1999, response.Year);
@@ -146,7 +138,7 @@ public class EntityMediaFileExtensionTest
     }
 
     [Fact]
-    public void ToResponse_AFileWithNoLinksAndNoLegacyText_HasNullTextAndEmptyIDLists()
+    public void ToResponse_AFileWithNoLinks_HasNullTextAndEmptyIDLists()
     {
         EntityMediaFile file = CreateFile();
 
@@ -160,41 +152,6 @@ public class EntityMediaFileExtensionTest
         Assert.Null(response.AlbumID);
         Assert.Empty(response.AlbumArtistIDList);
         Assert.Empty(response.GenreIDList);
-    }
-
-    [Fact]
-    public void ToResponse_LinkedNames_WinOverTheLegacyText()
-    {
-        EntityMediaFile file = CreateFile();
-        Assert.NotNull(file.Metadata);
-        file.Metadata.Artist = "Legacy";
-        file.Metadata.Genre = "Legacy genre";
-        LinkArtistList(file, Artist("Linked"));
-        LinkGenreList(file, "Linked genre");
-
-        ResponseMediaFile response = file.ToResponse();
-
-        Assert.Equal("Linked", response.Artist);
-        Assert.Equal("Linked genre", response.Genre);
-    }
-
-    [Fact]
-    public void ToResponse_AFileNotYetBackfilled_StillShowsItsLegacyText()
-    {
-        EntityMediaFile file = CreateFile();
-        Assert.NotNull(file.Metadata);
-        file.Metadata.Artist = "Legacy";
-        file.Metadata.Album = "Legacy album";
-        file.Metadata.AlbumArtist = "Legacy album artist";
-        file.Metadata.Genre = "Legacy genre";
-
-        ResponseMediaFile response = file.ToResponse();
-
-        Assert.Equal("Legacy", response.Artist);
-        Assert.Equal("Legacy album", response.Album);
-        Assert.Equal("Legacy album artist", response.AlbumArtist);
-        Assert.Equal("Legacy genre", response.Genre);
-        Assert.Empty(response.ArtistIDList);
     }
 
     [Fact]

@@ -15,9 +15,6 @@ public interface IMediaRepository
     // The user's file with exactly these bytes (the hash of the content), with its links loaded; null when the library holds none. Other users' files do not count.
     Task<EntityMediaFile?> FindMediaFileByHash(Guid userID, string contentHash, CancellationToken cancellationToken = default);
 
-    // The IDs, in ID order, of the files of every user whose metadata still holds artist, album, album artist or genre text from before items existed.
-    Task<List<Guid>> GetMediaFileIDListWithLegacyText(CancellationToken cancellationToken = default);
-
     // The files with those IDs, of any user, in ID order, with their links loaded. An ID that matches no file is skipped.
     Task<List<EntityMediaFile>> GetMediaFileListByID(List<Guid> idList, CancellationToken cancellationToken = default);
 

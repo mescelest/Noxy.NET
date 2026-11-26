@@ -81,21 +81,6 @@ public abstract class FileStoreContract
     }
 
     [Fact]
-    public async Task OpenPartial_ReadsWhatWasAppended_InOrder()
-    {
-        IFileStore store = CreateStore();
-        Guid id = Guid.CreateVersion7();
-        byte[] first = Bytes(300);
-        byte[] second = Bytes(200, 9);
-        await store.AppendPartial(id, new MemoryStream(first));
-        await store.AppendPartial(id, new MemoryStream(second));
-
-        byte[] expected = [.. first, .. second];
-
-        Assert.Equal(expected, await ReadAll(await store.OpenPartial(id)));
-    }
-
-    [Fact]
     public async Task APartialFile_IsNotHeld_AndHasNoPath()
     {
         IFileStore store = CreateStore();
@@ -216,10 +201,103 @@ public abstract class FileStoreContract
     }
 
     [Fact]
-    public async Task OpenPartial_WithNoPartialFile_ThrowsInvalidOperationException()
+    public async Task Rewrite_ReplacesTheHeldBytesWithWhatWriteLeft()
     {
         IFileStore store = CreateStore();
+        Guid id = Guid.CreateVersion7();
+        await Hold(store, id, Bytes(1000));
+        byte[] rewritten = Bytes(1200, 9);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => store.OpenPartial(Guid.CreateVersion7()));
+        await store.Rewrite(id, path => File.WriteAllBytes(path, rewritten));
+
+        Assert.Equal(rewritten, await ReadAll(await store.Open(id)));
+    }
+
+    [Fact]
+    public async Task Rewrite_StartsFromACopyOfTheHeldFile()
+    {
+        IFileStore store = CreateStore();
+        Guid id = Guid.CreateVersion7();
+        byte[] original = Bytes(1000);
+        await Hold(store, id, original);
+        byte[]? seen = null;
+
+        await store.Rewrite(id, path => seen = File.ReadAllBytes(path));
+
+        Assert.Equal(original, seen);
+    }
+
+    [Fact]
+    public async Task Rewrite_PassesAPathWithTheHeldFilesExtension()
+    {
+        IFileStore store = CreateStore();
+        Guid id = Guid.CreateVersion7();
+        await Hold(store, id, Bytes(100), "audio/flac");
+        string? passed = null;
+
+        await store.Rewrite(id, path => passed = path);
+
+        Assert.Equal(".flac", Path.GetExtension(passed));
+    }
+
+    [Fact]
+    public async Task Rewrite_WhenWriteThrows_KeepsTheHeldBytes_AndRethrows()
+    {
+        IFileStore store = CreateStore();
+        Guid id = Guid.CreateVersion7();
+        byte[] original = Bytes(1000);
+        await Hold(store, id, original);
+
+        await Assert.ThrowsAsync<IOException>(() => store.Rewrite(id, path =>
+        {
+            File.WriteAllBytes(path, Bytes(50, 3));
+            throw new IOException("The file is locked.");
+        }));
+
+        Assert.Equal(original, await ReadAll(await store.Open(id)));
+    }
+
+    [Fact]
+    public async Task Rewrite_WhenWriteThrows_LeavesNoTemporaryFile()
+    {
+        IFileStore store = CreateStore();
+        Guid id = Guid.CreateVersion7();
+        await Hold(store, id, Bytes(1000));
+        string? passed = null;
+
+        await Assert.ThrowsAsync<IOException>(() => store.Rewrite(id, path =>
+        {
+            passed = path;
+            throw new IOException("The file is locked.");
+        }));
+
+        Assert.False(File.Exists(passed));
+        Assert.Equal([id], await store.GetHeldIDList());
+    }
+
+    [Fact]
+    public async Task Rewrite_OfAFileThatIsNotHeld_Throws_WithoutCallingWrite()
+    {
+        IFileStore store = CreateStore();
+        bool called = false;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => store.Rewrite(Guid.CreateVersion7(), _ => called = true));
+
+        Assert.False(called);
+    }
+
+    [Fact]
+    public async Task Rewrite_DoesNotChangeWhatIsHeld_OrLeaveAPartialFile()
+    {
+        IFileStore store = CreateStore();
+        Guid id = Guid.CreateVersion7();
+        await Hold(store, id, Bytes(1000));
+        byte[] rewritten = Bytes(700, 5);
+
+        await store.Rewrite(id, path => File.WriteAllBytes(path, rewritten));
+
+        Assert.Equal([id], await store.GetHeldIDList());
+        Assert.Empty(await store.GetPartialIDList());
+        Assert.Equal(rewritten.Length, (await store.GetEstimate()).UsedBytes);
     }
 }

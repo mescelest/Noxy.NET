@@ -22,7 +22,7 @@ public class MediaEditServiceTest
     {
         return new()
         {
-            ID = Guid.CreateVersion7(), Title = "Title", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = "h", TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow,
+            ID = Guid.CreateVersion7(), Title = "Title", ContentType = "audio/mpeg", SizeBytes = 1, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow,
             Artist = artist, Year = year
         };
     }

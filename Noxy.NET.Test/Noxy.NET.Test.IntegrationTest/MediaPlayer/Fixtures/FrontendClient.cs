@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging.Abstractions;
+using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Presentation.Services;
 using Noxy.NET.MediaPlayer.Storage;
 using Noxy.NET.MediaPlayer.Storage.Stores;
@@ -31,8 +32,9 @@ public sealed class FrontendClient : IAsyncDisposable
         Hub = new(Sync, SettingService, MetadataSync, Session, storageServerAddress, NullLogger<MediaHubService>.Instance, Network);
 
         FileStore = new(folder);
-        Download = new(Api, FileStore, new HashService(), Store, new Delay(), NullLogger<DownloadService>.Instance);
+        Download = new(Api, FileStore, Store, new Delay(), NullLogger<DownloadService>.Instance);
         Reconciler = new(FileStore, Store, Download);
+        FileTag = new(FileStore, Store, Store, new MediaTagWritingService(), new MediaTagReadingService(NullLogger<MediaTagReadingService>.Instance), NullLogger<FileTagService>.Instance);
 
         QueueSource = new(Store, new ShuffleService(Random.Shared), Random.Shared);
         QueueFile = new(Path.Combine(folder, StorageConstants.LocalQueueFileName));
@@ -47,7 +49,7 @@ public sealed class FrontendClient : IAsyncDisposable
         ArtCache = new(folder);
         Art = new(Api, ArtCache, Store, MetadataSync);
         LocalDataOwner = new(Session, Store, Store, Store.Setting, FileStore, ArtCache, Download, Player);
-        Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, Queue, Reporter, CommandHandler, LocalDataOwner, Player, new Delay(), NullLogger<AppStartupService>.Instance);
+        Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, FileTag, Download, Queue, Reporter, CommandHandler, LocalDataOwner, Player, new Delay(), NullLogger<AppStartupService>.Instance);
     }
 
     public FakeTimeProvider Time { get; } = new();
@@ -79,6 +81,8 @@ public sealed class FrontendClient : IAsyncDisposable
     public DownloadService Download { get; }
 
     public FileReconciler Reconciler { get; }
+
+    public FileTagService FileTag { get; }
 
     // No sound device in a test: the player is driven against a fake that records what it was asked.
     public FakeAudioPlayer Audio { get; } = new();

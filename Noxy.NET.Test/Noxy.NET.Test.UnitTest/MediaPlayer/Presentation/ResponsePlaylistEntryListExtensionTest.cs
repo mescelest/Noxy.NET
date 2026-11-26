@@ -22,7 +22,6 @@ public class ResponsePlaylistEntryListExtensionTest
             AlbumArtist = albumArtist,
             ContentType = "audio/mpeg",
             SizeBytes = 1,
-            ContentHash = "h",
             TimeCreated = Start.AddDays(addedDays),
             TimeModified = Start
         };

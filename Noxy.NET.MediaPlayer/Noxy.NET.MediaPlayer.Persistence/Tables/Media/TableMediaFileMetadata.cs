@@ -14,18 +14,6 @@ public class TableMediaFileMetadata : BaseTable
     public required string Title { get; set; }
 
     [MaxLength(256)]
-    public string? Artist { get; set; }
-
-    [MaxLength(256)]
-    public string? Album { get; set; }
-
-    [MaxLength(256)]
-    public string? AlbumArtist { get; set; }
-
-    [MaxLength(128)]
-    public string? Genre { get; set; }
-
-    [MaxLength(256)]
     public string? Subtitle { get; set; }
 
     [MaxLength(2048)]

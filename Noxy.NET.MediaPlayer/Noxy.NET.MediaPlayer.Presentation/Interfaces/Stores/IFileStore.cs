@@ -24,9 +24,6 @@ public interface IFileStore
     // Adds the bytes to the end of the partial file, creating it when there is none.
     Task AppendPartial(Guid mediaFileID, Stream content);
 
-    // Throws InvalidOperationException when there is no partial file. The caller disposes the stream.
-    Task<Stream> OpenPartial(Guid mediaFileID);
-
     // An ID with no partial file is harmless.
     Task DiscardPartial(Guid mediaFileID);
 
@@ -34,4 +31,7 @@ public interface IFileStore
 
     // Moves the partial file into the store, replacing a held file, and removes the partial. Throws InvalidOperationException when there is no partial file. The content type decides the file's extension.
     Task Commit(Guid mediaFileID, string contentType);
+
+    // Lets write change a copy of the held file and swaps the copy in only when write returned: a failure of write or of the swap leaves the held file as it was and removes the copy, and is rethrown. write gets the path of the copy, which has the held file's extension and is not part of the held or partial lists. Throws InvalidOperationException when the file is not held, and StorageFullException when the copy does not fit.
+    Task Rewrite(Guid mediaFileID, Action<string> write);
 }

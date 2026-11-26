@@ -24,6 +24,13 @@ public interface ILibraryActionService
     // Opens the folder of the first media file that is on the device, with its file selected. One window for the whole list: the files all live in the same folder. Works offline.
     Task<BulkResult> OpenContainingFolder(List<Guid> mediaFileIDList);
 
+
+    // Writes the current metadata into the copies on this device of the ones that are held; the others are reported. Works offline.
+    Task<BulkResult> UpdateFileMetadata(List<Guid> mediaFileIDList);
+
+    // The same for every file on this device whose tags differ from the metadata. Works offline.
+    Task<BulkResult> UpdateAllFiles();
+
     // Takes the files off this device; the library is not touched. A playing one stops first so its file is released.
     Task<BulkResult> RemoveFromDevice(List<Guid> mediaFileIDList);
 

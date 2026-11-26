@@ -178,7 +178,7 @@ public sealed class FakeApiClient : IApiClient
     }
 
     public Func<Guid, RequestUpdateMedia, ResponseMediaFile> UpdateMediaHandler { get; set; } =
-        (id, _) => new() { ID = id, Title = "Media", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = "h", TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
+        (id, _) => new() { ID = id, Title = "Media", ContentType = "audio/mpeg", SizeBytes = 1, TimeCreated = DateTime.UtcNow, TimeModified = DateTime.UtcNow };
 
     public List<(Guid ID, RequestUpdateMedia Request)> UpdateMediaRequestList { get; } = [];
 

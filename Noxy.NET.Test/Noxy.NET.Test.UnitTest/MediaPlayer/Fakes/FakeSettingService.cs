@@ -18,6 +18,8 @@ public sealed class FakeSettingService : ISettingService
 
     public bool KeepQueuedItems { get; set; }
 
+    public bool UpdateFileMetadata { get; set; }
+
     public int PrefetchCount { get; set; } = 3;
 
     // Answers each Update call, or throws to script a failure. The default accepts it.
@@ -58,6 +60,11 @@ public sealed class FakeSettingService : ISettingService
     public Task<bool> GetKeepQueuedItems()
     {
         return Task.FromResult(KeepQueuedItems);
+    }
+
+    public Task<bool> GetUpdateFileMetadata()
+    {
+        return Task.FromResult(UpdateFileMetadata);
     }
 
     public Task<int> GetPrefetchCount()

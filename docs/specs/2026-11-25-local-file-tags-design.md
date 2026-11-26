@@ -40,15 +40,18 @@ The user shares the media files held on a device with other people, especially n
 
 ### Writing
 
-- The tag writer takes the metadata it needs from a value both sides have, instead of the server entity: title, artist names, album title, album artist names, genres, subtitle, comment, track, disc, year. The server's `HandlerMediaFileWithTags` and the device both use it. `ResponseMediaFile` already carries these as text.
+- The tag writer takes the metadata it needs from a value both sides have, instead of the server entity: title, artist names, album title, album artist names, genres, subtitle, comment, track, disc, year. The server's `HandlerMediaFileWithTags` builds it from the entity. The device builds it from the song it holds: title, album, subtitle, comment, track, disc and year are plain values on `ResponseMediaFile`, and artists, album artists and genres are resolved from their IDs through the device's local lists, so a name is never cut out of joined text. A song whose IDs the local lists do not have yet is skipped until they have synced. There is no fallback to text for songs from before items existed: the app is not in production, so there is no such data. (The user's call: IDs, not text.)
 - The device writes to a copy beside the held file and swaps it in only when the write succeeded, so a failure never leaves a half-written file. (Your call: how the swap is done per platform is for the builder.)
 - A write that fails, because the file is locked or the tagger cannot read it, leaves the file and its state as they were, and is retried the next time.
 
 ### Knowing what is out of date
 
 - The device records, per file, the `TimeModified` of the media file the tags were last written for. This is a new field next to the file state and not part of `VerifiedHash`.
-- A file is out of date when it is held, and either no tags were ever written or the recorded time differs from the media file's current `TimeModified`.
-- A file that was downloaded again (new bytes, new hash) has no recorded time, so it counts as out of date again.
+- The warning means the file on disk really differs from the metadata. A file with no recorded time, or a recorded time that differs from the media file's current `TimeModified`, is **checked**: the device reads the file's tags (`IMediaTagReadingService`) and compares them with the tags it would write (title, artists, album, album artists, genres, subtitle, comment, track, disc, year; not the picture or duration). When they are equal the device records the current `TimeModified` and writes nothing, so the file is not out of date. When they differ the file is out of date. (The user's call: a downloaded file whose tags already match must not warn.)
+- A file is out of date when it is held, its recorded time is not the current `TimeModified`, and a check at the current `TimeModified` found a difference. A file that has not been checked yet is not shown as out of date until its check has run; the check runs at start, after every sync change and after every download state change, whatever the setting says. It is a read, never a write. The result of a difference is kept in memory only (see below); only the recorded time is stored.
+- A file that was downloaded again (new bytes) has no recorded time and is checked again.
+- A file whose check found a difference is not read again in the same session until its state or the media file's `TimeModified` changes (an in-memory memo, not stored).
+- Unreadable tags count as a difference.
 
 ### Triggers
 
@@ -65,7 +68,7 @@ The user shares the media files held on a device with other people, especially n
 
 - `FileStatusIcon` (the file download icon) keeps the on-device icon for a held file that is out of date and adds a small warning badge to it, in the warning colour (`--color-warning` and `--color-on-warning` in `variables.css`, no literal colours in the component CSS). The tooltip says so, for example "On device, metadata out of date". (The user's call: a small warning badge.)
 - The out-of-date state is not a new `FileSyncStateEnum` value. Many places test `== OnDevice` (the context menu, the device section count), and a new value would make an out-of-date file look like it is not held. Instead the library state holds a set of the IDs that are out of date, and the icon gets a flag next to its state. (My call.)
-- The set is recomputed when a file's state, its written time or the song's `TimeModified` changes, and is also what "Update all files" counts.
+- The device service owns the list of out-of-date IDs (the checked differences above). The bridge loads it into the library state whenever the service reports a change, and it is also what "Update all files" counts.
 - Where the icon is used (the library table, the queue, a playlist) all show it, since they all pass the state to the same icon.
 
 ### Where it lives

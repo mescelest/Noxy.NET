@@ -8,7 +8,6 @@ public class ResponseMediaFile : BaseResponse
     public required string Title { get; init; }
     public required string ContentType { get; init; }
     public required long SizeBytes { get; init; }
-    public required string ContentHash { get; init; }
     public required DateTime TimeCreated { get; init; }
     public required DateTime TimeModified { get; init; }
 

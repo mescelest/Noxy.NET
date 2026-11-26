@@ -1,6 +1,6 @@
 @inherits BaseComponentElement
 
-<span @attributes="AdditionalAttributes" class="@CssClass" data-state="@State" title="@Label" role="img" aria-label="@Label">
+<span @attributes="AdditionalAttributes" class="@CssClass" data-state="@State" data-outdated="@ShowOutdated" title="@Label" role="img" aria-label="@Label">
     @switch (State)
     {
         case FileSyncStateEnum.OnDevice:
@@ -18,6 +18,12 @@
         default:
             throw new InvalidEnumArgumentException(nameof(State), (int)State, typeof(FileSyncStateEnum));
     }
+    @if (ShowOutdated)
+    {
+        <span class="badge">
+            <MaterialIcon Icon="priority_high" Size="var(--size-icon-xxs)"/>
+        </span>
+    }
 </span>
 
 @code {
@@ -25,12 +31,18 @@
     [Parameter]
     public FileSyncStateEnum State { get; set; }
 
+    // The file is on the device but its tags differ from the metadata.
+    [Parameter]
+    public bool IsOutdated { get; set; }
+
+    private bool ShowOutdated => IsOutdated && State == FileSyncStateEnum.OnDevice;
+
     private string Label => State switch
     {
-            FileSyncStateEnum.OnDevice => AppTexts.FileStatusOnDevice,
-            FileSyncStateEnum.Downloading => AppTexts.FileStatusDownloading,
-            FileSyncStateEnum.Failed => AppTexts.FileStatusFailed,
-            FileSyncStateEnum.NotDownloaded => AppTexts.FileStatusNotDownloaded,
+        FileSyncStateEnum.OnDevice => ShowOutdated ? AppTexts.FileStatusOnDeviceOutdated : AppTexts.FileStatusOnDevice,
+        FileSyncStateEnum.Downloading => AppTexts.FileStatusDownloading,
+        FileSyncStateEnum.Failed => AppTexts.FileStatusFailed,
+        FileSyncStateEnum.NotDownloaded => AppTexts.FileStatusNotDownloaded,
         _ => throw new InvalidEnumArgumentException(nameof(State), (int)State, typeof(FileSyncStateEnum))
     };
 

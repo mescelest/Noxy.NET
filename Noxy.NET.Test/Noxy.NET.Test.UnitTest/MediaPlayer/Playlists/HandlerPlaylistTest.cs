@@ -164,7 +164,7 @@ public class HandlerPlaylistTest
     public async Task Handle_ReturnsEntriesWithTheirMediaFileMetadata()
     {
         EntityMediaFile mediaFile = MediaFile();
-        mediaFile.Metadata = new() { Title = "Hello", Artist = "Someone", MediaFileID = mediaFile.ID };
+        mediaFile.Metadata = new() { Title = "Hello", MediaFileID = mediaFile.ID };
         EntityPlaylist playlist = Seed([mediaFile.ID]);
 
         PlaylistView view = await View(playlist.ID);
@@ -174,8 +174,6 @@ public class HandlerPlaylistTest
         Assert.Equal(mediaFile.ID, entry.MediaFileID);
         Assert.Equal(mediaFile.ID, entry.MediaFile.ID);
         Assert.Equal("Hello", entry.MediaFile.Title);
-        Assert.Equal("Someone", entry.MediaFile.Artist);
-        Assert.Equal(mediaFile.ContentHash, entry.MediaFile.ContentHash);
     }
 
     [Fact]
