@@ -19,12 +19,13 @@ public class HandlerMediaUpdateTest
     private readonly FakeStore _store = new();
     private readonly FakePublisher _publisher = new();
     private readonly FakeTimeProvider _time = new();
+    private readonly FakeAlbumArtService _art = new();
     private readonly HandlerMediaUpdate _handler;
 
     public HandlerMediaUpdateTest()
     {
         NameKeyService serviceNameKey = new();
-        _handler = new(new FakeUnitOfWorkFactory(_store), new MetadataResolutionService(serviceNameKey, new CreditSplittingService(serviceNameKey)), _publisher, _time);
+        _handler = new(new FakeUnitOfWorkFactory(_store), new MetadataResolutionService(serviceNameKey, new CreditSplittingService(serviceNameKey)), _art, _publisher, _time);
     }
 
     private EntityMediaFile Seed(Guid? userID = null, string title = "Media", DateTime? timeCreated = null, DateTime? timeModified = null)
@@ -289,6 +290,64 @@ public class HandlerMediaUpdateTest
         Assert.Equal("Greatest Hits", response.Album);
         Assert.Equal("ABBA", response.AlbumArtist);
         Assert.NotEqual(album.ID, response.AlbumID);
+    }
+
+    [Fact]
+    public async Task Update_AlbumArtistText_TheNewAlbumOfTheSameTitleInheritsThePictureOfTheOldOne()
+    {
+        EntityArtist queen = SeedArtist("Queen");
+        EntityAlbum album = SeedAlbum("Greatest Hits", queen);
+        album.TimeArtModified = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        EntityMediaFile file = Seed();
+        Link(file, album: album);
+
+        ResponseMediaFile response = await Update(file, Changes() with { AlbumArtist = new("ABBA") });
+
+        (Guid userID, Guid from, Guid to) = Assert.Single(_art.InheritList);
+        Assert.Equal(UserID, userID);
+        Assert.Equal(album.ID, from);
+        Assert.Equal(response.AlbumID, to);
+    }
+
+    [Fact]
+    public async Task Update_AlbumTitle_DoesNotInheritThePicture()
+    {
+        EntityArtist queen = SeedArtist("Queen");
+        EntityAlbum album = SeedAlbum("Greatest Hits", queen);
+        album.TimeArtModified = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        EntityMediaFile file = Seed();
+        Link(file, album: album);
+
+        await Update(file, Changes() with { Album = new("Live") });
+
+        Assert.Empty(_art.InheritList);
+    }
+
+    [Fact]
+    public async Task Update_AlbumArtistText_FromAnAlbumWithNoPicture_InheritsNothing()
+    {
+        EntityArtist queen = SeedArtist("Queen");
+        EntityAlbum album = SeedAlbum("Greatest Hits", queen);
+        EntityMediaFile file = Seed();
+        Link(file, album: album);
+
+        await Update(file, Changes() with { AlbumArtist = new("ABBA") });
+
+        Assert.Empty(_art.InheritList);
+    }
+
+    [Fact]
+    public async Task Update_ThatDoesNotMoveTheAlbum_InheritsNothing()
+    {
+        EntityArtist queen = SeedArtist("Queen");
+        EntityAlbum album = SeedAlbum("Greatest Hits", queen);
+        album.TimeArtModified = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        EntityMediaFile file = Seed();
+        Link(file, album: album);
+
+        await Update(file, Changes() with { Subtitle = new("Sub") });
+
+        Assert.Empty(_art.InheritList);
     }
 
     [Fact]

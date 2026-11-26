@@ -377,6 +377,10 @@ Nothing is deleted from your library on the server.</value>
     <value>Save</value>
         <comment>The button of the edit song form.</comment>
   </data>
+    <data name="MetadataDialogWeightHint" xml:space="preserve">
+    <value>Higher weights come first in the list of a song. 0 to 1000.</value>
+        <comment>The hint under the weight field of an artist or genre dialog.</comment>
+  </data>
     <data name="EditMediaCreditHint" xml:space="preserve">
     <value>Separate several with ;</value>
         <comment>The hint under the artist, album artist and genre fields.</comment>

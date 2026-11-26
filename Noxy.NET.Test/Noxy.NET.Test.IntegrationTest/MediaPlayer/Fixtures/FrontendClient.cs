@@ -34,7 +34,9 @@ public sealed class FrontendClient : IAsyncDisposable
         FileStore = new(folder);
         Download = new(Api, FileStore, Store, new Delay(), NullLogger<DownloadService>.Instance);
         Reconciler = new(FileStore, Store, Download);
-        FileTag = new(FileStore, Store, Store, new MediaTagWritingService(), new MediaTagReadingService(NullLogger<MediaTagReadingService>.Instance), NullLogger<FileTagService>.Instance);
+        ArtCache = new(folder);
+        Art = new(Api, ArtCache, Store, MetadataSync);
+        FileTag = new(FileStore, Store, Store, new MediaTagWritingService(), new MediaTagReadingService(NullLogger<MediaTagReadingService>.Instance), Art, NullLogger<FileTagService>.Instance);
 
         QueueSource = new(Store, new ShuffleService(Random.Shared), Random.Shared);
         QueueFile = new(Path.Combine(folder, StorageConstants.LocalQueueFileName));
@@ -46,8 +48,6 @@ public sealed class FrontendClient : IAsyncDisposable
         Reporter = new(Player, Queue, Remote, Hub, Store, NullLogger<PlaybackReporterService>.Instance);
         CommandHandler = new(Hub, Remote, Player, Queue, Reporter, NullLogger<RemoteCommandHandlerService>.Instance);
         Control = new(Player, Queue, Remote, Hub, Reporter, Device, new Delay(), NullLogger<PlaybackControlService>.Instance);
-        ArtCache = new(folder);
-        Art = new(Api, ArtCache, Store, MetadataSync);
         LocalDataOwner = new(Session, Store, Store, Store.Setting, FileStore, ArtCache, Download, Player);
         Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, FileTag, Download, Queue, Reporter, CommandHandler, LocalDataOwner, Player, new Delay(), NullLogger<AppStartupService>.Instance);
     }

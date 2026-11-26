@@ -40,6 +40,33 @@ public class ArtServiceTest
     }
 
     [Fact]
+    public async Task GetAlbumArt_ReturnsTheBytesOfThePicture()
+    {
+        ResponseAlbum album = await SeedAlbum(FirstVersion);
+
+        Assert.Equal(Bytes, await _service.GetAlbumArt(album.ID));
+    }
+
+    [Fact]
+    public async Task GetAlbumArt_AnAlbumWithNoPicture_IsNull_AndMakesNoRequest()
+    {
+        ResponseAlbum album = await SeedAlbum(null);
+
+        Assert.Null(await _service.GetAlbumArt(album.ID));
+
+        Assert.Empty(_api.AlbumArtRequestList);
+    }
+
+    [Fact]
+    public async Task GetAlbumArt_WhenTheServerCannotGiveIt_IsNull()
+    {
+        ResponseAlbum album = await SeedAlbum(FirstVersion);
+        _api.AlbumArtHandler = _ => throw new HttpRequestException("down");
+
+        Assert.Null(await _service.GetAlbumArt(album.ID));
+    }
+
+    [Fact]
     public async Task GetAlbumArtUri_AnAlbumWithNoArtTime_IsNull_AndMakesNoRequest()
     {
         ResponseAlbum album = await SeedAlbum(null);

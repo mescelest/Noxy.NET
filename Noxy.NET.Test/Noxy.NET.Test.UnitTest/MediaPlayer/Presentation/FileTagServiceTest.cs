@@ -19,17 +19,18 @@ public class FileTagServiceTest
     private readonly FakeMetadataStore _storeMetadata = new();
     private readonly FakeMediaTagWritingService _writer = new();
     private readonly FakeMediaTagReadingService _reader = new();
+    private readonly FakeArtService _art = new();
     private readonly FakeLogger<FileTagService> _logger = new();
     private readonly FileTagService _service;
     private int _changedCount;
 
     public FileTagServiceTest()
     {
-        _service = new(_storeFile, _storeMetadata, _storeMetadata, _writer, _reader, _logger);
+        _service = new(_storeFile, _storeMetadata, _storeMetadata, _writer, _reader, _art, _logger);
         _service.Changed += () => _changedCount++;
     }
 
-    private static ResponseMediaFile Media(string title, DateTime modified, List<Guid>? artistIDList = null)
+    private static ResponseMediaFile Media(string title, DateTime modified, List<Guid>? artistIDList = null, Guid? albumID = null)
     {
         return new()
         {
@@ -39,14 +40,15 @@ public class FileTagServiceTest
             SizeBytes = 3,
             TimeCreated = First,
             TimeModified = modified,
-            ArtistIDList = artistIDList ?? []
+            ArtistIDList = artistIDList ?? [],
+            AlbumID = albumID
         };
     }
 
     // A media file in the library with its bytes on the device and no tag time recorded, as right after a download.
-    private async Task<ResponseMediaFile> Held(string title = "Media", DateTime? modified = null, List<Guid>? artistIDList = null, DateTime? tagTime = null)
+    private async Task<ResponseMediaFile> Held(string title = "Media", DateTime? modified = null, List<Guid>? artistIDList = null, DateTime? tagTime = null, Guid? albumID = null)
     {
-        ResponseMediaFile media = Media(title, modified ?? First, artistIDList);
+        ResponseMediaFile media = Media(title, modified ?? First, artistIDList, albumID);
         await _storeMetadata.SaveMediaFile(media);
         _storeFile.Hold(media.ID, [1, 2, 3]);
         await _storeMetadata.SaveFileState(new(media.ID, FileSyncStateEnum.OnDevice, null, tagTime));
@@ -238,6 +240,136 @@ public class FileTagServiceTest
 
     #endregion
 
+    #region -- Cover --
+
+    private static readonly byte[] Cover = [0xFF, 0xD8, 7, 7, 7];
+
+    // An album the library lists, with a picture the device can give (or, with null, one that says it has a picture it cannot give now).
+    private async Task<Guid> AddAlbum(byte[]? picture, bool hasPicture = true)
+    {
+        Guid id = Guid.CreateVersion7();
+        await _storeMetadata.Album.Save(new() { ID = id, Title = "Album", ArtistIDList = [], MediaFileCount = 1, TimeModified = First, TimeArtModified = hasPicture ? First : null });
+        if (picture is not null) _art.PictureMap[id] = picture;
+
+        return id;
+    }
+
+    [Fact]
+    public async Task CheckFiles_AFileWithAnotherCover_IsOutOfDate()
+    {
+        Guid album = await AddAlbum(Cover);
+        ResponseMediaFile media = await Held(albumID: album);
+        _reader.Result = TagsOf(media) with { Picture = [1, 2, 3] };
+
+        await _service.CheckFiles();
+
+        Assert.Equal([media.ID], await _service.GetOutdatedIDList());
+    }
+
+    [Fact]
+    public async Task CheckFiles_AFileWithNoCover_IsOutOfDate()
+    {
+        Guid album = await AddAlbum(Cover);
+        ResponseMediaFile media = await Held(albumID: album);
+        _reader.Result = TagsOf(media);
+
+        await _service.CheckFiles();
+
+        Assert.Equal([media.ID], await _service.GetOutdatedIDList());
+    }
+
+    [Fact]
+    public async Task CheckFiles_AFileWithTheAlbumCover_MatchesAndRecordsTheTime()
+    {
+        Guid album = await AddAlbum(Cover);
+        ResponseMediaFile media = await Held(albumID: album);
+        _reader.Result = TagsOf(media) with { Picture = Cover };
+
+        await _service.CheckFiles();
+
+        Assert.Equal(media.TimeModified, (await State(media.ID))?.TagTimeModified);
+        Assert.Empty(await _service.GetOutdatedIDList());
+    }
+
+    [Fact]
+    public async Task CheckFiles_AnAlbumWithNoPicture_IsNotFlaggedForItsCover()
+    {
+        Guid album = await AddAlbum(null, hasPicture: false);
+        ResponseMediaFile media = await Held(albumID: album);
+        _reader.Result = TagsOf(media) with { Picture = [1, 2, 3] };
+
+        await _service.CheckFiles();
+
+        Assert.Equal(media.TimeModified, (await State(media.ID))?.TagTimeModified);
+        Assert.Empty(_art.RequestList);
+    }
+
+    [Fact]
+    public async Task CheckFiles_WhenThePictureCannotBeHad_LeavesTheFileUnchecked()
+    {
+        Guid album = await AddAlbum(null);
+        ResponseMediaFile media = await Held(albumID: album);
+        _reader.Result = TagsOf(media) with { Picture = [1, 2, 3] };
+
+        await _service.CheckFiles();
+
+        Assert.Null((await State(media.ID))?.TagTimeModified);
+        Assert.Empty(await _service.GetOutdatedIDList());
+    }
+
+    [Fact]
+    public async Task CheckFiles_ThreeFilesOfOneAlbum_AskForThePictureOnce()
+    {
+        Guid album = await AddAlbum(Cover);
+        foreach (string title in new[] { "A", "B", "C" })
+        {
+            ResponseMediaFile media = await Held(title, albumID: album);
+            _reader.Result = TagsOf(media) with { Picture = Cover };
+        }
+
+        await _service.CheckFiles();
+
+        Assert.Single(_art.RequestList);
+    }
+
+    [Fact]
+    public async Task Update_PassesTheAlbumPictureToTheWriter()
+    {
+        Guid album = await AddAlbum(Cover);
+        ResponseMediaFile media = await Held("Song", albumID: album);
+
+        BulkResult result = await _service.Update([media.ID]);
+
+        AssertResult(result, 1, [], null);
+        Assert.Equal(Cover, Assert.Single(_writer.PictureList));
+    }
+
+    [Fact]
+    public async Task Update_AnAlbumWithNoPicture_PassesNoPicture()
+    {
+        Guid album = await AddAlbum(null, hasPicture: false);
+        ResponseMediaFile media = await Held("Song", albumID: album);
+
+        await _service.Update([media.ID]);
+
+        Assert.Null(Assert.Single(_writer.PictureList));
+    }
+
+    [Fact]
+    public async Task Update_WhenThePictureCannotBeHad_FailsTheFile_AndWritesNothing()
+    {
+        Guid album = await AddAlbum(null);
+        ResponseMediaFile media = await Held("Song", albumID: album);
+
+        BulkResult result = await _service.Update([media.ID]);
+
+        Assert.Equal([media.ID], result.FailedIDList);
+        Assert.Empty(_writer.WriteList);
+        Assert.Null((await State(media.ID))?.TagTimeModified);
+    }
+
+    #endregion
+
     #region -- Write --
 
     [Fact]
@@ -253,6 +385,18 @@ public class FileTagServiceTest
         Assert.Equal("Song", values.Title);
         Assert.Equal(["Someone"], values.ArtistNameList);
         Assert.Equal(media.TimeModified, (await State(media.ID))?.TagTimeModified);
+    }
+
+    [Fact]
+    public async Task Update_WritesTheArtistsInTheOrderOfTheSongsIDList_NotAlphabetically()
+    {
+        Guid zed = await AddArtist("Zed");
+        Guid abe = await AddArtist("Abe");
+        ResponseMediaFile media = await Held("Song", artistIDList: [zed, abe]);
+
+        await _service.Update([media.ID]);
+
+        Assert.Equal(["Zed", "Abe"], Assert.Single(_writer.WriteList).Values.ArtistNameList);
     }
 
     [Fact]

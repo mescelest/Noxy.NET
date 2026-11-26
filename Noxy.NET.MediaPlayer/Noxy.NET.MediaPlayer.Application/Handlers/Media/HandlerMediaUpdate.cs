@@ -13,7 +13,7 @@ using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Application.Handlers.Media;
 
-public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataResolutionService serviceMetadataResolution, IPublisher publisher, TimeProvider time)
+public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataResolutionService serviceMetadataResolution, IAlbumArtService serviceAlbumArt, IPublisher publisher, TimeProvider time)
     : BaseHandlerMetadataChange<CommandMediaUpdate, ResponseMediaFile>(factoryUnitOfWork, publisher, time)
 {
     // Changes only the fields that were sent. Artists, album, album artists and genres can be sent as text (resolved to items exactly like an upload) or as item IDs. Items the file joined or left are pushed with their new file counts, a new one included, before the file itself. Throws MediaNotFoundException for an unknown media file or another user's media file, and MetadataItemNotFoundException for an unknown or another user's item ID.
@@ -22,10 +22,20 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataR
         ThrowIfConflicting(command);
 
         // Another request may create the same new artist first: then this whole edit runs again and reuses it.
-        return await Execute(command.UserID, uow => Apply(uow, command, cancellationToken), cancellationToken);
+        List<(Guid From, Guid To)> carryList = [];
+        ResponseMediaFile response = await Execute(command.UserID, uow =>
+        {
+            carryList.Clear();
+            return Apply(uow, command, carryList, cancellationToken);
+        }, cancellationToken);
+
+        // After the commit: the song now sits in a new album of the same title, which keeps the picture of the one it left.
+        foreach ((Guid from, Guid to) in carryList) await serviceAlbumArt.Inherit(command.UserID, from, to, cancellationToken);
+
+        return response;
     }
 
-    private async Task<MetadataChangeResult<ResponseMediaFile>> Apply(IUnitOfWork uow, CommandMediaUpdate command, CancellationToken cancellationToken)
+    private async Task<MetadataChangeResult<ResponseMediaFile>> Apply(IUnitOfWork uow, CommandMediaUpdate command, List<(Guid From, Guid To)> carryList, CancellationToken cancellationToken)
     {
         EntityMediaFile file = await uow.Media.FindMediaFile(command.ID, command.UserID, cancellationToken) ?? throw new MediaNotFoundException();
         EntityMediaFileMetadata metadata = file.Metadata ?? throw new MediaNotFoundException();
@@ -45,7 +55,7 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataR
         changed |= ApplyNumber(command.TrackNumber, metadata.TrackNumber, value => metadata.TrackNumber = value);
         changed |= ApplyNumber(command.DiscNumber, metadata.DiscNumber, value => metadata.DiscNumber = value);
         changed |= ApplyNumber(command.Year, metadata.Year, value => metadata.Year = value);
-        changed |= await ApplyItems(uow, command, file, cancellationToken);
+        changed |= await ApplyItems(uow, command, file, carryList, cancellationToken);
 
         // An edit that changes nothing leaves the modified time alone, so it can't change the library ETag or push anything.
         if (!changed) return new(file.ToResponse(), false, new(), []);
@@ -61,7 +71,7 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataR
         return new(response, true, changeSet, [response]);
     }
 
-    private async Task<bool> ApplyItems(IUnitOfWork uow, CommandMediaUpdate command, EntityMediaFile file, CancellationToken cancellationToken)
+    private async Task<bool> ApplyItems(IUnitOfWork uow, CommandMediaUpdate command, EntityMediaFile file, List<(Guid From, Guid To)> carryList, CancellationToken cancellationToken)
     {
         bool artistGiven = command.Artist.HasValue || command.ArtistIDList.HasValue;
         bool genreGiven = command.Genre.HasValue || command.GenreIDList.HasValue;
@@ -88,7 +98,15 @@ public class HandlerMediaUpdate(IUnitOfWorkFactory factoryUnitOfWork, IMetadataR
         bool changed = false;
         if (artistGiven) changed |= uow.SetArtistList(file, command.Artist.HasValue ? resolved.ArtistList : artistByIDList ?? []);
         if (genreGiven) changed |= uow.SetGenreList(file, command.Genre.HasValue ? resolved.GenreList : genreByIDList ?? []);
-        if (albumGiven) changed |= ApplyAlbum(file, albumByTitleGiven ? resolved.Album : albumByID);
+        if (albumGiven)
+        {
+            EntityAlbum? previous = file.Album;
+            bool moved = ApplyAlbum(file, albumByTitleGiven ? resolved.Album : albumByID);
+            changed |= moved;
+
+            // Only the same title with other album artists is the same album under another name; another title is another album.
+            if (moved && previous is { TimeArtModified: not null } && file.Album is { } target && previous.TitleKey == target.TitleKey) carryList.Add((previous.ID, target.ID));
+        }
 
         return changed;
     }

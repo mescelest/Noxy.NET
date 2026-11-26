@@ -14,6 +14,7 @@ public static class EntityGenreExtension
                 ID = genre.ID,
                 Name = genre.Name,
                 MediaFileCount = mediaFileCount,
+                Weight = genre.Weight,
                 TimeModified = DateTime.SpecifyKind(genre.TimeModified, DateTimeKind.Utc)
             };
         }

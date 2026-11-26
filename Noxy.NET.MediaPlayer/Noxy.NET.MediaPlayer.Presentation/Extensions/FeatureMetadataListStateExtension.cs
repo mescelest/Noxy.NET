@@ -14,9 +14,9 @@ public static class FeatureMetadataListStateExtension
         {
             List<MetadataItem> itemList = kind switch
             {
-                MetadataKindEnum.Artist => state.ArtistList.Select(x => new MetadataItem(x.ID, x.Name, x.MediaFileCount)).ToList(),
+                MetadataKindEnum.Artist => state.ArtistList.Select(x => new MetadataItem(x.ID, x.Name, x.MediaFileCount, x.Weight)).ToList(),
                 MetadataKindEnum.Album => state.AlbumList.Select(x => new MetadataItem(x.ID, x.Title, x.MediaFileCount)).ToList(),
-                MetadataKindEnum.Genre => state.GenreList.Select(x => new MetadataItem(x.ID, x.Name, x.MediaFileCount)).ToList(),
+                MetadataKindEnum.Genre => state.GenreList.Select(x => new MetadataItem(x.ID, x.Name, x.MediaFileCount, x.Weight)).ToList(),
                 _ => throw new InvalidEnumArgumentException(nameof(kind), (int)kind, typeof(MetadataKindEnum))
             };
 

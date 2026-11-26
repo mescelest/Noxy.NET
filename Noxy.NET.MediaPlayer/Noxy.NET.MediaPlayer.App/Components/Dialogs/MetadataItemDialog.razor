@@ -30,6 +30,7 @@
                 else
                 {
                     <InputGroupText @bind-Value="_context.Model.Name"/>
+                    <InputGroupInteger @bind-Value="_context.Model.Weight" Description="@AppTexts.MetadataDialogWeightHint"/>
                 }
                 <div class="actions">
                     <Button Type="@HTMLButtonTypeEnum.Submit" Status="StatusEnum.Success" Loading="@_context.IsSubmitting">@AppTexts.MetadataDialogSave</Button>
@@ -95,11 +96,17 @@
         _wasOpen = Open;
     }
 
+    // The weight the item had when the dialog opened: it is sent only when it changed.
+    private int _originalWeight = MetadataWeight.Default;
+
     private FormModelMetadataItem BuildModel()
     {
+        _originalWeight = MetadataWeight.Default;
         if (ItemID is not { } id) return new();
 
-        FormModelMetadataItem model = new() { Name = StateMetadataList.Value.ItemListOf(Kind).FirstOrDefault(x => x.ID == id)?.Name ?? string.Empty };
+        MetadataItem? item = StateMetadataList.Value.ItemListOf(Kind).FirstOrDefault(x => x.ID == id);
+        _originalWeight = item?.Weight ?? MetadataWeight.Default;
+        FormModelMetadataItem model = new() { Name = item?.Name ?? string.Empty, Weight = item?.Weight ?? MetadataWeight.Default };
         if (Kind == MetadataKindEnum.Album && StateMetadataList.Value.AlbumList.FirstOrDefault(x => x.ID == id) is { } album)
         {
             model.ArtistIDSet = [.. album.ArtistIDList];
@@ -158,6 +165,24 @@
         }
     }
 
+    // The item is saved by now, so a weight that cannot be sent is a toast and not a failed form, like the picture: it can be set again from the edit dialog.
+    private async Task SendWeight(WebFormContext<FormModelMetadataItem> context, Guid id)
+    {
+        if (Kind == MetadataKindEnum.Album) return;
+
+        int weight = context.Model.Weight ?? MetadataWeight.Default;
+        if (weight == _originalWeight) return;
+
+        try
+        {
+            await ServiceMetadataAction.SetWeight(Kind, id, weight);
+        }
+        catch (Exception exception) when (exception is ApiException or HttpRequestException)
+        {
+            ServiceToast.ShowError(exception.ToActionMessage());
+        }
+    }
+
     private async Task Submit(WebFormContext<FormModelMetadataItem> context)
     {
         string name = context.Model.Name.Trim();
@@ -183,6 +208,7 @@
             return;
         }
 
+        await SendWeight(context, id);
         await SendPicture(id);
         await Close();
         await OnSaved.InvokeAsync(id);

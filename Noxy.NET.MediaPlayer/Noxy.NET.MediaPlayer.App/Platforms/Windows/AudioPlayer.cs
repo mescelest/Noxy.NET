@@ -44,6 +44,8 @@ public class AudioPlayer : IAudioPlayer
             StorageFile file = await StorageFile.GetFileFromPathAsync(path);
             WindowsMediaSource source = WindowsMediaSource.CreateFromStorageFile(file);
             WindowsMediaPlayer player = new() { Source = new MediaPlaybackItem(source), AutoPlay = false, Volume = _volume };
+            // The keys belong to the window-level controls (MediaKeyService), which exist whether or not a file is loaded.
+            player.CommandManager.IsEnabled = false;
             player.MediaEnded += (_, _) => OnEnded();
             player.MediaFailed += (_, _) => OnFailed();
             player.MediaOpened += (_, _) => Changed?.Invoke();

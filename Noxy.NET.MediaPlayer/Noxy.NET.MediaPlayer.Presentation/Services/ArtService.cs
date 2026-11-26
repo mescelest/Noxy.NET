@@ -58,6 +58,13 @@ public class ArtService : IArtService
         }
     }
 
+    public async Task<byte[]?> GetAlbumArt(Guid albumID)
+    {
+        string? uri = await GetAlbumArtUri(albumID);
+
+        return uri is null ? null : Convert.FromBase64String(uri[DataUriPrefix.Length..]);
+    }
+
     // Never throws for a picture that cannot be had: the caller shows the default tile.
     private async Task<string?> Load(Guid albumID, DateTime version)
     {

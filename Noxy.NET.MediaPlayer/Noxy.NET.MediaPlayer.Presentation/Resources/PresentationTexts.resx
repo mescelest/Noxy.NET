@@ -188,6 +188,10 @@
     <value>Year</value>
         <comment>The label of the year field of a form.</comment>
   </data>
+    <data name="FieldWeight" xml:space="preserve">
+    <value>Weight</value>
+        <comment>The label of the weight field of an artist or genre form.</comment>
+  </data>
     <data name="FieldTrack" xml:space="preserve">
     <value>Track</value>
         <comment>The label of the track number field of a form.</comment>

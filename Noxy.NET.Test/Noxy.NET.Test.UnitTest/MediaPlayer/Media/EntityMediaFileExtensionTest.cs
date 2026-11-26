@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -181,4 +182,92 @@ public class EntityMediaFileExtensionTest
 
         Assert.Equal("stored.mp3", file.GetDownloadFileName());
     }
+
+    #region -- Weights --
+
+    private static EntityMediaFile WithArtists(params (string Name, int Weight)[] artistList)
+    {
+        EntityMediaFile file = CreateFile();
+        file.ArtistLinkList =
+        [
+            .. artistList.Select((x, index) => new EntityMediaFileArtist
+                { MediaFileID = file.ID, ArtistID = Guid.CreateVersion7(), Position = index, Artist = new() { UserID = file.UserID, Name = x.Name, NameKey = x.Name.ToLowerInvariant(), Weight = x.Weight } })
+        ];
+        return file;
+    }
+
+    private static EntityMediaFile WithGenres(params (string Name, int Weight)[] genreList)
+    {
+        EntityMediaFile file = CreateFile();
+        file.GenreLinkList =
+        [
+            .. genreList.Select((x, index) => new EntityMediaFileGenre { MediaFileID = file.ID, GenreID = Guid.CreateVersion7(), Position = index, Genre = new() { UserID = file.UserID, Name = x.Name, NameKey = x.Name.ToLowerInvariant(), Weight = x.Weight } })
+        ];
+        return file;
+    }
+
+    [Fact]
+    public void ArtistNameList_OrdersByWeightDescending()
+    {
+        EntityMediaFile file = WithArtists(("Low", 10), ("High", 900), ("Mid", 500));
+
+        Assert.Equal(["High", "Mid", "Low"], file.GetArtistNameList());
+    }
+
+    [Fact]
+    public void ArtistNameList_WithEqualWeights_KeepsThePositionOrder()
+    {
+        EntityMediaFile file = WithArtists(("B", MetadataWeight.Default), ("A", MetadataWeight.Default), ("C", MetadataWeight.Default));
+
+        Assert.Equal(["B", "A", "C"], file.GetArtistNameList());
+    }
+
+    [Fact]
+    public void GenreNameList_ALowerWeightComesLast()
+    {
+        EntityMediaFile file = WithGenres(("Soundtrack", 50), ("Pop", MetadataWeight.Default), ("Rock", 200));
+
+        Assert.Equal(["Rock", "Pop", "Soundtrack"], file.GetGenreNameList());
+    }
+
+    [Fact]
+    public void GenreNameList_AWeightOfZeroComesAfterTheDefault()
+    {
+        EntityMediaFile file = WithGenres(("Zero", MetadataWeight.Minimum), ("Pop", MetadataWeight.Default));
+
+        Assert.Equal(["Pop", "Zero"], file.GetGenreNameList());
+    }
+
+    [Fact]
+    public void Response_TextIDListAndTagValues_AgreeInOrder()
+    {
+        EntityMediaFile file = WithGenres(("Soundtrack", 50), ("Pop", 300));
+        file.ArtistLinkList = WithArtists(("Guest", 10), ("Main", 800)).ArtistLinkList;
+
+        ResponseMediaFile response = file.ToResponse();
+
+        Assert.Equal("Pop; Soundtrack", response.Genre);
+        Assert.Equal(file.GenreLinkList.OrderByDescending(x => x.Genre?.Weight).Select(x => x.GenreID), response.GenreIDList);
+        Assert.Equal("Main; Guest", response.Artist);
+        Assert.Equal(file.ArtistLinkList.OrderByDescending(x => x.Artist?.Weight).Select(x => x.ArtistID), response.ArtistIDList);
+        Assert.Equal(["Pop", "Soundtrack"], file.ToTagValues().GenreNameList);
+        Assert.Equal(["Main", "Guest"], file.ToTagValues().ArtistNameList);
+    }
+
+    [Fact]
+    public void AlbumArtistNameList_IsNotWeighted()
+    {
+        EntityMediaFile file = CreateFile();
+        EntityAlbum album = new() { UserID = file.UserID, Title = "A", TitleKey = "a", IdentityKey = "a|" };
+        album.ArtistLinkList =
+        [
+            new() { AlbumID = album.ID, ArtistID = Guid.CreateVersion7(), Position = 0, Artist = new() { UserID = file.UserID, Name = "First", NameKey = "first", Weight = 1 } },
+            new() { AlbumID = album.ID, ArtistID = Guid.CreateVersion7(), Position = 1, Artist = new() { UserID = file.UserID, Name = "Second", NameKey = "second", Weight = 999 } }
+        ];
+        file.Album = album;
+
+        Assert.Equal(["First", "Second"], file.GetAlbumArtistNameList());
+    }
+
+    #endregion -- Weights --
 }

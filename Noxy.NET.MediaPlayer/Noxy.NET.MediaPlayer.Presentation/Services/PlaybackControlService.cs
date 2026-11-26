@@ -58,6 +58,23 @@ public class PlaybackControlService : IPlaybackControlService
         await Route(new() { Command = PlayerCommandEnum.Pause }, _servicePlayer.Pause);
     }
 
+    public async Task TogglePlay()
+    {
+        bool isPlaying = IsController ? _serviceRemote.Remote?.State.IsPlaying ?? false : _servicePlayer.IsPlaying;
+
+        if (isPlaying)
+        {
+            await Pause();
+            return;
+        }
+
+        // A file that was only paused is resumed where it stands: the saved queue is continued only when nothing is loaded yet (a start-up with a restored queue).
+        if (!IsController && await _servicePlayer.Resume()) return;
+
+        if (CanContinue) await Continue();
+        else await Play();
+    }
+
     public async Task Next()
     {
         await Route(new() { Command = PlayerCommandEnum.Next }, _servicePlayer.Next);

@@ -35,6 +35,12 @@ public sealed class FakePlaybackControlService : IPlaybackControlService
         return Task.CompletedTask;
     }
 
+    public Task TogglePlay()
+    {
+        CallList.Add("TogglePlay");
+        return Task.CompletedTask;
+    }
+
     public Task Seek(TimeSpan position)
     {
         CallList.Add($"Seek {position}");

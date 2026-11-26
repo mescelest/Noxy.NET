@@ -5,6 +5,7 @@ using Noxy.NET.MediaPlayer.Application.Models.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
+using Noxy.NET.MediaPlayer.Domain.Responses.Metadata;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Exceptions;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
@@ -19,6 +20,7 @@ public class FileTagService(
     IMetadataListStore storeMetadataList,
     IMediaTagWritingService serviceMediaTagWriting,
     IMediaTagReadingService serviceMediaTagReading,
+    IArtService serviceArt,
     ILogger<FileTagService> logger) : IFileTagService
 {
     // One check or write at a time, so no file is read while it is being written.
@@ -76,6 +78,8 @@ public class FileTagService(
         {
             (Dictionary<Guid, string> artistNameMap, Dictionary<Guid, string> genreNameMap) = await LoadNameMapPair();
             List<FileState> stateList = await storeMetadata.GetFileStateList();
+            Dictionary<Guid, ResponseAlbum> albumMap = (await storeMetadataList.Album.GetList()).ToDictionary(x => x.ID);
+            Dictionary<Guid, byte[]?> pictureMap = [];
 
             foreach (Guid id in mediaFileIDList.Distinct())
             {
@@ -96,9 +100,17 @@ public class FileTagService(
                     continue;
                 }
 
+                (bool isPictureAvailable, byte[]? picture) = await GetPicture(media, albumMap, pictureMap);
+                if (!isPictureAvailable)
+                {
+                    failedList.Add(id);
+                    message ??= PresentationTexts.ActionMessageUpdateFileFailed;
+                    continue;
+                }
+
                 try
                 {
-                    await Task.Run(() => storeFile.Rewrite(id, path => serviceMediaTagWriting.Write(path, values)));
+                    await Task.Run(() => storeFile.Rewrite(id, path => serviceMediaTagWriting.Write(path, values, picture)));
                 }
                 catch (Exception exception) when (exception is not OperationCanceledException)
                 {
@@ -140,6 +152,8 @@ public class FileTagService(
         bool changed = ForgetDifferences(onDeviceSet);
 
         (Dictionary<Guid, string> artistNameMap, Dictionary<Guid, string> genreNameMap) = await LoadNameMapPair();
+        Dictionary<Guid, ResponseAlbum> albumMap = (await storeMetadataList.Album.GetList()).ToDictionary(x => x.ID);
+        Dictionary<Guid, byte[]?> pictureMap = [];
         foreach (FileState state in stateList.Where(x => x.State == FileSyncStateEnum.OnDevice))
         {
             if (!mediaMap.TryGetValue(state.MediaFileID, out ResponseMediaFile? media) || state.TagTimeModified == media.TimeModified) continue;
@@ -149,10 +163,14 @@ public class FileTagService(
             MediaTagValues? values = media.ToTagValues(artistNameMap, genreNameMap);
             if (path is null || values is null) continue;
 
+            // An album picture that cannot be had now leaves the file unchecked, so a failed request never flags it.
+            (bool isAvailable, byte[]? picture) = await GetPicture(media, albumMap, pictureMap);
+            if (!isAvailable) continue;
+
             MediaTagSet? tags = await ReadTags(path);
             if (tags is null) continue;
 
-            if (tags.Matches(values))
+            if (tags.Matches(values, picture))
             {
                 await storeMetadata.SaveFileState(state with { TagTimeModified = media.TimeModified });
                 lock (_differenceLock) _differenceMap.Remove(state.MediaFileID);
@@ -166,6 +184,16 @@ public class FileTagService(
         }
 
         return changed;
+    }
+
+    // The picture the file of a media file should carry. Available with no picture when its album has none (nothing to compare or write); not available when the album has one that cannot be had now. An album is asked once for each call.
+    private async Task<(bool IsAvailable, byte[]? Picture)> GetPicture(ResponseMediaFile media, Dictionary<Guid, ResponseAlbum> albumMap, Dictionary<Guid, byte[]?> pictureMap)
+    {
+        if (media.AlbumID is not { } albumID || !albumMap.TryGetValue(albumID, out ResponseAlbum? album) || album.TimeArtModified is null) return (true, null);
+
+        if (!pictureMap.TryGetValue(albumID, out byte[]? picture)) pictureMap[albumID] = picture = await serviceArt.GetAlbumArt(albumID);
+
+        return (picture is not null, picture);
     }
 
     private bool ForgetDifferences(HashSet<Guid> onDeviceSet)

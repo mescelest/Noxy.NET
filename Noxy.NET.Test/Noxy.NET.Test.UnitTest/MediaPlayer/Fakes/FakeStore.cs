@@ -98,12 +98,12 @@ public sealed class FakeStore
     [return: NotNullIfNotNull(nameof(artist))]
     public static EntityArtist? CopyArtist(EntityArtist? artist)
     {
-        return artist is null ? null : new() { ID = artist.ID, TimeCreated = artist.TimeCreated, UserID = artist.UserID, Name = artist.Name, NameKey = artist.NameKey, TimeModified = artist.TimeModified };
+        return artist is null ? null : new() { ID = artist.ID, TimeCreated = artist.TimeCreated, UserID = artist.UserID, Name = artist.Name, NameKey = artist.NameKey, Weight = artist.Weight, TimeModified = artist.TimeModified };
     }
 
     [return: NotNullIfNotNull(nameof(genre))]
     public static EntityGenre? CopyGenre(EntityGenre? genre)
     {
-        return genre is null ? null : new() { ID = genre.ID, TimeCreated = genre.TimeCreated, UserID = genre.UserID, Name = genre.Name, NameKey = genre.NameKey, TimeModified = genre.TimeModified };
+        return genre is null ? null : new() { ID = genre.ID, TimeCreated = genre.TimeCreated, UserID = genre.UserID, Name = genre.Name, NameKey = genre.NameKey, Weight = genre.Weight, TimeModified = genre.TimeModified };
     }
 }

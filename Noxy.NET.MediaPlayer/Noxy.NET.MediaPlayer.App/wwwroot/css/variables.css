@@ -41,6 +41,8 @@
     --size-playlist-art: var(--size-control-xs);
     --playlist-color-columns: 6;
     --size-album-art: var(--size-control-xs);
+    /* The picture in a library row. It is taller than --size-album-art, and the row gives up the same height in its vertical padding, so the row keeps its height. */
+    --size-table-art: 2.5rem;
     --size-button-min-width: 6rem;
     --size-icon-xxs: 1rem;
     --size-icon-xs: 1.25rem;

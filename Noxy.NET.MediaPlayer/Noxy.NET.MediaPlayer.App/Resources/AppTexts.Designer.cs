@@ -817,6 +817,15 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Higher weights come first in the list of a song. 0 to 1000..
+        /// </summary>
+        public static string MetadataDialogWeightHint {
+            get {
+                return ResourceManager.GetString("MetadataDialogWeightHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Separate several with ;.
         /// </summary>
         public static string EditMediaCreditHint {

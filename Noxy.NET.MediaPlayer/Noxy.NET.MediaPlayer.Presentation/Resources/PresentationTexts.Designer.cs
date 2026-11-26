@@ -328,6 +328,15 @@ namespace Noxy.NET.MediaPlayer.Presentation.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Weight.
+        /// </summary>
+        public static string FieldWeight {
+            get {
+                return ResourceManager.GetString("FieldWeight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Year.
         /// </summary>
         public static string FieldYear {

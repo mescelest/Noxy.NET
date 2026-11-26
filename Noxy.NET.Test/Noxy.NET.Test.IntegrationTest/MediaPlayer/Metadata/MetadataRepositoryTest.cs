@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Models.Metadata;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Persistence;
@@ -121,6 +122,54 @@ public class MetadataRepositoryTest : IDisposable
         Assert.Equal("Radiohead", found.Name);
         Assert.Equal("radiohead", found.NameKey);
         Assert.Equal(user.ID, found.UserID);
+    }
+
+    [Fact]
+    public async Task Weight_OfAnArtistAndAGenre_RoundTrips()
+    {
+        EntityUser user = await CreateUser();
+        EntityArtist artist = CreateArtist(user.ID, "Radiohead");
+        artist.Weight = 700;
+        EntityGenre genre = CreateGenre(user.ID, "Soundtrack");
+        genre.Weight = 20;
+        await Add(artist);
+        await Add(genre);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        EntityArtist? foundArtist = await uow.Metadata.FindArtist(artist.ID, user.ID, TestContext.Current.CancellationToken);
+        EntityGenre? foundGenre = await uow.Metadata.FindGenre(genre.ID, user.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(700, foundArtist?.Weight);
+        Assert.Equal(20, foundGenre?.Weight);
+    }
+
+    [Fact]
+    public async Task AnItemAddedWithNoWeight_HasTheDefault()
+    {
+        EntityUser user = await CreateUser();
+        EntityArtist artist = CreateArtist(user.ID);
+        await Add(artist);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        EntityArtist? found = await uow.Metadata.FindArtist(artist.ID, user.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(MetadataWeight.Default, found?.Weight);
+    }
+
+    [Fact]
+    public async Task LinkedArtists_AreLoadedWithTheirWeight()
+    {
+        EntityUser user = await CreateUser();
+        EntityMediaFile file = await CreateMediaFile(user.ID);
+        EntityArtist artist = CreateArtist(user.ID);
+        artist.Weight = 321;
+        await Add(artist);
+        await LinkArtist(file, artist, 0);
+
+        await using IUnitOfWork uow = _fixture.UoWFactory.Create();
+        List<EntityMediaFile> list = await uow.Metadata.GetMediaFileListByArtist(user.ID, artist.ID, TestContext.Current.CancellationToken);
+
+        Assert.Equal(321, Assert.Single(Assert.Single(list).ArtistLinkList).Artist?.Weight);
     }
 
     [Fact]

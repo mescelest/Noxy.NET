@@ -21,6 +21,12 @@ public static class MediaTagSetExtension
                    && IsSameNumber(tags.DiscNumber, values.DiscNumber)
                    && IsSameNumber(tags.Year, values.Year);
         }
+
+        // The same, and when a picture is given the file's cover must be those bytes: the album's picture is what the file should carry. No picture given leaves the cover out of it.
+        public bool Matches(MediaTagValues values, byte[]? picture)
+        {
+            return tags.Matches(values) && (picture is null || (tags.Picture is not null && tags.Picture.AsSpan().SequenceEqual(picture)));
+        }
     }
 
     private static bool IsSame(string? first, string? second)

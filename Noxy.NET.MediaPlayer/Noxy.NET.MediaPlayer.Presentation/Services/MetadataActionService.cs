@@ -48,6 +48,26 @@ public class MetadataActionService(IApiClient clientApi) : IMetadataActionServic
         });
     }
 
+    public async Task SetWeight(MetadataKindEnum kind, Guid id, int weight)
+    {
+        await Run(async () =>
+        {
+            switch (kind)
+            {
+                case MetadataKindEnum.Artist:
+                    await clientApi.SetArtistWeight(id, new() { Weight = weight });
+                    break;
+                case MetadataKindEnum.Genre:
+                    await clientApi.SetGenreWeight(id, new() { Weight = weight });
+                    break;
+                default:
+                    throw new NotSupportedException($"A {kind} has no weight.");
+            }
+
+            return 0;
+        });
+    }
+
     public async Task Delete(MetadataKindEnum kind, Guid id)
     {
         await Run(async () =>

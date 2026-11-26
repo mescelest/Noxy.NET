@@ -2,6 +2,10 @@ using Noxy.NET.MediaPlayer.Application.Services;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
 using Noxy.NET.Test.MediaPlayer.Fixtures;
+using TagLib;
+using TagLib.Id3v2;
+using File = System.IO.File;
+using Tag = TagLib.Id3v2.Tag;
 
 namespace Noxy.NET.Test.MediaPlayer.Media;
 
@@ -168,6 +172,86 @@ public class MediaTagWritingServiceTest : IDisposable
         Assert.Empty(file.Tag.Genres);
         Assert.Equal(0u, file.Tag.Year);
         Assert.Equal(0u, file.Tag.Track);
+    }
+
+    [Fact]
+    public void Write_NullTrackAndDisc_RemoveTheFramesEvenWhenTheFileHadATotal()
+    {
+        string path = WriteFile(MediaFileFixture.CreateWav());
+        using (TagLib.File seed = TagLib.File.Create(path))
+        {
+            seed.Tag.Track = 5;
+            seed.Tag.TrackCount = 12;
+            seed.Tag.Disc = 1;
+            seed.Tag.DiscCount = 2;
+            seed.Save();
+        }
+
+        _writer.Write(path, TitleOnly().ToTagValues());
+
+        using TagLib.File file = TagLib.File.Create(path);
+        Tag id3 = (Tag)file.GetTag(TagTypes.Id3v2);
+        Assert.Null(id3.GetTextAsString("TRCK"));
+        Assert.Null(id3.GetTextAsString("TPOS"));
+    }
+
+    [Fact]
+    public void Write_StandardGenreNames_AreWrittenAsTextNotAsID3v1Numbers()
+    {
+        string path = WriteFile(MediaFileFixture.CreateWav());
+        _writer.Write(path, Linked("T", ["A"], null, [], ["Rock", "Trip Hop", "Synthwave"]).ToTagValues());
+
+        using TagLib.File file = TagLib.File.Create(path);
+        Tag id3 = (Tag)file.GetTag(TagTypes.Id3v2);
+        TextInformationFrame frame = TextInformationFrame.Get(id3, "TCON", false);
+        Assert.Equal(["Rock", "Trip Hop", "Synthwave"], frame.Text);
+    }
+
+    [Fact]
+    public void Write_KeepsTheGivenGenreOrder()
+    {
+        string path = WriteFile(MediaFileFixture.CreateWav());
+
+        _writer.Write(path, Linked("T", ["A"], null, [], ["Rock", "Soundtrack", "Ambient"]).ToTagValues());
+
+        using TagLib.File file = TagLib.File.Create(path);
+        Tag id3 = (Tag)file.GetTag(TagTypes.Id3v2);
+        Assert.Equal(["Rock", "Soundtrack", "Ambient"], TextInformationFrame.Get(id3, "TCON", false).Text);
+    }
+
+    [Fact]
+    public void Write_APicture_ReplacesExistingPictures_AndReadsBackAsTheSameBytes()
+    {
+        string path = WriteFile(MediaFileFixture.CreateWav());
+        using (TagLib.File seed = TagLib.File.Create(path))
+        {
+            seed.Tag.Pictures = [new Picture(new ByteVector([1, 1, 1])), new Picture(new ByteVector([2, 2, 2]))];
+            seed.Save();
+        }
+
+        byte[] cover = [9, 8, 7, 6, 5];
+        _writer.Write(path, TitleOnly().ToTagValues(), cover);
+
+        using TagLib.File file = TagLib.File.Create(path);
+        IPicture picture = Assert.Single(file.Tag.Pictures);
+        Assert.Equal(PictureType.FrontCover, picture.Type);
+        Assert.Equal(cover, picture.Data.Data);
+    }
+
+    [Fact]
+    public void Write_NoPicture_LeavesThePicturesAlone()
+    {
+        string path = WriteFile(MediaFileFixture.CreateWav());
+        using (TagLib.File seed = TagLib.File.Create(path))
+        {
+            seed.Tag.Pictures = [new Picture(new ByteVector([1, 1, 1]))];
+            seed.Save();
+        }
+
+        _writer.Write(path, TitleOnly().ToTagValues());
+
+        using TagLib.File file = TagLib.File.Create(path);
+        Assert.Equal([1, 1, 1], Assert.Single(file.Tag.Pictures).Data.Data);
     }
 
     [Fact]

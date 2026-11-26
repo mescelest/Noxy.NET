@@ -82,6 +82,20 @@ public class MediaTagValuesTest
     }
 
     [Fact]
+    public void Entity_WithWeightedItems_UsesTheirNamesInWeightOrder()
+    {
+        EntityMediaFile file = new() { FilePath = "stored.mp3", ContentType = "audio/mpeg", SizeBytes = 1, ContentHash = new('a', 64), UserID = Guid.CreateVersion7() };
+        file.Metadata = new() { Title = "Media", MediaFileID = file.ID };
+        file.GenreLinkList =
+        [
+            new() { MediaFileID = file.ID, GenreID = Guid.CreateVersion7(), Position = 0, Genre = new() { UserID = file.UserID, Name = "Soundtrack", NameKey = "soundtrack", Weight = 50 } },
+            new() { MediaFileID = file.ID, GenreID = Guid.CreateVersion7(), Position = 1, Genre = new() { UserID = file.UserID, Name = "Rock", NameKey = "rock", Weight = 300 } }
+        ];
+
+        Assert.Equal(["Rock", "Soundtrack"], file.ToTagValues().GenreNameList);
+    }
+
+    [Fact]
     public void Entity_WithNoLinks_HasEmptyListsAndNoAlbum()
     {
         MediaTagValues values = CreateFile().ToTagValues();

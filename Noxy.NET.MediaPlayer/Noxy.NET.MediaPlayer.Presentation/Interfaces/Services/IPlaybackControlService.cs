@@ -15,6 +15,9 @@ public interface IPlaybackControlService
 
     Task Pause();
 
+    // Pauses when the player that matters plays (the active device's reported state for a controller, otherwise this device's player); otherwise plays, and continues the saved queue when there is one to continue.
+    Task TogglePlay();
+
     // A controller sends one command after the changes of a drag have stopped for PresentationConstants.RemoteDeferMilliseconds; the local player changes at once on a device that is not a controller.
     Task Seek(TimeSpan position);
 

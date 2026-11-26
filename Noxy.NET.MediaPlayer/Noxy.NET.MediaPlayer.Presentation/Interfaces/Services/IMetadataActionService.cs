@@ -17,6 +17,9 @@ public interface IMetadataActionService
     // For an album the name is the title, and the artists change only when the list is not null.
     Task Rename(MetadataKindEnum kind, Guid id, string name, List<Guid>? albumArtistIDList);
 
+    // Artists and genres only: where the item stands in the list of a song (MetadataWeight.Minimum to Maximum, higher first). Throws NotSupportedException for an album.
+    Task SetWeight(MetadataKindEnum kind, Guid id, int weight);
+
     Task Delete(MetadataKindEnum kind, Guid id);
 
     // Moves every media file of the item to the target and removes the item; the target keeps its own name and artists.

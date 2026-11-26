@@ -6,5 +6,6 @@ public interface IEntityNamedItem
     Guid UserID { get; }
     string Name { get; set; }
     string NameKey { get; set; }
+    int Weight { get; set; }
     DateTime TimeModified { get; set; }
 }

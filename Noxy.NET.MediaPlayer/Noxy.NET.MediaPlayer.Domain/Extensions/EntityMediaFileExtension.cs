@@ -1,3 +1,4 @@
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Models;
 using Noxy.NET.MediaPlayer.Domain.Responses.Media;
@@ -16,15 +17,15 @@ public static class EntityMediaFileExtension
             return mediaFile.Metadata is null ? mediaFile.FilePath : $"{mediaFile.Metadata.Title}{Path.GetExtension(mediaFile.FilePath)}";
         }
 
-        // The artist names in position order. A link whose artist was not loaded is a bug in the caller.
+        // The artist names, heaviest first and in position order among equals. A link whose artist was not loaded is a bug in the caller.
         public List<string> GetArtistNameList()
         {
-            return [.. mediaFile.ArtistLinkList.OrderBy(x => x.Position).Select(x => x.Artist?.Name ?? throw new InvalidOperationException($"The media file {mediaFile.ID} was loaded without its artists."))];
+            return [.. WeightedArtistList(mediaFile).Select(x => x.Artist?.Name ?? throw new InvalidOperationException($"The media file {mediaFile.ID} was loaded without its artists."))];
         }
 
         public List<string> GetGenreNameList()
         {
-            return [.. mediaFile.GenreLinkList.OrderBy(x => x.Position).Select(x => x.Genre?.Name ?? throw new InvalidOperationException($"The media file {mediaFile.ID} was loaded without its genres."))];
+            return [.. WeightedGenreList(mediaFile).Select(x => x.Genre?.Name ?? throw new InvalidOperationException($"The media file {mediaFile.ID} was loaded without its genres."))];
         }
 
         // The album's artists in position order.
@@ -65,12 +66,23 @@ public static class EntityMediaFileExtension
                 DiscNumber = mediaFile.Metadata?.DiscNumber,
                 Year = mediaFile.Metadata?.Year,
                 Duration = mediaFile.Metadata?.Duration,
-                ArtistIDList = [.. mediaFile.ArtistLinkList.OrderBy(x => x.Position).Select(x => x.ArtistID)],
+                ArtistIDList = [.. WeightedArtistList(mediaFile).Select(x => x.ArtistID)],
                 AlbumID = mediaFile.AlbumID,
                 AlbumArtistIDList = mediaFile.Album is null ? [] : [.. mediaFile.Album.ArtistLinkList.OrderBy(x => x.Position).Select(x => x.ArtistID)],
-                GenreIDList = [.. mediaFile.GenreLinkList.OrderBy(x => x.Position).Select(x => x.GenreID)]
+                GenreIDList = [.. WeightedGenreList(mediaFile).Select(x => x.GenreID)]
             };
         }
+    }
+
+    // The one place the order of a song's artists and genres is worked out: by weight, highest first, then the position the song has them in. A link whose item was not loaded counts as the default weight, and the accessors that read its name fail on it.
+    private static IEnumerable<EntityMediaFileArtist> WeightedArtistList(EntityMediaFile mediaFile)
+    {
+        return mediaFile.ArtistLinkList.OrderByDescending(x => x.Artist?.Weight ?? MetadataWeight.Default).ThenBy(x => x.Position);
+    }
+
+    private static IEnumerable<EntityMediaFileGenre> WeightedGenreList(EntityMediaFile mediaFile)
+    {
+        return mediaFile.GenreLinkList.OrderByDescending(x => x.Genre?.Weight ?? MetadataWeight.Default).ThenBy(x => x.Position);
     }
 
     private static string? Join(List<string> nameList)

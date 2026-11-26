@@ -345,6 +345,26 @@ public sealed class FakeApiClient : IApiClient
         return Task.FromResult(UpdateArtistHandler(id, request));
     }
 
+    public List<(Guid ID, RequestSetArtistWeight Request)> SetArtistWeightRequestList { get; } = [];
+
+    public Task<ResponseArtist> SetArtistWeight(Guid id, RequestSetArtistWeight request)
+    {
+        SetArtistWeightRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(ArtistFor(id, "Artist"));
+    }
+
+    public List<(Guid ID, RequestSetGenreWeight Request)> SetGenreWeightRequestList { get; } = [];
+
+    public Task<ResponseGenre> SetGenreWeight(Guid id, RequestSetGenreWeight request)
+    {
+        SetGenreWeightRequestList.Add((id, request));
+        if (WriteFailure is not null) throw WriteFailure;
+
+        return Task.FromResult(GenreFor(id, "Genre"));
+    }
+
     public List<Guid> DeleteArtistList { get; } = [];
 
     public Task DeleteArtist(Guid id)

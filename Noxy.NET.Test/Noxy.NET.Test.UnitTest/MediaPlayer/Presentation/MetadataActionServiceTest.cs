@@ -57,6 +57,29 @@ public class MetadataActionServiceTest
     }
 
     [Fact]
+    public async Task SetWeight_ForAnArtistAndAGenre_SendsTheWeightToTheRightEndpoint()
+    {
+        Guid artist = Guid.CreateVersion7();
+        Guid genre = Guid.CreateVersion7();
+
+        await _service.SetWeight(MetadataKindEnum.Artist, artist, 700);
+        await _service.SetWeight(MetadataKindEnum.Genre, genre, 20);
+
+        Assert.Equal((artist, 700), (_client.SetArtistWeightRequestList.Single().ID, _client.SetArtistWeightRequestList.Single().Request.Weight));
+        Assert.Equal((genre, 20), (_client.SetGenreWeightRequestList.Single().ID, _client.SetGenreWeightRequestList.Single().Request.Weight));
+    }
+
+    [Fact]
+    public async Task SetWeight_ForAnAlbum_Throws_AndSendsNothing()
+    {
+        await Assert.ThrowsAsync<NotSupportedException>(() => _service.SetWeight(MetadataKindEnum.Album, Guid.CreateVersion7(), 5));
+
+        Assert.Empty(_client.SetArtistWeightRequestList);
+        Assert.Empty(_client.SetGenreWeightRequestList);
+        Assert.False(_service.IsBusy);
+    }
+
+    [Fact]
     public async Task Rename_Album_SendsTheTitle_AndTheArtistsOnlyWhenGiven()
     {
         Guid album = Guid.CreateVersion7();

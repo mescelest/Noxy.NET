@@ -1,10 +1,12 @@
 using Mediator;
 using Noxy.NET.MediaPlayer.Application.Interfaces;
 using Noxy.NET.MediaPlayer.Application.Interfaces.Services;
+using Noxy.NET.MediaPlayer.Application.Notifications.Media;
 using Noxy.NET.MediaPlayer.Application.Notifications.Metadata;
 using Noxy.NET.MediaPlayer.Domain.Entities;
 using Noxy.NET.MediaPlayer.Domain.Exceptions;
 using Noxy.NET.MediaPlayer.Domain.Extensions;
+using Noxy.NET.MediaPlayer.Domain.Responses.Media;
 
 namespace Noxy.NET.MediaPlayer.Application.Services;
 
@@ -21,6 +23,51 @@ public class AlbumArtService(
     public async Task<bool> Apply(Guid userID, Guid albumID, byte[] picture, CancellationToken cancellationToken = default)
     {
         return await Store(userID, albumID, picture, false, cancellationToken) == StoreResult.Stored;
+    }
+
+    public async Task<bool> Inherit(Guid userID, Guid fromAlbumID, Guid toAlbumID, CancellationToken cancellationToken = default)
+    {
+        if (fromAlbumID == toAlbumID) return false;
+
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            await using IUnitOfWork uow = factoryUnitOfWork.Create();
+
+            EntityAlbum? from = await uow.Metadata.FindAlbum(fromAlbumID, userID, cancellationToken);
+            EntityAlbum? to = await uow.Metadata.FindAlbum(toAlbumID, userID, cancellationToken);
+            if (from?.TimeArtModified is null || to is null || to.TimeArtModified is not null) return false;
+
+            try
+            {
+                await using Stream? source = serviceArtStorage.OpenAlbumArt(fromAlbumID);
+                if (source is null) return false;
+
+                using MemoryStream bytes = new();
+                await source.CopyToAsync(bytes, cancellationToken);
+                await serviceArtStorage.SaveAlbumArt(toAlbumID, bytes.ToArray(), cancellationToken);
+            }
+            catch (IOException)
+            {
+                // The edit that asked for this is already done: a picture that cannot be copied is no reason to fail it.
+                return false;
+            }
+
+            DateTime now = time.GetUtcNow().UtcDateTime;
+            to.TimeArtModified = now;
+            to.TimeModified = now;
+            uow.Metadata.UpdateAlbum(to);
+            List<ResponseMediaFile> mediaList = await TouchFiles(uow, userID, toAlbumID, now, cancellationToken);
+            await uow.Commit(cancellationToken);
+
+            await publisher.Publish(new NotificationAlbumUpdated(userID, to.ToResponse(mediaList.Count)), cancellationToken);
+            await PublishFiles(userID, mediaList, cancellationToken);
+            return true;
+        }
+        finally
+        {
+            _gate.Release();
+        }
     }
 
     public async Task Replace(Guid userID, Guid albumID, byte[] picture, CancellationToken cancellationToken = default)
@@ -61,15 +108,38 @@ public class AlbumArtService(
             album.TimeArtModified = now;
             album.TimeModified = now;
             uow.Metadata.UpdateAlbum(album);
-            int mediaFileCount = (await uow.Metadata.GetMediaFileListByAlbum(userID, albumID, cancellationToken)).Count;
+            List<ResponseMediaFile> mediaList = await TouchFiles(uow, userID, albumID, now, cancellationToken);
             await uow.Commit(cancellationToken);
 
-            await publisher.Publish(new NotificationAlbumUpdated(userID, album.ToResponse(mediaFileCount)), cancellationToken);
+            await publisher.Publish(new NotificationAlbumUpdated(userID, album.ToResponse(mediaList.Count)), cancellationToken);
+            await PublishFiles(userID, mediaList, cancellationToken);
             return StoreResult.Stored;
         }
         finally
         {
             _gate.Release();
+        }
+    }
+
+    // A device decides that a file's tags are out of date from the file's modified time, which a new picture does not change by itself: the files of the album get the time of the change, and are pushed after the commit, so every device checks them again.
+    private static async Task<List<ResponseMediaFile>> TouchFiles(IUnitOfWork uow, Guid userID, Guid albumID, DateTime now, CancellationToken cancellationToken)
+    {
+        List<ResponseMediaFile> responseList = [];
+        foreach (EntityMediaFile file in await uow.Metadata.GetMediaFileListByAlbum(userID, albumID, cancellationToken))
+        {
+            file.TimeModified = now;
+            uow.Media.UpdateMediaFile(file);
+            responseList.Add(file.ToResponse());
+        }
+
+        return responseList;
+    }
+
+    private async Task PublishFiles(Guid userID, List<ResponseMediaFile> responseList, CancellationToken cancellationToken)
+    {
+        foreach (ResponseMediaFile response in responseList)
+        {
+            await publisher.Publish(new NotificationMediaUpdated(userID, response), cancellationToken);
         }
     }
 

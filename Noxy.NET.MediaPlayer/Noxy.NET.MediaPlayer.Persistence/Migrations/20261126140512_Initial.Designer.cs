@@ -11,7 +11,7 @@ using Noxy.NET.MediaPlayer.Persistence;
 namespace Noxy.NET.MediaPlayer.Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20261126075358_Initial")]
+    [Migration("20261126140512_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -357,6 +357,11 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.Property<Guid>("UserID")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Weight")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(100);
+
                     b.HasKey("ID");
 
                     b.HasIndex("TimeCreated");
@@ -390,6 +395,11 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
 
                     b.Property<Guid>("UserID")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Weight")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(100);
 
                     b.HasKey("ID");
 

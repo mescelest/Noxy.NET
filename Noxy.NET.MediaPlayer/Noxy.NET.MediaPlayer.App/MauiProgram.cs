@@ -39,6 +39,9 @@ public static class MauiProgram
 #if WINDOWS
         builder.Services.AddSingleton<IGoogleSignInService, GoogleSignInService>();
         builder.Services.AddSingleton<IAudioPlayer, AudioPlayer>();
+        builder.Services.AddSingleton<MediaKeyService>();
+        builder.Services.AddSingleton<IMediaKeyService>(services => services.GetRequiredService<MediaKeyService>());
+        builder.ConfigureLifecycleEvents(events => events.AddWindows(windows => windows.OnWindowCreated(window => IPlatformApplication.Current?.Services.GetRequiredService<MediaKeyService>().Attach(window))));
 
         // Windows refuses a file dragged in from outside the window (the "can't drop here" cursor) unless the WinUI web view allows drops; MAUI before 10.0.120 leaves it off.
         BlazorWebViewHandler.BlazorWebViewMapper.AppendToMapping(nameof(Microsoft.UI.Xaml.UIElement.AllowDrop), (handler, _) => handler.PlatformView.AllowDrop = true);
@@ -55,6 +58,9 @@ public static class MauiProgram
 
         // Not awaited: it never throws, and the app must show its first screen without waiting for the network.
         _ = app.Services.GetRequiredService<IAppStartupService>().Start();
+
+        // Created now so that it listens to the media keys from the first moment.
+        _ = app.Services.GetRequiredService<IHotkeyService>();
 
         return app;
     }

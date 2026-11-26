@@ -5,6 +5,7 @@
 @inject IPlaybackControlService ServiceControl
 @inject IRemotePlaybackService ServiceRemote
 @inject IToastService ServiceToast
+@inject IEnumerable<IMediaKeyService> ServiceMediaKeyList
 @inherits BaseComponentElementFluxor
 @implements IAsyncDisposable
 
@@ -67,6 +68,20 @@
         ServiceRemote.Changed += OnRemoteChanged;
         _tickSource = new();
         _ = Tick(_tickSource.Token);
+    }
+
+    private MediaKeyState? _mediaKeyState;
+
+    // The system media overlay shows what the bar shows; it is told only when that changed, not on every tick.
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        MediaKeyState state = new(Display.IsPlaying, Display.Title, Display.Artist);
+        if (state == _mediaKeyState) return;
+
+        _mediaKeyState = state;
+        foreach (IMediaKeyService service in ServiceMediaKeyList) service.SetState(state);
     }
 
     // Every render starts from figures read now, whatever read them before.
@@ -145,7 +160,7 @@
 
     private Task ClickPlayingHandler()
     {
-        return Run(Display.IsPlaying ? ServiceControl.Pause : ServiceControl.Play);
+        return Run(ServiceControl.TogglePlay);
     }
 
     private Task ClickNextHandler()

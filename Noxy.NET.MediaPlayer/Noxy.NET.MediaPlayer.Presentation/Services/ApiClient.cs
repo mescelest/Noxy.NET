@@ -31,6 +31,7 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     private const string ArtistPath = "/Artist";
     private const string AlbumPath = "/Album";
     private const string GenrePath = "/Genre";
+    private const string WeightSegment = "Weight";
     private const string PlayedSegment = "Played";
     private const string ArtSegment = "Art";
     private const string ValueProperty = "value";
@@ -204,6 +205,11 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
         return await Write<ResponseArtist>(HttpMethod.Patch, $"{ArtistPath}/{id}", request);
     }
 
+    public async Task<ResponseArtist> SetArtistWeight(Guid id, RequestSetArtistWeight request)
+    {
+        return await Write<ResponseArtist>(HttpMethod.Put, $"{ArtistPath}/{id}/{WeightSegment}", request);
+    }
+
     public async Task DeleteArtist(Guid id)
     {
         using HttpResponseMessage response = await Send(HttpMethod.Delete, $"{ArtistPath}/{id}", null, null);
@@ -254,6 +260,11 @@ public class ApiClient(HttpClient client, ISessionService serviceSession, IServe
     public async Task<ResponseGenre> UpdateGenre(Guid id, RequestUpdateGenre request)
     {
         return await Write<ResponseGenre>(HttpMethod.Patch, $"{GenrePath}/{id}", request);
+    }
+
+    public async Task<ResponseGenre> SetGenreWeight(Guid id, RequestSetGenreWeight request)
+    {
+        return await Write<ResponseGenre>(HttpMethod.Put, $"{GenrePath}/{id}/{WeightSegment}", request);
     }
 
     public async Task DeleteGenre(Guid id)

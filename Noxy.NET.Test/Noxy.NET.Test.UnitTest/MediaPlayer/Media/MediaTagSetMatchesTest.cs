@@ -29,6 +29,33 @@ public class MediaTagSetMatchesTest
     }
 
     [Fact]
+    public void Matches_WithAPicture_RequiresTheSameCoverBytes()
+    {
+        Assert.True(Tags().Matches(Values(), [1, 2, 3]));
+        Assert.False(Tags().Matches(Values(), [1, 2, 4]));
+        Assert.False(Tags().Matches(Values(), [1, 2]));
+    }
+
+    [Fact]
+    public void Matches_WithAPictureAndAFileWithNoCover_IsFalse()
+    {
+        Assert.False((Tags() with { Picture = null }).Matches(Values(), [1, 2, 3]));
+    }
+
+    [Fact]
+    public void Matches_WithNoPicture_IgnoresTheCover()
+    {
+        Assert.True((Tags() with { Picture = [9, 9] }).Matches(Values(), null));
+        Assert.True((Tags() with { Picture = null }).Matches(Values(), null));
+    }
+
+    [Fact]
+    public void Matches_WithAPicture_StillRequiresTheTextTagsToMatch()
+    {
+        Assert.False((Tags() with { Title = "Other" }).Matches(Values(), [1, 2, 3]));
+    }
+
+    [Fact]
     public void Matches_TreatsNullAndEmptyTextAsEqual()
     {
         MediaTagValues values = Values() with { Album = null, Subtitle = "", Comment = "  " };

@@ -693,6 +693,23 @@ public class ApiClientTest
         Assert.Null(notModified.Value);
     }
 
+    [Theory]
+    [InlineData("Artist")]
+    [InlineData("Genre")]
+    public async Task SetArtistWeightAndSetGenreWeight_PutTheWeightToTheWeightRoute(string kind)
+    {
+        Guid id = Guid.CreateVersion7();
+        _handler.Respond = _ => Ok(Artist("A"));
+
+        if (kind == "Artist") await _client.SetArtistWeight(id, new() { Weight = 640 });
+        else await _client.SetGenreWeight(id, new() { Weight = 640 });
+
+        FakeHttpMessageHandler.RecordedRequest request = Single();
+        Assert.Equal(HttpMethod.Put, request.Method);
+        Assert.Equal($"https://server.example/{kind}/{id}/Weight", request.Uri?.ToString());
+        Assert.Equal("{\"weight\":640}", request.Body);
+    }
+
     [Fact]
     public async Task GetArtistListGetAlbumListAndGetGenreList_On200_ReturnTheirListAndETag_AndOn304NotModified()
     {

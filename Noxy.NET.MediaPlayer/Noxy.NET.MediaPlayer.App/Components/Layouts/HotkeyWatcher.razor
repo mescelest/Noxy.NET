@@ -1,0 +1,64 @@
+@inject IJSRuntime JS
+@inject IHotkeyService ServiceHotkey
+@using Noxy.NET.UI.Extensions
+@implements IAsyncDisposable
+
+@code {
+
+    private const string FunctionWatch = "Watch";
+    private const string FunctionUnwatch = "Unwatch";
+
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<HotkeyWatcher>? _reference;
+    private bool _disposed;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender || _disposed) return;
+
+        IJSObjectReference module = await JS.InvokeAsync<IJSObjectReference>("import", JS.GetComponentPath(typeof(HotkeyWatcher), local: true));
+
+        // The component can be disposed while the module loads: then nobody else releases it.
+        if (_disposed)
+        {
+            await ReleaseModuleAsync(module);
+            return;
+        }
+
+        _module = module;
+        _reference = DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync(FunctionWatch, _reference, HotkeyCatalog.KeyList(HotkeyScopeEnum.Window));
+    }
+
+    [JSInvokable]
+    public async Task Press(string key)
+    {
+        await ServiceHotkey.Press(key);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+
+        _disposed = true;
+        _reference?.Dispose();
+        if (_module is not null)
+        {
+            await ReleaseModuleAsync(_module);
+        }
+    }
+
+    // The listener is stopped before the module is let go.
+    private async Task ReleaseModuleAsync(IJSObjectReference module)
+    {
+        try
+        {
+            await module.InvokeVoidAsync(FunctionUnwatch);
+            await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        catch (JSException) { }
+    }
+
+}

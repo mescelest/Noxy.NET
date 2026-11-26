@@ -11,7 +11,8 @@
 }
 
 .MediaFileTable ::deep > .table > .body > .row-menu > .row {
-    padding: var(--size-gap-sm) var(--size-gap-md);
+    /* The picture of the title cell sets the height of the row: it is bigger than --size-album-art by some height, and the padding is smaller by half of that above and below, so the row is as tall as it was. */
+    padding: calc((2 * var(--size-gap-sm) + var(--size-album-art) - var(--size-table-art)) / 2) var(--size-gap-md);
 }
 
 .MediaFileTable ::deep > .table {

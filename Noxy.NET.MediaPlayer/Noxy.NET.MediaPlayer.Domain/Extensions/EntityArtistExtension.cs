@@ -14,6 +14,7 @@ public static class EntityArtistExtension
                 ID = artist.ID,
                 Name = artist.Name,
                 MediaFileCount = mediaFileCount,
+                Weight = artist.Weight,
                 // Stored as UTC, but the database hands it back without a kind, which would serialize without a "Z".
                 TimeModified = DateTime.SpecifyKind(artist.TimeModified, DateTimeKind.Utc)
             };

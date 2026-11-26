@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Presentation.Enums;
 using Noxy.NET.MediaPlayer.Presentation.Extensions;
 using Noxy.NET.MediaPlayer.Presentation.Features.MetadataList;
@@ -35,6 +36,23 @@ public class FeatureMetadataListStateExtensionTest
     public void ItemListOf_Genre_ListsTheGenres()
     {
         Assert.Equal(["Rock"], State().ItemListOf(MetadataKindEnum.Genre).Select(x => x.Name));
+    }
+
+    [Fact]
+    public void ItemListOf_ArtistAndGenre_CarryTheirWeight_AndAnAlbumHasTheDefault()
+    {
+        Guid artistID = Guid.CreateVersion7();
+        Guid genreID = Guid.CreateVersion7();
+        FeatureMetadataListState state = new()
+        {
+            ArtistList = [new() { ID = artistID, Name = "A", MediaFileCount = 1, TimeModified = DateTime.UtcNow, Weight = 640 }],
+            AlbumList = [FakeApiClient.AlbumFor(Guid.CreateVersion7(), "Al")],
+            GenreList = [new() { ID = genreID, Name = "G", MediaFileCount = 1, TimeModified = DateTime.UtcNow, Weight = 20 }]
+        };
+
+        Assert.Equal(640, Assert.Single(state.ItemListOf(MetadataKindEnum.Artist)).Weight);
+        Assert.Equal(20, Assert.Single(state.ItemListOf(MetadataKindEnum.Genre)).Weight);
+        Assert.Equal(MetadataWeight.Default, Assert.Single(state.ItemListOf(MetadataKindEnum.Album)).Weight);
     }
 
     [Fact]

@@ -15,6 +15,7 @@ public class GenreController(IMediator mediator) : UserControllerBase
 {
     private const string IdRoute = "{id:guid}";
     private const string MediaFileListRoute = $"{IdRoute}/MediaFileList";
+    private const string WeightRoute = $"{IdRoute}/Weight";
 
     private static readonly string CacheControl = new CacheControlHeaderValue { Private = true, NoCache = true }.ToString();
 
@@ -42,6 +43,13 @@ public class GenreController(IMediator mediator) : UserControllerBase
 
     [HttpPatch(IdRoute)]
     public async Task<ActionResult<ResponseGenre>> Update(Guid id, RequestUpdateGenre request, CancellationToken cancellationToken)
+    {
+        return await mediator.Send(request.ToCommand(UserID, id), cancellationToken);
+    }
+
+
+    [HttpPut(WeightRoute)]
+    public async Task<ActionResult<ResponseGenre>> SetWeight(Guid id, RequestSetGenreWeight request, CancellationToken cancellationToken)
     {
         return await mediator.Send(request.ToCommand(UserID, id), cancellationToken);
     }

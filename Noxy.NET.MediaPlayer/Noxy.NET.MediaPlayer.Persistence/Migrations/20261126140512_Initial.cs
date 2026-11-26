@@ -58,6 +58,7 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     UserID = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     NameKey = table.Column<string>(type: "TEXT", maxLength: 1024, nullable: false),
+                    Weight = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 100),
                     TimeModified = table.Column<DateTime>(type: "TEXT", nullable: false),
                     TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
@@ -101,6 +102,7 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     UserID = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     NameKey = table.Column<string>(type: "TEXT", maxLength: 1024, nullable: false),
+                    Weight = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 100),
                     TimeModified = table.Column<DateTime>(type: "TEXT", nullable: false),
                     TimeCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },

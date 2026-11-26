@@ -44,6 +44,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IPlaybackReporterService, PlaybackReporterService>();
             services.AddSingleton<IRemoteCommandHandlerService, RemoteCommandHandlerService>();
             services.AddSingleton<IPlaybackControlService, PlaybackControlService>();
+            services.AddSingleton<IHotkeyService, HotkeyService>();
             services.AddSingleton<ILibraryActionService, LibraryActionService>();
             services.AddSingleton<IQueueActionService, QueueActionService>();
             services.AddSingleton<IPlaylistService, PlaylistService>();

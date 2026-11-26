@@ -354,6 +354,11 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
                     b.Property<Guid>("UserID")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Weight")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(100);
+
                     b.HasKey("ID");
 
                     b.HasIndex("TimeCreated");
@@ -387,6 +392,11 @@ namespace Noxy.NET.MediaPlayer.Persistence.Migrations
 
                     b.Property<Guid>("UserID")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Weight")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(100);
 
                     b.HasKey("ID");
 

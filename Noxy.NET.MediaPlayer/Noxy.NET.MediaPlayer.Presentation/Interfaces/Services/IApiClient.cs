@@ -83,6 +83,9 @@ public interface IApiClient
 
     Task<ResponseArtist> UpdateArtist(Guid id, RequestUpdateArtist request);
 
+    // PUT /Artist/{id}/Weight: where the artist stands in the list of a song (0 to 1000, higher first). The answer is the artist as it is now; the server pushes it, and the files that carry it, to every device.
+    Task<ResponseArtist> SetArtistWeight(Guid id, RequestSetArtistWeight request);
+
     Task DeleteArtist(Guid id);
 
     Task<ResponseArtist> AddArtistMediaFileList(Guid id, RequestAddMediaFileList request);
@@ -102,6 +105,8 @@ public interface IApiClient
     Task<ResponseGenre> CreateGenre(RequestCreateGenre request);
 
     Task<ResponseGenre> UpdateGenre(Guid id, RequestUpdateGenre request);
+
+    Task<ResponseGenre> SetGenreWeight(Guid id, RequestSetGenreWeight request);
 
     Task DeleteGenre(Guid id);
 

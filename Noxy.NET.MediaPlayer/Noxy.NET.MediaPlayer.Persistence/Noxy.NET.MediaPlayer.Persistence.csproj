@@ -28,4 +28,8 @@
         <ProjectReference Include="..\Noxy.NET.MediaPlayer.Domain\Noxy.NET.MediaPlayer.Domain.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Folder Include="Migrations\"/>
+    </ItemGroup>
+
 </Project>

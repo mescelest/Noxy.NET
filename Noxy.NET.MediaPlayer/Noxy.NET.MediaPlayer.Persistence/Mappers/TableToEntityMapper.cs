@@ -155,6 +155,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             UserID = table.UserID,
             Name = table.Name,
             NameKey = table.NameKey,
+            Weight = table.Weight,
             TimeModified = table.TimeModified
         };
     }
@@ -168,6 +169,7 @@ public class TableToEntityMapper : ITableToEntityMapper
             UserID = table.UserID,
             Name = table.Name,
             NameKey = table.NameKey,
+            Weight = table.Weight,
             TimeModified = table.TimeModified
         };
     }

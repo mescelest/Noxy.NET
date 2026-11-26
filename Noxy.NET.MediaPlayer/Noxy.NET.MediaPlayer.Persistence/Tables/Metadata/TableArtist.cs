@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Noxy.NET.MediaPlayer.Domain.Declarations;
 using Noxy.NET.MediaPlayer.Persistence.Abstractions.Tables;
 using Noxy.NET.MediaPlayer.Persistence.Tables.Authentication;
 
@@ -23,6 +24,9 @@ public class TableArtist : BaseTable
     [Required]
     [MaxLength(1024)]
     public required string NameKey { get; set; }
+
+    [Required]
+    public int Weight { get; set; } = MetadataWeight.Default;
 
     [Required]
     public DateTime TimeModified { get; set; }

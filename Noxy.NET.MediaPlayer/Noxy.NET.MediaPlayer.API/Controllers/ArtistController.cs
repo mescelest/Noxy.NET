@@ -15,6 +15,7 @@ public class ArtistController(IMediator mediator) : UserControllerBase
 {
     private const string IdRoute = "{id:guid}";
     private const string MediaFileListRoute = $"{IdRoute}/MediaFileList";
+    private const string WeightRoute = $"{IdRoute}/Weight";
 
     private static readonly string CacheControl = new CacheControlHeaderValue { Private = true, NoCache = true }.ToString();
 
@@ -42,6 +43,13 @@ public class ArtistController(IMediator mediator) : UserControllerBase
 
     [HttpPatch(IdRoute)]
     public async Task<ActionResult<ResponseArtist>> Update(Guid id, RequestUpdateArtist request, CancellationToken cancellationToken)
+    {
+        return await mediator.Send(request.ToCommand(UserID, id), cancellationToken);
+    }
+
+
+    [HttpPut(WeightRoute)]
+    public async Task<ActionResult<ResponseArtist>> SetWeight(Guid id, RequestSetArtistWeight request, CancellationToken cancellationToken)
     {
         return await mediator.Send(request.ToCommand(UserID, id), cancellationToken);
     }

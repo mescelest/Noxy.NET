@@ -488,6 +488,98 @@ public class PlaybackControlServiceTest
 
     #endregion -- Transfer --
 
+    #region -- TogglePlay --
+
+    private void WithRemoteState(bool isPlaying)
+    {
+        _remote.Remote =
+            new(
+                new()
+                {
+                    ActiveDeviceID = _remote.ActiveDeviceID, StateRevision = 1, IsPlaying = isPlaying, PositionSeconds = 0, ServerTime = DateTime.UtcNow, Volume = 50, Shuffle = ShuffleModeEnum.Off, Repeat = RepeatModeEnum.No, CurrentItemID = null,
+                    Title = null, Artist = null
+                }, DateTime.UtcNow);
+    }
+
+    [Fact]
+    public async Task TogglePlay_WhileTheLocalPlayerPlays_Pauses()
+    {
+        _player.IsPlaying = true;
+
+        await _control.TogglePlay();
+
+        Assert.Equal(["Pause"], _player.CallList);
+    }
+
+    [Fact]
+    public async Task TogglePlay_WhileALoadedFileIsPaused_Resumes()
+    {
+        _player.IsPlaying = false;
+        _player.IsLoaded = true;
+        _queue.Queue = new();
+
+        await _control.TogglePlay();
+
+        Assert.Equal(["Resume"], _player.CallList);
+    }
+
+    [Fact]
+    public async Task TogglePlay_AfterAPause_ResumesTheLoadedFile_AndDoesNotReloadTheQueue()
+    {
+        _player.IsPlaying = true;
+        _player.IsLoaded = true;
+        _player.Current = new(Guid.NewGuid(), Guid.NewGuid());
+        _queue.LocalCopyPosition = TimeSpan.Zero;
+
+        await _control.TogglePlay();
+        await _control.TogglePlay();
+
+        Assert.Equal(["Pause", "Resume"], _player.CallList);
+        Assert.Equal(0, _queue.LoadLocalCopyCount);
+        Assert.True(_player.IsPlaying);
+    }
+
+    [Fact]
+    public async Task TogglePlay_WithNothingLoadedAndASavedQueue_ContinuesIt()
+    {
+        _player.IsLoaded = false;
+        _queue.LocalCopyPosition = TimeSpan.Zero;
+        _player.Current = new(Guid.NewGuid(), Guid.NewGuid());
+
+        await _control.TogglePlay();
+
+        Assert.Equal(1, _queue.LoadLocalCopyCount);
+        Assert.Equal(["Resume", "PlayCurrent"], _player.CallList);
+    }
+
+    [Fact]
+    public async Task TogglePlay_AsAControllerWhoseActiveDevicePlays_SendsPause()
+    {
+        AsController();
+        WithRemoteState(true);
+        _player.IsPlaying = false;
+
+        await _control.TogglePlay();
+
+        Assert.Equal([PlayerCommandEnum.Pause], CommandList().Select(x => x.Command));
+        Assert.Empty(_player.CallList);
+    }
+
+    [Fact]
+    public async Task TogglePlay_AsAControllerWhoseActiveDeviceIsPaused_SendsPlay_EvenWhenThisDevicePlays()
+    {
+        AsController();
+        WithRemoteState(false);
+        _player.IsPlaying = true;
+
+        await _control.TogglePlay();
+
+        Assert.Equal([PlayerCommandEnum.Play], CommandList().Select(x => x.Command));
+        Assert.Empty(_player.CallList);
+    }
+
+    #endregion -- TogglePlay --
+
     #region -- Continue --
 
     [Fact]
