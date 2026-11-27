@@ -192,7 +192,21 @@ public class FrontendDownloadFlowTest
         await using FrontendClient frontend = await SignedIn(factory, email);
         await frontend.Download.EnsureOnDevice(media.ID);
         string path = await frontend.FileStore.GetPath(media.ID) ?? throw new InvalidOperationException("The file was not stored.");
-        File.Delete(path);
+
+        // The check of the tags that follows a download reads the file in the background, and Windows refuses to delete a file that is open: the delete is tried until the check lets go.
+        await FrontendClient.WaitFor(() =>
+        {
+            try
+            {
+                File.Delete(path);
+
+                return Task.FromResult(true);
+            }
+            catch (IOException)
+            {
+                return Task.FromResult(false);
+            }
+        }, "the background tag check to let go of the file");
 
         await frontend.Reconciler.Repair();
 

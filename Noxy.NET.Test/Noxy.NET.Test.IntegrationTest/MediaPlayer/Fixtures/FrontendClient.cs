@@ -36,20 +36,20 @@ public sealed class FrontendClient : IAsyncDisposable
         Reconciler = new(FileStore, Store, Download);
         ArtCache = new(folder);
         Art = new(Api, ArtCache, Store, MetadataSync);
-        FileTag = new(FileStore, Store, Store, new MediaTagWritingService(), new MediaTagReadingService(NullLogger<MediaTagReadingService>.Instance), Art, NullLogger<FileTagService>.Instance);
+        FileTag = new(FileStore, Store, Store, new MediaTagWritingService(), new MediaTagReadingService(NullLogger<MediaTagReadingService>.Instance), Art, FileUse, NullLogger<FileTagService>.Instance);
 
         QueueSource = new(Store, new ShuffleService(Random.Shared), Random.Shared);
         QueueFile = new(Path.Combine(folder, StorageConstants.LocalQueueFileName));
         Queue = new(QueueSource, SettingService, QueueFile, Sync, Store, Time, NullLogger<QueueService>.Instance);
         DeviceFile = new(Path.Combine(folder, StorageConstants.DeviceFileName));
         Device = new(DeviceFile);
-        Player = new(Audio, Download, FileStore, Store, Sync, DeviceFile, Queue, QueueSource, SettingService, Api, new Delay(), NullLogger<PlayerService>.Instance);
+        Player = new(Audio, Download, FileStore, Store, Sync, DeviceFile, Queue, QueueSource, SettingService, Api, FileUse, new Delay(), NullLogger<PlayerService>.Instance);
         Remote = new(Hub, Device, Queue, Time, NullLogger<RemotePlaybackService>.Instance);
         Reporter = new(Player, Queue, Remote, Hub, Store, NullLogger<PlaybackReporterService>.Instance);
         CommandHandler = new(Hub, Remote, Player, Queue, Reporter, NullLogger<RemoteCommandHandlerService>.Instance);
         Control = new(Player, Queue, Remote, Hub, Reporter, Device, new Delay(), NullLogger<PlaybackControlService>.Instance);
         LocalDataOwner = new(Session, Store, Store, Store.Setting, FileStore, ArtCache, Download, Player);
-        Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, FileTag, Download, Queue, Reporter, CommandHandler, LocalDataOwner, Player, new Delay(), NullLogger<AppStartupService>.Instance);
+        Startup = new(Session, Sync, SettingService, MetadataSync, Hub, Reconciler, FileTag, Download, Queue, Reporter, CommandHandler, LocalDataOwner, Player, FileUse, new Delay(), NullLogger<AppStartupService>.Instance);
     }
 
     public FakeTimeProvider Time { get; } = new();
@@ -81,6 +81,8 @@ public sealed class FrontendClient : IAsyncDisposable
     public DownloadService Download { get; }
 
     public FileReconciler Reconciler { get; }
+
+    public FileUseService FileUse { get; } = new();
 
     public FileTagService FileTag { get; }
 

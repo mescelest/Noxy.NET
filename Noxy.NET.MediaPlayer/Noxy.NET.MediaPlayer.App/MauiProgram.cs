@@ -1,12 +1,14 @@
 ﻿using Fluxor;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.LifecycleEvents;
-using Microsoft.UI.Xaml;
 using Noxy.NET.MediaPlayer.App.Services;
 using Noxy.NET.MediaPlayer.App.Stores;
 using Noxy.NET.MediaPlayer.Presentation;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Services;
 using Noxy.NET.MediaPlayer.Presentation.Interfaces.Stores;
+#if WINDOWS
+using Microsoft.Maui.LifecycleEvents;
+using Microsoft.UI.Xaml;
+#endif
 // ReSharper disable once RedundantUsingDirective
 using Microsoft.AspNetCore.Components.WebView.Maui;
 
