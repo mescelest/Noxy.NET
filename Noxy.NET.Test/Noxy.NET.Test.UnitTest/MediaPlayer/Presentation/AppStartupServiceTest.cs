@@ -23,6 +23,7 @@ public class AppStartupServiceTest
     private readonly FakeRemoteCommandHandlerService _serviceCommandHandler = new();
     private readonly FakeLocalDataOwnerService _serviceLocalDataOwner = new();
     private readonly FakePlayerService _servicePlayer = new();
+    private readonly FileUseService _serviceFileUse = new();
     private readonly FakeDelay _delay = new() { IsManual = true };
     private readonly FakeLogger<AppStartupService> _logger = new();
     private readonly AppStartupService _serviceStartup;
@@ -30,7 +31,7 @@ public class AppStartupServiceTest
     public AppStartupServiceTest()
     {
         _serviceStartup = new(_serviceSession, _serviceSync, _serviceSetting, _serviceMetadataSync, _serviceHub, _serviceFileReconciler, _serviceFileTag, _serviceDownload, _serviceQueue, _serviceReporter, _serviceCommandHandler, _serviceLocalDataOwner,
-            _servicePlayer, _delay, _logger);
+            _servicePlayer, _serviceFileUse, _delay, _logger);
     }
 
     [Fact]
@@ -99,6 +100,20 @@ public class AppStartupServiceTest
         await WaitUntil(() => _serviceFileTag.CheckCount == 2);
 
         Assert.Equal(0, _serviceFileTag.UpdateOutdatedCount);
+    }
+
+    [Fact]
+    public async Task AFileThatStopsBeingUsedByThePlayer_ChecksTheFilesAgain_AndWithTheSettingOnUpdatesThem()
+    {
+        await _serviceStartup.Start();
+        await WaitUntil(() => _serviceFileTag.CheckCount == 1);
+        _serviceSetting.UpdateFileMetadata = true;
+        await _serviceFileUse.Use(Guid.NewGuid());
+
+        await _serviceFileUse.Use(null);
+        await WaitUntil(() => _serviceFileTag.UpdateOutdatedCount == 1);
+
+        Assert.Equal(2, _serviceFileTag.CheckCount);
     }
 
     [Fact]

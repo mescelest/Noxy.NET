@@ -907,11 +907,20 @@ namespace Noxy.NET.MediaPlayer.App.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to You have no playlists yet. Use the Create playlist button in the sidebar to add one..
+        ///   Looks up a localized string similar to No playlists yet.
         /// </summary>
-        public static string HomeNoPlaylists {
+        public static string HomeNoPlaylistsTitle {
             get {
-                return ResourceManager.GetString("HomeNoPlaylists", resourceCulture);
+                return ResourceManager.GetString("HomeNoPlaylistsTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Make a playlist to group your songs and find them again from here..
+        /// </summary>
+        public static string HomeNoPlaylistsDescription {
+            get {
+                return ResourceManager.GetString("HomeNoPlaylistsDescription", resourceCulture);
             }
         }
 

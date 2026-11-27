@@ -24,6 +24,7 @@ public class PlayerService(
     IQueueSourceService serviceQueueSource,
     ISettingService serviceSetting,
     IApiClient clientApi,
+    IFileUseService serviceFileUse,
     IDelay delay,
     ILogger<PlayerService> logger) : IPlayerService
 {
@@ -528,6 +529,13 @@ public class PlayerService(
                 return;
             }
 
+            // From here the file is the player's: a tag write must not swap it while it downloads, loads or plays. A write that is already under way is waited for.
+            await serviceFileUse.Use(item.MediaFileID);
+            lock (_lock)
+            {
+                if (version != _version) return;
+            }
+
             await playerAudio.Stop();
             lock (_lock) _loaded = false;
             _changed?.Invoke();
@@ -548,6 +556,7 @@ public class PlayerService(
                 next = FirstPlayable();
                 if (next is null)
                 {
+                    await serviceFileUse.Use(null);
                     _changed?.Invoke();
                     return;
                 }
@@ -616,6 +625,7 @@ public class PlayerService(
     {
         await playerAudio.Stop();
         lock (_lock) _loaded = false;
+        await serviceFileUse.Use(null);
         _changed?.Invoke();
     }
 

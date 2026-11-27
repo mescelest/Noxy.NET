@@ -152,6 +152,10 @@
     <value>The metadata could not be written to the file.</value>
         <comment>The library action that writes the metadata into the file on the device, when the file could not be changed.</comment>
   </data>
+    <data name="ActionMessageFileInUse" xml:space="preserve">
+    <value>The file is playing right now.</value>
+        <comment>The library action that writes the metadata into the file on the device, when the song is loaded in the player: it is written once the player moves on.</comment>
+  </data>
     <data name="ActionMessageMetadataNotLoaded" xml:space="preserve">
     <value>The metadata of this song has not been loaded yet.</value>
         <comment>The library action that writes the metadata into the file on the device, when the artists or genres of the song are not on the device yet.</comment>

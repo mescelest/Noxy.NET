@@ -34,6 +34,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IDelay, Delay>();
             services.AddSingleton<IDownloadService, DownloadService>();
             services.AddSingleton<IFileReconciler, FileReconciler>();
+            services.AddSingleton<IFileUseService, FileUseService>();
             services.AddSingleton<IFileTagService, FileTagService>();
             services.AddSingleton<IMediaTagReadingService, MediaTagReadingService>();
             services.AddSingleton<IMediaTagWritingService, MediaTagWritingService>();

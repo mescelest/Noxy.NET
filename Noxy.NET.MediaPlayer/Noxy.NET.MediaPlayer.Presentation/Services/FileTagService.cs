@@ -21,6 +21,7 @@ public class FileTagService(
     IMediaTagWritingService serviceMediaTagWriting,
     IMediaTagReadingService serviceMediaTagReading,
     IArtService serviceArt,
+    IFileUseService serviceFileUse,
     ILogger<FileTagService> logger) : IFileTagService
 {
     // One check or write at a time, so no file is read while it is being written.
@@ -108,6 +109,14 @@ public class FileTagService(
                     continue;
                 }
 
+                // The write swaps a copy over the file, which breaks a decode that is reading it: a file the player uses waits, and is written once the player moves on.
+                if (!serviceFileUse.TryBeginWrite(id))
+                {
+                    failedList.Add(id);
+                    message ??= PresentationTexts.ActionMessageFileInUse;
+                    continue;
+                }
+
                 try
                 {
                     await Task.Run(() => storeFile.Rewrite(id, path => serviceMediaTagWriting.Write(path, values, picture)));
@@ -119,6 +128,10 @@ public class FileTagService(
                     failedList.Add(id);
                     message ??= exception is StorageFullException ? PresentationTexts.DownloadDiskFull : PresentationTexts.ActionMessageUpdateFileFailed;
                     continue;
+                }
+                finally
+                {
+                    serviceFileUse.EndWrite(id);
                 }
 
                 // The time of the media file as it was read before the write: an edit that arrived meanwhile leaves the file out of date.

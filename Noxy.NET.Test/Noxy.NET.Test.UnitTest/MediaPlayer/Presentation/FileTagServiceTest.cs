@@ -21,12 +21,13 @@ public class FileTagServiceTest
     private readonly FakeMediaTagReadingService _reader = new();
     private readonly FakeArtService _art = new();
     private readonly FakeLogger<FileTagService> _logger = new();
+    private readonly FileUseService _fileUse = new();
     private readonly FileTagService _service;
     private int _changedCount;
 
     public FileTagServiceTest()
     {
-        _service = new(_storeFile, _storeMetadata, _storeMetadata, _writer, _reader, _art, _logger);
+        _service = new(_storeFile, _storeMetadata, _storeMetadata, _writer, _reader, _art, _fileUse, _logger);
         _service.Changed += () => _changedCount++;
     }
 
@@ -564,6 +565,84 @@ public class FileTagServiceTest
 
         release.SetResult();
         await Task.WhenAll(update, check);
+    }
+
+    #endregion
+
+    #region -- In use --
+
+    [Fact]
+    public async Task Update_AFileThePlayerUses_IsNotWritten_AndIsReportedAsInUse()
+    {
+        ResponseMediaFile media = await Held();
+        await _fileUse.Use(media.ID);
+
+        BulkResult result = await _service.Update([media.ID]);
+
+        AssertResult(result, 0, [media.ID], PresentationTexts.ActionMessageFileInUse);
+        Assert.Empty(_writer.WriteList);
+        Assert.Equal(new(media.ID, FileSyncStateEnum.OnDevice, null), await State(media.ID));
+    }
+
+    [Fact]
+    public async Task Update_AFileThePlayerUses_DoesNotHoldBackTheOthers()
+    {
+        ResponseMediaFile used = await Held("Used");
+        ResponseMediaFile free = await Held("Free");
+        await _fileUse.Use(used.ID);
+
+        BulkResult result = await _service.Update([used.ID, free.ID]);
+
+        AssertResult(result, 1, [used.ID], PresentationTexts.ActionMessageFileInUse);
+        Assert.Equal("Free", Assert.Single(_writer.WriteList).Values.Title);
+    }
+
+    [Fact]
+    public async Task Update_AFileThePlayerNoLongerUses_IsWrittenByALaterCall()
+    {
+        ResponseMediaFile media = await Held();
+        await _fileUse.Use(media.ID);
+        await _service.Update([media.ID]);
+
+        await _fileUse.Use(null);
+        BulkResult result = await _service.Update([media.ID]);
+
+        AssertResult(result, 1, [], null);
+        Assert.Equal(media.TimeModified, (await State(media.ID))?.TagTimeModified);
+    }
+
+    [Fact]
+    public async Task Update_WhileTheFileIsBeingWritten_ThePlayerWaitsForTheWrite()
+    {
+        ResponseMediaFile media = await Held();
+        TaskCompletionSource entered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource release = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        _writer.BeforeWrite = _ =>
+        {
+            entered.TrySetResult();
+            release.Task.Wait(TestContext.Current.CancellationToken);
+        };
+
+        Task update = _service.Update([media.ID]);
+        await entered.Task;
+        Task use = _fileUse.Use(media.ID);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.False(use.IsCompleted);
+
+        release.SetResult();
+        await update;
+        await use.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task Update_WhenTheWriteFails_StillLetsThePlayerUseTheFile()
+    {
+        ResponseMediaFile media = await Held();
+        _writer.Failure = new IOException("The file is locked.");
+        await _service.Update([media.ID]);
+
+        await _fileUse.Use(media.ID).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
     }
 
     #endregion

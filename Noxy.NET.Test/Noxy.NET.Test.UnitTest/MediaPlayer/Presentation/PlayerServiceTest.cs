@@ -24,6 +24,7 @@ public class PlayerServiceTest
     private readonly FakeDelay _delay = new();
     private readonly FakeLocalQueueStore _storeLocalQueue = new();
     private readonly FakeLogger<PlayerService> _logger = new();
+    private readonly FileUseService _fileUse = new();
     private readonly QueueService _queue;
     private readonly PlayerService _player;
     private int _titleCount;
@@ -32,7 +33,7 @@ public class PlayerServiceTest
     {
         QueueSourceService serviceSource = new(_storeMetadata, new ShuffleService(new(31)), new(32));
         _queue = new(serviceSource, _serviceSetting, _storeLocalQueue, _sync, _storeMetadata, new FakeTimeProvider(), new FakeLogger<QueueService>()) { OwnsPlayback = true };
-        _player = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, serviceSource, _serviceSetting, _api, _delay, _logger);
+        _player = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, serviceSource, _serviceSetting, _api, _fileUse, _delay, _logger);
     }
 
     // A media file in the library, titled so that the Library's order is the order of creation; its bytes are on the device unless said otherwise.
@@ -216,6 +217,84 @@ public class PlayerServiceTest
         Assert.Empty(LoadList);
         Assert.Empty(_download.EnsureList);
         Assert.True(_player.IsDisabled);
+    }
+
+    [Fact]
+    public async Task StartLibrary_MarksTheFileInUse_BeforeItIsDownloaded_AndKeepsItSoWhilePlaying()
+    {
+        Guid id = await AddMedia(false);
+        TaskCompletionSource gate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        _download.EnsureHandler = async downloaded =>
+        {
+            await gate.Task;
+            _storeFile.Hold(downloaded, [1, 2, 3]);
+
+            return true;
+        };
+
+        Task play = Start(id);
+        await WaitUntil(() => _player.IsWaiting);
+
+        Assert.False(_fileUse.TryBeginWrite(id));
+
+        gate.SetResult();
+        await play;
+
+        Assert.True(_audio.IsPlaying);
+        Assert.False(_fileUse.TryBeginWrite(id));
+    }
+
+    [Fact]
+    public async Task StartLibrary_WhileAWriteReplacesTheFile_WaitsForTheWriteBeforeLoading()
+    {
+        Guid id = await AddMedia();
+        Assert.True(_fileUse.TryBeginWrite(id));
+
+        Task play = Start(id);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.False(play.IsCompleted);
+        Assert.Empty(LoadList);
+
+        _fileUse.EndWrite(id);
+        await play.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        Assert.Equal([$"Load {await PathOf(id)}"], LoadList);
+    }
+
+    [Fact]
+    public async Task Next_FreesThePreviousFile_AndUsesTheNextOne()
+    {
+        List<Guid> idList = await AddMedia(2);
+        await Start(idList[0]);
+
+        await _player.Next();
+
+        Assert.True(_fileUse.TryBeginWrite(idList[0]));
+        _fileUse.EndWrite(idList[0]);
+        Assert.False(_fileUse.TryBeginWrite(idList[1]));
+    }
+
+    [Fact]
+    public async Task Clear_FreesTheFile()
+    {
+        Guid id = await AddMedia();
+        await Start(id);
+
+        await _player.Clear();
+
+        Assert.True(_fileUse.TryBeginWrite(id));
+    }
+
+    [Fact]
+    public async Task StartLibrary_WhenTheOnlyItemCannotPlay_FreesTheFile()
+    {
+        Guid id = await AddMedia(false);
+        _download.EnsureResult = false;
+
+        await Start(id);
+
+        Assert.True(_fileUse.TryBeginWrite(id));
     }
 
     [Fact]
@@ -1340,7 +1419,7 @@ public class PlayerServiceTest
     public async Task TheVolume_SurvivesARestart()
     {
         await _player.SetVolume(0.6);
-        PlayerService restarted = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, new QueueSourceService(_storeMetadata, new ShuffleService(new(1)), new(1)), _serviceSetting, _api, _delay, _logger);
+        PlayerService restarted = new(_audio, _download, _storeFile, _storeMetadata, _sync, _storeMetadata, _queue, new QueueSourceService(_storeMetadata, new ShuffleService(new(1)), new(1)), _serviceSetting, _api, _fileUse, _delay, _logger);
 
         await restarted.LoadVolume();
 

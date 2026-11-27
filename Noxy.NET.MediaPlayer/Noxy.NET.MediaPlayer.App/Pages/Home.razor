@@ -21,9 +21,9 @@
                 </Section>
             }
 
-            <Section Title="@AppTexts.HomeRecentlyPlayed">
-                @if (_model.HasPlaylists)
-                {
+            @if (_model.HasPlaylists)
+            {
+                <Section Title="@AppTexts.HomeRecentlyPlayed">
                     <ButtonList>
                         @foreach (ResponsePlaylist playlist in _model.RecentList)
                         {
@@ -31,12 +31,24 @@
                             <PlaylistCard Playlist="playlist" OnPlay="() => Run(() => ServicePlaylist.Play(id))"/>
                         }
                     </ButtonList>
-                }
-                else
-                {
-                    <MessageBox MessageList="@([AppTexts.HomeNoPlaylists])" Status="StatusEnum.Info"/>
-                }
-            </Section>
+                </Section>
+            }
+            else
+            {
+                <EmptyState Title="@AppTexts.HomeNoPlaylistsTitle" Description="@AppTexts.HomeNoPlaylistsDescription">
+                    <Graphic>
+                        <MaterialIcon Icon="queue_music" Size="var(--size-icon-xxl)"/>
+                    </Graphic>
+                    <ChildContent>
+                        <Button Type="@HTMLButtonTypeEnum.Button" Status="StatusEnum.Highlight" @onclick="ClickNewPlaylistHandler">
+                            <MaterialIcon Icon="add" Size="var(--size-icon-sm)"/>
+                            @AppTexts.NewPlaylistTitle
+                        </Button>
+                    </ChildContent>
+                </EmptyState>
+            }
+
+            <NewPlaylistDialog @bind-Open="_showNewPlaylistDialog"/>
         }
     </PageContent>
 </div>
@@ -44,6 +56,12 @@
 @code {
 
     private HomeModel? _model;
+    private bool _showNewPlaylistDialog;
+
+    private void ClickNewPlaylistHandler()
+    {
+        _showNewPlaylistDialog = true;
+    }
 
     protected override async Task OnInitializedAsync()
     {

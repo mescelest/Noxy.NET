@@ -1,5 +1,7 @@
 ﻿using Fluxor;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.LifecycleEvents;
+using Microsoft.UI.Xaml;
 using Noxy.NET.MediaPlayer.App.Services;
 using Noxy.NET.MediaPlayer.App.Stores;
 using Noxy.NET.MediaPlayer.Presentation;
@@ -44,7 +46,7 @@ public static class MauiProgram
         builder.ConfigureLifecycleEvents(events => events.AddWindows(windows => windows.OnWindowCreated(window => IPlatformApplication.Current?.Services.GetRequiredService<MediaKeyService>().Attach(window))));
 
         // Windows refuses a file dragged in from outside the window (the "can't drop here" cursor) unless the WinUI web view allows drops; MAUI before 10.0.120 leaves it off.
-        BlazorWebViewHandler.BlazorWebViewMapper.AppendToMapping(nameof(Microsoft.UI.Xaml.UIElement.AllowDrop), (handler, _) => handler.PlatformView.AllowDrop = true);
+        BlazorWebViewHandler.BlazorWebViewMapper.AppendToMapping(nameof(UIElement.AllowDrop), (handler, _) => handler.PlatformView.AllowDrop = true);
 #else
         builder.Services.AddSingleton<IGoogleSignInService, UnavailableGoogleSignInService>();
 #endif

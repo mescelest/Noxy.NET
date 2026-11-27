@@ -22,6 +22,7 @@ public class AppStartupService(
     IRemoteCommandHandlerService serviceCommandHandler,
     ILocalDataOwnerService serviceLocalDataOwner,
     IPlayerService servicePlayer,
+    IFileUseService serviceFileUse,
     IDelay delay,
     ILogger<AppStartupService> logger) : IAppStartupService
 {
@@ -346,6 +347,9 @@ public class AppStartupService(
         serviceSession.Changed += OnSessionChanged;
         serviceSync.Changed += OnFilesMayHaveChanged;
         serviceDownload.Changed += OnFilesMayHaveChanged;
+
+        // A file the player held back from a tag write is written once the player has moved on.
+        serviceFileUse.Changed += OnFilesMayHaveChanged;
         _subscribed = true;
     }
 

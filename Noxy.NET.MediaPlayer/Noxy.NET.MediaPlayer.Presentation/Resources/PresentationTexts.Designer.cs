@@ -85,6 +85,15 @@ namespace Noxy.NET.MediaPlayer.Presentation.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The file is playing right now..
+        /// </summary>
+        public static string ActionMessageFileInUse {
+            get {
+                return ResourceManager.GetString("ActionMessageFileInUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The metadata of this song has not been loaded yet..
         /// </summary>
         public static string ActionMessageMetadataNotLoaded {

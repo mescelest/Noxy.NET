@@ -11,6 +11,13 @@
     grid-template-rows: auto minmax(0, 1fr);
 }
 
+/* The panel of the chosen tab is a column that is as tall as the grid row it sits in, so the list inside it scrolls instead of growing past the sidebar and scrolling the window. Not the hidden panels: a display of its own would show them. */
+.OrganiseSidebar ::deep > .organise-tab-list > .tab-panel:not([hidden]) {
+    display: flex;
+    flex-flow: column;
+    min-height: 0;
+}
+
 /* The tabs are the ones of the sign-in screen: a line under each, the chosen one in the strong colour. */
 .OrganiseSidebar ::deep > .organise-tab-list > .tab-list > .tab {
     flex: 1 1 0;

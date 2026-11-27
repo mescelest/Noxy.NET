@@ -46,16 +46,39 @@ public class AudioPlayer : IAudioPlayer
             WindowsMediaPlayer player = new() { Source = new MediaPlaybackItem(source), AutoPlay = false, Volume = _volume };
             // The keys belong to the window-level controls (MediaKeyService), which exist whether or not a file is loaded.
             player.CommandManager.IsEnabled = false;
-            player.MediaEnded += (_, _) => OnEnded();
-            player.MediaFailed += (_, _) => OnFailed();
-            player.MediaOpened += (_, _) => Changed?.Invoke();
-            player.PlaybackSession.PlaybackStateChanged += (_, _) => OnPlaybackStateChanged();
 
+            // The player is the current one before its events are listened to, or an early event would look stale.
             lock (_lock)
             {
                 _source = source;
                 _player = player;
             }
+
+            // One end or failure counts for each player, and only while it is the current one: a late or repeated event of a player that was already replaced would otherwise end or fail whatever plays now.
+            bool settled = false;
+
+            bool Claim()
+            {
+                lock (_lock)
+                {
+                    if (settled || !ReferenceEquals(player, _player)) return false;
+
+                    settled = true;
+
+                    return true;
+                }
+            }
+
+            player.MediaEnded += (_, _) =>
+            {
+                if (Claim()) OnEnded();
+            };
+            player.MediaFailed += (_, _) =>
+            {
+                if (Claim()) OnFailed();
+            };
+            player.MediaOpened += (_, _) => Changed?.Invoke();
+            player.PlaybackSession.PlaybackStateChanged += (_, _) => OnPlaybackStateChanged();
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
         {

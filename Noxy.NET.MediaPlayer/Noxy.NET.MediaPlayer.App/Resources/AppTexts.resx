@@ -417,9 +417,13 @@ Nothing is deleted from your library on the server.</value>
     <value>What shall we play?</value>
         <comment>The title of the home page.</comment>
   </data>
-    <data name="HomeNoPlaylists" xml:space="preserve">
-    <value>You have no playlists yet. Use the Create playlist button in the sidebar to add one.</value>
-        <comment>The message on the home page when there is no playlist.</comment>
+    <data name="HomeNoPlaylistsTitle" xml:space="preserve">
+    <value>No playlists yet</value>
+        <comment>The title of the empty state on the home page when there is no playlist.</comment>
+  </data>
+    <data name="HomeNoPlaylistsDescription" xml:space="preserve">
+    <value>Make a playlist to group your songs and find them again from here.</value>
+        <comment>The line under the title of the empty state on the home page when there is no playlist. The Create playlist button is below it.</comment>
   </data>
     <data name="SidebarPlaylists" xml:space="preserve">
     <value>Playlists</value>
